@@ -73,6 +73,12 @@ interface CalculatorScreenProps {
    * "stacked" están en el tipo pero sin render propio todavía. Paridad
    * con Screen.tsx de Lite. */
   layoutMode?: LayoutMode;
+  /** Botón "Graficar" explícito en el cuadrante de gráfica (decisión de
+   * producto confirmada por Carlos) — opcional porque no todos los
+   * modos que usan CalculatorScreen lo implementan todavía (alcance V1:
+   * solo BasicMode.tsx). Sin esta prop, GraphPlaceholder muestra el
+   * estado vacío de siempre. */
+  onGraphExpression?: () => void;
 }
 
 export function CalculatorScreen({
@@ -87,7 +93,12 @@ export function CalculatorScreen({
   isLoading,
   onClearField,
   layoutMode = "fused",
+  onGraphExpression,
 }: CalculatorScreenProps) {
+  // Botón "Graficar" (cuadrante de gráfica, las 6 disposiciones): solo
+  // tiene sentido ofrecerlo cuando hay algo escrito. El backend valida
+  // de verdad si es graficable al recibir el click.
+  const canGraph = Boolean(onGraphExpression) && latex.trim().length > 0;
   // Las entradas se guardan más-nuevo-primero (ver useHistoryStore.ts:
   // `[newEntry, ...get().entries]`) — se toman las 2 más recientes y se
   // invierten para que la cinta crezca hacia arriba, como en Lite.
@@ -174,7 +185,7 @@ export function CalculatorScreen({
         {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
         <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
         {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-        <GraphPlaceholder />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
         <StackedKeyboardSection />
       </div>
     );
@@ -185,14 +196,30 @@ export function CalculatorScreen({
   // estado de ventanas flotantes (P0). Ver Screen.tsx (Lite) para el
   // mismo criterio completo.
   if (layoutMode === "floating") {
-    return <FloatingScreenContent angleBadge={angleBadge} inputField={inputField} resultBlock={resultBlock} />;
+    return (
+      <FloatingScreenContent
+        angleBadge={angleBadge}
+        inputField={inputField}
+        resultBlock={resultBlock}
+        canGraph={canGraph}
+        onGraphExpression={onGraphExpression}
+      />
+    );
   }
 
   // "focus" (Enfoque, Módulo P2): sin historial, resultado destacado,
   // gráfica con más área. Factorizado en <FocusScreenContent> porque
   // Flotante degradado (arriba) reusa exactamente esta composición.
   if (layoutMode === "focus") {
-    return <FocusScreenContent angleBadge={angleBadge} inputField={inputField} resultBlock={resultBlock} />;
+    return (
+      <FocusScreenContent
+        angleBadge={angleBadge}
+        inputField={inputField}
+        resultBlock={resultBlock}
+        canGraph={canGraph}
+        onGraphExpression={onGraphExpression}
+      />
+    );
   }
 
   if (layoutMode === "separated") {
@@ -202,7 +229,7 @@ export function CalculatorScreen({
         {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
         <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
         {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-        <GraphPlaceholder />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
       </div>
     );
   }
@@ -224,7 +251,7 @@ export function CalculatorScreen({
           </div>
           <div className="flex flex-col gap-3">
             {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-            <GraphPlaceholder />
+            <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
           </div>
         </div>
       </div>
@@ -244,7 +271,7 @@ export function CalculatorScreen({
 
         {resultBlock && <div className="mt-2 border-t border-paper-line pt-2">{resultBlock}</div>}
       </div>
-      <GraphPlaceholder />
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
     </div>
   );
 }
@@ -298,17 +325,19 @@ interface FocusLikeContentProps {
   angleBadge: ReactNode;
   inputField: ReactNode;
   resultBlock: ReactNode;
+  canGraph: boolean;
+  onGraphExpression?: () => void;
 }
 
 /** Módulo P2 ("Enfoque"). Reusado tal cual por Flotante cuando degrada
  * (P0/P4). Ver Screen.tsx (Lite) para el mismo criterio. */
-function FocusScreenContent({ angleBadge, inputField, resultBlock }: FocusLikeContentProps) {
+function FocusScreenContent({ angleBadge, inputField, resultBlock, canGraph, onGraphExpression }: FocusLikeContentProps) {
   return (
     <div className="flex flex-1 flex-col gap-3">
       {angleBadge}
       <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
       {resultBlock && <div className="rounded-xl bg-paper-soft px-5 py-4 text-center shadow-sm">{resultBlock}</div>}
-      <GraphPlaceholder />
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
     </div>
   );
 }
@@ -318,7 +347,7 @@ function FocusScreenContent({ angleBadge, inputField, resultBlock }: FocusLikeCo
  * Screen.tsx (Lite) — ver ese archivo para el comentario completo sobre
  * el gating por breakpoint y la persistencia/clamp de las ventanas.
  */
-function FloatingScreenContent({ angleBadge, inputField, resultBlock }: FocusLikeContentProps) {
+function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, onGraphExpression }: FocusLikeContentProps) {
   const isWideEnough = useMinWidthMediaQuery(FLOATING_MIN_WIDTH_PX);
 
   const keyboardWindow = useFloatingLayoutStore((s) => s.keyboardWindow);
@@ -344,7 +373,15 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock }: FocusLik
   }, [isWideEnough, clampAllToViewport]);
 
   if (!isWideEnough) {
-    return <FocusScreenContent angleBadge={angleBadge} inputField={inputField} resultBlock={resultBlock} />;
+    return (
+      <FocusScreenContent
+        angleBadge={angleBadge}
+        inputField={inputField}
+        resultBlock={resultBlock}
+        canGraph={canGraph}
+        onGraphExpression={onGraphExpression}
+      />
+    );
   }
 
   return (
@@ -398,7 +435,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock }: FocusLik
         </button>
       )}
       <FloatingWindow title="Gráfica" rect={graphWindow} onChange={(rect) => setWindow("graph", rect)}>
-        <GraphPlaceholder />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
       </FloatingWindow>
     </div>
   );

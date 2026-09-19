@@ -419,6 +419,38 @@ export function BasicMode() {
     }
   }
 
+  // GraphPlaceholder.tsx, botón "Graficar" del cuadrante de gráfica
+  // (decisión de producto confirmada por Carlos: explícito, no
+  // automático). A diferencia de handleGraphComplex (que manda el campo
+  // TAL CUAL a /graph/complex_point, esperando un número concreto), esto
+  // manda la expresión a /graph/2d como y=f(x) — el backend mismo
+  // rechaza con un error claro si tiene más de una variable libre (no
+  // se duplica esa validación acá, ver Graph2DRequest en requests.py).
+  // Reutiliza el mismo puente pendingGraphResult que Graph2DForm ya
+  // consume.
+  async function handleGraphExpression(): Promise<void> {
+    const trimmed = latexToBackendSyntax(latex);
+    if (!trimmed) return;
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const result = await submitAndRecord(
+        "/graph/2d",
+        { expressions: [trimmed], variable: "x" },
+        `Graficar(${trimmed})`,
+      );
+      if (!result.success) {
+        setLastResult(result);
+        setErrorMessage(result.error_message ?? "No se pudo graficar esa expresión.");
+        return;
+      }
+      setPendingGraphResult(result);
+      setActiveMode("graph");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // Módulo 0 (paridad con precision-lab-lite): el teclado fijo de
   // columna 2 desaparece — NaturalMathKeyboard ya no se renderiza inline
   // aquí, se registra en el store compartido para que <KeyboardDock>
@@ -525,6 +557,7 @@ export function BasicMode() {
           isLoading={isLoading}
           onClearField={() => setLatex("")}
           layoutMode={layoutMode}
+          onGraphExpression={handleGraphExpression}
         />
 
         {systemRows && (
