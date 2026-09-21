@@ -59,8 +59,28 @@ describe("Suite exhaustiva original — Módulo 10: teclado ↔ motor (Plus fron
     expect(latexToBackendSyntax(latex)).toMatch(expected);
   });
 
-  it("logaritmo con base real", () => {
-    expect(latexToBackendSyntax("\\log_{2}\\left(8\\right)")).toBe("log(8,2)");
+  it.each([
+    ["log₂", "\\log_{2}\\left(8\\right)", "log(8,2)"],
+    ["log base editable", "\\log_{3}\\left(81\\right)", "log(81,3)"],
+  ] as const)("logaritmo con base real: %s", (_label, latex, expected) => {
+    expect(latexToBackendSyntax(latex)).toBe(expected);
+  });
+
+  it.each([
+    ["sinh inversa", "\\sinh^{-1}\\left(1\\right)", "asinh(1)"],
+    ["cosh inversa", "\\cosh^{-1}\\left(2\\right)", "acosh(2)"],
+    ["tanh inversa", "\\tanh^{-1}\\left(0.5\\right)", "atanh(0.5)"],
+    ["csch inversa", "\\csch^{-1}\\left(2\\right)", "acsch(2)"],
+    ["sech inversa", "\\sech^{-1}\\left(0.5\\right)", "asech(0.5)"],
+    ["coth inversa", "\\coth^{-1}\\left(2\\right)", "acoth(2)"],
+  ] as const)("normalización hiperbólica inversa: %s", (_label, latex, expected) => {
+    expect(latexToBackendSyntax(latex)).toBe(expected);
+  });
+
+  it("raíz n-ésima algebraica usa una potencia equivalente", () => {
+    const normalized = latexToBackendSyntax("\\sqrt[3]{27}");
+    expect(normalized).toMatch(/27/);
+    expect(normalized).toMatch(/1\/\(3\)/);
   });
 
   it.each([
