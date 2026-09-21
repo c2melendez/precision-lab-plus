@@ -116,7 +116,7 @@ export function KeyboardDock() {
         </KeyboardPanel>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2 dt:left-1/2 dt:right-auto dt:bottom-4 dt:w-[calc(100%-64px)] dt:max-w-[1376px] dt:-translate-x-1/2 dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft dt:px-4 dt:py-2 dt:shadow-xl">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2 dt:left-1/2 dt:right-auto dt:bottom-4 dt:w-[calc(100%_-_64px)] dt:max-w-[1376px] dt:-translate-x-1/2 dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft dt:px-4 dt:py-2 dt:shadow-xl">
         {/* Fase X, Módulo X0 (Smart Docks) — "justo arriba de donde
             aparecerá el teclado (colapsado o no)", confirmado por Carlos.
             Primera fila del mismo contenedor fijo: queda por encima del
