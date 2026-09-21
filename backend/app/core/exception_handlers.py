@@ -91,7 +91,7 @@ async def validation_exception_handler(
     return _error_response(
         request,
         ErrorCode.VALIDATION_ERROR,
-        status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status.HTTP_422_UNPROCESSABLE_CONTENT,
         "El payload enviado no cumple el schema esperado.",
     )
 

@@ -85,6 +85,11 @@ class ParseSecurityError(ValueError):
 
 # Sección 7, bloque de código literal — no se renombran ni se completan
 # entradas adicionales sin autorización explícita (Mensaje 0, regla 3).
+def _calculator_log(value, base=None, **_):
+    """Calculator semantics: log(x) is base 10; log(x,b) uses base b."""
+    return sympy.log(value, 10) if base is None else sympy.log(value, base)
+
+
 ALLOWED_FUNCTIONS = {
     "sin": sin,
     "cos": cos,
@@ -130,7 +135,7 @@ ALLOWED_FUNCTIONS = {
     # en vez de la raíz real, y por qué cbrt() es una excepción
     # deliberada a esa regla, igual que hacen la mayoría de calculadoras).
     "cbrt": lambda x, **_: sympy.Piecewise((-((-x) ** sympy.Rational(1, 3)), x < 0), (x ** sympy.Rational(1, 3), True)),
-    "log": log,
+    "log": _calculator_log,
     "ln": log,
     "exp": exp,
     "abs": Abs,

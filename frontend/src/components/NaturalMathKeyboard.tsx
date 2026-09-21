@@ -187,23 +187,28 @@ const SYMBOLS_ROW_1: KeyDef[] = [
 // SOLO para GraphMode (spec §11, sin tocar), que sigue viendo la fila de
 // siempre. Mismo criterio que CORE_GRID en el Módulo 1: no se borra
 // nada del archivo, se selecciona cuál fila renderizar según el modo.
-const SYMBOLS_ROW_1_BASIC_MODE: KeyDef[] = [
-  key("DEL", "", "borrar todo el campo", false, undefined, "borra todo lo escrito en el campo actual"),
-];
-
-const SYMBOLS_ROW_2: KeyDef[] = [
-  key({ italic: "i" }, "i", "número imaginario", false, undefined, "unidad imaginaria (raíz cuadrada de -1)"),
-  key("π", "\\pi", "pi", false, undefined, "constante pi (≈3.14159)"),
-  key("e", "e", "e", false, undefined, "constante de Euler (≈2.71828)"),
-  key("∞", "\\infty", "infinito", false, undefined, "símbolo de infinito, para límites y sumatorias"),
+export const SYMBOL_VARIABLES: KeyDef[] = [
   key({ italic: "x" }, "x", "variable x", false, undefined, "variable x"),
   key({ italic: "y" }, "y", "variable y", false, undefined, "variable y"),
-  key({ italic: "z" }, "z", "variable z", false, undefined, "variable z"),
-  key("θ", "\\theta", "theta", false, undefined, "letra griega theta, usada para ángulos"),
-  // Fase E (spec_edo_complejos_tooltips.md §2.3): prima suelta, sin
-  // plantilla de argumento -- combinada con la 'y' de arriba (o
-  // presionada varias veces) forma y'/y''/... que calculusIntent.ts
-  // (detectODE) reconoce contando primas dinámicamente.
+  key({ italic: "z" }, "z", "variable z", false, undefined, "variable z, usada también en números complejos"),
+  key("θ", "\\theta", "theta", false, undefined, "variable angular theta"),
+  key("Φ", "\\Phi", "Phi mayúscula", false, undefined, "ángulo azimutal Phi mayúscula en coordenadas polares"),
+  key({ italic: "r" }, "r", "variable r", false, undefined, "variable radial en coordenadas polares"),
+];
+
+export const SYMBOL_CONSTANTS: KeyDef[] = [
+  key("π", "\\pi", "pi", false, undefined, "constante pi (≈3.14159)"),
+  key("e", "e", "e", false, undefined, "constante de Euler (≈2.71828)"),
+  key({ italic: "i" }, "i", "número imaginario", false, undefined, "unidad imaginaria (raíz cuadrada de -1)"),
+  key("∞", "\\infty", "infinito", false, undefined, "representa infinito"),
+  key("φ", "\\frac{1+\\sqrt{5}}{2}", "número áureo phi", false, undefined, "número áureo: (1 + √5) / 2"),
+];
+
+// GraphMode conserva el inventario histórico completo. BasicMode usa las
+// colecciones semánticas anteriores dentro de la pestaña Símbolos.
+const SYMBOLS_ROW_2: KeyDef[] = [
+  ...SYMBOL_CONSTANTS.filter((k) => k.ariaLabel !== "número áureo phi"),
+  ...SYMBOL_VARIABLES.filter((k) => !["Phi mayúscula", "variable r"].includes(k.ariaLabel)),
   key(
     "'",
     "'",
@@ -228,7 +233,9 @@ const SYMBOLS_ROW_2: KeyDef[] = [
  * (interceptada antes, en `pressSymbol`).
  */
 const VARIABLE_CONSTANT_LATEX = new Set(
-  SYMBOLS_ROW_2.filter((k) => k.insertLatex !== "'" && k.insertLatex !== "").map((k) => k.insertLatex),
+  [...SYMBOL_VARIABLES, ...SYMBOL_CONSTANTS, ...SYMBOLS_ROW_2]
+    .filter((k) => k.insertLatex !== "'" && k.insertLatex !== "")
+    .map((k) => k.insertLatex),
 );
 
 export function isVariableOrConstantKey(k: KeyDef): boolean {
@@ -371,7 +378,7 @@ const TRIG_DESCRIPTIONS: Record<string, string> = {
   coth: "cotangente hiperbólica",
 };
 
-const CATEGORY_MENUS: Record<string, { section: string; keys: KeyDef[] }[]> = {
+export const CATEGORY_MENUS: Record<string, { section: string; keys: KeyDef[] }[]> = {
   Trigonométricas: [
     {
       section: "Directas",
@@ -800,25 +807,59 @@ export function NaturalMathKeyboard({
       {openCategory && (
         <div className="mb-1.5 rounded-lg bg-chrome-soft p-3 shadow-lg">
           {openCategory === "Símbolos" ? (
-            <div className="flex flex-col gap-1">
-              <div className="grid grid-cols-9 gap-1">
-                {(hideCoreGrid ? SYMBOLS_ROW_1_BASIC_MODE : SYMBOLS_ROW_1).map((k, i) => (
-                  <button
-                    key={`sym1-${i}`}
-                    type="button"
-                    onClick={() => pressSymbol(k)}
-                    aria-label={k.ariaLabel}
-                    title={k.description}
-                    className="rounded-md bg-chrome py-2 text-[11px] text-bone hover:bg-chrome/70"
-                  >
-                    <KeyGlyph glyph={k.glyph} />
-                  </button>
-                ))}
+            hideCoreGrid ? (
+              <div className="flex flex-col gap-3">
+                <div>
+                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">Variables</div>
+                  <div className="grid grid-cols-6 gap-1">
+                    {SYMBOL_VARIABLES.map((k, i) => (
+                      <button
+                        key={`var-${i}`}
+                        type="button"
+                        onClick={() => pressSymbol(k)}
+                        aria-label={k.ariaLabel}
+                        title={k.description}
+                        className="rounded-md bg-alpha-soft py-2 text-[11px] text-alpha hover:bg-alpha-soft/80"
+                      >
+                        <KeyGlyph glyph={k.glyph} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">Constantes y valores</div>
+                  <div className="grid grid-cols-5 gap-1">
+                    {SYMBOL_CONSTANTS.map((k, i) => (
+                      <button
+                        key={`const-${i}`}
+                        type="button"
+                        onClick={() => pressSymbol(k)}
+                        aria-label={k.ariaLabel}
+                        title={k.description}
+                        className="rounded-md bg-marker-soft/10 py-2 text-[11px] text-marker hover:bg-marker-soft/20"
+                      >
+                        <KeyGlyph glyph={k.glyph} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-              {/* SYMBOLS_ROW_2 solo cuando NO se ocultó el núcleo — en
-                  BasicMode ya no tiene contenido relevante (todo
-                  reubicado al panel básico, Módulo 1). */}
-              {!hideCoreGrid && (
+            ) : (
+              <div className="flex flex-col gap-1">
+                <div className="grid grid-cols-9 gap-1">
+                  {SYMBOLS_ROW_1.map((k, i) => (
+                    <button
+                      key={`sym1-${i}`}
+                      type="button"
+                      onClick={() => pressSymbol(k)}
+                      aria-label={k.ariaLabel}
+                      title={k.description}
+                      className="rounded-md bg-chrome py-2 text-[11px] text-bone hover:bg-chrome/70"
+                    >
+                      <KeyGlyph glyph={k.glyph} />
+                    </button>
+                  ))}
+                </div>
                 <div className="grid grid-cols-9 gap-1">
                   {SYMBOLS_ROW_2.map((k, i) => (
                     <button
@@ -826,15 +867,15 @@ export function NaturalMathKeyboard({
                       type="button"
                       onClick={() => pressSymbol(k)}
                       aria-label={k.ariaLabel}
-                    title={k.description}
+                      title={k.description}
                       className="rounded-md bg-chrome py-2 text-[11px] text-bone hover:bg-chrome/70"
                     >
                       <KeyGlyph glyph={k.glyph} />
                     </button>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )
           ) : (
             CATEGORY_MENUS[openCategory].map((group) =>
               group.section === "Ecuaciones" ? (
