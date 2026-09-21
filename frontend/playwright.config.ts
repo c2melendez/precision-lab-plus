@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 const frontendPort = 4174;
 const backendPort = 8000;
 const baseURL = `http://127.0.0.1:${frontendPort}/`;
+const frontendOrigin = `http://127.0.0.1:${frontendPort}`;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -31,6 +32,8 @@ export default defineConfig({
       url: `http://127.0.0.1:${backendPort}/api/v1/health`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
+      // QA-only: el frontend E2E vive en otro puerto/origen.
+      env: { CORS_ORIGINS: frontendOrigin },
     },
     {
       command: `npm run dev -- --host 127.0.0.1 --port ${frontendPort}`,
