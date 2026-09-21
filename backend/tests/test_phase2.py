@@ -128,36 +128,38 @@ def test_integral_improper_is_real_passthrough():
     assert body["result_text"] == "1"
 
 
-def test_graph_3d_is_unsupported_stub():
+def test_graph_3d_is_real_passthrough():
     response = client.post(
         "/api/v1/graph/3d", json={"expression": "x**2+y**2", "variables": ["x", "y"]}
     )
     body = response.json()
-    assert body["success"] is False
-    assert body["error_code"] == "UNSUPPORTED_IN_PHASE_1"
+    assert body["success"] is True
+    assert body["operation"] == "graph_3d"
+    assert body["graph_data"] is not None
 
 
-def test_graph_parametric_is_unsupported_stub():
+def test_graph_parametric_is_real_passthrough():
     response = client.post(
         "/api/v1/graph/parametric",
         json={"x_expression": "cos(t)", "y_expression": "sin(t)", "parameter": "t"},
     )
     body = response.json()
-    assert body["success"] is False
-    assert body["error_code"] == "UNSUPPORTED_IN_PHASE_1"
+    assert body["success"] is True
+    assert body["operation"] == "graph_parametric"
+    assert body["graph_data"] is not None
 
 
-def test_derivative_partial_is_unsupported_stub():
+def test_derivative_partial_is_real_passthrough():
     response = client.post(
         "/api/v1/derivative/partial", json={"expression": "x**2*y", "variable": "x"}
     )
     body = response.json()
-    assert body["success"] is False
-    assert body["error_code"] == "UNSUPPORTED_IN_PHASE_1"
+    assert body["success"] is True
+    assert body["result_text"] == "2*x*y"
 
 
-def test_derivative_implicit_is_unsupported_stub():
+def test_derivative_implicit_is_real_passthrough():
     response = client.post("/api/v1/derivative/implicit", json={"equation": "x**2+y**2=1"})
     body = response.json()
-    assert body["success"] is False
-    assert body["error_code"] == "UNSUPPORTED_IN_PHASE_1"
+    assert body["success"] is True
+    assert body["result_text"] in {"-x/y", "-x/y(x)"}
