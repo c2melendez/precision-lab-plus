@@ -243,13 +243,19 @@ export function BasicMode() {
     setErrorMessage(null);
     try {
       const result =
-        intent.kind === "derivative"
+        intent.kind === "partialDerivative"
           ? await submitAndRecord(
-              "/derivative",
-              { expression: trimmedInner, variable: intent.variable, order: intent.order },
-              `d/d${intent.variable} [${trimmedInner}]`,
+              "/derivative/partial",
+              { expression: trimmedInner, variable: intent.variable },
+              `∂/∂${intent.variable} [${trimmedInner}]`,
             )
-          : intent.kind === "integral"
+          : intent.kind === "derivative"
+            ? await submitAndRecord(
+                "/derivative",
+                { expression: trimmedInner, variable: intent.variable, order: intent.order },
+                `d/d${intent.variable} [${trimmedInner}]`,
+              )
+            : intent.kind === "integral"
             ? await submitAndRecord(
                 "/integral",
                 {
@@ -469,8 +475,6 @@ export function BasicMode() {
   // deps `[]`, para que se dispare una sola vez.
   const setKeyboardContent = useKeyboardPanelStore((s) => s.setContent);
   const clearKeyboardContent = useKeyboardPanelStore((s) => s.clearContent);
-  const setBasicKeyboardContent = useKeyboardPanelStore((s) => s.setBasicContent);
-  const clearBasicKeyboardContent = useKeyboardPanelStore((s) => s.clearBasicContent);
   const setCompactActions = useKeyboardPanelStore((s) => s.setCompactActions);
   const clearCompactActions = useKeyboardPanelStore((s) => s.clearCompactActions);
   const layoutMode = useLayoutModeStore((s) => s.layoutMode);
@@ -483,6 +487,13 @@ export function BasicMode() {
     setKeyboardContent(
       <NaturalMathKeyboard
         field={mathField}
+        basicContent={
+          <KeyboardBasicPanel
+            field={mathField}
+            onSubmit={() => formRef.current?.requestSubmit()}
+            lastAnswerLatex={lastResult?.result_latex ?? null}
+          />
+        }
         onSubmit={() => formRef.current?.requestSubmit()}
         onClearField={() => setLatex("")}
         onSolveEquation={handleSolveEquation}
@@ -497,21 +508,6 @@ export function BasicMode() {
 
   useEffect(() => {
     return () => clearKeyboardContent();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    setBasicKeyboardContent(
-      <KeyboardBasicPanel
-        field={mathField}
-        onSubmit={() => formRef.current?.requestSubmit()}
-        lastAnswerLatex={lastResult?.result_latex ?? null}
-      />,
-    );
-  });
-
-  useEffect(() => {
-    return () => clearBasicKeyboardContent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
