@@ -118,14 +118,14 @@ def test_inequality_is_real_passthrough():
     assert "2" in body["result_text"]
 
 
-def test_integral_improper_is_unsupported_stub():
+def test_integral_improper_is_real_passthrough():
     response = client.post(
         "/api/v1/integral/improper",
         json={"expression": "exp(-x)", "variable": "x", "lower_bound": "0", "upper_bound": "oo"},
     )
     body = response.json()
-    assert body["success"] is False
-    assert body["error_code"] == "UNSUPPORTED_IN_PHASE_1"
+    assert body["success"] is True
+    assert body["result_text"] == "1"
 
 
 def test_graph_3d_is_unsupported_stub():
