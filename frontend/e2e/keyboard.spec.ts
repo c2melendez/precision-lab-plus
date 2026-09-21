@@ -23,3 +23,31 @@ test("abrir/cerrar teclado no genera excepciones", async ({ page }) => {
   if (await closer.isVisible().catch(() => false)) await closer.click();
   expect(errors).toEqual([]);
 });
+
+
+test("el teclado desplegado coincide con las seis pestañas V5 aprobadas", async ({ page }) => {
+  await page.goto("./");
+  await openKeyboard(page);
+
+  for (const tab of ["Básico", "Símbolos", "Álgebra", "Trigonométricas", "Cálculo", "Complejos"]) {
+    await expect(page.getByRole("tab", { name: tab })).toBeVisible();
+  }
+
+  await expect(page.getByRole("tab", { name: "Básico" })).toHaveAttribute("aria-selected", "true");
+});
+
+test("Plus mantiene ∂/∂x activa y Π como única pendiente de Cálculo", async ({ page }) => {
+  await page.goto("./");
+  await openKeyboard(page);
+  await page.getByRole("tab", { name: "Cálculo" }).click();
+
+  const partial = page.getByRole("button", { name: "derivada parcial" });
+  await expect(partial).toBeVisible();
+  await partial.click();
+  await expect(page.getByText(/derivada parcial: todavía no disponible/i)).toHaveCount(0);
+
+  const product = page.getByRole("button", { name: "productoria" });
+  await expect(product).toBeVisible();
+  await product.click();
+  await expect(page.getByText(/productoria: todavía no disponible/i)).toBeVisible();
+});
