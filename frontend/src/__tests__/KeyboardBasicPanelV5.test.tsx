@@ -67,7 +67,7 @@ describe("KeyboardBasicPanel V5", () => {
       <KeyboardBasicPanel
         field={field as never}
         onSubmit={onSubmit}
-        lastAnswerLatex="\\frac{3}{2}"
+        lastAnswerLatex={"\\frac{3}{2}"}
       />,
     );
 
