@@ -9,8 +9,7 @@ async function openKeyboard(page: import("@playwright/test").Page) {
 }
 
 async function clearBasic(dialog: import("@playwright/test").Locator) {
-  const clear = dialog.getByRole("button", { name: "borrar todo el campo", exact: true });
-  await clear.click();
+  await dialog.getByRole("button", { name: "borrar todo el campo", exact: true }).click();
 }
 
 test("módulo 10: la tecla % calcula porcentaje real (50% = 0.5)", async ({ page }) => {
@@ -20,23 +19,28 @@ test("módulo 10: la tecla % calcula porcentaje real (50% = 0.5)", async ({ page
   await dialog.getByRole("button", { name: "5", exact: true }).click();
   await dialog.getByRole("button", { name: "0", exact: true }).click();
   await dialog.getByRole("button", { name: "porcentaje", exact: true }).click();
-  await dialog.getByRole("button", { name: "calcular", exact: true }).click();
 
-  const result = page.getByRole("region", { name: "Resultado", exact: true });
-  await expect(result).toContainText(/0[.,]5/, { timeout: 12000 });
+  const responsePromise = page.waitForResponse(r => r.url().includes("/api/v1/evaluate") && r.request().method() === "POST");
+  await dialog.getByRole("button", { name: "calcular", exact: true }).click();
+  const body = await (await responsePromise).json();
+  expect(body.success, JSON.stringify(body)).toBe(true);
+  expect(Number(body.result_approx)).toBeCloseTo(0.5, 12);
 });
 
-test("módulo 10: ±(5) produce las dos ramas", async ({ page }) => {
+test("módulo 10: ±(5) produce dos ramas matemáticas distintas", async ({ page }) => {
   const dialog = await openKeyboard(page);
   await dialog.getByRole("tab", { name: "Básico", exact: true }).click();
   await clearBasic(dialog);
   await dialog.getByRole("button", { name: "más/menos", exact: true }).click();
   await dialog.getByRole("button", { name: "5", exact: true }).click();
-  await dialog.getByRole("button", { name: "calcular", exact: true }).click();
 
-  const result = page.getByRole("region", { name: "Resultado", exact: true });
-  await expect(result).toContainText("5", { timeout: 12000 });
-  await expect(result).toContainText("-5", { timeout: 12000 });
+  const responsePromise = page.waitForResponse(r => r.url().includes("/api/v1/evaluate") && r.request().method() === "POST");
+  await dialog.getByRole("button", { name: "calcular", exact: true }).click();
+  const body = await (await responsePromise).json();
+  expect(body.success, JSON.stringify(body)).toBe(true);
+  const text = String(body.result_text ?? "").replace(/\s/g, "");
+  expect(text).toMatch(/(?:\[|\{|,).*5/);
+  expect(text).toContain("-5");
 });
 
 test("módulo 10: Productoria Π ya no aparece como pendiente", async ({ page }) => {
@@ -45,7 +49,7 @@ test("módulo 10: Productoria Π ya no aparece como pendiente", async ({ page })
   const product = dialog.getByRole("button", { name: "productoria", exact: true });
   await expect(product).toBeVisible();
   await product.click();
-  await expect(dialog.getByText(/productoria: todavía no disponible/i)).toHaveCount(0);
+  await expect(page.getByText(/productoria: todavía no disponible/i)).toHaveCount(0);
 });
 
 test("módulo 10: acciones no aritméticas de Álgebra exponen tooltip", async ({ page }) => {
@@ -66,5 +70,3 @@ test("módulo 10: acciones no aritméticas de Álgebra exponen tooltip", async (
     expect(title, `Falta tooltip en ${name}`).toBeTruthy();
   }
 });
-
-// QA rerun marker: módulo 10
