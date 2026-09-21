@@ -538,7 +538,7 @@ export function BasicMode() {
       ref={formRef}
       onSubmit={handleSubmit}
       aria-labelledby="basic-mode-heading"
-      className="mx-auto max-w-lg space-y-6 lg:max-w-3xl dt:max-w-4xl"
+      className="mx-auto w-full max-w-5xl space-y-6 dt:max-w-[1280px]"
     >
       <h2 id="basic-mode-heading" className="sr-only">
         Básico
