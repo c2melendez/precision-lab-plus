@@ -3,6 +3,7 @@
 QA-only. No modifica código de producto.
 """
 import math
+import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -22,7 +23,7 @@ def test_m5_basic_complex_functions():
         r = post("evaluate", {"expression":expr,"angle_unit":"rad"})
         b = r.json()
         assert r.status_code == 200 and b["success"] is True, b
-        assert b["result_approx"] == pytest.approx(expected, abs=1e-10)
+        assert b["result_approx"] == pytest.approx(expected, abs=1e-10), b
 
 def test_m5_conjugate_polar_root_power():
     for expr in ["conj(3+4*i)", "topolar(3+4*i)", "root(-4,2)", "(1+i)^2"]:
