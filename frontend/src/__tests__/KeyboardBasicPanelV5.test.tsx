@@ -48,11 +48,15 @@ describe("KeyboardBasicPanel V5", () => {
     const onSubmit = vi.fn();
     render(<KeyboardBasicPanel field={field as never} onSubmit={onSubmit} lastAnswerLatex={null} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "igual" }));
+    const equal = screen.getByRole("button", { name: "igual" });
+    fireEvent.pointerDown(equal);
+    fireEvent.pointerUp(equal);
     expect(field.insert).toHaveBeenCalledWith("=");
     expect(onSubmit).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: "calcular" }));
+    const enter = screen.getByRole("button", { name: "calcular" });
+    fireEvent.pointerDown(enter);
+    fireEvent.pointerUp(enter);
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
@@ -67,7 +71,9 @@ describe("KeyboardBasicPanel V5", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "insertar el último resultado" }));
+    const ans = screen.getByRole("button", { name: "insertar el último resultado" });
+    fireEvent.pointerDown(ans);
+    fireEvent.pointerUp(ans);
     expect(field.focus).toHaveBeenCalled();
     expect(field.insert).toHaveBeenCalledWith("\\frac{3}{2}");
     expect(onSubmit).not.toHaveBeenCalled();
@@ -77,7 +83,9 @@ describe("KeyboardBasicPanel V5", () => {
     const field = makeField();
     render(<KeyboardBasicPanel field={field as never} onSubmit={vi.fn()} lastAnswerLatex={null} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "insertar el último resultado" }));
+    const ans = screen.getByRole("button", { name: "insertar el último resultado" });
+    fireEvent.pointerDown(ans);
+    fireEvent.pointerUp(ans);
     expect(screen.getByText("Sin resultado previo todavía.")).toBeInTheDocument();
     expect(field.insert).not.toHaveBeenCalled();
 
@@ -91,10 +99,14 @@ describe("KeyboardBasicPanel V5", () => {
     const field = makeField();
     render(<KeyboardBasicPanel field={field as never} onSubmit={vi.fn()} lastAnswerLatex={null} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "borrar" }));
+    const backspace = screen.getByRole("button", { name: "borrar" });
+    fireEvent.pointerDown(backspace);
+    fireEvent.pointerUp(backspace);
     expect(field.executeCommand).toHaveBeenCalledWith("deleteBackward");
 
-    fireEvent.click(screen.getByRole("button", { name: "borrar todo el campo" }));
+    const del = screen.getByRole("button", { name: "borrar todo el campo" });
+    fireEvent.pointerDown(del);
+    fireEvent.pointerUp(del);
     expect(field.setValue).toHaveBeenCalledWith("");
   });
 });
