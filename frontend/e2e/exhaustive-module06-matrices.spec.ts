@@ -13,12 +13,13 @@ test("suite original módulo 6: matrices expone rango, traza y eigen y calcula r
   ]);
 
   await op.selectOption("rank");
-  const cells = page.getByRole("group", { name: "Celdas de Matriz A" }).getByRole("textbox");
+  const form = page.getByRole("form", { name: "Matrices" });
+  const cells = form.getByRole("group", { name: "Celdas de Matriz A" }).getByRole("textbox");
   await cells.nth(0).fill("1");
   await cells.nth(1).fill("2");
   await cells.nth(2).fill("2");
   await cells.nth(3).fill("4");
-  await page.getByRole("button", { name: /calcular/i }).click();
+  await form.getByRole("button", { name: "Calcular", exact: true }).click();
 
   const result = page.getByRole("region", { name: "Resultado", exact: true });
   await expect(result).toContainText("1", { timeout: 12000 });
