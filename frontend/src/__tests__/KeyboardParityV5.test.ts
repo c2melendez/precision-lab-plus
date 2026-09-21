@@ -38,9 +38,20 @@ describe("paridad de especificación del teclado V5 de Plus", () => {
     );
   });
 
-  it("conserva capacidades avanzadas declaradas en sus categorías", () => {
+  it("mantiene la paridad Plus: ∂/∂x activa y Π como pendiente real", () => {
     const calculus = CATEGORY_MENUS["Cálculo"].flatMap((group) => group.keys);
-    expect(calculus.find((key) => key.ariaLabel === "derivada parcial")?.unavailable).toBe(true);
-    expect(calculus.find((key) => key.ariaLabel === "productoria")?.unavailable).toBe(true);
+    const partial = calculus.find((key) => key.ariaLabel === "derivada parcial");
+    const product = calculus.find((key) => key.ariaLabel === "productoria");
+
+    expect(partial?.unavailable).toBeFalsy();
+    expect(partial?.insertLatex).toBe("\\frac{\\partial}{\\partial x}\\left(#0\\right)");
+    expect(product?.unavailable).toBe(true);
+    expect(product?.insertLatex).toBe("");
+  });
+
+  it("reincorpora sgn(a) y mod(a,b) en Álgebra", () => {
+    const algebra = CATEGORY_MENUS["Álgebra"].flatMap((group) => group.keys);
+    expect(algebra.find((key) => key.ariaLabel === "signo de a")?.insertLatex).toContain("sign");
+    expect(algebra.find((key) => key.ariaLabel === "módulo o residuo")?.insertLatex).toContain("mod");
   });
 });
