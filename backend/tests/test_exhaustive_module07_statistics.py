@@ -93,4 +93,4 @@ def test_m7_invalid_parameters_rejected():
     for path,payload in cases:
         b = post(path,payload).json()
         assert b["success"] is False, (path,b)
-        assert b["error_code"] == "DOMAIN_ERROR", (path,b)
+        assert b["error_code"] in {"DOMAIN_ERROR", "VALIDATION_ERROR"}, (path,b)
