@@ -28,12 +28,12 @@ const structuralLabels = new Set([
 
 describe("Suite exhaustiva original — Módulo 10: teclado ↔ motor (Plus frontend)", () => {
   it("todo KeyDef visible tiene etiqueta y las teclas semánticas tienen tooltip descriptivo", () => {
+    const missing: string[] = [];
     for (const key of allKeys) {
       expect(key.ariaLabel.trim()).not.toBe("");
-      if (!structuralLabels.has(key.ariaLabel)) {
-        expect(key.description?.trim(), `Falta tooltip descriptivo en: ${key.ariaLabel}`).toBeTruthy();
-      }
+      if (!structuralLabels.has(key.ariaLabel) && !key.description?.trim()) missing.push(key.ariaLabel);
     }
+    expect(missing).toEqual([]);
   });
 
   it("Productoria Π cumple el requisito actualizado: activa y con plantilla real", () => {
