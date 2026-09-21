@@ -320,7 +320,7 @@ describe("BasicMode", () => {
     expect(useUIStore.getState().activeMode).toBe("basic");
     // La tecla vive dentro de la categoría colapsable "Cálculo" (rediseño
     // de teclado) — hay que abrirla antes de que "derivada" esté en el DOM.
-    fireEvent.click(screen.getByRole("button", { name: "Cálculo" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Cálculo" }));
     fireEvent.click(screen.getByLabelText("derivada"));
     expect(useUIStore.getState().activeMode).toBe("basic");
   });
