@@ -21,6 +21,16 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
       });
     });
 
+    it("detecta la derivada parcial exacta que inserta el teclado Plus", () => {
+      expect(
+        detectCalculusIntent("\\frac{\\partial}{\\partial x}\\left(x^2y+\\sin\\left(x\\right)\\right)"),
+      ).toEqual({
+        kind: "partialDerivative",
+        variable: "x",
+        innerLatex: "x^2y+\\sin\\left(x\\right)",
+      });
+    });
+
     it("respeta paréntesis anidados dentro del argumento", () => {
       expect(detectCalculusIntent("\\frac{d}{dt}\\left(\\sin\\left(t\\right)+t^2\\right)")).toEqual({
         kind: "derivative",
