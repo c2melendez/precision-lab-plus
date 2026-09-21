@@ -14,7 +14,7 @@ test("suite original módulo 9: modos gráficos están activos y 2D renderiza", 
   await page.getByRole("button", { name: "Gráficas", exact: true }).click();
 
   for (const name of ["2D", "3D", "Paramétrica", "Polar"]) {
-    await expect(page.getByRole("button", { name, exact: true })).toBeVisible();
+    await expect(page.getByRole("tab", { name, exact: true })).toBeVisible();
   }
 
   await setMathField(page, 0, "x^2");
