@@ -235,6 +235,21 @@ describe("BasicMode", () => {
     });
   });
 
+  it("enruta ∂/∂x al endpoint dedicado de derivada parcial", async () => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), {
+      target: { value: "\\frac{\\partial}{\\partial x}\\left(x^2y\\right)" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
+
+    expect(mockedCallApi).toHaveBeenCalledWith("/derivative/partial", {
+      expression: "x^2y",
+      variable: "x",
+    });
+  });
+
   it("enruta a /integral con la sub-expresión limpia y los límites como string", async () => {
     render(<BasicMode />);
     fireEvent.change(screen.getByLabelText("Expresión"), {
@@ -305,7 +320,7 @@ describe("BasicMode", () => {
     expect(useUIStore.getState().activeMode).toBe("basic");
     // La tecla vive dentro de la categoría colapsable "Cálculo" (rediseño
     // de teclado) — hay que abrirla antes de que "derivada" esté en el DOM.
-    fireEvent.click(screen.getByRole("button", { name: "Cálculo" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Cálculo" }));
     fireEvent.click(screen.getByLabelText("derivada"));
     expect(useUIStore.getState().activeMode).toBe("basic");
   });

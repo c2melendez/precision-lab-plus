@@ -59,7 +59,7 @@
  */
 
 import type { MathfieldElement } from "mathlive";
-import { useEffect, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import { KeyGlyph, type Glyph, BOX } from "./KeyGlyph";
 import { triggerKeyFeedback } from "../utils/keyFeedback";
 import { useUIStore } from "../store/useUIStore";
@@ -75,8 +75,8 @@ export interface KeyDef {
   glyph: Glyph;
   insertLatex: string;
   ariaLabel: string;
-  /** Sin cómputo real detrás (∂/∂x) — presionarla muestra un aviso en
-   * vez de insertar algo que el backend no puede resolver. */
+  /** Sin cómputo real detrás — presionarla muestra un aviso en vez de
+   * insertar algo que el motor no puede resolver. */
   unavailable?: boolean;
   /** Módulo 0: campo nuevo, opcional, sin consumidores todavía. */
   secondaryAction?: KeySecondaryAction;
@@ -325,7 +325,14 @@ const CALCULUS_ROW_2: KeyDef[] = [
     undefined,
     "deriva la expresión repetidamente -- edita el número de orden en la plantilla",
   ),
-  key({ frac: ["∂", "∂x"] }, "", "derivada parcial", true),
+  key(
+    { frac: ["∂", "∂x"] },
+    "\\frac{\\partial}{\\partial x}\\left(#0\\right)",
+    "derivada parcial",
+    false,
+    undefined,
+    "derivada parcial respecto de x; disponible en Precision Lab Plus",
+  ),
   key(
     { base: "lim", sub: "x→a" },
     "\\lim_{#0\\to#1}#2",
@@ -595,6 +602,8 @@ CATEGORY_MENUS.Álgebra = [
     keys: [
       key("|a|", "\\left|#0\\right|", "valor absoluto de a", false, undefined, "distancia de un número a cero (siempre positiva)"),
       key("a!", "#0!", "factorial de a", false, undefined, "producto de todos los enteros positivos hasta a"),
+      key("sgn(a)", "\\mathrm{sign}\\left(#0\\right)", "signo de a", false, undefined, "devuelve -1, 0 o 1 según el signo del valor"),
+      key("mod(a,b)", "\\mathrm{mod}\\left(#0,#1\\right)", "módulo o residuo", false, undefined, "residuo de dividir a entre b"),
     ],
   },
   {
@@ -670,10 +679,12 @@ CATEGORY_MENUS.Cálculo = [
 ];
 
 const CATEGORIES_FULL = ["Trigonométricas", "Símbolos", "Complejos"] as const;
-const CATEGORIES_BASIC_MODE = ["Símbolos", "Álgebra", "Trigonométricas", "Cálculo", "Complejos"] as const;
+const CATEGORIES_BASIC_MODE = ["Básico", "Símbolos", "Álgebra", "Trigonométricas", "Cálculo", "Complejos"] as const;
 
 interface NaturalMathKeyboardProps {
   field: MathfieldElement | null;
+  /** Panel Básico V5 integrado como primera pestaña en Científica. */
+  basicContent?: ReactNode;
   onSubmit?: () => void;
   onClearField?: () => void;
   onSolveEquation?: () => void;
@@ -708,6 +719,7 @@ const SYSTEM_ROW_OPTIONS = [2, 3, 4, 5];
 
 export function NaturalMathKeyboard({
   field,
+  basicContent,
   onSubmit,
   onClearField,
   onSolveEquation,
@@ -719,7 +731,9 @@ export function NaturalMathKeyboard({
   hideCoreGrid = false,
 }: NaturalMathKeyboardProps) {
   const CATEGORIES = hideCoreGrid ? CATEGORIES_BASIC_MODE : CATEGORIES_FULL;
-  const [openCategory, setOpenCategory] = useState<(typeof CATEGORIES)[number] | null>(null);
+  const [openCategory, setOpenCategory] = useState<(typeof CATEGORIES)[number] | null>(
+    hideCoreGrid && basicContent ? "Básico" : null,
+  );
   const [notice, setNotice] = useState<string | null>(null);
   // Pendiente #2: menú chico "¿cuántas ecuaciones?" al tocar "Sistema".
   const [showSystemSizeMenu, setShowSystemSizeMenu] = useState(false);
@@ -749,7 +763,7 @@ export function NaturalMathKeyboard({
       // dock de recientes.
       recordKey(activeMode, k, isVariableOrConstantKey(k) ? "variable" : "operation");
     }
-    setOpenCategory(null);
+    if (!hideCoreGrid) setOpenCategory(null);
   }
 
   // Fase X, Módulo X0: registra `press` como el manejador de inserción
@@ -797,18 +811,29 @@ export function NaturalMathKeyboard({
   }
 
   return (
-    <div className="relative rounded-xl bg-chrome p-3" onClickCapture={handleKeyboardClickCapture}>
+    <div
+      className={hideCoreGrid ? "relative rounded-xl bg-paper-soft p-3 text-ink" : "relative rounded-xl bg-chrome p-3"}
+      onClickCapture={handleKeyboardClickCapture}
+    >
       {notice && (
-        <div className="mb-1.5 rounded-lg bg-chrome-soft px-3 py-2 text-center text-xs text-bone shadow-lg">
+        <div className="mb-1.5 rounded-lg bg-chrome px-3 py-2 text-center text-xs text-bone shadow-lg">
           {notice}
         </div>
       )}
 
       {openCategory && (
-        <div className="mb-1.5 rounded-lg bg-chrome-soft p-3 shadow-lg">
-          {openCategory === "Símbolos" ? (
+        <div
+          className={
+            hideCoreGrid
+              ? "mb-1.5 rounded-xl border border-paper-line bg-paper p-3 shadow-sm"
+              : "mb-1.5 rounded-lg bg-chrome-soft p-3 shadow-lg"
+          }
+        >
+          {openCategory === "Básico" ? (
+            basicContent
+          ) : openCategory === "Símbolos" ? (
             hideCoreGrid ? (
-              <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-1 gap-3 dt:grid-cols-2">
                 <div>
                   <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">Variables</div>
                   <div className="grid grid-cols-6 gap-1">
@@ -881,7 +906,7 @@ export function NaturalMathKeyboard({
               group.section === "Ecuaciones" ? (
                 <div key={group.section} className="mb-2 last:mb-0">
                   <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">{group.section}</div>
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-3 gap-1.5 dt:grid-cols-6">
                     <button
                       type="button"
                       onClick={() => {
@@ -970,7 +995,7 @@ export function NaturalMathKeyboard({
               ) : (
                 <div key={group.section} className="mb-2 last:mb-0">
                   <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">{group.section}</div>
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-3 gap-1.5 dt:grid-cols-6">
                     {group.keys.map((k, i) => (
                       <button
                         key={`${group.section}-${i}`}
@@ -985,8 +1010,10 @@ export function NaturalMathKeyboard({
                           // veía idéntica a una activa aunque k.unavailable
                           // fuera true.
                           k.unavailable
-                            ? "rounded-md border border-dashed border-bone/30 bg-chrome-soft/40 py-2 text-sm text-bone/40"
-                            : "rounded-md bg-marker-soft/10 py-2 text-sm text-marker hover:bg-marker-soft/20"
+                            ? "rounded-md border border-dashed border-paper-line bg-paper py-2 text-sm text-muted/60"
+                            : hideCoreGrid
+                              ? "rounded-md border border-paper-line bg-paper-soft py-2 text-sm text-ink shadow-sm hover:border-marker/50 hover:bg-marker-soft/20"
+                              : "rounded-md bg-marker-soft/10 py-2 text-sm text-marker hover:bg-marker-soft/20"
                         }
                       >
                         <KeyGlyph glyph={k.glyph} />
@@ -1110,14 +1137,34 @@ export function NaturalMathKeyboard({
         </div>
       )}
 
-      <div className="mb-1.5 flex flex-wrap gap-x-3 gap-y-1 px-1">
+      <div
+        className={
+          hideCoreGrid
+            ? "mb-2 flex flex-wrap gap-1 border-b border-paper-line pb-2"
+            : "mb-1.5 flex flex-wrap gap-x-3 gap-y-1 px-1"
+        }
+        role={hideCoreGrid ? "tablist" : undefined}
+        aria-label={hideCoreGrid ? "Categorías del teclado" : undefined}
+      >
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
             type="button"
-            onClick={() => setOpenCategory((c) => (c === cat ? null : cat))}
+            onClick={() =>
+              hideCoreGrid ? setOpenCategory(cat) : setOpenCategory((current) => (current === cat ? null : cat))
+            }
             aria-expanded={openCategory === cat}
-            className={openCategory === cat ? "text-xs font-semibold text-marker" : "text-xs text-bone/70"}
+            role={hideCoreGrid ? "tab" : undefined}
+            aria-selected={hideCoreGrid ? openCategory === cat : undefined}
+            className={
+              hideCoreGrid
+                ? openCategory === cat
+                  ? "rounded-lg bg-marker px-3 py-1.5 text-[11px] font-semibold text-chrome"
+                  : "rounded-lg border border-transparent px-3 py-1.5 text-[11px] text-muted hover:border-paper-line hover:bg-paper"
+                : openCategory === cat
+                  ? "text-xs font-semibold text-marker"
+                  : "text-xs text-bone/70"
+            }
           >
             {cat}
           </button>

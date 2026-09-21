@@ -41,7 +41,7 @@ export const BASIC_V5_ROWS: KeyDef[][] = [
     key("±()", "\\pm\\left(#0\\right)", "más/menos", false, undefined, "inserta las alternativas positiva y negativa"),
     key("≤", "\\le", "menor o igual que", false, undefined, "compara si el valor izquierdo es menor o igual que el derecho"),
     key("≥", "\\ge", "mayor o igual que", false, undefined, "compara si el valor izquierdo es mayor o igual que el derecho"),
-    key("⏎", "", "calcular", false, undefined, "ejecuta o resuelve la expresión actual"),
+    key("↵ Enter", "", "calcular", false, undefined, "ejecuta o resuelve la expresión actual"),
   ],
 ];
 
@@ -128,7 +128,7 @@ export function KeyboardBasicPanel({ field, onSubmit, lastAnswerLatex }: Keyboar
       field?.setValue("");
       return;
     }
-    if (k.glyph === "⏎") return onSubmit?.();
+    if (k.ariaLabel === "calcular") return onSubmit?.();
     if (k.glyph === "ANS") {
       if (!lastAnswerLatex) {
         setNotice("Sin resultado previo todavía.");
@@ -151,13 +151,14 @@ export function KeyboardBasicPanel({ field, onSubmit, lastAnswerLatex }: Keyboar
 
   function keyClass(k: KeyDef): string {
     const glyphStr = String(k.glyph);
-    if (k.unavailable) return "rounded-md border border-dashed border-bone/30 bg-chrome-soft/40 py-2.5 a11y-key-sm text-bone/40";
-    if (glyphStr === "⏎") return "col-span-2 rounded-md bg-graph py-2.5 a11y-key-sm font-semibold text-paper hover:bg-graph/90";
-    if (glyphStr === "=") return "rounded-md border border-marker py-2.5 a11y-key-sm font-medium text-marker hover:bg-marker-soft/10";
-    if (["×", "−", "+", "÷"].includes(glyphStr)) return "rounded-md bg-marker py-2.5 a11y-key-base font-semibold text-chrome hover:bg-marker/90";
-    if (/^[0-9.%]$/.test(glyphStr)) return "rounded-md bg-chrome-soft/80 py-2.5 a11y-key-sm font-medium text-bone hover:bg-chrome-soft/60";
-    if (["<", ">", "≤", "≥"].includes(glyphStr)) return "rounded-md bg-paper-soft py-2.5 a11y-key-sm text-ink hover:bg-paper-line/60";
-    return "rounded-md bg-chrome-soft py-2.5 a11y-key-tiny text-marker hover:bg-chrome-soft/70";
+    const base = "min-h-[38px] rounded-lg border shadow-sm transition-colors";
+    if (k.unavailable) return `${base} border-dashed border-paper-line bg-paper text-muted/60 a11y-key-sm`;
+    if (k.ariaLabel === "calcular") return `col-span-2 ${base} border-graph bg-graph text-paper a11y-key-sm font-semibold hover:bg-graph/90`;
+    if (glyphStr === "=") return `${base} border-marker/50 bg-paper-soft text-marker a11y-key-sm font-semibold hover:bg-marker-soft/30`;
+    if (["×", "−", "+", "÷"].includes(glyphStr)) return `${base} border-marker/25 bg-marker-soft text-marker-text a11y-key-base font-semibold hover:bg-marker-soft/70`;
+    if (["<", ">", "≤", "≥"].includes(glyphStr)) return `${base} border-marker/45 bg-paper-soft text-marker a11y-key-sm font-semibold hover:bg-marker-soft/20`;
+    if (/^[0-9.%]$/.test(glyphStr)) return `${base} border-paper-line bg-paper-soft text-ink a11y-key-sm font-medium hover:border-marker/40 hover:bg-paper`;
+    return `${base} border-paper-line bg-paper-soft text-ink a11y-key-tiny hover:border-marker/40 hover:bg-paper`;
   }
 
   function handleKeyboardClickCapture(e: ReactMouseEvent<HTMLDivElement>) {
@@ -167,7 +168,7 @@ export function KeyboardBasicPanel({ field, onSubmit, lastAnswerLatex }: Keyboar
   return (
     <div className="relative flex flex-col gap-1.5" onClickCapture={handleKeyboardClickCapture}>
       {notice && (
-        <div className="absolute bottom-full left-0 right-0 mb-1.5 rounded-lg bg-chrome-soft px-3 py-2 text-center text-xs text-bone shadow-lg">
+        <div className="absolute bottom-full left-0 right-0 z-20 mb-2 rounded-lg bg-chrome px-3 py-2 text-center text-xs text-bone shadow-xl">
           {notice}
         </div>
       )}

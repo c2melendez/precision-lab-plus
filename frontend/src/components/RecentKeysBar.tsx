@@ -38,7 +38,7 @@ function RecentKeyButton({ k }: { k: KeyDef }) {
       }}
       aria-label={k.ariaLabel}
       title={k.description ?? k.ariaLabel}
-      className="flex h-8 min-w-[2rem] items-center justify-center rounded-md bg-chrome-soft px-2 text-sm text-bone hover:bg-chrome-soft/70"
+      className="flex h-8 min-w-[2rem] items-center justify-center rounded-md bg-chrome-soft px-2 text-sm text-bone hover:bg-chrome-soft/70 dt:border dt:border-paper-line dt:bg-paper dt:text-ink dt:hover:border-marker/40 dt:hover:bg-marker-soft/20"
     >
       <KeyGlyph glyph={k.glyph} />
     </button>
@@ -49,7 +49,7 @@ function RecentKeysRow({ label, keys }: { label: string; keys: KeyDef[] }) {
   if (keys.length === 0) return null;
   return (
     <div className="flex items-center gap-1.5 overflow-x-auto">
-      <span className="shrink-0 text-[10px] uppercase tracking-wide text-bone/40">{label}</span>
+      <span className="shrink-0 text-[10px] uppercase tracking-wide text-bone/40 dt:text-muted">{label}</span>
       {keys.map((k, i) => (
         // insertLatex no es único entre modos/categorías distintas en teoría,
         // pero dentro de un mismo dock (ya deduplicado por el store) sí lo es.

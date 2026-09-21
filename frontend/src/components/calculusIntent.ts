@@ -89,6 +89,7 @@ import { ComputeEngine } from "@cortex-js/compute-engine";
 
 export type CalculusIntent =
   | { kind: "derivative"; variable: string; order: 1 | 2 | 3 | 4 | 5; innerLatex: string }
+  | { kind: "partialDerivative"; variable: string; innerLatex: string }
   | { kind: "integral"; variable: string; lowerBound: string | null; upperBound: string | null; innerLatex: string }
   | { kind: "limit"; variable: string; point: string; innerLatex: string; direction: "both" | "left" | "right" }
   | { kind: "ode"; cleanedExpression: string }
@@ -230,6 +231,26 @@ function detectDerivative(latex: string): Extract<CalculusIntent, { kind: "deriv
   if (innerLatex.length === 0) return null;
 
   return { kind: "derivative", variable, order: order as 1 | 2 | 3 | 4 | 5, innerLatex };
+}
+
+const PARTIAL_DERIVATIVE_PREFIX = /^\\frac\{\\partial\}\{\\partial\s*([a-zA-Z])\}\\left\(/;
+
+function detectPartialDerivative(
+  latex: string,
+): Extract<CalculusIntent, { kind: "partialDerivative" }> | null {
+  const trimmed = latex.trim();
+  const match = PARTIAL_DERIVATIVE_PREFIX.exec(trimmed);
+  if (!match) return null;
+
+  const variable = match[1];
+  const innerStart = match[0].length;
+  const end = findMatchingRightDelimiter(trimmed, innerStart);
+  if (end === null || end !== trimmed.length) return null;
+
+  const innerLatex = trimmed.slice(innerStart, end - 7).trim();
+  if (!innerLatex) return null;
+
+  return { kind: "partialDerivative", variable, innerLatex };
 }
 
 // ---------------------------------------------------------------------
@@ -375,6 +396,7 @@ function detectLimit(latex: string): Extract<CalculusIntent, { kind: "limit" }> 
  * de reconocimiento (Compute Engine). */
 export function detectCalculusIntent(latex: string): CalculusIntent | null {
   return (
+    detectPartialDerivative(latex) ??
     detectDerivative(latex) ??
     detectODE(latex) ??
     detectResidue(latex) ??

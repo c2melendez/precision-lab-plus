@@ -116,12 +116,12 @@ export function KeyboardDock() {
         </KeyboardPanel>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2 dt:left-1/2 dt:right-auto dt:bottom-4 dt:w-[calc(100%_-_64px)] dt:max-w-[1376px] dt:-translate-x-1/2 dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft dt:px-4 dt:py-2 dt:shadow-xl">
         {/* Fase X, Módulo X0 (Smart Docks) — "justo arriba de donde
             aparecerá el teclado (colapsado o no)", confirmado por Carlos.
             Primera fila del mismo contenedor fijo: queda por encima del
             grid básico Y de la fila compacta en cualquier estado. */}
-        <RecentKeysBar />
+        <div className="dt:flex dt:items-center dt:gap-3"><span className="hidden shrink-0 text-xs font-semibold text-ink dt:inline">⌨ Teclado matemático</span><div className="min-w-0 flex-1"><RecentKeysBar /></div><span className="hidden shrink-0 text-[10px] text-muted dt:inline">Pasa el cursor o enfoca una tecla para ver su función</span></div>
 
         {/* Fila compacta — móvil siempre, y cualquier breakpoint en Focus. */}
         <div className={forceCompactDock ? "grid grid-cols-3 gap-1.5" : "grid grid-cols-3 gap-1.5 md:hidden"}>
@@ -188,8 +188,8 @@ export function KeyboardDock() {
             aria-label={isOpen ? "Cerrar teclado" : "Abrir teclado"}
             className={
               canExpand
-                ? "flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium text-bone/70 hover:bg-chrome-soft hover:text-bone"
-                : "flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium text-bone/20"
+                ? "flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium text-bone/70 hover:bg-chrome-soft hover:text-bone dt:bg-marker-soft dt:text-marker-text dt:hover:bg-marker-soft/70"
+                : "flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium text-bone/20 dt:text-muted/40"
             }
           >
             <KeyboardIcon className="h-3.5 w-3.5" />

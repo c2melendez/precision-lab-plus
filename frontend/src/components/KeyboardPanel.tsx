@@ -55,7 +55,7 @@ export function KeyboardPanel({ isOpen, onClose, children }: KeyboardPanelProps)
         "lg:h-[45vh]",
         // Desktop dt (≥1440px): popover anclado, no full-width, no
         // full-height — flota sobre el dock en vez de cubrir la pantalla.
-        "dt:inset-x-auto dt:bottom-24 dt:right-6 dt:h-auto dt:max-h-[70vh] dt:w-[420px] dt:rounded-2xl dt:border",
+        "dt:left-1/2 dt:right-auto dt:bottom-20 dt:h-auto dt:max-h-[62vh] dt:w-[calc(100%_-_64px)] dt:max-w-[1376px] dt:-translate-x-1/2 dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft",
       ].join(" ")}
     >
       {/* Drag handle — solo afordance visual en este módulo, oculto en dt
@@ -65,12 +65,12 @@ export function KeyboardPanel({ isOpen, onClose, children }: KeyboardPanelProps)
       </div>
 
       <div className="flex items-center justify-between px-4 pb-2 pt-1">
-        <span className="text-sm font-medium text-bone/80">Teclado</span>
+        <span className="text-sm font-medium text-bone/80 dt:text-ink">Teclado matemático</span>
         <button
           type="button"
           onClick={onClose}
           aria-label="Cerrar teclado"
-          className="rounded p-1 text-bone/70 hover:bg-chrome-soft hover:text-bone"
+          className="rounded p-1 text-bone/70 hover:bg-chrome-soft hover:text-bone dt:text-muted dt:hover:bg-paper dt:hover:text-ink"
         >
           ✕
         </button>
