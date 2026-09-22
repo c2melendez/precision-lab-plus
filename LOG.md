@@ -157,3 +157,18 @@ La validación frontend completa (typecheck/Vitest/build/Playwright) queda deleg
 - Regresión específica Σ: `tests/test_track_d_regressions.py::test_m3_sum_still_works_after_aggregate_guard` → **1/1 aprobada**.
 - Suite backend completa: `python -m pytest -q` → **276/276 aprobadas** en 12.43 s.
 - Esto confirma el contrato backend de Σ después del nuevo guard de agregados. La validación UI/Playwright de Σ sigue requiriendo un entorno frontend con dependencias npm instalables.
+
+## Preparación de revalidación frontend/E2E dirigida
+
+Siguiendo la estrategia ya utilizada en M7–M12, Playwright quedó temporalmente aislado a:
+
+- M3 Cálculo;
+- M9 Graficación;
+- M10 Teclado ↔ motor;
+- M12 Personalización / accesibilidad base.
+
+El workflow Playwright conserva `workflow_dispatch` y el CI fue ampliado con `workflow_dispatch` para poder ejecutar manualmente la rama `qa/exhaustive-suite-module-01` cuando los eventos generados por la integración no disparan Actions.
+
+Durante esta preparación se detectó y corrigió un falso negativo del harness M3: el E2E todavía esperaba que Productoria mostrara “todavía no disponible”. La expectativa se actualizó al contrato actual y se añadió un centinela UI explícito: `\\prod_{i=1}^{5}i = 120`.
+
+Después de certificar estos módulos debe restaurarse Playwright a `npx playwright test` y ejecutarse la regresión completa.
