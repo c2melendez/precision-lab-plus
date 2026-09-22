@@ -136,7 +136,10 @@ def evaluate(
     # aplicada a algo que involucra pi (que es como se cuela un float en
     # vez de la forma exacta) — evalf() normal sigue siendo el camino
     # rápido para todo lo demás.
-    numeric_value = expr.evalf()
+    try:
+        numeric_value = expr.evalf()
+    except (ZeroDivisionError, ValueError, OverflowError) as exc:
+        raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
     needs_pole_check = (
         numeric_value.is_number
         and numeric_value.is_finite is not False
