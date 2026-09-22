@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   issues: write
   pull-requests: write
 
@@ -48,16 +48,15 @@ jobs:
         working-directory: frontend
         shell: bash
         run: npx playwright test e2e/exhaustive-module05-complex.spec.ts --reporter=line 2>&1 | tee ../m5-argand.log
-      - name: Publish result
+      - name: Persist diagnostic
         if: always()
         env:
-          GH_TOKEN: ${{ github.token }}
           E2E: ${{ steps.e2e.outcome }}
         shell: bash
         run: |
+          mkdir -p .qa-results
           {
-            echo "<!-- qa-plus-m5-argand -->"
-            echo "## QA Plus — M5 Argand gate"
+            echo "# QA Plus — M5 Argand gate"
             echo
             echo "- SHA: `$GITHUB_SHA`"
             echo "- E2E: **$E2E**"
@@ -65,5 +64,9 @@ jobs:
             echo '~~~text'
             tail -n 500 m5-argand.log
             echo '~~~'
-          } > /tmp/m5.md
-          gh pr comment 4 --repo c2melendez/precision-lab-plus --body-file /tmp/m5.md
+          } > .qa-results/plus-m5-argand.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .qa-results/plus-m5-argand.md
+          git diff --cached --quiet || git commit -m "QA M5 Argand diagnostic [skip ci]"
+          git push origin HEAD:qa/exhaustive-suite-module-01
