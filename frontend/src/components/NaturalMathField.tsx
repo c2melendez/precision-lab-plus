@@ -325,6 +325,7 @@ export function NaturalMathField({
       id={fieldId}
       ref={setRef}
       math-virtual-keyboard-policy="manual"
+      virtual-keyboard-mode="off"
       aria-label={ariaLabel}
       placeholder={placeholder}
       className={
