@@ -36,18 +36,22 @@ test("suite original módulo 3: inventario de Cálculo refleja capacidades actua
 
   const product = page.getByRole("button", { name: "productoria", exact: true }).first();
   await expect(product).toBeVisible();
+  await expect(product).toBeEnabled();
   await product.click();
-  await expect(page.getByText(/productoria: todavía no disponible/i)).toBeVisible();
+  await expect(page.getByText(/productoria: todavía no disponible/i)).toHaveCount(0);
 });
 
 test("suite original módulo 3: sumatoria de 1 a 5 se evalúa a 15 desde la UI", async ({ page }) => {
   await page.goto("./");
+  const field = page.locator("math-field").first();
+  await field.focus();
+  const keyboard = page.getByRole("dialog", { name: "Teclado matemático" });
+  await expect(keyboard).toBeVisible();
   await setExpression(page, "\\sum_{i=1}^{5}i");
 
-  const calculate = page.getByRole("button", { name: /calcular|evaluar/i }).first();
-  await expect(calculate).toBeEnabled();
-  await calculate.click();
-
-  const result = page.getByRole("region", { name: "Resultado", exact: true });
-  await expect(result).toContainText("15", { timeout: 12000 });
+  const responsePromise = page.waitForResponse(r => r.url().includes("/api/v1/evaluate") && r.request().method() === "POST");
+  await keyboard.getByRole("button", { name: "calcular", exact: true }).click();
+  const body = await (await responsePromise).json();
+  expect(body.success, JSON.stringify(body)).toBe(true);
+  expect(body.result_text).toBe("15");
 });
