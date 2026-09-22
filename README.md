@@ -400,3 +400,27 @@ Después de aplicar las correcciones derivadas de M1–M15 se ejecutó nuevament
 Esto confirma localmente los centinelas de singularidades, límite bilateral, funciones desconocidas/whitelist, sanitización de errores SymPy, porcentaje, más/menos, Productoria, logaritmo complejo principal y funciones activas que antes podían degradarse a símbolos.
 
 La validación frontend completa (typecheck/Vitest/build/Playwright) queda delegada a GitHub Actions porque el entorno de trabajo local no dispone de una instalación npm completa y reproducible.
+
+
+## Cierre Track D — 22 de septiembre de 2026
+
+Esta sección **supersede los estados pendientes anteriores de Track D**. La revalidación final se ejecutó con dependencias reales en GitHub Actions, siguiendo el Log técnico de ejecución y decisiones QA.
+
+### Gates finales
+
+- Backend dirigido: **103/103**.
+- Backend completo: **276/276**.
+- Frontend: `npm ci` ✅, typecheck ✅, **240/240** unitarias ✅, build ✅.
+- Playwright completo: **120/120** ✅ en Desktop, Tablet y Mobile.
+- Playwright quedó restaurado a `npx playwright test`.
+- Los workflows temporales de diagnóstico/auditoría usados durante el aislamiento fueron retirados; se conservan los workflows normales `ci.yml` y `playwright.yml`.
+
+### Seguridad de dependencias
+
+El audit completo registró **8 advisories**: 1 critical, 4 high y 3 moderate. Todos corresponden a tooling/desarrollo o cadenas de tooling (Vitest/Vite y transitivas). El audit de producción/runtime quedó en **0 vulnerabilidades**.
+
+No se ejecutó `npm audit fix --force`: las correcciones automáticas propuestas para Vitest/Vite implican upgrades mayores y se dejan para una migración controlada independiente de Track D.
+
+### Estado de integración
+
+Los defectos funcionales que motivaron M1–M15 fueron corregidos/revalidados y la regresión completa está verde. El PR canónico de Track D queda listo para revisión/integración, sujeto únicamente a las políticas normales del repositorio.
