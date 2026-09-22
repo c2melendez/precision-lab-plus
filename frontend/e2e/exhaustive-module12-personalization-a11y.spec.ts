@@ -205,3 +205,24 @@ test("M12: el resultado dinámico queda dentro de una región anunciable", async
   });
   expect(announcement, "El resultado debe estar contenido en aria-live/status/alert").not.toBeNull();
 });
+
+
+test("M12: la primera curva usa visualmente la paleta Azul SaaS por defecto", async ({ page }) => {
+  await page.goto("./");
+  await page.getByRole("button", { name: "Gráficas", exact: true }).click();
+
+  const field = page.locator("math-field").first();
+  await field.evaluate((node) => {
+    const el = node as HTMLElement & { value: string };
+    el.value = "x^2";
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await page.getByRole("button", { name: "Graficar", exact: true }).click();
+
+  const line = page.locator(".scatterlayer .trace .js-line").first();
+  await expect(line).toBeVisible({ timeout: 15000 });
+  const stroke = await line.evaluate((el) => getComputedStyle(el).stroke.replace(/\s/g, "").toLowerCase());
+  expect(stroke).toBe("rgb(37,99,235)");
+  expect(await page.evaluate(() => localStorage.getItem("precision-lab-graph-palette"))).toBeNull();
+});
+
