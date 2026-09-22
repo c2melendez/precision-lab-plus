@@ -21,9 +21,9 @@ def test_m3_derivatives_known_and_boundary():
     assert r.json()["result_text"] == "120*x"
 
     r = post("derivative", {"expression":"x**2","variable":"x","order":6})
-    assert r.status_code == 200
-    assert r.json()["success"] is False
-    assert r.json()["error_code"] == "VALIDATION_ERROR"
+    # El schema público limita el orden a 5; FastAPI/Pydantic lo rechaza
+    # antes de invocar el motor y por contrato HTTP devuelve 422.
+    assert r.status_code == 422
 
 def test_m3_integrals_known_and_boundary():
     r = post("integral", {"expression":"x**2","variable":"x"})
