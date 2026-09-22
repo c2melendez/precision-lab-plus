@@ -389,3 +389,14 @@ resumen de la operación correspondiente.
 
 `docker-compose`, caché, i18n, worker pool con cancelación real, notación
 científica en el parser, métricas, matriz de trazabilidad completa.
+
+## Revalidación post-fix Track D — 21 de septiembre de 2026
+
+Después de aplicar las correcciones derivadas de M1–M15 se ejecutó nuevamente el backend completo del paquete corregido:
+
+- `python -m pytest -q tests/test_track_d_regressions.py tests/test_evaluate.py tests/test_parsing.py` → **103/103 aprobadas**.
+- `python -m pytest -q` → **276/276 aprobadas**.
+
+Esto confirma localmente los centinelas de singularidades, límite bilateral, funciones desconocidas/whitelist, sanitización de errores SymPy, porcentaje, más/menos, Productoria, logaritmo complejo principal y funciones activas que antes podían degradarse a símbolos.
+
+La validación frontend completa (typecheck/Vitest/build/Playwright) queda delegada a GitHub Actions porque el entorno de trabajo local no dispone de una instalación npm completa y reproducible.
