@@ -6,6 +6,7 @@ on:
     paths:
       - .github/workflows/qa-plus-m5-argand.yml
       - frontend/e2e/exhaustive-module05-complex.spec.ts
+      - frontend/src/components/GraphViewer.tsx
   workflow_dispatch:
 
 permissions:
