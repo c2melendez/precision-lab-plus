@@ -151,3 +151,9 @@ Después de aplicar las correcciones derivadas de M1–M15 se ejecutó nuevament
 Esto confirma localmente los centinelas de singularidades, límite bilateral, funciones desconocidas/whitelist, sanitización de errores SymPy, porcentaje, más/menos, Productoria, logaritmo complejo principal y funciones activas que antes podían degradarse a símbolos.
 
 La validación frontend completa (typecheck/Vitest/build/Playwright) queda delegada a GitHub Actions porque el entorno de trabajo local no dispone de una instalación npm completa y reproducible.
+
+### Cierre de revalidación local — 21 de septiembre de 2026
+
+- Regresión específica Σ: `tests/test_track_d_regressions.py::test_m3_sum_still_works_after_aggregate_guard` → **1/1 aprobada**.
+- Suite backend completa: `python -m pytest -q` → **276/276 aprobadas** en 12.43 s.
+- Esto confirma el contrato backend de Σ después del nuevo guard de agregados. La validación UI/Playwright de Σ sigue requiriendo un entorno frontend con dependencias npm instalables.
