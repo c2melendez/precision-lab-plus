@@ -224,10 +224,13 @@ function rewriteFiniteAggregateLatex(latex: string): string | null {
 function rewriteFiniteAggregateAscii(ascii: string): string | null {
   // MathLive puede serializar una sumatoria/productoria editada como:
   //   "sum _(i=1)^5i" / "prod _(i=1)^5i"
-  // en lugar de conservar el macro LaTeX original. Esta forma aparece
-  // en navegador real y debe normalizarse al contrato de 4 argumentos
-  // del backend antes de pasar por el parser genérico.
-  const m = ascii.trim().match(
+  // e incluso deletrear el operador como "s u m"/"p r o d". Ambas formas
+  // aparecen en la conversión real y deben converger al contrato de
+  // 4 argumentos del backend.
+  const compact = ascii.trim()
+    .replace(/\bs\s+u\s+m(?=\s*_)/g, "sum")
+    .replace(/\bp\s+r\s+o\s+d(?=\s*_)/g, "prod");
+  const m = compact.match(
     /^(sum|prod)\s*_\s*\(\s*([A-Za-z][A-Za-z0-9_]*)\s*=\s*([^()]+?)\s*\)\s*\^\s*(?:\(\s*([^()]+?)\s*\)|([^\s]+))\s*(.+)$/s,
   );
   if (!m) return null;
