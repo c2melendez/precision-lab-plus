@@ -4,6 +4,7 @@ on:
   push:
     branches: [main, master, qa/exhaustive-suite-module-01]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
