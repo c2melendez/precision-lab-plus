@@ -40,7 +40,7 @@ declare global {
  * SÍ entiende (`convert_xor`/`**` ambos soportados).
  */
 function rewriteNthRoot(ascii: string): string {
-  const pattern = /root\(([^()]+)\)\(([^()]+)\)/g;
+  const pattern = /root\s*\(\s*([^()]+?)\s*\)\s*\(\s*([^()]+?)\s*\)/g;
   let result = ascii;
   // Se repite porque una raíz puede anidar otra en el índice o el radicando.
   for (let i = 0; i < 5 && pattern.test(result); i++) {
@@ -90,6 +90,9 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   // P6 (spec v2 §7.1): variantes poblacionales — mismo motivo.
   "stdevpop",
   "variancepop",
+  "sign",
+  "root",
+  "Log",
 ];
 
 function collapseKnownFunctionNames(ascii: string): string {
@@ -166,13 +169,74 @@ function rewriteHyperbolicInverses(ascii: string): string {
   return result;
 }
 
+
+
+function rewriteLogSubscriptBase(ascii: string): string {
+  let result = ascii;
+  // MathLive/Compute Engine puede serializar \\log_{2}(8) como
+  // "log _2(8)" o "log _(2)(8)". Normalizamos ambas formas al
+  // contrato explícito del backend: log(argumento,base).
+  result = result.replace(
+    /\blog\s*_\s*\(\s*([^()]+?)\s*\)\s*\(\s*([^()]+?)\s*\)/g,
+    "log($2,$1)",
+  );
+  result = result.replace(
+    /\blog\s*_\s*([A-Za-z0-9.+\-*/^]+)\s*\(\s*([^()]+?)\s*\)/g,
+    "log($2,$1)",
+  );
+  return result;
+}
+
+function rewritePostfixPercent(ascii: string): string {
+  let result = ascii;
+  const pattern = /(\([^()]+\)|(?:\d+(?:\.\d+)?)|(?:[A-Za-z][A-Za-z0-9_]*))%/g;
+  for (let i = 0; i < 8; i++) {
+    const next = result.replace(pattern, "($1)/100");
+    if (next === result) break;
+    result = next;
+  }
+  return result;
+}
+
+function rewriteCommonInverses(ascii: string): string {
+  const names: Record<string, string> = {
+    sin: "asin", cos: "acos", tan: "atan", csc: "acsc", sec: "asec", cot: "acot",
+  };
+  let result = ascii;
+  for (const [name, inverse] of Object.entries(names)) {
+    result = result.replace(new RegExp(`\\b${name}\\s*(?:\\^|\\*\\*)\\s*\\(?-1\\)?`, "g"), inverse);
+  }
+  return result;
+}
+
+function rewriteFiniteAggregateLatex(latex: string): string | null {
+  const m = latex.trim().match(/^\\(sum|prod)_\{([A-Za-z][A-Za-z0-9_]*)=([^{}]+)\}\^\{([^{}]+)\}(.+)$/s);
+  if (!m) return null;
+  const [, op, variable, lower, upper, body] = m;
+  const convert = (part: string) => convertLatexToAsciiMath(part).trim();
+  return `${op === "sum" ? "sum" : "product"}(${convert(body)},${variable},${convert(lower)},${convert(upper)})`;
+}
+
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
-  const ascii = convertLatexToAsciiMath(latex);
+  const aggregate = rewriteFiniteAggregateLatex(latex);
+  if (aggregate) return aggregate;
+  // MathLive may serialize ± as either \\pm or +-. Preserve its calculator
+  // semantics as two branches instead of letting the parser reduce it to -x.
+  const pmTrimmed = latex.trim();
+  const pmMatch = pmTrimmed.match(/^\\pm\\left\((.*)\\right\)$/s) ?? pmTrimmed.match(/^\\pm\((.*)\)$/s);
+  if (pmMatch) return `pm(${latexToBackendSyntax(pmMatch[1])})`;
+  // MathLive elimina un signo % literal durante la conversión ASCII.
+  // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
+  // de convertir, conservando casos como 100+50% -> 100+50/100.
+  const latexWithPercent = latex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
+  const ascii = convertLatexToAsciiMath(latexWithPercent);
 
-  return applyDegreeNotation(
-    rewriteHyperbolicInverses(collapseKnownFunctionNames(rewriteNthRoot(ascii))),
-  ).trim();
+  const collapsed = collapseKnownFunctionNames(ascii);
+  const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
+  return rewritePostfixPercent(applyDegreeNotation(
+    rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii)),
+  )).trim();
 }
 
 interface NaturalMathFieldProps {
