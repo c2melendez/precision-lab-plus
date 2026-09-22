@@ -86,7 +86,7 @@ describe("Suite exhaustiva original — Módulo 10: teclado ↔ motor (Plus fron
   it.each([
     ["sign", "\\mathrm{sign}\\left(-4\\right)", "sign(-4)"],
     ["root complejo", "\\mathrm{root}\\left(27,3\\right)", "root(27,3)"],
-    ["Log complejo", "\\mathrm{log}\\left(-1\\right)", "log(-1)"],
+    ["Log complejo", "\\mathrm{Log}\\left(-1\\right)", "Log(-1)"],
   ] as const)("normalización mathrm: %s", (_label, latex, expected) => {
     expect(latexToBackendSyntax(latex)).toBe(expected);
   });
