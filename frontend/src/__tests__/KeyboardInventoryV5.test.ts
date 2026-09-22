@@ -67,12 +67,12 @@ describe("inventario estructural del teclado V5 de Plus", () => {
     }
   });
 
-  it("mantiene productoria pendiente sin degradar la derivada parcial de Plus", () => {
+  it("mantiene Productoria y derivada parcial activas en Plus", () => {
     const unavailableLabels = allKeyboardKeys
       .filter((key) => key.unavailable)
       .map((key) => key.ariaLabel);
 
-    expect(unavailableLabels).toContain("productoria");
+    expect(unavailableLabels).not.toContain("productoria");
     expect(unavailableLabels).not.toContain("derivada parcial");
   });
 });
