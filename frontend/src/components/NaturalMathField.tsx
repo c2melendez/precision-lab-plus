@@ -92,7 +92,11 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "variancepop",
   "sign",
   "root",
+  "log",
   "Log",
+  "acsch",
+  "asech",
+  "acoth",
 ];
 
 function collapseKnownFunctionNames(ascii: string): string {
@@ -230,7 +234,15 @@ export function latexToBackendSyntax(latex: string): string {
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
   const latexWithPercent = latex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
-  const ascii = convertLatexToAsciiMath(latexWithPercent);
+  // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
+  // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
+  // conocido antes de delegar al conversor, y luego collapseKnownFunctionNames
+  // recompone el identificador multi-letra.
+  const latexWithReciprocalHyperbolicInverses = latexWithPercent
+    .replace(/\\csch\^\{-1\}/g, "\\mathrm{acsch}")
+    .replace(/\\sech\^\{-1\}/g, "\\mathrm{asech}")
+    .replace(/\\coth\^\{-1\}/g, "\\mathrm{acoth}");
+  const ascii = convertLatexToAsciiMath(latexWithReciprocalHyperbolicInverses);
 
   const collapsed = collapseKnownFunctionNames(ascii);
   const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
