@@ -40,13 +40,31 @@ test("suite original módulo 5: inventario complejo compartido está activo", as
 test("suite original módulo 5: Argand 3+4i usa ejes Re e Im", async ({ page }) => {
   await openComplex(page);
   await setExpression(page, "3+4i");
-  // BasicMode usa el estado React `latex` para construir la petición
-  // Argand. Esperamos una señal visible de que el evento input ya fue
-  // consumido antes de disparar la acción del teclado.
+  // BasicMode usa el estado React `latex` para construir la petición.
+  // "Graficar" se habilita solo cuando React ya consumió el evento input.
   await expect(page.getByRole("button", { name: "Graficar", exact: true }).first()).toBeVisible();
-  await page.waitForTimeout(250);
-  const graph = page.getByRole("button", { name: "graficar en el plano de Argand", exact: true }).first();
+
+  // El contenido del teclado se registra en un store mediante useEffect.
+  // Cerrarlo y reabrirlo después de la actualización de `latex` garantiza
+  // que la acción Argand use el callback más reciente y evita probar una
+  // closure anterior creada antes de inyectar 3+4i.
+  await page.keyboard.press("Escape");
+  const field = page.locator("math-field").first();
+  await field.focus();
+  const dialog = page.getByRole("dialog", { name: "Teclado matemático" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("tab", { name: "Complejos", exact: true }).click();
+
+  const responsePromise = page.waitForResponse(
+    (r) => r.url().includes("/api/v1/graph/complex_point") && r.request().method() === "POST",
+  );
+  const graph = dialog.getByRole("button", { name: "graficar en el plano de Argand", exact: true }).first();
   await graph.click();
+  const response = await responsePromise;
+  const body = await response.json();
+  expect(body.success, JSON.stringify(body)).toBe(true);
+  expect(body.graph_data?.x_axis_label).toBe("Re");
+  expect(body.graph_data?.y_axis_label).toBe("Im");
 
   await expect(page.getByText("Re", { exact: true }).first()).toBeVisible({ timeout: 12000 });
   await expect(page.getByText("Im", { exact: true }).first()).toBeVisible({ timeout: 12000 });
