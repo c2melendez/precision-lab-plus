@@ -390,24 +390,37 @@ resumen de la operación correspondiente.
 `docker-compose`, caché, i18n, worker pool con cancelación real, notación
 científica en el parser, métricas, matriz de trazabilidad completa.
 
-## Correcciones posteriores a Track D (suite exhaustiva M1–M15)
+## Revalidación post-fix Track D — 21 de septiembre de 2026
 
-La suite exhaustiva detectó fallos de integración en la cadena **teclado → LaTeX → normalización → parser/whitelist → motor**. Esta versión incorpora las correcciones de producto derivadas de esos hallazgos:
+Después de aplicar las correcciones derivadas de M1–M15 se ejecutó nuevamente el backend completo del paquete corregido:
 
-- singularidades `csc(0)`, `cot(0)` y `asech(0)` pasan a `DOMAIN_ERROR` controlado;
-- límite bilateral `lim 1/x, x→0` se clasifica como inexistente cuando los laterales difieren;
-- el parser rechaza llamadas multi-letra no permitidas (`foo(x)`, `dsolve(x)`) antes de que la multiplicación implícita cambie su semántica;
-- se elimina la exposición de excepciones internas de SymPy en errores de parseo;
-- se habilitan `acsc`, `asec`, `acot`, `csch`, `sech`, `coth`;
-- `Log(z)` usa el logaritmo complejo principal natural, separado del `log` base 10 de calculadora;
-- `%` funciona como operador postfix (`50% = 0.5`);
-- `±(x)` conserva las dos ramas;
-- Σ y Π se normalizan a agregados finitos seguros, con límites enteros y tope de 10 000 términos;
-- Argand respeta `x_axis_label`/`y_axis_label` (`Re`/`Im`);
-- las acciones especiales de Álgebra exponen tooltip consistente.
-- la normalización frontend cubre explícitamente la forma `log _2(8)` emitida por MathLive para logaritmos con base.
+- `python -m pytest -q tests/test_track_d_regressions.py tests/test_evaluate.py tests/test_parsing.py` → **103/103 aprobadas**.
+- `python -m pytest -q` → **276/276 aprobadas**.
 
-**Regresión posterior al fix:** backend completo **276/276 tests aprobados**. La verificación frontend completa se ejecuta en GitHub Actions por falta de acceso local al registro npm.
+Esto confirma localmente los centinelas de singularidades, límite bilateral, funciones desconocidas/whitelist, sanitización de errores SymPy, porcentaje, más/menos, Productoria, logaritmo complejo principal y funciones activas que antes podían degradarse a símbolos.
 
-La política de seguridad se mantiene: `Derivative`, `Integral`, `Sum`, `Product`, `Limit`, `Lambda` y matrices no se habilitan como AST arbitrario a través de `/evaluate`; las sumatorias/productorias del teclado se resuelven por una ruta estructurada y acotada.
+La validación frontend completa (typecheck/Vitest/build/Playwright) queda delegada a GitHub Actions porque el entorno de trabajo local no dispone de una instalación npm completa y reproducible.
 
+
+## Cierre Track D — 22 de septiembre de 2026
+
+Esta sección **supersede los estados pendientes anteriores de Track D**. La revalidación final se ejecutó con dependencias reales en GitHub Actions, siguiendo el Log técnico de ejecución y decisiones QA.
+
+### Gates finales
+
+- Backend dirigido: **103/103**.
+- Backend completo: **276/276**.
+- Frontend: `npm ci` ✅, typecheck ✅, **240/240** unitarias ✅, build ✅.
+- Playwright completo: **120/120** ✅ en Desktop, Tablet y Mobile.
+- Playwright quedó restaurado a `npx playwright test`.
+- Los workflows temporales de diagnóstico/auditoría usados durante el aislamiento fueron retirados; se conservan los workflows normales `ci.yml` y `playwright.yml`.
+
+### Seguridad de dependencias
+
+El audit completo registró **8 advisories**: 1 critical, 4 high y 3 moderate. Todos corresponden a tooling/desarrollo o cadenas de tooling (Vitest/Vite y transitivas). El audit de producción/runtime quedó en **0 vulnerabilidades**.
+
+No se ejecutó `npm audit fix --force`: las correcciones automáticas propuestas para Vitest/Vite implican upgrades mayores y se dejan para una migración controlada independiente de Track D.
+
+### Estado de integración
+
+Los defectos funcionales que motivaron M1–M15 fueron corregidos/revalidados y la regresión completa está verde. El PR canónico de Track D queda listo para revisión/integración, sujeto únicamente a las políticas normales del repositorio.

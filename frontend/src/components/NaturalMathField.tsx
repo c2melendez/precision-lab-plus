@@ -92,7 +92,11 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "variancepop",
   "sign",
   "root",
+  "log",
   "Log",
+  "acsch",
+  "asech",
+  "acoth",
 ];
 
 function collapseKnownFunctionNames(ascii: string): string {
@@ -217,6 +221,24 @@ function rewriteFiniteAggregateLatex(latex: string): string | null {
   return `${op === "sum" ? "sum" : "product"}(${convert(body)},${variable},${convert(lower)},${convert(upper)})`;
 }
 
+function rewriteFiniteAggregateAscii(ascii: string): string | null {
+  // MathLive puede serializar una sumatoria/productoria editada como:
+  //   "sum _(i=1)^5i" / "prod _(i=1)^5i"
+  // e incluso deletrear el operador como "s u m"/"p r o d". Ambas formas
+  // aparecen en la conversión real y deben converger al contrato de
+  // 4 argumentos del backend.
+  const compact = ascii.trim()
+    .replace(/\bs\s+u\s+m(?=\s*_)/g, "sum")
+    .replace(/\bp\s+r\s+o\s+d(?=\s*_)/g, "prod");
+  const m = compact.match(
+    /^(sum|prod)\s*_\s*\(\s*([A-Za-z][A-Za-z0-9_]*)\s*=\s*([^()]+?)\s*\)\s*\^\s*(?:\(\s*([^()]+?)\s*\)|([^\s]+))\s*(.+)$/s,
+  );
+  if (!m) return null;
+  const [, op, variable, lower, upperParen, upperBare, body] = m;
+  const upper = upperParen ?? upperBare;
+  return `${op === "sum" ? "sum" : "product"}(${body.trim()},${variable},${lower.trim()},${upper.trim()})`;
+}
+
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
   const aggregate = rewriteFiniteAggregateLatex(latex);
@@ -230,7 +252,17 @@ export function latexToBackendSyntax(latex: string): string {
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
   const latexWithPercent = latex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
-  const ascii = convertLatexToAsciiMath(latexWithPercent);
+  // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
+  // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
+  // conocido antes de delegar al conversor, y luego collapseKnownFunctionNames
+  // recompone el identificador multi-letra.
+  const latexWithReciprocalHyperbolicInverses = latexWithPercent
+    .replace(/\\csch\^\{-1\}/g, "\\mathrm{acsch}")
+    .replace(/\\sech\^\{-1\}/g, "\\mathrm{asech}")
+    .replace(/\\coth\^\{-1\}/g, "\\mathrm{acoth}");
+  const ascii = convertLatexToAsciiMath(latexWithReciprocalHyperbolicInverses);
+  const asciiAggregate = rewriteFiniteAggregateAscii(ascii);
+  if (asciiAggregate) return asciiAggregate;
 
   const collapsed = collapseKnownFunctionNames(ascii);
   const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
@@ -291,13 +323,19 @@ export function NaturalMathField({
   useEffect(() => {
     const el = elRef.current;
     if (!el) return;
+    const field = el;
 
     function handleFocus(): void {
+      // Precision Lab usa exclusivamente su teclado propio. Refuerzo la
+      // política "manual" también como propiedad del custom element y
+      // oculto cualquier panel nativo que MathLive hubiera conservado.
+      field.mathVirtualKeyboardPolicy = "manual";
+      window.mathVirtualKeyboard.hide();
       useKeyboardPanelStore.getState().open();
     }
 
-    el.addEventListener("focus", handleFocus);
-    return () => el.removeEventListener("focus", handleFocus);
+    field.addEventListener("focus", handleFocus);
+    return () => field.removeEventListener("focus", handleFocus);
   }, []);
 
   useEffect(() => {
@@ -318,6 +356,10 @@ export function NaturalMathField({
   const setRef = useCallback(
     (el: MathfieldElement | null) => {
       elRef.current = el;
+      if (el) {
+        el.mathVirtualKeyboardPolicy = "manual";
+        window.mathVirtualKeyboard.hide();
+      }
       fieldRef?.(el);
     },
     [fieldRef],

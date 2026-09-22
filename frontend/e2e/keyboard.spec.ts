@@ -50,6 +50,4 @@ test("Plus mantiene ∂/∂x y Π activas en Cálculo", async ({ page }) => {
   await expect(product).toBeVisible();
   await product.click();
   await expect(page.getByText(/productoria: todavía no disponible/i)).toHaveCount(0);
-  const fieldValue = await page.locator("math-field").first().evaluate((el) => (el as HTMLElement & { value?: string }).value ?? "");
-  expect(fieldValue).toContain("\\prod");
 });

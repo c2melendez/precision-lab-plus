@@ -136,16 +136,29 @@ def evaluate(
     # aplicada a algo que involucra pi (que es como se cuela un float en
     # vez de la forma exacta) — evalf() normal sigue siendo el camino
     # rápido para todo lo demás.
+    # Para funciones trig directas evaluadas en argumentos exactos con π,
+    # resolver primero el posible polo simbólico. Esto evita que expresiones
+    # como sec(pi/2) entren en evalf() antes de que SymPy las reduzca a zoo.
+    exact_trig_with_pi = expr.has(sympy.tan, sympy.sec, sympy.csc, sympy.cot) and expr.has(sympy.pi)
+    if exact_trig_with_pi:
+        try:
+            simplified_pole = sympy.simplify(expr)
+        except (AttributeError, ZeroDivisionError, ValueError, OverflowError):
+            simplified_pole = None
+        if simplified_pole is not None and simplified_pole.has(
+            sympy.zoo, sympy.oo, -sympy.oo, sympy.nan
+        ):
+            raise DomainErrorResult("El resultado no está definido en este dominio.")
+
     try:
         numeric_value = expr.evalf()
-    except (ZeroDivisionError, ValueError, OverflowError) as exc:
+    except (AttributeError, ZeroDivisionError, ValueError, OverflowError) as exc:
         raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
     needs_pole_check = (
         numeric_value.is_number
         and numeric_value.is_finite is not False
         and not numeric_value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan)
-        and expr.has(sympy.tan, sympy.sec, sympy.csc, sympy.cot)
-        and expr.has(sympy.pi)
+        and exact_trig_with_pi
     )
     if needs_pole_check:
         try:

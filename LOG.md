@@ -141,43 +141,58 @@ Nivel de evidencia: NIVEL 1 (ejecución real). `tsc --noEmit` limpio, `npx vites
 
 Decisión DEDUCIBLE tomada: el texto exacto de la etiqueta ("2 var.") y su posición (esquina inferior derecha del botón, `absolute -bottom-1 right-1`) se decidieron sin pedir confirmación previa por ser un detalle menor de layout — reversible con un cambio de una línea si Carlos prefiere otra redacción o posición. Verificado visualmente que no se corta ni se superpone con botones vecinos.
 
-# Corrección de producto posterior a Track D — M1–M15
+## Revalidación post-fix Track D — 21 de septiembre de 2026
 
-Se parte del reporte consolidado de la suite exhaustiva. A diferencia del Track D original, esta fase **sí modifica código de producto** y conserva los tests centinela QA.
+Después de aplicar las correcciones derivadas de M1–M15 se ejecutó nuevamente el backend completo del paquete corregido:
 
-## Hallazgos abordados
+- `python -m pytest -q tests/test_track_d_regressions.py tests/test_evaluate.py tests/test_parsing.py` → **103/103 aprobadas**.
+- `python -m pytest -q` → **276/276 aprobadas**.
 
-- M1: singularidades trigonométricas (`csc(0)`, `cot(0)`, `asech(0)`).
-- M3: límite bilateral inexistente, revalidación de Σ y habilitación de Π.
-- M4/M13: funciones no-whitelist degradadas a multiplicación implícita.
-- M5: `Log(z)` complejo y labels Re/Im de Argand.
-- M10: normalización inversas/recíprocas, `%`, `±`, Productoria y tooltips.
-- M13: sanitización de errores internos del parser.
+Esto confirma localmente los centinelas de singularidades, límite bilateral, funciones desconocidas/whitelist, sanitización de errores SymPy, porcentaje, más/menos, Productoria, logaritmo complejo principal y funciones activas que antes podían degradarse a símbolos.
 
-## Correcciones
+La validación frontend completa (typecheck/Vitest/build/Playwright) queda delegada a GitHub Actions porque el entorno de trabajo local no dispone de una instalación npm completa y reproducible.
 
-1. `parsing.py` rechaza llamadas multi-letra desconocidas antes de `implicit_multiplication_application`, conservando `y(x+1)` como multiplicación documentada.
-2. Se amplía whitelist con recíprocas/inversas faltantes y `Log` natural complejo.
-3. Σ/Π se procesan como agregados finitos estructurados, con índice forzado a `Symbol`, límites enteros y máximo 10 000 términos; no se permite inyectar un `sympy.Sum/Product` arbitrario en `/evaluate`.
-4. `%` se normaliza como división por 100 y `±` devuelve ambas ramas.
-5. `evaluate_service.py` convierte división por cero/evaluación singular a `DOMAIN_ERROR`.
-6. `compute_limit()` compara laterales cuando SymPy devuelve `zoo` en un límite bilateral.
-7. `GraphViewer.tsx` consume labels de ejes enviados por backend para Argand.
-8. `NaturalMathKeyboard.tsx` activa Π y completa tooltips de acciones especiales.
+### Cierre de revalidación local — 21 de septiembre de 2026
 
-## Verificación local disponible
+- Regresión específica Σ: `tests/test_track_d_regressions.py::test_m3_sum_still_works_after_aggregate_guard` → **1/1 aprobada**.
+- Suite backend completa: `python -m pytest -q` → **276/276 aprobadas** en 12.43 s.
+- Esto confirma el contrato backend de Σ después del nuevo guard de agregados. La validación UI/Playwright de Σ sigue requiriendo un entorno frontend con dependencias npm instalables.
 
-- `pytest tests/test_evaluate.py tests/test_parsing.py`: **85/85** después de los cambios.
-- Casos centinela directos verificados: `sum(i,i,1,5)=15`, `product(i,i,1,5)=120`, `50%=0.5`, `pm(5)={-5,5}`, rechazo de `foo(x)`/`dsolve(x)` y límite `1/x→0` marcado DNE.
-- El frontend se deja para validación completa en GitHub Actions porque el entorno local no pudo completar `npm ci` por acceso al registro.
+## Preparación de revalidación frontend/E2E dirigida
+
+Siguiendo la estrategia ya utilizada en M7–M12, Playwright quedó temporalmente aislado a:
+
+- M3 Cálculo;
+- M9 Graficación;
+- M10 Teclado ↔ motor;
+- M12 Personalización / accesibilidad base.
+
+El workflow Playwright conserva `workflow_dispatch` y el CI fue ampliado con `workflow_dispatch` para poder ejecutar manualmente la rama `qa/exhaustive-suite-module-01` cuando los eventos generados por la integración no disparan Actions.
+
+Durante esta preparación se detectó y corrigió un falso negativo del harness M3: el E2E todavía esperaba que Productoria mostrara “todavía no disponible”. La expectativa se actualizó al contrato actual y se añadió un centinela UI explícito: `\\prod_{i=1}^{5}i = 120`.
+
+Después de certificar estos módulos debe restaurarse Playwright a `npx playwright test` y ejecutarse la regresión completa.
 
 
-## Verificación final Track D
+## Cierre Track D — 22 de septiembre de 2026
 
-`python -m pytest -q` → **276/276 aprobados**. Frontend pendiente de CI por indisponibilidad del registro npm local.
+Esta sección **supersede los estados pendientes anteriores de Track D**. La revalidación final se ejecutó con dependencias reales en GitHub Actions, siguiendo el Log técnico de ejecución y decisiones QA.
 
-## Ajuste final de harness E2E durante la corrección
+### Gates finales
 
-Después de habilitar Productoria Π, el Playwright histórico `frontend/e2e/keyboard.spec.ts` todavía exigía el aviso `"productoria: todavía no disponible"` en Desktop/Tablet/Mobile. La ejecución demostró que el producto ya no mostraba ese aviso, que es precisamente el contrato nuevo esperado. Se clasificó como expectativa obsoleta del harness, no como regresión de producto.
+- Backend dirigido: **103/103**.
+- Backend completo: **276/276**.
+- Frontend: `npm ci` ✅, typecheck ✅, **240/240** unitarias ✅, build ✅.
+- Playwright completo: **120/120** ✅ en Desktop, Tablet y Mobile.
+- Playwright quedó restaurado a `npx playwright test`.
+- Los workflows temporales de diagnóstico/auditoría usados durante el aislamiento fueron retirados; se conservan los workflows normales `ci.yml` y `playwright.yml`.
 
-El spec se actualizó para verificar que Π permanece visible/activa, no muestra el aviso de indisponibilidad e inserta la plantilla `\\prod`. Esta corrección QA se realizó después de que CI ya hubiera validado backend, typecheck, unit/parity y build en verde.
+### Seguridad de dependencias
+
+El audit completo registró **8 advisories**: 1 critical, 4 high y 3 moderate. Todos corresponden a tooling/desarrollo o cadenas de tooling (Vitest/Vite y transitivas). El audit de producción/runtime quedó en **0 vulnerabilidades**.
+
+No se ejecutó `npm audit fix --force`: las correcciones automáticas propuestas para Vitest/Vite implican upgrades mayores y se dejan para una migración controlada independiente de Track D.
+
+### Estado de integración
+
+Los defectos funcionales que motivaron M1–M15 fueron corregidos/revalidados y la regresión completa está verde. El PR canónico de Track D queda listo para revisión/integración, sujeto únicamente a las políticas normales del repositorio.

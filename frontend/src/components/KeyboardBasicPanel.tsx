@@ -26,7 +26,7 @@ export const BASIC_V5_ROWS: KeyDef[][] = [
   [
     key("4", "4", "4"), key("5", "5", "5"), key("6", "6", "6"),
     key("×", "\\cdot", "multiplicar"), key("÷", "\\frac{#0}{#1}", "dividir"),
-    key("%", "\\%", "porcentaje"), key("<", "<", "menor que"), key(">", ">", "mayor que"),
+    key("%", "\\%", "porcentaje", false, undefined, "convierte el valor anterior en porcentaje dividiéndolo entre 100"), key("<", "<", "menor que"), key(">", ">", "mayor que"),
   ],
   [
     key("1", "1", "1"), key("2", "2", "2"), key("3", "3", "3"),
