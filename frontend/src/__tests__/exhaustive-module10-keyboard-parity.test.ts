@@ -42,6 +42,11 @@ describe("Suite exhaustiva original — Módulo 10: teclado ↔ motor (Plus fron
     expect(product?.insertLatex.trim()).not.toBe("");
   });
 
+  it("sumatoria/productoria sobreviven serialización alternativa de MathLive", () => {
+    expect(latexToBackendSyntax("sum_{i=1}^{5}i")).toBe("sum(i,i,1,5)");
+    expect(latexToBackendSyntax("prod_{i=1}^{5}i")).toBe("product(i,i,1,5)");
+  });
+
   it("grados y DMS se normalizan", () => {
     expect(latexToBackendSyntax("90°")).toMatch(/90.*pi.*180/);
     expect(latexToBackendSyntax("45°30′")).toMatch(/45.*30.*60.*pi.*180/);
