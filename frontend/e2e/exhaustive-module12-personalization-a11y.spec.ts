@@ -141,4 +141,25 @@ test("M12: resultado calculado queda dentro de una región anunciable", async ({
   }).toBe(true);
 });
 
-// QA rerun marker: módulo 12
+
+test("M12: vibración y sonido guardan preferencia y sobreviven recarga", async ({ page }) => {
+  await page.goto("./");
+  const { menu } = await openSettings(page);
+  await clickSettingRow(menu, "Vibración al presionar tecla");
+  await clickSettingRow(menu, "Sonido de clic");
+
+  expect(await page.evaluate(() => localStorage.getItem("precision-lab-key-vibration"))).toBe("false");
+  expect(await page.evaluate(() => localStorage.getItem("precision-lab-key-sound"))).toBe("true");
+
+  await page.reload();
+  await expect(page.locator("math-field").first()).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem("precision-lab-key-vibration"))).toBe("false");
+  expect(await page.evaluate(() => localStorage.getItem("precision-lab-key-sound"))).toBe("true");
+
+  const reopened = await openSettings(page);
+  const vibrationRow = reopened.menu.getByText("Vibración al presionar tecla", { exact: true }).locator("..");
+  const soundRow = reopened.menu.getByText("Sonido de clic", { exact: true }).locator("..");
+  await expect(vibrationRow.getByRole("button")).toHaveAttribute("aria-pressed", "false");
+  await expect(soundRow.getByRole("button")).toHaveAttribute("aria-pressed", "true");
+});
+
