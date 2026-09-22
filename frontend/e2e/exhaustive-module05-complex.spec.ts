@@ -40,6 +40,11 @@ test("suite original módulo 5: inventario complejo compartido está activo", as
 test("suite original módulo 5: Argand 3+4i usa ejes Re e Im", async ({ page }) => {
   await openComplex(page);
   await setExpression(page, "3+4i");
+  // BasicMode usa el estado React `latex` para construir la petición
+  // Argand. Esperamos una señal visible de que el evento input ya fue
+  // consumido antes de disparar la acción del teclado.
+  await expect(page.getByRole("button", { name: "Graficar", exact: true }).first()).toBeVisible();
+  await page.waitForTimeout(250);
   const graph = page.getByRole("button", { name: "graficar en el plano de Argand", exact: true }).first();
   await graph.click();
 
