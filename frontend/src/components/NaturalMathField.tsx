@@ -90,6 +90,10 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   // P6 (spec v2 §7.1): variantes poblacionales — mismo motivo.
   "stdevpop",
   "variancepop",
+  "sign",
+  "root",
+  "log",
+  "Log",
 ];
 
 function collapseKnownFunctionNames(ascii: string): string {
@@ -166,13 +170,70 @@ function rewriteHyperbolicInverses(ascii: string): string {
   return result;
 }
 
+function rewritePostfixPercent(ascii: string): string {
+  let result = ascii;
+  const pattern = /(\([^()]+\)|(?:\d+(?:\.\d+)?)|(?:[A-Za-z][A-Za-z0-9_]*))%/g;
+  for (let i = 0; i < 8; i++) {
+    const next = result.replace(pattern, "($1)/100");
+    if (next === result) break;
+    result = next;
+  }
+  return result;
+}
+
+function rewriteCommonInverses(ascii: string): string {
+  const names: Record<string, string> = {
+    sin: "asin", cos: "acos", tan: "atan", csc: "acsc", sec: "asec", cot: "acot",
+  };
+  let result = ascii;
+  for (const [name, inverse] of Object.entries(names)) {
+    result = result.replace(new RegExp(`\\b${name}\\s*(?:\\^|\\*\\*)\\s*\\(?-1\\)?`, "g"), inverse);
+  }
+  return result;
+}
+
+function rewriteFiniteAggregateLatex(latex: string): string | null {
+  const m = latex.trim().match(/^\\(sum|prod)_\{([A-Za-z][A-Za-z0-9_]*)=([^{}]+)\}\^\{([^{}]+)\}(.+)$/s);
+  if (!m) return null;
+  const [, op, variable, lower, upper, body] = m;
+  const convert = (part: string) => convertLatexToAsciiMath(part).trim();
+  return `${op === "sum" ? "sum" : "product"}(${convert(body)},${variable},${convert(lower)},${convert(upper)})`;
+}
+
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
+  const trimmed = latex.trim();
+
+  const logBase = trimmed.match(/^\\log_\{([^{}]+)\}\\left\((.*)\\right\)$/s);
+  if (logBase) {
+    return `log(${convertLatexToAsciiMath(logBase[2]).trim()},${convertLatexToAsciiMath(logBase[1]).trim()})`;
+  }
+
+  const inverseHyperbolic = trimmed.match(/^\\(sinh|cosh|tanh|csch|sech|coth)\^\{-1\}\\left\((.*)\\right\)$/s);
+  if (inverseHyperbolic) {
+    const map: Record<string, string> = {
+      sinh: "asinh", cosh: "acosh", tanh: "atanh",
+      csch: "acsch", sech: "asech", coth: "acoth",
+    };
+    return `${map[inverseHyperbolic[1]]}(${latexToBackendSyntax(inverseHyperbolic[2])})`;
+  }
+
+  const mathrmCall = trimmed.match(/^\\mathrm\{(sign|root|log|Log)\}\\left\((.*)\\right\)$/s);
+  if (mathrmCall) {
+    const args = convertLatexToAsciiMath(mathrmCall[2]).replace(/\s+/g, "");
+    return `${mathrmCall[1]}(${args})`;
+  }
+
+  const aggregate = rewriteFiniteAggregateLatex(latex);
+  if (aggregate) return aggregate;
+  const pmTrimmed = latex.trim();
+  const pmMatch = pmTrimmed.match(/^\\pm\\left\((.*)\\right\)$/s) ?? pmTrimmed.match(/^\\pm\((.*)\)$/s);
+  if (pmMatch) return `pm(${latexToBackendSyntax(pmMatch[1])})`;
   const ascii = convertLatexToAsciiMath(latex);
 
-  return applyDegreeNotation(
-    rewriteHyperbolicInverses(collapseKnownFunctionNames(rewriteNthRoot(ascii))),
-  ).trim();
+  return rewritePostfixPercent(applyDegreeNotation(
+    rewriteCommonInverses(rewriteHyperbolicInverses(collapseKnownFunctionNames(rewriteNthRoot(ascii)))),
+  )).trim();
 }
 
 interface NaturalMathFieldProps {
@@ -264,6 +325,7 @@ export function NaturalMathField({
       id={fieldId}
       ref={setRef}
       math-virtual-keyboard-policy="manual"
+      virtual-keyboard-mode="off"
       aria-label={ariaLabel}
       placeholder={placeholder}
       className={

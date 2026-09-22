@@ -28,6 +28,8 @@ evidencia de (1) y (2) verificada contra el código real.
 """
 
 from dataclasses import dataclass
+import re
+from tokenize import TokenError
 from typing import List, Optional, Tuple
 
 import sympy
@@ -37,6 +39,8 @@ from sympy.parsing.sympy_parser import (
     parse_expr,
     standard_transformations,
 )
+
+from app.services import parsing
 
 # Mismas transformaciones que parsing.py (multiplicación implícita: "3y'"
 # y "2x" deben interpretarse sin '*' explícito, igual que en el resto del
@@ -59,6 +63,32 @@ class ODEParseError(ValueError):
 
 class ODEUnsupportedError(ValueError):
     """EDO bien formada pero fuera del alcance resoluble -> ErrorCode.UNSUPPORTED_OPERATION."""
+
+
+_BLOCKED_ODE_CALLS = {
+    "Derivative", "Integral", "Sum", "Product", "Limit", "Lambda", "Matrix",
+    "dsolve", "__import__", "eval", "exec", "open", "getattr", "setattr",
+}
+
+
+def _validate_ode_user_text(text: str) -> None:
+    """Apply the same whitelist principle as the generic parser before parse_expr.
+
+    The ODE parser needs prime notation and internally creates Derivative nodes,
+    but the user is never allowed to invoke SymPy constructors or arbitrary
+    multi-letter callables directly.
+    """
+    if "__" in text:
+        raise ODEParseError("La expresión contiene un identificador no permitido.")
+    if re.search(r"[A-Za-z_][A-Za-z0-9_]*\s*\.\s*[A-Za-z_]", text):
+        raise ODEParseError("El acceso a atributos no está permitido.")
+
+    for match in re.finditer(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", text):
+        name = match.group(1)
+        if name == "y":
+            continue
+        if name in _BLOCKED_ODE_CALLS or (len(name) > 1 and name not in parsing.ALLOWED_FUNCTIONS):
+            raise ODEParseError(f"Función no reconocida o no permitida: '{name}'.")
 
 
 @dataclass
@@ -133,10 +163,10 @@ def _parse_initial_condition(ic_text: str, order: int) -> dict:
     primes, point_text, value_text = match.group(1), match.group(3), match.group(4)
     deriv_order = len(primes)
     try:
-        point = sympy.sympify(point_text)
-        value = sympy.sympify(value_text)
-    except (sympy.SympifyError, TypeError) as exc:
-        raise ODEParseError(f"No se pudo interpretar la condición inicial: {exc}") from exc
+        point = parsing.parse_expression_tree(point_text, allow_equation=False)
+        value = parsing.parse_expression_tree(value_text, allow_equation=False)
+    except Exception as exc:
+        raise ODEParseError("No se pudo interpretar la condición inicial.") from exc
 
     if deriv_order == 0:
         return {_y(point): value}
@@ -146,7 +176,8 @@ def _parse_initial_condition(ic_text: str, order: int) -> dict:
 def _parse_ode_text(text: str) -> Tuple[sympy.Eq, Optional[dict], int]:
     """Única puerta de entrada a la construcción de un `sympy.Eq` con
     `Derivative`/`Function` para EDO en todo el backend (ver nota de
-    seguridad arriba). No pasa por `parsing.parse_expression_tree`."""
+    seguridad arriba)."""
+    _validate_ode_user_text(text)
     eq_text, ic_text = _split_equation_and_condition(text)
 
     if "=" not in eq_text:
@@ -170,8 +201,8 @@ def _parse_ode_text(text: str) -> Tuple[sympy.Eq, Optional[dict], int]:
     try:
         lhs_expr = parse_expr(lhs_sub, local_dict=local_dict, transformations=_ODE_TRANSFORMATIONS)
         rhs_expr = parse_expr(rhs_sub, local_dict=local_dict, transformations=_ODE_TRANSFORMATIONS)
-    except (sympy.SympifyError, TypeError, SyntaxError) as exc:
-        raise ODEParseError(f"No se pudo interpretar la ecuación: {exc}") from exc
+    except (sympy.SympifyError, TypeError, SyntaxError, TokenError, ValueError) as exc:
+        raise ODEParseError("No se pudo interpretar la ecuación.") from exc
 
     equation = sympy.Eq(lhs_expr, rhs_expr)
 
