@@ -51,9 +51,9 @@ describe("Suite exhaustiva original — Módulo 10: inventario teclado Plus", ()
     }
   });
 
-  it("Plus conserva como única KeyDef unavailable a Productoria", () => {
+  it("Plus no conserva KeyDef matemáticas marcadas unavailable", () => {
     const unavailable = [...new Set(allKeys.filter(k => k.unavailable).map(k => k.ariaLabel))].sort();
-    expect(unavailable).toEqual(["productoria"]);
+    expect(unavailable).toEqual([]);
   });
 
   it("las divergencias Plus activas siguen accesibles", () => {
