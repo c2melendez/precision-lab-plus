@@ -913,7 +913,8 @@ export function NaturalMathKeyboard({
                         onSolveEquation?.();
                         setOpenCategory(null);
                       }}
-                      aria-label="Resolver ecuación"\n                      title="Resolver ecuación"
+                      aria-label="Resolver ecuación"
+                      title="Resolver ecuación"
                       className="rounded-md bg-marker-soft/10 py-2 text-xs text-marker hover:bg-marker-soft/20"
                     >
                       f(x)=0
@@ -924,7 +925,8 @@ export function NaturalMathKeyboard({
                         onSolveEquation?.();
                         setOpenCategory(null);
                       }}
-                      aria-label="Resolver inecuación"\n                      title="Resolver inecuación"
+                      aria-label="Resolver inecuación"
+                      title="Resolver inecuación"
                       className="rounded-md bg-marker-soft/10 py-2 text-xs text-marker hover:bg-marker-soft/20"
                     >
                       f(x)&gt;0
@@ -935,7 +937,8 @@ export function NaturalMathKeyboard({
                         setOpenCategory(null);
                         setShowSystemSizeMenu(true);
                       }}
-                      aria-label="Resolver sistema de ecuaciones"\n                      title="Resolver sistema de ecuaciones"
+                      aria-label="Resolver sistema de ecuaciones"
+                      title="Resolver sistema de ecuaciones"
                       className="rounded-md bg-alpha-soft py-2 text-xs text-alpha hover:bg-alpha-soft/80"
                     >
                       Sistema
@@ -969,7 +972,8 @@ export function NaturalMathKeyboard({
                         onSimplify?.();
                         setOpenCategory(null);
                       }}
-                      aria-label="Simplificar expresión"\n                      title="Simplificar expresión"
+                      aria-label="Simplificar expresión"
+                      title="Simplificar expresión"
                       className="rounded-md bg-graph/15 py-2 text-xs text-graph hover:bg-graph/25"
                     >
                       a+a → 2a
@@ -977,7 +981,8 @@ export function NaturalMathKeyboard({
                     <button
                       type="button"
                       onClick={() => press(key("LCM", "\\mathrm{lcm}\\left(#0,#1\\right)", "mínimo común múltiplo"))}
-                      aria-label="Mínimo común múltiplo"\n                      title="Mínimo común múltiplo"
+                      aria-label="Mínimo común múltiplo"
+                      title="Mínimo común múltiplo"
                       className="rounded-md border border-marker bg-marker-soft/10 py-2 text-xs font-medium text-marker hover:bg-marker-soft/20"
                     >
                       LCM
@@ -985,7 +990,8 @@ export function NaturalMathKeyboard({
                     <button
                       type="button"
                       onClick={() => press(key("GCD", "\\gcd\\left(#0,#1\\right)", "máximo común divisor"))}
-                      aria-label="Máximo común divisor"\n                      title="Máximo común divisor"
+                      aria-label="Máximo común divisor"
+                      title="Máximo común divisor"
                       className="rounded-md border border-marker bg-marker-soft/10 py-2 text-xs font-medium text-marker hover:bg-marker-soft/20"
                     >
                       GCD
