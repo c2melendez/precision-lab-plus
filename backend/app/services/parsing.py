@@ -30,9 +30,12 @@ from sympy import (
     Symbol,
     acos,
     acosh,
+    acot,
     acoth,
+    acsc,
     acsch,
     arg,
+    asec,
     asech,
     asin,
     asinh,
@@ -43,7 +46,9 @@ from sympy import (
     cos,
     cosh,
     cot,
+    coth,
     csc,
+    csch,
     exp,
     gcd,
     lcm,
@@ -52,6 +57,7 @@ from sympy import (
     pi,
     root,
     sec,
+    sech,
     sign,
     sin,
     sinh,
@@ -90,6 +96,17 @@ def _calculator_log(value, base=None, **_):
     return sympy.log(value, 10) if base is None else sympy.log(value, base)
 
 
+def _complex_log(value, **_):
+    """Principal complex logarithm used by the keyboard key ``Log``."""
+    return sympy.log(value)
+
+
+def _plus_minus(value, **_):
+    """Return both mathematical branches for the calculator ± key."""
+    return sympy.FiniteSet(value, -value)
+
+
+
 ALLOWED_FUNCTIONS = {
     "sin": sin,
     "cos": cos,
@@ -100,6 +117,9 @@ ALLOWED_FUNCTIONS = {
     "asin": asin,
     "acos": acos,
     "atan": atan,
+    "acsc": acsc,
+    "asec": asec,
+    "acot": acot,
     # Fix (suite de regresión v1.1, casos E136-E138): Lite reconoce tanto
     # "asin" como "arcsin" (fix de la sesión de paridad de teclado), pero
     # Python solo tenía "asin"/"acos"/"atan" — "arcsin(1)" quedaba sin
@@ -112,6 +132,9 @@ ALLOWED_FUNCTIONS = {
     "sinh": sinh,
     "cosh": cosh,
     "tanh": tanh,
+    "csch": csch,
+    "sech": sech,
+    "coth": coth,
     # Módulo A (spec_motor_matematico_pendiente.md §2, plantilla de motor
     # matemático): las 6 hiperbólicas inversas no estaban — verificado
     # directamente en este diccionario antes del cambio, ninguna de las 6
@@ -136,10 +159,12 @@ ALLOWED_FUNCTIONS = {
     # deliberada a esa regla, igual que hacen la mayoría de calculadoras).
     "cbrt": lambda x, **_: sympy.Piecewise((-((-x) ** sympy.Rational(1, 3)), x < 0), (x ** sympy.Rational(1, 3), True)),
     "log": _calculator_log,
+    "Log": _complex_log,
     "ln": log,
     "exp": exp,
     "abs": Abs,
     "sign": sign,
+    "pm": _plus_minus,
     # Fase 10 (auditoría Fase 0 v2, port de precision-lab-lite): estas 15
     # claves NUNCA estaban aquí — de las 10 teclas del menú "Stat" del
     # teclado, antes de esto solo "n!" (factorial, ya soportado vía
@@ -246,11 +271,19 @@ def validate_length(text: str) -> None:
 
 
 def normalize_unicode(text: str) -> str:
-    """Etapa 2 (sección 7 y sección 3): `π`→`pi`, `∞`→`oo`, `√`→`sqrt(...)`
-    envolviendo únicamente el siguiente token atómico (número, identificador
-    simple, o paréntesis balanceado). `∫` NO se normaliza (sección 3)."""
+    """Normaliza símbolos seguros antes del parser de SymPy."""
     text = text.replace("π", "pi").replace("∞", "oo")
-    return _expand_sqrt_tokens(text)
+    text = _expand_sqrt_tokens(text)
+    # Porcentaje postfix de calculadora: 50% -> (50)/100. Se limita a
+    # átomos simples o un único grupo parentizado para no inventar una
+    # gramática adicional alrededor de `%`.
+    pattern = re.compile(r"(\([^()]+\)|(?:\d+(?:\.\d+)?)|(?:[A-Za-z][A-Za-z0-9_]*))%")
+    for _ in range(8):
+        updated = pattern.sub(r"(\1)/100", text)
+        if updated == text:
+            break
+        text = updated
+    return text
 
 
 def _expand_sqrt_tokens(text: str) -> str:
@@ -370,6 +403,19 @@ def extract_candidate_identifiers(text: str) -> List[str]:
             raise ParseSecurityError(f"Identificador no permitido: '{token}'.")
 
     return seen
+
+
+def _validate_unknown_function_calls(text: str) -> None:
+    """Reject unknown multi-letter call syntax before implicit multiplication rewrites it.
+
+    Single-letter forms such as ``y(x+1)`` remain valid implicit multiplication,
+    preserving the documented calculator syntax. Multi-letter identifiers followed
+    by ``(`` are treated as function intent and must be whitelisted.
+    """
+    for match in re.finditer(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", text):
+        name = match.group(1)
+        if len(name) > 1 and name not in ALLOWED_FUNCTIONS:
+            raise ParseSecurityError(f"Función no reconocida: '{name}'.")
 
 
 def _validate_call_arity(text: str) -> None:
@@ -516,11 +562,45 @@ def _parse_side(side_text: str, local_dict: Dict[str, object]) -> sympy.Expr:
     except ParseSecurityError:
         raise
     except Exception as exc:
-        raise ParseSecurityError(f"No se pudo interpretar la expresión: {exc}") from exc
+        raise ParseSecurityError("No se pudo interpretar la expresión.") from exc
 
     ast_validator.validate_ast_safety(expr)
     ast_validator.check_complexity_limits(expr)
     return expr
+
+
+def _try_parse_finite_aggregate(text: str) -> Optional[sympy.Basic]:
+    """Parse calculator ``sum``/``product`` without allowing raw Sum/Product AST input.
+
+    The keyboard emits the whole construct as ``sum(body,index,lo,hi)`` or
+    ``product(body,index,lo,hi)``. The index is forced to a Symbol even for
+    ``i`` (normally the imaginary constant in the calculator).
+    """
+    m = re.fullmatch(r"(sum|product)\((.*)\)", text.strip(), re.S)
+    if not m:
+        return None
+    args = _split_top_level_commas(m.group(2))
+    if len(args) != 4:
+        raise ParseSecurityError(f"'{m.group(1)}' requiere cuerpo, índice, inicio y fin.")
+    body_text, index_name, lower_text, upper_text = [a.strip() for a in args]
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", index_name):
+        raise ParseSecurityError("Índice inválido en suma/productoria.")
+    index = sympy.Symbol(index_name)
+    ids = extract_candidate_identifiers(body_text)
+    local_dict, _ = classify_identifiers(ids)
+    local_dict[index_name] = index
+    body = _parse_side(body_text, local_dict)
+    lower = parse_expression_tree(lower_text, allow_equation=False)
+    upper = parse_expression_tree(upper_text, allow_equation=False)
+    if not (lower.is_Integer and upper.is_Integer):
+        raise ParseSecurityError("Los límites de suma/productoria deben ser enteros.")
+    if abs(int(upper) - int(lower)) > 10_000:
+        from app.services.ast_validator import ComplexityLimitError
+        raise ComplexityLimitError("El rango de suma/productoria excede 10,000 términos.")
+    value = sympy.summation(body, (index, lower, upper)) if m.group(1) == "sum" else sympy.product(body, (index, lower, upper))
+    from app.services import ast_validator
+    ast_validator.check_complexity_limits(value)
+    return value
 
 
 def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.Basic:
@@ -532,6 +612,11 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
     """
     validate_length(text)
     normalized = normalize_unicode(text)
+
+    if not allow_equation:
+        aggregate = _try_parse_finite_aggregate(normalized)
+        if aggregate is not None:
+            return aggregate
 
     if allow_equation:
         lhs_text, rhs_text = split_equation(normalized)
@@ -550,6 +635,7 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
             )
         lhs_text, rhs_text = normalized, None
 
+    _validate_unknown_function_calls(normalized)
     _validate_call_arity(normalized)
 
     sides = [lhs_text] if rhs_text is None else [lhs_text, rhs_text]
@@ -603,6 +689,7 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     validate_length(lhs_text)
     validate_length(rhs_text)
 
+    _validate_unknown_function_calls(normalized)
     _validate_call_arity(normalized)
 
     for side in (lhs_text, rhs_text):
