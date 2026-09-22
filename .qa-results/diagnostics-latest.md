@@ -2,7 +2,7 @@
 
 - npm_ci: 0
 - typecheck: 0
-- unit: 1
+- unit: 0
 - build: 0
 
 ## npm-ci
@@ -16,7 +16,7 @@ npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schem
 npm warn deprecated glob@11.1.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
 
-added 640 packages, and audited 641 packages in 5s
+added 640 packages, and audited 641 packages in 7s
 
 171 packages are looking for funding
   run `npm fund` for details
@@ -49,32 +49,28 @@ Run `npm audit` for details.
 
 [1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/precision-lab-plus/precision-lab-plus/frontend[39m
 
- [32m✓[39m src/__tests__/ResultPanel.test.tsx [2m([22m[2m19 tests[22m[2m)[22m[33m 433[2mms[22m[39m
- [32m✓[39m src/__tests__/GraphMode.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 1178[2mms[22m[39m
- [32m✓[39m src/__tests__/BasicMode.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[33m 1015[2mms[22m[39m
-   [33m[2m✓[22m[39m BasicMode[2m > [22marma el payload correcto contra /evaluate [33m324[2mms[22m[39m
- [32m✓[39m src/__tests__/calculusIntent.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 267[2mms[22m[39m
- [32m✓[39m src/__tests__/MatrixMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 436[2mms[22m[39m
- [31m❯[39m src/__tests__/exhaustive-module10-keyboard-parity.test.ts [2m([22m[2m25 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[90m 56[2mms[22m[39m
-[31m   [31m×[31m Suite exhaustiva original — Módulo 10: teclado ↔ motor (Plus frontend)[2m > [22msumatoria/productoria sobreviven serialización alternativa de MathLive[90m 21[2mms[22m[31m[39m
-[31m     → expected 's u m_(i=1)^5i' to be 'sum(i,i,1,5)' // Object.is equality[39m
- [32m✓[39m src/__tests__/e2e.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 657[2mms[22m[39m
-   [33m[2m✓[22m[39m E2E mínimo — Derivada (sección 15)[2m > [22mx**2 en Derivada -> MathResponse real -> steps renderizados -> historial -> reuseEntry reejecuta [33m656[2mms[22m[39m
- [32m✓[39m src/__tests__/historyStore.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 22[2mms[22m[39m
- [32m✓[39m src/__tests__/IntegralMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 812[2mms[22m[39m
- [32m✓[39m src/__tests__/SystemMode.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 889[2mms[22m[39m
-   [33m[2m✓[22m[39m SystemMode[2m > [22marma el payload correcto contra /solve/system con 2 ecuaciones y 2 variables [33m371[2mms[22m[39m
- [32m✓[39m src/__tests__/useRecentKeysStore.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 21[2mms[22m[39m
- [32m✓[39m src/__tests__/unitConversion.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 22[2mms[22m[39m
- [32m✓[39m src/__tests__/EquationMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 830[2mms[22m[39m
-   [33m[2m✓[22m[39m EquationMode[2m > [22marma el payload correcto contra /solve sin variable (inferencia automática) [33m312[2mms[22m[39m
- [32m✓[39m src/__tests__/LimitMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 986[2mms[22m[39m
-   [33m[2m✓[22m[39m LimitMode[2m > [22marma el payload correcto contra /limit con un punto finito [33m337[2mms[22m[39m
- [32m✓[39m src/__tests__/NaturalMathField.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 33[2mms[22m[39m
- [32m✓[39m src/__tests__/KeyboardBasicPanelV5.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 703[2mms[22m[39m
-   [33m[2m✓[22m[39m KeyboardBasicPanel V5[2m > [22mmantiene el inventario básico acordado y usa Enter en doble columna [33m441[2mms[22m[39m
- [32m✓[39m src/__tests__/contract.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 10[2mms[22m[39m
- [32m✓[39m src/__tests__/DerivativeMode.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 707[2mms[22m[39m
+ [32m✓[39m src/__tests__/ResultPanel.test.tsx [2m([22m[2m19 tests[22m[2m)[22m[33m 597[2mms[22m[39m
+ [32m✓[39m src/__tests__/BasicMode.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[33m 1065[2mms[22m[39m
+   [33m[2m✓[22m[39m BasicMode[2m > [22marma el payload correcto contra /evaluate [33m320[2mms[22m[39m
+ [32m✓[39m src/__tests__/GraphMode.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 1384[2mms[22m[39m
+   [33m[2m✓[22m[39m GraphMode[2m > [22marma el payload correcto contra /graph/2d con una sola expresión [33m312[2mms[22m[39m
+ [32m✓[39m src/__tests__/calculusIntent.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 299[2mms[22m[39m
+ [32m✓[39m src/__tests__/MatrixMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 460[2mms[22m[39m
+ [32m✓[39m src/__tests__/exhaustive-module10-keyboard-parity.test.ts [2m([22m[2m25 tests[22m[2m)[22m[90m 64[2mms[22m[39m
+ [32m✓[39m src/__tests__/e2e.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 721[2mms[22m[39m
+   [33m[2m✓[22m[39m E2E mínimo — Derivada (sección 15)[2m > [22mx**2 en Derivada -> MathResponse real -> steps renderizados -> historial -> reuseEntry reejecuta [33m719[2mms[22m[39m
+ [32m✓[39m src/__tests__/historyStore.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 19[2mms[22m[39m
+ [32m✓[39m src/__tests__/IntegralMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 756[2mms[22m[39m
+ [32m✓[39m src/__tests__/SystemMode.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 816[2mms[22m[39m
+ [32m✓[39m src/__tests__/useRecentKeysStore.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m src/__tests__/unitConversion.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m src/__tests__/EquationMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 765[2mms[22m[39m
+ [32m✓[39m src/__tests__/NaturalMathField.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 57[2mms[22m[39m
+ [32m✓[39m src/__tests__/LimitMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 864[2mms[22m[39m
+   [33m[2m✓[22m[39m LimitMode[2m > [22marma el payload correcto contra /limit con un punto finito [33m324[2mms[22m[39m
+ [32m✓[39m src/__tests__/KeyboardBasicPanelV5.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 690[2mms[22m[39m
+   [33m[2m✓[22m[39m KeyboardBasicPanel V5[2m > [22mmantiene el inventario básico acordado y usa Enter en doble columna [33m380[2mms[22m[39m
+ [32m✓[39m src/__tests__/contract.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 11[2mms[22m[39m
 [90mstderr[2m | src/__tests__/GraphViewer.test.tsx[2m > [22m[2mGraphViewer[2m > [22m[2mel botón 'Descargar PNG' llama a Plotly.toImage
 [22m[39mError: Not implemented: navigation (except hash changes)
     at module.exports (/home/runner/work/precision-lab-plus/precision-lab-plus/frontend/node_modules/jsdom/lib/jsdom/browser/not-implemented.js:9:17)
@@ -84,47 +80,28 @@ Run `npm audit` for details.
     at listOnTimeout (node:internal/timers:585:17)
     at processTimers (node:internal/timers:521:7) [90mundefined[39m
 
- [32m✓[39m src/__tests__/GraphViewer.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 402[2mms[22m[39m
- [32m✓[39m src/__tests__/client.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 11[2mms[22m[39m
- [32m✓[39m src/__tests__/History.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[90m 230[2mms[22m[39m
- [32m✓[39m src/__tests__/MathKeyboard.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 383[2mms[22m[39m
- [32m✓[39m src/__tests__/KeyboardParityV5.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 5[2mms[22m[39m
- [32m✓[39m src/__tests__/exhaustive-module10-keyboard-inventory.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 23[2mms[22m[39m
- [32m✓[39m src/__tests__/KeyboardInventoryV5.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 19[2mms[22m[39m
- [32m✓[39m src/exhaustive-module08-units.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
- [32m✓[39m src/__tests__/exhaustive-module14-branding-natural-text.test.tsx [2m([22m[2m1 test[22m[2m)[22m[90m 227[2mms[22m[39m
- [32m✓[39m src/__tests__/BrandingV521.test.tsx [2m([22m[2m1 test[22m[2m)[22m[90m 126[2mms[22m[39m
- [32m✓[39m src/__tests__/MathRenderer.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[90m 77[2mms[22m[39m
- [32m✓[39m src/__tests__/fractionDisplay.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m src/__tests__/GraphViewer.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 369[2mms[22m[39m
+ [32m✓[39m src/__tests__/DerivativeMode.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 628[2mms[22m[39m
+ [32m✓[39m src/__tests__/client.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m src/__tests__/History.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[90m 199[2mms[22m[39m
+ [32m✓[39m src/__tests__/MathKeyboard.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 444[2mms[22m[39m
+ [32m✓[39m src/__tests__/KeyboardParityV5.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m src/__tests__/exhaustive-module10-keyboard-inventory.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m src/__tests__/KeyboardInventoryV5.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32m✓[39m src/exhaustive-module08-units.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m src/__tests__/exhaustive-module14-branding-natural-text.test.tsx [2m([22m[2m1 test[22m[2m)[22m[90m 213[2mms[22m[39m
+ [32m✓[39m src/__tests__/MathRenderer.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[90m 71[2mms[22m[39m
+ [32m✓[39m src/__tests__/BrandingV521.test.tsx [2m([22m[2m1 test[22m[2m)[22m[90m 115[2mms[22m[39m
+ [32m✓[39m src/__tests__/fractionDisplay.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 11[2mms[22m[39m
  [32m✓[39m src/__tests__/systemSplit.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 8[2mms[22m[39m
- [32m✓[39m src/__tests__/exhaustive-module11-layout-responsive.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m src/__tests__/exhaustive-module11-layout-responsive.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 6[2mms[22m[39m
  [32m✓[39m src/__tests__/LayoutDefaultV521.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 6[2mms[22m[39m
 
-[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+[2m Test Files [22m [1m[32m33 passed[39m[22m[90m (33)[39m
+[2m      Tests [22m [1m[32m240 passed[39m[22m[90m (240)[39m
+[2m   Start at [22m 05:11:42
+[2m   Duration [22m 18.32s[2m (transform 1.24s, setup 7.43s, collect 2.84s, tests 10.75s, environment 21.46s, prepare 4.42s)[22m
 
-[31m[1m[7m FAIL [27m[22m[39m src/__tests__/exhaustive-module10-keyboard-parity.test.ts[2m > [22mSuite exhaustiva original — Módulo 10: teclado ↔ motor (Plus frontend)[2m > [22msumatoria/productoria sobreviven serialización alternativa de MathLive
-[31m[1mAssertionError[22m: expected 's u m_(i=1)^5i' to be 'sum(i,i,1,5)' // Object.is equality[39m
-
-Expected: [32m"s[7mum(i,i,1,5)[27m"[39m
-Received: [31m"s[7m u m_(i=1)^5i[27m"[39m
-
-[36m [2m❯[22m src/__tests__/exhaustive-module10-keyboard-parity.test.ts:[2m46:52[22m[39m
-    [90m 44| [39m
-    [90m 45| [39m  [34mit[39m([32m"sumatoria/productoria sobreviven serialización alternativa de Ma[39m…
-    [90m 46| [39m    [34mexpect[39m([34mlatexToBackendSyntax[39m([32m"sum_{i=1}^{5}i"[39m))[33m.[39m[34mtoBe[39m([32m"sum(i,i,1,5)"[39m…
-    [90m   | [39m                                                   [31m^[39m
-    [90m 47| [39m    [34mexpect[39m([34mlatexToBackendSyntax[39m([32m"prod_{i=1}^{5}i"[39m))[33m.[39m[34mtoBe[39m([32m"product(i,i,[39m…
-    [90m 48| [39m  })[33m;[39m
-
-[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
-
-[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m32 passed[39m[22m[90m (33)[39m
-[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m239 passed[39m[22m[90m (240)[39m
-[2m   Start at [22m 05:10:02
-[2m   Duration [22m 17.96s[2m (transform 1.11s, setup 7.49s, collect 2.66s, tests 10.62s, environment 20.99s, prepare 3.88s)[22m
-
-
-::error file=/home/runner/work/precision-lab-plus/precision-lab-plus/frontend/src/__tests__/exhaustive-module10-keyboard-parity.test.ts,title=src/__tests__/exhaustive-module10-keyboard-parity.test.ts > Suite exhaustiva original — Módulo 10%3A teclado ↔ motor (Plus frontend) > sumatoria/productoria sobreviven serialización alternativa de MathLive,line=46,column=52::AssertionError: expected 's u m_(i=1)^5i' to be 'sum(i,i,1,5)' // Object.is equality%0A%0AExpected: "sum(i,i,1,5)"%0AReceived: "s u m_(i=1)^5i"%0A%0A ❯ src/__tests__/exhaustive-module10-keyboard-parity.test.ts:46:52%0A%0A
 ~~~
 
 ## build
@@ -200,20 +177,20 @@ computing gzip size...
 [2mdist/[22m[2massets/[22m[32mKaTeX_Main-Regular-ypZvNtVU.ttf           [39m[1m[2m   53.58 kB[22m[1m[22m
 [2mdist/[22m[2massets/[22m[32mKaTeX_AMS-Regular-DRggAlZN.ttf            [39m[1m[2m   63.63 kB[22m[1m[22m
 [2mdist/[22m[2massets/[22m[35mindex-CB_OEzbf.css                        [39m[1m[2m   66.01 kB[22m[1m[22m[2m │ gzip:    15.78 kB[22m
-[2mdist/[22m[2massets/[22m[36mGraphViewer-J28Oqi_U.js                   [39m[1m[2m    2.57 kB[22m[1m[22m[2m │ gzip:     1.25 kB[22m
+[2mdist/[22m[2massets/[22m[36mGraphViewer-DHKbw7qd.js                   [39m[1m[2m    2.57 kB[22m[1m[22m[2m │ gzip:     1.25 kB[22m
 [2mdist/[22m[2massets/[22m[36mworkbox-window.prod.es5-BqEJf4Xk.js       [39m[1m[2m    5.71 kB[22m[1m[22m[2m │ gzip:     2.34 kB[22m
-[2mdist/[22m[2massets/[22m[36mindex-BbVFWqWW.js                         [39m[1m[33m2,808.77 kB[39m[22m[2m │ gzip:   783.84 kB[22m
-[2mdist/[22m[2massets/[22m[36mplotly.min-DYID_LBQ.js                    [39m[1m[33m4,840.47 kB[39m[22m[2m │ gzip: 1,468.44 kB[22m
+[2mdist/[22m[2massets/[22m[36mindex-BMQUeCi8.js                         [39m[1m[33m2,808.85 kB[39m[22m[2m │ gzip:   783.89 kB[22m
+[2mdist/[22m[2massets/[22m[36mplotly.min-G952r_Ed.js                    [39m[1m[33m4,840.47 kB[39m[22m[2m │ gzip: 1,468.44 kB[22m
 [33m
 (!) Some chunks are larger than 500 kB after minification. Consider:
 - Using dynamic import() to code-split the application
 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
-[32m✓ built in 22.21s[39m
+[32m✓ built in 22.64s[39m
 
 [36mPWA v1.3.0[39m
 mode      [35mgenerateSW[39m
-precache  [32m10 entries[39m [2m(7554.88 KiB)[22m
+precache  [32m10 entries[39m [2m(7554.96 KiB)[22m
 files generated
   [2mdist/sw.js[22m
   [2mdist/workbox-9c191d2f.js[22m
