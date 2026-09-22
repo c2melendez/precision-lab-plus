@@ -226,7 +226,11 @@ export function latexToBackendSyntax(latex: string): string {
   const pmTrimmed = latex.trim();
   const pmMatch = pmTrimmed.match(/^\\pm\\left\((.*)\\right\)$/s) ?? pmTrimmed.match(/^\\pm\((.*)\)$/s);
   if (pmMatch) return `pm(${latexToBackendSyntax(pmMatch[1])})`;
-  const ascii = convertLatexToAsciiMath(latex);
+  // MathLive elimina un signo % literal durante la conversión ASCII.
+  // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
+  // de convertir, conservando casos como 100+50% -> 100+50/100.
+  const latexWithPercent = latex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
+  const ascii = convertLatexToAsciiMath(latexWithPercent);
 
   const collapsed = collapseKnownFunctionNames(ascii);
   const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
