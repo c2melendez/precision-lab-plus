@@ -66,6 +66,19 @@ test("suite original módulo 5: Argand 3+4i usa ejes Re e Im", async ({ page }) 
   expect(body.graph_data?.x_axis_label).toBe("Re");
   expect(body.graph_data?.y_axis_label).toBe("Im");
 
-  await expect(page.getByText("Re", { exact: true }).first()).toBeVisible({ timeout: 12000 });
-  await expect(page.getByText("Im", { exact: true }).first()).toBeVisible({ timeout: 12000 });
+  const plot = page.locator(".js-plotly-plot").first();
+  await expect(plot).toBeVisible({ timeout: 12000 });
+  const axisTitles = await plot.evaluate((el) => {
+    const node = el as HTMLElement & {
+      _fullLayout?: {
+        xaxis?: { title?: { text?: string } };
+        yaxis?: { title?: { text?: string } };
+      };
+    };
+    return {
+      x: node._fullLayout?.xaxis?.title?.text ?? "",
+      y: node._fullLayout?.yaxis?.title?.text ?? "",
+    };
+  });
+  expect(axisTitles).toEqual({ x: "Re", y: "Im" });
 });
