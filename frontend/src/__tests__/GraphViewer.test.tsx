@@ -45,6 +45,29 @@ describe("GraphViewer", () => {
     );
   });
 
+
+  it("respeta etiquetas semánticas Re/Im entregadas por Argand", async () => {
+    const argandData: GraphData = {
+      traces: [{ type: "point", name: "3+4i", x: [3], y: [4] }],
+      x_range: [-6, 6],
+      y_range: [-6, 6],
+      points_truncated: false,
+      x_axis_label: "Re",
+      y_axis_label: "Im",
+    };
+
+    render(<GraphViewer data={argandData} />);
+    await waitFor(() => expect(newPlot).toHaveBeenCalledTimes(1));
+
+    const [, , layout] = newPlot.mock.calls[0];
+    expect(layout).toEqual(
+      expect.objectContaining({
+        xaxis: expect.objectContaining({ title: "Re" }),
+        yaxis: expect.objectContaining({ title: "Im" }),
+      }),
+    );
+  });
+
   it("muestra la advertencia de muestreo reducido cuando points_truncated es true", async () => {
     render(<GraphViewer data={{ ...sampleData, points_truncated: true }} />);
     await waitFor(() => expect(newPlot).toHaveBeenCalledTimes(1));
