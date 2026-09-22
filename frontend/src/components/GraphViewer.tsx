@@ -117,19 +117,19 @@ export default function GraphViewer({ data, colors }: GraphViewerProps) {
           isSurface(data)
             ? {
                 scene: {
-                  xaxis: { title: "x" },
-                  yaxis: { title: "y" },
-                  zaxis: { title: "z" },
+                  xaxis: { title: { text: "x" } },
+                  yaxis: { title: { text: "y" } },
+                  zaxis: { title: { text: "z" } },
                 },
                 paper_bgcolor: "transparent",
                 font: { color: "#1C1F26" },
                 margin: { t: 20, r: 20, b: 20, l: 20 },
               }
             : {
-                xaxis: { range: data.x_range, title: data.x_axis_label ?? "x" },
+                xaxis: { range: data.x_range, title: { text: data.x_axis_label ?? "x" } },
                 yaxis: data.y_range
-                  ? { range: data.y_range, title: data.y_axis_label ?? "y" }
-                  : { title: data.y_axis_label ?? "y" },
+                  ? { range: data.y_range, title: { text: data.y_axis_label ?? "y" } }
+                  : { title: { text: data.y_axis_label ?? "y" } },
                 paper_bgcolor: "transparent",
                 plot_bgcolor: "transparent",
                 font: { color: "#1C1F26" },
