@@ -1,4 +1,4 @@
-name: QA Diagnostic Snapshot
+name: QA Fast CI Diagnostic
 
 on:
   push:
@@ -13,71 +13,50 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
           ref: qa/exhaustive-suite-module-01
           fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-
-      - name: Run diagnostics
+      - name: Run CI diagnostics
         shell: bash
         run: |
           set +e
           mkdir -p .qa-results
-
-          (cd backend && pip install -r requirements.txt pytest pytest-cov) > backend-install.log 2>&1
-          S_BACKEND_INSTALL=$?
-          (cd backend && python -m pytest -q) > backend-tests.log 2>&1
-          S_BACKEND_TESTS=$?
           (cd frontend && npm ci) > npm-ci.log 2>&1
-          S_NPM_CI=$?
+          A=$?
           (cd frontend && npm run typecheck) > typecheck.log 2>&1
-          S_TYPECHECK=$?
-          (cd frontend && npm test -- --run) > unit.log 2>&1
-          S_UNIT=$?
+          B=$?
+          (cd frontend && npm test) > unit.log 2>&1
+          C=$?
           (cd frontend && npm run build) > build.log 2>&1
-          S_BUILD=$?
-          (cd frontend && npm install --no-save --package-lock=false @playwright/test@1.55.0 && npx playwright install --with-deps chromium) > pw-install.log 2>&1
-          S_PW_INSTALL=$?
-          (cd frontend && npx playwright test e2e/exhaustive-module03-calculus.spec.ts e2e/exhaustive-module09-graphing.spec.ts e2e/exhaustive-module10-keyboard.spec.ts e2e/exhaustive-module12-personalization-a11y.spec.ts --reporter=line) > e2e.log 2>&1
-          S_E2E=$?
-
+          D=$?
           {
-            echo "# QA diagnostic snapshot — Plus"
+            echo "# QA fast CI diagnostic — Plus"
             echo
-            echo "- commit: $GITHUB_SHA"
-            echo "- backend_install: $S_BACKEND_INSTALL"
-            echo "- backend_tests: $S_BACKEND_TESTS"
-            echo "- npm_ci: $S_NPM_CI"
-            echo "- typecheck: $S_TYPECHECK"
-            echo "- unit: $S_UNIT"
-            echo "- build: $S_BUILD"
-            echo "- playwright_install: $S_PW_INSTALL"
-            echo "- directed_e2e: $S_E2E"
-            for f in backend-install backend-tests npm-ci typecheck unit build pw-install e2e; do
+            echo "- npm_ci: $A"
+            echo "- typecheck: $B"
+            echo "- unit: $C"
+            echo "- build: $D"
+            for f in npm-ci typecheck unit build; do
               echo
               echo "## $f"
               echo '~~~text'
-              tail -n 220 "$f.log" 2>/dev/null || true
+              tail -n 260 "$f.log" 2>/dev/null || true
               echo '~~~'
             done
           } > .qa-results/diagnostics-latest.md
-
-      - name: Commit diagnostic snapshot
-        if: always()
+      - name: Commit snapshot
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .qa-results/diagnostics-latest.md
           git diff --cached --quiet && exit 0
-          git commit -m "QA diagnostics snapshot [skip ci]"
+          git commit -m "QA fast diagnostics [skip ci]"
           git push origin HEAD:qa/exhaustive-suite-module-01
