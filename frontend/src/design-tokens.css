@@ -26,11 +26,11 @@
   --color-marker: 232 163 61;
   --color-marker-soft: 251 239 218;
   --color-marker-text: 138 90 14;
-  --color-graph: 62 124 116;
+  --color-graph: 55 110 102;
   --color-graph-soft: 228 238 236;
   --color-alpha: 155 127 214;
   --color-alpha-soft: 36 28 51;
-  --color-muted: 138 131 113;
+  --color-muted: 105 98 80;
 }
 
 [data-theme="light"] {

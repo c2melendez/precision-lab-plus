@@ -273,7 +273,7 @@ function Graph2DForm() {
           <button
             type="button"
             onClick={addExpressionField}
-            className="text-sm text-marker hover:text-marker-text"
+            className="text-sm text-marker-text hover:underline"
           >
             + Añadir expresión
           </button>
