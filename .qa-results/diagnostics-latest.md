@@ -1,9 +1,9 @@
 # QA fast CI diagnostic — Plus
 
 - npm_ci: 0
-- typecheck: 0
+- typecheck: 2
 - unit: 0
-- build: 0
+- build: 2
 
 ## npm-ci
 ~~~text
@@ -16,7 +16,7 @@ npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schem
 npm warn deprecated glob@11.1.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
 
-added 640 packages, and audited 641 packages in 7s
+added 640 packages, and audited 641 packages in 5s
 
 171 packages are looking for funding
   run `npm fund` for details
@@ -38,6 +38,9 @@ Run `npm audit` for details.
 > precision-lab-frontend@0.1.0 typecheck
 > tsc --noEmit
 
+src/components/NaturalMathField.tsx(26,5): error TS2687: All declarations of 'mathVirtualKeyboard' must have identical modifiers.
+src/components/NaturalMathField.tsx(26,5): error TS2717: Subsequent property declarations must have the same type.  Property 'mathVirtualKeyboard' must be of type 'VirtualKeyboardInterface & EventTarget', but here has type '{ hide: () => void; } | undefined'.
+src/components/NaturalMathField.tsx(334,7): error TS18047: 'el' is possibly 'null'.
 ~~~
 
 ## unit
@@ -49,28 +52,25 @@ Run `npm audit` for details.
 
 [1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/precision-lab-plus/precision-lab-plus/frontend[39m
 
- [32m✓[39m src/__tests__/ResultPanel.test.tsx [2m([22m[2m19 tests[22m[2m)[22m[33m 597[2mms[22m[39m
- [32m✓[39m src/__tests__/BasicMode.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[33m 1065[2mms[22m[39m
-   [33m[2m✓[22m[39m BasicMode[2m > [22marma el payload correcto contra /evaluate [33m320[2mms[22m[39m
- [32m✓[39m src/__tests__/GraphMode.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 1384[2mms[22m[39m
-   [33m[2m✓[22m[39m GraphMode[2m > [22marma el payload correcto contra /graph/2d con una sola expresión [33m312[2mms[22m[39m
- [32m✓[39m src/__tests__/calculusIntent.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 299[2mms[22m[39m
- [32m✓[39m src/__tests__/MatrixMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 460[2mms[22m[39m
- [32m✓[39m src/__tests__/exhaustive-module10-keyboard-parity.test.ts [2m([22m[2m25 tests[22m[2m)[22m[90m 64[2mms[22m[39m
- [32m✓[39m src/__tests__/e2e.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 721[2mms[22m[39m
-   [33m[2m✓[22m[39m E2E mínimo — Derivada (sección 15)[2m > [22mx**2 en Derivada -> MathResponse real -> steps renderizados -> historial -> reuseEntry reejecuta [33m719[2mms[22m[39m
- [32m✓[39m src/__tests__/historyStore.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 19[2mms[22m[39m
- [32m✓[39m src/__tests__/IntegralMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 756[2mms[22m[39m
- [32m✓[39m src/__tests__/SystemMode.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 816[2mms[22m[39m
- [32m✓[39m src/__tests__/useRecentKeysStore.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 17[2mms[22m[39m
- [32m✓[39m src/__tests__/unitConversion.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 14[2mms[22m[39m
- [32m✓[39m src/__tests__/EquationMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 765[2mms[22m[39m
- [32m✓[39m src/__tests__/NaturalMathField.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 57[2mms[22m[39m
- [32m✓[39m src/__tests__/LimitMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 864[2mms[22m[39m
-   [33m[2m✓[22m[39m LimitMode[2m > [22marma el payload correcto contra /limit con un punto finito [33m324[2mms[22m[39m
- [32m✓[39m src/__tests__/KeyboardBasicPanelV5.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 690[2mms[22m[39m
-   [33m[2m✓[22m[39m KeyboardBasicPanel V5[2m > [22mmantiene el inventario básico acordado y usa Enter en doble columna [33m380[2mms[22m[39m
- [32m✓[39m src/__tests__/contract.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m src/__tests__/ResultPanel.test.tsx [2m([22m[2m19 tests[22m[2m)[22m[33m 408[2mms[22m[39m
+ [32m✓[39m src/__tests__/GraphMode.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 934[2mms[22m[39m
+ [32m✓[39m src/__tests__/BasicMode.test.tsx [2m([22m[2m16 tests[22m[2m)[22m[33m 856[2mms[22m[39m
+ [32m✓[39m src/__tests__/calculusIntent.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 262[2mms[22m[39m
+ [32m✓[39m src/__tests__/MatrixMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 403[2mms[22m[39m
+ [32m✓[39m src/__tests__/exhaustive-module10-keyboard-parity.test.ts [2m([22m[2m25 tests[22m[2m)[22m[90m 43[2mms[22m[39m
+ [32m✓[39m src/__tests__/e2e.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 540[2mms[22m[39m
+   [33m[2m✓[22m[39m E2E mínimo — Derivada (sección 15)[2m > [22mx**2 en Derivada -> MathResponse real -> steps renderizados -> historial -> reuseEntry reejecuta [33m539[2mms[22m[39m
+ [32m✓[39m src/__tests__/historyStore.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m src/__tests__/SystemMode.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 619[2mms[22m[39m
+ [32m✓[39m src/__tests__/IntegralMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 661[2mms[22m[39m
+ [32m✓[39m src/__tests__/useRecentKeysStore.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m src/__tests__/unitConversion.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m src/__tests__/EquationMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 580[2mms[22m[39m
+ [32m✓[39m src/__tests__/LimitMode.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 593[2mms[22m[39m
+ [32m✓[39m src/__tests__/KeyboardBasicPanelV5.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 442[2mms[22m[39m
+ [32m✓[39m src/__tests__/NaturalMathField.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 33[2mms[22m[39m
+ [32m✓[39m src/__tests__/contract.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m src/__tests__/DerivativeMode.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 440[2mms[22m[39m
 [90mstderr[2m | src/__tests__/GraphViewer.test.tsx[2m > [22m[2mGraphViewer[2m > [22m[2mel botón 'Descargar PNG' llama a Plotly.toImage
 [22m[39mError: Not implemented: navigation (except hash changes)
     at module.exports (/home/runner/work/precision-lab-plus/precision-lab-plus/frontend/node_modules/jsdom/lib/jsdom/browser/not-implemented.js:9:17)
@@ -80,27 +80,26 @@ Run `npm audit` for details.
     at listOnTimeout (node:internal/timers:585:17)
     at processTimers (node:internal/timers:521:7) [90mundefined[39m
 
- [32m✓[39m src/__tests__/GraphViewer.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 369[2mms[22m[39m
- [32m✓[39m src/__tests__/DerivativeMode.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 628[2mms[22m[39m
- [32m✓[39m src/__tests__/client.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 12[2mms[22m[39m
- [32m✓[39m src/__tests__/History.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[90m 199[2mms[22m[39m
- [32m✓[39m src/__tests__/MathKeyboard.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 444[2mms[22m[39m
- [32m✓[39m src/__tests__/KeyboardParityV5.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 9[2mms[22m[39m
- [32m✓[39m src/__tests__/exhaustive-module10-keyboard-inventory.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 24[2mms[22m[39m
- [32m✓[39m src/__tests__/KeyboardInventoryV5.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 26[2mms[22m[39m
- [32m✓[39m src/exhaustive-module08-units.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 8[2mms[22m[39m
- [32m✓[39m src/__tests__/exhaustive-module14-branding-natural-text.test.tsx [2m([22m[2m1 test[22m[2m)[22m[90m 213[2mms[22m[39m
- [32m✓[39m src/__tests__/MathRenderer.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[90m 71[2mms[22m[39m
- [32m✓[39m src/__tests__/BrandingV521.test.tsx [2m([22m[2m1 test[22m[2m)[22m[90m 115[2mms[22m[39m
- [32m✓[39m src/__tests__/fractionDisplay.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 11[2mms[22m[39m
- [32m✓[39m src/__tests__/systemSplit.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 8[2mms[22m[39m
- [32m✓[39m src/__tests__/exhaustive-module11-layout-responsive.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 6[2mms[22m[39m
- [32m✓[39m src/__tests__/LayoutDefaultV521.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m src/__tests__/GraphViewer.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 350[2mms[22m[39m
+ [32m✓[39m src/__tests__/client.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m src/__tests__/History.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[90m 145[2mms[22m[39m
+ [32m✓[39m src/__tests__/MathKeyboard.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 383[2mms[22m[39m
+ [32m✓[39m src/__tests__/KeyboardParityV5.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m src/__tests__/exhaustive-module10-keyboard-inventory.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m src/__tests__/KeyboardInventoryV5.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m src/exhaustive-module08-units.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m src/__tests__/exhaustive-module14-branding-natural-text.test.tsx [2m([22m[2m1 test[22m[2m)[22m[90m 207[2mms[22m[39m
+ [32m✓[39m src/__tests__/BrandingV521.test.tsx [2m([22m[2m1 test[22m[2m)[22m[90m 98[2mms[22m[39m
+ [32m✓[39m src/__tests__/MathRenderer.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[90m 58[2mms[22m[39m
+ [32m✓[39m src/__tests__/fractionDisplay.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m src/__tests__/systemSplit.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m src/__tests__/exhaustive-module11-layout-responsive.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/LayoutDefaultV521.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 7[2mms[22m[39m
 
 [2m Test Files [22m [1m[32m33 passed[39m[22m[90m (33)[39m
 [2m      Tests [22m [1m[32m240 passed[39m[22m[90m (240)[39m
-[2m   Start at [22m 05:11:42
-[2m   Duration [22m 18.32s[2m (transform 1.24s, setup 7.43s, collect 2.84s, tests 10.75s, environment 21.46s, prepare 4.42s)[22m
+[2m   Start at [22m 05:20:34
+[2m   Duration [22m 13.03s[2m (transform 913ms, setup 5.21s, collect 2.09s, tests 8.16s, environment 14.96s, prepare 2.94s)[22m
 
 ~~~
 
@@ -110,88 +109,7 @@ Run `npm audit` for details.
 > precision-lab-frontend@0.1.0 build
 > tsc --noEmit && vite build
 
-[36mvite v5.4.21 [32mbuilding for production...[36m[39m
-transforming...
-[32m✓[39m 103 modules transformed.
-rendering chunks...
-computing gzip size...
-[2mdist/[22m[32mmanifest.webmanifest                             [39m[1m[2m    0.46 kB[22m[1m[22m
-[2mdist/[22m[32mindex.html                                       [39m[1m[2m    1.15 kB[22m[1m[22m[2m │ gzip:     0.55 kB[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Size3-Regular-CTq5MqoE.woff         [39m[1m[2m    4.42 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Size4-Regular-Dl5lxZxV.woff2        [39m[1m[2m    4.93 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Size2-Regular-Dy4dx90m.woff2        [39m[1m[2m    5.21 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Size1-Regular-mCD8mA8B.woff2        [39m[1m[2m    5.47 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Size4-Regular-BF-4gkZK.woff         [39m[1m[2m    5.98 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Size2-Regular-oD1tc_U0.woff         [39m[1m[2m    6.19 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Size1-Regular-C195tn64.woff         [39m[1m[2m    6.50 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Caligraphic-Regular-Di6jR-x-.woff2  [39m[1m[2m    6.91 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Caligraphic-Bold-Dq_IR9rO.woff2     [39m[1m[2m    6.91 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Size3-Regular-DgpXs0kz.ttf          [39m[1m[2m    7.59 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Caligraphic-Regular-CTRA-rTL.woff   [39m[1m[2m    7.66 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Caligraphic-Bold-BEiXGLvX.woff      [39m[1m[2m    7.72 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Script-Regular-D3wIWfF6.woff2       [39m[1m[2m    9.64 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_SansSerif-Regular-DDBCnlJ7.woff2    [39m[1m[2m   10.34 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Size4-Regular-DWFBv043.ttf          [39m[1m[2m   10.36 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Script-Regular-D5yQViql.woff        [39m[1m[2m   10.59 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Fraktur-Regular-CTYiF6lA.woff2      [39m[1m[2m   11.32 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Fraktur-Bold-CL6g_b3V.woff2         [39m[1m[2m   11.35 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Size2-Regular-B7gKUWhC.ttf          [39m[1m[2m   11.51 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_SansSerif-Italic-C3H0VqGB.woff2     [39m[1m[2m   12.03 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_SansSerif-Bold-D1sUS0GD.woff2       [39m[1m[2m   12.22 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Size1-Regular-Dbsnue_I.ttf          [39m[1m[2m   12.23 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_SansSerif-Regular-CS6fqUqJ.woff     [39m[1m[2m   12.32 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Caligraphic-Regular-wX97UBjC.ttf    [39m[1m[2m   12.34 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Caligraphic-Bold-ATXxdsX0.ttf       [39m[1m[2m   12.37 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Fraktur-Regular-Dxdc4cR9.woff       [39m[1m[2m   13.21 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Fraktur-Bold-BsDP51OF.woff          [39m[1m[2m   13.30 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Typewriter-Regular-CO6r4hn1.woff2   [39m[1m[2m   13.57 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_SansSerif-Italic-DN2j7dab.woff      [39m[1m[2m   14.11 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_SansSerif-Bold-DbIhKOiC.woff        [39m[1m[2m   14.41 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Typewriter-Regular-C0xS9mPB.woff    [39m[1m[2m   16.03 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Math-BoldItalic-CZnvNsCZ.woff2      [39m[1m[2m   16.40 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Math-Italic-t53AETM-.woff2          [39m[1m[2m   16.44 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Script-Regular-C5JkGWo-.ttf         [39m[1m[2m   16.65 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Main-BoldItalic-DxDJ3AOS.woff2      [39m[1m[2m   16.78 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Main-Italic-NWA7e6Wa.woff2          [39m[1m[2m   16.99 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Math-BoldItalic-iY-2wyZ7.woff       [39m[1m[2m   18.67 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Math-Italic-DA0__PXp.woff           [39m[1m[2m   18.75 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Main-BoldItalic-SpSLRI95.woff       [39m[1m[2m   19.41 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_SansSerif-Regular-BNo7hRIc.ttf      [39m[1m[2m   19.44 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Fraktur-Regular-CB_wures.ttf        [39m[1m[2m   19.57 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Fraktur-Bold-BdnERNNW.ttf           [39m[1m[2m   19.58 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Main-Italic-BMLOBm91.woff           [39m[1m[2m   19.68 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_SansSerif-Italic-YYjJ1zSn.ttf       [39m[1m[2m   22.36 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_SansSerif-Bold-CFMepnvq.ttf         [39m[1m[2m   24.50 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Main-Bold-Cx986IdX.woff2            [39m[1m[2m   25.32 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Main-Regular-B22Nviop.woff2         [39m[1m[2m   26.27 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Typewriter-Regular-D3Ib7_Hf.ttf     [39m[1m[2m   27.56 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_AMS-Regular-BQhdFMY1.woff2          [39m[1m[2m   28.08 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Main-Bold-Jm3AIy58.woff             [39m[1m[2m   29.91 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Main-Regular-Dr94JaBh.woff          [39m[1m[2m   30.77 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Math-BoldItalic-B3XSjfu4.ttf        [39m[1m[2m   31.20 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Math-Italic-flOr_0UB.ttf            [39m[1m[2m   31.31 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Main-BoldItalic-DzxPMmG6.ttf        [39m[1m[2m   32.97 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_AMS-Regular-DMm9YOAa.woff           [39m[1m[2m   33.52 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Main-Italic-3WenGoN9.ttf            [39m[1m[2m   33.58 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Main-Bold-waoOVXN0.ttf              [39m[1m[2m   51.34 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_Main-Regular-ypZvNtVU.ttf           [39m[1m[2m   53.58 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[32mKaTeX_AMS-Regular-DRggAlZN.ttf            [39m[1m[2m   63.63 kB[22m[1m[22m
-[2mdist/[22m[2massets/[22m[35mindex-CB_OEzbf.css                        [39m[1m[2m   66.01 kB[22m[1m[22m[2m │ gzip:    15.78 kB[22m
-[2mdist/[22m[2massets/[22m[36mGraphViewer-DHKbw7qd.js                   [39m[1m[2m    2.57 kB[22m[1m[22m[2m │ gzip:     1.25 kB[22m
-[2mdist/[22m[2massets/[22m[36mworkbox-window.prod.es5-BqEJf4Xk.js       [39m[1m[2m    5.71 kB[22m[1m[22m[2m │ gzip:     2.34 kB[22m
-[2mdist/[22m[2massets/[22m[36mindex-BMQUeCi8.js                         [39m[1m[33m2,808.85 kB[39m[22m[2m │ gzip:   783.89 kB[22m
-[2mdist/[22m[2massets/[22m[36mplotly.min-G952r_Ed.js                    [39m[1m[33m4,840.47 kB[39m[22m[2m │ gzip: 1,468.44 kB[22m
-[33m
-(!) Some chunks are larger than 500 kB after minification. Consider:
-- Using dynamic import() to code-split the application
-- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
-- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
-[32m✓ built in 22.64s[39m
-
-[36mPWA v1.3.0[39m
-mode      [35mgenerateSW[39m
-precache  [32m10 entries[39m [2m(7554.96 KiB)[22m
-files generated
-  [2mdist/sw.js[22m
-  [2mdist/workbox-9c191d2f.js[22m
+src/components/NaturalMathField.tsx(26,5): error TS2687: All declarations of 'mathVirtualKeyboard' must have identical modifiers.
+src/components/NaturalMathField.tsx(26,5): error TS2717: Subsequent property declarations must have the same type.  Property 'mathVirtualKeyboard' must be of type 'VirtualKeyboardInterface & EventTarget', but here has type '{ hide: () => void; } | undefined'.
+src/components/NaturalMathField.tsx(334,7): error TS18047: 'el' is possibly 'null'.
 ~~~
