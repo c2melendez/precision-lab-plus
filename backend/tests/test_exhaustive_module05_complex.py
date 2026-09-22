@@ -33,7 +33,9 @@ def test_m5_conjugate_polar_root_power():
     assert root["result_text"] == "2*I"
 
 def test_m5_complex_log_uses_principal_natural_log():
-    b = post("evaluate", {"expression":"log(-1)","angle_unit":"rad"}).json()
+    # Contrato actual: log(x) es log base 10 de calculadora; Log(z) es
+    # el logaritmo complejo natural principal.
+    b = post("evaluate", {"expression":"Log(-1)","angle_unit":"rad"}).json()
     assert b["success"] is True, b
     assert b["result_text"] == "I*pi", b
 
