@@ -477,7 +477,7 @@ CATEGORY_MENUS.Complejos = [
     keys: [
       key(
         "Log(z)",
-        "\\mathrm{log}\\left(#0\\right)",
+        "\\mathrm{Log}\\left(#0\\right)",
         "logaritmo complejo (rama principal)",
         false,
         undefined,
