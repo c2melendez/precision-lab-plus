@@ -43,6 +43,13 @@ test("suite original módulo 5: Argand 3+4i usa ejes Re e Im", async ({ page }) 
   const graph = page.getByRole("button", { name: "graficar en el plano de Argand", exact: true }).first();
   await graph.click();
 
-  await expect(page.getByText("Re", { exact: true }).first()).toBeVisible({ timeout: 12000 });
-  await expect(page.getByText("Im", { exact: true }).first()).toBeVisible({ timeout: 12000 });
+  const plot = page.locator(".js-plotly-plot").first();
+  await expect(plot).toBeVisible({ timeout: 12000 });
+  const labels = await plot.evaluate((el) => {
+    const graph = el as HTMLElement & {
+      _fullLayout?: { xaxis?: { title?: { text?: string } }; yaxis?: { title?: { text?: string } } };
+    };
+    return [graph._fullLayout?.xaxis?.title?.text, graph._fullLayout?.yaxis?.title?.text];
+  });
+  expect(labels).toEqual(["Re", "Im"]);
 });
