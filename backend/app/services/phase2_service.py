@@ -82,6 +82,11 @@ def compute_limit(expression: str, variable: str, point: str, direction: str) ->
 
     try:
         value = sympy.limit(input_expr, var_symbol, point_expr, dir=_DIRECTION_MAP[direction])
+        if direction == "both" and value.has(sympy.zoo):
+            left = sympy.limit(input_expr, var_symbol, point_expr, dir="-")
+            right = sympy.limit(input_expr, var_symbol, point_expr, dir="+")
+            if left != right:
+                return LimitResult(input_expr, sympy.nan, dne=True, left_value=left, right_value=right)
         return LimitResult(input_expr, value)
     except ValueError as exc:
         if "does not exist" not in str(exc) or direction != "both":
