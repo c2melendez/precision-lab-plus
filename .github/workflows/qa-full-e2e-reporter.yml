@@ -7,6 +7,7 @@ on:
       - .github/workflows/qa-full-e2e-reporter.yml
       - .github/workflows/playwright.yml
       - frontend/e2e/**
+      - frontend/src/components/GraphViewer.tsx
   workflow_dispatch:
 
 permissions:
