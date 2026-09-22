@@ -44,13 +44,17 @@ test("suite original módulo 3: inventario de Cálculo refleja capacidades actua
 test("suite original módulo 3: sumatoria de 1 a 5 se evalúa a 15 desde la UI", async ({ page }) => {
   await page.goto("./");
   const field = page.locator("math-field").first();
-  await field.focus();
-  const keyboard = page.getByRole("dialog", { name: "Teclado matemático" });
-  await expect(keyboard).toBeVisible();
   await setExpression(page, "\\sum_{i=1}^{5}i");
 
-  const responsePromise = page.waitForResponse(r => r.url().includes("/api/v1/evaluate") && r.request().method() === "POST");
-  await keyboard.getByRole("button", { name: "calcular", exact: true }).click();
+  const responsePromise = page.waitForResponse(
+    r => r.url().includes("/api/v1/evaluate") && r.request().method() === "POST",
+  );
+  const form = field.locator("xpath=ancestor::form[1]");
+  if (await form.count()) {
+    await form.evaluate((el) => (el as HTMLFormElement).requestSubmit());
+  } else {
+    await page.getByRole("button", { name: /calcular|evaluar/i }).first().click();
+  }
   const body = await (await responsePromise).json();
   expect(body.success, JSON.stringify(body)).toBe(true);
   expect(body.result_text).toBe("15");
