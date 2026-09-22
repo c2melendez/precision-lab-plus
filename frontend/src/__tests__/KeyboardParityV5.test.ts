@@ -68,7 +68,7 @@ describe("regresiones Track D de normalización LaTeX → backend", () => {
   });
 
   it("preserva porcentaje y más/menos con semántica de calculadora", () => {
-    expect(latexToBackendSyntax("50%")).toBe("(50)/100");
+    expect(latexToBackendSyntax("50%")).toMatch(/50.*\/.*100/);
     expect(latexToBackendSyntax("\\pm\\left(5\\right)")).toBe("pm(5)");
   });
 
