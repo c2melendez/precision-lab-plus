@@ -122,7 +122,7 @@ export default function App() {
       <header className="border-b border-paper-line bg-paper-soft px-6 py-3">
         <div className="mx-auto flex max-w-3xl items-center justify-between lg:max-w-5xl dt:max-w-[1440px]">
           <h1 className="text-lg font-semibold text-ink">
-            Precision <span className="text-marker">Lab Plus</span>
+            Precision <span className="text-marker-text">Lab Plus</span>
           </h1>
           <div className="flex items-center gap-2">
             <button
@@ -149,7 +149,7 @@ export default function App() {
                 aria-current={activeMode === mode ? "page" : undefined}
                 className={`border-b-2 px-1 py-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker ${
                   activeMode === mode
-                    ? "border-marker text-marker"
+                    ? "border-marker text-marker-text"
                     : "border-transparent text-muted hover:text-ink"
                 }`}
               >
