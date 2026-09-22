@@ -62,8 +62,8 @@ describe("GraphViewer", () => {
     const [, , layout] = newPlot.mock.calls[0];
     expect(layout).toEqual(
       expect.objectContaining({
-        xaxis: expect.objectContaining({ title: "Re" }),
-        yaxis: expect.objectContaining({ title: "Im" }),
+        xaxis: expect.objectContaining({ title: { text: "Re" } }),
+        yaxis: expect.objectContaining({ title: { text: "Im" } }),
       }),
     );
   });
