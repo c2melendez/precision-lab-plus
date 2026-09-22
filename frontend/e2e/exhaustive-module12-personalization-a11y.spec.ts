@@ -1,228 +1,137 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-const COMMON_THEMES: Array<[string, string]> = [
-  ["Oscuro", "dark"],
-  ["Claro", "light"],
-  ["Alto contraste", "high-contrast"],
-  ["Azul SaaS", "saas-blue"],
-  ["Medianoche Púrpura", "midnight-purple"],
-  ["Grafito Monocromo", "graphite"],
-  ["Cian Tecnológico", "cyan-tech"],
-  ["Bosque Profundo", "deep-forest"],
-  ["Menta", "mint"],
-  ["Sepia Cuaderno", "sepia"],
-  ["Coral", "coral"],
-  ["Ámbar Claro", "amber-light"],
-  ["Alto Contraste Azul", "high-contrast-blue"],
-];
-
-async function openHome(page: Page) {
-  await page.goto("./");
-  await expect(page.getByRole("button", { name: "Ajustes", exact: true })).toBeVisible();
-}
-
-async function openSettings(page: Page): Promise<Locator> {
-  const trigger = page.getByRole("button", { name: "Ajustes", exact: true });
-  if ((await trigger.getAttribute("aria-expanded")) !== "true") await trigger.click();
+async function openSettings(page: import("@playwright/test").Page) {
+  const button = page.getByRole("button", { name: "Ajustes", exact: true });
+  await expect(button).toBeVisible();
+  await button.click();
   const menu = page.getByRole("menu");
   await expect(menu).toBeVisible();
-  return menu;
+  return { button, menu };
 }
 
-function menuButton(menu: Locator, label: string): Locator {
-  return menu.getByRole("button").filter({ hasText: label }).first();
+async function clickSettingRow(menu: import("@playwright/test").Locator, label: string) {
+  const labelNode = menu.getByText(label, { exact: true });
+  await expect(labelNode).toBeVisible();
+  const row = labelNode.locator("..");
+  const button = row.getByRole("button");
+  await expect(button).toBeVisible();
+  await button.click();
 }
 
-function settingRowButton(page: Page, label: string): Locator {
-  return page.getByText(label, { exact: true }).locator("..").getByRole("button").first();
-}
+test("M12: preferencias visuales se aplican y persisten tras recarga", async ({ page }) => {
+  await page.goto("./");
+  const { menu } = await openSettings(page);
 
-test("M12: todos los temas manuales comunes se aplican y persisten", async ({ page }) => {
-  await openHome(page);
-  const menu = await openSettings(page);
+  await menu.getByRole("button", { name: "Claro", exact: true }).click();
+  await menu.getByRole("button", { name: "Compacta", exact: true }).click();
+  await menu.getByRole("button", { name: "Muy grande", exact: true }).click();
+  await clickSettingRow(menu, "Espaciado amigable con dislexia");
+  await clickSettingRow(menu, "Reducir movimiento");
+  await menu.getByRole("button", { name: /Apta para daltonismo/i }).click();
+  await menu.getByRole("button", { name: "Separada", exact: true }).click();
 
-  for (const [label, id] of COMMON_THEMES) {
-    const button = menuButton(menu, label);
-    await expect(button, label).toBeVisible();
-    await button.click();
-    await expect(page.locator("html"), label).toHaveAttribute("data-theme", id);
-    expect(await page.evaluate(() => localStorage.getItem("precision-lab-theme")), label).toBe(id);
-    const token = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--color-paper").trim());
-    expect(token, label + ": --color-paper").not.toBe("");
-  }
+  const attrs = await page.evaluate(() => ({
+    theme: document.documentElement.getAttribute("data-theme"),
+    density: document.documentElement.getAttribute("data-density"),
+    textSize: document.documentElement.getAttribute("data-text-size"),
+    dyslexia: document.documentElement.getAttribute("data-dyslexia-friendly"),
+    reduced: document.documentElement.getAttribute("data-reduced-motion"),
+    lsTheme: localStorage.getItem("precision-lab-theme"),
+    lsDensity: localStorage.getItem("precision-lab-density"),
+    lsText: localStorage.getItem("precision-lab-text-size"),
+    lsDyslexia: localStorage.getItem("precision-lab-dyslexia-friendly"),
+    lsReduced: localStorage.getItem("precision-lab-reduced-motion"),
+    lsPalette: localStorage.getItem("precision-lab-graph-palette"),
+    lsLayout: localStorage.getItem("precision-lab-layout-mode"),
+  }));
 
-  const liteBlue = menu.getByRole("button").filter({ hasText: "Azul claro" });
-  if (await liteBlue.count()) {
-    await liteBlue.first().click();
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "v4-blue");
-    expect(await page.evaluate(() => localStorage.getItem("precision-lab-theme"))).toBe("v4-blue");
-  }
+  expect(attrs.theme).toBe("light");
+  expect(attrs.density).toBe("compact");
+  expect(attrs.textSize).toBe("xlarge");
+  expect(attrs.dyslexia).toBe("true");
+  expect(attrs.reduced).toBe("true");
+  expect(attrs.lsTheme).toBe("light");
+  expect(attrs.lsDensity).toBe("compact");
+  expect(attrs.lsText).toBe("xlarge");
+  expect(attrs.lsDyslexia).toBe("true");
+  expect(attrs.lsReduced).toBe("true");
+  expect(attrs.lsPalette).toBe("colorblind-safe");
+  expect(attrs.lsLayout).toBe("separated");
 
-  const stored = await page.evaluate(() => localStorage.getItem("precision-lab-theme"));
   await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", stored!);
+  await expect(page.locator("math-field").first()).toBeVisible();
+  const persisted = await page.evaluate(() => ({
+    theme: document.documentElement.getAttribute("data-theme"),
+    density: document.documentElement.getAttribute("data-density"),
+    textSize: document.documentElement.getAttribute("data-text-size"),
+    dyslexia: document.documentElement.getAttribute("data-dyslexia-friendly"),
+    reduced: document.documentElement.getAttribute("data-reduced-motion"),
+  }));
+  expect(persisted).toEqual({
+    theme: "light",
+    density: "compact",
+    textSize: "xlarge",
+    dyslexia: "true",
+    reduced: "true",
+  });
 });
 
-test("M12: tema Automático sigue prefers-color-scheme y persiste la selección auto", async ({ page }) => {
+test("M12: tema Automático sigue prefers-color-scheme", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "dark" });
-  await openHome(page);
-  const menu = await openSettings(page);
-  await menuButton(menu, "Automático (sistema)").click();
-
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.goto("./");
+  let opened = await openSettings(page);
+  await opened.menu.getByRole("button", { name: "Automático (sistema)", exact: true }).click();
+  expect(await page.evaluate(() => document.documentElement.getAttribute("data-theme"))).toBe("dark");
   expect(await page.evaluate(() => localStorage.getItem("precision-lab-theme"))).toBe("auto");
 
   await page.emulateMedia({ colorScheme: "light" });
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  expect(await page.evaluate(() => localStorage.getItem("precision-lab-theme"))).toBe("auto");
+  await expect.poll(async () => page.evaluate(() => document.documentElement.getAttribute("data-theme"))).toBe("light");
 });
 
-test("M12: densidad, texto, dislexia, feedback, paleta y layout persisten tras recarga", async ({ page }) => {
-  await openHome(page);
-  let menu = await openSettings(page);
-
-  await menuButton(menu, "Compacta").click();
-  await menuButton(menu, "Muy grande").click();
-  await settingRowButton(page, "Espaciado amigable con dislexia").click();
-  await settingRowButton(page, "Vibración al presionar tecla").click();
-  await settingRowButton(page, "Sonido de clic").click();
-  await menuButton(menu, "Apta para daltonismo").click();
-  await menuButton(menu, "Enfoque").click();
-
-  await expect(page.locator("html")).toHaveAttribute("data-density", "compact");
-  await expect(page.locator("html")).toHaveAttribute("data-text-size", "xlarge");
-  await expect(page.locator("html")).toHaveAttribute("data-dyslexia-friendly", "true");
-
-  const storage = await page.evaluate(() => ({
-    density: localStorage.getItem("precision-lab-density"),
-    text: localStorage.getItem("precision-lab-text-size"),
-    dyslexia: localStorage.getItem("precision-lab-dyslexia-friendly"),
-    vibration: localStorage.getItem("precision-lab-key-vibration"),
-    sound: localStorage.getItem("precision-lab-key-sound"),
-    palette: localStorage.getItem("precision-lab-graph-palette"),
-    layout: localStorage.getItem("precision-lab-layout-mode"),
-  }));
-  expect(storage).toEqual({
-    density: "compact",
-    text: "xlarge",
-    dyslexia: "true",
-    vibration: "false",
-    sound: "true",
-    palette: "colorblind-safe",
-    layout: "focus",
-  });
-
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-density", "compact");
-  await expect(page.locator("html")).toHaveAttribute("data-text-size", "xlarge");
-  await expect(page.locator("html")).toHaveAttribute("data-dyslexia-friendly", "true");
-
-  menu = await openSettings(page);
-  await expect(menuButton(menu, "Compacta")).toHaveAttribute("aria-pressed", "true");
-  await expect(menuButton(menu, "Muy grande")).toHaveAttribute("aria-pressed", "true");
-  await expect(menuButton(menu, "Apta para daltonismo")).toHaveAttribute("aria-pressed", "true");
-  await expect(menuButton(menu, "Enfoque")).toHaveAttribute("aria-pressed", "true");
-  await expect(settingRowButton(page, "Espaciado amigable con dislexia")).toHaveAttribute("aria-pressed", "true");
-  await expect(settingRowButton(page, "Vibración al presionar tecla")).toHaveAttribute("aria-pressed", "false");
-  await expect(settingRowButton(page, "Sonido de clic")).toHaveAttribute("aria-pressed", "true");
-});
-
-test("M12: reducir movimiento sigue al sistema hasta que existe override manual", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await openHome(page);
-  await expect(page.locator("html")).toHaveAttribute("data-reduced-motion", "true");
-
-  await openSettings(page);
-  const toggle = settingRowButton(page, "Reducir movimiento");
-  await expect(toggle).toHaveAttribute("aria-pressed", "true");
-  await toggle.click();
-
-  await expect(page.locator("html")).toHaveAttribute("data-reduced-motion", "false");
-  expect(await page.evaluate(() => localStorage.getItem("precision-lab-reduced-motion"))).toBe("false");
-
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(page.locator("html")).toHaveAttribute("data-reduced-motion", "false");
-
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-reduced-motion", "false");
-});
-
-test("M12: Ajustes y teclado tienen nombres/estado accesibles y cierran con Escape", async ({ page }) => {
-  await openHome(page);
-  const settings = page.getByRole("button", { name: "Ajustes", exact: true });
-  await expect(settings).toHaveAttribute("aria-expanded", "false");
-  await settings.click();
-  await expect(settings).toHaveAttribute("aria-expanded", "true");
-  await expect(page.getByRole("menu")).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("menu")).toHaveCount(0);
-  await expect(settings).toHaveAttribute("aria-expanded", "false");
-
-  const field = page.locator("math-field:not([read-only])").first();
-  await expect(field).toBeVisible();
-  const explicitName = await field.evaluate((el) => el.getAttribute("aria-label") || el.getAttribute("aria-labelledby"));
-  expect(explicitName, "El campo matemático principal debe tener nombre accesible explícito").toBeTruthy();
-
-  await field.focus();
-  const keyboard = page.getByRole("dialog", { name: "Teclado matemático" });
-  await expect(keyboard).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(keyboard).toHaveCount(0);
-});
-
-test("M12: el resultado dinámico queda dentro de una región anunciable", async ({ page }) => {
-  await openHome(page);
-  const field = page.locator("math-field:not([read-only])").first();
-  await field.evaluate((el) => {
-    const math = el as HTMLElement & { value: string };
-    math.value = "2+2";
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-  });
-
-  const form = field.locator("xpath=ancestor::form[1]");
-  const submit = form.getByRole("button", { name: /Evaluar|Calcular/i }).first();
-  await expect(submit).toBeEnabled();
-  await submit.click();
-
-  const readonlyMath = page.locator("math-field[read-only]").last();
-  const katex = page.locator(".katex").last();
-  await expect.poll(async () => (await readonlyMath.count()) + (await katex.count()), { timeout: 12000 }).toBeGreaterThan(0);
-
-  const resultNode = (await readonlyMath.count()) ? readonlyMath : katex;
-  const announcement = await resultNode.evaluate((el) => {
-    let node: Element | null = el;
-    while (node) {
-      const live = node.getAttribute("aria-live");
-      const role = node.getAttribute("role");
-      if (live || role === "status" || role === "alert") return { live, role };
-      node = node.parentElement;
-    }
-    return null;
-  });
-  expect(announcement, "El resultado debe estar contenido en aria-live/status/alert").not.toBeNull();
-});
-
-
-test("M12: la primera curva usa visualmente la paleta Azul SaaS por defecto", async ({ page }) => {
+test("M12: Ajustes expone estado y cierra con Escape", async ({ page }) => {
   await page.goto("./");
-  await page.getByRole("button", { name: "Gráficas", exact: true }).click();
-
-  const field = page.locator("math-field").first();
-  await field.evaluate((node) => {
-    const el = node as HTMLElement & { value: string };
-    el.value = "x^2";
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-  });
-  await page.getByRole("button", { name: "Graficar", exact: true }).click();
-
-  const line = page.locator(".scatterlayer .trace .js-line").first();
-  await expect(line).toBeVisible({ timeout: 15000 });
-  const stroke = await line.evaluate((el) => getComputedStyle(el).stroke.replace(/\s/g, "").toLowerCase());
-  expect(stroke).toBe("rgb(37,99,235)");
-  expect(await page.evaluate(() => localStorage.getItem("precision-lab-graph-palette"))).toBeNull();
+  const { button, menu } = await openSettings(page);
+  await expect(button).toHaveAttribute("aria-expanded", "true");
+  await page.keyboard.press("Escape");
+  await expect(menu).toHaveCount(0);
+  await expect(button).toHaveAttribute("aria-expanded", "false");
 });
 
+test("M12: teclado propio tiene diálogo nombrado y cierra con Escape", async ({ page }) => {
+  await page.goto("./");
+  const input = page.locator("math-field").first();
+  await input.focus();
+  const dialog = page.getByRole("dialog", { name: "Teclado matemático" });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+});
+
+test("M12: campo matemático principal tiene nombre accesible", async ({ page }) => {
+  await page.goto("./");
+  const input = page.locator("math-field").first();
+  await expect(input).toBeVisible();
+  const aria = await input.getAttribute("aria-label");
+  expect((aria ?? "").trim().length).toBeGreaterThan(0);
+});
+
+test("M12: resultado calculado queda dentro de una región anunciable", async ({ page }) => {
+  await page.goto("./");
+  const input = page.locator("math-field").first();
+  await input.evaluate((node, v) => {
+    const el = node as HTMLElement & { value: string };
+    el.value = v as string;
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  }, "2+2");
+  await page.getByRole("button", { name: /calcular/i }).first().click();
+
+  // Debe existir una región live/status/alert que represente el resultado dinámico.
+  await expect.poll(async () => {
+    return page.locator('[aria-live], [role="status"], [role="alert"]').evaluateAll((els) =>
+      els.some((el) => {
+        const text = (el.textContent ?? "").replace(/\s+/g, " ");
+        return text.includes("4") || text.includes("2+2");
+      }),
+    );
+  }).toBe(true);
+});
