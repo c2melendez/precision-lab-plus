@@ -91,6 +91,8 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "stdevpop",
   "variancepop",
   "sign",
+  "root",
+  "log",
   "Log",
 ];
 
@@ -200,6 +202,28 @@ function rewriteFiniteAggregateLatex(latex: string): string | null {
 
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
+  const trimmed = latex.trim();
+
+  const logBase = trimmed.match(/^\\log_\{([^{}]+)\}\\left\((.*)\\right\)$/s);
+  if (logBase) {
+    return `log(${convertLatexToAsciiMath(logBase[2]).trim()},${convertLatexToAsciiMath(logBase[1]).trim()})`;
+  }
+
+  const inverseHyperbolic = trimmed.match(/^\\(sinh|cosh|tanh|csch|sech|coth)\^\{-1\}\\left\((.*)\\right\)$/s);
+  if (inverseHyperbolic) {
+    const map: Record<string, string> = {
+      sinh: "asinh", cosh: "acosh", tanh: "atanh",
+      csch: "acsch", sech: "asech", coth: "acoth",
+    };
+    return `${map[inverseHyperbolic[1]]}(${latexToBackendSyntax(inverseHyperbolic[2])})`;
+  }
+
+  const mathrmCall = trimmed.match(/^\\mathrm\{(sign|root|log|Log)\}\\left\((.*)\\right\)$/s);
+  if (mathrmCall) {
+    const args = convertLatexToAsciiMath(mathrmCall[2]).replace(/\s+/g, "");
+    return `${mathrmCall[1]}(${args})`;
+  }
+
   const aggregate = rewriteFiniteAggregateLatex(latex);
   if (aggregate) return aggregate;
   const pmTrimmed = latex.trim();
