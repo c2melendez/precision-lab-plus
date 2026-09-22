@@ -36,7 +36,7 @@ test("el teclado desplegado coincide con las seis pestañas V5 aprobadas", async
   await expect(page.getByRole("tab", { name: "Básico" })).toHaveAttribute("aria-selected", "true");
 });
 
-test("Plus mantiene ∂/∂x activa y Π como única pendiente de Cálculo", async ({ page }) => {
+test("Plus mantiene ∂/∂x y Π activas en Cálculo", async ({ page }) => {
   await page.goto("./");
   await openKeyboard(page);
   await page.getByRole("tab", { name: "Cálculo" }).click();
@@ -49,5 +49,5 @@ test("Plus mantiene ∂/∂x activa y Π como única pendiente de Cálculo", asy
   const product = page.getByRole("button", { name: "productoria" });
   await expect(product).toBeVisible();
   await product.click();
-  await expect(page.getByText(/productoria: todavía no disponible/i)).toBeVisible();
+  await expect(page.getByText(/productoria: todavía no disponible/i)).toHaveCount(0);
 });
