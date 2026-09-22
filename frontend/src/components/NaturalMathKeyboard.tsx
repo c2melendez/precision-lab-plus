@@ -974,7 +974,7 @@ export function NaturalMathKeyboard({
                       }}
                       aria-label="Simplificar expresión"
                       title="Simplificar expresión"
-                      className="rounded-md bg-graph/15 py-2 text-xs text-graph hover:bg-graph/25"
+                      className="rounded-md bg-graph py-2 text-xs font-medium text-paper hover:bg-graph/90"
                     >
                       a+a → 2a
                     </button>
