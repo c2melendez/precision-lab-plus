@@ -140,3 +140,38 @@ Paridad `precision-lab-lite` confirmada — mismo cambio, mismo texto de aria-la
 Nivel de evidencia: NIVEL 1 (ejecución real). `tsc --noEmit` limpio, `npx vitest run` 150/150 (sin tests nuevos — este módulo es solo JSX/estilo, no motor), `npm run build` limpio (mismo warning preexistente de tamaño de chunk). Backend no se tocó (las 3 tareas son solo frontend + documentación externa).
 
 Decisión DEDUCIBLE tomada: el texto exacto de la etiqueta ("2 var.") y su posición (esquina inferior derecha del botón, `absolute -bottom-1 right-1`) se decidieron sin pedir confirmación previa por ser un detalle menor de layout — reversible con un cambio de una línea si Carlos prefiere otra redacción o posición. Verificado visualmente que no se corta ni se superpone con botones vecinos.
+
+# Corrección de producto posterior a Track D — M1–M15
+
+Se parte del reporte consolidado de la suite exhaustiva. A diferencia del Track D original, esta fase **sí modifica código de producto** y conserva los tests centinela QA.
+
+## Hallazgos abordados
+
+- M1: singularidades trigonométricas (`csc(0)`, `cot(0)`, `asech(0)`).
+- M3: límite bilateral inexistente, revalidación de Σ y habilitación de Π.
+- M4/M13: funciones no-whitelist degradadas a multiplicación implícita.
+- M5: `Log(z)` complejo y labels Re/Im de Argand.
+- M10: normalización inversas/recíprocas, `%`, `±`, Productoria y tooltips.
+- M13: sanitización de errores internos del parser.
+
+## Correcciones
+
+1. `parsing.py` rechaza llamadas multi-letra desconocidas antes de `implicit_multiplication_application`, conservando `y(x+1)` como multiplicación documentada.
+2. Se amplía whitelist con recíprocas/inversas faltantes y `Log` natural complejo.
+3. Σ/Π se procesan como agregados finitos estructurados, con índice forzado a `Symbol`, límites enteros y máximo 10 000 términos; no se permite inyectar un `sympy.Sum/Product` arbitrario en `/evaluate`.
+4. `%` se normaliza como división por 100 y `±` devuelve ambas ramas.
+5. `evaluate_service.py` convierte división por cero/evaluación singular a `DOMAIN_ERROR`.
+6. `compute_limit()` compara laterales cuando SymPy devuelve `zoo` en un límite bilateral.
+7. `GraphViewer.tsx` consume labels de ejes enviados por backend para Argand.
+8. `NaturalMathKeyboard.tsx` activa Π y completa tooltips de acciones especiales.
+
+## Verificación local disponible
+
+- `pytest tests/test_evaluate.py tests/test_parsing.py`: **85/85** después de los cambios.
+- Casos centinela directos verificados: `sum(i,i,1,5)=15`, `product(i,i,1,5)=120`, `50%=0.5`, `pm(5)={-5,5}`, rechazo de `foo(x)`/`dsolve(x)` y límite `1/x→0` marcado DNE.
+- El frontend se deja para validación completa en GitHub Actions porque el entorno local no pudo completar `npm ci` por acceso al registro.
+
+
+## Verificación final Track D
+
+`python -m pytest -q` → **276/276 aprobados**. Frontend pendiente de CI por indisponibilidad del registro npm local.
