@@ -221,6 +221,21 @@ function rewriteFiniteAggregateLatex(latex: string): string | null {
   return `${op === "sum" ? "sum" : "product"}(${convert(body)},${variable},${convert(lower)},${convert(upper)})`;
 }
 
+function rewriteFiniteAggregateAscii(ascii: string): string | null {
+  // MathLive puede serializar una sumatoria/productoria editada como:
+  //   "sum _(i=1)^5i" / "prod _(i=1)^5i"
+  // en lugar de conservar el macro LaTeX original. Esta forma aparece
+  // en navegador real y debe normalizarse al contrato de 4 argumentos
+  // del backend antes de pasar por el parser genérico.
+  const m = ascii.trim().match(
+    /^(sum|prod)\s*_\s*\(\s*([A-Za-z][A-Za-z0-9_]*)\s*=\s*([^()]+?)\s*\)\s*\^\s*(?:\(\s*([^()]+?)\s*\)|([^\s]+))\s*(.+)$/s,
+  );
+  if (!m) return null;
+  const [, op, variable, lower, upperParen, upperBare, body] = m;
+  const upper = upperParen ?? upperBare;
+  return `${op === "sum" ? "sum" : "product"}(${body.trim()},${variable},${lower.trim()},${upper.trim()})`;
+}
+
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
   const aggregate = rewriteFiniteAggregateLatex(latex);
@@ -243,6 +258,8 @@ export function latexToBackendSyntax(latex: string): string {
     .replace(/\\sech\^\{-1\}/g, "\\mathrm{asech}")
     .replace(/\\coth\^\{-1\}/g, "\\mathrm{acoth}");
   const ascii = convertLatexToAsciiMath(latexWithReciprocalHyperbolicInverses);
+  const asciiAggregate = rewriteFiniteAggregateAscii(ascii);
+  if (asciiAggregate) return asciiAggregate;
 
   const collapsed = collapseKnownFunctionNames(ascii);
   const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
