@@ -140,3 +140,14 @@ Paridad `precision-lab-lite` confirmada — mismo cambio, mismo texto de aria-la
 Nivel de evidencia: NIVEL 1 (ejecución real). `tsc --noEmit` limpio, `npx vitest run` 150/150 (sin tests nuevos — este módulo es solo JSX/estilo, no motor), `npm run build` limpio (mismo warning preexistente de tamaño de chunk). Backend no se tocó (las 3 tareas son solo frontend + documentación externa).
 
 Decisión DEDUCIBLE tomada: el texto exacto de la etiqueta ("2 var.") y su posición (esquina inferior derecha del botón, `absolute -bottom-1 right-1`) se decidieron sin pedir confirmación previa por ser un detalle menor de layout — reversible con un cambio de una línea si Carlos prefiere otra redacción o posición. Verificado visualmente que no se corta ni se superpone con botones vecinos.
+
+## Revalidación post-fix Track D — 21 de septiembre de 2026
+
+Después de aplicar las correcciones derivadas de M1–M15 se ejecutó nuevamente el backend completo del paquete corregido:
+
+- `python -m pytest -q tests/test_track_d_regressions.py tests/test_evaluate.py tests/test_parsing.py` → **103/103 aprobadas**.
+- `python -m pytest -q` → **276/276 aprobadas**.
+
+Esto confirma localmente los centinelas de singularidades, límite bilateral, funciones desconocidas/whitelist, sanitización de errores SymPy, porcentaje, más/menos, Productoria, logaritmo complejo principal y funciones activas que antes podían degradarse a símbolos.
+
+La validación frontend completa (typecheck/Vitest/build/Playwright) queda delegada a GitHub Actions porque el entorno de trabajo local no dispone de una instalación npm completa y reproducible.
