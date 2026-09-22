@@ -22,9 +22,6 @@ import type { MathfieldElement, MathfieldElementAttributes } from "mathlive";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 
 declare global {
-  interface Window {
-    mathVirtualKeyboard?: { hide: () => void };
-  }
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
@@ -326,18 +323,19 @@ export function NaturalMathField({
   useEffect(() => {
     const el = elRef.current;
     if (!el) return;
+    const field = el;
 
     function handleFocus(): void {
       // Precision Lab usa exclusivamente su teclado propio. Refuerzo la
       // política "manual" también como propiedad del custom element y
       // oculto cualquier panel nativo que MathLive hubiera conservado.
-      el.mathVirtualKeyboardPolicy = "manual";
-      window.mathVirtualKeyboard?.hide();
+      field.mathVirtualKeyboardPolicy = "manual";
+      window.mathVirtualKeyboard.hide();
       useKeyboardPanelStore.getState().open();
     }
 
-    el.addEventListener("focus", handleFocus);
-    return () => el.removeEventListener("focus", handleFocus);
+    field.addEventListener("focus", handleFocus);
+    return () => field.removeEventListener("focus", handleFocus);
   }, []);
 
   useEffect(() => {
@@ -360,7 +358,7 @@ export function NaturalMathField({
       elRef.current = el;
       if (el) {
         el.mathVirtualKeyboardPolicy = "manual";
-        window.mathVirtualKeyboard?.hide();
+        window.mathVirtualKeyboard.hide();
       }
       fieldRef?.(el);
     },
