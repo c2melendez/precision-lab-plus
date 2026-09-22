@@ -20,10 +20,11 @@ def test_m3_derivatives_known_and_boundary():
     assert r.status_code == 200
     assert r.json()["result_text"] == "120*x"
 
+    # El contrato Pydantic limita order a 1..5; order=6 se rechaza en la
+    # frontera HTTP antes de entrar al motor, por lo que el código correcto
+    # es 422 (no MathResponse 200 con VALIDATION_ERROR).
     r = post("derivative", {"expression":"x**2","variable":"x","order":6})
-    assert r.status_code == 200
-    assert r.json()["success"] is False
-    assert r.json()["error_code"] == "VALIDATION_ERROR"
+    assert r.status_code == 422
 
 def test_m3_integrals_known_and_boundary():
     r = post("integral", {"expression":"x**2","variable":"x"})
