@@ -175,3 +175,9 @@ Se parte del reporte consolidado de la suite exhaustiva. A diferencia del Track 
 ## Verificación final Track D
 
 `python -m pytest -q` → **276/276 aprobados**. Frontend pendiente de CI por indisponibilidad del registro npm local.
+
+## Ajuste final de harness E2E durante la corrección
+
+Después de habilitar Productoria Π, el Playwright histórico `frontend/e2e/keyboard.spec.ts` todavía exigía el aviso `"productoria: todavía no disponible"` en Desktop/Tablet/Mobile. La ejecución demostró que el producto ya no mostraba ese aviso, que es precisamente el contrato nuevo esperado. Se clasificó como expectativa obsoleta del harness, no como regresión de producto.
+
+El spec se actualizó para verificar que Π permanece visible/activa, no muestra el aviso de indisponibilidad e inserta la plantilla `\\prod`. Esta corrección QA se realizó después de que CI ya hubiera validado backend, typecheck, unit/parity y build en verde.
