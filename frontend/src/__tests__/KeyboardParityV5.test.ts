@@ -38,15 +38,15 @@ describe("paridad de especificación del teclado V5 de Plus", () => {
     );
   });
 
-  it("mantiene la paridad Plus: ∂/∂x activa y Π como pendiente real", () => {
+  it("mantiene la paridad Plus: ∂/∂x y Π activas", () => {
     const calculus = CATEGORY_MENUS["Cálculo"].flatMap((group) => group.keys);
     const partial = calculus.find((key) => key.ariaLabel === "derivada parcial");
     const product = calculus.find((key) => key.ariaLabel === "productoria");
 
     expect(partial?.unavailable).toBeFalsy();
     expect(partial?.insertLatex).toBe("\\frac{\\partial}{\\partial x}\\left(#0\\right)");
-    expect(product?.unavailable).toBe(true);
-    expect(product?.insertLatex).toBe("");
+    expect(product?.unavailable).toBeFalsy();
+    expect(product?.insertLatex).toContain("\\prod");
   });
 
   it("reincorpora sgn(a) y mod(a,b) en Álgebra", () => {
