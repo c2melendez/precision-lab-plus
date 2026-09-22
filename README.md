@@ -389,3 +389,21 @@ resumen de la operación correspondiente.
 
 `docker-compose`, caché, i18n, worker pool con cancelación real, notación
 científica en el parser, métricas, matriz de trazabilidad completa.
+
+## Correcciones posteriores a Track D (suite exhaustiva M1–M15)
+
+La suite exhaustiva detectó fallos de integración en la cadena **teclado → LaTeX → normalización → parser/whitelist → motor**. Esta versión incorpora las correcciones de producto derivadas de esos hallazgos:
+
+- singularidades `csc(0)`, `cot(0)` y `asech(0)` pasan a `DOMAIN_ERROR` controlado;
+- límite bilateral `lim 1/x, x→0` se clasifica como inexistente cuando los laterales difieren;
+- el parser rechaza llamadas multi-letra no permitidas (`foo(x)`, `dsolve(x)`) antes de que la multiplicación implícita cambie su semántica;
+- se elimina la exposición de excepciones internas de SymPy en errores de parseo;
+- se habilitan `acsc`, `asec`, `acot`, `csch`, `sech`, `coth`;
+- `Log(z)` usa el logaritmo complejo principal natural, separado del `log` base 10 de calculadora;
+- `%` funciona como operador postfix (`50% = 0.5`);
+- `±(x)` conserva las dos ramas;
+- Σ y Π se normalizan a agregados finitos seguros, con límites enteros y tope de 10 000 términos;
+- Argand respeta `x_axis_label`/`y_axis_label` (`Re`/`Im`);
+- las acciones especiales de Álgebra exponen tooltip consistente.
+
+La política de seguridad se mantiene: `Derivative`, `Integral`, `Sum`, `Product`, `Limit`, `Lambda` y matrices no se habilitan como AST arbitrario a través de `/evaluate`; las sumatorias/productorias del teclado se resuelven por una ruta estructurada y acotada.
