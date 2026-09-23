@@ -29,5 +29,12 @@ pythonpath = ["."]
 
 [tool.mutmut]
 source_paths = ["app/"]
+only_mutate = [
+    "app/services/parsing.py",
+    "app/services/ast_validator.py",
+    "app/services/solve_service.py",
+    "app/routers/evaluate.py",
+    "app/schemas/responses.py",
+]
 pytest_add_cli_args_test_selection = ["tests/"]
 pytest_add_cli_args = ["-q", "--disable-warnings"]
