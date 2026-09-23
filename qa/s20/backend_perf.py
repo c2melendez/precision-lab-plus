@@ -110,12 +110,18 @@ def main() -> None:
         assert_success(response, f"short:{expr}")
         samples.append(elapsed)
 
-    large_expr = "+".join(["1"] * 200)  # 399 chars, cerca del máximo contractual 500.
-    large_response, large_ms = timed(
-        lambda: post("/evaluate", {"expression": large_expr, "angle_unit": "rad"})
+    large_supported_expr = "+".join(["1"] * 90)
+    large_supported_response, large_supported_ms = timed(
+        lambda: post("/evaluate", {"expression": large_supported_expr, "angle_unit": "rad"})
     )
-    large_body = assert_success(large_response, "large-expression")
-    assert large_body.get("result_approx") == 200
+    large_supported_body = assert_success(large_supported_response, "large-supported-expression")
+    assert large_supported_body.get("result_approx") == 90
+
+    large_over_limit_expr = "+".join(["1"] * 200)  # 399 chars, supera el límite AST de 200 nodos.
+    large_over_limit_response, large_over_limit_ms = timed(
+        lambda: post("/evaluate", {"expression": large_over_limit_expr, "angle_unit": "rad"})
+    )
+    assert_complexity(large_over_limit_response, "large-over-limit-expression")
 
     sum100k_response, sum100k_ms = timed(
         lambda: post("/evaluate", {"expression": "sum(i,i,1,100000)", "angle_unit": "rad"})
@@ -183,7 +189,8 @@ def main() -> None:
             "samples_ms": samples,
         },
         "sentinels": {
-            "large_expression_ms": large_ms,
+            "large_supported_expression": {"outcome": "success", "elapsed_ms": large_supported_ms, "terms": 90},
+            "large_over_limit_expression": {"outcome": "COMPLEXITY_LIMIT", "elapsed_ms": large_over_limit_ms, "terms": 200},
             "sum_100000": {"outcome": "COMPLEXITY_LIMIT", "elapsed_ms": sum100k_ms},
             "product_100000": {"outcome": "COMPLEXITY_LIMIT", "elapsed_ms": product100k_ms},
             "sum_10000": {"outcome": "success", "elapsed_ms": sum10k_ms, "result": "50005000"},
