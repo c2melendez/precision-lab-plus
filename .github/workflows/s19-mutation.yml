@@ -89,8 +89,8 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: backend/requirements.txt
-      - name: Install backend and pinned mutmut
-        run: pip install -r requirements.txt mutmut==3.8.0
+      - name: Install backend QA stack and pinned mutmut
+        run: pip install -r requirements.txt -r requirements-qa.txt mutmut==3.8.0
       - name: Verify baseline tests
         run: pytest -q --disable-warnings
       - name: Run mutation baseline on critical backend surfaces
