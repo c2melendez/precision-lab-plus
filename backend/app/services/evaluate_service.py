@@ -21,6 +21,7 @@ from sympy import cos, cot, csc, pi, sec, sin, tan
 from app.services import parsing
 
 _DIRECT_TRIG_FUNCTIONS = (sin, cos, tan, sec, csc, cot)
+_NONFINITE_MARKERS = (sympy.zoo, sympy.oo, -sympy.oo, sympy.nan)
 
 
 class SubstitutionValidationError(ValueError):
@@ -100,6 +101,22 @@ def _apply_degree_conversion(expr: sympy.Expr) -> sympy.Expr:
     return expr.replace(_is_direct_trig, _convert)
 
 
+def _has_nonfinite(value: object) -> bool:
+    """Detecta zoo/oo/nan sin permitir que una anomalía interna de SymPy
+    escape como HTTP 500.
+
+    Hallazgo S19: bajo el entorno instrumentado de mutmut, `sec(pi/2)`
+    reprodujo de forma intermitente un AttributeError después de pasar la
+    suite normal. Para una expresión numérica en un polo exacto, una falla
+    de introspección durante `.has(...)` es semánticamente un resultado no
+    representable y debe convertirse en DOMAIN_ERROR, nunca INTERNAL_ERROR.
+    """
+    try:
+        return bool(value.has(*_NONFINITE_MARKERS))
+    except (AttributeError, TypeError, ValueError, OverflowError) as exc:
+        raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
+
+
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
@@ -117,59 +134,49 @@ def evaluate(
         expr = expr.subs(substitution_map)
 
     if expr.free_symbols:
-        # Variables libres sin sustituir -> resultado simbólico (sección 6).
         return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=False)
 
-    # Sin variables libres sin sustituir -> numérico (sección 6).
-    # Fix (suite de regresión v1.1, caso E147: tan(pi/2) evaluate daba un
-    # número finito gigante en vez de clasificarse como indefinido). El
-    # parser preserva "pi/2" en forma exacta (Rational * pi, no un
-    # Float), pero `expr.evalf()` no simplifica primero — numéricamente
-    # aproxima tan(pi/2) sin darse cuenta de que es una asíntota exacta.
-    # Un `simplify()` SÍ la resuelve a zoo exactamente (trabaja
-    # simbólicamente), pero llamarlo en CADA evaluate (incluso para
-    # expresiones que no tienen ninguna función trig) resultó demasiado
-    # lento en la práctica (~decenas de veces más lento, tumbó el
-    # servidor en la corrida de la suite). Se acota el chequeo caro a
-    # los dos casos donde puede pasar esto: la expresión evalúa a un
-    # número sospechosamente grande, o contiene una función trig directa
-    # aplicada a algo que involucra pi (que es como se cuela un float en
-    # vez de la forma exacta) — evalf() normal sigue siendo el camino
-    # rápido para todo lo demás.
-    # Para funciones trig directas evaluadas en argumentos exactos con π,
-    # resolver primero el posible polo simbólico. Esto evita que expresiones
-    # como sec(pi/2) entren en evalf() antes de que SymPy las reduzca a zoo.
-    exact_trig_with_pi = expr.has(sympy.tan, sympy.sec, sympy.csc, sympy.cot) and expr.has(sympy.pi)
-    if exact_trig_with_pi:
-        try:
-            simplified_pole = sympy.simplify(expr)
-        except (AttributeError, ZeroDivisionError, ValueError, OverflowError):
-            simplified_pole = None
-        if simplified_pole is not None and simplified_pole.has(
-            sympy.zoo, sympy.oo, -sympy.oo, sympy.nan
-        ):
-            raise DomainErrorResult("El resultado no está definido en este dominio.")
-
+    # Sin variables libres -> numérico. Los polos trigonométricos exactos
+    # con π se simplifican primero para evitar que evalf() los aproxime como
+    # números finitos gigantes. Toda la rama numérica se protege contra
+    # AttributeError/TypeError internos de SymPy: esos fallos son dominio
+    # no representable para el contrato público, no un 500.
     try:
-        numeric_value = expr.evalf()
-    except (AttributeError, ZeroDivisionError, ValueError, OverflowError) as exc:
-        raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
-    needs_pole_check = (
-        numeric_value.is_number
-        and numeric_value.is_finite is not False
-        and not numeric_value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan)
-        and exact_trig_with_pi
-    )
-    if needs_pole_check:
-        try:
-            got_big = abs(complex(numeric_value)) > 1e8
-        except Exception:
-            got_big = False
-        if got_big and sympy.simplify(expr).has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
-            raise DomainErrorResult("El resultado no está definido en este dominio.")
-    if numeric_value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
-        raise DomainErrorResult("El resultado no está definido en este dominio.")
+        exact_trig_with_pi = (
+            expr.has(sympy.tan, sympy.sec, sympy.csc, sympy.cot)
+            and expr.has(sympy.pi)
+        )
 
-    approx = float(numeric_value) if numeric_value.is_real else None
+        if exact_trig_with_pi:
+            simplified_pole = sympy.simplify(expr)
+            if _has_nonfinite(simplified_pole):
+                raise DomainErrorResult("El resultado no está definido en este dominio.")
+
+        numeric_value = expr.evalf()
+
+        if _has_nonfinite(numeric_value):
+            raise DomainErrorResult("El resultado no está definido en este dominio.")
+
+        needs_pole_check = (
+            numeric_value.is_number
+            and numeric_value.is_finite is not False
+            and exact_trig_with_pi
+        )
+        if needs_pole_check:
+            try:
+                got_big = abs(complex(numeric_value)) > 1e8
+            except (TypeError, ValueError, OverflowError):
+                got_big = False
+
+            if got_big:
+                simplified_pole = sympy.simplify(expr)
+                if _has_nonfinite(simplified_pole):
+                    raise DomainErrorResult("El resultado no está definido en este dominio.")
+
+        approx = float(numeric_value) if numeric_value.is_real else None
+    except DomainErrorResult:
+        raise
+    except (AttributeError, ZeroDivisionError, ValueError, OverflowError, TypeError) as exc:
+        raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
 
     return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=True, approx_value=approx)
