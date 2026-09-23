@@ -134,7 +134,7 @@ def generated_numeric_cases(count: int = 60) -> list[dict]:
         elif family == 2:
             x = rng.uniform(-2.0, 2.0)
             a = rng.randint(-3, 3)
-            plus = f"exp({x})+{a}*sin({x})"
+            plus = f"exp({x})+({a})*sin({x})"
             lite = plus
             sym = plus
         else:
