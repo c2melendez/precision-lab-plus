@@ -63,6 +63,20 @@ async def request_context_middleware(request: Request, call_next):
     request.state.start_time = time.perf_counter()
     response = await call_next(request)
     response.headers["X-Request-ID"] = request.state.request_id
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["X-Frame-Options"] = "DENY"
+
+    path = request.url.path
+    if path.startswith(API_V1_PREFIX) and not (
+        path.endswith("/docs")
+        or path.endswith("/redoc")
+        or path.endswith("/openapi.json")
+    ):
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'none'; frame-ancestors 'none'; "
+            "base-uri 'none'; form-action 'none'"
+        )
     return response
 
 
