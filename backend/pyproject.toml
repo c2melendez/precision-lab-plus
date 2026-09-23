@@ -26,3 +26,20 @@ ignore = ["UP006", "UP007", "UP035", "UP042", "UP045"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.mutmut]
+source_paths = ["app/"]
+only_mutate = [
+    "app/services/parsing.py",
+    "app/services/ast_validator.py",
+    "app/services/solve_service.py",
+    "app/routers/evaluate.py",
+    "app/schemas/responses.py",
+]
+pytest_add_cli_args_test_selection = [
+    "tests/test_parsing.py",
+    "tests/test_evaluate.py",
+    "tests/test_solve.py",
+    "tests/test_exhaustive_module13_security.py",
+]
+pytest_add_cli_args = ["-q", "--disable-warnings"]
