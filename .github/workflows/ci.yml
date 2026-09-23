@@ -13,6 +13,8 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      CORS_ORIGINS: https://security-test.example
     defaults:
       run:
         working-directory: backend
