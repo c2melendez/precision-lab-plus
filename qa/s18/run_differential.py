@@ -123,8 +123,8 @@ def generated_numeric_cases(count: int = 60) -> list[dict]:
         if family == 0:
             a, b, c = (rng.randint(-6, 6) for _ in range(3))
             x = rng.randint(-5, 5)
-            plus = f"{a}*({x})**2+{b}*({x})+{c}"
-            lite = f"{a}*({x})^2+{b}*({x})+{c}"
+            plus = f"({a})*({x})**2+({b})*({x})+({c})"
+            lite = f"({a})*({x})^2+({b})*({x})+({c})"
             sym = plus
         elif family == 1:
             x = rng.uniform(-3.0, 3.0)
