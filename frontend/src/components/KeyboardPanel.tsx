@@ -41,7 +41,7 @@ export function KeyboardPanel({ isOpen, onClose, children }: KeyboardPanelProps)
     window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
-      openerRef.current?.focus();
+      if (openerRef.current?.tagName.toLowerCase() !== "math-field") openerRef.current?.focus();
     };
   }, [isOpen, onClose]);
 
