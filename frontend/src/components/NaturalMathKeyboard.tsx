@@ -843,6 +843,7 @@ export function NaturalMathKeyboard({
                         type="button"
                         onClick={() => pressSymbol(k)}
                         aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined}
                         title={k.description}
                         className="rounded-md bg-alpha-soft py-2 text-[11px] text-alpha hover:bg-alpha-soft/80"
                       >
@@ -860,6 +861,7 @@ export function NaturalMathKeyboard({
                         type="button"
                         onClick={() => pressSymbol(k)}
                         aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined}
                         title={k.description}
                         className="rounded-md bg-marker-soft/10 py-2 text-[11px] text-marker hover:bg-marker-soft/20"
                       >
@@ -878,6 +880,7 @@ export function NaturalMathKeyboard({
                       type="button"
                       onClick={() => pressSymbol(k)}
                       aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined}
                       title={k.description}
                       className="rounded-md bg-chrome py-2 text-[11px] text-bone hover:bg-chrome/70"
                     >
@@ -892,6 +895,7 @@ export function NaturalMathKeyboard({
                       type="button"
                       onClick={() => pressSymbol(k)}
                       aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined}
                       title={k.description}
                       className="rounded-md bg-chrome py-2 text-[11px] text-bone hover:bg-chrome/70"
                     >
@@ -1008,6 +1012,7 @@ export function NaturalMathKeyboard({
                         type="button"
                         onClick={() => press(k)}
                         aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined}
                     title={k.description}
                         className={
                           // Módulo de cierre (honestidad visual): mismo patrón
@@ -1039,7 +1044,7 @@ export function NaturalMathKeyboard({
           onClick={onSolveEquation}
           aria-label="Resolver ecuación"
           title="Resolver ecuación"
-          className="rounded-md bg-marker-soft/15 py-2 text-[11px] font-medium text-marker hover:bg-marker-soft/25"
+          className="rounded-md border border-chrome-soft bg-chrome py-2 text-[11px] font-medium text-bone hover:bg-chrome-soft"
         >
           f(x)=0
         </button>
@@ -1101,6 +1106,7 @@ export function NaturalMathKeyboard({
                 type="button"
                 onClick={() => press(k)}
                 aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined}
                     title={k.description}
                 className={
                   k.unavailable
@@ -1121,6 +1127,7 @@ export function NaturalMathKeyboard({
                 type="button"
                 onClick={() => press(k)}
                 aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined}
                     title={k.description}
                 className={
                   k.unavailable
@@ -1204,6 +1211,7 @@ export function NaturalMathKeyboard({
                         : "rounded-md bg-chrome-soft py-2.5 text-[11px] text-marker hover:bg-chrome-soft/70";
                 return (
                   <button key={j} type="button" onClick={() => pressBase(k)} aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined}
                     title={k.description} className={className}>
                     <KeyGlyph glyph={k.glyph} />
                   </button>
@@ -1219,6 +1227,7 @@ export function NaturalMathKeyboard({
                 type="button"
                 onClick={() => press(k)}
                 aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined}
                     title={k.description}
                 className="rounded-md bg-paper-soft py-1.5 text-sm text-ink hover:bg-paper-line/60"
               >

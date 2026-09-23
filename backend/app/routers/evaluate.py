@@ -50,6 +50,15 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         return _error(request, ErrorCode.VALIDATION_ERROR, str(exc))
     except evaluate_service.DomainErrorResult as exc:
         return _error(request, ErrorCode.DOMAIN_ERROR, str(exc))
+    except (AttributeError, ZeroDivisionError, ValueError, OverflowError):
+        # Safety net for numeric-domain failures raised internally by SymPy.
+        # These inputs are mathematically undefined/unsupported, not server
+        # faults, and must never escape as HTTP 500 (e.g. sec(pi/2)).
+        return _error(
+            request,
+            ErrorCode.DOMAIN_ERROR,
+            "El resultado no está definido en este dominio.",
+        )
 
     warnings = []
     try:
