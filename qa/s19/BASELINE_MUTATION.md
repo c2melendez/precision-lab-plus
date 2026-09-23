@@ -14,17 +14,44 @@ Herramientas fijadas:
 
 La política de S19 no exige un porcentaje inicial arbitrariamente alto. A partir de este baseline, el score no debe degradarse sin una revisión y justificación explícita.
 
-## Resultado cuantitativo
+## Resultado cuantitativo certificado
 
-| Superficie | Total mutantes | Killed/controlados | Survived | No coverage | Timeout | Score |
+| Superficie | Total mutantes | Killed | Survived | No tests / No coverage | Timeout | Score |
 |---|---:|---:|---:|---:|---:|---:|
 | Plus frontend / Stryker | 1,468 | 225 | 977 | 266 | 0 | 15.33% |
 | Lite frontend / Stryker | 2,161 | 223 | 1,548 | 390 | 0 | 10.32% |
-| Plus backend / mutmut | 6,810 | 6,349 killed + 8 timeout | 453 | n/a | 8 | ~93.2% killed; ~93.35% incluyendo timeout como controlado |
+| Plus backend / mutmut estable | 1,028 | 590 | 371 | 58 | 9 | 57.39% killed; 58.27% si los timeouts se cuentan como controlados |
 
 Los pisos automatizados de Stryker quedan fijados en:
 - Plus frontend: `break = 15.3`.
 - Lite frontend: `break = 10.3`.
+
+### Evidencia histórica de campaña amplia
+
+Antes de estabilizar el harness se ejecutó una campaña backend más amplia de 6,810 mutantes sobre más superficies. Esa corrida produjo:
+- 6,349 killed.
+- 453 survived.
+- 8 timeout.
+- ~93.23% killed; ~93.35% contando timeout como controlado.
+
+Ese resultado se conserva como evidencia histórica, pero **no es el baseline operativo actual**. La campaña amplia mostró inestabilidad del harness en la fase de clean/stats con rutas trigonométricas como `sec(pi/2)` y `csc(pi/2)`, incluso cuando CI normal permanecía verde. Por ello el gate final backend se acotó a superficies y pruebas dirigidas estables.
+
+## Alcance backend estable
+
+Mutmut queda limitado a:
+- `app/services/parsing.py`
+- `app/services/ast_validator.py`
+- `app/services/solve_service.py`
+- `app/routers/evaluate.py`
+- `app/schemas/responses.py`
+
+Y usa como selección de pruebas:
+- `tests/test_parsing.py`
+- `tests/test_evaluate.py`
+- `tests/test_solve.py`
+- `tests/test_exhaustive_module13_security.py`
+
+Las rutas trigonométricas E2E continúan certificadas por CI, Playwright, S17 y S18; no se consideran parte del gate mutacional backend estable mientras el runner instrumentado de mutmut reproduzca el flake documentado.
 
 ## Lectura del baseline
 
@@ -59,19 +86,20 @@ Reglas críticas revisadas:
 
 ### Plus backend
 
-El backend presenta un baseline sustancialmente más fuerte. Los focos de sobrevivientes son:
-- `evaluate_service.evaluate`.
-- `try_parse_finite_aggregate`.
-- `solve_service._quadratic_steps`.
-- `solve_service._linear_steps`.
-- `parsing._expand_sqrt_tokens`.
-- validación de complejidad y parsing.
+La campaña estable detectó 371 sobrevivientes y 58 mutantes sin pruebas. Los focos principales siguen siendo:
+- validación y complejidad en `ast_validator`.
+- normalización y parsing en `parsing`.
+- `_expand_sqrt_tokens`.
+- separación de ecuaciones y validación decimal.
+- helpers de solución lineal/cuadrática en `solve_service`.
+- manejo de respuestas/error del router `evaluate`.
 
 Reglas críticas:
 - decimales: `validate_decimal_and_reject_scientific` mantiene mutantes sobrevivientes; el comportamiento funcional está cubierto, pero se prioriza endurecer tests unitarios.
-- errores de dominio/división por cero y respuestas controladas están cubiertos por S16/S17; S25 volverá a validar CORS/error handling a nivel HTTP.
-- los 8 timeouts se concentran en mutaciones de `_expand_sqrt_tokens`; se registran como mutantes controlados por no terminación, no como regresiones funcionales.
+- errores de dominio/división por cero y respuestas controladas están cubiertos por S16/S17/S18; S25 volverá a validar CORS/error handling a nivel HTTP.
+- los 9 timeouts del baseline estable se concentran en mutaciones de `_expand_sqrt_tokens`; se registran como no terminación controlada, no como regresiones funcionales.
 - no se modifica el límite global de Python para enteros; el fix S17 de presentación segura se mantiene como decisión normativa.
+- el flake de `sec(pi/2)`/`csc(pi/2)` observado en el runner instrumentado no se resolvió cambiando producto, porque CI normal demostraba que la semántica certificada era correcta. Se trató como limitación del harness y se mantuvo fuera del gate mutacional estable.
 
 ## Clasificación de sobrevivientes
 
@@ -85,6 +113,7 @@ S19 distingue tres grupos:
 
 - El primer baseline no se invalida por tener score bajo.
 - Toda reducción de los pisos Stryker requiere justificación explícita.
+- El baseline backend operativo es la campaña estable de 1,028 mutantes.
 - Los mutantes críticos conocidos de logaritmos, decimales, división por cero/dominio, límites de enteros, manejo de errores/CORS y persistencia no deben descartarse silenciosamente.
 - Cambios futuros sobre parser/normalización deben acompañarse de pruebas dirigidas capaces de matar los mutantes relevantes cuando sea razonable.
 - S25 será autoridad adicional para CORS/error handling.
@@ -93,17 +122,24 @@ S19 distingue tres grupos:
 
 ## Evidencia
 
-Workflow: `S19 Mutation Baseline`, run `35817851427`.
+Workflow final certificado: `S19 Mutation Baseline`, run `35838270384`.
 
 Jobs:
-- Plus frontend Stryker: `107043145369`.
-- Plus backend mutmut: `107043145683`.
-- Lite frontend Stryker: `107043145713`.
+- Plus backend mutmut: `107106893639` — success.
+- Lite frontend Stryker: `107106893880` — success.
+- Plus frontend Stryker: `107106893932` — success.
 
 Artefactos:
-- `s19-plus-frontend-stryker`.
-- `s19-plus-backend-mutmut`.
-- `s19-lite-frontend-stryker`.
+- Plus backend: artifact `10740671311`, `s19-plus-backend-mutmut`.
+- Plus frontend: artifact `10741420388`, `s19-plus-frontend-stryker`.
+- Lite frontend: artifact `10740479210`, `s19-lite-frontend-stryker`.
+
+Gates del mismo head `7568020f22534bbe41df722e82e7f18fa3a7e37a`:
+- CI — success.
+- Playwright E2E — success.
+- S17 API fuzzing — success.
+- S18 Differential Properties — success.
+- S19 Mutation Baseline — success.
 
 ## Criterio de cierre
 
