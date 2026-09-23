@@ -1,0 +1,111 @@
+name: S19 Mutation Baseline
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "qa/s19/**"
+      - ".github/workflows/s19-mutation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plus-frontend-stryker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend
+        run: npm ci
+      - name: Install pinned mutation tools
+        run: npm install --no-save @stryker-mutator/core@10.0.0 @stryker-mutator/vitest-runner@10.0.0
+      - name: Run Plus frontend mutation baseline
+        run: npx stryker run stryker.config.json
+      - name: Upload Plus mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s19-plus-frontend-stryker
+          path: frontend/reports/mutation
+          if-no-files-found: warn
+
+  lite-frontend-stryker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout Plus harness
+        uses: actions/checkout@v4
+      - name: Checkout certified Lite
+        uses: actions/checkout@v4
+        with:
+          repository: c2melendez/precision-lab-lite
+          ref: 6cbec7645b73ad18875d4472182c704eb35228b0
+          path: lite
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: lite/package-lock.json
+      - name: Install Lite
+        run: npm ci --prefix lite
+      - name: Install pinned mutation tools
+        run: npm install --prefix lite --no-save @stryker-mutator/core@10.0.0 @stryker-mutator/vitest-runner@10.0.0
+      - name: Copy certified S19 config
+        run: cp qa/s19/stryker-lite.config.json lite/stryker.config.json
+      - name: Run Lite frontend mutation baseline
+        working-directory: lite
+        run: npx stryker run stryker.config.json
+      - name: Upload Lite mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s19-lite-frontend-stryker
+          path: lite/reports/mutation
+          if-no-files-found: warn
+
+  plus-backend-mutmut:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      CORS_ORIGINS: http://localhost:5173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install backend and pinned mutmut
+        run: pip install -r requirements.txt mutmut==3.8.0
+      - name: Verify baseline tests
+        run: pytest -q --disable-warnings
+      - name: Run mutation baseline on critical backend surfaces
+        run: |
+          mkdir -p ../reports/s19
+          set +e
+          mutmut run "app.services.parsing*"             "app.services.evaluate_service*"             "app.services.ast_validator*"             "app.services.solve_service*"             "app.routers.evaluate*"             "app.schemas.responses*"
+          rc=$?
+          mutmut results > ../reports/s19/mutmut-results.txt 2>&1
+          echo "$rc" > ../reports/s19/mutmut-exit-code.txt
+          exit "$rc"
+      - name: Upload backend mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s19-plus-backend-mutmut
+          path: reports/s19
+          if-no-files-found: warn
