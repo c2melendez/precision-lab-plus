@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 15
     env:
       CORS_ORIGINS: http://localhost:5173
-      S20_LITE_SHA: qa/s20-performance-robustness
+      S20_LITE_SHA: 9e75fc7447e62e09d6afe7a4b79d6a1b3302e843
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -80,7 +80,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: c2melendez/precision-lab-lite
-          ref: qa/s20-performance-robustness
+          ref: 9e75fc7447e62e09d6afe7a4b79d6a1b3302e843
           path: lite
       - uses: actions/setup-node@v4
         with:
@@ -111,7 +111,9 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run Lite S20 worker E2E
         working-directory: lite
-        run: npx playwright test e2e/s20-performance-robustness.spec.ts --project=desktop-chromium
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ../reports/s20/lite-playwright.json
+        run: npx playwright test e2e/s20-performance-robustness.spec.ts --project=desktop-chromium --reporter=json
       - name: Capture browser/worker evidence
         if: always()
         run: |
