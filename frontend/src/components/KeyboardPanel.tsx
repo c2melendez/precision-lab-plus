@@ -34,15 +34,12 @@ export function KeyboardPanel({ isOpen, onClose, children }: KeyboardPanelProps)
   useEffect(() => {
     if (!isOpen) return;
     openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const frame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
-
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      window.cancelAnimationFrame(frame);
       window.removeEventListener("keydown", onKeyDown);
       openerRef.current?.focus();
     };
