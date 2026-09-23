@@ -38,3 +38,5 @@ only_mutate = [
 ]
 pytest_add_cli_args_test_selection = ["tests/"]
 pytest_add_cli_args = ["-q", "--disable-warnings"]
+process_isolation = "forkserver"
+forkserver_warmup = "none"
