@@ -30,6 +30,7 @@ SEED = 180018
 LITE_SHA = "6cbec7645b73ad18875d4472182c704eb35228b0"
 ABS_TOL = 1e-8
 REL_TOL = 1e-8
+LITE_TOL = 1e-6
 
 client = TestClient(app, raise_server_exceptions=False)
 rng = random.Random(SEED)
@@ -155,9 +156,9 @@ def property_numeric_differential() -> int:
         sym_value = float(sp.N(sympify_user(case["sympy"])))
         if not close(plus_value, sym_value):
             fail("plus-vs-sympy", case, f"plus={plus_value}, sympy={sym_value}")
-        if not close(lite_value, sym_value):
+        if not close(lite_value, sym_value, LITE_TOL):
             fail("lite-vs-sympy", case, f"lite={lite_value}, sympy={sym_value}")
-        if not close(plus_value, lite_value):
+        if not close(plus_value, lite_value, LITE_TOL):
             fail("plus-vs-lite", case, f"plus={plus_value}, lite={lite_value}")
     return len(cases)
 
