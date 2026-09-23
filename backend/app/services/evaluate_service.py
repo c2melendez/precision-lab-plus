@@ -21,8 +21,6 @@ from sympy import cos, cot, csc, pi, sec, sin, tan
 from app.services import parsing
 
 _DIRECT_TRIG_FUNCTIONS = (sin, cos, tan, sec, csc, cot)
-_NONFINITE_MARKERS = (sympy.zoo, sympy.oo, -sympy.oo, sympy.nan)
-
 
 class SubstitutionValidationError(ValueError):
     """Un valor (o nombre) de `substitutions` no cumple el contrato de la
@@ -112,7 +110,7 @@ def _has_nonfinite(value: object) -> bool:
     representable y debe convertirse en DOMAIN_ERROR, nunca INTERNAL_ERROR.
     """
     try:
-        return bool(value.has(*_NONFINITE_MARKERS))
+        return bool(value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan))
     except (AttributeError, TypeError, ValueError, OverflowError) as exc:
         raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
 
