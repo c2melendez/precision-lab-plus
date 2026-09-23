@@ -1,0 +1,67 @@
+name: S17 API fuzzing
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/s17-api-fuzz.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/s17-api-fuzz.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  openapi-fuzz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      CORS_ORIGINS: http://localhost:5173
+      S17_SEED: "170017"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-qa.txt
+      - name: Install API fuzzing dependencies
+        run: pip install -r requirements.txt -r requirements-qa.txt
+      - name: Run directed Hypothesis S17 tests
+        run: pytest -q tests/test_s17_api_fuzzing.py --disable-warnings
+      - name: Start local API
+        run: |
+          python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 > /tmp/s17-uvicorn.log 2>&1 &
+          echo $! > /tmp/s17-uvicorn.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/api/v1/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/s17-uvicorn.log
+          exit 1
+      - name: Verify OpenAPI schema
+        run: curl -fsS http://127.0.0.1:8000/api/v1/openapi.json -o /tmp/s17-openapi.json
+      - name: Schemathesis short PR budget
+        run: |
+          st run http://127.0.0.1:8000/api/v1/openapi.json \
+            --phases=fuzzing \
+            --mode=all \
+            --max-examples=5 \
+            --seed="$S17_SEED" \
+            --max-time=90 \
+            --checks=not_a_server_error \
+            --continue-on-failure
+      - name: Show API log on failure
+        if: failure()
+        run: cat /tmp/s17-uvicorn.log || true
