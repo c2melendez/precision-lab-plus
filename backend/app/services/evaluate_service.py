@@ -99,22 +99,6 @@ def _apply_degree_conversion(expr: sympy.Expr) -> sympy.Expr:
     return expr.replace(_is_direct_trig, _convert)
 
 
-def _has_nonfinite(value: object) -> bool:
-    """Detecta zoo/oo/nan sin permitir que una anomalía interna de SymPy
-    escape como HTTP 500.
-
-    Hallazgo S19: bajo el entorno instrumentado de mutmut, `sec(pi/2)`
-    reprodujo de forma intermitente un AttributeError después de pasar la
-    suite normal. Para una expresión numérica en un polo exacto, una falla
-    de introspección durante `.has(...)` es semánticamente un resultado no
-    representable y debe convertirse en DOMAIN_ERROR, nunca INTERNAL_ERROR.
-    """
-    try:
-        return bool(value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan))
-    except (AttributeError, TypeError, ValueError, OverflowError) as exc:
-        raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
-
-
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
@@ -134,11 +118,9 @@ def evaluate(
     if expr.free_symbols:
         return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=False)
 
-    # Sin variables libres -> numérico. Los polos trigonométricos exactos
-    # con π se simplifican primero para evitar que evalf() los aproxime como
-    # números finitos gigantes. Toda la rama numérica se protege contra
-    # AttributeError/TypeError internos de SymPy: esos fallos son dominio
-    # no representable para el contrato público, no un 500.
+    # S19: conserva la lógica de polos que ya certificaba csc(pi/2)=1 y
+    # captura de forma global las excepciones internas de SymPy para que
+    # ningún polo exacto termine como HTTP 500.
     try:
         exact_trig_with_pi = (
             expr.has(sympy.tan, sympy.sec, sympy.csc, sympy.cot)
@@ -147,31 +129,37 @@ def evaluate(
 
         if exact_trig_with_pi:
             simplified_pole = sympy.simplify(expr)
-            if _has_nonfinite(simplified_pole):
+            if simplified_pole.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
                 raise DomainErrorResult("El resultado no está definido en este dominio.")
 
         numeric_value = expr.evalf()
 
-        if _has_nonfinite(numeric_value):
-            raise DomainErrorResult("El resultado no está definido en este dominio.")
-
         needs_pole_check = (
             numeric_value.is_number
             and numeric_value.is_finite is not False
+            and not numeric_value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan)
             and exact_trig_with_pi
         )
+
         if needs_pole_check:
             try:
                 got_big = abs(complex(numeric_value)) > 1e8
             except (TypeError, ValueError, OverflowError):
                 got_big = False
 
-            if got_big:
-                simplified_pole = sympy.simplify(expr)
-                if _has_nonfinite(simplified_pole):
-                    raise DomainErrorResult("El resultado no está definido en este dominio.")
+            if (
+                got_big
+                and sympy.simplify(expr).has(
+                    sympy.zoo, sympy.oo, -sympy.oo, sympy.nan
+                )
+            ):
+                raise DomainErrorResult("El resultado no está definido en este dominio.")
+
+        if numeric_value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
+            raise DomainErrorResult("El resultado no está definido en este dominio.")
 
         approx = float(numeric_value) if numeric_value.is_real else None
+
     except DomainErrorResult:
         raise
     except (AttributeError, ZeroDivisionError, ValueError, OverflowError, TypeError) as exc:
