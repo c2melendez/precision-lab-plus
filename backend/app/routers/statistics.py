@@ -6,6 +6,7 @@ v2 §7.4, decisión explícita de mantener consistencia arquitectónica con
 el backend en vez de resolver esto 100% en frontend como Unidades/P7).
 """
 
+import math
 import time
 
 import sympy
@@ -44,19 +45,56 @@ def _error(request: Request, operation: OperationType, message: str) -> MathResp
     )
 
 
+def _safe_scalar_presentation(value: sympy.Expr) -> tuple[str, str, float | None, list[str]]:
+    """Serializa escalares sin convertir resultados exactos gigantes en 500.
+
+    Algunas probabilidades exactas son racionales perfectamente válidas
+    pero su numerador/denominador puede superar el límite de conversión de
+    enteros a texto de Python. En ese caso preservamos el cálculo y
+    degradamos únicamente la representación a una aproximación numérica.
+    """
+    warnings: list[str] = []
+    try:
+        result_text = str(value)
+        result_latex = sympy.latex(value)
+    except ValueError as exc:
+        if "integer string conversion" not in str(exc):
+            raise
+        approximate = sympy.N(value, 15)
+        result_text = str(approximate)
+        result_latex = sympy.latex(approximate)
+        warnings.append(
+            "El resultado exacto es demasiado grande para serializarlo de forma segura; "
+            "se muestra una aproximación numérica."
+        )
+
+    result_approx: float | None = None
+    if value.is_real:
+        try:
+            candidate = float(value)
+            if math.isfinite(candidate):
+                result_approx = candidate
+        except (OverflowError, TypeError, ValueError):
+            result_approx = None
+
+    return result_text, result_latex, result_approx, warnings
+
+
 def _scalar_response(
     request: Request, operation: OperationType, result: stats_service.ScalarResult
 ) -> MathResponse:
     value = result.value
+    result_text, result_latex, result_approx, warnings = _safe_scalar_presentation(value)
     return MathResponse(
         success=True,
         operation=operation,
         request_id=request.state.request_id,
         result_type=ResultType.SCALAR,
-        result_text=str(value),
-        result_latex=sympy.latex(value),
-        result_approx=float(value) if value.is_real else None,
+        result_text=result_text,
+        result_latex=result_latex,
+        result_approx=result_approx,
         has_detailed_steps=False,
+        warnings=warnings,
         duration_ms=_duration_ms(request),
     )
 
