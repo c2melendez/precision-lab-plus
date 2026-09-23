@@ -1,0 +1,4 @@
+# QA-only dependencies. Production/runtime dependencies stay in requirements.txt.
+# S17 reproducibility pins verified against current PyPI releases (2026-09).
+hypothesis==6.168.0
+schemathesis==4.27.5
