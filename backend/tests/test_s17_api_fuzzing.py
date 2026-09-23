@@ -205,3 +205,34 @@ def test_s17_hypothesis_linsolve_unique_integer_system(x_value, y_value):
     text = body["result_data"][0]["text"].replace(" ", "")
     assert f"x={x_value}" in text
     assert f"y={y_value}" in text
+
+
+# ---------------------------------------------------------------------------
+# Contraejemplos permanentes descubiertos por Schemathesis, seed 170017.
+# ---------------------------------------------------------------------------
+
+
+def test_s17_schemathesis_binomial_large_exact_probability_never_500():
+    response = _post(
+        "/api/v1/statistics/binomial",
+        {"n": 721, "p": 0.3325193466105812, "query": "pmf"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] is not None
+    assert 0.0 <= body["result_approx"] <= 1.0
+    assert any("aproximación numérica" in warning for warning in body["warnings"])
+
+
+def test_s17_schemathesis_poisson_tiny_lambda_cdf_never_500():
+    response = _post(
+        "/api/v1/statistics/poisson",
+        {"lam": 5.7785345391700715e-28, "query": "cdf", "k": 150},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] is not None
+    assert 0.0 <= body["result_approx"] <= 1.0
+    assert any("aproximación numérica" in warning for warning in body["warnings"])
