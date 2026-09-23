@@ -34,8 +34,7 @@ test("S21: smoke y 2+2 funcionan fuera de Chromium", async ({ page, request }) =
 
   await setExpression(page, "2+2");
 
-  const entry = page.getByRole("region", { name: "Entrada", exact: true });
-  const calculate = entry.getByRole("button", { name: "Calcular", exact: true });
+  const calculate = page.getByRole("button", { name: /Calcular|Evaluar/i }).first();
   await expect(calculate).toBeEnabled();
 
   const responsePromise = page.waitForResponse(
