@@ -19,7 +19,7 @@ type Request =
 function numericFromAlgebrite(expr: string): number {
   const raw = evaluate(expr);
   const decimal = toDecimalApprox(raw);
-  const candidate = (decimal ?? raw).replace("…", "");
+  const candidate = (decimal ?? raw).replace(/(?:\.\.\.|…)$/, "");
   const value = Number(candidate);
   if (!Number.isFinite(value)) {
     throw new Error(`Resultado Lite no numérico para "${expr}": ${raw}`);
