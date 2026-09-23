@@ -1,0 +1,66 @@
+name: S18 Differential Properties
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "qa/s18/**"
+      - ".github/workflows/s18-differential.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "qa/s18/**"
+      - ".github/workflows/s18-differential.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  differential:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CORS_ORIGINS: http://localhost:5173
+      S18_SEED: "180018"
+    steps:
+      - name: Checkout Plus
+        uses: actions/checkout@v4
+
+      - name: Checkout certified Lite snapshot
+        uses: actions/checkout@v4
+        with:
+          repository: c2melendez/precision-lab-lite
+          ref: 6cbec7645b73ad18875d4472182c704eb35228b0
+          path: lite
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: lite/package-lock.json
+
+      - name: Install Plus backend
+        working-directory: backend
+        run: pip install -r requirements.txt
+
+      - name: Install Lite dependencies
+        run: npm ci --prefix lite
+
+      - name: Record differential coordinates
+        run: |
+          echo "PLUS_SHA=$GITHUB_SHA"
+          echo "LITE_SHA=$(git -C lite rev-parse HEAD)"
+          echo "S18_SEED=$S18_SEED"
+          python --version
+          node --version
+
+      - name: Run S18 differential/property gate
+        run: python qa/s18/run_differential.py
