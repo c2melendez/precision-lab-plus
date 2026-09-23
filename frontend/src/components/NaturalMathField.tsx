@@ -248,8 +248,8 @@ export function latexToBackendSyntax(latex: string): string {
   // explícitamente el contrato real del teclado antes de convertir.
   const absoluteTrimmed = latex.trim();
   const absoluteMatch =
-    absoluteTrimmed.match(/^\\\\left\\\|(.*)\\\\right\\\|$/s) ??
-    absoluteTrimmed.match(/^\\\|(.*)\\\|$/s);
+    absoluteTrimmed.match(/^\\left\|(.*)\\right\|$/s) ??
+    absoluteTrimmed.match(/^\|(.*)\|$/s);
   if (absoluteMatch) return `abs(${latexToBackendSyntax(absoluteMatch[1])})`;
 
   const aggregate = rewriteFiniteAggregateLatex(latex);
