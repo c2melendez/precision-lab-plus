@@ -1,0 +1,7 @@
+{
+  "module": "S18",
+  "seed": 180018,
+  "lite_sha": "6cbec7645b73ad18875d4472182c704eb35228b0",
+  "note": "Persist minimized differential counterexamples here. Empty means no known unresolved divergence at baseline.",
+  "cases": []
+}
