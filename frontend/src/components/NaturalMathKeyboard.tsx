@@ -1044,7 +1044,7 @@ export function NaturalMathKeyboard({
           onClick={onSolveEquation}
           aria-label="Resolver ecuación"
           title="Resolver ecuación"
-          className="rounded-md bg-marker-soft/15 py-2 text-[11px] font-medium text-ink hover:bg-marker-soft/25"
+          className="rounded-md bg-marker-soft/15 py-2 text-[11px] font-medium text-bone hover:bg-marker-soft/25"
         >
           f(x)=0
         </button>
