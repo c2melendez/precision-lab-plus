@@ -79,6 +79,7 @@ function BasicKey({
         type="button"
         onClick={() => onPress(k, false)}
         aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined}
         title={k.description}
         className={className}
       >
@@ -88,7 +89,8 @@ function BasicKey({
   }
 
   return (
-    <button type="button" {...longPress} aria-label={k.ariaLabel} title={k.description} className={className}>
+    <button type="button" {...longPress} aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined} title={k.description} className={className}>
       <KeyGlyph glyph={k.glyph} />
     </button>
   );
