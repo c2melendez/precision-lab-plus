@@ -6,6 +6,7 @@ modo grados y polos/dominios por la API pública.
 
 import math
 import pytest
+import sympy
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -56,3 +57,30 @@ def test_module01_domain_edges_are_controlled():
                 f"success={body.get('success')}, error_code={body.get('error_code')}"
             )
     assert not failures, "\n".join(failures)
+
+
+def test_sec_pi_over_2_sympy_attribute_error_is_controlled(monkeypatch):
+    """S19: una anomalía de introspección de SymPy en el polo no puede
+    propagarse como INTERNAL_ERROR/HTTP 500."""
+    real_simplify = sympy.simplify
+
+    class BrokenSimplified:
+        pass
+
+    calls = {"count": 0}
+
+    def flaky_simplify(expr):
+        calls["count"] += 1
+        if calls["count"] == 1:
+            return BrokenSimplified()
+        return real_simplify(expr)
+
+    monkeypatch.setattr(sympy, "simplify", flaky_simplify)
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": "sec(pi/2)", "angle_unit": "rad"},
+    )
+    body = response.json()
+    assert response.status_code == 200
+    assert body["success"] is False
+    assert body["error_code"] == "DOMAIN_ERROR"
