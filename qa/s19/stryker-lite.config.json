@@ -1,0 +1,20 @@
+{
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "mutate": [
+    "src/engine/parsing/**/*.ts",
+    "src/engine/algebriteClient.ts",
+    "src/components/KeyboardBasicPanel.tsx",
+    "src/store/historyDb.ts",
+    "src/store/useRecentKeysStore.ts"
+  ],
+  "reporters": ["clear-text", "json", "html"],
+  "jsonReporter": {
+    "fileName": "reports/mutation/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation/mutation.html"
+  },
+  "timeoutMS": 15000,
+  "concurrency": 2
+}
