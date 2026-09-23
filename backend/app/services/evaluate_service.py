@@ -145,12 +145,17 @@ def evaluate(
 
     if exact_trig_with_pi:
         try:
-            simplified = sympy.simplify(expr)
+            # SymPy 1.13.x puede lanzar AttributeError al hacer
+            # simplify(csc(...))/simplify(sec(...)) cuando el árbol vino de
+            # parse_expr(..., evaluate=False). Reescribir las recíprocas a
+            # identidades sin/cos evita ese camino interno defectuoso y
+            # conserva la semántica exacta: csc(pi/2)->1, sec(pi/2)->zoo.
+            rewritten = expr.rewrite(sympy.sin)
         except (AttributeError, TypeError, ZeroDivisionError, ValueError, OverflowError) as exc:
             raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
-        if _contains_nonfinite(simplified):
+        if _contains_nonfinite(rewritten):
             raise DomainErrorResult("El resultado no está definido en este dominio.")
-        numeric_source = simplified
+        numeric_source = rewritten
 
     try:
         numeric_value = numeric_source.evalf()
