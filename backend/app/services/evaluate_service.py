@@ -121,45 +121,45 @@ def evaluate(
         return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=False)
 
     # Sin variables libres sin sustituir -> numérico (sección 6).
-    # Toda esta fase se considera una frontera de dominio: SymPy puede
-    # devolver objetos especiales (zoo/oo/nan) o lanzar errores internos
-    # al simplificar/evaluar singularidades exactas. Ninguno de esos casos
-    # debe escapar como HTTP 500.
-    try:
-        # Fix (suite de regresión v1.1, caso E147): en polos trig exactos
-        # con π, simplificar primero evita aproximaciones finitas gigantes.
-        exact_trig_with_pi = (
-            expr.has(sympy.tan, sympy.sec, sympy.csc, sympy.cot)
-            and expr.has(sympy.pi)
-        )
-        if exact_trig_with_pi:
-            simplified_pole = sympy.simplify(expr)
-            if simplified_pole.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
-                raise DomainErrorResult("El resultado no está definido en este dominio.")
+    # En trigonometría exacta con π, usar la forma simplificada como fuente
+    # numérica. Así csc(pi/2) se convierte en 1 antes de evalf(), mientras
+    # sec(pi/2), tan(pi/2), etc. se reducen a zoo/oo y se clasifican como
+    # dominio inválido sin depender de excepciones internas de SymPy.
+    nonfinite_atoms = (
+        sympy.S.ComplexInfinity,
+        sympy.S.Infinity,
+        sympy.S.NegativeInfinity,
+        sympy.S.NaN,
+    )
 
-        numeric_value = expr.evalf()
-        if numeric_value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
+    def _contains_nonfinite(value: sympy.Basic) -> bool:
+        if value in nonfinite_atoms:
+            return True
+        return any(value.has(atom) for atom in nonfinite_atoms)
+
+    exact_trig_with_pi = (
+        expr.has(sympy.tan, sympy.sec, sympy.csc, sympy.cot)
+        and expr.has(sympy.pi)
+    )
+    numeric_source = expr
+
+    if exact_trig_with_pi:
+        try:
+            simplified = sympy.simplify(expr)
+        except (AttributeError, TypeError, ZeroDivisionError, ValueError, OverflowError) as exc:
+            raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
+        if _contains_nonfinite(simplified):
             raise DomainErrorResult("El resultado no está definido en este dominio.")
+        numeric_source = simplified
 
-        needs_pole_check = (
-            numeric_value.is_number
-            and numeric_value.is_finite is not False
-            and exact_trig_with_pi
-        )
-        if needs_pole_check:
-            try:
-                got_big = abs(complex(numeric_value)) > 1e8
-            except Exception:
-                got_big = False
-            if got_big:
-                simplified_pole = sympy.simplify(expr)
-                if simplified_pole.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
-                    raise DomainErrorResult("El resultado no está definido en este dominio.")
-
-        approx = float(numeric_value) if numeric_value.is_real else None
-    except DomainErrorResult:
-        raise
+    try:
+        numeric_value = numeric_source.evalf()
     except (AttributeError, TypeError, ZeroDivisionError, ValueError, OverflowError) as exc:
         raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
+
+    if _contains_nonfinite(numeric_value):
+        raise DomainErrorResult("El resultado no está definido en este dominio.")
+
+    approx = float(numeric_value) if numeric_value.is_real else None
 
     return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=True, approx_value=approx)
