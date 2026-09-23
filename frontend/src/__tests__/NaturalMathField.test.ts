@@ -39,6 +39,10 @@ describe("latexToBackendSyntax", () => {
     expect(latexToBackendSyntax("3\\times4")).toBe("3 * 4");
   });
 
+  it("normaliza la plantilla real de valor absoluto al contrato abs() del backend", () => {
+    expect(latexToBackendSyntax("\\left|-3\\right|")).toBe("abs(-3)");
+  });
+
   it("una expresión vacía produce una cadena vacía", () => {
     expect(latexToBackendSyntax("")).toBe("");
     expect(latexToBackendSyntax("   ")).toBe("");
