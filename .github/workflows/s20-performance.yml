@@ -1,0 +1,129 @@
+name: S20 Performance Robustness
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "qa/s20/**"
+      - ".github/workflows/s20-performance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plus-backend-performance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CORS_ORIGINS: http://localhost:5173
+      S20_LITE_SHA: 9e75fc7447e62e09d6afe7a4b79d6a1b3302e843
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install backend
+        working-directory: backend
+        run: pip install -r requirements.txt -r requirements-qa.txt
+      - name: Record runner environment
+        run: |
+          mkdir -p reports/s20
+          {
+            echo "plus_sha=$GITHUB_SHA"
+            echo "lite_ref=$S20_LITE_SHA"
+            echo "cpu_count=$(nproc)"
+            echo "cpu_model=$(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | xargs)"
+            echo "ram_bytes=$(awk '/MemTotal/ {print $2 * 1024}' /proc/meminfo)"
+            uname -a
+          } | tee reports/s20/runner.txt
+      - name: Run backend S20 baseline
+        env:
+          PYTHONPATH: backend
+        run: python qa/s20/backend_perf.py
+      - name: Upload backend S20 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s20-plus-backend-performance
+          path: reports/s20
+          if-no-files-found: error
+
+  plus-api-timeout-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend
+        run: npm ci
+      - name: Run S20 timeout/recovery test
+        run: npm test -- src/__tests__/s20-api-timeout.test.ts
+
+  lite-performance-robustness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout Plus harness
+        uses: actions/checkout@v4
+      - name: Checkout Lite S20
+        uses: actions/checkout@v4
+        with:
+          repository: c2melendez/precision-lab-lite
+          ref: 9e75fc7447e62e09d6afe7a4b79d6a1b3302e843
+          path: lite
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: lite/package-lock.json
+      - name: Record Lite and runner environment
+        run: |
+          mkdir -p reports/s20
+          {
+            echo "plus_sha=$GITHUB_SHA"
+            echo "lite_sha=$(git -C lite rev-parse HEAD)"
+            echo "cpu_count=$(nproc)"
+            echo "cpu_model=$(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | xargs)"
+            echo "ram_bytes=$(awk '/MemTotal/ {print $2 * 1024}' /proc/meminfo)"
+            uname -a
+          } | tee reports/s20/lite-runner.txt
+      - name: Install Lite
+        run: npm ci --prefix lite
+      - name: Typecheck Lite S20 changes
+        run: npm run typecheck --prefix lite
+      - name: Run Lite S20 unit limits
+        run: npm test --prefix lite -- tests/s20-performance-robustness.test.ts
+      - name: Install Playwright runner
+        run: npm install --prefix lite --no-save --package-lock=false @playwright/test@1.63.0
+      - name: Install Chromium
+        working-directory: lite
+        run: npx playwright install --with-deps chromium
+      - name: Run Lite S20 worker E2E
+        working-directory: lite
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ../reports/s20/lite-playwright.json
+        run: npx playwright test e2e/s20-performance-robustness.spec.ts --project=desktop-chromium --reporter=json
+      - name: Capture browser/worker evidence
+        if: always()
+        run: |
+          mkdir -p reports/s20/lite-test-results reports/s20/lite-playwright-report
+          cp -R lite/test-results/. reports/s20/lite-test-results/ 2>/dev/null || true
+          cp -R lite/playwright-report/. reports/s20/lite-playwright-report/ 2>/dev/null || true
+      - name: Upload Lite S20 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s20-lite-performance-robustness
+          path: reports/s20
+          if-no-files-found: error
