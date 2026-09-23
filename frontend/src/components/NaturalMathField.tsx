@@ -241,6 +241,17 @@ function rewriteFiniteAggregateAscii(ascii: string): string | null {
 
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
+
+  // S16 REG-009: la tecla |a| inserta \\left|#0\\right|. MathLive no
+  // garantiza una forma ASCII que el parser Python interprete como valor
+  // absoluto, mientras que el backend sí expone abs(...). Normalizamos
+  // explícitamente el contrato real del teclado antes de convertir.
+  const absoluteTrimmed = latex.trim();
+  const absoluteMatch =
+    absoluteTrimmed.match(/^\\\\left\\\|(.*)\\\\right\\\|$/s) ??
+    absoluteTrimmed.match(/^\\\|(.*)\\\|$/s);
+  if (absoluteMatch) return `abs(${latexToBackendSyntax(absoluteMatch[1])})`;
+
   const aggregate = rewriteFiniteAggregateLatex(latex);
   if (aggregate) return aggregate;
   // MathLive may serialize ± as either \\pm or +-. Preserve its calculator
