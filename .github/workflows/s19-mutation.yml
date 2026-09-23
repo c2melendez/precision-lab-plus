@@ -97,7 +97,7 @@ jobs:
         run: |
           mkdir -p ../reports/s19
           set +e
-          mutmut run "app.services.parsing*"             "app.services.evaluate_service*"             "app.services.ast_validator*"             "app.services.solve_service*"             "app.routers.evaluate*"             "app.schemas.responses*"
+          mutmut run "app.services.parsing*"             "app.services.ast_validator*"             "app.services.solve_service*"             "app.routers.evaluate*"             "app.schemas.responses*"
           rc=$?
           mutmut results > ../reports/s19/mutmut-results.txt 2>&1
           echo "$rc" > ../reports/s19/mutmut-exit-code.txt
