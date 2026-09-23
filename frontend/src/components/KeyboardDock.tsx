@@ -188,7 +188,7 @@ export function KeyboardDock() {
             aria-label={isOpen ? "Cerrar teclado" : "Abrir teclado"}
             className={
               canExpand
-                ? "flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium text-bone/70 hover:bg-chrome-soft hover:text-bone dt:bg-marker-soft dt:text-marker-text dt:hover:bg-marker-soft/70"
+                ? "flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium text-bone/70 hover:bg-chrome-soft hover:text-bone dt:bg-marker-soft dt:text-ink dt:hover:bg-marker-soft/70"
                 : "flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium text-bone/20 dt:text-muted/40"
             }
           >
