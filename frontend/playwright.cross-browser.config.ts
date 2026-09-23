@@ -45,11 +45,11 @@ export default defineConfig({
       env: { CORS_ORIGINS: frontendOrigin },
     },
     {
-      command: `npm run dev -- --host 127.0.0.1 --port ${frontendPort}`,
+      command: `npm run build && npm run preview -- --host 127.0.0.1 --port ${frontendPort}`,
       cwd: ".",
       url: baseURL,
       reuseExistingServer: !process.env.CI,
-      timeout: 120_000,
+      timeout: 180_000,
       env: { VITE_API_BASE_URL: `http://127.0.0.1:${backendPort}` },
     },
   ],
