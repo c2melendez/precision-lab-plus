@@ -12,6 +12,7 @@ import os
 os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
 
 import pytest
+from hypothesis import given, seed, settings, strategies as st
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -157,3 +158,50 @@ def test_s17_system_hostile_payloads_are_controlled(payload):
 def test_s17_schema_fuzzing_returns_422_not_500(path, payload):
     response = _post(path, payload)
     assert response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Hypothesis dirigido — seed reproducible del módulo S17
+# ---------------------------------------------------------------------------
+
+S17_HYPOTHESIS_SEED = 170017
+
+
+@seed(S17_HYPOTHESIS_SEED)
+@settings(max_examples=40, deadline=None, database=None)
+@given(
+    a=st.integers(min_value=-1000, max_value=1000),
+    b=st.integers(min_value=-1000, max_value=1000),
+)
+def test_s17_hypothesis_integer_addition_matches_arithmetic(a, b):
+    response = _post("/api/v1/evaluate", {"expression": f"{a}+({b})"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True, body
+    assert float(body["result_approx"]) == pytest.approx(float(a + b))
+
+
+@seed(S17_HYPOTHESIS_SEED)
+@settings(max_examples=24, deadline=None, database=None)
+@given(
+    x_value=st.integers(min_value=-25, max_value=25),
+    y_value=st.integers(min_value=-25, max_value=25),
+)
+def test_s17_hypothesis_linsolve_unique_integer_system(x_value, y_value):
+    response = _post(
+        "/api/v1/solve/system",
+        {
+            "equations": [
+                f"x+y={x_value + y_value}",
+                f"x-y={x_value - y_value}",
+            ],
+            "variables": ["x", "y"],
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True, body
+    assert len(body["result_data"]) == 1, body
+    text = body["result_data"][0]["text"].replace(" ", "")
+    assert f"x={x_value}" in text
+    assert f"y={y_value}" in text
