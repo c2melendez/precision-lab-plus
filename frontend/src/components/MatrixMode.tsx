@@ -238,21 +238,29 @@ export function MatrixMode() {
   }
 
   return (
-    <form onSubmit={handleSubmit} aria-labelledby="matrix-mode-heading" className="rounded-lg border border-paper-line p-5 shadow-sm lg:grid lg:max-w-4xl lg:grid-cols-[1.4fr_1fr] lg:items-start lg:gap-6 dt:mx-auto dt:gap-10">
-      <div className="space-y-4 lg:col-start-1">
-        <h2 id="matrix-mode-heading" className="text-sm font-medium text-muted">
-          Matrices
-        </h2>
+    <form onSubmit={handleSubmit} aria-labelledby="matrix-mode-heading" className="mx-auto grid w-full max-w-[1376px] gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-start">
+      <section aria-label="Entrada de matrices" className="space-y-4 rounded-xl border border-paper-line bg-paper-soft p-4 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-paper-line pb-3">
+          <div>
+            <h2 id="matrix-mode-heading" className="text-base font-semibold text-ink">
+              Matrices
+            </h2>
+            <p className="mt-0.5 text-xs text-muted">Define dimensiones, valores y operación</p>
+          </div>
+          <span className="rounded-full border border-paper-line bg-paper px-2.5 py-1 text-[11px] text-muted">
+            Hasta 6×6
+          </span>
+        </div>
 
-        <div className="space-y-1">
-          <label htmlFor="matrix-operation" className="block text-sm text-muted">
+        <div className="rounded-xl border border-paper-line bg-paper p-3">
+          <label htmlFor="matrix-operation" className="block text-xs font-semibold uppercase tracking-[0.14em] text-muted">
             Operación
           </label>
           <select
             id="matrix-operation"
             value={operation}
             onChange={(e) => setOperation(e.target.value as Operation)}
-            className="rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="mt-2 w-full rounded-lg border border-paper-line bg-paper-soft px-3 py-2 text-sm"
           >
             {(Object.keys(OPERATION_LABELS) as Operation[]).map((op) => (
               <option key={op} value={op}>
@@ -318,17 +326,19 @@ export function MatrixMode() {
 
         <button
           type="submit"
-          className="rounded bg-graph px-4 py-2 text-sm font-medium text-white hover:bg-graph/90"
+          className="w-full rounded-lg bg-graph px-4 py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
         >
           Calcular
         </button>
-      </div>
+      </section>
 
-      <div className="mt-4 lg:col-start-2 lg:mt-0">
-        <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-inner shadow-black/10">
-          <ResultPanel result={lastResult} isLoading={isLoading} />
+      <section aria-label="Resultado de matrices" className="min-w-0 rounded-xl border border-paper-line bg-paper p-4 shadow-sm">
+        <div className="mb-3 border-b border-paper-line pb-3">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Resultado</h3>
+          <p className="mt-0.5 text-[11px] text-muted">Resultado de la operación seleccionada</p>
         </div>
-      </div>
+        <ResultPanel result={lastResult} isLoading={isLoading} />
+      </section>
     </form>
   );
 }
