@@ -330,7 +330,7 @@ describe("ResultPanel", () => {
       const { container } = render(
         <ResultPanel result={angleResult} isLoading={false} inputLatex="asin(0.5)" angleUnit="deg" />,
       );
-      expect(container.textContent).toContain("°");
+      expect(container.textContent).toMatch(/[°∘]/);
       expect(screen.getByRole("button", { name: "dms" })).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole("button", { name: "dms" }));
@@ -349,7 +349,7 @@ describe("ResultPanel", () => {
         />,
       );
       expect(screen.queryByRole("button", { name: "dms" })).not.toBeInTheDocument();
-      expect(container.textContent).not.toContain("°");
+      expect(container.textContent).not.toMatch(/[°∘]/);
     });
   });
 });
