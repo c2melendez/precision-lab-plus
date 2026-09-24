@@ -192,3 +192,14 @@ Certificado:
 - Plus: corrección de JSX en AnalysisPanel verificada;
 - CI, Playwright, accesibilidad, cross-browser, seguridad y gates aplicables: PASS.
 
+
+### Subbloque Gráficas 2D Plus — CERRADO
+Estado: PASS completo.
+
+Certificado:
+- rail izquierdo para expresiones, teclado y controles;
+- visor/análisis separado en columna derecha en desktop;
+- degradación a una columna en tablet/móvil;
+- endpoints, payloads, ResultArea, GraphViewer y análisis preservados;
+- CI, Playwright, S17, S18, S19, S20, S21, S23 y S25: PASS.
+
