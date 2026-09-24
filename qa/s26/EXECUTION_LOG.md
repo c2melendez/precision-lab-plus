@@ -108,3 +108,25 @@ Objetivos:
 - preservar resultados exactos y aproximados;
 - armonizar Entrada / Resultado / Pasos con el contrato visual;
 - no tocar motor matemático salvo defecto reproducible.
+
+### Excepción documentada — trigonometría inversa en DEG/GRAD
+Motivo: ampliación funcional explícitamente aprobada durante S26.3.
+
+Cambio matemático:
+- RAD conserva salidas de `asin/acos/atan` en radianes.
+- DEG/GRAD devuelve esas salidas en grados sexagesimales.
+- Las salidas angulares en grados pueden alternarse a DMS.
+- Las trigonométricas directas conservan su semántica de entrada por modo angular.
+
+Rutas protegidas modificadas:
+- `backend/app/services/evaluate_service.py`
+
+Pruebas añadidas:
+- `backend/tests/test_exhaustive_module01_trigonometry.py`
+- `frontend/src/__tests__/ResultPanel.test.tsx`
+
+Criterio de aceptación:
+- asin/acos/atan en DEG/GRAD devuelven grados.
+- composición directa(inversa) conserva resultado correcto.
+- RAD no cambia.
+- UI etiqueta grados con `°` y ofrece DMS solo cuando el resultado es angular.
