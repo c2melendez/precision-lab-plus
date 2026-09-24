@@ -203,3 +203,14 @@ Certificado:
 - endpoints, payloads, ResultArea, GraphViewer y análisis preservados;
 - CI, Playwright, S17, S18, S19, S20, S21, S23 y S25: PASS.
 
+
+### Subbloque Gráficas Polar + Paramétrica + 3D Plus — CERRADO
+Estado: PASS completo.
+
+Certificado:
+- formularios Polar, Paramétrica y 3D reorganizados en rail de controles + visor/resultado;
+- una columna en tablet/móvil;
+- IDs, labels, botones, endpoints y payloads preservados;
+- sin cambios en backend ni lógica matemática;
+- CI, Playwright, S17, S18, S19, S20, S21, S23 y S25: PASS.
+
