@@ -91,7 +91,7 @@ function AnalysisPanel({ result }: { result: MathResponse }) {
           </dl>
         </div>
       ))}
-    </section>
+    </div>
   );
 }
 
