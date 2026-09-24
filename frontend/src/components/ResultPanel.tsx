@@ -15,6 +15,7 @@ import { formatResultApprox } from "./formatNumber";
 import { parseFracLatex, toMixedFracLatex } from "./fractionDisplay";
 import { MathRenderer } from "./MathRenderer";
 import { StepList } from "./StepList";
+import { decimalDegreesToDms, parseDecimalDegreesInput } from "./dmsDisplay";
 
 // Fase 2.5 (bug reportado por el usuario): antes se mostraban SIEMPRE
 // "exacto" (result_latex) y "≈ aproximado" (result_approx) juntos, sin
@@ -26,7 +27,7 @@ import { StepList } from "./StepList";
 // aproximado (sería fabricar precisión falsa) — solo muestra
 // result_latex cuando SymPy ya lo devolvió como \frac{...}{...} de
 // forma exacta; si no, dice explícitamente que no aplica.
-type AnswerFormat = "exact" | "dec" | "scn" | "frac";
+type AnswerFormat = "exact" | "dec" | "scn" | "frac" | "dms";
 
 function isFractionLatex(latex: string | null | undefined): boolean {
   return latex !== null && latex !== undefined && latex.includes("\\frac");
@@ -35,6 +36,7 @@ function isFractionLatex(latex: string | null | undefined): boolean {
 interface ResultPanelProps {
   result: MathResponse | null;
   isLoading: boolean;
+  inputLatex?: string;
 }
 
 async function copyToClipboard(text: string): Promise<boolean> {
@@ -123,12 +125,14 @@ function SolutionListResult({ solutions }: { solutions: EquationSolution[] }) {
   );
 }
 
-export function ResultPanel({ result, isLoading }: ResultPanelProps) {
+export function ResultPanel({ result, isLoading, inputLatex = "" }: ResultPanelProps) {
   const [format, setFormat] = useState<AnswerFormat>("exact");
   // Modo fracción propia/impropia (pedido explícito) — mismo criterio
   // que el toggle equivalente en Lite: default mixta cuando corresponde,
   // el usuario puede pedir la impropia.
   const [showMixed, setShowMixed] = useState(true);
+  const dmsDegrees = parseDecimalDegreesInput(inputLatex);
+  const dmsValue = dmsDegrees === null ? null : decimalDegreesToDms(dmsDegrees);
 
   if (isLoading) {
     return (
@@ -172,6 +176,9 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
       {!matrixData && !solutionData && (result.result_latex || result.result_text) && (
         <div className="space-y-1">
           {(() => {
+            if (format === "dms" && dmsValue) {
+              return <MathRenderer latex={dmsValue.latex} fallbackText={dmsValue.text} className="a11y-scale-result-lg" />;
+            }
             if (format === "dec") {
               return approxText ? (
                 <p className="a11y-scale-result-lg text-ink">{approxText}</p>
@@ -232,7 +239,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
             </button>
           )}
           <div className="flex gap-3 pt-1 text-xs text-muted">
-            {(["exact", "dec", "frac", "scn"] as AnswerFormat[]).map((f) => (
+            {(["exact", "dec", "frac", "scn", ...(dmsValue ? ["dms" as const] : [])] as AnswerFormat[]).map((f) => (
               <button
                 key={f}
                 type="button"
