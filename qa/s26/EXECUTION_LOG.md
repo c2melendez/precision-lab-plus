@@ -239,3 +239,19 @@ Certificado:
 - integración visual compatible con 2D, Polar, Paramétrica y 3D;
 - CI, Playwright, S17, S18, S19, S20, S21, S23 y S25: PASS.
 
+
+### Bloque Gráficas — CERRADO
+Estado: PASS completo en Lite y Plus.
+
+Cobertura certificada:
+- shell visual y selector 2D / Polar / Paramétrica / 3D;
+- rail de expresiones/controles y visor separado;
+- Gráficas 2D Plus reorganizadas y certificadas;
+- Polar, Paramétrica y 3D Plus armonizadas y certificadas;
+- visor y análisis Plus armonizados;
+- análisis Lite armonizado con el mismo lenguaje visual;
+- responsive preservado para desktop, tablet y móvil;
+- endpoints, payloads, cálculo y motores sin cambios funcionales;
+- gates aplicables completos en verde.
+
+Siguiente bloque: Matrices.
