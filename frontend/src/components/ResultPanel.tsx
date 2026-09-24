@@ -183,8 +183,18 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
       {solutionData && <SolutionListResult solutions={solutionData} />}
 
       {!matrixData && !solutionData && (result.result_latex || result.result_text) && (
-        <div className="space-y-1">
-          {(() => {
+        <section className="space-y-3" aria-label="Resultado">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Resultado</p>
+            {!result.has_detailed_steps && (
+              <span className="rounded-md bg-paper-line/50 px-2 py-1 text-[11px] font-medium text-muted">
+                Resumen
+              </span>
+            )}
+          </div>
+
+          <div className="min-h-14 rounded-xl border border-paper-line bg-paper px-4 py-3">
+            {(() => {
             if (format === "dms" && dmsValue) {
               return <MathRenderer latex={dmsValue.latex} fallbackText={dmsValue.text} className="a11y-scale-result-lg" />;
             }
@@ -231,41 +241,52 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
             ) : (
               <p className="a11y-scale-result-lg text-ink">{result.result_text}</p>
             );
-          })()}
+            })()}
           {/* Fracción exacta (arriba) y decimal (abajo) mostrados juntos —
               nunca uno oculta al otro (sección 9: fracciones + su
               equivalente decimal) — solo en el formato "exact", que es el
               que ya traía este comportamiento antes de Fase 2.5. */}
-          {format === "exact" && approxText && approxText !== result.result_text && (
-            <p className="text-sm text-muted">≈ {approxText}{inverseAngleResult ? "°" : ""}</p>
-          )}
-          {format === "frac" && mixedLatex && (
-            <button
-              type="button"
-              onClick={() => setShowMixed((v) => !v)}
-              className="text-xs text-muted underline decoration-dotted hover:text-marker"
-            >
-              {showMixed ? "ver como impropia" : "ver como mixta"}
-            </button>
-          )}
-          <div className="flex gap-3 pt-1 text-xs text-muted">
-            {(["exact", "dec", "frac", "scn", ...(dmsValue ? ["dms" as const] : [])] as AnswerFormat[]).map((f) => (
-              <button
-                key={f}
-                type="button"
-                onClick={() => setFormat(f)}
-                aria-pressed={format === f}
-                className={format === f ? "font-semibold text-marker" : "hover:text-ink"}
-              >
-                {f === "exact" ? "exacto" : f}
-              </button>
-            ))}
+            {format === "exact" && approxText && approxText !== result.result_text && (
+              <p className="mt-1 text-sm text-muted">≈ {approxText}{inverseAngleResult ? "°" : ""}</p>
+            )}
           </div>
-        </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap gap-1.5 text-xs" aria-label="Formato del resultado">
+              {(["exact", "dec", "frac", "scn", ...(dmsValue ? ["dms" as const] : [])] as AnswerFormat[]).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFormat(f)}
+                  aria-pressed={format === f}
+                  className={
+                    format === f
+                      ? "min-h-8 rounded-full border border-marker bg-marker-soft px-3 font-semibold text-marker-text"
+                      : "min-h-8 rounded-full border border-paper-line bg-paper px-3 text-muted hover:border-marker/50 hover:text-ink"
+                  }
+                >
+                  {f === "exact" ? "exacto" : f}
+                </button>
+              ))}
+            </div>
+
+            {format === "frac" && mixedLatex && (
+              <button
+                type="button"
+                onClick={() => setShowMixed((v) => !v)}
+                className="min-h-8 rounded-full px-2 text-xs text-muted underline decoration-dotted hover:text-marker"
+              >
+                {showMixed ? "ver como impropia" : "ver como mixta"}
+              </button>
+            )}
+          </div>
+        </section>
       )}
 
       {!result.has_detailed_steps && (
-        <p className="text-xs text-amber-600">Procedimiento resumido (sin desglose paso a paso).</p>
+        <p className="rounded-lg border border-paper-line bg-paper px-3 py-2 text-xs text-muted">
+          Procedimiento resumido: este resultado no incluye desglose paso a paso.
+        </p>
       )}
 
       {result.warnings.length > 0 && (
@@ -283,7 +304,15 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
         </div>
       )}
 
-      {result.has_detailed_steps && <StepList steps={result.steps} />}
+      {result.has_detailed_steps && (
+        <section className="border-t border-paper-line pt-4" aria-label="Pasos">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-ink">Pasos</h3>
+            <span className="text-xs text-muted">{result.steps.length} {result.steps.length === 1 ? "paso" : "pasos"}</span>
+          </div>
+          <StepList steps={result.steps} />
+        </section>
+      )}
     </div>
   );
 }
