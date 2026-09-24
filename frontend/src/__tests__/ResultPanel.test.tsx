@@ -294,4 +294,27 @@ describe("ResultPanel", () => {
       expect(text).toContain("-28");
     });
   });
+  describe("S26.3 — formato DMS contextual", () => {
+    it("muestra DMS solo cuando la entrada usa simbología de grados", () => {
+      const { rerender } = render(
+        <ResultPanel result={baseResult} isLoading={false} inputLatex="30.525°" />,
+      );
+      expect(screen.getByRole("button", { name: "dms" })).toBeInTheDocument();
+
+      rerender(<ResultPanel result={baseResult} isLoading={false} inputLatex="30.525" />);
+      expect(screen.queryByRole("button", { name: "dms" })).not.toBeInTheDocument();
+    });
+
+    it("30.525° se presenta como 30° 31′ 30.0″", () => {
+      const { container } = render(
+        <ResultPanel result={baseResult} isLoading={false} inputLatex="30.525°" />,
+      );
+      fireEvent.click(screen.getByRole("button", { name: "dms" }));
+      const text = container.textContent?.replace(/\s+/g, "") ?? "";
+      expect(text).toContain("30");
+      expect(text).toContain("31");
+      expect(text).toContain("30.0");
+    });
+  });
+
 });
