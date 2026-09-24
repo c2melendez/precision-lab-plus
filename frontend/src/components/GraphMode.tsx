@@ -238,8 +238,16 @@ function Graph2DForm() {
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
+    <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
+      <aside aria-label="Controles de gráfica 2D" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Expresiones</h3>
+            <p className="mt-0.5 text-[11px] text-muted">Hasta {MAX_EXPRESSIONS} curvas</p>
+          </div>
+          <span className="text-[11px] text-muted">{latexRows.length}/{MAX_EXPRESSIONS}</span>
+        </div>
+        <div className="space-y-2">
         <span className="block text-sm text-muted">Expresiones (hasta {MAX_EXPRESSIONS})</span>
         {latexRows.map((row, index) => (
           <div key={index} className="flex items-center gap-2">
@@ -278,9 +286,9 @@ function Graph2DForm() {
             + Añadir expresión
           </button>
         )}
-      </div>
+        </div>
 
-      <div className="space-y-1">
+        <div className="space-y-1">
         {latexRows.length > 1 && (
           <div className="flex flex-wrap gap-1">
             <span className="pt-1 text-xs font-medium text-muted">Teclado para:</span>
@@ -308,7 +316,7 @@ function Graph2DForm() {
         />
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label htmlFor="graph-variable" className="block text-sm text-muted">
             Variable
@@ -318,7 +326,7 @@ function Graph2DForm() {
             type="text"
             value={variable}
             onChange={(e) => setVariable(e.target.value)}
-            className="w-20 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -330,7 +338,7 @@ function Graph2DForm() {
             type="text"
             value={xMin}
             onChange={(e) => setXMin(e.target.value)}
-            className="w-24 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -342,7 +350,7 @@ function Graph2DForm() {
             type="text"
             value={xMax}
             onChange={(e) => setXMax(e.target.value)}
-            className="w-24 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -354,7 +362,7 @@ function Graph2DForm() {
             type="text"
             value={samples}
             onChange={(e) => setSamples(e.target.value)}
-            className="w-24 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -365,7 +373,7 @@ function Graph2DForm() {
             id="graph-angle-unit"
             value={angleUnit}
             onChange={(e) => setAngleUnit(e.target.value as "rad" | "deg")}
-            className="rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           >
             <option value="rad">Radianes</option>
             <option value="deg">Grados</option>
@@ -381,14 +389,23 @@ function Graph2DForm() {
 
       <button
         type="submit"
-        className="rounded bg-graph px-4 py-2 text-sm font-medium text-white hover:bg-graph/90"
+        className="w-full rounded-lg bg-graph px-4 py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
       >
         Graficar
       </button>
 
-      <div className="border-t border-paper-line pt-4">
+      </aside>
+
+      <section aria-label="Vista y análisis de gráfica 2D" className="min-w-0 rounded-xl border border-paper-line bg-paper p-3 shadow-sm">
+        <div className="mb-3 flex items-center justify-between gap-3 border-b border-paper-line pb-2">
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Vista</h3>
+            <p className="mt-0.5 text-[11px] text-muted">Gráfica cartesiana y análisis</p>
+          </div>
+          <span className="text-[11px] text-muted">{latexRows.filter((row) => row.trim() !== "").length} activas</span>
+        </div>
         <ResultArea result={lastResult} isLoading={isLoading} colors={colors} />
-      </div>
+      </section>
     </form>
   );
 }
