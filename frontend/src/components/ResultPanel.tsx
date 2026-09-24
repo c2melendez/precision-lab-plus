@@ -15,7 +15,7 @@ import { formatResultApprox } from "./formatNumber";
 import { parseFracLatex, toMixedFracLatex } from "./fractionDisplay";
 import { MathRenderer } from "./MathRenderer";
 import { StepList } from "./StepList";
-import { decimalDegreesToDms, parseDecimalDegreesInput } from "./dmsDisplay";
+import { decimalDegreesToDms, isInverseTrigAngleExpression, parseDecimalDegreesInput } from "./dmsDisplay";
 
 // Fase 2.5 (bug reportado por el usuario): antes se mostraban SIEMPRE
 // "exacto" (result_latex) y "≈ aproximado" (result_approx) juntos, sin
@@ -37,6 +37,7 @@ interface ResultPanelProps {
   result: MathResponse | null;
   isLoading: boolean;
   inputLatex?: string;
+  angleUnit?: "rad" | "deg";
 }
 
 async function copyToClipboard(text: string): Promise<boolean> {
@@ -125,14 +126,22 @@ function SolutionListResult({ solutions }: { solutions: EquationSolution[] }) {
   );
 }
 
-export function ResultPanel({ result, isLoading, inputLatex = "" }: ResultPanelProps) {
+export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "rad" }: ResultPanelProps) {
   const [format, setFormat] = useState<AnswerFormat>("exact");
   // Modo fracción propia/impropia (pedido explícito) — mismo criterio
   // que el toggle equivalente en Lite: default mixta cuando corresponde,
   // el usuario puede pedir la impropia.
   const [showMixed, setShowMixed] = useState(true);
-  const dmsDegrees = parseDecimalDegreesInput(inputLatex);
+  const explicitDegreeInput = parseDecimalDegreesInput(inputLatex);
+  const inverseAngleResult = angleUnit === "deg" && isInverseTrigAngleExpression(inputLatex);
+  const inverseDegrees = inverseAngleResult && result?.result_approx != null && Number.isFinite(Number(result.result_approx))
+    ? Number(result.result_approx)
+    : null;
+  const dmsDegrees = explicitDegreeInput ?? inverseDegrees;
   const dmsValue = dmsDegrees === null ? null : decimalDegreesToDms(dmsDegrees);
+  const exactLatex = inverseAngleResult && result?.result_latex
+    ? `{${result.result_latex}}^{\\circ}`
+    : result?.result_latex;
 
   if (isLoading) {
     return (
@@ -181,7 +190,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "" }: ResultPanelP
             }
             if (format === "dec") {
               return approxText ? (
-                <p className="a11y-scale-result-lg text-ink">{approxText}</p>
+                <p className="a11y-scale-result-lg text-ink">{approxText}{inverseAngleResult ? "°" : ""}</p>
               ) : (
                 <p className="text-sm text-muted">No hay aproximación decimal disponible.</p>
               );
@@ -189,7 +198,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "" }: ResultPanelP
             if (format === "scn") {
               const n = result.result_approx != null ? Number(result.result_approx) : NaN;
               return Number.isFinite(n) ? (
-                <p className="a11y-scale-result-lg text-ink">{n.toExponential(6)}</p>
+                <p className="a11y-scale-result-lg text-ink">{n.toExponential(6)}{inverseAngleResult ? "°" : ""}</p>
               ) : (
                 <p className="text-sm text-muted">No hay un valor numérico para notación científica.</p>
               );
@@ -201,7 +210,8 @@ export function ResultPanel({ result, isLoading, inputLatex = "" }: ResultPanelP
               if (!isFractionLatex(result.result_latex)) {
                 return <p className="text-sm text-muted">El resultado no es una fracción exacta.</p>;
               }
-              const displayLatex = mixedLatex && showMixed ? mixedLatex : result.result_latex!;
+              const rawDisplayLatex = mixedLatex && showMixed ? mixedLatex : result.result_latex!;
+              const displayLatex = inverseAngleResult ? `{${rawDisplayLatex}}^{\\circ}` : rawDisplayLatex;
               return (
                 <MathRenderer
                   latex={displayLatex}
@@ -212,9 +222,9 @@ export function ResultPanel({ result, isLoading, inputLatex = "" }: ResultPanelP
             }
             // "exact": comportamiento original, sin cambios (salvo
             // Módulo R0: a11y-scale-result-lg reemplaza a text-lg).
-            return result.result_latex ? (
+            return exactLatex ? (
               <MathRenderer
-                latex={result.result_latex}
+                latex={exactLatex}
                 fallbackText={result.result_text ?? undefined}
                 className="a11y-scale-result-lg"
               />
