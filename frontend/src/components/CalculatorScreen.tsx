@@ -173,6 +173,17 @@ export function CalculatorScreen({
     </div>
   );
 
+  const inputSurface = (
+    <section aria-label="Entrada" className="rounded-xl border border-paper-line bg-paper-soft shadow-sm">
+      <div className="flex items-center justify-between border-b border-paper-line px-4 py-2.5">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Entrada</p>
+        <span className="text-[11px] text-muted">Expresión matemática</span>
+      </div>
+      <div className="px-4 py-3">{inputField}</div>
+    </section>
+  );
+
+
   const resultBlock = (isLoading || result) && <ResultPanel result={result} isLoading={isLoading} inputLatex={latex} angleUnit={angleUnit} />;
 
   // "stacked" (Apilado, Módulo P3): una sola columna, teclado como
@@ -183,7 +194,7 @@ export function CalculatorScreen({
       <div className="flex flex-col gap-3">
         {angleBadge}
         {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
-        <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
+        {inputSurface}
         {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
         <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
         <StackedKeyboardSection />
@@ -199,7 +210,7 @@ export function CalculatorScreen({
     return (
       <FloatingScreenContent
         angleBadge={angleBadge}
-        inputField={inputField}
+        inputField={inputSurface}
         resultBlock={resultBlock}
         canGraph={canGraph}
         onGraphExpression={onGraphExpression}
@@ -214,7 +225,7 @@ export function CalculatorScreen({
     return (
       <FocusScreenContent
         angleBadge={angleBadge}
-        inputField={inputField}
+        inputField={inputSurface}
         resultBlock={resultBlock}
         canGraph={canGraph}
         onGraphExpression={onGraphExpression}
@@ -227,7 +238,7 @@ export function CalculatorScreen({
       <div className="flex flex-col gap-3">
         {angleBadge}
         {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
-        <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
+        {inputSurface}
         {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
         <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
       </div>
@@ -247,7 +258,7 @@ export function CalculatorScreen({
         <div className="flex flex-col gap-3 dt:grid dt:grid-cols-[1.2fr_1fr] dt:items-start dt:gap-4">
           <div className="flex flex-col gap-3">
             {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
-            <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
+            {inputSurface}
           </div>
           <div className="flex flex-col gap-3">
             {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
@@ -267,9 +278,9 @@ export function CalculatorScreen({
 
         {historyRibbon && <div className="mb-2 border-b border-paper-line pb-2">{historyRibbon}</div>}
 
-        {inputField}
+        {inputSurface}
 
-        {resultBlock && <div className="mt-2 border-t border-paper-line pt-2">{resultBlock}</div>}
+        {resultBlock && <div className="mt-3 border-t border-paper-line pt-3">{resultBlock}</div>}
       </div>
       <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
     </div>
@@ -335,7 +346,7 @@ function FocusScreenContent({ angleBadge, inputField, resultBlock, canGraph, onG
   return (
     <div className="flex flex-1 flex-col gap-3">
       {angleBadge}
-      <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
+      {inputSurface}
       {resultBlock && <div className="rounded-xl bg-paper-soft px-5 py-4 text-center shadow-sm">{resultBlock}</div>}
       <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
     </div>
@@ -376,7 +387,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
     return (
       <FocusScreenContent
         angleBadge={angleBadge}
-        inputField={inputField}
+        inputField={inputSurface}
         resultBlock={resultBlock}
         canGraph={canGraph}
         onGraphExpression={onGraphExpression}
@@ -392,7 +403,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
           Restablecer posición de ventanas
         </button>
       </div>
-      <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
+      {inputSurface}
       {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
       {/* Fase X, Módulo X0 — "justo arriba de donde aparecerá el
           teclado": aquí el teclado vive en su propia FloatingWindow, así
