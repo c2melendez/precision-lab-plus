@@ -346,7 +346,7 @@ function FocusScreenContent({ angleBadge, inputField, resultBlock, canGraph, onG
   return (
     <div className="flex flex-1 flex-col gap-3">
       {angleBadge}
-      {inputSurface}
+      {inputField}
       {resultBlock && <div className="rounded-xl bg-paper-soft px-5 py-4 text-center shadow-sm">{resultBlock}</div>}
       <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
     </div>
@@ -387,7 +387,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
     return (
       <FocusScreenContent
         angleBadge={angleBadge}
-        inputField={inputSurface}
+        inputField={inputField}
         resultBlock={resultBlock}
         canGraph={canGraph}
         onGraphExpression={onGraphExpression}
@@ -403,7 +403,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
           Restablecer posición de ventanas
         </button>
       </div>
-      {inputSurface}
+      {inputField}
       {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
       {/* Fase X, Módulo X0 — "justo arriba de donde aparecerá el
           teclado": aquí el teclado vive en su propia FloatingWindow, así
