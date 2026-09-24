@@ -25,7 +25,7 @@ _DIRECT_TRIG_FUNCTIONS = (sin, cos, tan, sec, csc, cot)
 _INVERSE_TRIG_FUNCTIONS = (asin, acos, atan, asec, acsc, acot)
 
 _STANDALONE_INVERSE_TRIG_RE = re.compile(
-    r"^\\s*(?:asin|acos|atan|asec|acsc|acot|arcsin|arccos|arctan)\\s*\\(.*\\)\\s*$",
+    r"^\s*(?:asin|acos|atan|asec|acsc|acot|arcsin|arccos|arctan)\s*\(.*\)\s*$",
     re.S,
 )
 
