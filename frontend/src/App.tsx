@@ -24,8 +24,11 @@ import { MatrixMode } from "./components/MatrixMode";
 import { StatisticsMode } from "./components/StatisticsMode";
 import { SystemMode } from "./components/SystemMode";
 import { UnitsMode } from "./components/UnitsMode";
+import { GeometryMode } from "./components/GeometryMode";
 import { AjustesPopover } from "./components/AjustesPopover";
 import { KeyboardDock } from "./components/KeyboardDock";
+import { ProjectBrand } from "./components/ProjectBrand";
+import { ModeIcon, type ModeIconName } from "./components/ModeIcon";
 import { useUIStore, type CalculatorMode } from "./store/useUIStore";
 import { useLayoutModeStore } from "./store/useLayoutModeStore";
 import { useMinWidthMediaQuery, FLOATING_MIN_WIDTH_PX } from "./hooks/useMinWidthMediaQuery";
@@ -41,6 +44,7 @@ const MODE_LABELS: Record<CalculatorMode, string> = {
   graph: "Gráficas",
   limit: "Límite",
   statistics: "Estadística",
+  geometry: "Geometría",
   units: "Unidades",
 };
 
@@ -65,7 +69,16 @@ const MODE_LABELS: Record<CalculatorMode, string> = {
 // de precision-lab-lite, SimpleKeyboard.tsx (Full) no tiene ninguna
 // función propia sin equivalente (solo dígitos/paréntesis/AC/⌫/⏎, todo
 // cubierto por BasicMode) — acá la eliminación no deja nada huérfano.
-const VISIBLE_MODES: CalculatorMode[] = ["basic", "matrix", "graph", "statistics", "units"];
+const VISIBLE_MODES: CalculatorMode[] = ["basic", "matrix", "graph", "statistics", "geometry", "units"];
+
+const MODE_ICONS: Partial<Record<CalculatorMode, ModeIconName>> = {
+  basic: "scientific",
+  matrix: "matrix",
+  graph: "graph",
+  statistics: "statistics",
+  geometry: "geometry",
+  units: "units",
+};
 
 function ActiveModeForm({ mode }: { mode: CalculatorMode }) {
   switch (mode) {
@@ -87,6 +100,8 @@ function ActiveModeForm({ mode }: { mode: CalculatorMode }) {
       return <GraphMode />;
     case "statistics":
       return <StatisticsMode />;
+    case "geometry":
+      return <GeometryMode />;
     case "units":
       return <UnitsMode />;
     case "limit":
@@ -119,44 +134,48 @@ export default function App() {
         Saltar al contenido principal
       </a>
 
-      <header className="border-b border-paper-line bg-paper-soft px-6 py-3">
-        <div className="mx-auto flex max-w-3xl items-center justify-between lg:max-w-5xl dt:max-w-[1440px]">
-          <h1 className="text-lg font-semibold text-ink">
-            Precision <span className="text-marker-text">Lab Plus</span>
-          </h1>
-          <div className="flex items-center gap-2">
+      <header className="border-b border-paper-line bg-paper-soft px-3 py-3 sm:px-4">
+        <div className="mx-auto flex max-w-[1376px] items-center justify-between gap-2">
+          <ProjectBrand />
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={() => setShowHistory((current) => !current)}
+              aria-label="Historial"
               aria-expanded={showHistory}
               aria-controls="history-panel"
-              className="rounded-full border border-paper-line px-3 py-1.5 text-sm text-ink hover:bg-paper-line/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker"
+              className="min-h-11 rounded-full border border-paper-line px-3 text-sm text-ink hover:bg-paper-line/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker"
             >
-              Historial
+              <span className="hidden sm:inline">Historial</span>
+              <span className="sm:hidden" aria-hidden="true">▤</span>
             </button>
             <AjustesPopover />
           </div>
         </div>
       </header>
 
-      <nav aria-label="Modos de la calculadora" className="border-b border-paper-line bg-paper-soft px-6">
-        <ul className="mx-auto flex max-w-3xl flex-wrap gap-6 lg:max-w-5xl dt:max-w-[1440px]">
-          {VISIBLE_MODES.map((mode) => (
-            <li key={mode}>
-              <button
-                type="button"
-                onClick={() => setActiveMode(mode)}
-                aria-current={activeMode === mode ? "page" : undefined}
-                className={`border-b-2 px-1 py-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker ${
-                  activeMode === mode
-                    ? "border-marker text-marker-text"
-                    : "border-transparent text-muted hover:text-ink"
-                }`}
-              >
-                {MODE_LABELS[mode]}
-              </button>
-            </li>
-          ))}
+      <nav aria-label="Modos de la calculadora" className="border-b border-paper-line bg-paper-soft">
+        <ul className="mx-auto flex max-w-[1376px] flex-nowrap gap-1 overflow-x-auto px-3 py-1.5 sm:justify-center sm:px-4 lg:gap-2">
+          {VISIBLE_MODES.map((mode) => {
+            const icon = MODE_ICONS[mode];
+            return (
+              <li key={mode} className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveMode(mode)}
+                  aria-current={activeMode === mode ? "page" : undefined}
+                  className={`flex min-h-11 items-center gap-2 whitespace-nowrap rounded-lg border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker ${
+                    activeMode === mode
+                      ? "border-marker bg-marker-soft text-marker-text"
+                      : "border-transparent text-muted hover:bg-paper-line/40 hover:text-ink"
+                  }`}
+                >
+                  {icon && <ModeIcon name={icon} className="h-4 w-4" />}
+                  <span>{MODE_LABELS[mode]}</span>
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </nav>
 
@@ -169,7 +188,7 @@ export default function App() {
         <main
           id="main-content"
           tabIndex={-1}
-          className={`mx-auto min-w-0 max-w-3xl flex-1 px-6 py-8 lg:max-w-5xl dt:max-w-[1440px] dt:px-10 ${mainBottomPadding} focus:outline-none`}
+          className={`mx-auto min-w-0 max-w-[1376px] flex-1 px-3 py-5 sm:px-4 sm:py-6 lg:px-6 dt:px-0 ${mainBottomPadding} focus:outline-none`}
         >
           {lastErrorMessage && (
             <p role="alert" className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -177,7 +196,7 @@ export default function App() {
             </p>
           )}
 
-          <section aria-live="polite" aria-label="Resultado" className="mx-auto max-w-md lg:max-w-none">
+          <section aria-live="polite" aria-label="Resultado" className="min-w-0">
             <ErrorBoundary fallbackLabel="No se pudo mostrar el resultado.">
               <ActiveModeForm mode={activeMode} />
             </ErrorBoundary>
