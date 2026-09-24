@@ -317,4 +317,39 @@ describe("ResultPanel", () => {
     });
   });
 
+
+  describe("S26.3 — trig inversa en DEG", () => {
+    const angleResult: MathResponse = {
+      ...baseResult,
+      result_latex: "30",
+      result_text: "30",
+      result_approx: 30,
+    };
+
+    it("asin(0.5) en DEG muestra grados y habilita DMS", () => {
+      const { container } = render(
+        <ResultPanel result={angleResult} isLoading={false} inputLatex="asin(0.5)" angleUnit="deg" />,
+      );
+      expect(container.textContent).toContain("°");
+      expect(screen.getByRole("button", { name: "dms" })).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "dms" }));
+      const text = container.textContent?.replace(/\s+/g, "") ?? "";
+      expect(text).toContain("30");
+      expect(text).toContain("0.0");
+    });
+
+    it("asin(0.5) en RAD conserva radianes", () => {
+      const { container } = render(
+        <ResultPanel
+          result={{ ...angleResult, result_latex: "\\frac{\\pi}{6}", result_text: "pi/6", result_approx: 0.523599 }}
+          isLoading={false}
+          inputLatex="asin(0.5)"
+          angleUnit="rad"
+        />,
+      );
+      expect(screen.queryByRole("button", { name: "dms" })).not.toBeInTheDocument();
+      expect(container.textContent).not.toContain("°");
+    });
+  });
 });
