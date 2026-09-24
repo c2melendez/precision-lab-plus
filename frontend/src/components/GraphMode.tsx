@@ -891,6 +891,6 @@ export function GraphMode() {
       {kind === "3d" && <Graph3DForm />}
       {kind === "parametric" && <GraphParametricForm />}
       {kind === "polar" && <GraphPolarForm />}
-    </div>
+    </section>
   );
 }
