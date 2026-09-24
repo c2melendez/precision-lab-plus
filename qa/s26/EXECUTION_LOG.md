@@ -228,3 +228,14 @@ Regla acordada:
 - el preview no sustituye pruebas ni baselines;
 - cualquier ajuste derivado del preview debe aplicarse antes de S26.4.
 
+
+### Subbloque Gráficas — visor + análisis Plus — CERRADO
+Estado: PASS completo.
+
+Certificado:
+- AnalysisPanel reorganizado como sección visual coherente con S26;
+- tarjetas por expresión y jerarquía de métricas mejoradas;
+- datos, endpoints y cálculo sin cambios;
+- integración visual compatible con 2D, Polar, Paramétrica y 3D;
+- CI, Playwright, S17, S18, S19, S20, S21, S23 y S25: PASS.
+
