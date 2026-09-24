@@ -163,6 +163,21 @@ function detectSingularities(latex: string): Extract<CalculusIntent, { kind: "si
 // fuera la variable — el signo de derivada debe pegar a una 'y' sola).
 const ODE_PRIME_TOKEN = /(?:^|[^a-zA-Z])y'+/;
 
+// MathLive puede serializar una prima escrita como y' de varias formas
+// equivalentes: y', y′, y^{\\prime} e incluso y^\\prime. El backend de
+// EDO usa notación prima ASCII, así que convergemos todas esas variantes
+// ANTES de decidir el intent y antes de mandar la expresión a /ode.
+function normalizeODEPrimeNotation(latex: string): string {
+  return latex
+    .replace(/y\^\{\\prime\\prime\}/g, "y''")
+    .replace(/y\^\{\\prime\}/g, "y'")
+    .replace(/y\^\\prime/g, "y'")
+    .replace(/y\^\{′′\}/g, "y''")
+    .replace(/y\^\{′\}/g, "y'")
+    .replace(/y′′/g, "y''")
+    .replace(/y′/g, "y'");
+}
+
 // Tecla "dy/dx" (spec 2.3: "notación alternativa, mismo intent que y'").
 // \frac{dy}{dx} NUNCA matchea DERIVATIVE_PREFIX (ese exige numerador
 // exactamente "d", no "dy" -- verificado arriba con los regex reales) así
@@ -174,7 +189,7 @@ const DY_DX_TOKEN = /\\frac\{dy\}\{dx\}/g;
 function detectODE(latex: string): Extract<CalculusIntent, { kind: "ode" }> | null {
   const trimmed = latex.trim();
   if (trimmed.length === 0) return null;
-  const normalized = trimmed.replace(DY_DX_TOKEN, "y'");
+  const normalized = normalizeODEPrimeNotation(trimmed).replace(DY_DX_TOKEN, "y'");
   if (!ODE_PRIME_TOKEN.test(normalized)) return null;
   if (!normalized.includes("=")) return null;
   return { kind: "ode", cleanedExpression: normalized };
