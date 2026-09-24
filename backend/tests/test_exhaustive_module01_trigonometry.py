@@ -63,6 +63,7 @@ def test_module01_domain_edges_are_controlled():
     ("asin(1)", 90.0),
     ("acos(1)", 0.0),
     ("atan(1)", 45.0),
+    ("asin(0.5)", 30.0),
     ("arcsin(0.5)", 30.0),
     ("asec(2)", 60.0),
     ("acsc(2)", 30.0),
