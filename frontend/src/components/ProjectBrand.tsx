@@ -8,9 +8,9 @@ export function ProjectBrand() {
         PL
         <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-marker text-[10px] font-bold text-white">+</span>
       </span>
-      <span className="min-w-0 truncate text-lg font-semibold text-ink">
+      <h1 className="min-w-0 truncate text-lg font-semibold text-ink">
         Precision Lab <span className="text-marker-text">Plus</span>
-      </span>
+      </h1>
     </div>
   );
 }
