@@ -169,13 +169,11 @@ const ODE_PRIME_TOKEN = /(?:^|[^a-zA-Z])y'+/;
 // ANTES de decidir el intent y antes de mandar la expresión a /ode.
 function normalizeODEPrimeNotation(latex: string): string {
   return latex
-    .replace(/y\^\{\\prime\\prime\}/g, "y''")
-    .replace(/y\^\{\\prime\}/g, "y'")
-    .replace(/y\^\\prime/g, "y'")
-    .replace(/y\^\{′′\}/g, "y''")
-    .replace(/y\^\{′\}/g, "y'")
-    .replace(/y\^′′/g, "y''")
-    .replace(/y\^′/g, "y'")
+    // Formas con caret producidas por MathLive:
+    // y^{\\prime}, y^{\\prime\\prime}, y^′, y^′′ y variantes mixtas.
+    .replace(/y\^(?:\{)?(?:\\prime|′)(?:\\prime|′)(?:\})?/g, "y''")
+    .replace(/y\^(?:\{)?(?:\\prime|′)(?:\})?/g, "y'")
+    // Formas Unicode sin caret.
     .replace(/y′′/g, "y''")
     .replace(/y′/g, "y'");
 }
