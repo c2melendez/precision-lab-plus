@@ -237,7 +237,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
               equivalente decimal) — solo en el formato "exact", que es el
               que ya traía este comportamiento antes de Fase 2.5. */}
           {format === "exact" && approxText && approxText !== result.result_text && (
-            <p className="text-sm text-muted">≈ {approxText}</p>
+            <p className="text-sm text-muted">≈ {approxText}{inverseAngleResult ? "°" : ""}</p>
           )}
           {format === "frac" && mixedLatex && (
             <button
