@@ -232,7 +232,12 @@ export function BasicMode() {
         : intent.kind === "residue" || intent.kind === "singularities"
           ? intent.expressionLatex
           : intent.innerLatex;
-    const trimmedInner = latexToBackendSyntax(rawInner);
+    // EDO ya viene normalizada por detectODE() a notación prima ASCII.
+    // No debe pasar otra vez por MathLive -> ASCII porque esa conversión
+    // puede reserializar y' como y^′ y romper el contrato del backend.
+    const trimmedInner = intent.kind === "ode"
+      ? rawInner.trim()
+      : latexToBackendSyntax(rawInner);
     if (!trimmedInner) {
       setValidationError("La expresión no puede estar vacía.");
       return;
