@@ -183,7 +183,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
       {solutionData && <SolutionListResult solutions={solutionData} />}
 
       {!matrixData && !solutionData && (result.result_latex || result.result_text) && (
-        <section className="space-y-3" aria-label="Resultado">
+        <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Resultado</p>
             {!result.has_detailed_steps && (
@@ -280,7 +280,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
               </button>
             )}
           </div>
-        </section>
+        </div>
       )}
 
       {!result.has_detailed_steps && (
