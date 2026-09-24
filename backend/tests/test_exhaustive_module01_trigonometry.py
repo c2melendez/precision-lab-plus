@@ -56,3 +56,25 @@ def test_module01_domain_edges_are_controlled():
                 f"success={body.get('success')}, error_code={body.get('error_code')}"
             )
     assert not failures, "\n".join(failures)
+
+
+@pytest.mark.parametrize("expression,expected", [
+    ("asin(1)", 90.0),
+    ("acos(1)", 0.0),
+    ("atan(1)", 45.0),
+    ("arcsin(0.5)", 30.0),
+])
+def test_module01_inverse_trig_returns_degrees(expression, expected):
+    response = client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "deg"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] == pytest.approx(expected, abs=1e-10)
+
+
+def test_module01_nested_direct_inverse_preserves_degree_semantics():
+    response = client.post("/api/v1/evaluate", json={"expression": "sin(asin(0.5))", "angle_unit": "deg"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] == pytest.approx(0.5, abs=1e-10)
