@@ -500,6 +500,7 @@ export function BasicMode() {
         onSolveSystem={handleSolveSystem}
         onSimplify={handleSimplify}
         onGraphComplex={handleGraphComplex}
+        angleUnit={angleUnit}
         showCalculusStrip
         hideCoreGrid
       />,
