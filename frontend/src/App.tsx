@@ -27,6 +27,7 @@ import { UnitsMode } from "./components/UnitsMode";
 import { GeometryMode } from "./components/GeometryMode";
 import { AjustesPopover } from "./components/AjustesPopover";
 import { KeyboardDock } from "./components/KeyboardDock";
+import { GlobalKeyboardFallback } from "./components/GlobalKeyboardFallback";
 import { ProjectBrand } from "./components/ProjectBrand";
 import { ModeIcon, type ModeIconName } from "./components/ModeIcon";
 import { useUIStore, type CalculatorMode } from "./store/useUIStore";
@@ -208,6 +209,7 @@ export default function App() {
           </ErrorBoundary>
         </HistoryDrawer>
       </div>
+      <GlobalKeyboardFallback mode={activeMode} />
       <KeyboardDock />
     </div>
   );
