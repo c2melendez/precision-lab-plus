@@ -248,7 +248,6 @@ function Graph2DForm() {
           <span className="text-[11px] text-muted">{latexRows.length}/{MAX_EXPRESSIONS}</span>
         </div>
         <div className="space-y-2">
-        <span className="block text-sm text-muted">Expresiones (hasta {MAX_EXPRESSIONS})</span>
         {latexRows.map((row, index) => (
           <div key={index} className="flex items-center gap-2">
             <span
