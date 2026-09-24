@@ -91,7 +91,7 @@ function AnalysisPanel({ result }: { result: MathResponse }) {
           </dl>
         </div>
       ))}
-    </div>
+    </section>
   );
 }
 
@@ -866,10 +866,10 @@ export function GraphMode() {
   const [kind, setKind] = useState<GraphKind>("2d");
 
   return (
-    <div className="mx-auto max-w-lg space-y-4 rounded-lg border border-paper-line bg-paper-soft p-5 shadow-sm lg:max-w-3xl dt:max-w-4xl">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-muted">Gráficas</h2>
-        <div className="flex gap-1" role="tablist" aria-label="Tipo de gráfica">
+    <section aria-label="Gráficas" className="mx-auto w-full max-w-[1376px] space-y-4 rounded-xl border border-paper-line bg-paper-soft p-4 shadow-sm md:p-5">
+      <div className="flex flex-col gap-3 border-b border-paper-line pb-3 md:flex-row md:items-center md:justify-between">
+        <div><h2 className="text-sm font-semibold text-ink">Gráficas</h2><p className="mt-0.5 text-xs text-muted">Expresiones, visualización y análisis</p></div>
+        <div className="flex gap-1 overflow-x-auto pb-1" role="tablist" aria-label="Tipo de gráfica">
           {(Object.keys(GRAPH_KIND_LABELS) as GraphKind[]).map((k) => (
             <button
               key={k}
@@ -877,7 +877,7 @@ export function GraphMode() {
               role="tab"
               aria-selected={kind === k}
               onClick={() => setKind(k)}
-              className={`rounded px-3 py-1 text-xs font-medium ${
+              className={`min-h-8 shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
                 kind === k ? "bg-graph text-white" : "text-muted hover:bg-paper-line/40"
               }`}
             >
