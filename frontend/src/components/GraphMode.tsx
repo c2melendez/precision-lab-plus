@@ -464,8 +464,10 @@ function Graph3DForm() {
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-1">
+    <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
+      <aside aria-label="Controles de gráfica 3D" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
+<div><h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Superficie</h3><p className="mt-0.5 text-[11px] text-muted">Expresión y dominio</p></div>
+<div className="space-y-1">
         <NaturalMathField
           latex={latex}
           onLatexChange={setLatex}
@@ -480,7 +482,7 @@ function Graph3DForm() {
         />
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label htmlFor="graph3d-xvar" className="block text-sm text-muted">
             Variable x
@@ -490,7 +492,7 @@ function Graph3DForm() {
             type="text"
             value={xVar}
             onChange={(e) => setXVar(e.target.value)}
-            className="w-16 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -502,7 +504,7 @@ function Graph3DForm() {
             type="text"
             value={yVar}
             onChange={(e) => setYVar(e.target.value)}
-            className="w-16 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -514,7 +516,7 @@ function Graph3DForm() {
             type="text"
             value={xMin}
             onChange={(e) => setXMin(e.target.value)}
-            className="w-20 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -526,7 +528,7 @@ function Graph3DForm() {
             type="text"
             value={xMax}
             onChange={(e) => setXMax(e.target.value)}
-            className="w-20 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -538,7 +540,7 @@ function Graph3DForm() {
             type="text"
             value={yMin}
             onChange={(e) => setYMin(e.target.value)}
-            className="w-20 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -550,7 +552,7 @@ function Graph3DForm() {
             type="text"
             value={yMax}
             onChange={(e) => setYMax(e.target.value)}
-            className="w-20 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
       </div>
@@ -563,14 +565,20 @@ function Graph3DForm() {
 
       <button
         type="submit"
-        className="rounded bg-graph px-4 py-2 text-sm font-medium text-white hover:bg-graph/90"
+        className="w-full rounded-lg bg-graph px-4 py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
       >
         Graficar superficie
       </button>
 
-      <div className="border-t border-paper-line pt-4">
+      </aside>
+
+      <section aria-label="Vista de gráfica 3D" className="min-w-0 rounded-xl border border-paper-line bg-paper p-3 shadow-sm">
+        <div className="mb-3 border-b border-paper-line pb-2">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Vista</h3>
+          <p className="mt-0.5 text-[11px] text-muted">Superficie y resultado</p>
+        </div>
         <ResultArea result={lastResult} isLoading={isLoading} />
-      </div>
+      </section>
     </form>
   );
 }
@@ -633,8 +641,10 @@ function GraphParametricForm() {
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-1">
+    <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
+      <aside aria-label="Controles de gráfica paramétrica" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
+<div><h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Paramétrica</h3><p className="mt-0.5 text-[11px] text-muted">Componentes y rango del parámetro</p></div>
+<div className="space-y-1">
         <span className="block text-sm text-muted">x(t)</span>
         <NaturalMathField
           latex={xLatex}
@@ -689,7 +699,7 @@ function GraphParametricForm() {
         />
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label htmlFor="param-parameter" className="block text-sm text-muted">
             Parámetro
@@ -699,7 +709,7 @@ function GraphParametricForm() {
             type="text"
             value={parameter}
             onChange={(e) => setParameter(e.target.value)}
-            className="w-16 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -711,7 +721,7 @@ function GraphParametricForm() {
             type="text"
             value={tMin}
             onChange={(e) => setTMin(e.target.value)}
-            className="w-28 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -723,7 +733,7 @@ function GraphParametricForm() {
             type="text"
             value={tMax}
             onChange={(e) => setTMax(e.target.value)}
-            className="w-28 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
       </div>
@@ -736,14 +746,20 @@ function GraphParametricForm() {
 
       <button
         type="submit"
-        className="rounded bg-graph px-4 py-2 text-sm font-medium text-white hover:bg-graph/90"
+        className="w-full rounded-lg bg-graph px-4 py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
       >
         Graficar curva
       </button>
 
-      <div className="border-t border-paper-line pt-4">
+      </aside>
+
+      <section aria-label="Vista de gráfica paramétrica" className="min-w-0 rounded-xl border border-paper-line bg-paper p-3 shadow-sm">
+        <div className="mb-3 border-b border-paper-line pb-2">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Vista</h3>
+          <p className="mt-0.5 text-[11px] text-muted">Curva paramétrica y resultado</p>
+        </div>
         <ResultArea result={lastResult} isLoading={isLoading} />
-      </div>
+      </section>
     </form>
   );
 }
@@ -801,8 +817,10 @@ function GraphPolarForm() {
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-1">
+    <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
+      <aside aria-label="Controles de gráfica polar" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
+<div><h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Polar</h3><p className="mt-0.5 text-[11px] text-muted">Radio y rango angular</p></div>
+<div className="space-y-1">
         <span className="block text-sm text-muted">r(θ)</span>
         <NaturalMathField
           latex={rLatex}
@@ -819,7 +837,7 @@ function GraphPolarForm() {
         onGoToDerivative={() => setActiveMode("derivative")}
       />
 
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label htmlFor="polar-variable" className="block text-sm text-muted">
             Variable
@@ -829,7 +847,7 @@ function GraphPolarForm() {
             type="text"
             value={variable}
             onChange={(e) => setVariable(e.target.value)}
-            className="w-16 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -841,7 +859,7 @@ function GraphPolarForm() {
             type="text"
             value={thetaMin}
             onChange={(e) => setThetaMin(e.target.value)}
-            className="w-28 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -853,7 +871,7 @@ function GraphPolarForm() {
             type="text"
             value={thetaMax}
             onChange={(e) => setThetaMax(e.target.value)}
-            className="w-28 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
       </div>
@@ -866,14 +884,20 @@ function GraphPolarForm() {
 
       <button
         type="submit"
-        className="rounded bg-graph px-4 py-2 text-sm font-medium text-white hover:bg-graph/90"
+        className="w-full rounded-lg bg-graph px-4 py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
       >
         Graficar curva
       </button>
 
-      <div className="border-t border-paper-line pt-4">
+      </aside>
+
+      <section aria-label="Vista de gráfica polar" className="min-w-0 rounded-xl border border-paper-line bg-paper p-3 shadow-sm">
+        <div className="mb-3 border-b border-paper-line pb-2">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Vista</h3>
+          <p className="mt-0.5 text-[11px] text-muted">Curva polar y resultado</p>
+        </div>
         <ResultArea result={lastResult} isLoading={isLoading} />
-      </div>
+      </section>
     </form>
   );
 }
