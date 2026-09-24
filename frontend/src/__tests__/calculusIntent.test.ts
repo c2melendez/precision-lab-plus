@@ -174,6 +174,20 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
       });
     });
 
+    it("normaliza prima Unicode con caret, forma real observada en MathLive E2E", () => {
+      expect(detectCalculusIntent("y^′=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("normaliza segundo orden Unicode con caret", () => {
+      expect(detectCalculusIntent("y^′′+y=0")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y''+y=0",
+      });
+    });
+
     it("normaliza segundo orden con primas LaTeX", () => {
       expect(detectCalculusIntent("y^{\\prime\\prime}+y=0")).toEqual({
         kind: "ode",
