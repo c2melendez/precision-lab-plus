@@ -271,8 +271,14 @@ def validate_length(text: str) -> None:
 
 
 def normalize_unicode(text: str) -> str:
-    """Normaliza símbolos seguros antes del parser de SymPy."""
-    text = text.replace("π", "pi").replace("∞", "oo")
+    """Normaliza símbolos seguros antes del parser de SymPy.
+
+    El símbolo postfix ° se representa como multiplicación exacta por pi/180.
+    Esto permite entradas como sin(30°) y también valores angulares sueltos.
+    evaluate_service evita una segunda conversión en modo DEG cuando el
+    argumento ya contiene pi.
+    """
+    text = text.replace("π", "pi").replace("∞", "oo").replace("°", "*pi/180")
     text = _expand_sqrt_tokens(text)
     # Porcentaje postfix de calculadora: 50% -> (50)/100. Se limita a
     # átomos simples o un único grupo parentizado para no inventar una
