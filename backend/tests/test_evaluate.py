@@ -312,3 +312,21 @@ def test_stdev_with_single_value_is_parse_error():
     body = response.json()
     assert body["success"] is False
     assert body["error_code"] == "PARSE_ERROR"
+
+
+def test_standalone_inverse_trig_detector():
+    from app.services.evaluate_service import _is_standalone_inverse_trig_expression
+
+    for expression in [
+        "asin(0.5)",
+        "arcsin(0.5)",
+        "acos(0)",
+        "atan(1)",
+        "asec(2)",
+        "acsc(2)",
+        "acot(1)",
+    ]:
+        assert _is_standalone_inverse_trig_expression(expression) is True
+
+    assert _is_standalone_inverse_trig_expression("sin(asin(0.5))") is False
+    assert _is_standalone_inverse_trig_expression("1+asin(0.5)") is False
