@@ -2,7 +2,9 @@
 app/services/evaluate_service.py — `/evaluate` (spec, secciones 3, 5, 6, 7).
 
 `/evaluate`: sin variables libres sin sustituir -> numérico; con variables
-libres sin sustituir -> simbólico (sección 6). `angle_unit` controla tanto los argumentos de funciones trig DIRECTAS\n(`sin`,`cos`,`tan`,`sec`,`csc`,`cot`) como la unidad de salida de las\ninversas convencionales (`asin`,`acos`,`atan`). `substitutions` deben parsear
+libres sin sustituir -> simbólico (sección 6). `angle_unit` controla tanto los argumentos de funciones trig DIRECTAS
+(`sin`,`cos`,`tan`,`sec`,`csc`,`cot`) como la unidad de salida de las
+inversas convencionales (`asin`,`acos`,`atan`,`asec`,`acsc`,`acot`). `substitutions` deben parsear
 a valores PURAMENTE numéricos (sin variables libres) — si no, `VALIDATION_ERROR`.
 
 `/evaluate` no está en la lista de operaciones con procedimiento paso a paso
