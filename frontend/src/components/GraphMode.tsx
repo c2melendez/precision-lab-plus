@@ -51,47 +51,61 @@ const GRAPH_KIND_LABELS: Record<GraphKind, string> = {
 function AnalysisPanel({ result }: { result: MathResponse }) {
   if (!result.graph_data?.analysis) return null;
   return (
-    <div className="space-y-3">
-      {result.graph_data.analysis.map((analysis, index) => (
-        <div key={index} className="rounded border border-paper-line bg-paper p-3 text-sm">
-          <p className="mb-2 font-medium text-ink">
-            {result.graph_data!.traces[index]?.name ?? `Expresión ${index + 1}`}
-          </p>
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted sm:grid-cols-3">
-            <dt className="text-muted">Dominio</dt>
-            <dd className="col-span-1 sm:col-span-2">{analysis.domain_text ?? "—"}</dd>
-            <dt className="text-muted">Rango</dt>
-            <dd className="col-span-1 sm:col-span-2">{analysis.range_text ?? "—"}</dd>
-            <dt className="text-muted">Corte en y</dt>
-            <dd className="col-span-1 sm:col-span-2">{analysis.y_intercept ?? "—"}</dd>
-            <dt className="text-muted">Cortes en x</dt>
-            <dd className="col-span-1 sm:col-span-2">
-              {analysis.x_intercepts && analysis.x_intercepts.length > 0
-                ? analysis.x_intercepts.join(", ")
-                : "—"}
-            </dd>
-            <dt className="text-muted">Máximos locales</dt>
-            <dd className="col-span-1 sm:col-span-2">
-              {analysis.local_maxima && analysis.local_maxima.length > 0
-                ? analysis.local_maxima.join(", ")
-                : "—"}
-            </dd>
-            <dt className="text-muted">Mínimos locales</dt>
-            <dd className="col-span-1 sm:col-span-2">
-              {analysis.local_minima && analysis.local_minima.length > 0
-                ? analysis.local_minima.join(", ")
-                : "—"}
-            </dd>
-            <dt className="text-muted">Puntos de inflexión</dt>
-            <dd className="col-span-1 sm:col-span-2">
-              {analysis.inflection_points && analysis.inflection_points.length > 0
-                ? analysis.inflection_points.join(", ")
-                : "—"}
-            </dd>
-          </dl>
+    <section aria-label="Análisis de gráfica" className="space-y-3 rounded-xl border border-paper-line bg-paper-soft p-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Análisis</h4>
+          <p className="mt-0.5 text-[11px] text-muted">Dominio, rango y puntos notables</p>
         </div>
-      ))}
-    </div>
+        <span className="text-[11px] text-muted">
+          {result.graph_data.analysis.length} {result.graph_data.analysis.length === 1 ? "expresión" : "expresiones"}
+        </span>
+      </div>
+      <div className="grid gap-3 xl:grid-cols-2">
+        {result.graph_data.analysis.map((analysis, index) => (
+          <article key={index} className="rounded-xl border border-paper-line bg-paper p-3 text-sm">
+            <div className="mb-3 flex items-center gap-2 border-b border-paper-line pb-2">
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-graph" aria-hidden="true" />
+              <p className="font-medium text-ink">
+                {result.graph_data!.traces[index]?.name ?? `Expresión ${index + 1}`}
+              </p>
+            </div>
+            <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2">
+              <dt className="text-muted">Dominio</dt>
+              <dd className="min-w-0 break-words text-ink">{analysis.domain_text ?? "—"}</dd>
+              <dt className="text-muted">Rango</dt>
+              <dd className="min-w-0 break-words text-ink">{analysis.range_text ?? "—"}</dd>
+              <dt className="text-muted">Corte en y</dt>
+              <dd className="min-w-0 break-words text-ink">{analysis.y_intercept ?? "—"}</dd>
+              <dt className="text-muted">Cortes en x</dt>
+              <dd className="min-w-0 break-words text-ink">
+                {analysis.x_intercepts && analysis.x_intercepts.length > 0
+                  ? analysis.x_intercepts.join(", ")
+                  : "—"}
+              </dd>
+              <dt className="text-muted">Máximos</dt>
+              <dd className="min-w-0 break-words text-ink">
+                {analysis.local_maxima && analysis.local_maxima.length > 0
+                  ? analysis.local_maxima.join(", ")
+                  : "—"}
+              </dd>
+              <dt className="text-muted">Mínimos</dt>
+              <dd className="min-w-0 break-words text-ink">
+                {analysis.local_minima && analysis.local_minima.length > 0
+                  ? analysis.local_minima.join(", ")
+                  : "—"}
+              </dd>
+              <dt className="text-muted">Inflexión</dt>
+              <dd className="min-w-0 break-words text-ink">
+                {analysis.inflection_points && analysis.inflection_points.length > 0
+                  ? analysis.inflection_points.join(", ")
+                  : "—"}
+              </dd>
+            </dl>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
