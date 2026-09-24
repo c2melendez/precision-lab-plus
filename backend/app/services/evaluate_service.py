@@ -18,7 +18,8 @@ from sympy import acos, acot, acsc, asec, asin, atan, cos, cot, csc, pi, sec, si
 
 from app.services import parsing
 
-_DIRECT_TRIG_FUNCTIONS = (sin, cos, tan, sec, csc, cot)\n_INVERSE_TRIG_FUNCTIONS = (asin, acos, atan, asec, acsc, acot)
+_DIRECT_TRIG_FUNCTIONS = (sin, cos, tan, sec, csc, cot)
+_INVERSE_TRIG_FUNCTIONS = (asin, acos, atan, asec, acsc, acot)
 
 
 class SubstitutionValidationError(ValueError):
