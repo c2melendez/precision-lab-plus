@@ -174,6 +174,8 @@ function normalizeODEPrimeNotation(latex: string): string {
     .replace(/y\^\\prime/g, "y'")
     .replace(/y\^\{′′\}/g, "y''")
     .replace(/y\^\{′\}/g, "y'")
+    .replace(/y\^′′/g, "y''")
+    .replace(/y\^′/g, "y'")
     .replace(/y′′/g, "y''")
     .replace(/y′/g, "y'");
 }
