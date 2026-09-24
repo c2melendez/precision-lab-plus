@@ -78,3 +78,19 @@ def test_module01_nested_direct_inverse_preserves_degree_semantics():
     body = response.json()
     assert body["success"] is True, body
     assert body["result_approx"] == pytest.approx(0.5, abs=1e-10)
+
+
+@pytest.mark.parametrize("expression,expected", [
+    ("sin(30°)", 0.5),
+    ("cos(60°)", 0.5),
+    ("tan(45°)", 1.0),
+    ("sec(60°)", 2.0),
+    ("csc(30°)", 2.0),
+    ("cot(45°)", 1.0),
+])
+def test_module01_explicit_degree_symbol_direct_trig(expression, expected):
+    response = client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "deg"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] == pytest.approx(expected, abs=1e-10)
