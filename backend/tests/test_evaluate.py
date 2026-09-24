@@ -170,7 +170,7 @@ def test_multiletter_xyz_single_identifier_not_x_times_y_times_z():
 
 
 # ---------------------------------------------------------------------------
-# Modo grados con substitutions / inversas siempre en radianes
+# Modo grados con substitutions / inversas devuelven la unidad activa
 # ---------------------------------------------------------------------------
 
 
@@ -196,11 +196,11 @@ def test_evaluate_without_substitutions_is_symbolic():
     assert body["result_text"] == "sin(x)"
 
 
-def test_inverse_trig_always_radians_regardless_of_angle_unit():
+def test_inverse_trig_returns_degrees_when_angle_unit_is_deg():
     response = _evaluate(expression="asin(1)", angle_unit="deg")
     body = response.json()
     assert body["success"] is True
-    assert body["result_approx"] == pytest.approx(math.pi / 2)
+    assert body["result_approx"] == pytest.approx(90.0)
 
 
 # ---------------------------------------------------------------------------
