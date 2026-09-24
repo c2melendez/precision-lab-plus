@@ -188,6 +188,27 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
       });
     });
 
+    it("normaliza \\prime sin llaves", () => {
+      expect(detectCalculusIntent("y^\\prime=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("normaliza doble \\prime sin llaves", () => {
+      expect(detectCalculusIntent("y^\\prime\\prime+y=0")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y''+y=0",
+      });
+    });
+
+    it("preserva la condición inicial al normalizar primas", () => {
+      expect(detectCalculusIntent("y^′=2x, y(0)=1")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x, y(0)=1",
+      });
+    });
+
     it("normaliza segundo orden con primas LaTeX", () => {
       expect(detectCalculusIntent("y^{\\prime\\prime}+y=0")).toEqual({
         kind: "ode",
