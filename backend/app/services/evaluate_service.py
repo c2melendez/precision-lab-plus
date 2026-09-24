@@ -14,11 +14,11 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 
 import sympy
-from sympy import acos, asin, atan, cos, cot, csc, pi, sec, sin, tan
+from sympy import acos, acot, acsc, asec, asin, atan, cos, cot, csc, pi, sec, sin, tan
 
 from app.services import parsing
 
-_DIRECT_TRIG_FUNCTIONS = (sin, cos, tan, sec, csc, cot)\n_INVERSE_TRIG_FUNCTIONS = (asin, acos, atan)
+_DIRECT_TRIG_FUNCTIONS = (sin, cos, tan, sec, csc, cot)\n_INVERSE_TRIG_FUNCTIONS = (asin, acos, atan, asec, acsc, acot)
 
 
 class SubstitutionValidationError(ValueError):
