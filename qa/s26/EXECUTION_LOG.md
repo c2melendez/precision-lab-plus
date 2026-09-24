@@ -214,3 +214,17 @@ Certificado:
 - sin cambios en backend ni lógica matemática;
 - CI, Playwright, S17, S18, S19, S20, S21, S23 y S25: PASS.
 
+
+### Decisión de proceso — Preview S26 incorporado
+Se añade formalmente **S26.3.5 — Preview S26** entre implementación (S26.3) y regresión visual automatizada (S26.4).
+
+Motivo:
+- permitir revisión visual humana del rediseño antes de congelar baselines;
+- mantener producción estable durante la implementación;
+- separar claramente producción, preview y rama de trabajo.
+
+Regla acordada:
+- el preview puede habilitarse cuando Gráficas + Matrices estén rediseñadas y verdes;
+- el preview no sustituye pruebas ni baselines;
+- cualquier ajuste derivado del preview debe aplicarse antes de S26.4.
+
