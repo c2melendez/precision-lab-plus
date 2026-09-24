@@ -7,7 +7,7 @@
 import { create } from "zustand";
 import type { MathResponse } from "../api/client";
 
-export type CalculatorMode = "basic" | "simple" | "derivative" | "integral" | "equation" | "system" | "matrix" | "graph" | "limit" | "statistics" | "units";
+export type CalculatorMode = "basic" | "simple" | "derivative" | "integral" | "equation" | "system" | "matrix" | "graph" | "limit" | "statistics" | "geometry" | "units";
 export type Theme = "dark" | "light";
 
 interface UIState {
