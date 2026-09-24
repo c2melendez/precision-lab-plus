@@ -2,9 +2,7 @@
 app/services/evaluate_service.py — `/evaluate` (spec, secciones 3, 5, 6, 7).
 
 `/evaluate`: sin variables libres sin sustituir -> numérico; con variables
-libres sin sustituir -> simbólico (sección 6). `angle_unit` solo dentro de
-argumentos de funciones trig DIRECTAS (`sin`,`cos`,`tan`,`sec`,`csc`,`cot`);
-las inversas siempre en radianes (sección 3). `substitutions` deben parsear
+libres sin sustituir -> simbólico (sección 6). `angle_unit` controla tanto los argumentos de funciones trig DIRECTAS\n(`sin`,`cos`,`tan`,`sec`,`csc`,`cot`) como la unidad de salida de las\ninversas convencionales (`asin`,`acos`,`atan`). `substitutions` deben parsear
 a valores PURAMENTE numéricos (sin variables libres) — si no, `VALIDATION_ERROR`.
 
 `/evaluate` no está en la lista de operaciones con procedimiento paso a paso
@@ -16,11 +14,11 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 
 import sympy
-from sympy import cos, cot, csc, pi, sec, sin, tan
+from sympy import acos, asin, atan, cos, cot, csc, pi, sec, sin, tan
 
 from app.services import parsing
 
-_DIRECT_TRIG_FUNCTIONS = (sin, cos, tan, sec, csc, cot)
+_DIRECT_TRIG_FUNCTIONS = (sin, cos, tan, sec, csc, cot)\n_INVERSE_TRIG_FUNCTIONS = (asin, acos, atan)
 
 
 class SubstitutionValidationError(ValueError):
@@ -100,6 +98,22 @@ def _apply_degree_conversion(expr: sympy.Expr) -> sympy.Expr:
     return expr.replace(_is_direct_trig, _convert)
 
 
+def _apply_inverse_degree_output(expr: sympy.Expr) -> sympy.Expr:
+    """Convierte a grados la SALIDA de asin/acos/atan.
+
+    Se aplica después de _apply_degree_conversion para conservar la semántica
+    de composiciones como sin(asin(0.5)) en modo DEG.
+    """
+
+    def _is_inverse_trig(node: sympy.Basic) -> bool:
+        return isinstance(node, _INVERSE_TRIG_FUNCTIONS)
+
+    def _convert(node: sympy.Basic) -> sympy.Basic:
+        return node * 180 / pi
+
+    return expr.replace(_is_inverse_trig, _convert)
+
+
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
@@ -112,6 +126,7 @@ def evaluate(
 
     if angle_unit == "deg":
         expr = _apply_degree_conversion(expr)
+        expr = _apply_inverse_degree_output(expr)
 
     if substitution_map:
         expr = expr.subs(substitution_map)
