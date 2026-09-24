@@ -30,6 +30,7 @@ def test_module01_known_values(expression, expected):
 
 @pytest.mark.parametrize("expression,expected", [
     ("sin(30)", 0.5), ("cos(60)", 0.5), ("tan(45)", 1.0),
+    ("sec(60)", 2.0), ("csc(30)", 2.0), ("cot(45)", 1.0),
 ])
 def test_module01_degrees(expression, expected):
     response = client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "deg"})
@@ -63,6 +64,9 @@ def test_module01_domain_edges_are_controlled():
     ("acos(1)", 0.0),
     ("atan(1)", 45.0),
     ("arcsin(0.5)", 30.0),
+    ("asec(2)", 60.0),
+    ("acsc(2)", 30.0),
+    ("acot(1)", 45.0),
 ])
 def test_module01_inverse_trig_returns_degrees(expression, expected):
     response = client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "deg"})
