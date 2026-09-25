@@ -321,3 +321,66 @@ Correcciones iniciadas:
 - render exclusivo de `content ?? basicContent` para impedir duplicación de teclado;
 - layouts stacked/floating ajustados al mismo criterio;
 - Gráficas 2D/3D/Paramétrica/Polar migradas del teclado inline al teclado global único.
+
+### Cierre de sesión / Handoff — 2026-09-24
+
+Estado de proceso: **PAUSA CONTROLADA PARA RECONFIRMACIÓN VISUAL S26.2R**.
+
+La sesión se cierra deliberadamente para continuar en otra conversación sin perder trazabilidad.
+
+#### Regla de reanudación
+La próxima sesión **NO debe empezar modificando código**.
+
+Primero debe:
+1. leer `MOCKUP_REGENERATION_BRIEF.md`;
+2. regenerar mockups definitivos consolidados;
+3. mostrar teclado colapsado y desplegado;
+4. reconciliar todos los módulos y breakpoints;
+5. presentar al usuario;
+6. esperar aprobación explícita.
+
+Solo tras la aprobación se retoma S26.3.
+
+#### Estado de código de referencia
+Último SHA de producto relevante antes del cierre documental:
+`75d816b8e74acfe1b91661e02843966719e7fcc0`
+
+Preview:
+https://precision-lab-plus-s26.onrender.com
+
+#### Estado técnico
+- Revisión humana Preview: FAIL visual.
+- Teclado duplicado corregido en arquitectura compartida.
+- Layouts stacked/floating ajustados a `content ?? basicContent`.
+- Gráficas migradas del teclado inline al teclado global único.
+- Teclado Desktop limitado a ~45vh.
+- Regresión TypeScript por cuatro `setActiveMode` sin uso corregida.
+- Último estado consultado: CI, Playwright, S17, S18, S20, S21, S23 y S25 PASS; S19 Mutation Baseline seguía in_progress.
+- Preview Render separado de producción; API Preview: https://precision-lab-plus-s26-api.onrender.com.
+
+#### Decisión sobre el teclado
+El teclado visible actualmente en Preview **NO constituye el diseño visual final aprobado**.
+
+Debe conservarse su funcionalidad/paridad, pero su composición visual deberá adaptarse al próximo mockup definitivo. El contrato final del teclado se congelará únicamente después de la revisión del usuario.
+
+#### Documentos de continuidad obligatorios
+- `qa/s26/HANDOFF_PROMPT.md`
+- `qa/s26/MOCKUP_REGENERATION_BRIEF.md`
+- `qa/s26/VISUAL_REFERENCE_CHECKLIST.md`
+- `qa/s26/ROADMAP.md`
+- `qa/s26/KEYBOARD_CONTRACT.md`
+- `qa/s26/DESIGN_TARGET.md`
+- `qa/s26/RESULT_FORMATS.md`
+- `qa/s26/GRAPH_3D_CONTRACT.md`
+- `qa/s26/GEOMETRY_CONTRACT.md`
+- `qa/s26/BRAND_IDENTITY.md`
+- `qa/s26/MATHEMATICAL_INTEGRITY_POLICY.md`
+- `qa/s26/TEST_MAPPING.md`
+
+#### No cerrar
+- S26.3: no cerrado visualmente.
+- S26.3.5 Preview: revisión humana FAIL visual.
+- S26.4: NO iniciar.
+- S26.5: pendiente.
+- S26.6: pendiente.
+
