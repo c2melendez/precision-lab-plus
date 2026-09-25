@@ -80,6 +80,41 @@ describe("History", () => {
     expect(mockedCallApi).not.toHaveBeenCalled();
   });
 
+  it("muestra el módulo de origen separado del tipo de operación", () => {
+    useHistoryStore.setState({
+      entries: [
+        {
+          id: "matrix-1",
+          sourceModule: "Matrices",
+          operation: "determinant",
+          endpointUrl: "/matrix/determinant",
+          requestPayload: { matrix: [[1, 2], [3, 4]] },
+          label: "det(A)",
+          hasDetailedSteps: false,
+          warnings: [],
+          timestamp: Date.now(),
+        },
+        {
+          id: "stats-1",
+          sourceModule: "Estadística",
+          operation: "statistics_descriptive",
+          endpointUrl: "/statistics/descriptive",
+          requestPayload: { values: [1, 2, 3], stat: "mean" },
+          label: "Media(1,2,3)",
+          hasDetailedSteps: false,
+          warnings: [],
+          timestamp: Date.now() - 1,
+        },
+      ],
+    });
+
+    render(<History />);
+    expect(screen.getByText("Matrices")).toBeInTheDocument();
+    expect(screen.getByText("determinant")).toBeInTheDocument();
+    expect(screen.getByText("Estadística")).toBeInTheDocument();
+    expect(screen.getByText("statistics_descriptive")).toBeInTheDocument();
+  });
+
   it("Borrar historial vacía la lista", () => {
     useHistoryStore.getState().addEntry({
       operation: "evaluate",
