@@ -72,7 +72,7 @@ import { RecentKeysBar } from "./RecentKeysBar";
  * por un frame.
  */
 
-export function KeyboardDock() {
+export function KeyboardDock({ sidebarExpanded }: { sidebarExpanded: boolean }) {
   const isOpen = useKeyboardPanelStore((s) => s.isOpen);
   const content = useKeyboardPanelStore((s) => s.content);
   const basicContent = useKeyboardPanelStore((s) => s.basicContent);
@@ -103,7 +103,7 @@ export function KeyboardDock() {
   return (
     <>
       {(content || basicContent) && (
-        <KeyboardPanel isOpen={isOpen} onClose={close}>
+        <KeyboardPanel isOpen={isOpen} onClose={close} sidebarExpanded={sidebarExpanded}>
           {/* Grid básico completo — Fase Y: el panel es ahora la ÚNICA
               fuente del teclado en cualquier breakpoint (antes existía
               una copia siempre-visible de basicContent en la barra
@@ -115,7 +115,7 @@ export function KeyboardDock() {
         </KeyboardPanel>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2 dt:left-1/2 dt:right-auto dt:bottom-4 dt:w-[calc(100%_-_64px)] dt:max-w-[1376px] dt:-translate-x-1/2 dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft dt:px-4 dt:py-2 dt:shadow-xl">
+      <div className={`fixed bottom-0 right-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2 dt:bottom-4 dt:right-8 dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft dt:px-4 dt:py-2 dt:shadow-xl ${sidebarExpanded ? "left-60 dt:left-[17rem]" : "left-[72px] dt:left-[104px]"}`}>
         {/* Fase X, Módulo X0 (Smart Docks) — "justo arriba de donde
             aparecerá el teclado (colapsado o no)", confirmado por Carlos.
             Primera fila del mismo contenedor fijo: queda por encima del
