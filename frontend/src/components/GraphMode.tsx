@@ -15,6 +15,9 @@ import type { MathfieldElement } from "mathlive";
 
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
+
+const submitGraphs = (endpoint: Parameters<typeof submitAndRecord>[0], payload: Record<string, unknown>, label: string) =>
+  submitAndRecord(endpoint, payload, label, "Gráficas");
 import { useGraphColorPaletteStore } from "../store/useGraphColorPaletteStore";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useUIStore } from "../store/useUIStore";
@@ -268,7 +271,7 @@ function Graph2DForm() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitGraphs(
         "/graph/2d",
         {
           expressions: trimmedExpressions,
@@ -490,7 +493,7 @@ function Graph3DForm() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitGraphs(
         "/graph/3d",
         {
           expression: trimmedExpression,
@@ -661,7 +664,7 @@ function GraphParametricForm() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitGraphs(
         "/graph/parametric",
         {
           x_expression: trimmedX,
@@ -833,7 +836,7 @@ function GraphPolarForm() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitGraphs(
         "/graph/polar",
         {
           r_expression: trimmedR,
