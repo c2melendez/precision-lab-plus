@@ -11,9 +11,10 @@ describe("layout inicial V5.2.1", () => {
     expect(mod.useLayoutModeStore.getState().layoutMode).toBe("split");
   });
 
-  it("respeta una preferencia guardada válida", async () => {
+  it("migra una preferencia retirada a Default", async () => {
     localStorage.setItem("precision-lab-layout-mode", "focus");
     const mod = await import("../store/useLayoutModeStore");
-    expect(mod.useLayoutModeStore.getState().layoutMode).toBe("focus");
+    expect(mod.useLayoutModeStore.getState().layoutMode).toBe("fused");
+    expect(localStorage.getItem("precision-lab-layout-mode")).toBe("fused");
   });
 });
