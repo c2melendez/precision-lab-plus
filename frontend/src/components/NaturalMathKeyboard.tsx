@@ -993,7 +993,7 @@ export function NaturalMathKeyboard({
                       }}
                       aria-label="Simplificar expresión"
                       title="Simplificar expresión"
-                      className="rounded-md bg-graph py-2 text-xs font-medium text-paper hover:bg-graph/90"
+                      className="rounded-md bg-graph py-2 text-xs font-medium text-white hover:bg-graph/90"
                     >
                       a+a → 2a
                     </button>
@@ -1102,7 +1102,7 @@ export function NaturalMathKeyboard({
           onClick={onSimplify}
           aria-label="Simplificar expresión"
           title="Simplificar expresión"
-          className="rounded-md bg-graph py-2 text-[11px] font-medium text-paper hover:bg-graph/90"
+          className="rounded-md bg-graph py-2 text-[11px] font-medium text-white hover:bg-graph/90"
         >
           a+a → 2a
         </button>
@@ -1216,7 +1216,7 @@ export function NaturalMathKeyboard({
                 const isEquals = glyphStr === "=";
                 const isEnter = glyphStr === "⏎";
                 const className = isEnter
-                  ? "rounded-md bg-graph py-2.5 text-sm font-semibold text-paper hover:bg-graph/90"
+                  ? "rounded-md bg-graph py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
                   : isEquals
                     ? "rounded-md border border-marker py-2.5 text-sm font-medium text-marker hover:bg-marker-soft/10"
                     : isOperator
