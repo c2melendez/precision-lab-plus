@@ -131,7 +131,7 @@ export function KeyboardDock({ sidebarExpanded }: { sidebarExpanded: boolean }) 
             aria-label="Calcular"
             className={
               compactActions
-                ? "rounded-md bg-graph py-2 text-sm font-semibold text-paper hover:bg-graph/90"
+                ? "rounded-md bg-graph py-2 text-sm font-semibold text-white hover:bg-graph/90"
                 : "rounded-md bg-chrome-soft py-2 text-sm font-semibold text-bone/30"
             }
           >
