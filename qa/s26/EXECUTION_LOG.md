@@ -295,3 +295,29 @@ Cobertura cerrada:
 
 Hito alcanzado: Gráficas + Matrices cerradas y verdes.
 Siguiente paso de proceso: S26.3.5 — Preview S26.
+
+### S26.3.5 — Preview S26 — REVISIÓN HUMANA: FAIL VISUAL
+
+Fecha: 2026-09-24.
+
+La revisión humana del preview Plus detectó discrepancias entre la implementación visible y los contratos `DESIGN_TARGET.md` / `KEYBOARD_CONTRACT.md`.
+
+Hallazgos confirmados:
+- teclado global duplicado al abrirse: se renderizaban `basicContent` y `content` simultáneamente;
+- Gráficas mantenía un `NaturalMathKeyboard` inline, creando un segundo teclado específico del módulo y contradiciendo el contrato de teclado global único;
+- Científica aún no presenta de forma satisfactoria la jerarquía Entrada → Resultado → Pasos → Gráfica acordada;
+- Estadística y Unidades siguen pendientes de rediseño S26 y aparecen visualmente como generación anterior;
+- Geometría es una base parcial, no un módulo visual terminado;
+- la armonización transversal de los seis layouts aún no puede considerarse cerrada.
+
+Decisión:
+- NO avanzar a S26.4;
+- reabrir aceptación visual de Científica/Teclado y Gráficas;
+- mantener Matrices funcionalmente verde, pero su aceptación visual final queda condicionada a la corrección del dock/teclado global;
+- completar Estadística, Unidades, Historial/Ajustes y responsive antes de una nueva aprobación humana del Preview;
+- los cierres anteriores conservan valor como certificación funcional, pero NO constituyen aprobación visual final.
+
+Correcciones iniciadas:
+- render exclusivo de `content ?? basicContent` para impedir duplicación de teclado;
+- layouts stacked/floating ajustados al mismo criterio;
+- Gráficas 2D/3D/Paramétrica/Polar migradas del teclado inline al teclado global único.
