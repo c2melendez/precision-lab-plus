@@ -323,8 +323,7 @@ function StackedKeyboardSection() {
         </button>
         {isOpen && canExpand && (
           <div className="border-t border-paper-line px-3 pb-3 pt-2">
-            {basicContent}
-            {content}
+            {content ?? basicContent}
           </div>
         )}
       </div>
@@ -425,8 +424,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
           disposiciones, sobre el mismo store `isOpen`. */}
       {isOpen && canExpand ? (
         <FloatingWindow title="Teclado" rect={keyboardWindow} onChange={(rect) => setWindow("keyboard", rect)}>
-          {basicContent}
-          {content}
+          {content ?? basicContent}
         </FloatingWindow>
       ) : (
         <button
