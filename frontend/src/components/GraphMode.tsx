@@ -937,7 +937,7 @@ export function GraphMode() {
   const [kind, setKind] = useState<GraphKind>("2d");
 
   return (
-    <section aria-label="Gráficas" className="mx-auto w-full max-w-[1376px] space-y-4 rounded-xl border border-paper-line bg-paper-soft p-4 shadow-sm md:p-5">
+    <section aria-label="Gráficas" className="mx-auto min-w-0 w-full max-w-[1376px] overflow-x-hidden space-y-4 rounded-xl border border-paper-line bg-paper-soft p-4 shadow-sm md:p-5">
       <div className="flex flex-col gap-3 border-b border-paper-line pb-3 md:flex-row md:items-center md:justify-between">
         <div><h2 className="text-sm font-semibold text-ink">Gráficas</h2><p className="mt-0.5 text-xs text-muted">Expresiones, visualización y análisis</p></div>
         <div className="flex gap-1 overflow-x-auto pb-1" role="tablist" aria-label="Tipo de gráfica">
