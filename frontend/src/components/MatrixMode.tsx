@@ -8,6 +8,9 @@ import { useState, type FormEvent } from "react";
 
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
+
+const submitMatrices = (endpoint: Parameters<typeof submitAndRecord>[0], payload: Record<string, unknown>, label: string) =>
+  submitAndRecord(endpoint, payload, label, "Matrices");
 import { useUIStore } from "../store/useUIStore";
 import { ResultPanel } from "./ResultPanel";
 
@@ -204,35 +207,35 @@ export function MatrixMode() {
         operation === "dot" ||
         operation === "cross"
       ) {
-        result = await submitAndRecord(
+        result = await submitMatrices(
           "/matrix/operations",
           { operation, matrix_a: matrixA, matrix_b: matrixB },
           `Matrices ${rowsA}x${colsA} ${operation} ${rowsB}x${colsB}`,
         );
       } else if (operation === "transpose") {
-        result = await submitAndRecord("/matrix/transpose", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/transpose", { matrix: matrixA }, label);
       } else if (operation === "determinant") {
-        result = await submitAndRecord("/matrix/determinant", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/determinant", { matrix: matrixA }, label);
       } else if (operation === "inverse") {
-        result = await submitAndRecord("/matrix/inverse", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/inverse", { matrix: matrixA }, label);
       } else if (operation === "ref") {
-        result = await submitAndRecord("/matrix/ref", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/ref", { matrix: matrixA }, label);
       } else if (operation === "rref") {
-        result = await submitAndRecord("/matrix/rref", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/rref", { matrix: matrixA }, label);
       } else if (operation === "norm") {
-        result = await submitAndRecord("/matrix/norm", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/norm", { matrix: matrixA }, label);
       } else if (operation === "trace") {
-        result = await submitAndRecord("/matrix/trace", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/trace", { matrix: matrixA }, label);
       } else if (operation === "rank") {
-        result = await submitAndRecord("/matrix/rank", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/rank", { matrix: matrixA }, label);
       } else if (operation === "power") {
-        result = await submitAndRecord(
+        result = await submitMatrices(
           "/matrix/power",
           { matrix: matrixA, exponent: Number(exponent) },
           `${label} (n=${exponent})`,
         );
       } else {
-        result = await submitAndRecord("/matrix/eigen", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/eigen", { matrix: matrixA }, label);
       }
 
       setLastResult(result);
