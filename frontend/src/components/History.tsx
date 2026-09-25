@@ -39,18 +39,22 @@ export function History() {
   }
 
   if (entries.length === 0) {
-    return <p className="text-sm text-muted">Todavía no hay historial en esta sesión.</p>;
+    return (
+      <div className="rounded-xl border border-dashed border-paper-line bg-paper p-6 text-center">
+        <p className="text-sm font-medium text-ink">Todavía no hay historial en esta sesión.</p>
+        <p className="mt-1 text-xs text-muted">Las operaciones recientes aparecerán aquí y podrás reutilizarlas.</p>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-muted">Historial</h2>
+      <div className="flex items-center justify-end">
         <button
           type="button"
           onClick={clearHistory}
           aria-label="Borrar historial"
-          className="text-xs text-muted hover:text-ink"
+          className="rounded-lg border border-paper-line bg-paper px-3 py-2 text-xs font-medium text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/30"
         >
           Borrar historial
         </button>
@@ -60,20 +64,30 @@ export function History() {
         {entries.map((entry: HistoryEntry) => (
           <li
             key={entry.id}
-            className="flex items-center justify-between rounded border border-paper-line bg-paper px-3 py-2"
+            className="rounded-xl border border-paper-line bg-paper p-3 shadow-sm"
           >
-            <div>
-              <p className="text-sm text-ink">{entry.label}</p>
-              <p className="text-xs text-muted">{entry.operation}</p>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="break-words text-sm font-medium text-ink">{entry.label}</p>
+                <p className="mt-0.5 text-xs text-muted">{entry.operation}</p>
+                {(entry.resultText || entry.resultLatex) && (
+                  <p className="mt-1 break-words text-xs text-marker">{entry.resultText ?? entry.resultLatex}</p>
+                )}
+              </div>
+              <time className="shrink-0 text-[10px] text-muted" dateTime={new Date(entry.timestamp).toISOString()}>
+                {new Date(entry.timestamp).toLocaleString()}
+              </time>
             </div>
-            <button
+            <div className="mt-3 flex justify-end">
+              <button
               type="button"
               onClick={() => handleReuse(entry.id)}
               aria-label={`Reusar entrada: ${entry.label}`}
-              className="rounded border border-paper-line px-2 py-1 text-xs text-muted hover:bg-paper-line/40"
-            >
-              Reusar
-            </button>
+                className="rounded-lg border border-paper-line bg-paper-soft px-3 py-1.5 text-xs font-medium text-ink hover:bg-paper-line/40"
+              >
+                Reusar
+              </button>
+            </div>
           </li>
         ))}
       </ul>
