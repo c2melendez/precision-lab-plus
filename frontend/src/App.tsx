@@ -168,7 +168,7 @@ export default function App() {
             </ul>
           </nav>
 
-          <div className="space-y-1 border-t border-paper-line px-2 py-3">
+          <div className={`space-y-1 border-t border-paper-line px-2 py-3 ${hasFixedDock ? "mb-24" : ""}`}>
             <button
               type="button"
               onClick={() => setShowHistory((current) => !current)}
