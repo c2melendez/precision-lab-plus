@@ -247,7 +247,7 @@ export function StatisticsMode() {
   const btnPrimaryClass = "rounded bg-graph py-2 text-xs font-medium text-white hover:bg-graph/90";
 
   return (
-    <div className="mx-auto max-w-lg space-y-4 rounded-lg border border-paper-line bg-paper-soft p-5 shadow-sm lg:max-w-2xl dt:max-w-3xl">
+    <div className="mx-auto max-w-lg space-y-4 rounded-lg border border-paper-line bg-white p-5 text-slate-900 shadow-sm lg:max-w-2xl dt:max-w-3xl">
       <div className="flex gap-1 rounded-lg border border-paper-line p-1 text-sm">
         {TABS.map((t) => (
           <button
