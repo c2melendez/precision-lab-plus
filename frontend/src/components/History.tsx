@@ -68,8 +68,13 @@ export function History() {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="break-words text-sm font-medium text-ink">{entry.label}</p>
-                <p className="mt-0.5 text-xs text-muted">{entry.operation}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-marker-soft px-2 py-0.5 text-[10px] font-semibold text-marker-text">
+                    {entry.sourceModule ?? "Científica"}
+                  </span>
+                  <span className="text-[10px] font-medium text-muted">{entry.operation}</span>
+                </div>
+                <p className="mt-1 break-words text-sm font-medium text-ink">{entry.label}</p>
                 {(entry.resultText || entry.resultLatex) && (
                   <p className="mt-1 break-words text-xs text-marker">{entry.resultText ?? entry.resultLatex}</p>
                 )}
