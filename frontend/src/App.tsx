@@ -122,7 +122,7 @@ export default function App() {
         <aside
           aria-label="Navegación principal"
           data-sidebar-state={sidebarExpanded ? "expanded" : "compact"}
-          className={`sticky top-0 z-40 flex h-screen shrink-0 flex-col border-r border-paper-line bg-paper-soft transition-[width] duration-200 ${sidebarExpanded ? "w-[72px] md:w-60" : "w-[72px]"}`}
+          className={`sticky top-0 z-10 flex h-screen shrink-0 flex-col border-r border-paper-line bg-paper-soft transition-[width] duration-200 ${sidebarExpanded ? "w-[72px] md:w-60" : "w-[72px]"}`}
         >
           <header className={`flex min-h-[72px] items-center justify-center gap-2 border-b border-paper-line px-3 ${sidebarExpanded ? "flex-col md:flex-row md:justify-start" : ""}`}>
             <div className={`min-w-0 overflow-hidden ${sidebarExpanded ? "w-full md:w-auto md:flex-1" : "w-full"}`}>
@@ -193,7 +193,7 @@ export default function App() {
         <main
           id="main-content"
           tabIndex={-1}
-          className={`mx-auto min-h-screen min-w-0 max-w-[1376px] flex-1 px-3 py-5 sm:px-4 sm:py-6 lg:px-6 dt:px-8 ${mainBottomPadding} focus:outline-none`}
+          className={`mx-auto min-h-screen min-w-0 max-w-[1376px] flex-1 overflow-x-hidden px-3 py-5 sm:px-4 sm:py-6 lg:px-6 dt:px-8 ${mainBottomPadding} focus:outline-none`}
         >
           {lastErrorMessage && (
             <p role="alert" className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
