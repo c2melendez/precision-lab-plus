@@ -43,6 +43,9 @@ import type { MathfieldElement } from "mathlive";
 
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
+
+const submitScientific = (endpoint: Parameters<typeof submitAndRecord>[0], payload: Record<string, unknown>, label: string) =>
+  submitAndRecord(endpoint, payload, label, "Científica");
 import { useUIStore } from "../store/useUIStore";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useLayoutModeStore } from "../store/useLayoutModeStore";
@@ -147,7 +150,7 @@ export function BasicMode() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitScientific(
         "/solve/system",
         { equations, variables: variableList },
         `Sistema: ${equations.join(" ; ")}`,
@@ -181,7 +184,7 @@ export function BasicMode() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitScientific(
         "/inequality/system",
         { inequalities: inequalitiesBackend, variables: variableList },
         `Sistema: ${inequalitiesBackend.join(" ; ")}`,
@@ -249,19 +252,19 @@ export function BasicMode() {
     try {
       const result =
         intent.kind === "partialDerivative"
-          ? await submitAndRecord(
+          ? await submitScientific(
               "/derivative/partial",
               { expression: trimmedInner, variable: intent.variable },
               `∂/∂${intent.variable} [${trimmedInner}]`,
             )
           : intent.kind === "derivative"
-            ? await submitAndRecord(
+            ? await submitScientific(
                 "/derivative",
                 { expression: trimmedInner, variable: intent.variable, order: intent.order },
                 `d/d${intent.variable} [${trimmedInner}]`,
               )
             : intent.kind === "integral"
-            ? await submitAndRecord(
+            ? await submitScientific(
                 "/integral",
                 {
                   expression: trimmedInner,
@@ -273,7 +276,7 @@ export function BasicMode() {
                 `∫ ${trimmedInner}`,
               )
             : intent.kind === "limit"
-              ? await submitAndRecord(
+              ? await submitScientific(
                   "/limit",
                   // Corrección post-auditoría: calculusIntent.ts ahora
                   // reconoce la notación lateral con un escáner propio (ver
@@ -283,14 +286,14 @@ export function BasicMode() {
                   `lim[${intent.variable}->${intent.point}] ${trimmedInner}`,
                 )
               : intent.kind === "ode"
-                ? await submitAndRecord("/ode", { expression: trimmedInner }, trimmedInner)
+                ? await submitScientific("/ode", { expression: trimmedInner }, trimmedInner)
                 : intent.kind === "residue"
-                  ? await submitAndRecord(
+                  ? await submitScientific(
                       "/complex/residue",
                       { expression: trimmedInner, point: latexToBackendSyntax(intent.pointLatex) },
                       `Res(${trimmedInner}, z=${intent.pointLatex})`,
                     )
-                  : await submitAndRecord(
+                  : await submitScientific(
                       "/complex/singularities",
                       { expression: trimmedInner },
                       `Sing(${trimmedInner})`,
@@ -341,10 +344,10 @@ export function BasicMode() {
     setErrorMessage(null);
     try {
       const result = isInequality
-        ? await submitAndRecord("/inequality", { inequality: trimmed }, trimmed)
+        ? await submitScientific("/inequality", { inequality: trimmed }, trimmed)
         : isEquation
-          ? await submitAndRecord("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed)
-          : await submitAndRecord(
+          ? await submitScientific("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed)
+          : await submitScientific(
               "/evaluate",
               {
                 expression: trimmed,
@@ -413,7 +416,7 @@ export function BasicMode() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitScientific(
         "/graph/complex_point",
         { expression: trimmed },
         `Graficar(${trimmed})`,
@@ -445,7 +448,7 @@ export function BasicMode() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitScientific(
         "/graph/2d",
         { expressions: [trimmed], variable: "x" },
         `Graficar(${trimmed})`,
