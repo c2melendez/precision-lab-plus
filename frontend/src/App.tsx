@@ -213,7 +213,7 @@ export default function App() {
         </HistoryDrawer>
       </div>
       <GlobalKeyboardFallback mode={activeMode} />
-      <KeyboardDock />
+      <KeyboardDock sidebarExpanded={sidebarExpanded} />
     </div>
   );
 }
