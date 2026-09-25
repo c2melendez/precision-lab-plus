@@ -10,6 +10,15 @@ import { useHistoryStore } from "../store/useHistoryStore";
 import { callApi, type MathResponse } from "./client";
 import type { KnownEndpoint } from "./endpoints";
 
+function inferSourceModule(endpoint: KnownEndpoint): string {
+  if (endpoint.startsWith("/matrix/")) return "Matrices";
+  if (endpoint.startsWith("/statistics/")) return "Estadística";
+  if (endpoint.startsWith("/graph/")) return "Gráficas";
+  if (endpoint.startsWith("/geometry/")) return "Geometría";
+  if (endpoint.startsWith("/units/")) return "Unidades";
+  return "Científica";
+}
+
 export async function submitAndRecord(
   endpoint: KnownEndpoint,
   payload: Record<string, unknown>,
@@ -18,6 +27,7 @@ export async function submitAndRecord(
   const result = await callApi(endpoint, payload);
 
   useHistoryStore.getState().addEntry({
+    sourceModule: inferSourceModule(endpoint),
     operation: result.operation,
     endpointUrl: endpoint,
     requestPayload: payload,
