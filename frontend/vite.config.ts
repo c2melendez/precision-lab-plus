@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["apple-touch-icon.png"],
+      includeAssets: ["precision-lab-plus.svg", "precision-lab-plus-maskable.svg", "apple-touch-icon.png"],
       manifest: {
         // Fase Z, Módulo Z0 (spec_rediseno_visual.md sección 12.2):
         // nombre visible en pantalla de inicio/instalación PWA — antes
@@ -17,7 +17,7 @@ export default defineConfig({
         // ahora "Precision Lab Plus"). Los íconos ya eran los correctos
         // (icon-192.png/icon-512.png, activos existentes, sin cambios).
         name: "Precision Lab Plus",
-        short_name: "Precision Lab",
+        short_name: "Precision Lab Plus",
         description: "Calculadora científica con resolución simbólica paso a paso",
         lang: "es",
         theme_color: "#1d4ed8",
@@ -25,6 +25,8 @@ export default defineConfig({
         display: "standalone",
         start_url: "/",
         icons: [
+          { src: "precision-lab-plus.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
+          { src: "precision-lab-plus-maskable.svg", sizes: "any", type: "image/svg+xml", purpose: "maskable" },
           { src: "icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "icon-512.png", sizes: "512x512", type: "image/png" },
           { src: "icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
