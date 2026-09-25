@@ -106,31 +106,38 @@ function MatrixGrid({
   onCellChange,
 }: MatrixGridProps) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-muted">{label}</span>
-        <Stepper label="Filas" value={rows} onChange={(n) => onDimensionsChange(n, cols)} />
-        <Stepper label="Col" value={cols} onChange={(n) => onDimensionsChange(rows, n)} />
+    <section aria-label={label} className="space-y-3 rounded-xl border border-paper-line bg-paper p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h3 className="text-sm font-semibold text-ink">{label}</h3>
+          <p className="text-[11px] text-muted">{rows} × {cols}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Stepper label="Filas" value={rows} onChange={(n) => onDimensionsChange(n, cols)} />
+          <Stepper label="Col" value={cols} onChange={(n) => onDimensionsChange(rows, n)} />
+        </div>
       </div>
-      <div
-        role="group"
-        aria-label={`Celdas de ${label}`}
-        className="inline-grid gap-1"
-        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-      >
-        {matrix.map((row, r) =>
-          row.map((cell, c) => (
-            <input
-              key={`${r}-${c}`}
-              aria-label={`${label} celda fila ${r + 1} columna ${c + 1}`}
-              value={cell}
-              onChange={(e) => onCellChange(r, c, e.target.value)}
-              className="w-14 rounded border border-paper-line bg-paper-soft px-1 py-1 text-center text-sm"
-            />
-          )),
-        )}
+      <div className="max-w-full overflow-x-auto pb-1">
+        <div
+          role="group"
+          aria-label={`Celdas de ${label}`}
+          className="inline-grid min-w-max gap-1 rounded-lg bg-paper-soft p-2"
+          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+        >
+          {matrix.map((row, r) =>
+            row.map((cell, c) => (
+              <input
+                key={`${r}-${c}`}
+                aria-label={`${label} celda fila ${r + 1} columna ${c + 1}`}
+                value={cell}
+                onChange={(e) => onCellChange(r, c, e.target.value)}
+                className="w-12 rounded-md border border-paper-line bg-paper px-1.5 py-1.5 text-center text-sm text-ink sm:w-14"
+              />
+            )),
+          )}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
