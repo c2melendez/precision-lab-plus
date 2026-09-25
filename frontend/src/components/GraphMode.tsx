@@ -16,6 +16,7 @@ import type { MathfieldElement } from "mathlive";
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
 import { useGraphColorPaletteStore } from "../store/useGraphColorPaletteStore";
+import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useUIStore } from "../store/useUIStore";
 import { latexToBackendSyntax, NaturalMathField } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
@@ -32,6 +33,42 @@ const GraphViewer = lazy(() => import("./GraphViewer"));
 // depende de GraphViewer.tsx — sigue sin forzar el bundle eager.
 
 const MAX_EXPRESSIONS = 5;
+
+function useGlobalGraphKeyboard(field: MathfieldElement | null, formRef: { current: HTMLFormElement | null }) {
+  const setContent = useKeyboardPanelStore((s) => s.setContent);
+  const clearContent = useKeyboardPanelStore((s) => s.clearContent);
+  const setCompactActions = useKeyboardPanelStore((s) => s.setCompactActions);
+  const clearCompactActions = useKeyboardPanelStore((s) => s.clearCompactActions);
+  const clearBasicContent = useKeyboardPanelStore((s) => s.clearBasicContent);
+
+  useEffect(() => {
+    clearBasicContent();
+    setContent(
+      <NaturalMathKeyboard
+        field={field}
+        onSubmit={() => formRef.current?.requestSubmit()}
+      />,
+    );
+  }, [field, formRef, setContent, clearBasicContent]);
+
+  useEffect(() => {
+    setCompactActions({
+      onEnter: () => formRef.current?.requestSubmit(),
+      onBackspace: () => {
+        field?.focus();
+        field?.executeCommand("deleteBackward");
+      },
+    });
+  }, [field, formRef, setCompactActions]);
+
+  useEffect(() => {
+    return () => {
+      clearContent();
+      clearCompactActions();
+      clearBasicContent();
+    };
+  }, [clearContent, clearCompactActions, clearBasicContent]);
+}
 
 type GraphKind = "2d" | "3d" | "parametric" | "polar";
 
@@ -139,6 +176,7 @@ function Graph2DForm() {
   const [latexRows, setLatexRows] = useState<string[]>([""]);
   const [mathFields, setMathFields] = useState<(MathfieldElement | null)[]>([null]);
   const [activeRow, setActiveRow] = useState(0);
+  useGlobalGraphKeyboard(mathFields[activeRow] ?? null, formRef);
   const [variable, setVariable] = useState("x");
   const [xMin, setXMin] = useState("");
   const [xMax, setXMax] = useState("");
@@ -322,11 +360,6 @@ function Graph2DForm() {
             ))}
           </div>
         )}
-        <NaturalMathKeyboard
-          field={mathFields[activeRow] ?? null}
-          onSubmit={() => formRef.current?.requestSubmit()}
-          onGoToDerivative={() => setActiveMode("derivative")}
-        />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -427,6 +460,7 @@ function Graph3DForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const [latex, setLatex] = useState("");
   const [mathField, setMathField] = useState<MathfieldElement | null>(null);
+  useGlobalGraphKeyboard(mathField, formRef);
   const [xVar, setXVar] = useState("x");
   const [yVar, setYVar] = useState("y");
   const [xMin, setXMin] = useState("-10");
@@ -488,11 +522,6 @@ function Graph3DForm() {
           ariaLabel="Expresión"
           placeholder="x^2+y^2"
           fieldRef={setMathField}
-        />
-        <NaturalMathKeyboard
-          field={mathField}
-          onSubmit={() => formRef.current?.requestSubmit()}
-          onGoToDerivative={() => setActiveMode("derivative")}
         />
       </div>
 
@@ -604,6 +633,7 @@ function GraphParametricForm() {
   const [xMathField, setXMathField] = useState<MathfieldElement | null>(null);
   const [yMathField, setYMathField] = useState<MathfieldElement | null>(null);
   const [activeField, setActiveField] = useState<"x" | "y">("x");
+  useGlobalGraphKeyboard(activeField === "x" ? xMathField : yMathField, formRef);
   const [parameter, setParameter] = useState("t");
   const [tMin, setTMin] = useState("0");
   const [tMax, setTMax] = useState("6.283185307179586");
@@ -706,11 +736,6 @@ function GraphParametricForm() {
             Teclado para y(t)
           </button>
         </div>
-        <NaturalMathKeyboard
-          field={activeField === "x" ? xMathField : yMathField}
-          onSubmit={() => formRef.current?.requestSubmit()}
-          onGoToDerivative={() => setActiveMode("derivative")}
-        />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -782,6 +807,7 @@ function GraphPolarForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const [rLatex, setRLatex] = useState("");
   const [rMathField, setRMathField] = useState<MathfieldElement | null>(null);
+  useGlobalGraphKeyboard(rMathField, formRef);
   const [variable, setVariable] = useState("theta");
   const [thetaMin, setThetaMin] = useState("0");
   const [thetaMax, setThetaMax] = useState("6.283185307179586");
@@ -845,11 +871,6 @@ function GraphPolarForm() {
         />
       </div>
 
-      <NaturalMathKeyboard
-        field={rMathField}
-        onSubmit={() => formRef.current?.requestSubmit()}
-        onGoToDerivative={() => setActiveMode("derivative")}
-      />
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
