@@ -16,7 +16,7 @@ test("M14: Plus conserva identidad PL+ y sidebar contractual responsive", async 
   await expect(brandImage).toBeVisible();
 
   if (startsCompact) {
-    await expect(page.getByRole("heading", { name: "Precision Lab Plus", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Precision Lab Plus", exact: true })).toHaveClass(/sr-only/);
   } else {
     await expect(page.getByRole("heading", { name: "Precision Lab Plus", exact: true })).toBeVisible();
   }
@@ -40,7 +40,7 @@ test("M14: Plus conserva identidad PL+ y sidebar contractual responsive", async 
     await page.setViewportSize({ width: 1100, height: original.height });
     await expect(sidebar).toHaveAttribute("data-sidebar-state", "compact");
     await expect(brandImage).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Precision Lab Plus", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Precision Lab Plus", exact: true })).toHaveClass(/sr-only/);
 
     await page.setViewportSize(original);
     await expect(sidebar).toHaveAttribute("data-sidebar-state", "expanded");
