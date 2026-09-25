@@ -9,6 +9,9 @@
 
 import { useState } from "react";
 import { submitAndRecord } from "../api/submitWithHistory";
+
+const submitStatistics = (endpoint: Parameters<typeof submitAndRecord>[0], payload: Record<string, unknown>, label: string) =>
+  submitAndRecord(endpoint, payload, label, "Estadística");
 import type { MathResponse } from "../api/client";
 import { ResultPanel } from "./ResultPanel";
 
@@ -76,7 +79,7 @@ export function StatisticsMode() {
     }
     setDescriptiveLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/descriptive",
         { values, stat, variance_kind: varianceKind, percentile_p: percentileP },
         `Estadística descriptiva: ${stat}(${values.join(",")})`,
@@ -98,7 +101,7 @@ export function StatisticsMode() {
     const r = Number(rStr);
     setCombinatoricsLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/combinatorics",
         { n, r, fn },
         `Combinatoria: ${fn}(${n}${fn === "factorial" ? "" : `,${r}`})`,
@@ -125,7 +128,7 @@ export function StatisticsMode() {
   async function runBinomial(query: "pmf" | "cdf" | "survival" | "mean" | "variance") {
     setDistributionLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/binomial",
         { n: Number(binN), p: Number(binP), k: Number(binK), query },
         `Binomial(${binN},${binP}) ${query}`,
@@ -139,7 +142,7 @@ export function StatisticsMode() {
   async function runNormal(query: "cdf" | "range" | "zscore") {
     setDistributionLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/normal",
         { mu: Number(mu), sigma: Number(sigma), x: Number(normX), a: Number(normA), b: Number(normB), query },
         `Normal(${mu},${sigma}) ${query}`,
@@ -162,7 +165,7 @@ export function StatisticsMode() {
   async function runPoisson(query: "pmf" | "cdf" | "mean" | "variance") {
     setDistributionLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/poisson",
         { lam: Number(poissonLam), k: Number(poissonK), query },
         `Poisson(${poissonLam}) ${query}`,
@@ -176,7 +179,7 @@ export function StatisticsMode() {
   async function runUniform(query: "cdf" | "mean" | "variance") {
     setDistributionLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/uniform",
         { a: Number(uniformA), b: Number(uniformB), x: Number(uniformX), query },
         `Uniforme(${uniformA},${uniformB}) ${query}`,
@@ -190,7 +193,7 @@ export function StatisticsMode() {
   async function runExponential(query: "cdf" | "mean" | "variance") {
     setDistributionLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/exponential",
         { lam: Number(expLam), x: Number(expX), query },
         `Exponencial(${expLam}) ${query}`,
@@ -235,7 +238,7 @@ export function StatisticsMode() {
     }
     setCorrelationLoading(true);
     try {
-      const result = await submitAndRecord("/statistics/correlation", { x, y, query }, `Correlación: ${query}`);
+      const result = await submitStatistics("/statistics/correlation", { x, y, query }, `Correlación: ${query}`);
       setCorrelationResult(result);
     } finally {
       setCorrelationLoading(false);
