@@ -122,7 +122,7 @@ export default function App() {
         <aside
           aria-label="Navegación principal"
           data-sidebar-state={sidebarExpanded ? "expanded" : "compact"}
-          className={`sticky top-0 z-10 flex h-screen shrink-0 flex-col border-r border-[#0b467d] bg-[#052b52] text-white transition-[width] duration-200 ${sidebarExpanded ? "w-[72px] md:w-60" : "w-[72px]"}`}
+          className={`sticky top-0 z-10 flex h-screen shrink-0 flex-col border-r border-[#0b467d] bg-[#052b52] text-white transition-[width] duration-200 ${sidebarExpanded ? "w-60" : "w-[72px]"}`}
         >
           <header className={`relative flex shrink-0 border-b border-white/15 ${sidebarExpanded ? "min-h-[112px] flex-col items-center px-2 py-3 md:min-h-[104px] md:items-start md:px-3" : "min-h-[112px] flex-col items-center px-2 py-3"}`}>
             <ProjectBrand showName={sidebarExpanded} />
@@ -153,7 +153,7 @@ export default function App() {
                       title={!sidebarExpanded ? MODE_LABELS[mode] : undefined}
                       className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker ${
                         active
-                          ? "bg-[#1478ff] text-white shadow-sm"
+                          ? "bg-[#1268db] text-white shadow-sm"
                           : "text-white/80 hover:bg-white/10 hover:text-white"
                       }`}
                     >
