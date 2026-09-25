@@ -188,7 +188,6 @@ function Graph2DForm() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
-  const setActiveMode = useUIStore((state) => state.setActiveMode);
   const pendingGraphResult = useUIStore((state) => state.pendingGraphResult);
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
 
@@ -473,7 +472,6 @@ function Graph3DForm() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
-  const setActiveMode = useUIStore((state) => state.setActiveMode);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -643,7 +641,6 @@ function GraphParametricForm() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
-  const setActiveMode = useUIStore((state) => state.setActiveMode);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -817,7 +814,6 @@ function GraphPolarForm() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
-  const setActiveMode = useUIStore((state) => state.setActiveMode);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
