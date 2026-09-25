@@ -155,7 +155,7 @@ export function KeyboardBasicPanel({ field, onSubmit, lastAnswerLatex }: Keyboar
     const glyphStr = String(k.glyph);
     const base = "min-h-[38px] rounded-lg border shadow-sm transition-colors";
     if (k.unavailable) return `${base} border-dashed border-paper-line bg-paper text-muted/60 a11y-key-sm`;
-    if (k.ariaLabel === "calcular") return `col-span-2 ${base} border-graph bg-graph text-paper a11y-key-sm font-semibold hover:bg-graph/90`;
+    if (k.ariaLabel === "calcular") return `col-span-2 ${base} border-graph bg-graph text-white a11y-key-sm font-semibold hover:bg-graph/90`;
     if (glyphStr === "=") return `${base} border-marker/50 bg-paper-soft text-marker a11y-key-sm font-semibold hover:bg-marker-soft/30`;
     if (["×", "−", "+", "÷"].includes(glyphStr)) return `${base} border-marker/25 bg-marker-soft text-marker-text a11y-key-base font-semibold hover:bg-marker-soft/70`;
     if (["<", ">", "≤", "≥"].includes(glyphStr)) return `${base} border-marker/45 bg-paper-soft text-marker a11y-key-sm font-semibold hover:bg-marker-soft/20`;
