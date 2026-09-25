@@ -17,7 +17,7 @@ export default defineConfig({
         // ahora "Precision Lab Plus"). Los íconos ya eran los correctos
         // (icon-192.png/icon-512.png, activos existentes, sin cambios).
         name: "Precision Lab Plus",
-        short_name: "Precision Lab Plus",
+        short_name: "Precision Lab",
         description: "Calculadora científica con resolución simbólica paso a paso",
         lang: "es",
         theme_color: "#1d4ed8",
