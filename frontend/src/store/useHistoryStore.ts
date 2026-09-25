@@ -19,6 +19,7 @@ export const HISTORY_MAX_ENTRIES = 50;
 
 export interface HistoryEntry {
   id: string;
+  sourceModule?: string;
   operation: string;
   endpointUrl: string;
   requestPayload: Record<string, unknown>;
