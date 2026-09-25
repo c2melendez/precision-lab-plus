@@ -23,11 +23,12 @@ export async function submitAndRecord(
   endpoint: KnownEndpoint,
   payload: Record<string, unknown>,
   label: string,
+  sourceModule?: string,
 ): Promise<MathResponse> {
   const result = await callApi(endpoint, payload);
 
   useHistoryStore.getState().addEntry({
-    sourceModule: inferSourceModule(endpoint),
+    sourceModule: sourceModule ?? inferSourceModule(endpoint),
     operation: result.operation,
     endpointUrl: endpoint,
     requestPayload: payload,
