@@ -12,11 +12,9 @@ export function ProjectBrand({ showName = true }: ProjectBrandProps) {
         aria-hidden="true"
         className="h-10 w-10 shrink-0 rounded-xl shadow-sm"
       />
-      {showName && (
-        <h1 className="whitespace-nowrap text-[15px] font-semibold leading-tight text-white">
-          Precision Lab <span className="text-sky-300">Plus</span>
-        </h1>
-      )}
+      <h1 className={showName ? "whitespace-nowrap text-[15px] font-semibold leading-tight text-white" : "sr-only"}>
+        Precision Lab <span className="text-sky-300">Plus</span>
+      </h1>
     </div>
   );
 }
