@@ -1,16 +1,22 @@
-export function ProjectBrand() {
+interface ProjectBrandProps {
+  showName?: boolean;
+}
+
+export function ProjectBrand({ showName = true }: ProjectBrandProps) {
   const brandIcon = `${import.meta.env.BASE_URL}precision-lab-plus.svg`;
   return (
-    <div className="flex min-w-0 items-center gap-2.5" aria-label="Precision Lab Plus">
+    <div className="flex min-w-0 flex-col items-start gap-1.5" aria-label="Precision Lab Plus">
       <img
         src={brandIcon}
         alt=""
         aria-hidden="true"
         className="h-10 w-10 shrink-0 rounded-xl shadow-sm"
       />
-      <h1 className="min-w-0 truncate text-lg font-semibold text-ink">
-        Precision Lab <span className="text-marker-text">Plus</span>
-      </h1>
+      {showName && (
+        <h1 className="hidden whitespace-nowrap text-[15px] font-semibold leading-tight text-white md:block">
+          Precision Lab <span className="text-sky-300">Plus</span>
+        </h1>
+      )}
     </div>
   );
 }
