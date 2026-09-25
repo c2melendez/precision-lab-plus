@@ -75,7 +75,7 @@ export function KeyboardPanel({ isOpen, onClose, children, sidebarExpanded }: Ke
       </div>
 
       <div className="flex items-center justify-between px-4 pb-2 pt-1">
-        <span className="text-sm font-medium text-bone/80 dt:text-ink">Teclado matemático</span>
+        <span className="text-sm font-medium text-ink dt:text-ink">Teclado matemático</span>
         <button
           ref={closeButtonRef}
           type="button"
