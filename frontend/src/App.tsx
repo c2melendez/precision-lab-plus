@@ -1,14 +1,12 @@
 /**
- * src/App.tsx — layout base + selector de modos + historial (spec,
- * sección 11, Módulo 12).
+ * S26.3 — shell global contractual.
  *
- * Accesibilidad final (Módulo 12): skip-link al contenido principal,
- * `aria-current` en el modo activo, `aria-expanded` en el toggle de
- * historial, foco visible (`focus-visible:outline`) en todos los
- * controles interactivos añadidos aquí.
+ * Navegación principal mediante sidebar izquierdo expandible/compacto.
+ * El contenido de los módulos, motores, teclado global e historial se
+ * conservan sin cambios funcionales.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { BasicMode } from "./components/BasicMode";
 import { SimpleBasicMode } from "./components/SimpleBasicMode";
@@ -49,37 +47,23 @@ const MODE_LABELS: Record<CalculatorMode, string> = {
   units: "Unidades",
 };
 
-// Punto 4 del rediseño de teclado (pedido de Carlos): Derivada/Integral/
-// Ecuación/Sistema ya no deben verse en el frontend — su función quedó
-// cubierta por el router de Fase 1/2 dentro de "Científica" (ecuación/
-// sistema/derivada/integral, todo en una sola pantalla vía
-// calculusIntent.ts + submitCalculus). Los modos en sí NO se eliminan
-// (siguen existiendo, siguen siendo válidos si algo interno navega ahí,
-// ej. antes onGoToDerivative), solo se les quita la pestaña visible.
-// Límite sigue el mismo criterio desde que se creó: el router también lo
-// detecta ahora (ver calculusIntent.ts), así que tampoco ocupa un lugar
-// en la navegación principal.
-//
-// P6 (spec v2 §7): "statistics" nueva, visible.
-// P7 (spec v2 §8): "units" nueva, visible — con esto queda el orden
-// final de §9 (previo al Módulo 5): Científica · Basic · Matrices ·
-// Gráficas · Estadística · Unidades.
-//
-// Módulo 5 (hoja-de-ruta-visual.md §5 / spec §3): mismo tratamiento para
-// "simple" (Basic) — confirmado por el usuario. Verificado: a diferencia
-// de precision-lab-lite, SimpleKeyboard.tsx (Full) no tiene ninguna
-// función propia sin equivalente (solo dígitos/paréntesis/AC/⌫/⏎, todo
-// cubierto por BasicMode) — acá la eliminación no deja nada huérfano.
-const VISIBLE_MODES: CalculatorMode[] = ["basic", "matrix", "graph", "statistics", "geometry", "units"];
+const VISIBLE_MODES: CalculatorMode[] = ["basic", "graph", "matrix", "statistics", "geometry", "units"];
 
 const MODE_ICONS: Partial<Record<CalculatorMode, ModeIconName>> = {
   basic: "scientific",
-  matrix: "matrix",
   graph: "graph",
+  matrix: "matrix",
   statistics: "statistics",
   geometry: "geometry",
   units: "units",
 };
+
+const SIDEBAR_STORAGE_KEY = "precision-lab-sidebar-expanded";
+
+function readInitialSidebarExpanded(): boolean {
+  if (typeof window === "undefined") return true;
+  return localStorage.getItem(SIDEBAR_STORAGE_KEY) !== "false";
+}
 
 function ActiveModeForm({ mode }: { mode: CalculatorMode }) {
   switch (mode) {
@@ -115,16 +99,15 @@ export default function App() {
   const setActiveMode = useUIStore((state) => state.setActiveMode);
   const lastErrorMessage = useUIStore((state) => state.lastErrorMessage);
   const [showHistory, setShowHistory] = useState(false);
-  // Módulo P3: sin dock fijo en "stacked" (KeyboardDock retorna null ahí).
-  // Módulo P4: tampoco hay dock fijo en "floating" cuando el viewport es
-  // lo bastante ancho (el teclado vive en su FloatingWindow) — pero SÍ lo
-  // hay si Flotante degrada a Enfoque en viewport angosto, por eso se usa
-  // el mismo hook que KeyboardDock.tsx, no basta con mirar el string de
-  // layoutMode.
+  const [sidebarExpanded, setSidebarExpanded] = useState(readInitialSidebarExpanded);
   const layoutMode = useLayoutModeStore((s) => s.layoutMode);
   const isFloatingWideEnough = useMinWidthMediaQuery(FLOATING_MIN_WIDTH_PX);
   const hasFixedDock = !(layoutMode === "stacked" || (layoutMode === "floating" && isFloatingWideEnough));
   const mainBottomPadding = hasFixedDock ? "pb-56 dt:pb-40" : "pb-8";
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, String(sidebarExpanded));
+  }, [sidebarExpanded]);
 
   return (
     <div className="min-h-screen bg-paper text-ink">
@@ -135,61 +118,82 @@ export default function App() {
         Saltar al contenido principal
       </a>
 
-      <header className="border-b border-paper-line bg-paper-soft px-3 py-3 sm:px-4">
-        <div className="mx-auto flex max-w-[1376px] items-center justify-between gap-2">
-          <ProjectBrand />
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div className="flex min-h-screen">
+        <aside
+          aria-label="Navegación principal"
+          data-sidebar-state={sidebarExpanded ? "expanded" : "compact"}
+          className={`sticky top-0 z-40 flex h-screen shrink-0 flex-col border-r border-paper-line bg-paper-soft transition-[width] duration-200 ${sidebarExpanded ? "w-60" : "w-[72px]"}`}
+        >
+          <div className="flex min-h-[72px] items-center gap-2 border-b border-paper-line px-3">
+            <div className={`min-w-0 flex-1 overflow-hidden ${sidebarExpanded ? "" : "w-9 flex-none"}`}>
+              <ProjectBrand />
+            </div>
+            <button
+              type="button"
+              onClick={() => setSidebarExpanded((current) => !current)}
+              aria-label={sidebarExpanded ? "Contraer navegación" : "Expandir navegación"}
+              aria-expanded={sidebarExpanded}
+              title={sidebarExpanded ? "Contraer navegación" : "Expandir navegación"}
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-muted hover:bg-paper-line/40 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker"
+            >
+              <span aria-hidden="true" className="text-xl leading-none">☰</span>
+            </button>
+          </div>
+
+          <nav aria-label="Módulos" className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
+            <ul className="space-y-1">
+              {VISIBLE_MODES.map((mode) => {
+                const icon = MODE_ICONS[mode];
+                const active = activeMode === mode;
+                return (
+                  <li key={mode}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveMode(mode)}
+                      aria-current={active ? "page" : undefined}
+                      aria-label={!sidebarExpanded ? MODE_LABELS[mode] : undefined}
+                      title={!sidebarExpanded ? MODE_LABELS[mode] : undefined}
+                      className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker ${
+                        active
+                          ? "bg-marker-soft text-marker-text"
+                          : "text-muted hover:bg-paper-line/40 hover:text-ink"
+                      }`}
+                    >
+                      {icon && <ModeIcon name={icon} className="h-5 w-5 shrink-0" />}
+                      {sidebarExpanded && <span className="truncate">{MODE_LABELS[mode]}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          <div className="space-y-1 border-t border-paper-line px-2 py-3">
             <button
               type="button"
               onClick={() => setShowHistory((current) => !current)}
               aria-label="Historial"
               aria-expanded={showHistory}
               aria-controls="history-panel"
-              className="min-h-11 rounded-full border border-paper-line px-3 text-sm text-ink hover:bg-paper-line/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker"
+              title={!sidebarExpanded ? "Historial" : undefined}
+              className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-muted hover:bg-paper-line/40 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker"
             >
-              <span className="hidden sm:inline">Historial</span>
-              <span className="sm:hidden" aria-hidden="true">▤</span>
+              <span aria-hidden="true" className="grid h-5 w-5 shrink-0 place-items-center">▤</span>
+              {sidebarExpanded && <span className="truncate text-sm">Historial</span>}
             </button>
-            <AjustesPopover />
+            <div className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-muted" title={!sidebarExpanded ? "Configuración" : undefined}>
+              <div className="grid h-5 w-5 shrink-0 place-items-center">
+                <AjustesPopover />
+              </div>
+              {sidebarExpanded && <span className="truncate text-sm">Configuración</span>}
+            </div>
           </div>
-        </div>
-      </header>
+        </aside>
 
-      <nav aria-label="Modos de la calculadora" className="border-b border-paper-line bg-paper-soft">
-        <ul className="mx-auto flex max-w-[1376px] flex-nowrap gap-1 overflow-x-auto px-3 py-1.5 sm:justify-center sm:px-4 lg:gap-2">
-          {VISIBLE_MODES.map((mode) => {
-            const icon = MODE_ICONS[mode];
-            return (
-              <li key={mode} className="shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setActiveMode(mode)}
-                  aria-current={activeMode === mode ? "page" : undefined}
-                  className={`flex min-h-11 items-center gap-2 whitespace-nowrap rounded-lg border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker ${
-                    activeMode === mode
-                      ? "border-marker bg-marker-soft text-marker-text"
-                      : "border-transparent text-muted hover:bg-paper-line/40 hover:text-ink"
-                  }`}
-                >
-                  {icon && <ModeIcon name={icon} className="h-4 w-4" />}
-                  <span>{MODE_LABELS[mode]}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-
-      <div className="flex">
-        {/* Módulo 0: padding inferior para que el KeyboardDock fijo no
-            tape el contenido de ningún modo — cambio de layout global,
-            deliberado, ver Cierre del Módulo 0 (mismo criterio que en
-            precision-lab-lite/src/App.tsx). Módulo P3: en "stacked" no
-            hay dock fijo que compensar (ver mainBottomPadding arriba). */}
         <main
           id="main-content"
           tabIndex={-1}
-          className={`mx-auto min-w-0 max-w-[1376px] flex-1 px-3 py-5 sm:px-4 sm:py-6 lg:px-6 dt:px-0 ${mainBottomPadding} focus:outline-none`}
+          className={`mx-auto min-h-screen min-w-0 max-w-[1376px] flex-1 px-3 py-5 sm:px-4 sm:py-6 lg:px-6 dt:px-8 ${mainBottomPadding} focus:outline-none`}
         >
           {lastErrorMessage && (
             <p role="alert" className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -203,6 +207,7 @@ export default function App() {
             </ErrorBoundary>
           </section>
         </main>
+
         <HistoryDrawer isOpen={showHistory} onClose={() => setShowHistory(false)}>
           <ErrorBoundary fallbackLabel="No se pudo mostrar el historial.">
             <History />
