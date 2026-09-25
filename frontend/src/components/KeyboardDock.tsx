@@ -111,8 +111,7 @@ export function KeyboardDock() {
               ver comentario donde se quitó, más abajo). Por eso ya NO
               se oculta en md+: si se ocultara ahí, el numpad básico
               quedaría inalcanzable en tablet/desktop. */}
-          {basicContent && <div className="mb-3">{basicContent}</div>}
-          {content}
+          {content ?? basicContent}
         </KeyboardPanel>
       )}
 
