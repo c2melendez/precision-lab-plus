@@ -4,116 +4,48 @@ Fecha de preparación: 2026-09-26
 Branch: `qa/s26-execution`
 
 ## Objetivo
+Antes de iniciar el Bloque 5, auditar paridad real Lite ↔ Plus en los Bloques 1–4.
 
-Antes de iniciar el Bloque 5, auditar paridad real Lite ↔ Plus en los Bloques 1–4 ya implementados.
-
-Clasificación obligatoria:
-- **PARIDAD**: debe coincidir;
-- **DIFERENCIA INTENCIONAL**: diferencia válida por capacidades reales;
-- **GAP**: divergencia no justificada que debe corregirse antes del Bloque 5.
+Clasificación:
+- **PARIDAD**
+- **DIFERENCIA INTENCIONAL**
+- **GAP**
 
 ## HEAD de código certificado previo al checkpoint
-
 - Lite: `c878da8183cdab6ca791afcacee6841199a5c067`
 - Plus: `40fcf3b3aa2d83fa58943fec603198dd0bb291bb`
 
-Estos son HEAD de código certificado. Los commits posteriores de documentación no sustituyen esta referencia.
+Los commits documentales posteriores no sustituyen estos HEAD.
 
 ## Bloque 1 — Shell / Sidebar / Identidad
+Verificar orden contractual; 240/72 px; auto-colapso <1200; restauración de preferencia; PL/PL+; iconos; Historial/Configuración abajo; H1 accesible; convivencia con teclado; cuatro viewports.
 
-Verificar:
-- Científica → Gráficas → Matrices → Estadística → Geometría → Unidades;
-- 240 px expandido / 72 px compacto;
-- auto-colapso <1200 px y restauración de preferencia;
-- PL / PL+ persistente;
-- iconos equivalentes;
-- Historial y Configuración abajo;
-- H1 accesible en compacto;
-- convivencia con dock/panel de teclado;
-- Desktop/Laptop/Tablet/Mobile.
-
-## Bloque 2 — Configuración / Apariencia / Layout
-
-Verificar:
-- ventana independiente;
-- Claro / Oscuro / Sistema;
-- sidebar sensible al tema;
-- Default=fused, Compacto=stacked, Lateral=split;
-- migración separated/focus/floating → fused;
-- instalación nueva: split;
-- X/Escape/foco;
-- responsive;
-- misma jerarquía visual.
+## Bloque 2 — Configuración
+Verificar ventana independiente; Claro/Oscuro/Sistema; sidebar sensible al tema; Default=fused, Compacto=stacked, Lateral=split; migración legacy a fused; instalación nueva split; X/Escape/foco; responsive.
 
 ## Bloque 3 — Historial
+Verificar operación natural; módulo de origen; fecha/hora; matrices; resultado natural; Reusar; routing; autofill; integral completa; reutilización dentro del módulo actual.
 
-Verificar:
-- ventana independiente centrada;
-- operación natural;
-- módulo de origen;
-- fecha/hora;
-- matrices visuales;
-- resultado matemático natural;
-- Reusar;
-- routing al módulo de origen;
-- autofill editable;
-- integral completa al reutilizar;
-- mismo comportamiento al reutilizar dentro del módulo actual.
+Diferencia conocida: Geometría/Unidades aún no alimentan Historial con la misma cobertura completa.
 
-Diferencia conocida:
-- Geometría/Unidades todavía no alimentan Historial con la misma cobertura completa. Documentarla; no ocultarla.
-
-## Bloque 4 — Resultados + formatos
-
-Verificar:
-- encabezado único;
-- caja visual equivalente;
-- alineación derecha;
-- escala tipográfica equivalente;
-- selector contextual;
-- Exacto / Decimal / Fracción / Científica cuando apliquen;
-- mixta/impropia;
-- matrices/soluciones estructuradas;
-- DD/DMS exclusivo para magnitudes angulares en grados;
-- DD usa °;
-- DMS usa °, ′, ″;
-- RAD conserva formatos numéricos normales.
+## Bloque 4 — Resultados
+Verificar encabezado único; caja equivalente; alineación derecha; escala equivalente; selector contextual; Exacto/Decimal/Fracción/Científica cuando apliquen; mixta/impropia; estructurados; DD/DMS exclusivo para grados; RAD normal.
 
 Diferencias intencionales:
-- Plus conserva Pasos, Resumen, warnings y Copiar;
-- Lite conserva aviso de fallback numérico.
+- Plus: Pasos, Resumen, warnings, Copiar.
+- Lite: fallback numérico local.
 
-## Regla angular vigente
+## Regla angular
+Salida angular en grados → solo:
+- DD: `56.55°`
+- DMS: `56° 33′ 0.0″`
 
-Cuando el resultado sea una magnitud angular en grados, ofrecer solo:
-- **DD** — grados decimales, p. ej. `56.55°`;
-- **DMS** — p. ej. `56° 33′ 0.0″`.
+No mostrar Exacto/Decimal/Fracción/Científica en ese contexto.
 
-No mostrar Exacto / Decimal / Fracción / Científica en ese contexto.
-
-Ejemplos:
-- `56.55° ↔ 56° 33′ 0.0″`
-- DEG: `asin(0.5) → 30° ↔ 30° 0′ 0.0″`
-
-## Método obligatorio
-
-Para cada bloque:
-1. contrato S26.2R;
-2. implementación Lite;
-3. implementación Plus;
-4. pruebas;
-5. runtime visual;
-6. responsive;
-7. accesibilidad;
-8. clasificación PARIDAD / DIFERENCIA INTENCIONAL / GAP.
+## Método
+Contrato → Lite → Plus → pruebas → runtime visual → responsive → accesibilidad → clasificación.
 
 ## Regla de salida
+No iniciar Bloque 5 hasta cerrar la matriz, corregir GAPs y recertificar si hubo cambios.
 
-No iniciar Bloque 5 hasta:
-- completar la matriz B1–B4;
-- corregir GAPs;
-- recertificar si hubo cambios;
-- registrar nuevos HEAD certificados.
-
-Siguiente bloque después del checkpoint:
-**Bloque 5 — teclado global: shell, apertura/cierre y responsive.**
+Siguiente bloque: **Bloque 5 — teclado global: shell, apertura/cierre y responsive.**
