@@ -210,6 +210,7 @@ export function StatisticsMode() {
   const [yRaw, setYRaw] = useState("");
   const [correlationResult, setCorrelationResult] = useState<MathResponse | null>(null);
   const [correlationLoading, setCorrelationLoading] = useState(false);
+  const pendingHistoryReuse = usePendingHistoryReuseStore((s) => s.pending);
   const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
 
   useEffect(() => {
@@ -274,7 +275,7 @@ export function StatisticsMode() {
       }
       setDistributionResult(null);
     }
-  }, [takePendingHistoryReuse]);
+  }, [pendingHistoryReuse, takePendingHistoryReuse]);
 
   async function runCorrelation(query: "correlation" | "slope" | "intercept") {
     let x: number[];
