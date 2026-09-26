@@ -498,3 +498,12 @@ Ejecutar `PARITY_CHECKPOINT_B1_B4.md`. No iniciar Bloque 5 antes de cerrar la au
 - M11 Plus ahora verifica que Compacto abre teclado inline y no dentro de contenedor fixed.
 - B5 Plus también verifica apertura/cierre global en los seis módulos.
 - B6 (contenido/paridad de categorías) no fue modificado.
+
+
+## 2026-09-26 — B5 rerun 1: hallazgos CI/Compacto
+
+- CI frontend falló porque `ResizeObserver` no existe en JSDOM; Stryker reprodujo el mismo fallo en dry-run.
+- Playwright B5 shell/global pasó en Desktop/Tablet/Mobile.
+- Playwright M11 Compacto falló porque Plus no exponía el teclado inline con `role=region`/`aria-label=Teclado matemático`, aunque el contenido sí se renderizaba inline.
+- Correcciones aplicadas: fallback opcional de `ResizeObserver`; semántica accesible de Compacto alineada con Lite.
+- B5 permanece EN CURSO hasta rerun verde.
