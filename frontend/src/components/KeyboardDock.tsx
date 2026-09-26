@@ -94,11 +94,11 @@ export function KeyboardDock({ sidebarExpanded }: { sidebarExpanded: boolean }) 
       setDockBottomOffset(Math.max(0, window.innerHeight - rect.top + 12));
     };
     measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(dock);
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    observer?.observe(dock);
     window.addEventListener("resize", measure);
     return () => {
-      observer.disconnect();
+      observer?.disconnect();
       window.removeEventListener("resize", measure);
     };
   }, [layoutMode, isFloatingWideEnough, hasDockContent, sidebarExpanded]);
