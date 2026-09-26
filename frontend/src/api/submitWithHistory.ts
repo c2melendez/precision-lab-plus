@@ -37,6 +37,7 @@ export async function submitAndRecord(
     resultLatex: result.success ? (result.result_latex ?? undefined) : undefined,
     resultText: result.success ? (result.result_text ?? undefined) : undefined,
     resultType: result.success ? (result.result_type ?? undefined) : undefined,
+    resultData: result.success ? (result.result_data ?? undefined) : undefined,
     hasDetailedSteps: result.has_detailed_steps,
     warnings: result.warnings,
   });
