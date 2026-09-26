@@ -82,7 +82,7 @@ test("Historial: Reusar reconstruye una integral completa en Científica", async
   await expect(panel).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Científica", exact: true })).toHaveAttribute("aria-current", "page");
 
-  const field = page.locator('math-field[aria-label="Expresión matemática"]').first();
+  const field = page.locator('math-field[aria-label="Expresión"]').first();
   await expect(field).toBeVisible();
   const latex = await field.evaluate((node) => (node as unknown as { getValue: (format?: string) => string }).getValue("latex-unstyled"));
   expect(latex).toContain("\\int");
