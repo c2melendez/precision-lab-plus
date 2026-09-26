@@ -131,7 +131,8 @@ describe("History", () => {
     });
 
     renderHistory();
-    const time = screen.getByRole("time");
+    const time = document.querySelector("time");
+    expect(time).not.toBeNull();
     expect(time).toHaveAttribute("dateTime", new Date(timestamp).toISOString());
     expect(time.textContent).toMatch(/\d{2}\/\d{2}\/\d{4}/);
     expect(time.textContent).toMatch(/\d{2}:\d{2}/);
