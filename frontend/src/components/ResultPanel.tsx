@@ -226,12 +226,16 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
 
           <div className="min-h-14 rounded-xl border border-paper-line bg-paper px-4 py-3">
             {(() => {
+            if (activeFormat === "dd" && dmsDegrees !== null) {
+              const cleanDegrees = Math.round((dmsDegrees + Number.EPSILON) * 1e12) / 1e12;
+              return <p className="a11y-scale-result-3xl font-semibold tracking-tight text-ink">{cleanDegrees}°</p>;
+            }
             if (activeFormat === "dms" && dmsValue) {
-              return <MathRenderer latex={dmsValue.latex} fallbackText={dmsValue.text} className="a11y-scale-result-lg" />;
+              return <MathRenderer latex={dmsValue.latex} fallbackText={dmsValue.text} className="a11y-scale-result-3xl" />;
             }
             if (activeFormat === "dec") {
               return approxText ? (
-                <p className="a11y-scale-result-lg text-ink">{approxText}{inverseAngleResult ? "°" : ""}</p>
+                <p className="a11y-scale-result-3xl text-ink">{approxText}{inverseAngleResult ? "°" : ""}</p>
               ) : (
                 <p className="text-sm text-muted">No hay aproximación decimal disponible.</p>
               );
@@ -239,7 +243,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
             if (activeFormat === "scn") {
               const n = result.result_approx != null ? Number(result.result_approx) : NaN;
               return Number.isFinite(n) ? (
-                <p className="a11y-scale-result-lg text-ink">{n.toExponential(6)}{inverseAngleResult ? "°" : ""}</p>
+                <p className="a11y-scale-result-3xl text-ink">{n.toExponential(6)}{inverseAngleResult ? "°" : ""}</p>
               ) : (
                 <p className="text-sm text-muted">No hay un valor numérico para notación científica.</p>
               );
@@ -257,7 +261,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
                 <MathRenderer
                   latex={displayLatex}
                   fallbackText={result.result_text ?? undefined}
-                  className="a11y-scale-result-lg"
+                  className="a11y-scale-result-3xl"
                 />
               );
             }
@@ -267,10 +271,10 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
               <MathRenderer
                 latex={exactLatex}
                 fallbackText={result.result_text ?? undefined}
-                className="a11y-scale-result-lg"
+                className="a11y-scale-result-3xl"
               />
             ) : (
-              <p className="a11y-scale-result-lg text-ink">{result.result_text}</p>
+              <p className="a11y-scale-result-3xl text-ink">{result.result_text}</p>
             );
             })()}
           {/* Fracción exacta (arriba) y decimal (abajo) mostrados juntos —
