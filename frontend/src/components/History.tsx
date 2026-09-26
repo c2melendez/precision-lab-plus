@@ -1,4 +1,6 @@
 import { MathRenderer } from "./MathRenderer";
+import { formatResultApprox } from "./formatNumber";
+import { isInverseTrigAngleExpression } from "./dmsDisplay";
 import { useHistoryStore, type HistoryEntry } from "../store/useHistoryStore";
 
 interface HistoryProps {
@@ -117,6 +119,12 @@ function normalizeBackendMathForDisplay(value: string): string {
     .replace(/\binfinity\b|\binf\b/g, "\\infty")
     .replace(/\bsqrt\s*\(([^()]+)\)/g, "\\sqrt{$1}")
     .replace(/\bsqrt\s*([A-Za-z0-9.]+)/g, "\\sqrt{$1}")
+    // El backend usa asin/acos/atan; en UI se deben presentar como
+    // funciones inversas naturales, no como letras "a s i n".
+    .replace(/\b(asin|acos|atan|asec|acsc|acot)\s*\(/g, (_match, fn: string) => {
+      const direct = fn === "asin" ? "sin" : fn === "acos" ? "cos" : fn === "atan" ? "tan" : fn === "asec" ? "sec" : fn === "acsc" ? "csc" : "cot";
+      return `\\${direct}^{-1}\\left(`;
+    })
     .replace(/\b(sin|cos|tan|sec|csc|cot|ln|log|exp)\s*\(/g, (_match, fn: string) => `\\${fn}\\left(`);
 
   // Fracciones backend simples: (a)/(b) -> \\frac{a}{b}.
@@ -135,6 +143,22 @@ function normalizeBackendMathForDisplay(value: string): string {
   }
 
   return out;
+}
+
+function historyAngularResult(entry: HistoryEntry): string | null {
+  if (entry.requestPayload.angle_unit !== "deg" || entry.resultApprox == null) return null;
+
+  const source = String(
+    entry.inputText ??
+    entry.requestPayload.expression ??
+    entry.requestPayload.equation ??
+    "",
+  );
+  if (!isInverseTrigAngleExpression(source)) return null;
+
+  const numeric = Number(entry.resultApprox);
+  if (!Number.isFinite(numeric)) return null;
+  return `${formatResultApprox(entry.resultApprox)}°`;
 }
 
 function MathOrText({ latex, text, className }: { latex?: string; text?: string; className?: string }) {
@@ -183,6 +207,7 @@ export function History({ onReuse }: HistoryProps) {
           const when = formatDateTime(entry.timestamp);
           const matrices = extractMatrices(entry.requestPayload);
           const matrixResult = entry.sourceModule === "Matrices" ? parseMatrixResult(entry) : null;
+          const angularResult = historyAngularResult(entry);
           return (
             <li key={entry.id} className="rounded-xl border border-paper-line bg-paper p-3 shadow-sm">
               <div className="flex items-start justify-between gap-4">
@@ -205,7 +230,7 @@ export function History({ onReuse }: HistoryProps) {
                     </div>
                   )}
 
-                  {(entry.resultText || entry.resultLatex || matrixResult) && (
+                  {(entry.resultText || entry.resultLatex || entry.resultApprox || matrixResult) && (
                     matrixResult ? (
                       <div className="mt-3">
                         <MatrixGridPreview name="Resultado" values={matrixResult} />
@@ -213,11 +238,15 @@ export function History({ onReuse }: HistoryProps) {
                     ) : (
                       <div className="mt-2 flex flex-wrap items-baseline gap-2">
                         <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Resultado</span>
-                        <MathOrText
-                          latex={entry.resultLatex}
-                          text={entry.resultText}
-                          className="text-sm font-medium text-marker-text"
-                        />
+                        {angularResult ? (
+                          <span className="text-sm font-medium text-marker-text">{angularResult}</span>
+                        ) : (
+                          <MathOrText
+                            latex={entry.resultLatex}
+                            text={entry.resultText}
+                            className="text-sm font-medium text-marker-text"
+                          />
+                        )}
                       </div>
                     )
                   )}
