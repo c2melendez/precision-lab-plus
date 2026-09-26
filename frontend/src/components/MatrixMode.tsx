@@ -160,6 +160,7 @@ export function MatrixMode() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
+  const pendingHistoryReuse = usePendingHistoryReuseStore((s) => s.pending);
   const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
 
   useEffect(() => {
@@ -199,7 +200,7 @@ export function MatrixMode() {
     if (payload.exponent !== undefined) setExponent(String(payload.exponent));
     setLastResult(null);
     setValidationError(null);
-  }, [takePendingHistoryReuse]);
+  }, [pendingHistoryReuse, takePendingHistoryReuse]);
 
   function handleDimensionsA(rows: number, cols: number): void {
     setRowsA(rows);
