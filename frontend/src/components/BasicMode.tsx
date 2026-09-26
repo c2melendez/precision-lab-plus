@@ -89,6 +89,7 @@ export function BasicMode() {
   const isLoading = useUIStore((state) => state.isLoading);
   const setActiveMode = useUIStore((state) => state.setActiveMode);
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
+  const pendingHistoryReuse = usePendingHistoryReuseStore((s) => s.pending);
   const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
 
   useEffect(() => {
@@ -118,7 +119,7 @@ export function BasicMode() {
     }
     setLastResult(null);
     setValidationError(null);
-  }, [takePendingHistoryReuse]);
+  }, [pendingHistoryReuse, takePendingHistoryReuse]);
 
   const systemRows = splitSystemLatex(latex);
 
