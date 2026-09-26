@@ -47,3 +47,46 @@ test("Historial: Reusar vuelve al módulo de origen y muestra matrices, fecha y 
   await expect(page.getByLabel("Matriz B celda fila 1 columna 1")).toHaveValue("5");
   await expect(page.getByLabel("Matriz B celda fila 2 columna 2")).toHaveValue("8");
 });
+
+
+test("Historial: Reusar reconstruye una integral completa en Científica", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("calculadora-cientifica-history", JSON.stringify({
+      schemaVersion: 1,
+      entries: [{
+        id: "integral-history",
+        sourceModule: "Científica",
+        operation: "integral",
+        endpointUrl: "/integral",
+        requestPayload: {
+          expression: "x**2/4",
+          variable: "x"
+        },
+        inputText: "∫ x**2/4",
+        label: "∫ x**2/4",
+        resultLatex: "\\frac{x^{3}}{12}+C",
+        resultText: "x**3/12 + C",
+        hasDetailedSteps: false,
+        warnings: [],
+        timestamp: Date.now(),
+      }],
+    }));
+  });
+
+  await page.goto("./");
+  await page.getByRole("button", { name: "Historial", exact: true }).click();
+  const panel = page.locator("#history-panel");
+  await expect(panel).toBeVisible();
+
+  await panel.getByRole("button", { name: /Reusar entrada/ }).click();
+  await expect(panel).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Científica", exact: true })).toHaveAttribute("aria-current", "page");
+
+  const field = page.locator('math-field[aria-label="Expresión matemática"]').first();
+  await expect(field).toBeVisible();
+  const latex = await field.evaluate((node) => (node as unknown as { getValue: (format?: string) => string }).getValue("latex-unstyled"));
+  expect(latex).toContain("\\int");
+  expect(latex).toContain("x");
+  expect(latex).toMatch(/d\s*x|dx/);
+  expect(latex).not.toBe("x^{2}/4");
+});
