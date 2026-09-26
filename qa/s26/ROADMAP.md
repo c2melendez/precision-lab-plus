@@ -176,9 +176,9 @@ Regla: cada bloque cierra con diff acotado, gates aplicables, revisión contract
 
 1. Shell + sidebar — **PASS DEFINITIVO**.
 2. Configuración + Apariencia + layouts — **PASS DEFINITIVO**.
-3. Historial — **REABIERTO: corrección de paridad en Plus pendiente de recertificación**.
-4. Resultado + formatos — **REABIERTO: paridad Historial↔Resultado en Plus pendiente de recertificación**.
-5. Teclado global shell/open-close/responsive — **PAUSADO hasta recertificar GAP B3/B4 en Plus**.
+3. Historial — **PASS DEFINITIVO**.
+4. Resultado + formatos — **PASS DEFINITIVO**.
+5. Teclado global shell/open-close/responsive — **EN CURSO**.
 6. Paridad de seis categorías del teclado — pendiente.
 7. Científica — pendiente.
 8. Matrices — pendiente.
@@ -231,3 +231,9 @@ Estado operativo:
 - corrección aplicada en Plus;
 - CI + Playwright pendientes;
 - B5: **PAUSADO** hasta recertificación.
+
+
+### B3/B4 recertificados — 2026-09-26
+
+Todos los gates del HEAD `c82779a8b411e7b0a695e3e873e94bf24516e145` quedaron verdes, incluido Playwright E2E.
+La regresión de Historial/Reusar en Plus quedó cerrada y B5 vuelve a estar **EN CURSO**.
