@@ -1002,6 +1002,7 @@ function GraphPolarForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
 export function GraphMode() {
   const [kind, setKind] = useState<GraphKind>("2d");
   const [reuseEntry, setReuseEntry] = useState<HistoryEntry | null>(null);
+  const pendingHistoryReuse = usePendingHistoryReuseStore((s) => s.pending);
   const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
 
   useEffect(() => {
@@ -1012,7 +1013,7 @@ export function GraphMode() {
     else if (entry.endpointUrl.includes("/graph/parametric")) setKind("parametric");
     else if (entry.endpointUrl.includes("/graph/polar")) setKind("polar");
     else setKind("2d");
-  }, [takePendingHistoryReuse]);
+  }, [pendingHistoryReuse, takePendingHistoryReuse]);
 
   return (
     <section aria-label="Gráficas" className="mx-auto min-w-0 w-full max-w-[1376px] overflow-x-hidden space-y-4 rounded-xl border border-paper-line bg-paper-soft p-4 shadow-sm md:p-5">
