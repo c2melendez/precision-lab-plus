@@ -1,20 +1,99 @@
-/**
- * src/components/History.tsx — historial (spec, sección 11): conectado a
- * `useHistoryStore`; "Reusar" pasa por `reuseEntry` (que valida
- * `endpointUrl` contra `KNOWN_ENDPOINTS`, sección 11) antes de reejecutar
- * la llamada.
- */
-
+import { MathRenderer } from "./MathRenderer";
 import { useHistoryStore, type HistoryEntry } from "../store/useHistoryStore";
 
 interface HistoryProps {
   onReuse: (entry: HistoryEntry) => void;
 }
 
+const OPERATION_LABELS: Record<string, string> = {
+  evaluate: "Cálculo",
+  solve: "Resolver ecuación",
+  inequality: "Resolver inecuación",
+  derivative: "Derivada",
+  partial_derivative: "Derivada parcial",
+  integral: "Integral",
+  limit: "Límite",
+  ode: "Ecuación diferencial",
+  matrix_operation: "Operación de matrices",
+  matrix_determinant: "Determinante",
+  matrix_inverse: "Matriz inversa",
+  matrix_transpose: "Matriz transpuesta",
+  matrix_rank: "Rango de matriz",
+  matrix_ref: "Forma escalonada",
+  matrix_rref: "Forma escalonada reducida",
+  matrix_trace: "Traza",
+  statistics_descriptive: "Estadística descriptiva",
+  statistics_combinatorics: "Combinatoria",
+  statistics_correlation: "Correlación",
+  graph_2d: "Gráfica 2D",
+  graph_3d: "Gráfica 3D",
+  graph_parametric: "Gráfica paramétrica",
+  graph_polar: "Gráfica polar",
+};
+
+function naturalOperation(operation: string): string {
+  if (OPERATION_LABELS[operation]) return OPERATION_LABELS[operation];
+  return operation
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatDateTime(timestamp: number): { date: string; time: string } {
+  const date = new Date(timestamp);
+  return {
+    date: date.toLocaleDateString(undefined, { day: "2-digit", month: "2-digit", year: "numeric" }),
+    time: date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+  };
+}
+
+function extractMatrices(payload: Record<string, unknown>): Array<{ name: string; values: unknown[][] }> {
+  const labels: Record<string, string> = {
+    matrix: "A",
+    matrix_a: "A",
+    matrix_b: "B",
+  };
+  return Object.entries(payload)
+    .filter(([, value]) => Array.isArray(value) && (value as unknown[]).every((row) => Array.isArray(row)))
+    .map(([key, value], index) => ({
+      name: labels[key] ?? String.fromCharCode(65 + index),
+      values: value as unknown[][],
+    }));
+}
+
+function MatrixPayload({ payload }: { payload: Record<string, unknown> }) {
+  const matrices = extractMatrices(payload);
+  if (matrices.length === 0) return null;
+  return (
+    <div className="mt-2 flex flex-wrap gap-3">
+      {matrices.map(({ name, values }) => (
+        <div key={name} className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-muted">{name} =</span>
+          <div className="rounded-lg border border-paper-line bg-paper-soft px-2 py-1">
+            {values.map((row, rowIndex) => (
+              <div key={rowIndex} className="grid grid-flow-col auto-cols-min justify-center gap-2 font-mono text-xs text-ink">
+                {row.map((value, columnIndex) => <span key={columnIndex}>{String(value)}</span>)}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MathOrText({ latex, text, className }: { latex?: string; text?: string; className?: string }) {
+  const value = latex ?? text ?? "";
+  if (!value) return null;
+  if (latex) return <MathRenderer latex={latex} fallbackText={text ?? latex} className={className} />;
+  const looksLikeMath = /\\[a-zA-Z]+|[{}^_]/.test(value);
+  return looksLikeMath
+    ? <MathRenderer latex={value} fallbackText={value} className={className} />
+    : <span className={className}>{value}</span>;
+}
+
 export function History({ onReuse }: HistoryProps) {
   const entries = useHistoryStore((state) => state.entries);
   const clearHistory = useHistoryStore((state) => state.clearHistory);
-
 
   if (entries.length === 0) {
     return (
@@ -39,53 +118,62 @@ export function History({ onReuse }: HistoryProps) {
       </div>
 
       <ul className="space-y-2">
-        {entries.map((entry: HistoryEntry) => (
-          <li
-            key={entry.id}
-            className="rounded-xl border border-paper-line bg-paper p-3 shadow-sm"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-marker-soft px-2 py-0.5 text-[10px] font-semibold text-marker-text">
-                    {entry.sourceModule ?? "Científica"}
-                  </span>
-                  <span className="text-[10px] font-medium text-muted">{entry.operation}</span>
+        {entries.map((entry) => {
+          const when = formatDateTime(entry.timestamp);
+          const matrices = extractMatrices(entry.requestPayload);
+          return (
+            <li key={entry.id} className="rounded-xl border border-paper-line bg-paper p-3 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-marker-soft px-2 py-0.5 text-[10px] font-semibold text-marker-text">
+                      {entry.sourceModule ?? "Científica"}
+                    </span>
+                    <span className="text-[11px] font-medium text-muted">{naturalOperation(entry.operation)}</span>
+                  </div>
+
+                  {matrices.length > 0 ? (
+                    <>
+                      <p className="mt-2 text-sm font-medium text-ink">{entry.label}</p>
+                      <MatrixPayload payload={entry.requestPayload} />
+                    </>
+                  ) : (
+                    <div className="mt-2 text-sm font-medium text-ink">
+                      <MathOrText latex={entry.inputText} text={entry.label} className="text-sm font-medium text-ink" />
+                    </div>
+                  )}
+
+                  {(entry.resultText || entry.resultLatex) && (
+                    <div className="mt-2 flex flex-wrap items-baseline gap-2">
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Resultado</span>
+                      <MathOrText
+                        latex={entry.resultLatex}
+                        text={entry.resultText}
+                        className="text-sm font-medium text-marker-text"
+                      />
+                    </div>
+                  )}
                 </div>
-                <p className="mt-1 break-words text-sm font-medium text-ink">{entry.label}</p>
-                {(entry.resultText || entry.resultLatex) && (
-                  <p className="mt-1 break-words text-xs text-marker">{entry.resultText ?? entry.resultLatex}</p>
-                )}
+
+                <div className="flex shrink-0 flex-col items-end gap-2">
+                  <time className="text-right text-[10px] leading-4 text-muted" dateTime={new Date(entry.timestamp).toISOString()}>
+                    <span className="block">{when.date}</span>
+                    <span className="block">{when.time}</span>
+                  </time>
+                  <button
+                    type="button"
+                    onClick={() => onReuse(entry)}
+                    aria-label={`Reusar entrada: ${entry.label}`}
+                    className="rounded-lg border border-paper-line bg-paper-soft px-3 py-1.5 text-xs font-medium text-ink hover:bg-paper-line/40"
+                  >
+                    Reusar
+                  </button>
+                </div>
               </div>
-              <time className="shrink-0 text-[10px] text-muted" dateTime={new Date(entry.timestamp).toISOString()}>
-                {new Date(entry.timestamp).toLocaleString()}
-              </time>
-            </div>
-            <div className="mt-3 flex justify-end">
-              <button
-              type="button"
-              onClick={() => onReuse(entry)
-              aria-label={`Reusar entrada: ${entry.label}`}
-                className="rounded-lg border border-paper-line bg-paper-soft px-3 py-1.5 text-xs font-medium text-ink hover:bg-paper-line/40"
-              >
-                Reusar
-              </button>
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
-
-      {reuseError && (
-        <p role="alert" className="text-sm text-red-600">
-          {reuseError}
-        </p>
-      )}
-
-      {(isReusing || reusedResult) && (
-        <div className="border-t border-paper-line pt-4">
-          <ResultPanel result={reusedResult} isLoading={isReusing} />
-        </div>
-      )}
     </div>
   );
 }
