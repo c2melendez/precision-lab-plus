@@ -186,7 +186,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
     hasFraction: Boolean(parsedFraction),
     hasDms: Boolean(dmsValue),
   }) as AnswerFormat[];
-  const activeFormat = availableFormats.includes(format) ? format : "exact";
+  const activeFormat = availableFormats.includes(format) ? format : (availableFormats[0] ?? "exact");
 
   return (
     <div aria-live="polite" className="space-y-4 fade-in">
