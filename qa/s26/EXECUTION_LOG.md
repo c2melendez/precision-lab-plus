@@ -517,3 +517,11 @@ Ejecutar `PARITY_CHECKPOINT_B1_B4.md`. No iniciar Bloque 5 antes de cerrar la au
 - El teclado global fue validado en Científica, Gráficas, Matrices, Estadística, Geometría y Unidades.
 - B5: **PASS DEFINITIVO**.
 - Próximo bloque: B6 — inventario/paridad de Básico, Símbolos, Álgebra, Trigonométricas, Cálculo y Complejos.
+
+
+## 2026-09-26 — Inicio B6 con autoridad visual aprobada
+
+- Decisión explícita: usar `Mockups definitivos de Precision Lab.png` junto con `VISUAL_CONTRACT_FINAL_S26_2R.md` como autoridad visual.
+- `KEYBOARD_CONTRACT.md` queda como autoridad funcional/semántica.
+- Se elimina como requisito previo regenerar el mockup: la captura aprobada ya existe.
+- Próximo trabajo: reconciliación categoría por categoría y tecla por tecla Lite↔Plus.
