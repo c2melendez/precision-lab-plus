@@ -1,95 +1,59 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { History } from "../components/History";
-import { useHistoryStore } from "../store/useHistoryStore";
-
-vi.mock("../api/client", async () => {
-  const actual = await vi.importActual<typeof import("../api/client")>("../api/client");
-  return { ...actual, callApi: vi.fn() };
-});
-
-import { callApi } from "../api/client";
-
-const mockedCallApi = vi.mocked(callApi);
+import { useHistoryStore, type HistoryEntry } from "../store/useHistoryStore";
 
 beforeEach(() => {
-  mockedCallApi.mockReset();
   useHistoryStore.setState({ entries: [] });
 });
 
+function renderHistory(onReuse = vi.fn<(entry: HistoryEntry) => void>()) {
+  render(<History onReuse={onReuse} />);
+  return onReuse;
+}
+
 describe("History", () => {
   it("muestra el mensaje vacío cuando no hay entradas", () => {
-    render(<History />);
+    renderHistory();
     expect(screen.getByText(/no hay historial/)).toBeInTheDocument();
   });
 
-  it("Reusar reejecuta la llamada con el endpoint y payload guardados (endpoint válido)", async () => {
+  it("Reusar entrega la entrada al shell para volver al módulo de origen", () => {
     useHistoryStore.getState().addEntry({
+      sourceModule: "Científica",
       operation: "derivative",
       endpointUrl: "/derivative",
       requestPayload: { expression: "x**2", variable: "x", order: 1 },
+      inputText: "x^2",
       label: "d/dx [x**2]",
       hasDetailedSteps: true,
       warnings: [],
     });
-    mockedCallApi.mockResolvedValue({
-      success: true,
-      operation: "derivative",
-      request_id: "id",
-      result_text: "2*x",
-      steps: [],
-      has_detailed_steps: true,
-      warnings: [],
-      duration_ms: 1,
-    } as never);
 
-    render(<History />);
+    const onReuse = renderHistory();
     fireEvent.click(screen.getByRole("button", { name: /Reusar entrada/ }));
 
-    await waitFor(() =>
-      expect(mockedCallApi).toHaveBeenCalledWith("/derivative", {
-        expression: "x**2",
-        variable: "x",
-        order: 1,
-      }),
-    );
-    await screen.findByText("2*x");
-  });
-
-  it("Reusar con un endpointUrl fuera de KNOWN_ENDPOINTS no reejecuta la llamada", async () => {
-    useHistoryStore.setState({
-      entries: [
-        {
-          id: "corrupt-1",
-          operation: "evaluate",
-          endpointUrl: "/no-existe",
-          requestPayload: { expression: "1+1" },
-          label: "entrada corrupta",
-          hasDetailedSteps: false,
-          warnings: [],
-          timestamp: Date.now(),
-        },
-      ],
+    expect(onReuse).toHaveBeenCalledTimes(1);
+    expect(onReuse.mock.calls[0]?.[0].sourceModule).toBe("Científica");
+    expect(onReuse.mock.calls[0]?.[0].requestPayload).toEqual({
+      expression: "x**2",
+      variable: "x",
+      order: 1,
     });
-
-    render(<History />);
-    fireEvent.click(screen.getByRole("button", { name: /Reusar entrada/ }));
-
-    expect(screen.getByRole("alert")).toHaveTextContent("no reconocido");
-    expect(mockedCallApi).not.toHaveBeenCalled();
   });
 
-  it("muestra el módulo de origen separado del tipo de operación", () => {
+  it("muestra el módulo y el nombre natural de la operación", () => {
     useHistoryStore.setState({
       entries: [
         {
           id: "matrix-1",
           sourceModule: "Matrices",
-          operation: "determinant",
+          operation: "matrix_determinant",
           endpointUrl: "/matrix/determinant",
           requestPayload: { matrix: [[1, 2], [3, 4]] },
           label: "det(A)",
+          resultText: "-2",
           hasDetailedSteps: false,
           warnings: [],
           timestamp: Date.now(),
@@ -101,6 +65,7 @@ describe("History", () => {
           endpointUrl: "/statistics/descriptive",
           requestPayload: { values: [1, 2, 3], stat: "mean" },
           label: "Media(1,2,3)",
+          resultText: "2",
           hasDetailedSteps: false,
           warnings: [],
           timestamp: Date.now() - 1,
@@ -108,15 +73,73 @@ describe("History", () => {
       ],
     });
 
-    render(<History />);
+    renderHistory();
     expect(screen.getByText("Matrices")).toBeInTheDocument();
-    expect(screen.getByText("determinant")).toBeInTheDocument();
+    expect(screen.getByText("Determinante")).toBeInTheDocument();
     expect(screen.getByText("Estadística")).toBeInTheDocument();
-    expect(screen.getByText("statistics_descriptive")).toBeInTheDocument();
+    expect(screen.getByText("Estadística descriptiva")).toBeInTheDocument();
+    expect(screen.queryByText("matrix_determinant")).not.toBeInTheDocument();
+    expect(screen.queryByText("statistics_descriptive")).not.toBeInTheDocument();
+  });
+
+  it("muestra los valores guardados de las matrices", () => {
+    useHistoryStore.setState({
+      entries: [
+        {
+          id: "matrix-values",
+          sourceModule: "Matrices",
+          operation: "matrix_operation",
+          endpointUrl: "/matrix/operations",
+          requestPayload: {
+            operation: "multiply",
+            matrix_a: [[1, 2], [3, 4]],
+            matrix_b: [[5, 6], [7, 8]],
+          },
+          label: "A × B",
+          resultText: "[[19,22],[43,50]]",
+          hasDetailedSteps: false,
+          warnings: [],
+          timestamp: Date.now(),
+        },
+      ],
+    });
+
+    renderHistory();
+    expect(screen.getByText("A =")).toBeInTheDocument();
+    expect(screen.getByText("B =")).toBeInTheDocument();
+    for (const value of ["1", "2", "3", "4", "5", "6", "7", "8"]) {
+      expect(screen.getAllByText(value).length).toBeGreaterThan(0);
+    }
+  });
+
+  it("muestra fecha y hora del resultado", () => {
+    const timestamp = new Date(2026, 8, 25, 20, 16, 21).getTime();
+    useHistoryStore.setState({
+      entries: [
+        {
+          id: "dated-1",
+          sourceModule: "Gráficas",
+          operation: "graph_2d",
+          endpointUrl: "/graph/2d",
+          requestPayload: { expressions: ["1/x"], variable: "x" },
+          label: "1/x",
+          hasDetailedSteps: false,
+          warnings: [],
+          timestamp,
+        },
+      ],
+    });
+
+    renderHistory();
+    const time = screen.getByRole("time");
+    expect(time).toHaveAttribute("dateTime", new Date(timestamp).toISOString());
+    expect(time.textContent).toMatch(/\d{2}\/\d{2}\/\d{4}/);
+    expect(time.textContent).toMatch(/\d{2}:\d{2}/);
   });
 
   it("Borrar historial vacía la lista", () => {
     useHistoryStore.getState().addEntry({
+      sourceModule: "Científica",
       operation: "evaluate",
       endpointUrl: "/evaluate",
       requestPayload: { expression: "1+1" },
@@ -124,7 +147,8 @@ describe("History", () => {
       hasDetailedSteps: false,
       warnings: [],
     });
-    render(<History />);
+
+    renderHistory();
     fireEvent.click(screen.getByRole("button", { name: "Borrar historial" }));
     expect(screen.getByText(/no hay historial/)).toBeInTheDocument();
   });
