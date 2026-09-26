@@ -507,3 +507,13 @@ Ejecutar `PARITY_CHECKPOINT_B1_B4.md`. No iniciar Bloque 5 antes de cerrar la au
 - Playwright M11 Compacto falló porque Plus no exponía el teclado inline con `role=region`/`aria-label=Teclado matemático`, aunque el contenido sí se renderizaba inline.
 - Correcciones aplicadas: fallback opcional de `ResizeObserver`; semántica accesible de Compacto alineada con Lite.
 - B5 permanece EN CURSO hasta rerun verde.
+
+
+## 2026-09-26 — Cierre B5
+
+- HEAD certificado: `17bb72b5e12cd6fb0d1961459dae80631ca3766b`.
+- Todos los gates relevantes quedaron verdes, incluido S19 Mutation Baseline.
+- Se cerraron los GAPs de offset Desktop, semántica accesible de Compacto y fallback de `ResizeObserver`.
+- El teclado global fue validado en Científica, Gráficas, Matrices, Estadística, Geometría y Unidades.
+- B5: **PASS DEFINITIVO**.
+- Próximo bloque: B6 — inventario/paridad de Básico, Símbolos, Álgebra, Trigonométricas, Cálculo y Complejos.
