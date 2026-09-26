@@ -129,7 +129,7 @@ function SolutionListResult({ solutions }: { solutions: EquationSolution[] }) {
 }
 
 export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "rad" }: ResultPanelProps) {
-  const [format, setFormat] = useState<AnswerFormat>("exact");
+  const [format, setFormat] = useState<AnswerFormat>("dec");
   // Modo fracción propia/impropia (pedido explícito) — mismo criterio
   // que el toggle equivalente en Lite: default mixta cuando corresponde,
   // el usuario puede pedir la impropia.
