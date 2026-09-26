@@ -16,6 +16,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { GraphMode } from "./components/GraphMode";
 import { History } from "./components/History";
 import type { HistoryEntry } from "./store/useHistoryStore";
+import { usePendingHistoryReuseStore } from "./store/usePendingHistoryReuseStore";
 import { HistoryDrawer } from "./components/HistoryDrawer";
 import { IntegralMode } from "./components/IntegralMode";
 import { LimitMode } from "./components/LimitMode";
@@ -125,7 +126,10 @@ export default function App() {
     return () => media.removeEventListener("change", onChange);
   }, []);
 
+  const setPendingHistoryReuse = usePendingHistoryReuseStore((s) => s.setPending);
+
   const reuseHistoryEntry = (entry: HistoryEntry) => {
+    setPendingHistoryReuse(entry);
     const target: CalculatorMode =
       entry.sourceModule === "Matrices"
         ? "matrix"
