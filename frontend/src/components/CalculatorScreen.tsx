@@ -313,6 +313,7 @@ function StackedKeyboardSection() {
           onClick={toggle}
           disabled={!canExpand}
           aria-expanded={isOpen}
+          aria-label={isOpen ? "Cerrar teclado" : "Abrir teclado"}
           className="flex w-full items-center justify-between px-4 py-2.5 text-sm font-medium text-ink disabled:text-muted/40"
         >
           <span className="flex items-center gap-2">
@@ -322,7 +323,7 @@ function StackedKeyboardSection() {
           <span aria-hidden="true">{isOpen ? "▾" : "▴"}</span>
         </button>
         {isOpen && canExpand && (
-          <div className="border-t border-paper-line px-3 pb-3 pt-2">
+          <div role="region" aria-label="Teclado matemático" className="border-t border-paper-line px-3 pb-3 pt-2">
             {content ?? basicContent}
           </div>
         )}
