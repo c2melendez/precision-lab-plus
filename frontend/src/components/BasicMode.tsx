@@ -44,8 +44,12 @@ import type { MathfieldElement } from "mathlive";
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
 
-const submitScientific = (endpoint: Parameters<typeof submitAndRecord>[0], payload: Record<string, unknown>, label: string) =>
-  submitAndRecord(endpoint, payload, label, "Científica");
+const submitScientific = (
+  endpoint: Parameters<typeof submitAndRecord>[0],
+  payload: Record<string, unknown>,
+  label: string,
+  historyInputText?: string,
+) => submitAndRecord(endpoint, payload, label, "Científica", historyInputText);
 import { useUIStore } from "../store/useUIStore";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useLayoutModeStore } from "../store/useLayoutModeStore";
@@ -110,6 +114,10 @@ function backendExpressionToLatex(value: unknown): string {
     }
 
     text = text
+      .replace(/\b(asin|acos|atan|asec|acsc|acot)\s*\(([^()]*)\)/g, (_match, fn: string, body: string) => {
+        const direct = fn === "asin" ? "sin" : fn === "acos" ? "cos" : fn === "atan" ? "tan" : fn === "asec" ? "sec" : fn === "acsc" ? "csc" : "cot";
+        return `\\${direct}^{-1}\\left(${convert(body)}\\right)`;
+      })
       .replace(/\bpi\b/g, "\\pi")
       .replace(/\boo\b|\binf(?:inity)?\b/g, "\\infty")
       .replace(/\*\*\s*\(?(-?\d+(?:\.\d+)?)\)?/g, "^{$1}")
@@ -126,6 +134,16 @@ function backendExpressionToLatex(value: unknown): string {
 
 function scientificHistoryEntryToLatex(entry: HistoryEntry): string {
   const payload = entry.requestPayload;
+  const preservedInput = String(entry.inputText ?? "").trim();
+  if (preservedInput) {
+    // Nuevas entradas de Historial guardan el LaTeX visible original.
+    // Las entradas antiguas guardaban sintaxis backend (p. ej. asin(1));
+    // esas se normalizan más abajo para mantener compatibilidad.
+    const looksLikeVisualMath =
+      preservedInput.includes("\\") ||
+      /[∫∂√π∞°′″≤≥]/.test(preservedInput);
+    if (looksLikeVisualMath) return preservedInput;
+  }
   const expression = backendExpressionToLatex(
     payload.expression ?? payload.equation ?? payload.inequality ?? entry.inputText ?? entry.label,
   );
@@ -276,6 +294,7 @@ export function BasicMode() {
         "/solve/system",
         { equations, variables: variableList },
         `Sistema: ${equations.join(" ; ")}`,
+        latex,
       );
       setLastResult(result);
       if (!result.success) {
@@ -310,6 +329,7 @@ export function BasicMode() {
         "/inequality/system",
         { inequalities: inequalitiesBackend, variables: variableList },
         `Sistema: ${inequalitiesBackend.join(" ; ")}`,
+        latex,
       );
       if (result.success) {
         // El backend devuelve result_text = "bounded"/"unbounded"/"empty"
@@ -378,12 +398,14 @@ export function BasicMode() {
               "/derivative/partial",
               { expression: trimmedInner, variable: intent.variable },
               `∂/∂${intent.variable} [${trimmedInner}]`,
+              latex,
             )
           : intent.kind === "derivative"
             ? await submitScientific(
                 "/derivative",
                 { expression: trimmedInner, variable: intent.variable, order: intent.order },
                 `d/d${intent.variable} [${trimmedInner}]`,
+                latex,
               )
             : intent.kind === "integral"
             ? await submitScientific(
@@ -396,6 +418,7 @@ export function BasicMode() {
                     : {}),
                 },
                 `∫ ${trimmedInner}`,
+                latex,
               )
             : intent.kind === "limit"
               ? await submitScientific(
@@ -406,19 +429,22 @@ export function BasicMode() {
                   // — intent.direction ya trae "left"/"right" cuando aplica.
                   { expression: trimmedInner, variable: intent.variable, point: intent.point, direction: intent.direction },
                   `lim[${intent.variable}->${intent.point}] ${trimmedInner}`,
+                  latex,
                 )
               : intent.kind === "ode"
-                ? await submitScientific("/ode", { expression: trimmedInner }, trimmedInner)
+                ? await submitScientific("/ode", { expression: trimmedInner }, trimmedInner, latex)
                 : intent.kind === "residue"
                   ? await submitScientific(
                       "/complex/residue",
                       { expression: trimmedInner, point: latexToBackendSyntax(intent.pointLatex) },
                       `Res(${trimmedInner}, z=${intent.pointLatex})`,
+                      latex,
                     )
                   : await submitScientific(
                       "/complex/singularities",
                       { expression: trimmedInner },
                       `Sing(${trimmedInner})`,
+                      latex,
                     );
       setLastResult(result);
       if (!result.success) {
@@ -466,9 +492,9 @@ export function BasicMode() {
     setErrorMessage(null);
     try {
       const result = isInequality
-        ? await submitScientific("/inequality", { inequality: trimmed }, trimmed)
+        ? await submitScientific("/inequality", { inequality: trimmed }, trimmed, latex)
         : isEquation
-          ? await submitScientific("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed)
+          ? await submitScientific("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed, latex)
           : await submitScientific(
               "/evaluate",
               {
@@ -477,6 +503,7 @@ export function BasicMode() {
                 ...(substitutionsPayload ? { substitutions: substitutionsPayload } : {}),
               },
               trimmed,
+              latex,
             );
       setLastResult(result);
       if (!result.success) {
