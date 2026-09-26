@@ -49,6 +49,7 @@ const submitScientific = (endpoint: Parameters<typeof submitAndRecord>[0], paylo
 import { useUIStore } from "../store/useUIStore";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useLayoutModeStore } from "../store/useLayoutModeStore";
+import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStore";
 import { CalculatorScreen } from "./CalculatorScreen";
 import { detectCalculusIntent, type CalculusIntent } from "./calculusIntent";
 import { latexToBackendSyntax } from "./NaturalMathField";
@@ -88,6 +89,36 @@ export function BasicMode() {
   const isLoading = useUIStore((state) => state.isLoading);
   const setActiveMode = useUIStore((state) => state.setActiveMode);
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
+  const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
+
+  useEffect(() => {
+    const entry = takePendingHistoryReuse();
+    if (!entry) return;
+    const payload = entry.requestPayload;
+    const expression =
+      payload.expression ??
+      payload.equation ??
+      payload.inequality ??
+      entry.inputText ??
+      entry.label;
+    if (Array.isArray(payload.equations)) {
+      setLatex(payload.equations.join("; "));
+      if (Array.isArray(payload.variables)) setSystemVariables(payload.variables.join(", "));
+    } else {
+      setLatex(String(expression ?? ""));
+    }
+    if (payload.angle_unit === "deg" || payload.angle_unit === "rad") setAngleUnit(payload.angle_unit);
+    if (payload.substitutions && typeof payload.substitutions === "object" && !Array.isArray(payload.substitutions)) {
+      setSubstitutions(
+        Object.entries(payload.substitutions as Record<string, unknown>).map(([name, value]) => ({
+          name,
+          value: String(value),
+        })),
+      );
+    }
+    setLastResult(null);
+    setValidationError(null);
+  }, [takePendingHistoryReuse]);
 
   const systemRows = splitSystemLatex(latex);
 
