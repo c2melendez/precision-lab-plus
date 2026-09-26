@@ -46,3 +46,25 @@ test("S26.3R B5: shell global del teclado abre, cierra y respeta el viewport", a
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
 });
+
+
+test("S26.3R B5: teclado global es alcanzable desde los seis módulos", async ({ page }) => {
+  await page.goto("./");
+
+  for (const name of ["Científica", "Gráficas", "Matrices", "Estadística", "Geometría", "Unidades"]) {
+    const navigation = page.locator("nav").getByRole("button", { name, exact: true });
+    await navigation.click();
+    await expect(navigation).toHaveAttribute("aria-current", "page");
+
+    const opener = page
+      .getByRole("button", { name: /abrir teclado|expandir teclado|^teclado$/i })
+      .first();
+    await expect(opener, `${name}: apertura global`).toBeVisible();
+    await opener.click();
+
+    const keyboard = page.getByRole("dialog", { name: "Teclado matemático" });
+    await expect(keyboard, `${name}: panel global`).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(keyboard, `${name}: cierre por Escape`).toBeHidden();
+  }
+});
