@@ -28,6 +28,7 @@ export interface HistoryEntry {
   resultLatex?: string;
   resultText?: string;
   resultType?: string;
+  resultData?: unknown;
   hasDetailedSteps: boolean;
   warnings: string[];
   timestamp: number;
