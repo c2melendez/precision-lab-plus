@@ -71,3 +71,30 @@ Decisión:
 - checkpoint B1–B4 **CERRADO**;
 - Bloque 5 **DESBLOQUEADO**;
 - no se requirió modificar rutas matemáticas protegidas durante el checkpoint.
+
+
+## Reapertura por regresión observada en Preview — 2026-09-26
+
+Estado: **REABIERTO PARCIALMENTE — GAP B3/B4 EN PLUS**.
+
+Evidencia humana:
+- `sin⁻¹(1)` en DEG se mostraba correctamente como `90°` en Resultado;
+- Historial Plus guardaba/mostraba `asin(1)` y el resultado simbólico interno `180 asin(1)/π`;
+- Reusar reconstruía incorrectamente la entrada (`asin1`/forma no natural).
+
+Causa:
+- `BasicMode` enviaba al historial la sintaxis normalizada para backend como `inputText`;
+- el reuso priorizaba `requestPayload.expression`;
+- el historial no conservaba `result_approx`, por lo que no podía aplicar la misma política angular contextual que `ResultPanel`.
+
+Corrección aplicada:
+- separar `requestPayload` (backend) de `inputText` (expresión visual original);
+- conservar `resultApprox` en Historial;
+- presentar inversas backend `asin/acos/atan/...` en notación natural;
+- para salida inversa en DEG, Historial presenta grados decimales con `°`;
+- Reusar prioriza la expresión visual preservada y mantiene fallback para entradas históricas;
+- gate E2E específico: `sin⁻¹(1)` DEG → Historial natural + `90°` → Reusar restaura `sin⁻¹(1)` editable.
+
+Regla de salida:
+- B3/B4 vuelven a PASS solo después de CI + Playwright verdes y revisión en Preview.
+- B5 queda pausado hasta recertificar esta regresión.
