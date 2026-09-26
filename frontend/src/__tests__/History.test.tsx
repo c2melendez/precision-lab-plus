@@ -16,7 +16,7 @@ function renderHistory(onReuse = vi.fn<(entry: HistoryEntry) => void>()) {
 describe("History", () => {
   it("muestra el mensaje vacío cuando no hay entradas", () => {
     renderHistory();
-    expect(screen.getByText(/no hay historial/)).toBeInTheDocument();
+    expect(screen.getByText(/no hay cálculos guardados/)).toBeInTheDocument();
   });
 
   it("Reusar entrega la entrada al shell para volver al módulo de origen", () => {
@@ -182,6 +182,6 @@ describe("History", () => {
 
     renderHistory();
     fireEvent.click(screen.getByRole("button", { name: "Borrar historial" }));
-    expect(screen.getByText(/no hay historial/)).toBeInTheDocument();
+    expect(screen.getByText(/no hay cálculos guardados/)).toBeInTheDocument();
   });
 });
