@@ -16,6 +16,7 @@ import { parseFracLatex, toMixedFracLatex } from "./fractionDisplay";
 import { MathRenderer } from "./MathRenderer";
 import { StepList } from "./StepList";
 import { decimalDegreesToDms, isInverseTrigAngleExpression, parseDecimalDegreesInput } from "./dmsDisplay";
+import { ResultFormatSelector, type ResultFormatId } from "./ResultFormatSelector";
 
 // Fase 2.5 (bug reportado por el usuario): antes se mostraban SIEMPRE
 // "exacto" (result_latex) y "≈ aproximado" (result_approx) juntos, sin
@@ -27,7 +28,7 @@ import { decimalDegreesToDms, isInverseTrigAngleExpression, parseDecimalDegreesI
 // aproximado (sería fabricar precisión falsa) — solo muestra
 // result_latex cuando SymPy ya lo devolvió como \frac{...}{...} de
 // forma exacta; si no, dice explícitamente que no aplica.
-type AnswerFormat = "exact" | "dec" | "scn" | "frac" | "dms";
+type AnswerFormat = ResultFormatId;
 
 function isFractionLatex(latex: string | null | undefined): boolean {
   return latex !== null && latex !== undefined && latex.includes("\\frac");
@@ -176,6 +177,15 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
   const copyText = result.result_text ?? approxText;
   const parsedFraction = isFractionLatex(result.result_latex) ? parseFracLatex(result.result_latex!) : null;
   const mixedLatex = parsedFraction ? toMixedFracLatex(parsedFraction.n, parsedFraction.d) : null;
+  const numericApprox = result.result_approx != null ? Number(result.result_approx) : NaN;
+  const hasNumericApprox = Number.isFinite(numericApprox);
+  const availableFormats: AnswerFormat[] = [
+    "exact",
+    ...(hasNumericApprox ? ["dec" as const, "scn" as const] : []),
+    ...(parsedFraction ? ["frac" as const] : []),
+    ...(dmsValue ? ["dms" as const] : []),
+  ];
+  const activeFormat = availableFormats.includes(format) ? format : "exact";
 
   return (
     <div aria-live="polite" className="space-y-4 fade-in">
@@ -195,17 +205,17 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
 
           <div className="min-h-14 rounded-xl border border-paper-line bg-paper px-4 py-3">
             {(() => {
-            if (format === "dms" && dmsValue) {
+            if (activeFormat === "dms" && dmsValue) {
               return <MathRenderer latex={dmsValue.latex} fallbackText={dmsValue.text} className="a11y-scale-result-lg" />;
             }
-            if (format === "dec") {
+            if (activeFormat === "dec") {
               return approxText ? (
                 <p className="a11y-scale-result-lg text-ink">{approxText}{inverseAngleResult ? "°" : ""}</p>
               ) : (
                 <p className="text-sm text-muted">No hay aproximación decimal disponible.</p>
               );
             }
-            if (format === "scn") {
+            if (activeFormat === "scn") {
               const n = result.result_approx != null ? Number(result.result_approx) : NaN;
               return Number.isFinite(n) ? (
                 <p className="a11y-scale-result-lg text-ink">{n.toExponential(6)}{inverseAngleResult ? "°" : ""}</p>
@@ -213,7 +223,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
                 <p className="text-sm text-muted">No hay un valor numérico para notación científica.</p>
               );
             }
-            if (format === "frac") {
+            if (activeFormat === "frac") {
               // No se fabrica una fracción a partir de un decimal
               // aproximado — solo se muestra cuando SymPy ya la dio
               // exacta (ver isFractionLatex arriba).
@@ -246,31 +256,19 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
               nunca uno oculta al otro (sección 9: fracciones + su
               equivalente decimal) — solo en el formato "exact", que es el
               que ya traía este comportamiento antes de Fase 2.5. */}
-            {format === "exact" && approxText && approxText !== result.result_text && (
+            {activeFormat === "exact" && approxText && approxText !== result.result_text && (
               <p className="mt-1 text-sm text-muted">≈ {approxText}{inverseAngleResult ? "°" : ""}</p>
             )}
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap gap-1.5 text-xs" aria-label="Formato del resultado">
-              {(["exact", "dec", "frac", "scn", ...(dmsValue ? ["dms" as const] : [])] as AnswerFormat[]).map((f) => (
-                <button
-                  key={f}
-                  type="button"
-                  onClick={() => setFormat(f)}
-                  aria-pressed={format === f}
-                  className={
-                    format === f
-                      ? "min-h-8 rounded-full border border-marker bg-marker-soft px-3 font-semibold text-marker-text"
-                      : "min-h-8 rounded-full border border-paper-line bg-paper px-3 text-muted hover:border-marker/50 hover:text-ink"
-                  }
-                >
-                  {f === "exact" ? "exacto" : f}
-                </button>
-              ))}
-            </div>
+            <ResultFormatSelector
+              formats={availableFormats}
+              value={activeFormat}
+              onChange={setFormat}
+            />
 
-            {format === "frac" && mixedLatex && (
+            {activeFormat === "frac" && mixedLatex && (
               <button
                 type="button"
                 onClick={() => setShowMixed((v) => !v)}
