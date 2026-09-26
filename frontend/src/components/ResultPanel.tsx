@@ -190,8 +190,28 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
 
   return (
     <div aria-live="polite" className="space-y-4 fade-in">
-      {matrixData && <MatrixResult matrix={matrixData} />}
-      {solutionData && <SolutionListResult solutions={solutionData} />}
+      {matrixData && (
+        <section aria-label="Resultado estructurado" className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Resultado</p>
+            <span className="rounded-md bg-paper-line/50 px-2 py-1 text-[11px] font-medium text-muted">Matriz</span>
+          </div>
+          <div className="min-h-14 rounded-xl border border-paper-line bg-paper px-4 py-3">
+            <MatrixResult matrix={matrixData} />
+          </div>
+        </section>
+      )}
+      {solutionData && (
+        <section aria-label="Resultado estructurado" className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Resultado</p>
+            <span className="rounded-md bg-paper-line/50 px-2 py-1 text-[11px] font-medium text-muted">Soluciones</span>
+          </div>
+          <div className="min-h-14 rounded-xl border border-paper-line bg-paper px-4 py-3">
+            <SolutionListResult solutions={solutionData} />
+          </div>
+        </section>
+      )}
 
       {!matrixData && !solutionData && (result.result_latex || result.result_text) && (
         <div className="space-y-3">
