@@ -254,3 +254,11 @@ La regresión de Historial/Reusar en Plus quedó cerrada y B5 vuelve a estar **E
 - CI, Playwright E2E, S17, S18, S19, S20, S21, S23 y S25: PASS.
 - Validado: teclado inicia colapsado, apertura/cierre global, Desktop/Tablet/Mobile, Compacto inline, acceso desde los seis módulos y anclaje panel↔dock.
 - B5 queda **PASS DEFINITIVO**. Siguiente: B6 — paridad interna de categorías/teclas.
+
+
+### B6 — autoridad visual congelada
+
+- Autoridad visual conjunta: `VISUAL_CONTRACT_FINAL_S26_2R.md` + `Mockups definitivos de Precision Lab.png`.
+- Autoridad funcional/semántica: `KEYBOARD_CONTRACT.md`.
+- La implementación actual no es autoridad visual.
+- B6 debe cerrar con matriz tecla por tecla Lite↔Plus, gates automáticos y revisión humana de Preview.
