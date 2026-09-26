@@ -456,3 +456,14 @@ Ejecutar `PARITY_CHECKPOINT_B1_B4.md`. No iniciar Bloque 5 antes de cerrar la au
 - Bloque 5 quedó **DESBLOQUEADO / EN CURSO**.
 - Alcance B5: shell global del teclado, apertura/cierre y responsive. La paridad de las seis categorías se reserva para B6.
 - Se añadió `frontend/e2e/s26-b5-keyboard-shell.spec.ts` como gate específico de B5: cerrado inicial, apertura, cierre por botón, cierre por Escape, contención en viewport y límite de altura por breakpoint.
+
+
+## 2026-09-26 — Regresión B3/B4 Plus detectada por revisión humana
+
+- Preview demostró una divergencia real no detectada por revisión estática.
+- Caso: `sin⁻¹(1)` en DEG.
+- Resultado principal: `90°` correcto.
+- Historial previo: `asin(1)` + representación simbólica interna; Reusar degradaba la expresión.
+- Se reabren B3/B4 y se pausa B5.
+- Correcciones: `HistoryEntry.resultApprox`, `submitAndRecord(..., historyInputText?)`, preservación del LaTeX visible, normalización natural de inversas y gate E2E de reuso.
+- Cierre condicionado a CI + Playwright + Preview.
