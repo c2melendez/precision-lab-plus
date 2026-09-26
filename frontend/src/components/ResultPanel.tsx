@@ -17,6 +17,7 @@ import { MathRenderer } from "./MathRenderer";
 import { StepList } from "./StepList";
 import { decimalDegreesToDms, isInverseTrigAngleExpression, parseDecimalDegreesInput } from "./dmsDisplay";
 import { ResultFormatSelector, type ResultFormatId } from "./ResultFormatSelector";
+import { getAvailableResultFormats } from "./resultFormatPolicy";
 
 // Fase 2.5 (bug reportado por el usuario): antes se mostraban SIEMPRE
 // "exacto" (result_latex) y "≈ aproximado" (result_approx) juntos, sin
@@ -179,12 +180,12 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
   const mixedLatex = parsedFraction ? toMixedFracLatex(parsedFraction.n, parsedFraction.d) : null;
   const numericApprox = result.result_approx != null ? Number(result.result_approx) : NaN;
   const hasNumericApprox = Number.isFinite(numericApprox);
-  const availableFormats: AnswerFormat[] = [
-    "exact",
-    ...(hasNumericApprox ? ["dec" as const, "scn" as const] : []),
-    ...(parsedFraction ? ["frac" as const] : []),
-    ...(dmsValue ? ["dms" as const] : []),
-  ];
+  const availableFormats = getAvailableResultFormats({
+    hasExact: Boolean(result.result_latex ?? result.result_text),
+    hasDecimal: hasNumericApprox,
+    hasFraction: Boolean(parsedFraction),
+    hasDms: Boolean(dmsValue),
+  }) as AnswerFormat[];
   const activeFormat = availableFormats.includes(format) ? format : "exact";
 
   return (
