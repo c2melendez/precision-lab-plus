@@ -136,13 +136,22 @@ function scientificHistoryEntryToLatex(entry: HistoryEntry): string {
   const payload = entry.requestPayload;
   const preservedInput = String(entry.inputText ?? "").trim();
   if (preservedInput) {
-    // Nuevas entradas de Historial guardan el LaTeX visible original.
-    // Las entradas antiguas guardaban sintaxis backend (p. ej. asin(1));
-    // esas se normalizan más abajo para mantener compatibilidad.
-    const looksLikeVisualMath =
-      preservedInput.includes("\\") ||
-      /[∫∂√π∞°′″≤≥]/.test(preservedInput);
-    if (looksLikeVisualMath) return preservedInput;
+    // Nuevas entradas guardan el LaTeX visual completo y pueden
+    // reutilizarse literalmente. Entradas históricas de operaciones
+    // estructuradas podían guardar etiquetas parciales como "∫ x**2/4"
+    // sin dx/límites; en esos casos NO debemos devolver la etiqueta
+    // parcial: se reconstruye la operación completa desde requestPayload.
+    const structuredEndpoint = [
+      "/integral",
+      "/derivative",
+      "/derivative/partial",
+      "/limit",
+      "/solve/system",
+      "/inequality/system",
+    ].includes(entry.endpointUrl);
+    const hasFullLatex = preservedInput.includes("\\");
+    const hasNaturalSymbols = /[√π∞°′″≤≥]/.test(preservedInput);
+    if (hasFullLatex || (!structuredEndpoint && hasNaturalSymbols)) return preservedInput;
   }
   const expression = backendExpressionToLatex(
     payload.expression ?? payload.equation ?? payload.inequality ?? entry.inputText ?? entry.label,
