@@ -24,9 +24,12 @@ test("S26.3R B5: shell global del teclado abre, cierra y respeta el viewport", a
 
   if (viewport!.width >= 1440) {
     const sidebar = await page.locator('aside[aria-label="Navegación principal"]').boundingBox();
+    const dock = await page.getByTestId("keyboard-dock").boundingBox();
     expect(sidebar).not.toBeNull();
+    expect(dock).not.toBeNull();
     expect(bounds!.x).toBeGreaterThanOrEqual(sidebar!.x + sidebar!.width);
     expect(bounds!.height).toBeLessThanOrEqual(viewport!.height * 0.45 + 1);
+    expect(dock!.y - (bounds!.y + bounds!.height)).toBeCloseTo(12, 0);
   } else if (viewport!.width >= 1024) {
     expect(bounds!.height).toBeLessThanOrEqual(viewport!.height * 0.45 + 1);
   } else if (viewport!.width >= 768) {
