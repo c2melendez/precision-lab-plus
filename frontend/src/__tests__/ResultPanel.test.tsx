@@ -167,14 +167,14 @@ describe("ResultPanel", () => {
     expect(screen.getByText("El sistema no tiene solución.")).toBeInTheDocument();
   });
 
-  it("muestra la fracción exacta y el decimal juntos, sin que uno oculte al otro", () => {
+  it("Exacto muestra la representación original y el decimal juntos cuando aplica", () => {
     render(
       <ResultPanel
-        result={{ ...baseResult, result_text: "63/4", result_approx: 15.75 }}
+        result={{ ...baseResult, result_latex: "\\frac{63}{4}", result_text: "63/4", result_approx: 15.75 }}
         isLoading={false}
       />,
     );
-    expect(screen.getByText("63/4")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Exacto" }));
     expect(screen.getByText("≈ 15.75")).toBeInTheDocument();
   });
 
