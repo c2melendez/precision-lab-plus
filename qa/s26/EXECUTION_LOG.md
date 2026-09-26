@@ -478,3 +478,12 @@ Ejecutar `PARITY_CHECKPOINT_B1_B4.md`. No iniciar Bloque 5 antes de cerrar la au
 - Causa: la nueva prioridad de `inputText` aceptó una etiqueta histórica parcial de operación estructurada.
 - Corrección: solo reutilizar literalmente `inputText` en operaciones estructuradas cuando ya contiene LaTeX completo; si no, reconstruir desde `requestPayload`.
 - Nuevo commit de corrección: `677c70717a83c4861b74649968089e052fa5e52d`.
+
+
+## 2026-09-26 — B3/B4 recertificados, B5 reanudado
+
+- HEAD recertificado: `c82779a8b411e7b0a695e3e873e94bf24516e145`.
+- CI, Playwright, S17, S18, S19, S20, S21, S23 y S25: PASS.
+- Regresión de `sin⁻¹(1)` en DEG cerrada.
+- Reuso de integral completa nuevamente PASS.
+- B3/B4 cerrados; B5 reanudado.
