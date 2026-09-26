@@ -112,6 +112,33 @@ describe("History", () => {
     }
   });
 
+  it("normaliza sintaxis backend a formato matemático natural en Científica", () => {
+    useHistoryStore.setState({
+      entries: [
+        {
+          id: "natural-science",
+          sourceModule: "Científica",
+          operation: "evaluate",
+          endpointUrl: "/evaluate",
+          requestPayload: { expression: "sin((pi)/(4))+sqrt2" },
+          inputText: "sin((pi)/(4))+sqrt2",
+          label: "sin((pi)/(4))+sqrt2",
+          resultLatex: "sin((pi)/(4))+sqrt2",
+          resultText: "sin((pi)/(4))+sqrt2",
+          hasDetailedSteps: false,
+          warnings: [],
+          timestamp: Date.now(),
+        },
+      ],
+    });
+
+    const { container } = render(<History onReuse={vi.fn()} />);
+    expect(container.querySelector(".katex")).not.toBeNull();
+    expect(container.textContent).not.toContain("sqrt2");
+    expect(container.textContent).not.toContain("pi");
+    expect(container.textContent).toContain("π");
+  });
+
   it("muestra fecha y hora del resultado", () => {
     const timestamp = new Date(2026, 8, 25, 20, 16, 21).getTime();
     useHistoryStore.setState({
