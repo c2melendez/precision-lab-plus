@@ -54,4 +54,18 @@ describe("paridad de especificación del teclado V5 de Plus", () => {
     expect(algebra.find((key) => key.ariaLabel === "signo de a")?.insertLatex).toContain("sign");
     expect(algebra.find((key) => key.ariaLabel === "módulo o residuo")?.insertLatex).toContain("mod");
   });
+  it("B6 congela el inventario visual y exige tooltip real en todas las teclas de Básico", () => {
+    expect(BASIC_V5_ROWS.map((row) => row.map((key) => String(key.glyph)))).toEqual([
+      ["7", "8", "9", "(", ")", "⌫", "DEL", "ANS"],
+      ["4", "5", "6", "×", "÷", "%", "<", ">"],
+      ["1", "2", "3", "+", "−", ".", "=", "′"],
+      ["0", "°", "DMS", "±()", "≤", "≥", "Enter"],
+    ]);
+    expect(basicKeys).toHaveLength(31);
+    for (const key of basicKeys) {
+      expect(key.description, `tooltip faltante en ${key.ariaLabel}`).toBeTruthy();
+    }
+    expect(byLabel("calcular")?.glyph).toBe("Enter");
+  });
+
 });
