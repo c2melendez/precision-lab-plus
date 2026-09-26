@@ -200,19 +200,19 @@ describe("ResultPanel", () => {
 
     it("formato 'dec' muestra la aproximación decimal", () => {
       render(<ResultPanel result={fractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "dec" }));
+      fireEvent.click(screen.getByRole("button", { name: "Decimal" }));
       expect(screen.getByText(/0\.888/)).toBeInTheDocument();
     });
 
     it("formato 'scn' muestra notación científica", () => {
       render(<ResultPanel result={fractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "scn" }));
+      fireEvent.click(screen.getByRole("button", { name: "Científica" }));
       expect(screen.getByText(/8\.888889e-1/)).toBeInTheDocument();
     });
 
     it("formato 'frac' muestra la fracción cuando result_latex ya es \\frac{}{}", () => {
       const { container } = render(<ResultPanel result={fractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "frac" }));
+      fireEvent.click(screen.getByRole("button", { name: "Fracción" }));
       // KaTeX descompone el LaTeX en spans (y duplica texto en su capa de
       // accesibilidad) — se compara el texto renderizado del contenedor
       // en vez de buscar nodos de texto exactos.
@@ -228,7 +228,7 @@ describe("ResultPanel", () => {
           isLoading={false}
         />,
       );
-      expect(screen.queryByRole("button", { name: "frac" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Fracción" })).not.toBeInTheDocument();
       expect(screen.getByText("Exacto")).toBeInTheDocument();
       expect(screen.getByText("Decimal")).toBeInTheDocument();
       expect(screen.getByText("Científica")).toBeInTheDocument();
@@ -236,8 +236,8 @@ describe("ResultPanel", () => {
 
     it("volver a 'exacto' muestra de nuevo el resultado original con el aproximado debajo", () => {
       render(<ResultPanel result={fractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "dec" }));
-      fireEvent.click(screen.getByRole("button", { name: "exacto" }));
+      fireEvent.click(screen.getByRole("button", { name: "Decimal" }));
+      fireEvent.click(screen.getByRole("button", { name: "Exacto" }));
       expect(screen.getByText(/≈ 0\.888/)).toBeInTheDocument();
     });
   });
@@ -262,13 +262,13 @@ describe("ResultPanel", () => {
         result_approx: 0.888,
       };
       render(<ResultPanel result={fractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "frac" }));
+      fireEvent.click(screen.getByRole("button", { name: "Fracción" }));
       expect(screen.queryByText(/ver como/)).not.toBeInTheDocument();
     });
 
     it("una fracción impropia (57/2) se muestra mixta por defecto (28 y 1/2)", () => {
       const { container } = render(<ResultPanel result={improperFractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "frac" }));
+      fireEvent.click(screen.getByRole("button", { name: "Fracción" }));
       const text = container.textContent?.replace(/\s+/g, "") ?? "";
       expect(text).toContain("28");
       expect(text).toContain("1");
@@ -278,7 +278,7 @@ describe("ResultPanel", () => {
 
     it("el toggle cambia a la forma impropia (57/2) y de vuelta a mixta", () => {
       const { container } = render(<ResultPanel result={improperFractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "frac" }));
+      fireEvent.click(screen.getByRole("button", { name: "Fracción" }));
 
       fireEvent.click(screen.getByText("ver como impropia"));
       expect(screen.getByText("ver como mixta")).toBeInTheDocument();
@@ -299,7 +299,7 @@ describe("ResultPanel", () => {
           isLoading={false}
         />,
       );
-      fireEvent.click(screen.getByRole("button", { name: "frac" }));
+      fireEvent.click(screen.getByRole("button", { name: "Fracción" }));
       const text = container.textContent?.replace(/\s+/g, "") ?? "";
       expect(text).toContain("-28");
     });
@@ -309,17 +309,17 @@ describe("ResultPanel", () => {
       const { rerender } = render(
         <ResultPanel result={baseResult} isLoading={false} inputLatex="30.525°" />,
       );
-      expect(screen.getByRole("button", { name: "dms" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "DMS" })).toBeInTheDocument();
 
       rerender(<ResultPanel result={baseResult} isLoading={false} inputLatex="30.525" />);
-      expect(screen.queryByRole("button", { name: "dms" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "DMS" })).not.toBeInTheDocument();
     });
 
     it("30.525° se presenta como 30° 31′ 30.0″", () => {
       const { container } = render(
         <ResultPanel result={baseResult} isLoading={false} inputLatex="30.525°" />,
       );
-      fireEvent.click(screen.getByRole("button", { name: "dms" }));
+      fireEvent.click(screen.getByRole("button", { name: "DMS" }));
       const text = container.textContent?.replace(/\s+/g, "") ?? "";
       expect(text).toContain("30");
       expect(text).toContain("31");
@@ -341,9 +341,9 @@ describe("ResultPanel", () => {
         <ResultPanel result={angleResult} isLoading={false} inputLatex="asin(0.5)" angleUnit="deg" />,
       );
       expect(container.textContent).toMatch(/[°∘]/);
-      expect(screen.getByRole("button", { name: "dms" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "DMS" })).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole("button", { name: "dms" }));
+      fireEvent.click(screen.getByRole("button", { name: "DMS" }));
       const text = container.textContent?.replace(/\s+/g, "") ?? "";
       expect(text).toContain("30");
       expect(text).toContain("0.0");
@@ -358,7 +358,7 @@ describe("ResultPanel", () => {
           angleUnit="rad"
         />,
       );
-      expect(screen.queryByRole("button", { name: "dms" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "DMS" })).not.toBeInTheDocument();
       expect(container.textContent).not.toMatch(/[°∘]/);
     });
   });
