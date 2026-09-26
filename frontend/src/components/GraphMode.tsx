@@ -21,6 +21,8 @@ const submitGraphs = (endpoint: Parameters<typeof submitAndRecord>[0], payload: 
 import { useGraphColorPaletteStore } from "../store/useGraphColorPaletteStore";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useUIStore } from "../store/useUIStore";
+import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStore";
+import type { HistoryEntry } from "../store/useHistoryStore";
 import { latexToBackendSyntax, NaturalMathField } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { ResultPanel } from "./ResultPanel";
@@ -171,7 +173,7 @@ function ResultArea({
   return <ResultPanel result={result} isLoading={isLoading} />;
 }
 
-function Graph2DForm() {
+function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   // Fase T, Módulo T0: fuente única de verdad, ver comentario donde
   // antes vivía la constante CURVE_COLORS.
   const colors = useGraphColorPaletteStore((s) => s.colors);
@@ -193,6 +195,24 @@ function Graph2DForm() {
   const isLoading = useUIStore((state) => state.isLoading);
   const pendingGraphResult = useUIStore((state) => state.pendingGraphResult);
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
+
+  useEffect(() => {
+    if (!reuseEntry?.endpointUrl.includes("/graph/2d")) return;
+    const payload = reuseEntry.requestPayload;
+    if (Array.isArray(payload.expressions)) {
+      const expressions = payload.expressions.map((value) => String(value));
+      setLatexRows(expressions.length ? expressions : [""]);
+      setMathFields(expressions.length ? expressions.map(() => null) : [null]);
+      setActiveRow(0);
+    }
+    if (payload.variable !== undefined) setVariable(String(payload.variable));
+    setXMin(payload.x_min !== undefined ? String(payload.x_min) : "");
+    setXMax(payload.x_max !== undefined ? String(payload.x_max) : "");
+    setSamples(payload.samples !== undefined ? String(payload.samples) : "");
+    if (payload.angle_unit === "rad" || payload.angle_unit === "deg") setAngleUnit(payload.angle_unit);
+    setLastResult(null);
+    setValidationError(null);
+  }, [reuseEntry]);
 
   // Fase F (Módulo F3): consume el "puente" del botón Graficar (ver
   // useUIStore.ts) una sola vez -- si hay un resultado pendiente al
@@ -458,7 +478,7 @@ function Graph2DForm() {
   );
 }
 
-function Graph3DForm() {
+function Graph3DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [latex, setLatex] = useState("");
   const [mathField, setMathField] = useState<MathfieldElement | null>(null);
@@ -475,6 +495,26 @@ function Graph3DForm() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
+
+  useEffect(() => {
+    if (!reuseEntry?.endpointUrl.includes("/graph/3d")) return;
+    const payload = reuseEntry.requestPayload;
+    if (payload.expression !== undefined) setLatex(String(payload.expression));
+    if (Array.isArray(payload.variables)) {
+      setXVar(String(payload.variables[0] ?? "x"));
+      setYVar(String(payload.variables[1] ?? "y"));
+    }
+    if (Array.isArray(payload.x_range)) {
+      setXMin(String(payload.x_range[0] ?? "-10"));
+      setXMax(String(payload.x_range[1] ?? "10"));
+    }
+    if (Array.isArray(payload.y_range)) {
+      setYMin(String(payload.y_range[0] ?? "-10"));
+      setYMax(String(payload.y_range[1] ?? "10"));
+    }
+    setLastResult(null);
+    setValidationError(null);
+  }, [reuseEntry]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -627,7 +667,7 @@ function Graph3DForm() {
   );
 }
 
-function GraphParametricForm() {
+function GraphParametricForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [xLatex, setXLatex] = useState("");
   const [yLatex, setYLatex] = useState("");
@@ -644,6 +684,18 @@ function GraphParametricForm() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
+
+  useEffect(() => {
+    if (!reuseEntry?.endpointUrl.includes("/graph/parametric")) return;
+    const payload = reuseEntry.requestPayload;
+    if (payload.x_expression !== undefined) setXLatex(String(payload.x_expression));
+    if (payload.y_expression !== undefined) setYLatex(String(payload.y_expression));
+    if (payload.parameter !== undefined) setParameter(String(payload.parameter));
+    if (payload.t_min !== undefined) setTMin(String(payload.t_min));
+    if (payload.t_max !== undefined) setTMax(String(payload.t_max));
+    setLastResult(null);
+    setValidationError(null);
+  }, [reuseEntry]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -803,7 +855,7 @@ function GraphParametricForm() {
   );
 }
 
-function GraphPolarForm() {
+function GraphPolarForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [rLatex, setRLatex] = useState("");
   const [rMathField, setRMathField] = useState<MathfieldElement | null>(null);
@@ -817,6 +869,17 @@ function GraphPolarForm() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
+
+  useEffect(() => {
+    if (!reuseEntry?.endpointUrl.includes("/graph/polar")) return;
+    const payload = reuseEntry.requestPayload;
+    if (payload.r_expression !== undefined) setRLatex(String(payload.r_expression));
+    if (payload.variable !== undefined) setVariable(String(payload.variable));
+    if (payload.theta_min !== undefined) setThetaMin(String(payload.theta_min));
+    if (payload.theta_max !== undefined) setThetaMax(String(payload.theta_max));
+    setLastResult(null);
+    setValidationError(null);
+  }, [reuseEntry]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -938,6 +1001,18 @@ function GraphPolarForm() {
 
 export function GraphMode() {
   const [kind, setKind] = useState<GraphKind>("2d");
+  const [reuseEntry, setReuseEntry] = useState<HistoryEntry | null>(null);
+  const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
+
+  useEffect(() => {
+    const entry = takePendingHistoryReuse();
+    if (!entry) return;
+    setReuseEntry(entry);
+    if (entry.endpointUrl.includes("/graph/3d")) setKind("3d");
+    else if (entry.endpointUrl.includes("/graph/parametric")) setKind("parametric");
+    else if (entry.endpointUrl.includes("/graph/polar")) setKind("polar");
+    else setKind("2d");
+  }, [takePendingHistoryReuse]);
 
   return (
     <section aria-label="Gráficas" className="mx-auto min-w-0 w-full max-w-[1376px] overflow-x-hidden space-y-4 rounded-xl border border-paper-line bg-paper-soft p-4 shadow-sm md:p-5">
@@ -961,10 +1036,10 @@ export function GraphMode() {
         </div>
       </div>
 
-      {kind === "2d" && <Graph2DForm />}
-      {kind === "3d" && <Graph3DForm />}
-      {kind === "parametric" && <GraphParametricForm />}
-      {kind === "polar" && <GraphPolarForm />}
+      {kind === "2d" && <Graph2DForm reuseEntry={reuseEntry} />}
+      {kind === "3d" && <Graph3DForm reuseEntry={reuseEntry} />}
+      {kind === "parametric" && <GraphParametricForm reuseEntry={reuseEntry} />}
+      {kind === "polar" && <GraphPolarForm reuseEntry={reuseEntry} />}
     </section>
   );
 }
