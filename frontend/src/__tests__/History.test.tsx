@@ -132,7 +132,7 @@ describe("History", () => {
 
     renderHistory();
     const time = document.querySelector("time");
-    expect(time).not.toBeNull();
+    if (!(time instanceof HTMLTimeElement)) throw new Error("No se encontró el elemento time del historial");
     expect(time).toHaveAttribute("dateTime", new Date(timestamp).toISOString());
     expect(time.textContent).toMatch(/\d{2}\/\d{2}\/\d{4}/);
     expect(time.textContent).toMatch(/\d{2}:\d{2}/);
