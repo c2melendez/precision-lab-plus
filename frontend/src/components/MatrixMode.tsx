@@ -4,7 +4,7 @@
  * conectado a `POST /matrix/operations`.
  */
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
@@ -12,6 +12,7 @@ import { submitAndRecord } from "../api/submitWithHistory";
 const submitMatrices = (endpoint: Parameters<typeof submitAndRecord>[0], payload: Record<string, unknown>, label: string) =>
   submitAndRecord(endpoint, payload, label, "Matrices");
 import { useUIStore } from "../store/useUIStore";
+import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStore";
 import { ResultPanel } from "./ResultPanel";
 
 type Operation =
@@ -159,6 +160,46 @@ export function MatrixMode() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
+  const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
+
+  useEffect(() => {
+    const entry = takePendingHistoryReuse();
+    if (!entry) return;
+    const payload = entry.requestPayload;
+    const rawA = (payload.matrix_a ?? payload.matrix) as unknown;
+    const rawB = payload.matrix_b as unknown;
+
+    if (Array.isArray(rawA) && rawA.every((row) => Array.isArray(row))) {
+      const nextA = (rawA as unknown[][]).map((row) => row.map((cell) => String(cell)));
+      setRowsA(nextA.length);
+      setColsA(nextA[0]?.length ?? 1);
+      setMatrixA(nextA);
+    }
+    if (Array.isArray(rawB) && rawB.every((row) => Array.isArray(row))) {
+      const nextB = (rawB as unknown[][]).map((row) => row.map((cell) => String(cell)));
+      setRowsB(nextB.length);
+      setColsB(nextB[0]?.length ?? 1);
+      setMatrixB(nextB);
+    }
+
+    const operationFromPayload = payload.operation;
+    if (typeof operationFromPayload === "string" && operationFromPayload in OPERATION_LABELS) {
+      setOperation(operationFromPayload as Operation);
+    } else if (entry.endpointUrl.includes("transpose")) setOperation("transpose");
+    else if (entry.endpointUrl.includes("determinant")) setOperation("determinant");
+    else if (entry.endpointUrl.includes("inverse")) setOperation("inverse");
+    else if (entry.endpointUrl.includes("/ref")) setOperation("ref");
+    else if (entry.endpointUrl.includes("/rref")) setOperation("rref");
+    else if (entry.endpointUrl.includes("norm")) setOperation("norm");
+    else if (entry.endpointUrl.includes("trace")) setOperation("trace");
+    else if (entry.endpointUrl.includes("rank")) setOperation("rank");
+    else if (entry.endpointUrl.includes("eigen")) setOperation("eigen");
+    else if (entry.endpointUrl.includes("power")) setOperation("power");
+
+    if (payload.exponent !== undefined) setExponent(String(payload.exponent));
+    setLastResult(null);
+    setValidationError(null);
+  }, [takePendingHistoryReuse]);
 
   function handleDimensionsA(rows: number, cols: number): void {
     setRowsA(rows);
