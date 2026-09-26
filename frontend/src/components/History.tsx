@@ -158,7 +158,7 @@ function historyAngularResult(entry: HistoryEntry): string | null {
 
   const numeric = Number(entry.resultApprox);
   if (!Number.isFinite(numeric)) return null;
-  return `${formatResultApprox(entry.resultApprox)}°`;
+  return `${formatResultApprox(numeric)}°`;
 }
 
 function MathOrText({ latex, text, className }: { latex?: string; text?: string; className?: string }) {
