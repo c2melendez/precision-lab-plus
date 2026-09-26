@@ -15,6 +15,7 @@ import { EquationMode } from "./components/EquationMode";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { GraphMode } from "./components/GraphMode";
 import { History } from "./components/History";
+import type { HistoryEntry } from "./store/useHistoryStore";
 import { HistoryDrawer } from "./components/HistoryDrawer";
 import { IntegralMode } from "./components/IntegralMode";
 import { LimitMode } from "./components/LimitMode";
@@ -123,6 +124,23 @@ export default function App() {
     media.addEventListener("change", onChange);
     return () => media.removeEventListener("change", onChange);
   }, []);
+
+  const reuseHistoryEntry = (entry: HistoryEntry) => {
+    const target: CalculatorMode =
+      entry.sourceModule === "Matrices"
+        ? "matrix"
+        : entry.sourceModule === "Estadística"
+          ? "statistics"
+          : entry.sourceModule === "Gráficas"
+            ? "graph"
+            : entry.sourceModule === "Geometría"
+              ? "geometry"
+              : entry.sourceModule === "Unidades"
+                ? "units"
+                : "basic";
+    setActiveMode(target);
+    setShowHistory(false);
+  };
 
   const toggleSidebar = () => {
     setSidebarExpanded((current) => {
@@ -233,7 +251,7 @@ export default function App() {
 
         <HistoryDrawer isOpen={showHistory} onClose={() => setShowHistory(false)}>
           <ErrorBoundary fallbackLabel="No se pudo mostrar el historial.">
-            <History />
+            <History onReuse={reuseHistoryEntry} />
           </ErrorBoundary>
         </HistoryDrawer>
       </div>
