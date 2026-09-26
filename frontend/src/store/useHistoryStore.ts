@@ -27,6 +27,10 @@ export interface HistoryEntry {
   label: string;
   resultLatex?: string;
   resultText?: string;
+  /** Aproximación numérica cruda del backend. Se conserva para que
+   * Historial pueda aplicar la misma política contextual de presentación
+   * que ResultPanel (por ejemplo DD/DMS para ángulos en grados). */
+  resultApprox?: string;
   resultType?: string;
   resultData?: unknown;
   hasDetailedSteps: boolean;
