@@ -237,3 +237,12 @@ Estado operativo:
 
 Todos los gates del HEAD `c82779a8b411e7b0a695e3e873e94bf24516e145` quedaron verdes, incluido Playwright E2E.
 La regresión de Historial/Reusar en Plus quedó cerrada y B5 vuelve a estar **EN CURSO**.
+
+
+### B5 — auditoría de shell reforzada
+
+- Se detectó GAP de robustez en Plus: el panel Desktop usaba un `bottom-20` fijo mientras el dock puede cambiar de altura por teclas recientes.
+- Se cambió a anclaje dinámico contra la geometría real del dock, manteniendo separación contractual de 12 px.
+- Se añadió `data-testid="keyboard-dock"` para gate geométrico.
+- Se elevó la cobertura de Plus para exigir teclado inline no-fixed en Compacto y acceso global desde Científica, Gráficas, Matrices, Estadística, Geometría y Unidades.
+- Estado: **EN CURSO — pendiente rerun de CI/Playwright**.
