@@ -90,3 +90,53 @@ test("Historial: Reusar reconstruye una integral completa en Científica", async
   expect(latex).toMatch(/d\s*x|dx/);
   expect(latex).not.toBe("x^{2}/4");
 });
+
+
+test("Historial: inversa trigonométrica en DEG conserva forma natural, 90° y reuso editable", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("calculadora-cientifica-history", JSON.stringify({
+      schemaVersion: 1,
+      entries: [{
+        id: "inverse-deg-history",
+        sourceModule: "Científica",
+        operation: "evaluate",
+        endpointUrl: "/evaluate",
+        requestPayload: {
+          expression: "asin(1)",
+          angle_unit: "deg"
+        },
+        inputText: "\\sin^{-1}\\left(1\\right)",
+        label: "asin(1)",
+        resultLatex: "\\frac{180 asin(1)}{\\pi}",
+        resultText: "180*asin(1)/pi",
+        resultApprox: "90",
+        hasDetailedSteps: false,
+        warnings: [],
+        timestamp: Date.now(),
+      }],
+    }));
+  });
+
+  await page.goto("./");
+  await page.getByRole("button", { name: "Historial", exact: true }).click();
+  const panel = page.locator("#history-panel");
+  await expect(panel).toBeVisible();
+
+  const item = panel.locator("li").filter({ hasText: "Científica" }).first();
+  await expect(item).toContainText("90°");
+  const visualInput = item.locator(".katex-html").first();
+  await expect(visualInput).toContainText("sin");
+  await expect(visualInput).not.toContainText("asin");
+
+  await item.getByRole("button", { name: /Reusar entrada/ }).click();
+  await expect(panel).toHaveCount(0);
+
+  const field = page.locator('math-field[aria-label="Expresión"]').first();
+  await expect(field).toBeVisible();
+  const latex = await field.evaluate((node) =>
+    (node as unknown as { getValue: (format?: string) => string }).getValue("latex-unstyled"),
+  );
+  expect(latex).toContain("\\sin");
+  expect(latex).toContain("-1");
+  expect(latex).not.toContain("asin");
+});
