@@ -98,3 +98,20 @@ Corrección aplicada:
 Regla de salida:
 - B3/B4 vuelven a PASS solo después de CI + Playwright verdes y revisión en Preview.
 - B5 queda pausado hasta recertificar esta regresión.
+
+
+## Recertificación B3/B4 — PASS
+
+Fecha: 2026-09-26
+
+Resultado: **PASS DEFINITIVO tras corrección y rerun completo**.
+
+- CI: PASS.
+- Playwright E2E: PASS.
+- Accesibilidad: PASS.
+- Cross-browser: PASS.
+- Security: PASS.
+- Caso de regresión `sin⁻¹(1)` en DEG: Historial natural + `90°` + Reusar natural, PASS en Desktop/Tablet/Mobile.
+- Reuso de integral completa: PASS tras restaurar reconstrucción desde `requestPayload` para entradas históricas parciales.
+- B3/B4 vuelven a estado cerrado.
+- Bloque 5 queda desbloqueado.
