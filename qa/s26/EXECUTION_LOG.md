@@ -487,3 +487,14 @@ Ejecutar `PARITY_CHECKPOINT_B1_B4.md`. No iniciar Bloque 5 antes de cerrar la au
 - Regresión de `sin⁻¹(1)` en DEG cerrada.
 - Reuso de integral completa nuevamente PASS.
 - B3/B4 cerrados; B5 reanudado.
+
+
+## 2026-09-26 — B5 shell/responsive Plus armonizado
+
+- Auditoría Lite↔Plus encontró offset Desktop fijo en Plus frente a anclaje real del dock en Lite.
+- `KeyboardDock` Plus ahora mide el borde superior real del dock con ResizeObserver + resize y entrega offset al panel.
+- `KeyboardPanel` usa `--keyboard-panel-bottom` dinámico en Desktop.
+- Playwright B5 ahora exige 12 px entre panel y dock.
+- M11 Plus ahora verifica que Compacto abre teclado inline y no dentro de contenedor fixed.
+- B5 Plus también verifica apertura/cierre global en los seis módulos.
+- B6 (contenido/paridad de categorías) no fue modificado.
