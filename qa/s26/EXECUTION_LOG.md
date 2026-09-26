@@ -467,3 +467,14 @@ Ejecutar `PARITY_CHECKPOINT_B1_B4.md`. No iniciar Bloque 5 antes de cerrar la au
 - Se reabren B3/B4 y se pausa B5.
 - Correcciones: `HistoryEntry.resultApprox`, `submitAndRecord(..., historyInputText?)`, preservación del LaTeX visible, normalización natural de inversas y gate E2E de reuso.
 - Cierre condicionado a CI + Playwright + Preview.
+
+
+## 2026-09-26 — Reintento Plus tras fallo de integral histórica
+
+- CI y todos los gates no-E2E quedaron verdes.
+- El nuevo caso `sin⁻¹(1)` DEG → Historial natural + `90°` → Reusar natural pasó en Desktop/Tablet/Mobile.
+- El gate B5 del shell del teclado también pasó en Desktop/Tablet/Mobile.
+- Playwright falló únicamente en el test histórico de integral completa: recibió `∫x**2/4` en vez de reconstruir `\\int ... dx`.
+- Causa: la nueva prioridad de `inputText` aceptó una etiqueta histórica parcial de operación estructurada.
+- Corrección: solo reutilizar literalmente `inputText` en operaciones estructuradas cuando ya contiene LaTeX completo; si no, reconstruir desde `requestPayload`.
+- Nuevo commit de corrección: `677c70717a83c4861b74649968089e052fa5e52d`.
