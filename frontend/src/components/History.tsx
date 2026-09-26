@@ -106,14 +106,50 @@ function MatrixPayload({ payload }: { payload: Record<string, unknown> }) {
   );
 }
 
+function normalizeBackendMathForDisplay(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  // Si ya contiene comandos LaTeX, se conserva tal cual.
+  if (/\\[a-zA-Z]+/.test(trimmed)) return trimmed;
+
+  let out = trimmed
+    .replace(/\bpi\b/g, "\\pi")
+    .replace(/\binfinity\b|\binf\b/g, "\\infty")
+    .replace(/\bsqrt\s*\(([^()]+)\)/g, "\\sqrt{$1}")
+    .replace(/\bsqrt\s*([A-Za-z0-9.]+)/g, "\\sqrt{$1}")
+    .replace(/\b(sin|cos|tan|sec|csc|cot|ln|log|exp)\s*\(/g, (_match, fn: string) => `\\${fn}\\left(`);
+
+  // Fracciones backend simples: (a)/(b) -> \\frac{a}{b}.
+  // Se ejecuta varias veces para cubrir fracciones anidadas sencillas.
+  for (let i = 0; i < 3; i += 1) {
+    const next = out.replace(/\(([^()]+)\)\s*\/\s*\(([^()]+)\)/g, "\\frac{$1}{$2}");
+    if (next === out) break;
+    out = next;
+  }
+
+  // Cierra los \\left( introducidos arriba.
+  const opens = (out.match(/\\left\(/g) ?? []).length;
+  const closes = (out.match(/\\right\)/g) ?? []).length;
+  if (opens > closes) {
+    out += "\\right)".repeat(opens - closes);
+  }
+
+  return out;
+}
+
 function MathOrText({ latex, text, className }: { latex?: string; text?: string; className?: string }) {
-  const value = latex ?? text ?? "";
-  if (!value) return null;
-  if (latex) return <MathRenderer latex={latex} fallbackText={text ?? latex} className={className} />;
-  const looksLikeMath = /\\[a-zA-Z]+|[{}^_]/.test(value);
-  return looksLikeMath
-    ? <MathRenderer latex={value} fallbackText={value} className={className} />
-    : <span className={className}>{value}</span>;
+  const raw = latex ?? text ?? "";
+  if (!raw) return null;
+
+  const normalized = normalizeBackendMathForDisplay(raw);
+  const shouldRenderMath =
+    Boolean(latex) ||
+    /\\[a-zA-Z]+|[{}^_]/.test(normalized) ||
+    /[+\-*/=()]/.test(normalized);
+
+  return shouldRenderMath
+    ? <MathRenderer latex={normalized} fallbackText={text ?? raw} className={className} />
+    : <span className={className}>{raw}</span>;
 }
 
 export function History({ onReuse }: HistoryProps) {
