@@ -132,14 +132,15 @@ describe("History", () => {
       ],
     });
 
-    const { container } = render(<History onReuse={vi.fn()} />);
+    render(<History onReuse={vi.fn()} />);
     const resultLabel = screen.getByText("Resultado");
     const resultRow = resultLabel.parentElement;
-    expect(resultRow).not.toBeNull();
-    expect(resultRow?.querySelector(".katex")).not.toBeNull();
-    expect(resultRow?.textContent).not.toContain("sqrt2");
-    expect(resultRow?.textContent).not.toContain("pi");
-    expect(resultRow?.textContent).toContain("π");
+    if (!(resultRow instanceof HTMLElement)) throw new Error("No se encontró la fila de resultado");
+    const visibleMath = resultRow.querySelector(".katex-html");
+    if (!(visibleMath instanceof HTMLElement)) throw new Error("No se encontró la salida visual de KaTeX");
+    expect(visibleMath.textContent).not.toContain("sqrt2");
+    expect(visibleMath.textContent).not.toContain("pi");
+    expect(visibleMath.textContent).toContain("π");
   });
 
   it("muestra fecha y hora del resultado", () => {
