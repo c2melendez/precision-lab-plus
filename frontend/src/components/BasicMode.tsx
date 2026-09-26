@@ -50,6 +50,7 @@ import { useUIStore } from "../store/useUIStore";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useLayoutModeStore } from "../store/useLayoutModeStore";
 import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStore";
+import type { HistoryEntry } from "../store/useHistoryStore";
 import { CalculatorScreen } from "./CalculatorScreen";
 import { detectCalculusIntent, type CalculusIntent } from "./calculusIntent";
 import { latexToBackendSyntax } from "./NaturalMathField";
@@ -159,12 +160,12 @@ function scientificHistoryEntryToLatex(entry: HistoryEntry): string {
   }
 
   if (entry.endpointUrl === "/solve/system" && Array.isArray(payload.equations)) {
-    const rows = payload.equations.map((row) => backendExpressionToLatex(row)).join("\\\\");
+    const rows = payload.equations.map((row: unknown) => backendExpressionToLatex(row)).join("\\\\");
     return `\\begin{cases}${rows}\\end{cases}`;
   }
 
   if (entry.endpointUrl === "/inequality/system" && Array.isArray(payload.inequalities)) {
-    const rows = payload.inequalities.map((row) => backendExpressionToLatex(row)).join("\\\\");
+    const rows = payload.inequalities.map((row: unknown) => backendExpressionToLatex(row)).join("\\\\");
     return `\\begin{cases}${rows}\\end{cases}`;
   }
 
