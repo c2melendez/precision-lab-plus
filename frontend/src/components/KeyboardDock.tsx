@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useLayoutModeStore } from "../store/useLayoutModeStore";
 import { useMinWidthMediaQuery, FLOATING_MIN_WIDTH_PX } from "../hooks/useMinWidthMediaQuery";
@@ -73,6 +74,8 @@ import { RecentKeysBar } from "./RecentKeysBar";
  */
 
 export function KeyboardDock({ sidebarExpanded }: { sidebarExpanded: boolean }) {
+  const dockRef = useRef<HTMLDivElement>(null);
+  const [dockBottomOffset, setDockBottomOffset] = useState(0);
   const isOpen = useKeyboardPanelStore((s) => s.isOpen);
   const content = useKeyboardPanelStore((s) => s.content);
   const basicContent = useKeyboardPanelStore((s) => s.basicContent);
@@ -81,6 +84,26 @@ export function KeyboardDock({ sidebarExpanded }: { sidebarExpanded: boolean }) 
   const close = useKeyboardPanelStore((s) => s.close);
   const layoutMode = useLayoutModeStore((s) => s.layoutMode);
   const isFloatingWideEnough = useMinWidthMediaQuery(FLOATING_MIN_WIDTH_PX);
+  const hasDockContent = content !== null || basicContent !== null || compactActions !== null;
+
+  useLayoutEffect(() => {
+    const dock = dockRef.current;
+    if (!dock) return;
+    const measure = () => {
+      const rect = dock.getBoundingClientRect();
+      setDockBottomOffset(Math.max(0, window.innerHeight - rect.top + 12));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(dock);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [layoutMode, isFloatingWideEnough, hasDockContent, sidebarExpanded]);
+
+  if (!hasDockContent) return null;
 
   // Módulo P3: Apilado maneja su propia sección de teclado inline (ver
   // comentario de cabecera) — este dock fijo se retira por completo.
@@ -103,7 +126,7 @@ export function KeyboardDock({ sidebarExpanded }: { sidebarExpanded: boolean }) 
   return (
     <>
       {(content || basicContent) && (
-        <KeyboardPanel isOpen={isOpen} onClose={close} sidebarExpanded={sidebarExpanded}>
+        <KeyboardPanel isOpen={isOpen} onClose={close} dockBottomOffset={dockBottomOffset} sidebarExpanded={sidebarExpanded}>
           {/* Grid básico completo — Fase Y: el panel es ahora la ÚNICA
               fuente del teclado en cualquier breakpoint (antes existía
               una copia siempre-visible de basicContent en la barra
@@ -115,7 +138,7 @@ export function KeyboardDock({ sidebarExpanded }: { sidebarExpanded: boolean }) 
         </KeyboardPanel>
       )}
 
-      <div className={`fixed bottom-0 right-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2 dt:bottom-4 dt:right-8 dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft dt:px-4 dt:py-2 dt:shadow-xl ${sidebarExpanded ? "left-60 dt:left-[17rem]" : "left-[72px] dt:left-[104px]"}`}>
+      <div ref={dockRef} data-testid="keyboard-dock" className={`fixed bottom-0 right-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2 dt:bottom-4 dt:right-8 dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft dt:px-4 dt:py-2 dt:shadow-xl ${sidebarExpanded ? "left-60 dt:left-[17rem]" : "left-[72px] dt:left-[104px]"}`}>
         {/* Fase X, Módulo X0 (Smart Docks) — "justo arriba de donde
             aparecerá el teclado (colapsado o no)", confirmado por Carlos.
             Primera fila del mismo contenedor fijo: queda por encima del
