@@ -60,22 +60,47 @@ function extractMatrices(payload: Record<string, unknown>): Array<{ name: string
     }));
 }
 
+function parseMatrixResult(entry: HistoryEntry): unknown[][] | null {
+  if (Array.isArray(entry.resultData) && entry.resultData.every((row) => Array.isArray(row))) {
+    return entry.resultData as unknown[][];
+  }
+  const value = entry.resultText ?? entry.resultLatex ?? "";
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed) && parsed.every((row) => Array.isArray(row))) return parsed as unknown[][];
+  } catch {
+    // Puede venir como LaTeX.
+  }
+  const match = value.match(/\\begin\{(?:bmatrix|pmatrix|matrix)\}([\s\S]*?)\\end\{(?:bmatrix|pmatrix|matrix)\}/);
+  if (!match) return null;
+  return match[1]
+    .split(/\\\\/)
+    .map((row) => row.split("&").map((cell) => cell.trim()))
+    .filter((row) => row.length > 0);
+}
+
+function MatrixGridPreview({ name, values }: { name: string; values: unknown[][] }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-semibold text-muted">{name} =</span>
+      <div className="rounded-lg border border-paper-line bg-paper-soft px-2 py-1">
+        {values.map((row, rowIndex) => (
+          <div key={rowIndex} className="grid grid-flow-col auto-cols-min justify-center gap-2 font-mono text-xs text-ink">
+            {row.map((value, columnIndex) => <span key={columnIndex}>{String(value)}</span>)}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function MatrixPayload({ payload }: { payload: Record<string, unknown> }) {
   const matrices = extractMatrices(payload);
   if (matrices.length === 0) return null;
   return (
     <div className="mt-2 flex flex-wrap gap-3">
       {matrices.map(({ name, values }) => (
-        <div key={name} className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-muted">{name} =</span>
-          <div className="rounded-lg border border-paper-line bg-paper-soft px-2 py-1">
-            {values.map((row, rowIndex) => (
-              <div key={rowIndex} className="grid grid-flow-col auto-cols-min justify-center gap-2 font-mono text-xs text-ink">
-                {row.map((value, columnIndex) => <span key={columnIndex}>{String(value)}</span>)}
-              </div>
-            ))}
-          </div>
-        </div>
+        <MatrixGridPreview key={name} name={name} values={values} />
       ))}
     </div>
   );
@@ -121,6 +146,7 @@ export function History({ onReuse }: HistoryProps) {
         {entries.map((entry) => {
           const when = formatDateTime(entry.timestamp);
           const matrices = extractMatrices(entry.requestPayload);
+          const matrixResult = entry.sourceModule === "Matrices" ? parseMatrixResult(entry) : null;
           return (
             <li key={entry.id} className="rounded-xl border border-paper-line bg-paper p-3 shadow-sm">
               <div className="flex items-start justify-between gap-4">
@@ -143,15 +169,21 @@ export function History({ onReuse }: HistoryProps) {
                     </div>
                   )}
 
-                  {(entry.resultText || entry.resultLatex) && (
-                    <div className="mt-2 flex flex-wrap items-baseline gap-2">
-                      <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Resultado</span>
-                      <MathOrText
-                        latex={entry.resultLatex}
-                        text={entry.resultText}
-                        className="text-sm font-medium text-marker-text"
-                      />
-                    </div>
+                  {(entry.resultText || entry.resultLatex || matrixResult) && (
+                    matrixResult ? (
+                      <div className="mt-3">
+                        <MatrixGridPreview name="Resultado" values={matrixResult} />
+                      </div>
+                    ) : (
+                      <div className="mt-2 flex flex-wrap items-baseline gap-2">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Resultado</span>
+                        <MathOrText
+                          latex={entry.resultLatex}
+                          text={entry.resultText}
+                          className="text-sm font-medium text-marker-text"
+                        />
+                      </div>
+                    )
                   )}
                 </div>
 
