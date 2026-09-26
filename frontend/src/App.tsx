@@ -159,10 +159,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-paper text-ink">
+    <div className="min-h-screen bg-paper pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] text-ink">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-graph focus:px-3 focus:py-2 focus:text-white"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[60] focus:rounded focus:bg-marker focus:px-3 focus:py-2 focus:text-chrome"
       >
         Saltar al contenido principal
       </a>
