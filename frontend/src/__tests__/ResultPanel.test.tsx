@@ -305,14 +305,26 @@ describe("ResultPanel", () => {
     });
   });
   describe("S26.3 — formato DMS contextual", () => {
-    it("muestra DMS solo cuando la entrada usa simbología de grados", () => {
+    it("cuando la entrada usa grados solo ofrece DD y DMS", () => {
       const { rerender } = render(
         <ResultPanel result={baseResult} isLoading={false} inputLatex="30.525°" />,
       );
+      expect(screen.getByRole("button", { name: "DD" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "DMS" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Exacto" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Decimal" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Fracción" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Científica" })).not.toBeInTheDocument();
 
       rerender(<ResultPanel result={baseResult} isLoading={false} inputLatex="30.525" />);
+      expect(screen.queryByRole("button", { name: "DD" })).not.toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "DMS" })).not.toBeInTheDocument();
+    });
+
+    it("DD conserva el valor en grados decimales con símbolo de grado", () => {
+      render(<ResultPanel result={baseResult} isLoading={false} inputLatex="56.55°" />);
+      fireEvent.click(screen.getByRole("button", { name: "DD" }));
+      expect(screen.getByText("56.55°")).toBeInTheDocument();
     });
 
     it("30.525° se presenta como 30° 31′ 30.0″", () => {
@@ -336,12 +348,18 @@ describe("ResultPanel", () => {
       result_approx: 30,
     };
 
-    it("asin(0.5) en DEG muestra grados y habilita DMS", () => {
+    it("asin(0.5) en DEG solo ofrece DD/DMS y muestra grados", () => {
       const { container } = render(
         <ResultPanel result={angleResult} isLoading={false} inputLatex="asin(0.5)" angleUnit="deg" />,
       );
-      expect(container.textContent).toMatch(/[°∘]/);
+      expect(screen.getByRole("button", { name: "DD" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "DMS" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Exacto" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Decimal" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Científica" })).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "DD" }));
+      expect(screen.getByText("30°")).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole("button", { name: "DMS" }));
       const text = container.textContent?.replace(/\s+/g, "") ?? "";
