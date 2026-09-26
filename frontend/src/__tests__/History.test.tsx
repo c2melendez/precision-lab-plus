@@ -133,10 +133,13 @@ describe("History", () => {
     });
 
     const { container } = render(<History onReuse={vi.fn()} />);
-    expect(container.querySelector(".katex")).not.toBeNull();
-    expect(container.textContent).not.toContain("sqrt2");
-    expect(container.textContent).not.toContain("pi");
-    expect(container.textContent).toContain("π");
+    const resultLabel = screen.getByText("Resultado");
+    const resultRow = resultLabel.parentElement;
+    expect(resultRow).not.toBeNull();
+    expect(resultRow?.querySelector(".katex")).not.toBeNull();
+    expect(resultRow?.textContent).not.toContain("sqrt2");
+    expect(resultRow?.textContent).not.toContain("pi");
+    expect(resultRow?.textContent).toContain("π");
   });
 
   it("muestra fecha y hora del resultado", () => {
