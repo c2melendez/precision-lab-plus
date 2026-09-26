@@ -7,13 +7,14 @@
  * usa MatrixMode.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { submitAndRecord } from "../api/submitWithHistory";
 
 const submitStatistics = (endpoint: Parameters<typeof submitAndRecord>[0], payload: Record<string, unknown>, label: string) =>
   submitAndRecord(endpoint, payload, label, "Estadística");
 import type { MathResponse } from "../api/client";
 import { ResultPanel } from "./ResultPanel";
+import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStore";
 
 type SubMode = "descriptive" | "combinatorics" | "distribution" | "correlation";
 type VarianceKind = "population" | "sample";
@@ -209,6 +210,71 @@ export function StatisticsMode() {
   const [yRaw, setYRaw] = useState("");
   const [correlationResult, setCorrelationResult] = useState<MathResponse | null>(null);
   const [correlationLoading, setCorrelationLoading] = useState(false);
+  const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
+
+  useEffect(() => {
+    const entry = takePendingHistoryReuse();
+    if (!entry) return;
+    const payload = entry.requestPayload;
+
+    if (entry.endpointUrl.includes("/descriptive")) {
+      setSubMode("descriptive");
+      if (Array.isArray(payload.values)) setDataRaw(payload.values.join(", "));
+      if (payload.variance_kind === "population" || payload.variance_kind === "sample") setVarianceKind(payload.variance_kind);
+      if (payload.percentile_p !== undefined) setPercentileP(String(payload.percentile_p));
+      setDescriptiveResult(null);
+      return;
+    }
+
+    if (entry.endpointUrl.includes("/correlation")) {
+      setSubMode("correlation");
+      if (Array.isArray(payload.x)) setXRaw(payload.x.join(", "));
+      if (Array.isArray(payload.y)) setYRaw(payload.y.join(", "));
+      setCorrelationResult(null);
+      return;
+    }
+
+    if (entry.endpointUrl.includes("/combinatorics")) {
+      setSubMode("combinatorics");
+      if (payload.n !== undefined) setNStr(String(payload.n));
+      if (payload.r !== undefined) setRStr(String(payload.r));
+      setCombinatoricsResult(null);
+      return;
+    }
+
+    if (entry.endpointUrl.includes("/statistics/")) {
+      setSubMode("distribution");
+      if (typeof payload.distribution === "string" && ["binomial", "normal", "poisson", "uniform", "exponential"].includes(payload.distribution)) {
+        setDistribution(payload.distribution as Distribution);
+      }
+      if (payload.n !== undefined) setBinN(String(payload.n));
+      if (payload.p !== undefined) setBinP(String(payload.p));
+      if (payload.k !== undefined) {
+        setBinK(String(payload.k));
+        setPoissonK(String(payload.k));
+      }
+      if (payload.mu !== undefined) setMu(String(payload.mu));
+      if (payload.sigma !== undefined) setSigma(String(payload.sigma));
+      if (payload.lambda !== undefined) {
+        setPoissonLam(String(payload.lambda));
+        setExpLam(String(payload.lambda));
+      }
+      if (payload.a !== undefined) {
+        setNormA(String(payload.a));
+        setUniformA(String(payload.a));
+      }
+      if (payload.b !== undefined) {
+        setNormB(String(payload.b));
+        setUniformB(String(payload.b));
+      }
+      if (payload.x !== undefined && !Array.isArray(payload.x)) {
+        setNormX(String(payload.x));
+        setUniformX(String(payload.x));
+        setExpX(String(payload.x));
+      }
+      setDistributionResult(null);
+    }
+  }, [takePendingHistoryReuse]);
 
   async function runCorrelation(query: "correlation" | "slope" | "intercept") {
     let x: number[];
