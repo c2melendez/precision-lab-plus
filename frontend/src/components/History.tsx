@@ -5,38 +5,16 @@
  * la llamada.
  */
 
-import { useState } from "react";
-
-import { callApi, type MathResponse } from "../api/client";
 import { useHistoryStore, type HistoryEntry } from "../store/useHistoryStore";
-import { ResultPanel } from "./ResultPanel";
 
-export function History() {
+interface HistoryProps {
+  onReuse: (entry: HistoryEntry) => void;
+}
+
+export function History({ onReuse }: HistoryProps) {
   const entries = useHistoryStore((state) => state.entries);
-  const reuseEntry = useHistoryStore((state) => state.reuseEntry);
   const clearHistory = useHistoryStore((state) => state.clearHistory);
 
-  const [reusedResult, setReusedResult] = useState<MathResponse | null>(null);
-  const [isReusing, setIsReusing] = useState(false);
-  const [reuseError, setReuseError] = useState<string | null>(null);
-
-  async function handleReuse(id: string): Promise<void> {
-    setReuseError(null);
-    const entry = reuseEntry(id);
-    if (!entry) {
-      // endpointUrl fuera de KNOWN_ENDPOINTS, o id inexistente — nunca se
-      // reejecuta una llamada no validada (sección 11).
-      setReuseError("No se pudo reutilizar esta entrada (endpoint no reconocido).");
-      return;
-    }
-    setIsReusing(true);
-    try {
-      const result = await callApi(entry.endpointUrl, entry.requestPayload);
-      setReusedResult(result);
-    } finally {
-      setIsReusing(false);
-    }
-  }
 
   if (entries.length === 0) {
     return (
@@ -86,7 +64,7 @@ export function History() {
             <div className="mt-3 flex justify-end">
               <button
               type="button"
-              onClick={() => handleReuse(entry.id)}
+              onClick={() => onReuse(entry)
               aria-label={`Reusar entrada: ${entry.label}`}
                 className="rounded-lg border border-paper-line bg-paper-soft px-3 py-1.5 text-xs font-medium text-ink hover:bg-paper-line/40"
               >
