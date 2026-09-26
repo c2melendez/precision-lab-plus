@@ -32,6 +32,7 @@ import { ProjectBrand } from "./components/ProjectBrand";
 import { ModeIcon, type ModeIconName } from "./components/ModeIcon";
 import { useUIStore, type CalculatorMode } from "./store/useUIStore";
 import { useLayoutModeStore } from "./store/useLayoutModeStore";
+import { useKeyboardPanelStore } from "./store/useKeyboardPanelStore";
 import { useMinWidthMediaQuery, FLOATING_MIN_WIDTH_PX } from "./hooks/useMinWidthMediaQuery";
 
 const MODE_LABELS: Record<CalculatorMode, string> = {
@@ -111,7 +112,9 @@ export default function App() {
   const [sidebarExpanded, setSidebarExpanded] = useState(readInitialSidebarExpanded);
   const layoutMode = useLayoutModeStore((s) => s.layoutMode);
   const isFloatingWideEnough = useMinWidthMediaQuery(FLOATING_MIN_WIDTH_PX);
-  const hasFixedDock = !(layoutMode === "stacked" || (layoutMode === "floating" && isFloatingWideEnough));
+  const hasDockContent = useKeyboardPanelStore((s) =>
+    s.content !== null || s.basicContent !== null || s.compactActions !== null);
+  const hasFixedDock = hasDockContent && !(layoutMode === "stacked" || (layoutMode === "floating" && isFloatingWideEnough));
   const mainBottomPadding = hasFixedDock ? "pb-56 dt:pb-40" : "pb-8";
 
   useEffect(() => {
