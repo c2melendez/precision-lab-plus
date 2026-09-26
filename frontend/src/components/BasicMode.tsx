@@ -74,6 +74,103 @@ const EXAMPLES: { display: string; latex: string }[] = [
 // comporte igual sin importar desde qué pantalla se escribió.
 const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
 
+function backendExpressionToLatex(value: unknown): string {
+  const source = String(value ?? "").trim();
+  if (!source) return "";
+
+  function convert(expr: string): string {
+    let text = expr.trim();
+    if (!text) return "";
+
+    while (text.startsWith("(") && text.endsWith(")")) {
+      let depth = 0;
+      let wrapsAll = true;
+      for (let i = 0; i < text.length; i += 1) {
+        const ch = text[i];
+        if (ch === "(") depth += 1;
+        else if (ch === ")") depth -= 1;
+        if (depth === 0 && i < text.length - 1) {
+          wrapsAll = false;
+          break;
+        }
+      }
+      if (!wrapsAll) break;
+      text = text.slice(1, -1).trim();
+    }
+
+    let depth = 0;
+    for (let i = 0; i < text.length; i += 1) {
+      const ch = text[i];
+      if (ch === "(") depth += 1;
+      else if (ch === ")") depth -= 1;
+      else if (ch === "/" && depth === 0) {
+        return `\\frac{${convert(text.slice(0, i))}}{${convert(text.slice(i + 1))}}`;
+      }
+    }
+
+    text = text
+      .replace(/\bpi\b/g, "\\pi")
+      .replace(/\boo\b|\binf(?:inity)?\b/g, "\\infty")
+      .replace(/\*\*\s*\(?(-?\d+(?:\.\d+)?)\)?/g, "^{$1}")
+      .replace(/\bsqrt\s*\(([^()]+)\)/g, (_m, body: string) => `\\sqrt{${convert(body)}}`)
+      .replace(/\b(sin|cos|tan|sec|csc|cot|ln|log|exp)\s*\(([^()]*)\)/g, (_m, fn: string, body: string) =>
+        `\\${fn}\\left(${convert(body)}\\right)`,
+      );
+
+    return text;
+  }
+
+  return convert(source);
+}
+
+function scientificHistoryEntryToLatex(entry: HistoryEntry): string {
+  const payload = entry.requestPayload;
+  const expression = backendExpressionToLatex(
+    payload.expression ?? payload.equation ?? payload.inequality ?? entry.inputText ?? entry.label,
+  );
+  const variable = String(payload.variable ?? "x");
+
+  if (entry.endpointUrl === "/integral") {
+    const lower = payload.lower_bound;
+    const upper = payload.upper_bound;
+    if (lower !== undefined && upper !== undefined) {
+      return `\\int_{${backendExpressionToLatex(lower)}}^{${backendExpressionToLatex(upper)}} ${expression}\\,d${variable}`;
+    }
+    return `\\int ${expression}\\,d${variable}`;
+  }
+
+  if (entry.endpointUrl === "/derivative") {
+    const order = Number(payload.order ?? 1);
+    return order > 1
+      ? `\\frac{d^{${order}}}{d${variable}^{${order}}}\\left(${expression}\\right)`
+      : `\\frac{d}{d${variable}}\\left(${expression}\\right)`;
+  }
+
+  if (entry.endpointUrl === "/derivative/partial") {
+    return `\\frac{\\partial}{\\partial ${variable}}\\left(${expression}\\right)`;
+  }
+
+  if (entry.endpointUrl === "/limit") {
+    const point = backendExpressionToLatex(payload.point ?? "0");
+    const direction =
+      payload.direction === "left" ? "^{-}" :
+      payload.direction === "right" ? "^{+}" : "";
+    return `\\lim_{${variable}\\to ${point}${direction}} ${expression}`;
+  }
+
+  if (entry.endpointUrl === "/solve/system" && Array.isArray(payload.equations)) {
+    const rows = payload.equations.map((row) => backendExpressionToLatex(row)).join("\\\\");
+    return `\\begin{cases}${rows}\\end{cases}`;
+  }
+
+  if (entry.endpointUrl === "/inequality/system" && Array.isArray(payload.inequalities)) {
+    const rows = payload.inequalities.map((row) => backendExpressionToLatex(row)).join("\\\\");
+    return `\\begin{cases}${rows}\\end{cases}`;
+  }
+
+  return expression;
+}
+
 export function BasicMode() {
   const formRef = useRef<HTMLFormElement>(null);
   const [mathField, setMathField] = useState<MathfieldElement | null>(null);
@@ -96,17 +193,9 @@ export function BasicMode() {
     const entry = takePendingHistoryReuse();
     if (!entry) return;
     const payload = entry.requestPayload;
-    const expression =
-      payload.expression ??
-      payload.equation ??
-      payload.inequality ??
-      entry.inputText ??
-      entry.label;
-    if (Array.isArray(payload.equations)) {
-      setLatex(payload.equations.join("; "));
-      if (Array.isArray(payload.variables)) setSystemVariables(payload.variables.join(", "));
-    } else {
-      setLatex(String(expression ?? ""));
+    setLatex(scientificHistoryEntryToLatex(entry));
+    if (Array.isArray(payload.variables)) {
+      setSystemVariables(payload.variables.join(", "));
     }
     if (payload.angle_unit === "deg" || payload.angle_unit === "rad") setAngleUnit(payload.angle_unit);
     if (payload.substitutions && typeof payload.substitutions === "object" && !Array.isArray(payload.substitutions)) {
