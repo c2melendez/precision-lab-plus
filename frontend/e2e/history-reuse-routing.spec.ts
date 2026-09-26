@@ -33,10 +33,17 @@ test("Historial: Reusar vuelve al módulo de origen y muestra matrices, fecha y 
   await expect(panel.getByText("Operación de matrices", { exact: true })).toBeVisible();
   await expect(panel.getByText("A =", { exact: true })).toBeVisible();
   await expect(panel.getByText("B =", { exact: true })).toBeVisible();
+  await expect(panel.getByText("Resultado =", { exact: true })).toBeVisible();
   await expect(panel.locator("time")).toContainText(/\d{2}\/\d{2}\/\d{4}/);
   await expect(panel.locator("time")).toContainText(/\d{2}:\d{2}/);
 
   await panel.getByRole("button", { name: /Reusar entrada/ }).click();
   await expect(panel).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Matrices", exact: true }).first()).toBeVisible();
+  await expect(page.getByLabel("Matriz A celda fila 1 columna 1")).toHaveValue("1");
+  await expect(page.getByLabel("Matriz A celda fila 1 columna 2")).toHaveValue("2");
+  await expect(page.getByLabel("Matriz A celda fila 2 columna 1")).toHaveValue("3");
+  await expect(page.getByLabel("Matriz A celda fila 2 columna 2")).toHaveValue("4");
+  await expect(page.getByLabel("Matriz B celda fila 1 columna 1")).toHaveValue("5");
+  await expect(page.getByLabel("Matriz B celda fila 2 columna 2")).toHaveValue("8");
 });
