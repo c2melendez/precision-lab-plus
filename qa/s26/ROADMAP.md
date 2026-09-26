@@ -178,7 +178,7 @@ Regla: cada bloque cierra con diff acotado, gates aplicables, revisión contract
 2. Configuración + Apariencia + layouts — **PASS DEFINITIVO**.
 3. Historial — **PASS DEFINITIVO**.
 4. Resultado + formatos — **PASS DEFINITIVO**.
-5. Teclado global shell/open-close/responsive — **EN CURSO**.
+5. Teclado global shell/open-close/responsive — **PASS DEFINITIVO**.
 6. Paridad de seis categorías del teclado — pendiente.
 7. Científica — pendiente.
 8. Matrices — pendiente.
@@ -246,3 +246,11 @@ La regresión de Historial/Reusar en Plus quedó cerrada y B5 vuelve a estar **E
 - Se añadió `data-testid="keyboard-dock"` para gate geométrico.
 - Se elevó la cobertura de Plus para exigir teclado inline no-fixed en Compacto y acceso global desde Científica, Gráficas, Matrices, Estadística, Geometría y Unidades.
 - Estado: **EN CURSO — pendiente rerun de CI/Playwright**.
+
+
+### B5 cerrado — 2026-09-26
+
+- HEAD certificado: `17bb72b5e12cd6fb0d1961459dae80631ca3766b`.
+- CI, Playwright E2E, S17, S18, S19, S20, S21, S23 y S25: PASS.
+- Validado: teclado inicia colapsado, apertura/cierre global, Desktop/Tablet/Mobile, Compacto inline, acceso desde los seis módulos y anclaje panel↔dock.
+- B5 queda **PASS DEFINITIVO**. Siguiente: B6 — paridad interna de categorías/teclas.
