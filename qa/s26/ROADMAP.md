@@ -176,9 +176,9 @@ Regla: cada bloque cierra con diff acotado, gates aplicables, revisión contract
 
 1. Shell + sidebar — **PASS DEFINITIVO**.
 2. Configuración + Apariencia + layouts — **PASS DEFINITIVO**.
-3. Historial — **PASS DEFINITIVO**.
-4. Resultado + formatos — **PASS DEFINITIVO**.
-5. Teclado global shell/open-close/responsive — **EN CURSO**.
+3. Historial — **REABIERTO: corrección de paridad en Plus pendiente de recertificación**.
+4. Resultado + formatos — **REABIERTO: paridad Historial↔Resultado en Plus pendiente de recertificación**.
+5. Teclado global shell/open-close/responsive — **PAUSADO hasta recertificar GAP B3/B4 en Plus**.
 6. Paridad de seis categorías del teclado — pendiente.
 7. Científica — pendiente.
 8. Matrices — pendiente.
@@ -220,3 +220,14 @@ Resultado: **PASS, sin GAPs bloqueantes detectados**.
 - Diferencias Plus/Lite ya documentadas se mantienen como intencionales.
 
 Bloque 5 queda **desbloqueado y EN CURSO**. Su alcance es únicamente shell global, apertura/cierre y responsive. La paridad tecla por tecla de las seis categorías permanece reservada para B6.
+
+
+### Regresión B3/B4 detectada en Preview — 2026-09-26
+
+La revisión humana detectó un GAP no capturado por el checkpoint estático: Plus mostraba resultado angular correcto (`90°`) pero Historial persistía la sintaxis interna (`asin(1)` / forma simbólica backend) y Reusar reconstruía mal la entrada.
+
+Estado operativo:
+- B3/B4: **REABIERTOS**;
+- corrección aplicada en Plus;
+- CI + Playwright pendientes;
+- B5: **PAUSADO** hasta recertificación.
