@@ -24,6 +24,7 @@ export async function submitAndRecord(
   payload: Record<string, unknown>,
   label: string,
   sourceModule?: string,
+  historyInputText?: string,
 ): Promise<MathResponse> {
   const result = await callApi(endpoint, payload);
 
@@ -32,10 +33,15 @@ export async function submitAndRecord(
     operation: result.operation,
     endpointUrl: endpoint,
     requestPayload: payload,
-    inputText: label,
+    // requestPayload conserva la sintaxis del backend; inputText conserva
+    // la expresión visual original cuando el llamador la conoce. No deben
+    // mezclarse: Historial/Reusar necesitan la segunda para reconstruir
+    // exactamente lo que el usuario escribió en MathLive.
+    inputText: historyInputText ?? label,
     label,
     resultLatex: result.success ? (result.result_latex ?? undefined) : undefined,
     resultText: result.success ? (result.result_text ?? undefined) : undefined,
+    resultApprox: result.success && result.result_approx != null ? String(result.result_approx) : undefined,
     resultType: result.success ? (result.result_type ?? undefined) : undefined,
     resultData: result.success ? (result.result_data ?? undefined) : undefined,
     hasDetailedSteps: result.has_detailed_steps,
