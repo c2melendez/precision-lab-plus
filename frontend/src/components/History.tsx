@@ -159,8 +159,8 @@ export function History({ onReuse }: HistoryProps) {
   if (entries.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-paper-line bg-paper p-6 text-center">
-        <p className="text-sm font-medium text-ink">Todavía no hay historial en esta sesión.</p>
-        <p className="mt-1 text-xs text-muted">Las operaciones recientes aparecerán aquí y podrás reutilizarlas.</p>
+        <p className="text-sm font-medium text-ink">Todavía no hay cálculos guardados.</p>
+        <p className="mt-1 text-xs text-muted">Los cálculos que guardes aparecerán aquí, del más reciente al más antiguo.</p>
       </div>
     );
   }
