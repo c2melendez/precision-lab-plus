@@ -43,9 +43,18 @@ import type { MathfieldElement } from "mathlive";
 
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
+
+const submitScientific = (
+  endpoint: Parameters<typeof submitAndRecord>[0],
+  payload: Record<string, unknown>,
+  label: string,
+  historyInputText?: string,
+) => submitAndRecord(endpoint, payload, label, "Científica", historyInputText);
 import { useUIStore } from "../store/useUIStore";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useLayoutModeStore } from "../store/useLayoutModeStore";
+import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStore";
+import type { HistoryEntry } from "../store/useHistoryStore";
 import { CalculatorScreen } from "./CalculatorScreen";
 import { detectCalculusIntent, type CalculusIntent } from "./calculusIntent";
 import { latexToBackendSyntax } from "./NaturalMathField";
@@ -70,6 +79,126 @@ const EXAMPLES: { display: string; latex: string }[] = [
 // comporte igual sin importar desde qué pantalla se escribió.
 const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
 
+function backendExpressionToLatex(value: unknown): string {
+  const source = String(value ?? "").trim();
+  if (!source) return "";
+
+  function convert(expr: string): string {
+    let text = expr.trim();
+    if (!text) return "";
+
+    while (text.startsWith("(") && text.endsWith(")")) {
+      let depth = 0;
+      let wrapsAll = true;
+      for (let i = 0; i < text.length; i += 1) {
+        const ch = text[i];
+        if (ch === "(") depth += 1;
+        else if (ch === ")") depth -= 1;
+        if (depth === 0 && i < text.length - 1) {
+          wrapsAll = false;
+          break;
+        }
+      }
+      if (!wrapsAll) break;
+      text = text.slice(1, -1).trim();
+    }
+
+    let depth = 0;
+    for (let i = 0; i < text.length; i += 1) {
+      const ch = text[i];
+      if (ch === "(") depth += 1;
+      else if (ch === ")") depth -= 1;
+      else if (ch === "/" && depth === 0) {
+        return `\\frac{${convert(text.slice(0, i))}}{${convert(text.slice(i + 1))}}`;
+      }
+    }
+
+    text = text
+      .replace(/\b(asin|acos|atan|asec|acsc|acot)\s*\(([^()]*)\)/g, (_match, fn: string, body: string) => {
+        const direct = fn === "asin" ? "sin" : fn === "acos" ? "cos" : fn === "atan" ? "tan" : fn === "asec" ? "sec" : fn === "acsc" ? "csc" : "cot";
+        return `\\${direct}^{-1}\\left(${convert(body)}\\right)`;
+      })
+      .replace(/\bpi\b/g, "\\pi")
+      .replace(/\boo\b|\binf(?:inity)?\b/g, "\\infty")
+      .replace(/\*\*\s*\(?(-?\d+(?:\.\d+)?)\)?/g, "^{$1}")
+      .replace(/\bsqrt\s*\(([^()]+)\)/g, (_m, body: string) => `\\sqrt{${convert(body)}}`)
+      .replace(/\b(sin|cos|tan|sec|csc|cot|ln|log|exp)\s*\(([^()]*)\)/g, (_m, fn: string, body: string) =>
+        `\\${fn}\\left(${convert(body)}\\right)`,
+      );
+
+    return text;
+  }
+
+  return convert(source);
+}
+
+function scientificHistoryEntryToLatex(entry: HistoryEntry): string {
+  const payload = entry.requestPayload;
+  const preservedInput = String(entry.inputText ?? "").trim();
+  if (preservedInput) {
+    // Nuevas entradas guardan el LaTeX visual completo y pueden
+    // reutilizarse literalmente. Entradas históricas de operaciones
+    // estructuradas podían guardar etiquetas parciales como "∫ x**2/4"
+    // sin dx/límites; en esos casos NO debemos devolver la etiqueta
+    // parcial: se reconstruye la operación completa desde requestPayload.
+    const structuredEndpoint = [
+      "/integral",
+      "/derivative",
+      "/derivative/partial",
+      "/limit",
+      "/solve/system",
+      "/inequality/system",
+    ].includes(entry.endpointUrl);
+    const hasFullLatex = preservedInput.includes("\\");
+    const hasNaturalSymbols = /[√π∞°′″≤≥]/.test(preservedInput);
+    if (hasFullLatex || (!structuredEndpoint && hasNaturalSymbols)) return preservedInput;
+  }
+  const expression = backendExpressionToLatex(
+    payload.expression ?? payload.equation ?? payload.inequality ?? entry.inputText ?? entry.label,
+  );
+  const variable = String(payload.variable ?? "x");
+
+  if (entry.endpointUrl === "/integral") {
+    const lower = payload.lower_bound;
+    const upper = payload.upper_bound;
+    if (lower !== undefined && upper !== undefined) {
+      return `\\int_{${backendExpressionToLatex(lower)}}^{${backendExpressionToLatex(upper)}} ${expression}\\,d${variable}`;
+    }
+    return `\\int ${expression}\\,d${variable}`;
+  }
+
+  if (entry.endpointUrl === "/derivative") {
+    const order = Number(payload.order ?? 1);
+    return order > 1
+      ? `\\frac{d^{${order}}}{d${variable}^{${order}}}\\left(${expression}\\right)`
+      : `\\frac{d}{d${variable}}\\left(${expression}\\right)`;
+  }
+
+  if (entry.endpointUrl === "/derivative/partial") {
+    return `\\frac{\\partial}{\\partial ${variable}}\\left(${expression}\\right)`;
+  }
+
+  if (entry.endpointUrl === "/limit") {
+    const point = backendExpressionToLatex(payload.point ?? "0");
+    const direction =
+      payload.direction === "left" ? "^{-}" :
+      payload.direction === "right" ? "^{+}" : "";
+    return `\\lim_{${variable}\\to ${point}${direction}} ${expression}`;
+  }
+
+  if (entry.endpointUrl === "/solve/system" && Array.isArray(payload.equations)) {
+    const rows = payload.equations.map((row: unknown) => backendExpressionToLatex(row)).join("\\\\");
+    return `\\begin{cases}${rows}\\end{cases}`;
+  }
+
+  if (entry.endpointUrl === "/inequality/system" && Array.isArray(payload.inequalities)) {
+    const rows = payload.inequalities.map((row: unknown) => backendExpressionToLatex(row)).join("\\\\");
+    return `\\begin{cases}${rows}\\end{cases}`;
+  }
+
+  return expression;
+}
+
 export function BasicMode() {
   const formRef = useRef<HTMLFormElement>(null);
   const [mathField, setMathField] = useState<MathfieldElement | null>(null);
@@ -85,6 +214,29 @@ export function BasicMode() {
   const isLoading = useUIStore((state) => state.isLoading);
   const setActiveMode = useUIStore((state) => state.setActiveMode);
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
+  const pendingHistoryReuse = usePendingHistoryReuseStore((s) => s.pending);
+  const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
+
+  useEffect(() => {
+    const entry = takePendingHistoryReuse();
+    if (!entry) return;
+    const payload = entry.requestPayload;
+    setLatex(scientificHistoryEntryToLatex(entry));
+    if (Array.isArray(payload.variables)) {
+      setSystemVariables(payload.variables.join(", "));
+    }
+    if (payload.angle_unit === "deg" || payload.angle_unit === "rad") setAngleUnit(payload.angle_unit);
+    if (payload.substitutions && typeof payload.substitutions === "object" && !Array.isArray(payload.substitutions)) {
+      setSubstitutions(
+        Object.entries(payload.substitutions as Record<string, unknown>).map(([name, value]) => ({
+          name,
+          value: String(value),
+        })),
+      );
+    }
+    setLastResult(null);
+    setValidationError(null);
+  }, [pendingHistoryReuse, takePendingHistoryReuse]);
 
   const systemRows = splitSystemLatex(latex);
 
@@ -147,10 +299,11 @@ export function BasicMode() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitScientific(
         "/solve/system",
         { equations, variables: variableList },
         `Sistema: ${equations.join(" ; ")}`,
+        latex,
       );
       setLastResult(result);
       if (!result.success) {
@@ -181,10 +334,11 @@ export function BasicMode() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitScientific(
         "/inequality/system",
         { inequalities: inequalitiesBackend, variables: variableList },
         `Sistema: ${inequalitiesBackend.join(" ; ")}`,
+        latex,
       );
       if (result.success) {
         // El backend devuelve result_text = "bounded"/"unbounded"/"empty"
@@ -232,7 +386,12 @@ export function BasicMode() {
         : intent.kind === "residue" || intent.kind === "singularities"
           ? intent.expressionLatex
           : intent.innerLatex;
-    const trimmedInner = latexToBackendSyntax(rawInner);
+    // EDO ya viene normalizada por detectODE() a notación prima ASCII.
+    // No debe pasar otra vez por MathLive -> ASCII porque esa conversión
+    // puede reserializar y' como y^′ y romper el contrato del backend.
+    const trimmedInner = intent.kind === "ode"
+      ? rawInner.trim()
+      : latexToBackendSyntax(rawInner);
     if (!trimmedInner) {
       setValidationError("La expresión no puede estar vacía.");
       return;
@@ -244,19 +403,21 @@ export function BasicMode() {
     try {
       const result =
         intent.kind === "partialDerivative"
-          ? await submitAndRecord(
+          ? await submitScientific(
               "/derivative/partial",
               { expression: trimmedInner, variable: intent.variable },
               `∂/∂${intent.variable} [${trimmedInner}]`,
+              latex,
             )
           : intent.kind === "derivative"
-            ? await submitAndRecord(
+            ? await submitScientific(
                 "/derivative",
                 { expression: trimmedInner, variable: intent.variable, order: intent.order },
                 `d/d${intent.variable} [${trimmedInner}]`,
+                latex,
               )
             : intent.kind === "integral"
-            ? await submitAndRecord(
+            ? await submitScientific(
                 "/integral",
                 {
                   expression: trimmedInner,
@@ -266,9 +427,10 @@ export function BasicMode() {
                     : {}),
                 },
                 `∫ ${trimmedInner}`,
+                latex,
               )
             : intent.kind === "limit"
-              ? await submitAndRecord(
+              ? await submitScientific(
                   "/limit",
                   // Corrección post-auditoría: calculusIntent.ts ahora
                   // reconoce la notación lateral con un escáner propio (ver
@@ -276,19 +438,22 @@ export function BasicMode() {
                   // — intent.direction ya trae "left"/"right" cuando aplica.
                   { expression: trimmedInner, variable: intent.variable, point: intent.point, direction: intent.direction },
                   `lim[${intent.variable}->${intent.point}] ${trimmedInner}`,
+                  latex,
                 )
               : intent.kind === "ode"
-                ? await submitAndRecord("/ode", { expression: trimmedInner }, trimmedInner)
+                ? await submitScientific("/ode", { expression: trimmedInner }, trimmedInner, latex)
                 : intent.kind === "residue"
-                  ? await submitAndRecord(
+                  ? await submitScientific(
                       "/complex/residue",
                       { expression: trimmedInner, point: latexToBackendSyntax(intent.pointLatex) },
                       `Res(${trimmedInner}, z=${intent.pointLatex})`,
+                      latex,
                     )
-                  : await submitAndRecord(
+                  : await submitScientific(
                       "/complex/singularities",
                       { expression: trimmedInner },
                       `Sing(${trimmedInner})`,
+                      latex,
                     );
       setLastResult(result);
       if (!result.success) {
@@ -336,10 +501,10 @@ export function BasicMode() {
     setErrorMessage(null);
     try {
       const result = isInequality
-        ? await submitAndRecord("/inequality", { inequality: trimmed }, trimmed)
+        ? await submitScientific("/inequality", { inequality: trimmed }, trimmed, latex)
         : isEquation
-          ? await submitAndRecord("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed)
-          : await submitAndRecord(
+          ? await submitScientific("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed, latex)
+          : await submitScientific(
               "/evaluate",
               {
                 expression: trimmed,
@@ -347,6 +512,7 @@ export function BasicMode() {
                 ...(substitutionsPayload ? { substitutions: substitutionsPayload } : {}),
               },
               trimmed,
+              latex,
             );
       setLastResult(result);
       if (!result.success) {
@@ -408,7 +574,7 @@ export function BasicMode() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitScientific(
         "/graph/complex_point",
         { expression: trimmed },
         `Graficar(${trimmed})`,
@@ -440,7 +606,7 @@ export function BasicMode() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitScientific(
         "/graph/2d",
         { expressions: [trimmed], variable: "x" },
         `Graficar(${trimmed})`,
@@ -500,6 +666,7 @@ export function BasicMode() {
         onSolveSystem={handleSolveSystem}
         onSimplify={handleSimplify}
         onGraphComplex={handleGraphComplex}
+        angleUnit={angleUnit}
         showCalculusStrip
         hideCoreGrid
       />,

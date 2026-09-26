@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { convert } from "../utils/unitConversion";
+import { CATEGORY_LABELS, UNITS, convert } from "../utils/unitConversion";
 
 // Módulo O0 (spec_graficacion_matrices_estadistica_unidades.md, sección
 // 8): almacenamiento digital, presión, energía, potencia, fuerza.
@@ -110,5 +110,26 @@ describe("regresión: categorías existentes tras O0", () => {
 
   it("velocidad: 36 km/h = 10 m/s", () => {
     expect(convert("speed", 36, "kmh", "mps")).toBeCloseTo(10, 9);
+  });
+});
+
+
+describe("metadatos de unidades — regresión de etiquetas visibles", () => {
+  it("conserva etiquetas de categorías principales", () => {
+    expect(CATEGORY_LABELS.length).toBe("Longitud");
+    expect(CATEGORY_LABELS.temperature).toBe("Temperatura");
+    expect(CATEGORY_LABELS.storage).toBe("Almacenamiento digital");
+    expect(CATEGORY_LABELS.force).toBe("Fuerza");
+  });
+
+  it("conserva etiquetas visibles de unidades representativas", () => {
+    expect(UNITS.length.m.label).toBe("Metros (m)");
+    expect(UNITS.area.ft2.label).toBe("Pies² (ft²)");
+    expect(UNITS.volume.ml.label).toBe("Mililitros (mL)");
+    expect(UNITS.speed.kmh.label).toBe("Kilómetros/hora (km/h)");
+    expect(UNITS.storage.byte.label).toBe("Bytes (B)");
+    expect(UNITS.energy.kwh.label).toBe("Kilovatios-hora (kWh)");
+    expect(UNITS.power.hp.label).toBe("Caballos de fuerza (hp)");
+    expect(UNITS.force.lbf.label).toBe("Libra-fuerza (lbf)");
   });
 });

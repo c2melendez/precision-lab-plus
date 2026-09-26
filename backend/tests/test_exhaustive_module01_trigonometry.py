@@ -30,6 +30,7 @@ def test_module01_known_values(expression, expected):
 
 @pytest.mark.parametrize("expression,expected", [
     ("sin(30)", 0.5), ("cos(60)", 0.5), ("tan(45)", 1.0),
+    ("sec(60)", 2.0), ("csc(30)", 2.0), ("cot(45)", 1.0),
 ])
 def test_module01_degrees(expression, expected):
     response = client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "deg"})
@@ -56,3 +57,45 @@ def test_module01_domain_edges_are_controlled():
                 f"success={body.get('success')}, error_code={body.get('error_code')}"
             )
     assert not failures, "\n".join(failures)
+
+
+@pytest.mark.parametrize("expression,expected", [
+    ("asin(1)", 90.0),
+    ("acos(1)", 0.0),
+    ("atan(1)", 45.0),
+    ("asin(0.5)", 30.0),
+    ("arcsin(0.5)", 30.0),
+    ("asec(2)", 60.0),
+    ("acsc(2)", 30.0),
+    ("acot(1)", 45.0),
+])
+def test_module01_inverse_trig_returns_degrees(expression, expected):
+    response = client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "deg"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] == pytest.approx(expected, abs=1e-10)
+
+
+def test_module01_nested_direct_inverse_preserves_degree_semantics():
+    response = client.post("/api/v1/evaluate", json={"expression": "sin(asin(0.5))", "angle_unit": "deg"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] == pytest.approx(0.5, abs=1e-10)
+
+
+@pytest.mark.parametrize("expression,expected", [
+    ("sin(30°)", 0.5),
+    ("cos(60°)", 0.5),
+    ("tan(45°)", 1.0),
+    ("sec(60°)", 2.0),
+    ("csc(30°)", 2.0),
+    ("cot(45°)", 1.0),
+])
+def test_module01_explicit_degree_symbol_direct_trig(expression, expected):
+    response = client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "deg"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] == pytest.approx(expected, abs=1e-10)

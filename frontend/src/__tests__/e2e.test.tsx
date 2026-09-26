@@ -84,7 +84,7 @@ describe("E2E mínimo — Derivada (sección 15)", () => {
     vi.restoreAllMocks();
   });
 
-  it("x**2 en Derivada -> MathResponse real -> steps renderizados -> historial -> reuseEntry reejecuta", async () => {
+  it("x**2 en Derivada -> MathResponse real -> steps renderizados -> historial -> Reusar vuelve a Científica", async () => {
     render(<App />);
 
     // 1. Cambiar al modo Derivada. Punto 4 del rediseño de teclado: la
@@ -124,25 +124,13 @@ describe("E2E mínimo — Derivada (sección 15)", () => {
     const persisted = JSON.parse(window.localStorage.getItem(HISTORY_STORAGE_KEY) as string);
     expect(persisted.entries).toHaveLength(1);
 
-    // 6. Abrir el historial y reusar la entrada -> reconstruye y reejecuta.
+    // 6. Abrir el historial y reusar la entrada -> vuelve al módulo de
+    // origen. No recalcula dentro del modal ni hace una segunda petición.
     fireEvent.click(screen.getByRole("button", { name: "Historial" }));
     fireEvent.click(screen.getByRole("button", { name: /Reusar entrada/ }));
 
-    await waitFor(() => expect(globalThis.fetch).toHaveBeenCalledTimes(2));
-    const [reuseUrl, reuseOptions] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[1];
-    expect(reuseUrl).toContain("/api/v1/derivative");
-    expect(JSON.parse((reuseOptions as RequestInit).body as string)).toEqual({
-      expression: "x**2",
-      variable: "x",
-      order: 1,
-    });
-
-    // El resultado reusado también se renderiza (segunda ocurrencia del
-    // mismo paso, esta vez dentro del panel de historial — result_latex se
-    // renderiza vía KaTeX como spans, no como el texto plano "2*x", así
-    // que se verifica sobre el título del step, que sí es texto plano).
-    await waitFor(() => {
-      expect(screen.getAllByText("Regla de la potencia").length).toBe(2);
-    });
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    expect(useUIStore.getState().activeMode).toBe("basic");
+    expect(screen.queryByRole("dialog", { name: "Historial" })).not.toBeInTheDocument();
   });
 });

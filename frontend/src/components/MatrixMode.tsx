@@ -4,11 +4,15 @@
  * conectado a `POST /matrix/operations`.
  */
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
+
+const submitMatrices = (endpoint: Parameters<typeof submitAndRecord>[0], payload: Record<string, unknown>, label: string) =>
+  submitAndRecord(endpoint, payload, label, "Matrices");
 import { useUIStore } from "../store/useUIStore";
+import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStore";
 import { ResultPanel } from "./ResultPanel";
 
 type Operation =
@@ -106,31 +110,38 @@ function MatrixGrid({
   onCellChange,
 }: MatrixGridProps) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-muted">{label}</span>
-        <Stepper label="Filas" value={rows} onChange={(n) => onDimensionsChange(n, cols)} />
-        <Stepper label="Col" value={cols} onChange={(n) => onDimensionsChange(rows, n)} />
+    <section aria-label={label} className="space-y-3 rounded-xl border border-paper-line bg-paper p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h3 className="text-sm font-semibold text-ink">{label}</h3>
+          <p className="text-[11px] text-muted">{rows} × {cols}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Stepper label="Filas" value={rows} onChange={(n) => onDimensionsChange(n, cols)} />
+          <Stepper label="Col" value={cols} onChange={(n) => onDimensionsChange(rows, n)} />
+        </div>
       </div>
-      <div
-        role="group"
-        aria-label={`Celdas de ${label}`}
-        className="inline-grid gap-1"
-        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-      >
-        {matrix.map((row, r) =>
-          row.map((cell, c) => (
-            <input
-              key={`${r}-${c}`}
-              aria-label={`${label} celda fila ${r + 1} columna ${c + 1}`}
-              value={cell}
-              onChange={(e) => onCellChange(r, c, e.target.value)}
-              className="w-14 rounded border border-paper-line bg-paper-soft px-1 py-1 text-center text-sm"
-            />
-          )),
-        )}
+      <div className="max-w-full overflow-x-auto pb-1">
+        <div
+          role="group"
+          aria-label={`Celdas de ${label}`}
+          className="inline-grid min-w-max gap-1 rounded-lg bg-paper-soft p-2"
+          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+        >
+          {matrix.map((row, r) =>
+            row.map((cell, c) => (
+              <input
+                key={`${r}-${c}`}
+                aria-label={`${label} celda fila ${r + 1} columna ${c + 1}`}
+                value={cell}
+                onChange={(e) => onCellChange(r, c, e.target.value)}
+                className="w-12 rounded-md border border-paper-line bg-paper px-1.5 py-1.5 text-center text-sm text-ink sm:w-14"
+              />
+            )),
+          )}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -149,6 +160,47 @@ export function MatrixMode() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
+  const pendingHistoryReuse = usePendingHistoryReuseStore((s) => s.pending);
+  const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
+
+  useEffect(() => {
+    const entry = takePendingHistoryReuse();
+    if (!entry) return;
+    const payload = entry.requestPayload;
+    const rawA = (payload.matrix_a ?? payload.matrix) as unknown;
+    const rawB = payload.matrix_b as unknown;
+
+    if (Array.isArray(rawA) && rawA.every((row) => Array.isArray(row))) {
+      const nextA = (rawA as unknown[][]).map((row) => row.map((cell) => String(cell)));
+      setRowsA(nextA.length);
+      setColsA(nextA[0]?.length ?? 1);
+      setMatrixA(nextA);
+    }
+    if (Array.isArray(rawB) && rawB.every((row) => Array.isArray(row))) {
+      const nextB = (rawB as unknown[][]).map((row) => row.map((cell) => String(cell)));
+      setRowsB(nextB.length);
+      setColsB(nextB[0]?.length ?? 1);
+      setMatrixB(nextB);
+    }
+
+    const operationFromPayload = payload.operation;
+    if (typeof operationFromPayload === "string" && operationFromPayload in OPERATION_LABELS) {
+      setOperation(operationFromPayload as Operation);
+    } else if (entry.endpointUrl.includes("transpose")) setOperation("transpose");
+    else if (entry.endpointUrl.includes("determinant")) setOperation("determinant");
+    else if (entry.endpointUrl.includes("inverse")) setOperation("inverse");
+    else if (entry.endpointUrl.includes("/ref")) setOperation("ref");
+    else if (entry.endpointUrl.includes("/rref")) setOperation("rref");
+    else if (entry.endpointUrl.includes("norm")) setOperation("norm");
+    else if (entry.endpointUrl.includes("trace")) setOperation("trace");
+    else if (entry.endpointUrl.includes("rank")) setOperation("rank");
+    else if (entry.endpointUrl.includes("eigen")) setOperation("eigen");
+    else if (entry.endpointUrl.includes("power")) setOperation("power");
+
+    if (payload.exponent !== undefined) setExponent(String(payload.exponent));
+    setLastResult(null);
+    setValidationError(null);
+  }, [pendingHistoryReuse, takePendingHistoryReuse]);
 
   function handleDimensionsA(rows: number, cols: number): void {
     setRowsA(rows);
@@ -197,35 +249,35 @@ export function MatrixMode() {
         operation === "dot" ||
         operation === "cross"
       ) {
-        result = await submitAndRecord(
+        result = await submitMatrices(
           "/matrix/operations",
           { operation, matrix_a: matrixA, matrix_b: matrixB },
           `Matrices ${rowsA}x${colsA} ${operation} ${rowsB}x${colsB}`,
         );
       } else if (operation === "transpose") {
-        result = await submitAndRecord("/matrix/transpose", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/transpose", { matrix: matrixA }, label);
       } else if (operation === "determinant") {
-        result = await submitAndRecord("/matrix/determinant", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/determinant", { matrix: matrixA }, label);
       } else if (operation === "inverse") {
-        result = await submitAndRecord("/matrix/inverse", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/inverse", { matrix: matrixA }, label);
       } else if (operation === "ref") {
-        result = await submitAndRecord("/matrix/ref", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/ref", { matrix: matrixA }, label);
       } else if (operation === "rref") {
-        result = await submitAndRecord("/matrix/rref", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/rref", { matrix: matrixA }, label);
       } else if (operation === "norm") {
-        result = await submitAndRecord("/matrix/norm", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/norm", { matrix: matrixA }, label);
       } else if (operation === "trace") {
-        result = await submitAndRecord("/matrix/trace", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/trace", { matrix: matrixA }, label);
       } else if (operation === "rank") {
-        result = await submitAndRecord("/matrix/rank", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/rank", { matrix: matrixA }, label);
       } else if (operation === "power") {
-        result = await submitAndRecord(
+        result = await submitMatrices(
           "/matrix/power",
           { matrix: matrixA, exponent: Number(exponent) },
           `${label} (n=${exponent})`,
         );
       } else {
-        result = await submitAndRecord("/matrix/eigen", { matrix: matrixA }, label);
+        result = await submitMatrices("/matrix/eigen", { matrix: matrixA }, label);
       }
 
       setLastResult(result);
@@ -238,21 +290,29 @@ export function MatrixMode() {
   }
 
   return (
-    <form onSubmit={handleSubmit} aria-labelledby="matrix-mode-heading" className="rounded-lg border border-paper-line p-5 shadow-sm lg:grid lg:max-w-4xl lg:grid-cols-[1.4fr_1fr] lg:items-start lg:gap-6 dt:mx-auto dt:gap-10">
-      <div className="space-y-4 lg:col-start-1">
-        <h2 id="matrix-mode-heading" className="text-sm font-medium text-muted">
-          Matrices
-        </h2>
+    <form onSubmit={handleSubmit} aria-labelledby="matrix-mode-heading" className="mx-auto grid w-full max-w-[1376px] gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-start">
+      <section aria-label="Entrada de matrices" className="space-y-4 rounded-xl border border-paper-line bg-paper-soft p-4 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-paper-line pb-3">
+          <div>
+            <h2 id="matrix-mode-heading" className="text-base font-semibold text-ink">
+              Matrices
+            </h2>
+            <p className="mt-0.5 text-xs text-muted">Define dimensiones, valores y operación</p>
+          </div>
+          <span className="rounded-full border border-paper-line bg-paper px-2.5 py-1 text-[11px] text-muted">
+            Hasta 6×6
+          </span>
+        </div>
 
-        <div className="space-y-1">
-          <label htmlFor="matrix-operation" className="block text-sm text-muted">
+        <div className="rounded-xl border border-paper-line bg-paper p-3">
+          <label htmlFor="matrix-operation" className="block text-xs font-semibold uppercase tracking-[0.14em] text-muted">
             Operación
           </label>
           <select
             id="matrix-operation"
             value={operation}
             onChange={(e) => setOperation(e.target.value as Operation)}
-            className="rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="mt-2 w-full rounded-lg border border-paper-line bg-paper-soft px-3 py-2 text-sm"
           >
             {(Object.keys(OPERATION_LABELS) as Operation[]).map((op) => (
               <option key={op} value={op}>
@@ -318,17 +378,19 @@ export function MatrixMode() {
 
         <button
           type="submit"
-          className="rounded bg-graph px-4 py-2 text-sm font-medium text-white hover:bg-graph/90"
+          className="w-full rounded-lg bg-graph px-4 py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
         >
           Calcular
         </button>
-      </div>
+      </section>
 
-      <div className="mt-4 lg:col-start-2 lg:mt-0">
-        <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-inner shadow-black/10">
-          <ResultPanel result={lastResult} isLoading={isLoading} />
+      <section aria-label="Resultado de matrices" className="min-w-0 rounded-xl border border-paper-line bg-paper p-4 shadow-sm">
+        <div className="mb-3 border-b border-paper-line pb-3">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Resultado</h3>
+          <p className="mt-0.5 text-[11px] text-muted">Resultado de la operación seleccionada</p>
         </div>
-      </div>
+        <ResultPanel result={lastResult} isLoading={isLoading} />
+      </section>
     </form>
   );
 }

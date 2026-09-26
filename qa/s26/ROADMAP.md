@@ -46,6 +46,37 @@ Baseline funcional previo a S26: `5de721e32c13a60f77671cd2bd98a8cc05cf0140`
 - documentar diferencias necesarias entre Lite y Plus;
 - aprobar visualmente antes de implementación.
 
+### S26.2R — Reconfirmación definitiva del contrato visual
+
+**Obligatoria antes de continuar S26.3 tras la revisión humana del Preview.**
+
+Motivo:
+- el contrato S26.2 evolucionó por piezas durante varias sesiones;
+- el Preview reveló inconsistencias entre módulos;
+- el teclado implementado conserva una arquitectura visual anterior que no representa el mockup definitivo deseado.
+
+Procedimiento:
+1. regenerar mockups definitivos consolidados para todos los módulos;
+2. incluir teclado global colapsado y desplegado;
+3. incluir seis categorías del teclado;
+4. incluir Desktop 1440×900 y estrategia laptop/tablet/mobile;
+5. reconfirmar los seis layouts;
+6. presentar al usuario;
+7. **detenerse y esperar aprobación explícita**;
+8. actualizar contratos escritos para que coincidan exactamente con los mockups aprobados;
+9. congelar el contrato visual definitivo;
+10. solo entonces reanudar S26.3.
+
+Documento operativo:
+- `qa/s26/MOCKUP_REGENERATION_BRIEF.md`
+- `qa/s26/VISUAL_REFERENCE_CHECKLIST.md`
+
+Criterio de salida:
+- mockups definitivos aprobados por el usuario;
+- teclado definitivo visualmente aprobado;
+- contratos escritos reconciliados;
+- ninguna ambigüedad entre mockup y código objetivo.
+
 ### S26.3 — Implementación por bloques
 Orden sugerido:
 1. shell/navegación común;
@@ -62,6 +93,31 @@ Cada bloque debe cerrar con:
 - tests funcionales del área;
 - Playwright;
 - sin cambios injustificados en rutas protegidas.
+
+### S26.3.5 — Preview S26
+Antes de congelar los baselines visuales, desplegar una versión de preview separada de producción para revisión humana.
+
+Objetivos:
+- permitir revisar visualmente el rediseño sin afectar la versión pública estable;
+- validar la dirección visual conjunta de Lite y Plus antes de S26.4;
+- recoger ajustes de composición, jerarquía, responsive y consistencia entre módulos;
+- mantener producción estable mientras `qa/s26-execution` continúa siendo la rama de trabajo.
+
+Momento recomendado:
+- habilitar el preview cuando Gráficas + Matrices estén rediseñadas y verdes;
+- actualizar el preview conforme se cierren Estadística, Unidades, Historial/Ajustes y Teclado/responsive;
+- no considerar el preview como evidencia suficiente para cerrar una celda de la matriz visual: sigue siendo obligatoria la certificación automatizada posterior.
+
+Separación de entornos:
+1. Producción estable.
+2. Preview S26 para revisión visual.
+3. `qa/s26-execution` para trabajo activo.
+
+Criterio de salida:
+- revisión visual humana completada;
+- ajustes derivados del preview aplicados o documentados;
+- preview estable en Desktop 1440, laptop, tablet y móvil;
+- listo para congelar baselines en S26.4.
 
 ### S26.4 — Regresión visual automatizada
 Baselines Playwright por viewport y estado.
@@ -88,3 +144,131 @@ S26 solo se cierra si:
 Una captura visual nunca sustituye una prueba funcional. Toda UI matemática modificada debe tener al menos un recorrido funcional que pruebe:
 
 **UI → estado → adapter/API/worker → motor → resultado → UI**
+
+
+## Reconciliación S26.2R / S26.3R — 2026-09-25
+
+Autoridad visual vigente: contrato final S26.2R aprobado por el usuario.
+
+Orden operativo vigente de S26.3R:
+1. Shell global + sidebar expandido/compacto — **PASS DEFINITIVO**.
+2. Configuración + Apariencia + selector de layouts — **EN CURSO**.
+3. Historial.
+4. Capa común de Resultado y formatos.
+5. Teclado global — shell, apertura/cierre y responsive.
+6. Teclado global — paridad de las seis categorías.
+7. Científica.
+8. Matrices.
+9. Estadística.
+10. Unidades.
+11. Gráficas 2D.
+12. Gráficas 3D.
+13. Geometría.
+14. Armonización responsive transversal.
+15. Preview S26.3.5 + revisión humana.
+16. Correcciones del Preview.
+17. Preparación de S26.4.
+
+Regla: cada bloque cierra con diff acotado, gates aplicables, revisión contractual y actualización del log.
+
+
+## Estado S26.3R — 2026-09-26
+
+1. Shell + sidebar — **PASS DEFINITIVO**.
+2. Configuración + Apariencia + layouts — **PASS DEFINITIVO**.
+3. Historial — **PASS DEFINITIVO**.
+4. Resultado + formatos — **PASS DEFINITIVO**.
+5. Teclado global shell/open-close/responsive — **PASS DEFINITIVO**.
+6. Paridad de seis categorías del teclado — pendiente.
+7. Científica — pendiente.
+8. Matrices — pendiente.
+9. Estadística — pendiente.
+10. Unidades — pendiente.
+11. Gráficas 2D — pendiente.
+12. Gráficas 3D — pendiente.
+13. Geometría — pendiente.
+14. Armonización responsive transversal — pendiente.
+15. Preview S26.3.5 — pendiente.
+16. Correcciones Preview — pendiente.
+17. Preparación S26.4 — pendiente.
+
+### Checkpoint obligatorio antes del Bloque 5
+
+**Checkpoint de Paridad S26.3R — Bloques 1–4**
+
+Documento:
+- `qa/s26/PARITY_CHECKPOINT_B1_B4.md`
+
+Regla:
+**NO iniciar Bloque 5 hasta cerrar el checkpoint, corregir GAPs y recertificar si hubo cambios.**
+
+HEAD de código certificado:
+- Lite: `c878da8183cdab6ca791afcacee6841199a5c067`
+- Plus: `40fcf3b3aa2d83fa58943fec603198dd0bb291bb`
+
+Los commits posteriores de documentación no sustituyen esos HEAD de certificación funcional.
+
+
+### Checkpoint B1–B4 cerrado — 2026-09-26
+
+Resultado: **PASS, sin GAPs bloqueantes detectados**.
+
+- B1: PARIDAD.
+- B2: PARIDAD.
+- B3: PARIDAD; cobertura incompleta de Geometría/Unidades permanece documentada como limitación compartida.
+- B4: PARIDAD; DD/DMS exclusivo en grados verificado en ambos proyectos.
+- Diferencias Plus/Lite ya documentadas se mantienen como intencionales.
+
+Bloque 5 queda **desbloqueado y EN CURSO**. Su alcance es únicamente shell global, apertura/cierre y responsive. La paridad tecla por tecla de las seis categorías permanece reservada para B6.
+
+
+### Regresión B3/B4 detectada en Preview — 2026-09-26
+
+La revisión humana detectó un GAP no capturado por el checkpoint estático: Plus mostraba resultado angular correcto (`90°`) pero Historial persistía la sintaxis interna (`asin(1)` / forma simbólica backend) y Reusar reconstruía mal la entrada.
+
+Estado operativo:
+- B3/B4: **REABIERTOS**;
+- corrección aplicada en Plus;
+- CI + Playwright pendientes;
+- B5: **PAUSADO** hasta recertificación.
+
+
+### B3/B4 recertificados — 2026-09-26
+
+Todos los gates del HEAD `c82779a8b411e7b0a695e3e873e94bf24516e145` quedaron verdes, incluido Playwright E2E.
+La regresión de Historial/Reusar en Plus quedó cerrada y B5 vuelve a estar **EN CURSO**.
+
+
+### B5 — auditoría de shell reforzada
+
+- Se detectó GAP de robustez en Plus: el panel Desktop usaba un `bottom-20` fijo mientras el dock puede cambiar de altura por teclas recientes.
+- Se cambió a anclaje dinámico contra la geometría real del dock, manteniendo separación contractual de 12 px.
+- Se añadió `data-testid="keyboard-dock"` para gate geométrico.
+- Se elevó la cobertura de Plus para exigir teclado inline no-fixed en Compacto y acceso global desde Científica, Gráficas, Matrices, Estadística, Geometría y Unidades.
+- Estado: **EN CURSO — pendiente rerun de CI/Playwright**.
+
+
+### B5 cerrado — 2026-09-26
+
+- HEAD certificado: `17bb72b5e12cd6fb0d1961459dae80631ca3766b`.
+- CI, Playwright E2E, S17, S18, S19, S20, S21, S23 y S25: PASS.
+- Validado: teclado inicia colapsado, apertura/cierre global, Desktop/Tablet/Mobile, Compacto inline, acceso desde los seis módulos y anclaje panel↔dock.
+- B5 queda **PASS DEFINITIVO**. Siguiente: B6 — paridad interna de categorías/teclas.
+
+
+### B6 — autoridad visual congelada
+
+- Autoridad visual conjunta: `VISUAL_CONTRACT_FINAL_S26_2R.md` + `Mockups definitivos de Precision Lab.png`.
+- Autoridad funcional/semántica: `KEYBOARD_CONTRACT.md`.
+- La implementación actual no es autoridad visual.
+- B6 debe cerrar con matriz tecla por tecla Lite↔Plus, gates automáticos y revisión humana de Preview.
+
+
+### B6 Básico — implementación
+
+- Inventario congelado: 31 teclas en 4 filas.
+- Enter unificado visualmente en Lite/Plus.
+- Tooltips reales obligatorios en todas las teclas básicas.
+- Lite alineado a la gramática visual theme-aware de Plus.
+- Matriz: `B6_BASIC_RECONCILIATION.md`.
+- Estado: **IMPLEMENTADO — pendiente gates + Preview/revisión humana**.

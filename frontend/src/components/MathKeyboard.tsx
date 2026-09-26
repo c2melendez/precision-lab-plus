@@ -181,7 +181,7 @@ export function MathKeyboard({ value, onChange, inputId, onSubmit }: MathKeyboar
           type="button"
           onClick={() => onSubmit?.()}
           aria-label="Calcular"
-          className="rounded-md bg-graph py-2 text-base font-semibold text-paper hover:bg-graph/90"
+          className="rounded-md bg-graph py-2 text-base font-semibold text-white hover:bg-graph/90"
         >
           =
         </button>

@@ -1,25 +1,42 @@
-# S26 — Prompt de continuidad para otra sesión
+# S26 — Prompt de continuidad actualizado
 
-Continúa el módulo S26 de Precision Lab para el proyecto **Precision Lab Plus**.
+Proyecto: **Precision Lab Plus**  
+Branch: `qa/s26-execution`  
+HEAD de código certificado B4: `40fcf3b3aa2d83fa58943fec603198dd0bb291bb`
 
-Antes de hacer cambios:
-1. lee `qa/s26/ROADMAP.md`;
-2. lee `qa/s26/VISUAL_MATRIX.md`;
-3. lee `qa/s26/MATHEMATICAL_INTEGRITY_POLICY.md`;
-4. lee `qa/s26/EXECUTION_LOG_TEMPLATE.md` o el log S26 más reciente;
-5. consulta GitHub y verifica branch, PR, SHA y gates actuales;
-6. identifica el último submódulo S26 cerrado y continúa desde allí.
+## INSTRUCCIÓN DE ARRANQUE
+**No empieces implementando el Bloque 5.**
 
-Reglas obligatorias:
-- no reducir S26 a la pantalla científica;
-- cubrir gráfica, matrices, estadística, conversión, historial, configuración y teclado;
-- cubrir Desktop 1440, laptop, tablet y móvil;
-- no tocar rutas matemáticas protegidas salvo defecto reproducible;
-- toda modificación visual con impacto funcional debe tener test funcional asociado;
-- una captura visual no sustituye una prueba funcional;
-- antes de cerrar S26 ejecutar recertificación matemática completa;
-- mantener un log de decisiones, archivos modificados, defectos, tests y SHAs.
+Primero ejecuta el Checkpoint de Paridad S26.3R — Bloques 1–4.
 
-Baseline previo a S26: `5de721e32c13a60f77671cd2bd98a8cc05cf0140`.
+Lee:
+1. `PARITY_CHECKPOINT_B1_B4.md`
+2. `RESULT_FORMATS.md`
+3. `ROADMAP.md`
+4. final de `EXECUTION_LOG.md`
+5. `DESIGN_TARGET.md`
+6. `KEYBOARD_CONTRACT.md`
+7. `MATHEMATICAL_INTEGRITY_POLICY.md`
 
-Si la conversación anterior no está disponible, estos archivos son la fuente de continuidad y deben prevalecer sobre suposiciones.
+Estado:
+- B1 PASS DEFINITIVO
+- B2 PASS DEFINITIVO
+- B3 PASS DEFINITIVO
+- B4 PASS DEFINITIVO
+- B5 pendiente y bloqueado hasta cerrar paridad B1–B4.
+
+Clasifica diferencias como PARIDAD / DIFERENCIA INTENCIONAL / GAP.
+
+Regla angular:
+- grados → solo DD y DMS;
+- DD usa °;
+- DMS usa °, ′, ″;
+- RAD conserva formatos normales.
+
+Diferencias intencionales:
+- Plus: SymPy/backend, Pasos, Resumen, warnings, Copiar, resultados estructurados.
+- Lite: cálculo local y fallback numérico.
+
+Después de corregir GAPs, recertifica si tocaste código y actualiza log/roadmap/checkpoint.
+
+Luego iniciar B5: teclado global shell/open-close/responsive.

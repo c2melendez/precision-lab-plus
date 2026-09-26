@@ -2,9 +2,9 @@
 app/services/evaluate_service.py — `/evaluate` (spec, secciones 3, 5, 6, 7).
 
 `/evaluate`: sin variables libres sin sustituir -> numérico; con variables
-libres sin sustituir -> simbólico (sección 6). `angle_unit` solo dentro de
-argumentos de funciones trig DIRECTAS (`sin`,`cos`,`tan`,`sec`,`csc`,`cot`);
-las inversas siempre en radianes (sección 3). `substitutions` deben parsear
+libres sin sustituir -> simbólico (sección 6). `angle_unit` controla tanto los argumentos de funciones trig DIRECTAS
+(`sin`,`cos`,`tan`,`sec`,`csc`,`cot`) como la unidad de salida de las
+inversas convencionales (`asin`,`acos`,`atan`,`asec`,`acsc`,`acot`). `substitutions` deben parsear
 a valores PURAMENTE numéricos (sin variables libres) — si no, `VALIDATION_ERROR`.
 
 `/evaluate` no está en la lista de operaciones con procedimiento paso a paso
@@ -13,14 +13,33 @@ a valores PURAMENTE numéricos (sin variables libres) — si no, `VALIDATION_ERR
 """
 
 from dataclasses import dataclass
+import re
 from typing import Dict, Optional
 
 import sympy
-from sympy import cos, cot, csc, pi, sec, sin, tan
+from sympy import acos, acot, acsc, asec, asin, atan, cos, cot, csc, pi, sec, sin, tan
 
 from app.services import parsing
 
 _DIRECT_TRIG_FUNCTIONS = (sin, cos, tan, sec, csc, cot)
+_INVERSE_TRIG_FUNCTIONS = (asin, acos, atan, asec, acsc, acot)
+
+_STANDALONE_INVERSE_TRIG_RE = re.compile(
+    r"^\s*(?:asin|acos|atan|asec|acsc|acot|arcsin|arccos|arctan)\s*\(.*\)\s*$",
+    re.S,
+)
+
+
+def _is_standalone_inverse_trig_expression(expression: str) -> bool:
+    """True cuando toda la entrada representa una única trig inversa.
+
+    SymPy puede evaluar asin/acos/etc. con argumentos Float durante el parseo
+    (por ejemplo arcsin(0.5) -> 0.523598...), eliminando el nodo funcional
+    antes de _apply_inverse_degree_output. En una expresión angular
+    independiente, convertir el resultado completo preserva la semántica
+    DEG y evita depender de si SymPy mantuvo o simplificó el nodo.
+    """
+    return bool(_STANDALONE_INVERSE_TRIG_RE.fullmatch(expression))
 
 
 class SubstitutionValidationError(ValueError):
@@ -100,6 +119,22 @@ def _apply_degree_conversion(expr: sympy.Expr) -> sympy.Expr:
     return expr.replace(_is_direct_trig, _convert)
 
 
+def _apply_inverse_degree_output(expr: sympy.Expr) -> sympy.Expr:
+    """Convierte a grados la SALIDA de asin/acos/atan.
+
+    Se aplica después de _apply_degree_conversion para conservar la semántica
+    de composiciones como sin(asin(0.5)) en modo DEG.
+    """
+
+    def _is_inverse_trig(node: sympy.Basic) -> bool:
+        return isinstance(node, _INVERSE_TRIG_FUNCTIONS)
+
+    def _convert(node: sympy.Basic) -> sympy.Basic:
+        return node * 180 / pi
+
+    return expr.replace(_is_inverse_trig, _convert)
+
+
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
@@ -112,6 +147,10 @@ def evaluate(
 
     if angle_unit == "deg":
         expr = _apply_degree_conversion(expr)
+        if _is_standalone_inverse_trig_expression(expression):
+            expr = expr * 180 / pi
+        else:
+            expr = _apply_inverse_degree_output(expr)
 
     if substitution_map:
         expr = expr.subs(substitution_map)

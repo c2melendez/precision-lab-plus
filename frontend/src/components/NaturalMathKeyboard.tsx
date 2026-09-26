@@ -107,6 +107,17 @@ export const key = (
   description,
 });
 
+
+const DIRECT_TRIG_ARIA = new Set(["sin", "cos", "tan", "sec", "csc", "cot"]);
+
+export function angleAwareTrigInsertLatex(
+  k: KeyDef,
+  isDegrees: boolean,
+): string {
+  if (!isDegrees || !DIRECT_TRIG_ARIA.has(k.ariaLabel)) return k.insertLatex;
+  return k.insertLatex.replace("#0", "#0^{\\circ}");
+}
+
 export { BOX };
 
 // MÓDULO 1 (paridad con precision-lab-lite): CORE_GRID/RELATIONAL_ROW/
@@ -711,6 +722,9 @@ interface NaturalMathKeyboardProps {
    * agrega la pestaña temporal "Funciones". Default false — GraphMode
    * (spec §11, sin tocar) no lo pasa, ve el teclado completo de siempre. */
   hideCoreGrid?: boolean;
+  /** S26.3: en DEG las trigonométricas directas insertan ° dentro
+   * del argumento. En RAD conservan la plantilla normal. */
+  angleUnit?: "rad" | "deg";
 }
 
 /** Cuántas filas puede pedir el selector de "Sistema" — spec §6 (5×5 ya
@@ -729,6 +743,7 @@ export function NaturalMathKeyboard({
   onGoToDerivative: _onGoToDerivative,
   showCalculusStrip = false,
   hideCoreGrid = false,
+  angleUnit = "rad",
 }: NaturalMathKeyboardProps) {
   const CATEGORIES = hideCoreGrid ? CATEGORIES_BASIC_MODE : CATEGORIES_FULL;
   const [openCategory, setOpenCategory] = useState<(typeof CATEGORIES)[number] | null>(
@@ -755,7 +770,7 @@ export function NaturalMathKeyboard({
     if (k.glyph === "Graficar" && k.insertLatex === "") return onGraphComplex?.();
     field?.focus();
     if (k.insertLatex) {
-      field?.insert(k.insertLatex);
+      field?.insert(angleAwareTrigInsertLatex(k, angleUnit === "deg"));
       // Fase X, Módulo X0: solo se registran teclas que insertan
       // contenido real (excluye "=", "f(x)=0", DEL/⌫, "Graficar" —
       // todas con insertLatex vacío o interceptadas antes de llegar
@@ -978,7 +993,7 @@ export function NaturalMathKeyboard({
                       }}
                       aria-label="Simplificar expresión"
                       title="Simplificar expresión"
-                      className="rounded-md bg-graph py-2 text-xs font-medium text-paper hover:bg-graph/90"
+                      className="rounded-md bg-graph py-2 text-xs font-medium text-white hover:bg-graph/90"
                     >
                       a+a → 2a
                     </button>
@@ -1087,7 +1102,7 @@ export function NaturalMathKeyboard({
           onClick={onSimplify}
           aria-label="Simplificar expresión"
           title="Simplificar expresión"
-          className="rounded-md bg-graph py-2 text-[11px] font-medium text-paper hover:bg-graph/90"
+          className="rounded-md bg-graph py-2 text-[11px] font-medium text-white hover:bg-graph/90"
         >
           a+a → 2a
         </button>
@@ -1201,7 +1216,7 @@ export function NaturalMathKeyboard({
                 const isEquals = glyphStr === "=";
                 const isEnter = glyphStr === "⏎";
                 const className = isEnter
-                  ? "rounded-md bg-graph py-2.5 text-sm font-semibold text-paper hover:bg-graph/90"
+                  ? "rounded-md bg-graph py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
                   : isEquals
                     ? "rounded-md border border-marker py-2.5 text-sm font-medium text-marker hover:bg-marker-soft/10"
                     : isOperator

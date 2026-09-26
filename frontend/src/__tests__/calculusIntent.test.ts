@@ -152,6 +152,82 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
     });
   });
 
+  describe("EDO (notación prima normalizada)", () => {
+    it("detecta y' ASCII", () => {
+      expect(detectCalculusIntent("y'=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("normaliza prima Unicode de MathLive", () => {
+      expect(detectCalculusIntent("y′=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("normaliza \\prime en superíndice", () => {
+      expect(detectCalculusIntent("y^{\\prime}=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("normaliza prima Unicode con caret, forma real observada en MathLive E2E", () => {
+      expect(detectCalculusIntent("y^′=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("normaliza segundo orden Unicode con caret", () => {
+      expect(detectCalculusIntent("y^′′+y=0")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y''+y=0",
+      });
+    });
+
+    it("normaliza \\prime sin llaves", () => {
+      expect(detectCalculusIntent("y^\\prime=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("normaliza doble \\prime sin llaves", () => {
+      expect(detectCalculusIntent("y^\\prime\\prime+y=0")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y''+y=0",
+      });
+    });
+
+    it("preserva la condición inicial al normalizar primas", () => {
+      expect(detectCalculusIntent("y^′=2x, y(0)=1")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x, y(0)=1",
+      });
+    });
+
+    it("normaliza segundo orden con primas LaTeX", () => {
+      expect(detectCalculusIntent("y^{\\prime\\prime}+y=0")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y''+y=0",
+      });
+    });
+
+    it("mantiene la notación alternativa dy/dx", () => {
+      expect(detectCalculusIntent("\\frac{dy}{dx}=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("no confunde una ecuación ordinaria con EDO", () => {
+      expect(detectCalculusIntent("y=2x")).toBeNull();
+    });
+  });
+
   describe("controles negativos", () => {
     it("una ecuación simple no es cálculo", () => {
       expect(detectCalculusIntent("2x+3=7")).toBeNull();

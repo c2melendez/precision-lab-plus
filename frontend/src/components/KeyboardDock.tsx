@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useLayoutModeStore } from "../store/useLayoutModeStore";
 import { useMinWidthMediaQuery, FLOATING_MIN_WIDTH_PX } from "../hooks/useMinWidthMediaQuery";
@@ -72,7 +73,9 @@ import { RecentKeysBar } from "./RecentKeysBar";
  * por un frame.
  */
 
-export function KeyboardDock() {
+export function KeyboardDock({ sidebarExpanded }: { sidebarExpanded: boolean }) {
+  const dockRef = useRef<HTMLDivElement>(null);
+  const [dockBottomOffset, setDockBottomOffset] = useState(0);
   const isOpen = useKeyboardPanelStore((s) => s.isOpen);
   const content = useKeyboardPanelStore((s) => s.content);
   const basicContent = useKeyboardPanelStore((s) => s.basicContent);
@@ -81,6 +84,26 @@ export function KeyboardDock() {
   const close = useKeyboardPanelStore((s) => s.close);
   const layoutMode = useLayoutModeStore((s) => s.layoutMode);
   const isFloatingWideEnough = useMinWidthMediaQuery(FLOATING_MIN_WIDTH_PX);
+  const hasDockContent = content !== null || basicContent !== null || compactActions !== null;
+
+  useLayoutEffect(() => {
+    const dock = dockRef.current;
+    if (!dock) return;
+    const measure = () => {
+      const rect = dock.getBoundingClientRect();
+      setDockBottomOffset(Math.max(0, window.innerHeight - rect.top + 12));
+    };
+    measure();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    observer?.observe(dock);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [layoutMode, isFloatingWideEnough, hasDockContent, sidebarExpanded]);
+
+  if (!hasDockContent) return null;
 
   // Módulo P3: Apilado maneja su propia sección de teclado inline (ver
   // comentario de cabecera) — este dock fijo se retira por completo.
@@ -103,7 +126,7 @@ export function KeyboardDock() {
   return (
     <>
       {(content || basicContent) && (
-        <KeyboardPanel isOpen={isOpen} onClose={close}>
+        <KeyboardPanel isOpen={isOpen} onClose={close} dockBottomOffset={dockBottomOffset} sidebarExpanded={sidebarExpanded}>
           {/* Grid básico completo — Fase Y: el panel es ahora la ÚNICA
               fuente del teclado en cualquier breakpoint (antes existía
               una copia siempre-visible de basicContent en la barra
@@ -111,12 +134,11 @@ export function KeyboardDock() {
               ver comentario donde se quitó, más abajo). Por eso ya NO
               se oculta en md+: si se ocultara ahí, el numpad básico
               quedaría inalcanzable en tablet/desktop. */}
-          {basicContent && <div className="mb-3">{basicContent}</div>}
-          {content}
+          {content ?? basicContent}
         </KeyboardPanel>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2 dt:left-1/2 dt:right-auto dt:bottom-4 dt:w-[calc(100%_-_64px)] dt:max-w-[1376px] dt:-translate-x-1/2 dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft dt:px-4 dt:py-2 dt:shadow-xl">
+      <div ref={dockRef} data-testid="keyboard-dock" className={`fixed bottom-0 right-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2 dt:bottom-4 dt:right-8 dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft dt:px-4 dt:py-2 dt:shadow-xl ${sidebarExpanded ? "left-60 dt:left-[17rem]" : "left-[72px] dt:left-[104px]"}`}>
         {/* Fase X, Módulo X0 (Smart Docks) — "justo arriba de donde
             aparecerá el teclado (colapsado o no)", confirmado por Carlos.
             Primera fila del mismo contenedor fijo: queda por encima del
@@ -132,7 +154,7 @@ export function KeyboardDock() {
             aria-label="Calcular"
             className={
               compactActions
-                ? "rounded-md bg-graph py-2 text-sm font-semibold text-paper hover:bg-graph/90"
+                ? "rounded-md bg-graph py-2 text-sm font-semibold text-white hover:bg-graph/90"
                 : "rounded-md bg-chrome-soft py-2 text-sm font-semibold text-bone/30"
             }
           >
@@ -188,7 +210,7 @@ export function KeyboardDock() {
             aria-label={isOpen ? "Cerrar teclado" : "Abrir teclado"}
             className={
               canExpand
-                ? "flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium text-bone/70 hover:bg-chrome-soft hover:text-bone dt:bg-marker-soft dt:!text-ink dt:hover:bg-marker-soft/70"
+                ? "flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium text-ink hover:bg-chrome-soft hover:text-ink dt:bg-marker-soft dt:!text-ink dt:hover:bg-marker-soft/70"
                 : "flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium text-bone/20 dt:text-muted/40"
             }
           >

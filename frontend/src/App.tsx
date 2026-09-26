@@ -1,14 +1,12 @@
 /**
- * src/App.tsx — layout base + selector de modos + historial (spec,
- * sección 11, Módulo 12).
+ * S26.3 — shell global contractual.
  *
- * Accesibilidad final (Módulo 12): skip-link al contenido principal,
- * `aria-current` en el modo activo, `aria-expanded` en el toggle de
- * historial, foco visible (`focus-visible:outline`) en todos los
- * controles interactivos añadidos aquí.
+ * Navegación principal mediante sidebar izquierdo expandible/compacto.
+ * El contenido de los módulos, motores, teclado global e historial se
+ * conservan sin cambios funcionales.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { BasicMode } from "./components/BasicMode";
 import { SimpleBasicMode } from "./components/SimpleBasicMode";
@@ -17,6 +15,8 @@ import { EquationMode } from "./components/EquationMode";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { GraphMode } from "./components/GraphMode";
 import { History } from "./components/History";
+import type { HistoryEntry } from "./store/useHistoryStore";
+import { usePendingHistoryReuseStore } from "./store/usePendingHistoryReuseStore";
 import { HistoryDrawer } from "./components/HistoryDrawer";
 import { IntegralMode } from "./components/IntegralMode";
 import { LimitMode } from "./components/LimitMode";
@@ -24,10 +24,15 @@ import { MatrixMode } from "./components/MatrixMode";
 import { StatisticsMode } from "./components/StatisticsMode";
 import { SystemMode } from "./components/SystemMode";
 import { UnitsMode } from "./components/UnitsMode";
+import { GeometryMode } from "./components/GeometryMode";
 import { AjustesPopover } from "./components/AjustesPopover";
 import { KeyboardDock } from "./components/KeyboardDock";
+import { GlobalKeyboardFallback } from "./components/GlobalKeyboardFallback";
+import { ProjectBrand } from "./components/ProjectBrand";
+import { ModeIcon, type ModeIconName } from "./components/ModeIcon";
 import { useUIStore, type CalculatorMode } from "./store/useUIStore";
 import { useLayoutModeStore } from "./store/useLayoutModeStore";
+import { useKeyboardPanelStore } from "./store/useKeyboardPanelStore";
 import { useMinWidthMediaQuery, FLOATING_MIN_WIDTH_PX } from "./hooks/useMinWidthMediaQuery";
 
 const MODE_LABELS: Record<CalculatorMode, string> = {
@@ -41,31 +46,33 @@ const MODE_LABELS: Record<CalculatorMode, string> = {
   graph: "Gráficas",
   limit: "Límite",
   statistics: "Estadística",
+  geometry: "Geometría",
   units: "Unidades",
 };
 
-// Punto 4 del rediseño de teclado (pedido de Carlos): Derivada/Integral/
-// Ecuación/Sistema ya no deben verse en el frontend — su función quedó
-// cubierta por el router de Fase 1/2 dentro de "Científica" (ecuación/
-// sistema/derivada/integral, todo en una sola pantalla vía
-// calculusIntent.ts + submitCalculus). Los modos en sí NO se eliminan
-// (siguen existiendo, siguen siendo válidos si algo interno navega ahí,
-// ej. antes onGoToDerivative), solo se les quita la pestaña visible.
-// Límite sigue el mismo criterio desde que se creó: el router también lo
-// detecta ahora (ver calculusIntent.ts), así que tampoco ocupa un lugar
-// en la navegación principal.
-//
-// P6 (spec v2 §7): "statistics" nueva, visible.
-// P7 (spec v2 §8): "units" nueva, visible — con esto queda el orden
-// final de §9 (previo al Módulo 5): Científica · Basic · Matrices ·
-// Gráficas · Estadística · Unidades.
-//
-// Módulo 5 (hoja-de-ruta-visual.md §5 / spec §3): mismo tratamiento para
-// "simple" (Basic) — confirmado por el usuario. Verificado: a diferencia
-// de precision-lab-lite, SimpleKeyboard.tsx (Full) no tiene ninguna
-// función propia sin equivalente (solo dígitos/paréntesis/AC/⌫/⏎, todo
-// cubierto por BasicMode) — acá la eliminación no deja nada huérfano.
-const VISIBLE_MODES: CalculatorMode[] = ["basic", "matrix", "graph", "statistics", "units"];
+const VISIBLE_MODES: CalculatorMode[] = ["basic", "graph", "matrix", "statistics", "geometry", "units"];
+
+const MODE_ICONS: Partial<Record<CalculatorMode, ModeIconName>> = {
+  basic: "scientific",
+  graph: "graph",
+  matrix: "matrix",
+  statistics: "statistics",
+  geometry: "geometry",
+  units: "units",
+};
+
+const SIDEBAR_STORAGE_KEY = "precision-lab-sidebar-expanded";
+const SIDEBAR_AUTO_COLLAPSE_QUERY = "(max-width: 1199px)";
+
+function readSidebarPreference(): boolean {
+  if (typeof window === "undefined") return true;
+  return localStorage.getItem(SIDEBAR_STORAGE_KEY) !== "false";
+}
+
+function readInitialSidebarExpanded(): boolean {
+  if (typeof window === "undefined") return true;
+  return readSidebarPreference() && !window.matchMedia(SIDEBAR_AUTO_COLLAPSE_QUERY).matches;
+}
 
 function ActiveModeForm({ mode }: { mode: CalculatorMode }) {
   switch (mode) {
@@ -87,6 +94,8 @@ function ActiveModeForm({ mode }: { mode: CalculatorMode }) {
       return <GraphMode />;
     case "statistics":
       return <StatisticsMode />;
+    case "geometry":
+      return <GeometryMode />;
     case "units":
       return <UnitsMode />;
     case "limit":
@@ -99,77 +108,140 @@ export default function App() {
   const setActiveMode = useUIStore((state) => state.setActiveMode);
   const lastErrorMessage = useUIStore((state) => state.lastErrorMessage);
   const [showHistory, setShowHistory] = useState(false);
-  // Módulo P3: sin dock fijo en "stacked" (KeyboardDock retorna null ahí).
-  // Módulo P4: tampoco hay dock fijo en "floating" cuando el viewport es
-  // lo bastante ancho (el teclado vive en su FloatingWindow) — pero SÍ lo
-  // hay si Flotante degrada a Enfoque en viewport angosto, por eso se usa
-  // el mismo hook que KeyboardDock.tsx, no basta con mirar el string de
-  // layoutMode.
+  const sidebarPreferenceRef = useRef(readSidebarPreference());
+  const [sidebarExpanded, setSidebarExpanded] = useState(readInitialSidebarExpanded);
   const layoutMode = useLayoutModeStore((s) => s.layoutMode);
   const isFloatingWideEnough = useMinWidthMediaQuery(FLOATING_MIN_WIDTH_PX);
-  const hasFixedDock = !(layoutMode === "stacked" || (layoutMode === "floating" && isFloatingWideEnough));
+  const hasDockContent = useKeyboardPanelStore((s) =>
+    s.content !== null || s.basicContent !== null || s.compactActions !== null);
+  const hasFixedDock = hasDockContent && !(layoutMode === "stacked" || (layoutMode === "floating" && isFloatingWideEnough));
   const mainBottomPadding = hasFixedDock ? "pb-56 dt:pb-40" : "pb-8";
 
+  useEffect(() => {
+    const media = window.matchMedia(SIDEBAR_AUTO_COLLAPSE_QUERY);
+    const applyResponsiveState = (isConstrained: boolean) => {
+      setSidebarExpanded(isConstrained ? false : sidebarPreferenceRef.current);
+    };
+
+    applyResponsiveState(media.matches);
+    const onChange = (event: MediaQueryListEvent) => applyResponsiveState(event.matches);
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
+
+  const setPendingHistoryReuse = usePendingHistoryReuseStore((s) => s.setPending);
+
+  const reuseHistoryEntry = (entry: HistoryEntry) => {
+    setPendingHistoryReuse(entry);
+    const target: CalculatorMode =
+      entry.sourceModule === "Matrices"
+        ? "matrix"
+        : entry.sourceModule === "Estadística"
+          ? "statistics"
+          : entry.sourceModule === "Gráficas"
+            ? "graph"
+            : entry.sourceModule === "Geometría"
+              ? "geometry"
+              : entry.sourceModule === "Unidades"
+                ? "units"
+                : "basic";
+    setActiveMode(target);
+    setShowHistory(false);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarExpanded((current) => {
+      const next = !current;
+      sidebarPreferenceRef.current = next;
+      localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
+      return next;
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-paper text-ink">
+    <div className="min-h-screen bg-paper pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] text-ink">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-graph focus:px-3 focus:py-2 focus:text-white"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[60] focus:rounded focus:bg-marker focus:px-3 focus:py-2 focus:text-chrome"
       >
         Saltar al contenido principal
       </a>
 
-      <header className="border-b border-paper-line bg-paper-soft px-6 py-3">
-        <div className="mx-auto flex max-w-3xl items-center justify-between lg:max-w-5xl dt:max-w-[1440px]">
-          <h1 className="text-lg font-semibold text-ink">
-            Precision <span className="text-marker-text">Lab Plus</span>
-          </h1>
-          <div className="flex items-center gap-2">
+      <div className="flex min-h-screen">
+        <aside
+          aria-label="Navegación principal"
+          data-sidebar-state={sidebarExpanded ? "expanded" : "compact"}
+          data-sidebar-responsive="auto"
+          className={`precision-sidebar sticky top-0 z-10 flex h-screen shrink-0 flex-col border-r transition-[width] duration-200 ${sidebarExpanded ? "w-60" : "w-[72px]"}`}
+        >
+          <header className={`relative flex shrink-0 border-b precision-sidebar-divider ${sidebarExpanded ? "min-h-[112px] flex-col items-center px-2 py-3 md:min-h-[104px] md:items-start md:px-3" : "min-h-[112px] flex-col items-center px-2 py-3"}`}>
+            <ProjectBrand showName={sidebarExpanded} />
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              aria-label={sidebarExpanded ? "Contraer navegación" : "Expandir navegación"}
+              aria-expanded={sidebarExpanded}
+              title={sidebarExpanded ? "Contraer navegación" : "Expandir navegación"}
+              className={`precision-sidebar-action precision-sidebar-focus grid h-11 w-11 shrink-0 place-items-center rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${sidebarExpanded ? "mt-2 md:absolute md:right-2 md:top-2 md:mt-0" : "mt-2"}`}
+            >
+              <span aria-hidden="true" className="text-xl leading-none">☰</span>
+            </button>
+          </header>
+
+          <nav aria-label="Modos de la calculadora" className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
+            <ul className="space-y-1">
+              {VISIBLE_MODES.map((mode) => {
+                const icon = MODE_ICONS[mode];
+                const active = activeMode === mode;
+                return (
+                  <li key={mode}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveMode(mode)}
+                      aria-current={active ? "page" : undefined}
+                      aria-label={MODE_LABELS[mode]}
+                      title={!sidebarExpanded ? MODE_LABELS[mode] : undefined}
+                      className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker ${
+                        active
+                          ? "precision-sidebar-active shadow-sm"
+                          : "precision-sidebar-action"
+                      }`}
+                    >
+                      {icon && <ModeIcon name={icon} className="h-5 w-5 shrink-0" />}
+                      {sidebarExpanded && <span className="whitespace-nowrap">{MODE_LABELS[mode]}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          <div className={`space-y-1 border-t precision-sidebar-divider px-2 py-3 ${hasFixedDock ? "mb-24" : ""}`}>
             <button
               type="button"
               onClick={() => setShowHistory((current) => !current)}
+              aria-label="Historial"
               aria-expanded={showHistory}
               aria-controls="history-panel"
-              className="rounded-full border border-paper-line px-3 py-1.5 text-sm text-ink hover:bg-paper-line/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker"
+              title={!sidebarExpanded ? "Historial" : undefined}
+              className="precision-sidebar-action precision-sidebar-focus flex min-h-11 w-full items-center gap-3 rounded-lg px-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             >
-              Historial
+              <span aria-hidden="true" className="grid h-5 w-5 shrink-0 place-items-center">▤</span>
+              {sidebarExpanded && <span className="whitespace-nowrap text-sm">Historial</span>}
             </button>
-            <AjustesPopover />
+            <div className="precision-sidebar-action flex min-h-11 items-center gap-3 rounded-lg px-3" title={!sidebarExpanded ? "Configuración" : undefined}>
+              <div className="grid h-5 w-5 shrink-0 place-items-center">
+                <AjustesPopover />
+              </div>
+              {sidebarExpanded && <span className="whitespace-nowrap text-sm">Configuración</span>}
+            </div>
           </div>
-        </div>
-      </header>
+        </aside>
 
-      <nav aria-label="Modos de la calculadora" className="border-b border-paper-line bg-paper-soft px-6">
-        <ul className="mx-auto flex max-w-3xl flex-wrap gap-6 lg:max-w-5xl dt:max-w-[1440px]">
-          {VISIBLE_MODES.map((mode) => (
-            <li key={mode}>
-              <button
-                type="button"
-                onClick={() => setActiveMode(mode)}
-                aria-current={activeMode === mode ? "page" : undefined}
-                className={`border-b-2 px-1 py-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marker ${
-                  activeMode === mode
-                    ? "border-marker text-marker-text"
-                    : "border-transparent text-muted hover:text-ink"
-                }`}
-              >
-                {MODE_LABELS[mode]}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      <div className="flex">
-        {/* Módulo 0: padding inferior para que el KeyboardDock fijo no
-            tape el contenido de ningún modo — cambio de layout global,
-            deliberado, ver Cierre del Módulo 0 (mismo criterio que en
-            precision-lab-lite/src/App.tsx). Módulo P3: en "stacked" no
-            hay dock fijo que compensar (ver mainBottomPadding arriba). */}
         <main
           id="main-content"
           tabIndex={-1}
-          className={`mx-auto min-w-0 max-w-3xl flex-1 px-6 py-8 lg:max-w-5xl dt:max-w-[1440px] dt:px-10 ${mainBottomPadding} focus:outline-none`}
+          className={`mx-auto min-h-screen min-w-0 max-w-[1376px] flex-1 overflow-x-hidden px-3 py-5 sm:px-4 sm:py-6 lg:px-6 dt:px-8 ${mainBottomPadding} focus:outline-none`}
         >
           {lastErrorMessage && (
             <p role="alert" className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -177,19 +249,21 @@ export default function App() {
             </p>
           )}
 
-          <section aria-live="polite" aria-label="Resultado" className="mx-auto max-w-md lg:max-w-none">
+          <section aria-live="polite" aria-label="Resultado" className="min-w-0">
             <ErrorBoundary fallbackLabel="No se pudo mostrar el resultado.">
               <ActiveModeForm mode={activeMode} />
             </ErrorBoundary>
           </section>
         </main>
+
         <HistoryDrawer isOpen={showHistory} onClose={() => setShowHistory(false)}>
           <ErrorBoundary fallbackLabel="No se pudo mostrar el historial.">
-            <History />
+            <History onReuse={reuseHistoryEntry} />
           </ErrorBoundary>
         </HistoryDrawer>
       </div>
-      <KeyboardDock />
+      <GlobalKeyboardFallback mode={activeMode} />
+      <KeyboardDock sidebarExpanded={sidebarExpanded} />
     </div>
   );
 }
