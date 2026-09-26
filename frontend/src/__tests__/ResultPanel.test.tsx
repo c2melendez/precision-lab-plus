@@ -190,6 +190,14 @@ describe("ResultPanel", () => {
       result_approx: 0.8888888888888888,
     };
 
+    it("usa etiquetas naturales para los formatos", () => {
+      render(<ResultPanel result={fractionResult} isLoading={false} />);
+      expect(screen.getByText("Exacto")).toBeInTheDocument();
+      expect(screen.getByText("Decimal")).toBeInTheDocument();
+      expect(screen.getByText("Fracción")).toBeInTheDocument();
+      expect(screen.getByText("Científica")).toBeInTheDocument();
+    });
+
     it("formato 'dec' muestra la aproximación decimal", () => {
       render(<ResultPanel result={fractionResult} isLoading={false} />);
       fireEvent.click(screen.getByRole("button", { name: "dec" }));
@@ -213,15 +221,17 @@ describe("ResultPanel", () => {
       expect(text).toContain("9");
     });
 
-    it("formato 'frac' NO fabrica una fracción cuando el resultado no es exacto (ej. sqrt(7))", () => {
+    it("oculta Fracción cuando el resultado no tiene forma racional exacta (ej. sqrt(7))", () => {
       render(
         <ResultPanel
           result={{ ...baseResult, result_latex: "\\sqrt{7}", result_text: "sqrt(7)", result_approx: 2.6457513 }}
           isLoading={false}
         />,
       );
-      fireEvent.click(screen.getByRole("button", { name: "frac" }));
-      expect(screen.getByText(/no es una fracción exacta/)).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "frac" })).not.toBeInTheDocument();
+      expect(screen.getByText("Exacto")).toBeInTheDocument();
+      expect(screen.getByText("Decimal")).toBeInTheDocument();
+      expect(screen.getByText("Científica")).toBeInTheDocument();
     });
 
     it("volver a 'exacto' muestra de nuevo el resultado original con el aproximado debajo", () => {
