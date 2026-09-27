@@ -47,7 +47,6 @@ import { GraphPlaceholder } from "./GraphPlaceholder";
 import { KeyboardIcon } from "./KeyboardIcon";
 import { MathRenderer } from "./MathRenderer";
 import { NaturalMathField } from "./NaturalMathField";
-import { RecentKeysBar } from "./RecentKeysBar";
 import { ResultPanel } from "./ResultPanel";
 import { useMinWidthMediaQuery, FLOATING_MIN_WIDTH_PX } from "../hooks/useMinWidthMediaQuery";
 
@@ -306,11 +305,6 @@ function StackedKeyboardSection() {
 
   return (
     <div className="flex flex-col gap-1.5">
-      {/* Fase X, Módulo X0 — "justo arriba de donde aparecerá el
-          teclado (colapsado o no)": en Apilado, la sección entera
-          (colapsada o expandida) vive dentro de esta caja, así que el
-          dock de recientes va fuera y encima de ella. */}
-      <RecentKeysBar />
       <div className="rounded-xl border border-paper-line bg-paper-soft">
         <button
           type="button"
@@ -409,14 +403,6 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
       </div>
       {inputField}
       {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-      {/* Fase X, Módulo X0 — "justo arriba de donde aparecerá el
-          teclado": aquí el teclado vive en su propia FloatingWindow, así
-          que el dock de recientes va fuera de ella, inmediatamente
-          encima. No entra DENTRO de FloatingWindow porque esa ventana es
-          arrastrable/redimensionable de forma independiente (persistida
-          en useFloatingLayoutStore) — el dock de recientes no forma
-          parte de esa superficie, es un elemento fijo del layout. */}
-      <RecentKeysBar />
       {/* Fase Y (spec_rediseno_visual.md sección 11) — restricción dura:
           el teclado SIEMPRE inicia colapsado, en las 6 disposiciones sin
           excepción, Flotante incluida. Antes de este fix, la
