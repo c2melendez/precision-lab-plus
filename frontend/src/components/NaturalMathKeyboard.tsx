@@ -376,12 +376,20 @@ const CALCULUS_ROW_2: KeyDef[] = [
   // `unavailable` — calculusIntent.ts ahora reconoce esta notación con un
   // escáner propio (ver detectLateralLimit), mismo template que Lite.
   key(
-    { base: "lim", sub: "x→a±" },
-    "\\lim_{#0\\to#1^{#2}}#3",
-    "límite lateral (edita + o - en el exponente)",
+    { base: "lim", sub: "x→a⁻" },
+    "\\lim_{#0\\to#1^{-}}#2",
+    "límite lateral por la izquierda",
     false,
     undefined,
-    "límite acercándose solo por la derecha (+) o solo por la izquierda (-) de un punto",
+    "límite cuando la variable se acerca al punto solo por la izquierda",
+  ),
+  key(
+    { base: "lim", sub: "x→a⁺" },
+    "\\lim_{#0\\to#1^{+}}#2",
+    "límite lateral por la derecha",
+    false,
+    undefined,
+    "límite cuando la variable se acerca al punto solo por la derecha",
   ),
 ];
 
@@ -696,7 +704,7 @@ CATEGORY_MENUS.Cálculo = [
   { section: "Integrales", keys: CALCULUS_ROW_1.slice(0, 2) },
   { section: "Sumas y productos", keys: CALCULUS_ROW_1.slice(2, 4) },
   { section: "Derivadas", keys: CALCULUS_ROW_2.slice(0, 4) },
-  { section: "Límites", keys: CALCULUS_ROW_2.slice(4, 7) },
+  { section: "Límites", keys: CALCULUS_ROW_2.slice(4, 8) },
   // Fase E: 5ª sección, spec 2.3 ("NO es una pestaña nueva").
   { section: "Ecuaciones diferenciales", keys: ODE_ROW },
 ];
