@@ -272,3 +272,16 @@ La regresión de Historial/Reusar en Plus quedó cerrada y B5 vuelve a estar **E
 - Lite alineado a la gramática visual theme-aware de Plus.
 - Matriz: `B6_BASIC_RECONCILIATION.md`.
 - Estado: **IMPLEMENTADO — pendiente gates + Preview/revisión humana**.
+
+
+## Checkpoint B6 — cierre de sesión 2026-09-27
+
+- B1–B5: **PASS DEFINITIVO**.
+- B6: **PASS AUTOMATIZADO — pendiente confirmación visual humana final**.
+- HEAD certificado de código Precision Lab Plus: `a61f57f5a234723a199ca3afaa273ab826c6d7ec`.
+- Arquitectura vigente: familias arriba → subcategorías → teclas contextuales → núcleo básico debajo.
+- SmartDock retirado.
+- Acciones rápidas de Ecuaciones restringidas a Álgebra → Ecuaciones.
+- No iniciar B7 hasta confirmar visualmente la última versión.
+
+Ver: `SESSION_CLOSURE_2026-09-27.md` y `START_HERE_2026-09-27.md`.
