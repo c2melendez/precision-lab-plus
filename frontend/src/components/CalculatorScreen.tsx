@@ -187,7 +187,7 @@ export function CalculatorScreen({
   );
 
 
-  const resultBlock = (isLoading || result) && <ResultPanel result={result} isLoading={isLoading} inputLatex={latex} angleUnit={angleUnit} />;
+  const resultBlock = <ResultPanel result={result} isLoading={isLoading} inputLatex={latex} angleUnit={angleUnit} />;
 
   // "stacked" (Apilado, Módulo P3): una sola columna, teclado como
   // sección colapsada inline (no overlay). Ver Screen.tsx (Lite) para el
