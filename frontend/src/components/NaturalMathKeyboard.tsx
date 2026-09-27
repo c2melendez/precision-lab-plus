@@ -784,6 +784,13 @@ CATEGORY_MENUS.Más = [
 const CATEGORIES_FULL = ["Trigonométricas", "Símbolos", "Complejos"] as const;
 const CATEGORIES_BASIC_MODE = ["Álgebra", "Trigonométricas", "Cálculo", "Complejos", "Símbolos", "Unidades", "Más"] as const;
 
+const SYMBOL_SUBCATEGORIES = ["Variables", "Constantes y valores", "Funciones"] as const;
+
+function subcategoriesFor(category: (typeof CATEGORIES_BASIC_MODE)[number]): string[] {
+  if (category === "Símbolos") return [...SYMBOL_SUBCATEGORIES];
+  return (CATEGORY_MENUS[category] ?? []).map((group) => group.section);
+}
+
 interface NaturalMathKeyboardProps {
   field: MathfieldElement | null;
   /** Panel Básico V5 integrado como primera pestaña en Científica. */
@@ -840,6 +847,9 @@ export function NaturalMathKeyboard({
   const CATEGORIES = hideCoreGrid ? CATEGORIES_BASIC_MODE : CATEGORIES_FULL;
   const [openCategory, setOpenCategory] = useState<(typeof CATEGORIES)[number] | null>(
     hideCoreGrid ? "Álgebra" : null,
+  );
+  const [activeSubcategory, setActiveSubcategory] = useState<string>(() =>
+    hideCoreGrid ? (subcategoriesFor("Álgebra")[0] ?? "") : "",
   );
   const [notice, setNotice] = useState<string | null>(null);
   // Pendiente #2: menú chico "¿cuántas ecuaciones?" al tocar "Sistema".
@@ -931,11 +941,11 @@ export function NaturalMathKeyboard({
       <div
         data-testid={hideCoreGrid ? "keyboard-b6-layout" : undefined}
         className={hideCoreGrid
-          ? "grid min-h-0 grid-cols-1 gap-3 dt:grid-cols-[10rem_minmax(18rem,0.8fr)_minmax(0,1.2fr)]"
+          ? "flex min-h-0 flex-col gap-2"
           : "contents"}
       >
       {hideCoreGrid && basicContent && (
-        <div className="order-2 min-w-0 rounded-xl border border-paper-line bg-paper p-2" data-testid="keyboard-b6-core">
+        <div className="order-3 min-w-0 rounded-xl border border-paper-line bg-paper p-2" data-testid="keyboard-b6-core">
           {basicContent}
         </div>
       )}
@@ -944,15 +954,37 @@ export function NaturalMathKeyboard({
         <div
           className={
             hideCoreGrid
-              ? "order-3 min-w-0 rounded-xl border border-paper-line bg-paper p-3 shadow-sm"
+              ? "order-2 grid min-w-0 grid-cols-1 gap-2 rounded-xl border border-paper-line bg-paper p-2 shadow-sm dt:grid-cols-[10.5rem_minmax(0,1fr)]"
               : "mb-1.5 rounded-lg bg-chrome-soft p-3 shadow-lg"
           }
         >
+          {hideCoreGrid && (
+            <div
+              aria-label={`Subcategorías de ${openCategory}`}
+              className="flex gap-1 overflow-x-auto rounded-lg border border-paper-line bg-paper-soft p-1.5 dt:flex-col dt:overflow-visible"
+            >
+              {subcategoriesFor(openCategory as (typeof CATEGORIES_BASIC_MODE)[number]).map((section) => (
+                <button
+                  key={section}
+                  type="button"
+                  aria-pressed={activeSubcategory === section}
+                  onClick={() => setActiveSubcategory(section)}
+                  className={
+                    activeSubcategory === section
+                      ? "shrink-0 rounded-lg border border-marker/30 bg-marker-soft/20 px-2.5 py-2 text-left text-[11px] font-semibold text-marker"
+                      : "shrink-0 rounded-lg px-2.5 py-2 text-left text-[11px] font-medium text-muted hover:bg-paper hover:text-ink"
+                  }
+                >
+                  {section}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="min-w-0 rounded-lg border border-paper-line bg-paper p-2">
           {openCategory === "Símbolos" ? (
             hideCoreGrid ? (
-              <div className="grid grid-cols-1 gap-3 dt:grid-cols-2">
-                <div>
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">Variables</div>
+              <div className="min-h-[3.25rem]">
+                {activeSubcategory === "Variables" && (
                   <div className="grid grid-cols-6 gap-1">
                     {SYMBOL_VARIABLES.map((k, i) => (
                       <button
@@ -968,10 +1000,9 @@ export function NaturalMathKeyboard({
                       </button>
                     ))}
                   </div>
-                </div>
-                <div>
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">Constantes y valores</div>
-                  <div className="grid grid-cols-5 gap-1">
+                )}
+                {activeSubcategory === "Constantes y valores" && (
+                  <div className="grid grid-cols-6 gap-1">
                     {SYMBOL_CONSTANTS.map((k, i) => (
                       <button
                         key={`const-${i}`}
@@ -986,9 +1017,8 @@ export function NaturalMathKeyboard({
                       </button>
                     ))}
                   </div>
-                </div>
-                <div className="dt:col-span-2">
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">Funciones</div>
+                )}
+                {activeSubcategory === "Funciones" && (
                   <div className="grid grid-cols-3 gap-1">
                     {SYMBOL_FUNCTIONS.map((k, i) => (
                       <button
@@ -1004,7 +1034,7 @@ export function NaturalMathKeyboard({
                       </button>
                     ))}
                   </div>
-                </div>
+                )}
               </div>
             ) : (
               <div className="flex flex-col gap-1">
@@ -1041,7 +1071,10 @@ export function NaturalMathKeyboard({
               </div>
             )
           ) : (
-            CATEGORY_MENUS[openCategory].map((group) =>
+            (hideCoreGrid
+              ? CATEGORY_MENUS[openCategory].filter((group) => group.section === activeSubcategory)
+              : CATEGORY_MENUS[openCategory]
+            ).map((group) =>
               group.section === "Ecuaciones" ? (
                 <div key={group.section} className="mb-2 last:mb-0">
                   <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">{group.section}</div>
@@ -1050,7 +1083,7 @@ export function NaturalMathKeyboard({
                       type="button"
                       onClick={() => {
                         onSolveEquation?.();
-                        setOpenCategory(null);
+                        if (!hideCoreGrid) setOpenCategory(null);
                       }}
                       aria-label="Resolver ecuación"
                       title="Resolver ecuación"
@@ -1062,7 +1095,7 @@ export function NaturalMathKeyboard({
                       type="button"
                       onClick={() => {
                         onSolveEquation?.();
-                        setOpenCategory(null);
+                        if (!hideCoreGrid) setOpenCategory(null);
                       }}
                       aria-label="Resolver inecuación"
                       title="Resolver inecuación"
@@ -1125,7 +1158,7 @@ export function NaturalMathKeyboard({
                       type="button"
                       onClick={() => {
                         onSimplify?.();
-                        setOpenCategory(null);
+                        if (!hideCoreGrid) setOpenCategory(null);
                       }}
                       aria-label="Simplificar expresión"
                       title="Simplificar expresión"
@@ -1186,6 +1219,7 @@ export function NaturalMathKeyboard({
               ),
             )
           )}
+          </div>
         </div>
       )}
 
@@ -1309,19 +1343,24 @@ export function NaturalMathKeyboard({
       <div
         className={
           hideCoreGrid
-            ? "order-1 flex gap-1 overflow-x-auto rounded-xl border border-paper-line bg-paper-soft p-2 dt:flex-col dt:overflow-visible"
+            ? "order-1 flex gap-1 overflow-x-auto rounded-xl border border-paper-line bg-paper-soft p-1.5"
             : "mb-1.5 flex flex-wrap gap-x-3 gap-y-1 px-1"
         }
         role={hideCoreGrid ? "tablist" : undefined}
         aria-label={hideCoreGrid ? "Familias del teclado matemático" : undefined}
-        aria-orientation={hideCoreGrid ? "vertical" : undefined}
+        aria-orientation={hideCoreGrid ? "horizontal" : undefined}
       >
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
             type="button"
-            onClick={() =>
-              hideCoreGrid ? setOpenCategory(cat) : setOpenCategory((current) => (current === cat ? null : cat))
+            onClick={() => {
+              if (hideCoreGrid) {
+                setOpenCategory(cat);
+                setActiveSubcategory(subcategoriesFor(cat as (typeof CATEGORIES_BASIC_MODE)[number])[0] ?? "");
+              } else {
+                setOpenCategory((current) => (current === cat ? null : cat));
+              }
             }
             aria-expanded={openCategory === cat}
             role={hideCoreGrid ? "tab" : undefined}
@@ -1329,8 +1368,8 @@ export function NaturalMathKeyboard({
             className={
               hideCoreGrid
                 ? openCategory === cat
-                  ? "shrink-0 rounded-lg bg-marker px-3 py-2 text-left text-[11px] font-semibold text-chrome"
-                  : "shrink-0 rounded-lg border border-transparent px-3 py-2 text-left text-[11px] text-muted hover:border-paper-line hover:bg-paper"
+                  ? "shrink-0 rounded-lg bg-marker px-3 py-2 text-[11px] font-semibold text-chrome"
+                  : "shrink-0 rounded-lg border border-transparent px-3 py-2 text-[11px] text-muted hover:border-paper-line hover:bg-paper"
                 : openCategory === cat
                   ? "text-xs font-semibold text-marker"
                   : "text-xs text-bone/70"
