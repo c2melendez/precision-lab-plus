@@ -995,7 +995,7 @@ export function NaturalMathKeyboard({
       >
       {hideCoreGrid && basicContent && (
         <div
-          className="order-3 min-w-0 shrink-0 rounded-xl border border-paper-line bg-paper p-2"
+          className="row-start-3 min-w-0 shrink-0 rounded-xl border border-paper-line bg-paper p-2"
           data-testid="keyboard-b6-core"
         >
           {basicContent}
@@ -1007,7 +1007,7 @@ export function NaturalMathKeyboard({
           data-testid={hideCoreGrid ? "keyboard-b6-context" : undefined}
           className={
             hideCoreGrid
-              ? "order-2 grid min-h-0 min-w-0 grid-cols-1 gap-2 overflow-hidden rounded-xl border border-paper-line bg-paper p-2 shadow-sm [contain:layout_paint] dt:grid-cols-[10.5rem_minmax(0,1fr)]"
+              ? "row-start-2 grid min-h-0 min-w-0 grid-cols-1 gap-2 overflow-hidden rounded-xl border border-paper-line bg-paper p-2 shadow-sm [contain:layout_paint] dt:grid-cols-[10.5rem_minmax(0,1fr)]"
               : "mb-1.5 rounded-lg bg-chrome-soft p-3 shadow-lg"
           }
         >
@@ -1399,7 +1399,7 @@ export function NaturalMathKeyboard({
       <div
         className={
           hideCoreGrid
-            ? "order-1 flex gap-1 overflow-x-auto rounded-xl border border-paper-line bg-paper-soft p-1.5"
+            ? "row-start-1 flex gap-1 overflow-x-auto rounded-xl border border-paper-line bg-paper-soft p-1.5"
             : "mb-1.5 flex flex-wrap gap-x-3 gap-y-1 px-1"
         }
         role={hideCoreGrid ? "tablist" : undefined}
