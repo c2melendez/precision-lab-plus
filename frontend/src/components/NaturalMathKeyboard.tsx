@@ -990,31 +990,22 @@ export function NaturalMathKeyboard({
       <div
         data-testid={hideCoreGrid ? "keyboard-b6-layout" : undefined}
         className={hideCoreGrid
-          ? "grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-2"
+          ? "grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-2"
           : "contents"}
       >
-      {hideCoreGrid && basicContent && (
-        <div
-          className="row-start-3 min-w-0 shrink-0 rounded-xl border border-paper-line bg-paper p-2"
-          data-testid="keyboard-b6-core"
-        >
-          {basicContent}
-        </div>
-      )}
-
       {openCategory && (
         <div
-          data-testid={hideCoreGrid ? "keyboard-b6-context" : undefined}
           className={
             hideCoreGrid
-              ? "row-start-2 grid min-h-0 min-w-0 grid-cols-1 gap-2 overflow-hidden rounded-xl border border-paper-line bg-paper p-2 shadow-sm [contain:layout_paint] dt:grid-cols-[10.5rem_minmax(0,1fr)]"
+              ? "row-start-2 grid min-h-0 min-w-0 grid-cols-1 gap-2 overflow-y-auto rounded-xl border border-paper-line bg-paper p-2 shadow-sm [contain:layout_paint] lg:grid-cols-[10rem_minmax(22rem,1fr)_minmax(14rem,18rem)] lg:overflow-hidden"
               : "mb-1.5 rounded-lg bg-chrome-soft p-3 shadow-lg"
           }
         >
           {hideCoreGrid && (
             <div
+              data-testid="keyboard-b6-subcategories"
               aria-label={`Subcategorías de ${openCategory}`}
-              className="flex min-h-0 gap-1 overflow-x-auto rounded-lg border border-paper-line bg-paper-soft p-1.5 dt:flex-col dt:overflow-x-hidden dt:overflow-y-auto"
+              className="flex min-h-0 gap-1 overflow-x-auto rounded-lg border border-paper-line bg-paper-soft p-1.5 lg:flex-col lg:overflow-x-hidden lg:overflow-y-auto"
             >
               {subcategoriesFor(openCategory as (typeof CATEGORIES_BASIC_MODE)[number]).map((section) => (
                 <button
@@ -1034,7 +1025,18 @@ export function NaturalMathKeyboard({
               ))}
             </div>
           )}
-          <div className="min-h-0 min-w-0 overflow-y-auto rounded-lg border border-paper-line bg-paper p-2">
+          {hideCoreGrid && basicContent && (
+            <div
+              data-testid="keyboard-b6-core"
+              className="min-h-0 min-w-0 overflow-y-auto rounded-lg border border-paper-line bg-paper p-2"
+            >
+              {basicContent}
+            </div>
+          )}
+          <div
+            data-testid={hideCoreGrid ? "keyboard-b6-context" : undefined}
+            className="min-h-0 min-w-0 overflow-y-auto rounded-lg border border-paper-line bg-paper p-2"
+          >
           {openCategory === "Símbolos" ? (
             hideCoreGrid ? (
               <div className="min-h-[3.25rem]">
