@@ -25,6 +25,7 @@ import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStor
 import type { HistoryEntry } from "../store/useHistoryStore";
 import { latexToBackendSyntax, NaturalMathField } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
+import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { ResultPanel } from "./ResultPanel";
 
 const GraphViewer = lazy(() => import("./GraphViewer"));
@@ -42,19 +43,26 @@ const MAX_EXPRESSIONS = 5;
 function useGlobalGraphKeyboard(field: MathfieldElement | null, formRef: { current: HTMLFormElement | null }) {
   const setContent = useKeyboardPanelStore((s) => s.setContent);
   const clearContent = useKeyboardPanelStore((s) => s.clearContent);
+  const setBasicContent = useKeyboardPanelStore((s) => s.setBasicContent);
+  const clearBasicContent = useKeyboardPanelStore((s) => s.clearBasicContent);
   const setCompactActions = useKeyboardPanelStore((s) => s.setCompactActions);
   const clearCompactActions = useKeyboardPanelStore((s) => s.clearCompactActions);
-  const clearBasicContent = useKeyboardPanelStore((s) => s.clearBasicContent);
 
   useEffect(() => {
-    clearBasicContent();
+    const submit = () => formRef.current?.requestSubmit();
+    const basic = <KeyboardBasicPanel field={field} onSubmit={submit} lastAnswerLatex={null} />;
+
+    setBasicContent(basic);
     setContent(
       <NaturalMathKeyboard
         field={field}
-        onSubmit={() => formRef.current?.requestSubmit()}
+        basicContent={basic}
+        onSubmit={submit}
+        onClearField={() => field?.setValue("")}
+        hideCoreGrid
       />,
     );
-  }, [field, formRef, setContent, clearBasicContent]);
+  }, [field, formRef, setContent, setBasicContent]);
 
   useEffect(() => {
     setCompactActions({
