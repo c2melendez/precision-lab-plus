@@ -285,3 +285,27 @@ La regresión de Historial/Reusar en Plus quedó cerrada y B5 vuelve a estar **E
 - No iniciar B7 hasta confirmar visualmente la última versión.
 
 Ver: `SESSION_CLOSURE_2026-09-27.md` y `START_HERE_2026-09-27.md`.
+
+
+## Cierre B6 — 2026-09-27
+
+Estado:
+- B1 Shell/Sidebar — **PASS DEFINITIVO**.
+- B2 Configuración/Apariencia/Layouts — **PASS DEFINITIVO**.
+- B3 Historial/Reusar — **PASS DEFINITIVO**.
+- B4 Resultado/Formatos/DD-DMS — **PASS DEFINITIVO**.
+- B5 Teclado global shell/open-close/responsive — **PASS DEFINITIVO**.
+- B6 Teclado interno/paridad/jerarquía — **PASS AUTOMÁTICO; pendiente confirmación visual humana final**.
+
+HEAD certificado B6: `a61f57f5a234723a199ca3afaa273ab826c6d7ec`.
+
+Gates:
+CI, Playwright E2E, S17 API fuzzing, S18 Differential Properties, S19 Mutation Baseline, S20 Performance Robustness, S21 Cross-browser Compatibility, S23 Accessibility y S25 Security: PASS.
+
+### Próximo paso obligatorio
+1. revisar B6 visualmente en Desktop, Tablet y Mobile;
+2. si el usuario aprueba, marcar B6 PASS DEFINITIVO;
+3. actualizar log/matriz;
+4. continuar con **B7 — Científica**.
+
+No iniciar S26.4 todavía.
