@@ -952,6 +952,24 @@ export function NaturalMathKeyboard({
                     ))}
                   </div>
                 </div>
+                <div className="dt:col-span-2">
+                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">Funciones</div>
+                  <div className="grid grid-cols-3 gap-1">
+                    {SYMBOL_FUNCTIONS.map((k, i) => (
+                      <button
+                        key={`func-${i}`}
+                        type="button"
+                        onClick={() => pressSymbol(k)}
+                        aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined}
+                        title={k.description}
+                        className="rounded-md border border-paper-line bg-paper-soft py-2 text-[11px] text-ink hover:border-marker/50 hover:bg-marker-soft/20"
+                      >
+                        <KeyGlyph glyph={k.glyph} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="flex flex-col gap-1">
