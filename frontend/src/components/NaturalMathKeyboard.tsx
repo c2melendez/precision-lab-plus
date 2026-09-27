@@ -1110,7 +1110,8 @@ export function NaturalMathKeyboard({
         </div>
       )}
 
-      {!hideCoreGrid && (\n      <div className="relative mb-1.5 grid grid-cols-3 gap-1.5">
+      {!hideCoreGrid && (
+      <div className="relative mb-1.5 grid grid-cols-3 gap-1.5">
         <button
           type="button"
           onClick={onSolveEquation}
@@ -1163,7 +1164,10 @@ export function NaturalMathKeyboard({
         >
           a+a → 2a
         </button>
-      </div>\n      )}\n\n      {/* Módulo 4: además de showCalculusStrip (ya existía, GraphMode
+      </div>
+      )}
+
+      {/* Módulo 4: además de showCalculusStrip (ya existía, GraphMode
           nunca lo pasa), ahora también se apaga con hideCoreGrid=true
           (BasicMode) — su contenido (menos LCM/GCD, ya en Álgebra >
           Ecuaciones) vive en la pestaña "Cálculo" nueva. */}
