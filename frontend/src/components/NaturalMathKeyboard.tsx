@@ -1420,7 +1420,7 @@ export function NaturalMathKeyboard({
               hideCoreGrid
                 ? openCategory === cat
                   ? "flex shrink-0 items-center gap-1.5 rounded-lg bg-marker px-3 py-2 text-xs font-semibold text-chrome"
-                  : "flex shrink-0 items-center gap-1.5 rounded-lg border border-transparent px-3 py-2 text-xs font-medium text-muted hover:border-paper-line hover:bg-paper hover:text-ink"
+                  : "flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted hover:bg-paper hover:text-ink"
                 : openCategory === cat
                   ? "text-xs font-semibold text-marker"
                   : "text-xs text-bone/70"
