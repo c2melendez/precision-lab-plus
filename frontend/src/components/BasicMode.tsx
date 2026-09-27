@@ -711,6 +711,7 @@ export function BasicMode() {
         <CalculatorScreen
           latex={latex}
           onLatexChange={setLatex}
+          onEnter={() => formRef.current?.requestSubmit()}
           ariaLabel="Expresión"
           placeholder="2x + √9"
           fieldRef={setMathField}
