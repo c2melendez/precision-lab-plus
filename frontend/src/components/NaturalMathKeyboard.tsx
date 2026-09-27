@@ -1247,7 +1247,7 @@ export function NaturalMathKeyboard({
               ) : (
                 <div key={group.section} className="mb-2 last:mb-0">
                   <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">{group.section}</div>
-                  <div className="grid grid-cols-3 gap-1.5 dt:grid-cols-6">
+                  <div className="grid grid-cols-3 gap-1.5">
                     {group.keys.map((k, i) => (
                       <button
                         key={`${group.section}-${i}`}
