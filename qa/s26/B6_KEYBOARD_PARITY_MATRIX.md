@@ -166,3 +166,39 @@ Revisión humana de la última composición:
 - densidad razonable en Desktop/Tablet/Mobile.
 
 Después de esa revisión se puede cambiar el estado a **PASS DEFINITIVO** y abrir B7.
+
+
+## Cierre de matriz — 2026-09-27
+
+HEAD certificado: `a61f57f5a234723a199ca3afaa273ab826c6d7ec`.
+
+### Arquitectura final certificada
+| Contrato | Estado |
+|---|---|
+| Núcleo permanente de 23 teclas | PASS |
+| Básico no es pestaña | PASS |
+| 7 familias arriba | PASS |
+| Subcategorías separadas de familias | PASS |
+| Una sola subcategoría visible a la vez | PASS |
+| Teclas contextuales solo de subcategoría activa | PASS |
+| Núcleo básico debajo | PASS |
+| `=` inserta y no ejecuta | PASS |
+| Enter virtual/físico mismo flujo | PASS |
+| SmartDock visual retirado | PASS |
+| Acciones rápidas globales retiradas | PASS |
+| Sistema 2–5 dentro de Álgebra → Ecuaciones | PASS |
+| Acceso global desde módulos | PASS E2E |
+| Desktop/Tablet/Mobile automáticos | PASS |
+
+Gates:
+CI, Playwright E2E, S17 API fuzzing, S18 Differential Properties, S19 Mutation Baseline, S20 Performance Robustness, S21 Cross-browser Compatibility, S23 Accessibility y S25 Security: PASS.
+
+### Estado B6
+**PASS AUTOMÁTICO / pendiente confirmación visual humana final.**
+
+Cualquier sección histórica de esta matriz que mencione:
+- “Desktop izquierda/centro/derecha”;
+- “Básico 31 teclas”;
+- SmartDock como superficie vigente;
+
+queda supersedida por este cierre y por `KEYBOARD_CONTRACT.md`.
