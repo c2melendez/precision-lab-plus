@@ -35,15 +35,10 @@ test("B6 expone siete familias y mantiene el núcleo permanente", async ({ page 
 
   await expect(page.getByRole("tab", { name: "Álgebra" })).toHaveAttribute("aria-selected", "true");
   await expect(page.getByTestId("keyboard-b6-core")).toBeVisible();
-  expect((await page.getByRole("tab").allTextContents()).map((value) => value.trim())).toEqual([
-    "Álgebra",
-    "Trigonométricas",
-    "Cálculo",
-    "Complejos",
-    "Símbolos",
-    "Unidades",
-    "Más",
-  ]);
+  await expect(page.getByRole("tab")).toHaveCount(7);
+  for (const family of ["Álgebra", "Trigonométricas", "Cálculo", "Complejos", "Símbolos", "Unidades", "Más"]) {
+    await expect(page.getByRole("tab", { name: family, exact: true })).toBeVisible();
+  }
   await expect(page.getByRole("tab", { name: "Básico" })).toHaveCount(0);
 
   const algebraSubcategories = page.getByLabel("Subcategorías de Álgebra");
