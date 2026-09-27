@@ -22,7 +22,7 @@ test("suite original módulo 5: inventario complejo compartido está activo", as
   const subcategories = page.getByLabel("Subcategorías de Complejos");
 
   await subcategories.getByRole("button", { name: "Funciones", exact: true }).click();
-  for (const name of ["parte real", "parte imaginaria", "argumento", "conjugado", "módulo"]) {
+  for (const name of ["parte real", "parte imaginaria", "argumento", "conjugado", "módulo", "convertir a forma polar"]) {
     const key = page.getByRole("button", { name, exact: true }).first();
     await expect(key).toBeVisible();
     expect(await key.isDisabled()).toBe(false);
@@ -30,7 +30,6 @@ test("suite original módulo 5: inventario complejo compartido está activo", as
 
   await subcategories.getByRole("button", { name: "Avanzado", exact: true }).click();
   for (const name of [
-    "convertir a forma polar",
     "logaritmo complejo (rama principal)",
     "potencia compleja",
     "raíz n-ésima compleja (rama principal)",
