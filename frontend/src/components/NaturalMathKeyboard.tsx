@@ -978,7 +978,7 @@ export function NaturalMathKeyboard({
 
   return (
     <div
-      className={hideCoreGrid ? "relative rounded-xl bg-paper-soft p-3 text-ink" : "relative rounded-xl bg-chrome p-3"}
+      className={hideCoreGrid ? "relative h-full min-h-0 rounded-xl bg-paper-soft p-3 text-ink" : "relative rounded-xl bg-chrome p-3"}
       onClickCapture={handleKeyboardClickCapture}
     >
       {notice && (
@@ -990,12 +990,12 @@ export function NaturalMathKeyboard({
       <div
         data-testid={hideCoreGrid ? "keyboard-b6-layout" : undefined}
         className={hideCoreGrid
-          ? "flex min-h-0 flex-col gap-2"
+          ? "grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-2"
           : "contents"}
       >
       {hideCoreGrid && basicContent && (
         <div
-          className="sticky bottom-0 z-20 order-3 min-w-0 shrink-0 rounded-xl border border-paper-line bg-paper p-2 shadow-[0_-8px_18px_-14px_rgba(0,0,0,0.45)]"
+          className="order-3 min-w-0 shrink-0 rounded-xl border border-paper-line bg-paper p-2"
           data-testid="keyboard-b6-core"
         >
           {basicContent}
@@ -1006,14 +1006,14 @@ export function NaturalMathKeyboard({
         <div
           className={
             hideCoreGrid
-              ? "order-2 grid min-w-0 max-h-[30vh] grid-cols-1 gap-2 overflow-y-auto rounded-xl border border-paper-line bg-paper p-2 shadow-sm dt:max-h-[18rem] dt:grid-cols-[10.5rem_minmax(0,1fr)]"
+              ? "order-2 grid min-h-0 min-w-0 grid-cols-1 gap-2 overflow-hidden rounded-xl border border-paper-line bg-paper p-2 shadow-sm dt:grid-cols-[10.5rem_minmax(0,1fr)]"
               : "mb-1.5 rounded-lg bg-chrome-soft p-3 shadow-lg"
           }
         >
           {hideCoreGrid && (
             <div
               aria-label={`Subcategorías de ${openCategory}`}
-              className="flex gap-1 overflow-x-auto rounded-lg border border-paper-line bg-paper-soft p-1.5 dt:flex-col dt:overflow-visible"
+              className="flex min-h-0 gap-1 overflow-x-auto rounded-lg border border-paper-line bg-paper-soft p-1.5 dt:flex-col dt:overflow-x-hidden dt:overflow-y-auto"
             >
               {subcategoriesFor(openCategory as (typeof CATEGORIES_BASIC_MODE)[number]).map((section) => (
                 <button
@@ -1033,7 +1033,7 @@ export function NaturalMathKeyboard({
               ))}
             </div>
           )}
-          <div className="min-w-0 rounded-lg border border-paper-line bg-paper p-2">
+          <div className="min-h-0 min-w-0 overflow-y-auto rounded-lg border border-paper-line bg-paper p-2">
           {openCategory === "Símbolos" ? (
             hideCoreGrid ? (
               <div className="min-h-[3.25rem]">
