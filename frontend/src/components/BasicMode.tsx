@@ -538,6 +538,15 @@ export function BasicMode() {
     formRef.current?.requestSubmit();
   }
 
+  function handleSolveInequality(): void {
+    if (!/[<>]|\\\\(?:le|ge)/.test(latex)) {
+      mathField?.focus();
+      mathField?.insert("\\ge0");
+      return;
+    }
+    formRef.current?.requestSubmit();
+  }
+
   // Pendiente #2 (revisión post-Módulo D, pedido por el usuario): recibe
   // la cantidad de ecuaciones elegida en el selector 2-5 de
   // NaturalMathKeyboard.tsx. Solo se usa para la plantilla nueva — si el
@@ -554,8 +563,64 @@ export function BasicMode() {
     formRef.current?.requestSubmit();
   }
 
-  function handleSimplify(): void {
+  function handleSolveInequalitySystem(): void {
+    if (!splitSystemLatex(latex)) {
+      mathField?.focus();
+      mathField?.insert("\\begin{cases}#0\\ge0\\\\#1\\le0\\end{cases}");
+      return;
+    }
     formRef.current?.requestSubmit();
+  }
+
+  async function runAlgebraAction(endpoint: "/simplify" | "/factor", label: string): Promise<void> {
+    const trimmed = latexToBackendSyntax(latex);
+    if (!trimmed) {
+      setValidationError("La expresión no puede estar vacía.");
+      return;
+    }
+    setValidationError(null);
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const result = await submitScientific(endpoint, { expression: trimmed }, label, latex);
+      setLastResult(result);
+      if (!result.success) setErrorMessage(result.error_message ?? "Ocurrió un error.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleSimplify(): void {
+    void runAlgebraAction("/simplify", `Simplificar(${latex})`);
+  }
+
+  function handleFactor(): void {
+    void runAlgebraAction("/factor", `Factorizar(${latex})`);
+  }
+
+  async function handleEvaluatePoint(): Promise<void> {
+    const point = window.prompt("Valor del punto para x =", "a");
+    if (point === null || point.trim() === "") return;
+    const trimmed = latexToBackendSyntax(latex);
+    if (!trimmed) {
+      setValidationError("La expresión no puede estar vacía.");
+      return;
+    }
+    setValidationError(null);
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const result = await submitScientific(
+        "/evaluate",
+        { expression: trimmed, angle_unit: angleUnit, substitutions: { x: point.trim() } },
+        `Evaluar ${trimmed} en x=${point.trim()}`,
+        latex,
+      );
+      setLastResult(result);
+      if (!result.success) setErrorMessage(result.error_message ?? "Ocurrió un error.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   // Fase F (spec_edo_complejos_tooltips.md §3.4, Módulo F3): "Graficar"
@@ -663,8 +728,12 @@ export function BasicMode() {
         onSubmit={() => formRef.current?.requestSubmit()}
         onClearField={() => setLatex("")}
         onSolveEquation={handleSolveEquation}
+        onSolveInequality={handleSolveInequality}
         onSolveSystem={handleSolveSystem}
+        onSolveInequalitySystem={handleSolveInequalitySystem}
         onSimplify={handleSimplify}
+        onFactor={handleFactor}
+        onEvaluatePoint={handleEvaluatePoint}
         onGraphComplex={handleGraphComplex}
         angleUnit={angleUnit}
         showCalculusStrip
