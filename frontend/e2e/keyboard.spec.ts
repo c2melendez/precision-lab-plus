@@ -45,6 +45,14 @@ test("B6 expone siete familias y mantiene el núcleo permanente", async ({ page 
     "Más",
   ]);
   await expect(page.getByRole("tab", { name: "Básico" })).toHaveCount(0);
+
+  const algebraSubcategories = page.getByLabel("Subcategorías de Álgebra");
+  await expect(algebraSubcategories).toBeVisible();
+  await expect(algebraSubcategories.getByRole("button", { name: "Constantes", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "logaritmo natural", exact: true })).toHaveCount(0);
+
+  await algebraSubcategories.getByRole("button", { name: "Logaritmos", exact: true }).click();
+  await expect(page.getByRole("button", { name: "logaritmo natural", exact: true })).toBeVisible();
 });
 
 test("Plus mantiene ∂/∂x y Π activas en Cálculo", async ({ page }) => {
@@ -52,11 +60,16 @@ test("Plus mantiene ∂/∂x y Π activas en Cálculo", async ({ page }) => {
   await openKeyboard(page);
   await page.getByRole("tab", { name: "Cálculo" }).click();
 
+  const subcategories = page.getByLabel("Subcategorías de Cálculo");
+  await expect(subcategories).toBeVisible();
+
+  await subcategories.getByRole("button", { name: "Derivadas", exact: true }).click();
   const partial = page.getByRole("button", { name: "derivada parcial" });
   await expect(partial).toBeVisible();
   await partial.click();
   await expect(page.getByText(/derivada parcial: todavía no disponible/i)).toHaveCount(0);
 
+  await subcategories.getByRole("button", { name: "Sumas y productos", exact: true }).click();
   const product = page.getByRole("button", { name: "productoria" });
   await expect(product).toBeVisible();
   await product.click();
