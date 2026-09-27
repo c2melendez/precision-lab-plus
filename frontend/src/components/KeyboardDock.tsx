@@ -4,7 +4,6 @@ import { useLayoutModeStore } from "../store/useLayoutModeStore";
 import { useMinWidthMediaQuery, FLOATING_MIN_WIDTH_PX } from "../hooks/useMinWidthMediaQuery";
 import { KeyboardIcon } from "./KeyboardIcon";
 import { KeyboardPanel } from "./KeyboardPanel";
-import { RecentKeysBar } from "./RecentKeysBar";
 
 /**
  * KeyboardDock.tsx — Módulo 0 + Módulo 1 + corrección post-Módulo 7 (idéntico a Lite, paridad obligatoria).
@@ -139,11 +138,6 @@ export function KeyboardDock({ sidebarExpanded }: { sidebarExpanded: boolean }) 
       )}
 
       <div ref={dockRef} data-testid="keyboard-dock" className={`fixed bottom-0 right-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2 dt:bottom-4 dt:right-8 dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft dt:px-4 dt:py-2 dt:shadow-xl ${sidebarExpanded ? "left-60 dt:left-[17rem]" : "left-[72px] dt:left-[104px]"}`}>
-        {/* Fase X, Módulo X0 (Smart Docks) — "justo arriba de donde
-            aparecerá el teclado (colapsado o no)", confirmado por Carlos.
-            Primera fila del mismo contenedor fijo: queda por encima del
-            grid básico Y de la fila compacta en cualquier estado. */}
-        <div className="dt:flex dt:items-center dt:gap-3"><span className="hidden shrink-0 text-xs font-semibold text-ink dt:inline">⌨ Teclado matemático</span><div className="min-w-0 flex-1"><RecentKeysBar /></div><span className="hidden shrink-0 text-[10px] text-muted dt:inline">Pasa el cursor o enfoca una tecla para ver su función</span></div>
 
         {/* Fila compacta — móvil siempre, y cualquier breakpoint en Focus. */}
         <div className={forceCompactDock ? "grid grid-cols-3 gap-1.5" : "grid grid-cols-3 gap-1.5 md:hidden"}>
