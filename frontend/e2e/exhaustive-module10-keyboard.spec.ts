@@ -14,7 +14,6 @@ async function clearBasic(dialog: import("@playwright/test").Locator) {
 
 test("módulo 10: la tecla % calcula porcentaje real (50% = 0.5)", async ({ page }) => {
   const dialog = await openKeyboard(page);
-  await dialog.getByRole("tab", { name: "Básico", exact: true }).click();
   await clearBasic(dialog);
   await dialog.getByRole("button", { name: "5", exact: true }).click();
   await dialog.getByRole("button", { name: "0", exact: true }).click();
@@ -29,8 +28,8 @@ test("módulo 10: la tecla % calcula porcentaje real (50% = 0.5)", async ({ page
 
 test("módulo 10: ±(5) produce dos ramas matemáticas distintas", async ({ page }) => {
   const dialog = await openKeyboard(page);
-  await dialog.getByRole("tab", { name: "Básico", exact: true }).click();
   await clearBasic(dialog);
+  await dialog.getByRole("tab", { name: "Más", exact: true }).click();
   await dialog.getByRole("button", { name: "más/menos", exact: true }).click();
   await dialog.getByRole("button", { name: "5", exact: true }).click();
 
