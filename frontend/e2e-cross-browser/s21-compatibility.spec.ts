@@ -59,9 +59,12 @@ test("S21: teclado abre, navega y cierra fuera de Chromium", async ({ page }) =>
   const dialog = page.getByRole("dialog", { name: "Teclado matemático" });
   await expect(dialog).toBeVisible();
 
-  const basic = dialog.getByRole("tab", { name: "Básico", exact: true });
+  await expect(dialog.getByTestId("keyboard-b6-core")).toBeVisible();
   const algebra = dialog.getByRole("tab", { name: "Álgebra", exact: true });
-  await expect(basic).toHaveAttribute("aria-selected", "true");
+  await expect(algebra).toHaveAttribute("aria-selected", "true");
+  const trig = dialog.getByRole("tab", { name: "Trigonométricas", exact: true });
+  await trig.click();
+  await expect(trig).toHaveAttribute("aria-selected", "true");
   await algebra.click();
   await expect(algebra).toHaveAttribute("aria-selected", "true");
 
