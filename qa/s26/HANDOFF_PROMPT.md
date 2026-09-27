@@ -1,42 +1,50 @@
-# S26 — Prompt de continuidad actualizado
+# Prompt de continuidad S26 — 2026-09-27
 
-Proyecto: **Precision Lab Plus**  
-Branch: `qa/s26-execution`  
-HEAD de código certificado B4: `40fcf3b3aa2d83fa58943fec603198dd0bb291bb`
+Continúa Precision Lab S26 usando la rama `qa/s26-execution`.
 
-## INSTRUCCIÓN DE ARRANQUE
-**No empieces implementando el Bloque 5.**
-
-Primero ejecuta el Checkpoint de Paridad S26.3R — Bloques 1–4.
-
-Lee:
-1. `PARITY_CHECKPOINT_B1_B4.md`
-2. `RESULT_FORMATS.md`
-3. `ROADMAP.md`
-4. final de `EXECUTION_LOG.md`
-5. `DESIGN_TARGET.md`
-6. `KEYBOARD_CONTRACT.md`
-7. `MATHEMATICAL_INTEGRITY_POLICY.md`
+Antes de tocar código:
+- lee `qa/s26/START_HERE_2026-09-27.md`;
+- lee `qa/s26/SESSION_CLOSURE_2026-09-27.md`;
+- usa `qa/s26/KEYBOARD_CONTRACT.md` como autoridad funcional B6;
+- usa el contrato visual S26.2R y la captura aprobada como autoridad de composición, NO como inventario literal;
+- revisa `qa/s26/B6_KEYBOARD_PARITY_MATRIX.md`, `ROADMAP.md` y `EXECUTION_LOG.md`.
 
 Estado:
-- B1 PASS DEFINITIVO
-- B2 PASS DEFINITIVO
-- B3 PASS DEFINITIVO
-- B4 PASS DEFINITIVO
-- B5 pendiente y bloqueado hasta cerrar paridad B1–B4.
+- B1–B5 PASS DEFINITIVO.
+- B6 tiene gates automáticos verdes en el HEAD certificado y requiere únicamente confirmación visual humana final de las últimas correcciones.
+- Precision Lab Plus: HEAD certificado `a61f57f5a234723a199ca3afaa273ab826c6d7ec`.
 
-Clasifica diferencias como PARIDAD / DIFERENCIA INTENCIONAL / GAP.
+Primera tarea:
+1. verificar visualmente Desktop/Tablet/Mobile;
+2. confirmar familias arriba, subcategorías separadas, teclas contextuales por subcategoría y núcleo básico debajo;
+3. confirmar SmartDock retirado;
+4. confirmar que f(x)=0/Sistema/Simplificar solo aparecen en Álgebra → Ecuaciones;
+5. confirmar selector Sistema 2–5;
+6. confirmar que el teclado no tapa Entrada/Resultado/Gráfica.
 
-Regla angular:
-- grados → solo DD y DMS;
-- DD usa °;
-- DMS usa °, ′, ″;
-- RAD conserva formatos normales.
+Si todo es correcto:
+- declarar B6 PASS DEFINITIVO;
+- actualizar matriz/log/roadmap;
+- continuar B7 según ROADMAP.
 
-Diferencias intencionales:
-- Plus: SymPy/backend, Pasos, Resumen, warnings, Copiar, resultados estructurados.
-- Lite: cálculo local y fallback numérico.
+No volver a:
+- Básico como pestaña;
+- inventario histórico de 31 teclas;
+- layout familias a la izquierda;
+- SmartDock visible;
+- tira global de acciones de Ecuaciones;
+- mostrar todas las subcategorías de una familia a la vez.
 
-Después de corregir GAPs, recertifica si tocaste código y actualiza log/roadmap/checkpoint.
+Conservar decisiones:
+- Enter físico = Enter virtual;
+- = solo inserta;
+- ^ físico/virtual;
+- EXP eliminado;
+- MCM/MCD aridad variable;
+- sgn/mod;
+- cuatro límites;
+- hiperbólicas inversas soportadas;
+- τ, Φ/φ;
+- paridad Lite/Plus y tooltips/accesibilidad.
 
-Luego iniciar B5: teclado global shell/open-close/responsive.
+Toda corrección debe mantener los gates verdes y respetar la política de integridad matemática.
