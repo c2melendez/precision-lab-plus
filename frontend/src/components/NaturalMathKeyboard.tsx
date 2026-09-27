@@ -629,12 +629,14 @@ CATEGORY_MENUS.Álgebra = [
     ],
   },
   {
-    section: "Generales",
+    section: "Aritmética",
     keys: [
       key("|a|", "\\left|#0\\right|", "valor absoluto de a", false, undefined, "distancia de un número a cero (siempre positiva)"),
       key("a!", "#0!", "factorial de a", false, undefined, "producto de todos los enteros positivos hasta a"),
       key("sgn(a)", "\\mathrm{sign}\\left(#0\\right)", "signo de a", false, undefined, "devuelve -1, 0 o 1 según el signo del valor"),
       key("mod(a,b)", "\\mathrm{mod}\\left(#0,#1\\right)", "módulo o residuo", false, undefined, "residuo de dividir a entre b"),
+      key("LCM", "\\mathrm{lcm}\\left(#0\\right)", "mínimo común múltiplo", false, undefined, "mínimo común múltiplo de dos o más valores separados por comas"),
+      key("GCD", "\\gcd\\left(#0\\right)", "máximo común divisor", false, undefined, "máximo común divisor de dos o más valores separados por comas"),
     ],
   },
   {
@@ -699,7 +701,7 @@ const ODE_ROW: KeyDef[] = [
 // Módulo 4 (spec §5.3 / log §3.3): categoría Cálculo, 4 secciones — todo
 // contenido YA existente (CALCULUS_ROW_1/2), solo reagrupado como
 // pestaña propia. Mismas teclas, sin reescribir plantillas. LCM/GCD NO
-// se repiten aquí (ya viven en Álgebra > Ecuaciones, Módulo 3).
+// se repiten aquí (ya viven en Álgebra > Aritmética, Módulo 3).
 CATEGORY_MENUS.Cálculo = [
   { section: "Integrales", keys: CALCULUS_ROW_1.slice(0, 2) },
   { section: "Sumas y productos", keys: CALCULUS_ROW_1.slice(2, 4) },
@@ -1166,24 +1168,6 @@ export function NaturalMathKeyboard({
                     >
                       a+a → 2a
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => press(key("LCM", "\\mathrm{lcm}\\left(#0\\right)", "mínimo común múltiplo", false, undefined, "MCM de dos o más valores separados por comas"))}
-                      aria-label="Mínimo común múltiplo"
-                      title="MCM de dos o más valores separados por comas"
-                      className="rounded-md border border-marker bg-marker-soft/10 py-2 text-xs font-medium text-marker hover:bg-marker-soft/20"
-                    >
-                      LCM
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => press(key("GCD", "\\gcd\\left(#0\\right)", "máximo común divisor", false, undefined, "MCD de dos o más valores separados por comas"))}
-                      aria-label="Máximo común divisor"
-                      title="MCD de dos o más valores separados por comas"
-                      className="rounded-md border border-marker bg-marker-soft/10 py-2 text-xs font-medium text-marker hover:bg-marker-soft/20"
-                    >
-                      GCD
-                    </button>
                   </div>
                 </div>
               ) : (
@@ -1283,7 +1267,7 @@ export function NaturalMathKeyboard({
       {/* Módulo 4: además de showCalculusStrip (ya existía, GraphMode
           nunca lo pasa), ahora también se apaga con hideCoreGrid=true
           (BasicMode) — su contenido (menos LCM/GCD, ya en Álgebra >
-          Ecuaciones) vive en la pestaña "Cálculo" nueva. */}
+          Aritmética) vive en la pestaña "Cálculo" nueva. */}
       {showCalculusStrip && !hideCoreGrid && (
         <div className="relative mb-1.5 rounded-lg bg-chrome-soft/60 p-1.5">
           <div className="mb-1 grid grid-cols-6 gap-1">
