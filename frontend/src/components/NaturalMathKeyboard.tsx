@@ -343,7 +343,7 @@ const CALCULUS_ROW_2: KeyDef[] = [
   key(
     { frac: ["dⁿ", "dxⁿ"] },
     "\\frac{d^3}{dx^3}\\left(#0\\right)",
-    "derivada de orden n (edita el 3 por el orden que quieras, hasta 5)",
+    "derivada de orden n (edita el 3 por el orden que quieras)",
     false,
     undefined,
     "deriva la expresión repetidamente -- edita el número de orden en la plantilla",
@@ -689,7 +689,7 @@ const ODE_ROW: KeyDef[] = [
     "fija el valor de y en un punto específico, separada de la ecuación por una coma",
   ),
   key(
-    "dy/dx",
+    { frac: ["dy", "dx"] },
     "\\frac{dy}{dx}",
     "notación alternativa de derivada para ecuaciones diferenciales",
     false,
@@ -1015,7 +1015,7 @@ export function NaturalMathKeyboard({
                   onClick={() => setActiveSubcategory(section)}
                   className={
                     activeSubcategory === section
-                      ? "flex shrink-0 items-center gap-2 rounded-lg border border-marker bg-marker px-2.5 py-2 text-left text-[11px] font-semibold text-chrome"
+                      ? "flex shrink-0 items-center gap-2 rounded-lg border border-marker/30 bg-marker-soft/20 px-2.5 py-2 text-left text-[11px] font-semibold text-marker"
                       : "flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[11px] font-medium text-muted hover:bg-paper hover:text-ink"
                   }
                 >
@@ -1028,7 +1028,7 @@ export function NaturalMathKeyboard({
           {hideCoreGrid && basicContent && (
             <div
               data-testid="keyboard-b6-core"
-              className="min-h-0 min-w-0 overflow-y-auto rounded-lg border border-paper-line bg-paper p-2"
+              className="min-h-0 min-w-0 overflow-y-auto rounded-xl border border-paper-line bg-paper p-2"
             >
               {basicContent}
             </div>
@@ -1255,18 +1255,11 @@ export function NaturalMathKeyboard({
                         onClick={() => press(k)}
                         aria-label={k.ariaLabel}
                         aria-disabled={k.unavailable ? "true" : undefined}
-                    title={k.description}
+                    title={k.description ?? k.ariaLabel}
                         className={
-                          // Módulo de cierre (honestidad visual): mismo patrón
-                          // gris/borde punteado que ya usa KeyboardBasicPanel.tsx
-                          // (este mismo repo) para "°" — antes esta tecla se
-                          // veía idéntica a una activa aunque k.unavailable
-                          // fuera true.
                           k.unavailable
-                            ? "rounded-md border border-dashed border-paper-line bg-paper py-2 text-sm text-muted/60"
-                            : hideCoreGrid
-                              ? "rounded-md border border-paper-line bg-paper-soft py-2 text-sm text-ink shadow-sm hover:border-marker/50 hover:bg-marker-soft/20"
-                              : "rounded-md bg-marker-soft/10 py-2 text-sm text-marker hover:bg-marker-soft/20"
+                            ? "rounded-md border border-dashed border-bone/30 bg-chrome-soft/40 py-2 text-sm text-bone/40"
+                            : "rounded-md bg-marker-soft/10 py-2 text-sm text-marker hover:bg-marker-soft/20"
                         }
                       >
                         <KeyGlyph glyph={k.glyph} />
