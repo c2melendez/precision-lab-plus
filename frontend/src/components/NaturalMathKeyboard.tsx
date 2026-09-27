@@ -800,11 +800,15 @@ interface NaturalMathKeyboardProps {
   onSubmit?: () => void;
   onClearField?: () => void;
   onSolveEquation?: () => void;
+  onSolveInequality?: () => void;
   /** Pendiente #2 (revisión post-Módulo D): recibe la cantidad de
    * ecuaciones elegida en el selector 2-5 que se abre al tocar
    * "Sistema" (mismo criterio que Lite, paridad). */
   onSolveSystem?: (rows?: number) => void;
   onSimplify?: () => void;
+  onFactor?: () => void;
+  onEvaluatePoint?: () => void;
+  onSolveInequalitySystem?: () => void;
   // Fase F (spec_edo_complejos_tooltips.md §3.4, Módulo F3): "Graficar"
   // es una acción sobre el resultado ya evaluado, no una plantilla --
   // mismo patrón ya establecido acá para "=" (onSubmit) y "f(x)=0"
@@ -838,8 +842,12 @@ export function NaturalMathKeyboard({
   onSubmit,
   onClearField,
   onSolveEquation,
+  onSolveInequality,
   onSolveSystem,
+  onSolveInequalitySystem,
   onSimplify,
+  onFactor,
+  onEvaluatePoint,
   onGraphComplex,
   onGoToDerivative: _onGoToDerivative,
   showCalculusStrip = false,
@@ -1080,7 +1088,7 @@ export function NaturalMathKeyboard({
               group.section === "Ecuaciones" ? (
                 <div key={group.section} className="mb-2 last:mb-0">
                   <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">{group.section}</div>
-                  <div className="grid grid-cols-3 gap-1.5 dt:grid-cols-6">
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => {
@@ -1088,22 +1096,22 @@ export function NaturalMathKeyboard({
                         if (!hideCoreGrid) setOpenCategory(null);
                       }}
                       aria-label="Resolver ecuación"
-                      title="Resolver ecuación"
-                      className="rounded-md bg-marker-soft/10 py-2 text-xs text-marker hover:bg-marker-soft/20"
+                      title="Ecuación: f(x)=0"
+                      className="rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-sm text-marker shadow-sm hover:border-marker/50"
                     >
                       f(x)=0
                     </button>
                     <button
                       type="button"
                       onClick={() => {
-                        onSolveEquation?.();
+                        onSolveInequality?.();
                         if (!hideCoreGrid) setOpenCategory(null);
                       }}
                       aria-label="Resolver inecuación"
-                      title="Resolver inecuación"
-                      className="rounded-md bg-marker-soft/10 py-2 text-xs text-marker hover:bg-marker-soft/20"
+                      title="Inecuación: f(x)≥0"
+                      className="rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-sm text-marker shadow-sm hover:border-marker/50"
                     >
-                      f(x)&gt;0
+                      f(x)≥0
                     </button>
                     <button
                       type="button"
@@ -1112,33 +1120,27 @@ export function NaturalMathKeyboard({
                       }}
                       aria-expanded={showSystemSizeMenu}
                       aria-label="Resolver sistema de ecuaciones"
-                      title="Resolver sistema de ecuaciones"
-                      className="rounded-md bg-alpha-soft py-2 text-xs text-alpha hover:bg-alpha-soft/80"
+                      title="Sistema de ecuaciones"
+                      className="flex items-center justify-center gap-2 rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-marker shadow-sm hover:border-marker/50"
                     >
-                      Sistema
+                      <span className="text-2xl font-light leading-none">{"{"}</span>
+                      <span className="text-left text-xs leading-tight">f(x)=0<br />g(x)=0</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => {
-                        // B6 conserva el panel de Álgebra abierto para que el
-                        // selector 2–5 permanezca visible dentro del panel derecho.
-                        setShowSystemSizeMenu(true);
+                        onSolveInequalitySystem?.();
+                        if (!hideCoreGrid) setOpenCategory(null);
                       }}
-                      aria-expanded={showSystemSizeMenu}
-                      aria-label="Sistema de inecuaciones de 2 variables — escribe inecuaciones dentro de las llaves"
-                      className="relative rounded-md bg-alpha-soft py-2 text-[10px] text-alpha hover:bg-alpha-soft/80"
+                      aria-label="Resolver sistema de inecuaciones"
+                      title="Sistema de inecuaciones: f(x)≥0, g(x)≤0"
+                      className="flex items-center justify-center gap-2 rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-marker shadow-sm hover:border-marker/50"
                     >
-                      Sist. inecuaciones
-                      {/* Módulo de cierre (honestidad de alcance): el motor
-                          (linear_inequality_system.py) solo resuelve EXACTAMENTE
-                          2 variables — este botón es funcional (no unavailable),
-                          pero no comunicaba esa limitación real antes de tocarlo. */}
-                      <span className="absolute -bottom-1 right-1 rounded-sm bg-alpha/20 px-1 text-[7px] font-medium leading-tight text-alpha">
-                        2 var.
-                      </span>
+                      <span className="text-2xl font-light leading-none">{"{"}</span>
+                      <span className="text-left text-xs leading-tight">f(x)≥0<br />g(x)≤0</span>
                     </button>
                     {showSystemSizeMenu && (
-                      <div className="col-span-3 flex flex-wrap items-center gap-1 rounded-md border border-paper-line bg-paper p-2 dt:col-span-6">
+                      <div className="col-span-2 flex flex-wrap items-center gap-1 rounded-md border border-paper-line bg-paper p-2">
                         <span className="mr-1 text-[10px] font-medium text-muted">Ecuaciones:</span>
                         {SYSTEM_ROW_OPTIONS.map((n) => (
                           <button
@@ -1149,6 +1151,7 @@ export function NaturalMathKeyboard({
                               setShowSystemSizeMenu(false);
                             }}
                             aria-label={`Sistema de ${n} ecuaciones`}
+                            title={`Insertar sistema de ${n} ecuaciones`}
                             className="h-7 w-7 rounded-md bg-alpha-soft text-xs font-semibold text-alpha hover:bg-alpha-soft/70"
                           >
                             {n}
@@ -1163,10 +1166,35 @@ export function NaturalMathKeyboard({
                         if (!hideCoreGrid) setOpenCategory(null);
                       }}
                       aria-label="Simplificar expresión"
-                      title="Simplificar expresión"
-                      className="rounded-md bg-graph py-2 text-xs font-medium text-white hover:bg-graph/90"
+                      title="Simplificar"
+                      className="rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-sm text-graph shadow-sm hover:border-graph/50"
                     >
                       a+a → 2a
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onFactor?.();
+                        if (!hideCoreGrid) setOpenCategory(null);
+                      }}
+                      aria-label="Factorizar expresión"
+                      title="Factorizar"
+                      className="rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-sm text-graph shadow-sm hover:border-graph/50"
+                    >
+                      x²+2x+1 → (x+1)²
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onEvaluatePoint?.();
+                        if (!hideCoreGrid) setOpenCategory(null);
+                      }}
+                      aria-label="Evaluar función en un punto"
+                      title="Evaluar f(x) en x=a"
+                      className="col-span-2 rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-sm text-marker shadow-sm hover:border-marker/50"
+                    >
+                      <span className="font-medium">f(a)</span>
+                      <span className="ml-2 text-[10px] text-muted">(x=a)</span>
                     </button>
                   </div>
                 </div>
