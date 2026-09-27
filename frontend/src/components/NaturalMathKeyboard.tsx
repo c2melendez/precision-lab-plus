@@ -1073,9 +1073,9 @@ export function NaturalMathKeyboard({
                     <button
                       type="button"
                       onClick={() => {
-                        setOpenCategory(null);
                         setShowSystemSizeMenu(true);
                       }}
+                      aria-expanded={showSystemSizeMenu}
                       aria-label="Resolver sistema de ecuaciones"
                       title="Resolver sistema de ecuaciones"
                       className="rounded-md bg-alpha-soft py-2 text-xs text-alpha hover:bg-alpha-soft/80"
@@ -1085,14 +1085,11 @@ export function NaturalMathKeyboard({
                     <button
                       type="button"
                       onClick={() => {
-                        // Corrección post-auditoría (Módulo C): BasicMode.tsx
-                        // ya detecta solo si un \begin{cases} es de ecuaciones
-                        // o de inecuaciones (ver submitSystem) — esta tecla usa
-                        // la MISMA plantilla/selector que "Sistema", solo con
-                        // un rótulo que deja claro que también acepta <, >, ≤, ≥.
-                        setOpenCategory(null);
+                        // B6 conserva el panel de Álgebra abierto para que el
+                        // selector 2–5 permanezca visible dentro del panel derecho.
                         setShowSystemSizeMenu(true);
                       }}
+                      aria-expanded={showSystemSizeMenu}
                       aria-label="Sistema de inecuaciones de 2 variables — escribe inecuaciones dentro de las llaves"
                       className="relative rounded-md bg-alpha-soft py-2 text-[10px] text-alpha hover:bg-alpha-soft/80"
                     >
@@ -1105,6 +1102,25 @@ export function NaturalMathKeyboard({
                         2 var.
                       </span>
                     </button>
+                    {showSystemSizeMenu && (
+                      <div className="col-span-3 flex flex-wrap items-center gap-1 rounded-md border border-paper-line bg-paper p-2 dt:col-span-6">
+                        <span className="mr-1 text-[10px] font-medium text-muted">Ecuaciones:</span>
+                        {SYSTEM_ROW_OPTIONS.map((n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() => {
+                              onSolveSystem?.(n);
+                              setShowSystemSizeMenu(false);
+                            }}
+                            aria-label={`Sistema de ${n} ecuaciones`}
+                            className="h-7 w-7 rounded-md bg-alpha-soft text-xs font-semibold text-alpha hover:bg-alpha-soft/70"
+                          >
+                            {n}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
