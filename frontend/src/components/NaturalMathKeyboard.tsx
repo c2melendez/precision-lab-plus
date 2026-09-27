@@ -883,8 +883,14 @@ export function NaturalMathKeyboard({
         </div>
       )}
 
+      <div
+        data-testid={hideCoreGrid ? "keyboard-b6-layout" : undefined}
+        className={hideCoreGrid
+          ? "grid min-h-0 grid-cols-1 gap-3 dt:grid-cols-[10rem_minmax(18rem,0.8fr)_minmax(0,1.2fr)]"
+          : "contents"}
+      >
       {hideCoreGrid && basicContent && (
-        <div className="mb-3 rounded-xl border border-paper-line bg-paper p-2" data-testid="keyboard-b6-core">
+        <div className="order-2 min-w-0 rounded-xl border border-paper-line bg-paper p-2" data-testid="keyboard-b6-core">
           {basicContent}
         </div>
       )}
@@ -893,7 +899,7 @@ export function NaturalMathKeyboard({
         <div
           className={
             hideCoreGrid
-              ? "mb-1.5 rounded-xl border border-paper-line bg-paper p-3 shadow-sm"
+              ? "order-3 min-w-0 rounded-xl border border-paper-line bg-paper p-3 shadow-sm"
               : "mb-1.5 rounded-lg bg-chrome-soft p-3 shadow-lg"
           }
         >
@@ -1222,11 +1228,12 @@ export function NaturalMathKeyboard({
       <div
         className={
           hideCoreGrid
-            ? "mb-2 flex flex-wrap gap-1 border-b border-paper-line pb-2"
+            ? "order-1 flex gap-1 overflow-x-auto rounded-xl border border-paper-line bg-paper-soft p-2 dt:flex-col dt:overflow-visible"
             : "mb-1.5 flex flex-wrap gap-x-3 gap-y-1 px-1"
         }
         role={hideCoreGrid ? "tablist" : undefined}
-        aria-label={hideCoreGrid ? "Categorías del teclado" : undefined}
+        aria-label={hideCoreGrid ? "Familias del teclado matemático" : undefined}
+        aria-orientation={hideCoreGrid ? "vertical" : undefined}
       >
         {CATEGORIES.map((cat) => (
           <button
@@ -1241,8 +1248,8 @@ export function NaturalMathKeyboard({
             className={
               hideCoreGrid
                 ? openCategory === cat
-                  ? "rounded-lg bg-marker px-3 py-1.5 text-[11px] font-semibold text-chrome"
-                  : "rounded-lg border border-transparent px-3 py-1.5 text-[11px] text-muted hover:border-paper-line hover:bg-paper"
+                  ? "shrink-0 rounded-lg bg-marker px-3 py-2 text-left text-[11px] font-semibold text-chrome"
+                  : "shrink-0 rounded-lg border border-transparent px-3 py-2 text-left text-[11px] text-muted hover:border-paper-line hover:bg-paper"
                 : openCategory === cat
                   ? "text-xs font-semibold text-marker"
                   : "text-xs text-bone/70"
@@ -1251,6 +1258,8 @@ export function NaturalMathKeyboard({
             {cat}
           </button>
         ))}
+      </div>
+
       </div>
 
       {/* Núcleo fijo + relacionales — ocultos cuando hideCoreGrid=true
