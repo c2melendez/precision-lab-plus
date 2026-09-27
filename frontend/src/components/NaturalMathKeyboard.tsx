@@ -1361,7 +1361,7 @@ export function NaturalMathKeyboard({
               } else {
                 setOpenCategory((current) => (current === cat ? null : cat));
               }
-            }
+            }}
             aria-expanded={openCategory === cat}
             role={hideCoreGrid ? "tab" : undefined}
             aria-selected={hideCoreGrid ? openCategory === cat : undefined}
