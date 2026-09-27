@@ -48,6 +48,12 @@ async function expectThreeColumnContract(
       expect(coreBox.x + coreBox.width).toBeLessThanOrEqual(contextBox.x + 2);
       expect(Math.abs(subBox.y - coreBox.y)).toBeLessThanOrEqual(2);
       expect(Math.abs(coreBox.y - contextBox.y)).toBeLessThanOrEqual(2);
+
+      const coreOverflow = await core.evaluate((element) => ({
+        clientHeight: element.clientHeight,
+        scrollHeight: element.scrollHeight,
+      }));
+      expect(coreOverflow.scrollHeight).toBeLessThanOrEqual(coreOverflow.clientHeight + 1);
     }
   }
 }
