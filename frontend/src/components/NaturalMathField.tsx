@@ -334,7 +334,7 @@ export function NaturalMathField({
       if (event.key !== "Enter" || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) return;
       event.preventDefault();
       event.stopPropagation();
-      enter();
+      enter?.();
     }
 
     el.addEventListener("keydown", handleKeyDown);
