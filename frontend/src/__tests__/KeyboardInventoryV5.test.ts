@@ -41,11 +41,19 @@ describe("inventario estructural del teclado V5 de Plus", () => {
     }
   });
 
-  it("mantiene ocho columnas lógicas por fila en Básico", () => {
-    expect(BASIC_V5_ROWS[0]).toHaveLength(8);
-    expect(BASIC_V5_ROWS[1]).toHaveLength(8);
-    expect(BASIC_V5_ROWS[2]).toHaveLength(8);
-    expect(BASIC_V5_ROWS[3]).toHaveLength(7);
+  it("B6 mantiene el núcleo compacto y expulsa teclas contextuales", () => {
+    expect(BASIC_V5_ROWS.map((row) => row.length)).toEqual([6, 6, 6, 5]);
+    const labels = BASIC_V5_ROWS.flat().map((key) => key.ariaLabel);
+    expect(labels).toContain("igual");
+    expect(labels).toContain("calcular");
+    expect(labels).toContain("borrar");
+    expect(labels).not.toContain("grados");
+    expect(labels).not.toContain("grados minutos segundos");
+    expect(labels).not.toContain("prima");
+    expect(labels).not.toContain("menor que");
+    expect(labels).not.toContain("mayor que");
+    expect(labels).not.toContain("menor o igual que");
+    expect(labels).not.toContain("mayor o igual que");
   });
 
   it("no deja teclas sin etiqueta accesible ni descripción utilizable", () => {
