@@ -788,6 +788,45 @@ const CATEGORIES_BASIC_MODE = ["Álgebra", "Trigonométricas", "Cálculo", "Comp
 
 const SYMBOL_SUBCATEGORIES = ["Variables", "Constantes y valores", "Funciones"] as const;
 
+const FAMILY_ICONS: Record<(typeof CATEGORIES_BASIC_MODE)[number], string> = {
+  "Álgebra": "x²",
+  "Trigonométricas": "sin",
+  "Cálculo": "∫",
+  "Complejos": "i",
+  "Símbolos": "Ω",
+  "Unidades": "°",
+  "Más": "⋯",
+};
+
+const SUBCATEGORY_ICONS: Record<string, string> = {
+  "Constantes": "π",
+  "Logaritmos": "ln",
+  "Exponenciales": "xⁿ",
+  "Radicales": "√",
+  "Aritmética": "a!",
+  "Ecuaciones": "x=",
+  "Directas": "sin",
+  "Inversas": "sin⁻¹",
+  "Hiperbólicas": "sinh",
+  "Hiperbólicas inversas": "sinh⁻¹",
+  "Integrales": "∫",
+  "Sumas y productos": "Σ",
+  "Derivadas": "d/dx",
+  "Límites": "lim",
+  "Ecuaciones diferenciales": "y′",
+  "Acceso directo": "i",
+  "Funciones": "ƒ",
+  "Avanzado": "zⁿ",
+  "Ángulos": "∠",
+  "Variables": "x",
+  "Constantes y valores": "π",
+  "Relaciones": "≤",
+  "Fracciones": "a/b",
+  "Constante útil": "π",
+  "Relaciones y ángulos": "°",
+  "Signos": "±",
+};
+
 function subcategoriesFor(category: (typeof CATEGORIES_BASIC_MODE)[number]): string[] {
   if (category === "Símbolos") return [...SYMBOL_SUBCATEGORIES];
   return (CATEGORY_MENUS[category] ?? []).map((group) => group.section);
@@ -955,7 +994,10 @@ export function NaturalMathKeyboard({
           : "contents"}
       >
       {hideCoreGrid && basicContent && (
-        <div className="order-3 min-w-0 rounded-xl border border-paper-line bg-paper p-2" data-testid="keyboard-b6-core">
+        <div
+          className="sticky bottom-0 z-20 order-3 min-w-0 shrink-0 rounded-xl border border-paper-line bg-paper p-2 shadow-[0_-8px_18px_-14px_rgba(0,0,0,0.45)]"
+          data-testid="keyboard-b6-core"
+        >
           {basicContent}
         </div>
       )}
@@ -964,7 +1006,7 @@ export function NaturalMathKeyboard({
         <div
           className={
             hideCoreGrid
-              ? "order-2 grid min-w-0 grid-cols-1 gap-2 rounded-xl border border-paper-line bg-paper p-2 shadow-sm dt:grid-cols-[10.5rem_minmax(0,1fr)]"
+              ? "order-2 grid min-w-0 max-h-[30vh] grid-cols-1 gap-2 overflow-y-auto rounded-xl border border-paper-line bg-paper p-2 shadow-sm dt:max-h-[18rem] dt:grid-cols-[10.5rem_minmax(0,1fr)]"
               : "mb-1.5 rounded-lg bg-chrome-soft p-3 shadow-lg"
           }
         >
@@ -981,11 +1023,12 @@ export function NaturalMathKeyboard({
                   onClick={() => setActiveSubcategory(section)}
                   className={
                     activeSubcategory === section
-                      ? "shrink-0 rounded-lg border border-marker bg-marker px-2.5 py-2 text-left text-[11px] font-semibold text-chrome"
-                      : "shrink-0 rounded-lg px-2.5 py-2 text-left text-[11px] font-medium text-muted hover:bg-paper hover:text-ink"
+                      ? "flex shrink-0 items-center gap-2 rounded-lg border border-marker bg-marker px-2.5 py-2 text-left text-[11px] font-semibold text-chrome"
+                      : "flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[11px] font-medium text-muted hover:bg-paper hover:text-ink"
                   }
                 >
-                  {section}
+                  <span aria-hidden="true" className="min-w-8 text-center text-[10px] font-semibold">{SUBCATEGORY_ICONS[section] ?? "·"}</span>
+                  <span>{section}</span>
                 </button>
               ))}
             </div>
@@ -1380,14 +1423,19 @@ export function NaturalMathKeyboard({
             className={
               hideCoreGrid
                 ? openCategory === cat
-                  ? "shrink-0 rounded-lg bg-marker px-3 py-2 text-[11px] font-semibold text-chrome"
-                  : "shrink-0 rounded-lg border border-transparent px-3 py-2 text-[11px] text-muted hover:border-paper-line hover:bg-paper"
+                  ? "flex shrink-0 items-center gap-1.5 rounded-lg bg-marker px-3 py-2 text-[11px] font-semibold text-chrome"
+                  : "flex shrink-0 items-center gap-1.5 rounded-lg border border-transparent px-3 py-2 text-[11px] text-muted hover:border-paper-line hover:bg-paper"
                 : openCategory === cat
                   ? "text-xs font-semibold text-marker"
                   : "text-xs text-bone/70"
             }
           >
-            {cat}
+            {hideCoreGrid && (
+              <span aria-hidden="true" className="min-w-5 text-center text-[10px] font-semibold">
+                {FAMILY_ICONS[cat as (typeof CATEGORIES_BASIC_MODE)[number]]}
+              </span>
+            )}
+            <span>{cat}</span>
           </button>
         ))}
       </div>
