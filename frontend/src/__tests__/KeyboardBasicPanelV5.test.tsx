@@ -21,23 +21,28 @@ describe("KeyboardBasicPanel V5", () => {
     vi.useRealTimers();
   });
 
-  it("mantiene el inventario básico acordado y usa Enter en doble columna", () => {
+  it("mantiene el núcleo B6 y usa Enter en doble columna", () => {
     render(<KeyboardBasicPanel field={makeField() as never} onSubmit={vi.fn()} lastAnswerLatex={null} />);
 
     for (const name of [
       "borrar",
       "borrar todo el campo",
       "insertar el último resultado",
+      "igual",
+      "calcular",
+    ]) {
+      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+    }
+
+    for (const moved of [
       "grados minutos segundos",
       "prima",
       "menor que",
       "mayor que",
       "menor o igual que",
       "mayor o igual que",
-      "igual",
-      "calcular",
     ]) {
-      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: moved })).not.toBeInTheDocument();
     }
 
     expect(screen.getByRole("button", { name: "calcular" })).toHaveClass("col-span-2");
