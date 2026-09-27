@@ -69,3 +69,23 @@ test("módulo 10: acciones no aritméticas de Álgebra exponen tooltip", async (
     expect(title, `Falta tooltip en ${name}`).toBeTruthy();
   }
 });
+
+
+test("módulo 10 B6: Enter físico evalúa igual que Enter virtual", async ({ page }) => {
+  await page.goto("./");
+  const field = page.locator('math-field[aria-label="Expresión"]').first();
+  await field.evaluate((node) => {
+    const mathField = node as HTMLElement & { setValue?: (value: string) => void; value?: string };
+    if (typeof mathField.setValue === "function") mathField.setValue("2+2");
+    else mathField.value = "2+2";
+    node.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+
+  const responsePromise = page.waitForResponse(
+    r => r.url().includes("/api/v1/evaluate") && r.request().method() === "POST",
+  );
+  await field.press("Enter");
+  const body = await (await responsePromise).json();
+  expect(body.success, JSON.stringify(body)).toBe(true);
+  expect(Number(body.result_approx)).toBeCloseTo(4, 12);
+});
