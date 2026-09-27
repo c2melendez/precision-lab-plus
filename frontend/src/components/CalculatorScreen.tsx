@@ -54,6 +54,8 @@ import { useMinWidthMediaQuery, FLOATING_MIN_WIDTH_PX } from "../hooks/useMinWid
 interface CalculatorScreenProps {
   latex: string;
   onLatexChange: (latex: string) => void;
+  /** B6: callback de evaluación para Enter/Return físico en MathLive. */
+  onEnter?: () => void;
   ariaLabel: string;
   placeholder?: string;
   fieldRef?: (el: MathfieldElement | null) => void;
@@ -84,6 +86,7 @@ interface CalculatorScreenProps {
 export function CalculatorScreen({
   latex,
   onLatexChange,
+  onEnter,
   ariaLabel,
   placeholder,
   fieldRef,
@@ -147,6 +150,7 @@ export function CalculatorScreen({
       <NaturalMathField
         latex={latex}
         onLatexChange={onLatexChange}
+        onEnter={onEnter}
         ariaLabel={ariaLabel}
         placeholder={placeholder}
         fieldRef={fieldRef}
