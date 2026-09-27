@@ -971,7 +971,7 @@ export function NaturalMathKeyboard({
                   onClick={() => setActiveSubcategory(section)}
                   className={
                     activeSubcategory === section
-                      ? "shrink-0 rounded-lg border border-marker/30 bg-marker-soft/20 px-2.5 py-2 text-left text-[11px] font-semibold text-marker"
+                      ? "shrink-0 rounded-lg border border-marker bg-marker px-2.5 py-2 text-left text-[11px] font-semibold text-chrome"
                       : "shrink-0 rounded-lg px-2.5 py-2 text-left text-[11px] font-medium text-muted hover:bg-paper hover:text-ink"
                   }
                 >
