@@ -28,7 +28,8 @@ test("suite original módulo 3: inventario de Cálculo refleja capacidades actua
     "derivada segunda",
     "límite",
     "límite al infinito",
-    "límite lateral (edita + o - en el exponente)",
+    "límite lateral por la izquierda",
+    "límite lateral por la derecha",
   ]) {
     await expect(page.getByRole("button", { name, exact: true }).first()).toBeVisible();
   }
