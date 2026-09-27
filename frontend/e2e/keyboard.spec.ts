@@ -25,15 +25,17 @@ test("abrir/cerrar teclado no genera excepciones", async ({ page }) => {
 });
 
 
-test("el teclado desplegado coincide con las seis pestañas V5 aprobadas", async ({ page }) => {
+test("B6 expone siete familias y mantiene el núcleo permanente", async ({ page }) => {
   await page.goto("./");
   await openKeyboard(page);
 
-  for (const tab of ["Básico", "Símbolos", "Álgebra", "Trigonométricas", "Cálculo", "Complejos"]) {
+  for (const tab of ["Álgebra", "Trigonométricas", "Cálculo", "Complejos", "Símbolos", "Unidades", "Más"]) {
     await expect(page.getByRole("tab", { name: tab })).toBeVisible();
   }
 
-  await expect(page.getByRole("tab", { name: "Básico" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: "Álgebra" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByTestId("keyboard-b6-core")).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Básico" })).toHaveCount(0);
 });
 
 test("Plus mantiene ∂/∂x y Π activas en Cálculo", async ({ page }) => {
