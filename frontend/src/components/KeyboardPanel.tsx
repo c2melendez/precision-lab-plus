@@ -67,7 +67,7 @@ export function KeyboardPanel({ isOpen, onClose, children, dockBottomOffset = 0,
         "lg:h-[45vh]",
         // Desktop dt (≥1440px): popover anclado, no full-width, no
         // full-height — flota sobre el dock en vez de cubrir la pantalla.
-        `dt:bottom-[var(--keyboard-panel-bottom)] dt:right-8 dt:h-auto dt:max-h-[45vh] dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft ${sidebarExpanded ? "dt:left-[17rem]" : "dt:left-[104px]"}`,
+        `dt:bottom-[var(--keyboard-panel-bottom)] dt:right-8 dt:h-[45vh] dt:max-h-[28rem] dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft ${sidebarExpanded ? "dt:left-[17rem]" : "dt:left-[104px]"}`,
       ].join(" ")}
     >
       {/* Drag handle — solo afordance visual en este módulo, oculto en dt
