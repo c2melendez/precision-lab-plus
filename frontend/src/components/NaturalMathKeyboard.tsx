@@ -995,7 +995,7 @@ export function NaturalMathKeyboard({
       >
       {hideCoreGrid && basicContent && (
         <div
-          className="order-3 min-w-0 shrink-0 rounded-xl border border-paper-line bg-paper p-2"
+          className="order-3 mt-2 min-w-0 shrink-0 rounded-xl border border-paper-line bg-paper p-2"
           data-testid="keyboard-b6-core"
         >
           {basicContent}
