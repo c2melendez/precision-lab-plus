@@ -952,7 +952,7 @@ export function NaturalMathKeyboard({
             hideCoreGrid ? (
               <div className="grid grid-cols-1 gap-3 dt:grid-cols-2">
                 <div>
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">Variables</div>
+                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">Variables</div>
                   <div className="grid grid-cols-6 gap-1">
                     {SYMBOL_VARIABLES.map((k, i) => (
                       <button
@@ -970,7 +970,7 @@ export function NaturalMathKeyboard({
                   </div>
                 </div>
                 <div>
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">Constantes y valores</div>
+                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">Constantes y valores</div>
                   <div className="grid grid-cols-5 gap-1">
                     {SYMBOL_CONSTANTS.map((k, i) => (
                       <button
@@ -988,7 +988,7 @@ export function NaturalMathKeyboard({
                   </div>
                 </div>
                 <div className="dt:col-span-2">
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">Funciones</div>
+                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">Funciones</div>
                   <div className="grid grid-cols-3 gap-1">
                     {SYMBOL_FUNCTIONS.map((k, i) => (
                       <button
@@ -1044,7 +1044,7 @@ export function NaturalMathKeyboard({
             CATEGORY_MENUS[openCategory].map((group) =>
               group.section === "Ecuaciones" ? (
                 <div key={group.section} className="mb-2 last:mb-0">
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">{group.section}</div>
+                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">{group.section}</div>
                   <div className="grid grid-cols-3 gap-1.5 dt:grid-cols-6">
                     <button
                       type="button"
@@ -1139,7 +1139,7 @@ export function NaturalMathKeyboard({
                 </div>
               ) : (
                 <div key={group.section} className="mb-2 last:mb-0">
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">{group.section}</div>
+                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">{group.section}</div>
                   <div className="grid grid-cols-3 gap-1.5 dt:grid-cols-6">
                     {group.keys.map((k, i) => (
                       <button
