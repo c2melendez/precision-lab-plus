@@ -1062,7 +1062,7 @@ export function NaturalMathKeyboard({
                       type="button"
                       onClick={() => press(key("LCM", "\\mathrm{lcm}\\left(#0\\right)", "mínimo común múltiplo", false, undefined, "MCM de dos o más valores separados por comas"))}
                       aria-label="Mínimo común múltiplo"
-                      title="Mínimo común múltiplo"
+                      title="MCM de dos o más valores separados por comas"
                       className="rounded-md border border-marker bg-marker-soft/10 py-2 text-xs font-medium text-marker hover:bg-marker-soft/20"
                     >
                       LCM
@@ -1071,7 +1071,7 @@ export function NaturalMathKeyboard({
                       type="button"
                       onClick={() => press(key("GCD", "\\gcd\\left(#0\\right)", "máximo común divisor", false, undefined, "MCD de dos o más valores separados por comas"))}
                       aria-label="Máximo común divisor"
-                      title="Máximo común divisor"
+                      title="MCD de dos o más valores separados por comas"
                       className="rounded-md border border-marker bg-marker-soft/10 py-2 text-xs font-medium text-marker hover:bg-marker-soft/20"
                     >
                       GCD
