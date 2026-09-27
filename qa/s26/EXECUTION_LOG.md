@@ -536,3 +536,33 @@ Ejecutar `PARITY_CHECKPOINT_B1_B4.md`. No iniciar Bloque 5 antes de cerrar la au
 - Lite dejó la gramática dark legacy del panel Básico y usa tokens `paper/marker/graph` equivalentes a Plus.
 - Se creó `B6_BASIC_RECONCILIATION.md`.
 - No avanzar a Símbolos hasta revisar gates y Preview de este subbloque.
+
+
+## 2026-09-27 — B6 teclado unificado: cierre de sesión
+
+### Resultado
+- Reconciliada arquitectura visual con captura aprobada: familias superiores, subcategorías separadas, panel contextual y núcleo debajo.
+- Eliminada interpretación previa izquierda/centro/derecha.
+- Eliminada tira global f(x)=0 / Sistema / Simplificar en B6; acciones restringidas a Álgebra → Ecuaciones.
+- Selector de sistemas 2–5 restaurado dentro de Ecuaciones.
+- SmartDock Recientes / Var./const. retirado de dock, Apilado y Flotante.
+- Ajustadas suites heredadas a navegación familia → subcategoría → tecla.
+- Corregido contraste de subcategoría activa en Plus.
+- B6 Basic histórico marcado como supersedido.
+
+### HEAD certificado
+`a61f57f5a234723a199ca3afaa273ab826c6d7ec`
+
+### Gates
+- CI — PASS
+- Playwright E2E — PASS
+- S17 API fuzzing — PASS
+- S18 Differential Properties — PASS
+- S19 Mutation Baseline — PASS
+- S20 Performance Robustness — PASS
+- S21 Cross-browser Compatibility — PASS
+- S23 Accessibility — PASS
+- S25 Security — PASS
+
+### Estado
+**B6 PASS AUTOMATIZADO.** Falta únicamente revisión visual humana final de las últimas correcciones antes de declarar PASS DEFINITIVO y abrir B7.
