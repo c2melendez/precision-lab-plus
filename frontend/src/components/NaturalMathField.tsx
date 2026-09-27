@@ -327,13 +327,14 @@ export function NaturalMathField({
 
   useEffect(() => {
     const el = elRef.current;
-    if (!el || !onEnter) return;
+    const enter = onEnter;
+    if (!el || !enter) return;
 
     function handleKeyDown(event: KeyboardEvent): void {
       if (event.key !== "Enter" || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) return;
       event.preventDefault();
       event.stopPropagation();
-      onEnter();
+      enter();
     }
 
     el.addEventListener("keydown", handleKeyDown);
