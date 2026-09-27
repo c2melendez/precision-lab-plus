@@ -978,7 +978,7 @@ export function NaturalMathKeyboard({
 
   return (
     <div
-      className={hideCoreGrid ? "relative h-full min-h-0 rounded-xl bg-paper-soft p-3 text-ink" : "relative rounded-xl bg-chrome p-3"}
+      className={hideCoreGrid ? "relative h-full min-h-0 text-ink" : "relative rounded-xl bg-chrome p-3"}
       onClickCapture={handleKeyboardClickCapture}
     >
       {notice && (
@@ -997,7 +997,7 @@ export function NaturalMathKeyboard({
         <div
           className={
             hideCoreGrid
-              ? "row-start-2 grid min-h-0 min-w-0 grid-cols-1 gap-2 overflow-y-auto rounded-xl border border-paper-line bg-paper p-2 shadow-sm [contain:layout_paint] lg:grid-cols-[10rem_minmax(22rem,1fr)_minmax(14rem,18rem)] lg:overflow-hidden"
+              ? "row-start-2 grid min-h-0 min-w-0 grid-cols-1 gap-2 overflow-y-auto rounded-xl [contain:layout_paint] lg:grid-cols-[10rem_minmax(22rem,1fr)_minmax(14rem,18rem)] lg:overflow-hidden"
               : "mb-1.5 rounded-lg bg-chrome-soft p-3 shadow-lg"
           }
         >
