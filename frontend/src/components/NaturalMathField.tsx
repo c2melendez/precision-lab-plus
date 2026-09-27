@@ -285,6 +285,8 @@ export function latexToBackendSyntax(latex: string): string {
 interface NaturalMathFieldProps {
   latex: string;
   onLatexChange: (latex: string) => void;
+  /** B6: Enter/Return físico comparte exactamente la acción del Enter virtual. */
+  onEnter?: () => void;
   ariaLabel: string;
   placeholder?: string;
   fieldRef?: (el: MathfieldElement | null) => void;
@@ -299,6 +301,7 @@ interface NaturalMathFieldProps {
 export function NaturalMathField({
   latex,
   onLatexChange,
+  onEnter,
   ariaLabel,
   placeholder,
   fieldRef,
@@ -321,6 +324,21 @@ export function NaturalMathField({
     return () => el.removeEventListener("input", handleInput);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onLatexChange]);
+
+  useEffect(() => {
+    const el = elRef.current;
+    if (!el || !onEnter) return;
+
+    function handleKeyDown(event: KeyboardEvent): void {
+      if (event.key !== "Enter" || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) return;
+      event.preventDefault();
+      event.stopPropagation();
+      onEnter();
+    }
+
+    el.addEventListener("keydown", handleKeyDown);
+    return () => el.removeEventListener("keydown", handleKeyDown);
+  }, [onEnter]);
 
   // Fase Y (spec_rediseno_visual.md sección 11) — restricción dura: el
   // teclado SIEMPRE inicia colapsado, y uno de los 2 mecanismos
