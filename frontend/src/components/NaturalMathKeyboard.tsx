@@ -1004,6 +1004,7 @@ export function NaturalMathKeyboard({
 
       {openCategory && (
         <div
+          data-testid={hideCoreGrid ? "keyboard-b6-context" : undefined}
           className={
             hideCoreGrid
               ? "order-2 grid min-h-0 min-w-0 grid-cols-1 gap-2 overflow-hidden rounded-xl border border-paper-line bg-paper p-2 shadow-sm dt:grid-cols-[10.5rem_minmax(0,1fr)]"
