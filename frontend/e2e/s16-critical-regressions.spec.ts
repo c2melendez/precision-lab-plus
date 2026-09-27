@@ -32,22 +32,18 @@ async function press(dialog: Locator, name: string) {
     return;
   }
 
-  // En V5 el contenido del panel cambia con la categoría. Las teclas de
-  // escritura/control viven en Básico: volver ahí reproduce el recorrido
-  // normal del usuario después de insertar una plantilla temática.
-  await category(dialog, "Básico");
+  // B6 mantiene el núcleo numérico/edición siempre visible, por lo que no
+  // existe una pestaña "Básico" a la cual regresar.
   button = dialog.getByRole("button", { name, exact: true }).first();
   await expect(button).toBeVisible();
   await button.click();
 }
 
 async function clear(dialog: Locator) {
-  await category(dialog, "Básico");
   await press(dialog, "borrar todo el campo");
 }
 
 async function calculate(page: Page, dialog: Locator): Promise<EvaluateBody> {
-  await category(dialog, "Básico");
   const responsePromise: Promise<APIResponse> = page.waitForResponse(
     (r) => r.url().includes("/api/v1/evaluate") && r.request().method() === "POST",
   );
@@ -131,11 +127,11 @@ test("S16 REG-006 Plus: 50% => 0.5", async ({ page }) => {
   expect(approx(await calculate(page, dialog))).toBeCloseTo(0.5, 12);
 });
 
-test("S16 REG-007 Plus: exp(1) => e", async ({ page }) => {
+test("S16 REG-007 Plus: e^1 => e desde la tecla exponencial natural", async ({ page }) => {
   const dialog = await openKeyboard(page);
   await clear(dialog);
   await category(dialog, "Álgebra");
-  await press(dialog, "exponencial");
+  await press(dialog, "e a la n");
   await press(dialog, "1");
   expect(approx(await calculate(page, dialog))).toBeCloseTo(Math.E, 10);
 });
@@ -147,6 +143,7 @@ test("S16 REG-008 Plus: sin(90°) => 1 usando tecla grados", async ({ page }) =>
   await press(dialog, "sin");
   await press(dialog, "9");
   await press(dialog, "0");
+  await category(dialog, "Unidades");
   await press(dialog, "grados");
   expect(approx(await calculate(page, dialog))).toBeCloseTo(1, 10);
 });
