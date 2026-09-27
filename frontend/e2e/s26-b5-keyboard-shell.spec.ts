@@ -64,6 +64,11 @@ test("S26.3R B5: teclado global es alcanzable desde los seis módulos", async ({
 
     const keyboard = page.getByRole("dialog", { name: "Teclado matemático" });
     await expect(keyboard, `${name}: panel global`).toBeVisible();
+    await expect(keyboard.getByTestId("keyboard-b6-core"), `${name}: núcleo B6`).toBeVisible();
+    await expect(keyboard.getByRole("tab"), `${name}: siete familias B6`).toHaveCount(7);
+    for (const family of ["Álgebra", "Trigonométricas", "Cálculo", "Complejos", "Símbolos", "Unidades", "Más"]) {
+      await expect(keyboard.getByRole("tab", { name: family, exact: true }), `${name}: ${family}`).toBeVisible();
+    }
     await page.keyboard.press("Escape");
     await expect(keyboard, `${name}: cierre por Escape`).toBeHidden();
   }
