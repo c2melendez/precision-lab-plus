@@ -1005,7 +1005,7 @@ export function NaturalMathKeyboard({
             <div
               data-testid="keyboard-b6-subcategories"
               aria-label={`Subcategorías de ${openCategory}`}
-              className="flex min-h-0 gap-1 overflow-x-auto rounded-lg border border-paper-line bg-paper-soft p-1.5 lg:flex-col lg:overflow-x-hidden lg:overflow-y-auto"
+              className="flex min-h-0 gap-1 overflow-x-auto rounded-xl border border-paper-line bg-paper-soft p-1.5 lg:flex-col lg:overflow-x-hidden lg:overflow-y-auto"
             >
               {subcategoriesFor(openCategory as (typeof CATEGORIES_BASIC_MODE)[number]).map((section) => (
                 <button
@@ -1035,7 +1035,7 @@ export function NaturalMathKeyboard({
           )}
           <div
             data-testid={hideCoreGrid ? "keyboard-b6-context" : undefined}
-            className="min-h-0 min-w-0 overflow-y-auto rounded-lg border border-paper-line bg-paper p-2"
+            className="min-h-0 min-w-0 overflow-y-auto rounded-xl border border-paper-line bg-paper p-2"
           >
           {openCategory === "Símbolos" ? (
             hideCoreGrid ? (
@@ -1133,7 +1133,7 @@ export function NaturalMathKeyboard({
             ).map((group) =>
               group.section === "Ecuaciones" ? (
                 <div key={group.section} className="mb-2 last:mb-0">
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">{group.section}</div>
+                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-muted">{group.section}</div>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
@@ -1246,7 +1246,7 @@ export function NaturalMathKeyboard({
                 </div>
               ) : (
                 <div key={group.section} className="mb-2 last:mb-0">
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/70">{group.section}</div>
+                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-muted">{group.section}</div>
                   <div className="grid grid-cols-3 gap-1.5">
                     {group.keys.map((k, i) => (
                       <button
@@ -1419,15 +1419,15 @@ export function NaturalMathKeyboard({
             className={
               hideCoreGrid
                 ? openCategory === cat
-                  ? "flex shrink-0 items-center gap-1.5 rounded-lg bg-marker px-3 py-2 text-[11px] font-semibold text-chrome"
-                  : "flex shrink-0 items-center gap-1.5 rounded-lg border border-transparent px-3 py-2 text-[11px] text-muted hover:border-paper-line hover:bg-paper"
+                  ? "flex shrink-0 items-center gap-1.5 rounded-lg bg-marker px-3 py-2 text-xs font-semibold text-chrome"
+                  : "flex shrink-0 items-center gap-1.5 rounded-lg border border-transparent px-3 py-2 text-xs font-medium text-muted hover:border-paper-line hover:bg-paper hover:text-ink"
                 : openCategory === cat
                   ? "text-xs font-semibold text-marker"
                   : "text-xs text-bone/70"
             }
           >
             {hideCoreGrid && (
-              <span aria-hidden="true" className="min-w-5 text-center text-[10px] font-semibold">
+              <span aria-hidden="true" className="min-w-5 text-center text-[11px] font-semibold">
                 {FAMILY_ICONS[cat as (typeof CATEGORIES_BASIC_MODE)[number]]}
               </span>
             )}
