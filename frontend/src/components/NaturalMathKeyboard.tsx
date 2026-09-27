@@ -782,7 +782,7 @@ CATEGORY_MENUS.Más = [
 ];
 
 const CATEGORIES_FULL = ["Trigonométricas", "Símbolos", "Complejos"] as const;
-const CATEGORIES_BASIC_MODE = ["Símbolos", "Álgebra", "Trigonométricas", "Cálculo", "Complejos", "Unidades", "Más"] as const;
+const CATEGORIES_BASIC_MODE = ["Álgebra", "Trigonométricas", "Cálculo", "Complejos", "Símbolos", "Unidades", "Más"] as const;
 
 interface NaturalMathKeyboardProps {
   field: MathfieldElement | null;
