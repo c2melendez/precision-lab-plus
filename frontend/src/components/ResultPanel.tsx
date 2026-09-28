@@ -128,7 +128,7 @@ function MatrixResult({ matrix }: { matrix: string[][] }) {
           ))}
         </tbody>
       </table>
-    </section>
+    </div>
   );
 }
 
