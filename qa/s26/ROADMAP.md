@@ -309,3 +309,28 @@ CI, Playwright E2E, S17 API fuzzing, S18 Differential Properties, S19 Mutation B
 4. continuar con **B7 — Científica**.
 
 No iniciar S26.4 todavía.
+
+
+## B6 — PASS DEFINITIVO — 2026-09-27
+
+- Revisión humana final: aprobada.
+- Arquitectura desktop/laptop: **familias arriba → subcategorías | básico | contexto**.
+- Básico: 23 teclas, cuatro filas, paridad Lite/Plus.
+- Contextuales genéricas: 3 columnas en ambos motores.
+- Responsive móvil: panel a ancho completo; tablet/laptop/desktop protegidos por E2E.
+- Densidad de Ecuaciones diferenciales y Complejos → Avanzado validada.
+- Contraste accesible de subcategoría activa recertificado.
+- HEAD certificado de código: `e74865bb8ea52513f57e9d115cda1bd1e915ab36`.
+- Gates: CI, Playwright E2E, S17 API fuzzing, S18 Differential Properties, S19 Mutation Baseline, S20 Performance Robustness, S21 Cross-browser Compatibility, S23 Accessibility y S25 Security: PASS.
+
+**B6 queda cerrado como PASS DEFINITIVO.**
+
+### B7 — Científica — EN CURSO
+
+Alcance:
+- composición Entrada → Resultado → Pasos → Gráfica;
+- estados vacío, resultado, carga y error;
+- responsive Desktop 1440, Laptop 1280, Tablet 768 y Mobile 390;
+- paridad Lite/Plus sin eliminar diferencias funcionales intencionales;
+- en Plus, revisar Ejemplos y Opciones avanzadas como superficies secundarias que no deben competir con Entrada/Resultado;
+- no modificar rutas matemáticas protegidas salvo defecto reproducible.
