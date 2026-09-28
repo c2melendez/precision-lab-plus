@@ -16,7 +16,7 @@
  * red simulada en la frontera de `fetch` en vez de un servidor real.
  */
 
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import App from "../App";
@@ -127,7 +127,8 @@ describe("E2E mínimo — Derivada (sección 15)", () => {
     // 6. Abrir el historial y reusar la entrada -> vuelve al módulo de
     // origen. No recalcula dentro del modal ni hace una segunda petición.
     fireEvent.click(screen.getByRole("button", { name: "Historial" }));
-    fireEvent.click(screen.getByRole("button", { name: /Reusar entrada/ }));
+    const historyDialog = screen.getByRole("dialog", { name: "Historial" });
+    fireEvent.click(within(historyDialog).getByRole("button", { name: /Reusar entrada/ }));
 
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     expect(useUIStore.getState().activeMode).toBe("basic");
