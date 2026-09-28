@@ -198,7 +198,7 @@ export function CalculatorScreen({
         {angleBadge}
         {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
         {inputSurface}
-        {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
+        {resultBlock && <section aria-label="Resultado" className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</section>}
         <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
         <StackedKeyboardSection />
       </div>
@@ -242,7 +242,7 @@ export function CalculatorScreen({
         {angleBadge}
         {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
         {inputSurface}
-        {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
+        {resultBlock && <section aria-label="Resultado" className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</section>}
         <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
       </div>
     );
@@ -264,7 +264,7 @@ export function CalculatorScreen({
             {inputSurface}
           </div>
           <div className="flex flex-col gap-3">
-            {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
+            {resultBlock && <section aria-label="Resultado" className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</section>}
             <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
           </div>
         </div>
@@ -283,7 +283,7 @@ export function CalculatorScreen({
 
         {inputSurface}
 
-        {resultBlock && <div className="mt-3 border-t border-paper-line pt-3">{resultBlock}</div>}
+        {resultBlock && <section aria-label="Resultado" className="mt-3 border-t border-paper-line pt-3">{resultBlock}</section>}
       </div>
       <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
     </div>
@@ -345,7 +345,7 @@ function FocusScreenContent({ angleBadge, inputField, resultBlock, canGraph, onG
     <div className="flex flex-1 flex-col gap-3">
       {angleBadge}
       {inputField}
-      {resultBlock && <div className="rounded-xl bg-paper-soft px-5 py-4 text-center shadow-sm">{resultBlock}</div>}
+      {resultBlock && <section aria-label="Resultado" className="rounded-xl bg-paper-soft px-5 py-4 text-center shadow-sm">{resultBlock}</section>}
       <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
     </div>
   );
@@ -402,7 +402,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
         </button>
       </div>
       {inputField}
-      {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
+      {resultBlock && <section aria-label="Resultado" className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</section>}
       {/* Fase Y (spec_rediseno_visual.md sección 11) — restricción dura:
           el teclado SIEMPRE inicia colapsado, en las 6 disposiciones sin
           excepción, Flotante incluida. Antes de este fix, la
