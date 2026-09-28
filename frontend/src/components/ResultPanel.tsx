@@ -195,7 +195,6 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
     ? result.result_data
     : null;
   const approxText = result.result_approx != null ? formatResultApprox(result.result_approx) : null;
-  const copyText = result.result_text ?? approxText;
   const parsedFraction = isFractionLatex(result.result_latex) ? parseFracLatex(result.result_latex!) : null;
   const mixedLatex = parsedFraction ? toMixedFracLatex(parsedFraction.n, parsedFraction.d) : null;
   const numericApprox = result.result_approx != null ? Number(result.result_approx) : NaN;
