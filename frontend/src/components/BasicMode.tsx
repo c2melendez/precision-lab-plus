@@ -772,6 +772,25 @@ export function BasicMode() {
           onClearField={() => setLatex("")}
           layoutMode={layoutMode}
           onGraphExpression={handleGraphExpression}
+          onReuseRecent={(entry) => {
+            const payload = entry.requestPayload;
+            setLatex(scientificHistoryEntryToLatex(entry));
+            if (Array.isArray(payload.variables)) setSystemVariables(payload.variables.join(", "));
+            if (payload.angle_unit === "deg" || payload.angle_unit === "rad") setAngleUnit(payload.angle_unit);
+            if (payload.substitutions && typeof payload.substitutions === "object" && !Array.isArray(payload.substitutions)) {
+              setSubstitutions(
+                Object.entries(payload.substitutions as Record<string, unknown>).map(([name, value]) => ({
+                  name,
+                  value: String(value),
+                })),
+              );
+            } else {
+              setSubstitutions([]);
+            }
+            setLastResult(null);
+            setValidationError(null);
+            requestAnimationFrame(() => mathField?.focus());
+          }}
         />
 
         {systemRows && (
