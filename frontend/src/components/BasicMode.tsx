@@ -770,13 +770,14 @@ export function BasicMode() {
       ref={formRef}
       onSubmit={handleSubmit}
       aria-labelledby="basic-mode-heading"
-      className="mx-auto w-full max-w-5xl space-y-6 dt:max-w-[1280px]"
+      data-testid="scientific-mode-shell"
+      className="mx-auto w-full max-w-5xl space-y-3 dt:max-w-[1440px] dt:px-8"
     >
       <h2 id="basic-mode-heading" className="sr-only">
         Básico
       </h2>
 
-      <div className="space-y-6">
+      <div className="space-y-3">
         <CalculatorScreen
           latex={latex}
           onLatexChange={setLatex}
@@ -815,8 +816,8 @@ export function BasicMode() {
         )}
       </div>
 
-      <div className="space-y-6 lg:col-span-2">
-        <div className="flex flex-wrap gap-2">
+      <div className="space-y-3 lg:col-span-2">
+        <div data-testid="scientific-examples" className="flex flex-wrap items-center gap-2 rounded-xl border border-paper-line bg-paper/50 px-3 py-2">
           <span className="pt-1.5 text-xs font-medium text-muted">Ejemplos:</span>
           {EXAMPLES.map((example) => (
             <button
@@ -830,7 +831,7 @@ export function BasicMode() {
           ))}
         </div>
 
-        <details className="group rounded-lg border border-paper-line bg-paper-soft open:pb-3">
+        <details data-testid="scientific-advanced-options" className="group rounded-xl border border-paper-line bg-paper-soft open:pb-3">
           <summary className="cursor-pointer list-none px-4 py-2.5 text-sm font-medium text-muted marker:content-none">
             Opciones avanzadas (sustituciones)
           </summary>
