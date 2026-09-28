@@ -114,6 +114,9 @@ test("S16 REG-004 Plus: log base 2 de 8 => 3", async ({ page }) => {
   await category(dialog, "Álgebra");
   await subcategory(dialog, "Logaritmos");
   await press(dialog, "logaritmo base 2");
+  // El núcleo numérico B6 debe seguir montado al insertar una plantilla.
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByTestId("keyboard-b6-core")).toBeVisible();
   await press(dialog, "8");
   expect(approx(await calculate(page, dialog))).toBeCloseTo(3, 12);
 });

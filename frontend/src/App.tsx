@@ -114,8 +114,13 @@ export default function App() {
   const isFloatingWideEnough = useMinWidthMediaQuery(FLOATING_MIN_WIDTH_PX);
   const hasDockContent = useKeyboardPanelStore((s) =>
     s.content !== null || s.basicContent !== null || s.compactActions !== null);
+  const isKeyboardOpen = useKeyboardPanelStore((s) => s.isOpen);
   const hasFixedDock = hasDockContent && !(layoutMode === "stacked" || (layoutMode === "floating" && isFloatingWideEnough));
-  const mainBottomPadding = hasFixedDock ? "pb-56 dt:pb-40" : "pb-8";
+  const mainBottomPadding = hasFixedDock
+    ? isKeyboardOpen
+      ? "pb-[70vh] md:pb-[60vh] lg:pb-[50vh]"
+      : "pb-56 dt:pb-40"
+    : "pb-8";
 
   useEffect(() => {
     const media = window.matchMedia(SIDEBAR_AUTO_COLLAPSE_QUERY);
