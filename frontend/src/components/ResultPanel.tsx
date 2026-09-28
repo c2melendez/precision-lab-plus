@@ -31,6 +31,25 @@ import { getAvailableResultFormats } from "./resultFormatPolicy";
 // forma exacta; si no, dice explícitamente que no aplica.
 type AnswerFormat = ResultFormatId;
 
+function mathLatexToPlainText(value: string): string {
+  return value
+    .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, "($1)/($2)")
+    .replace(/\\sqrt\{([^{}]+)\}/g, "√($1)")
+    .replace(/\\pi/g, "π")
+    .replace(/\\infty/g, "∞")
+    .replace(/\\cdot|\\times/g, "×")
+    .replace(/\^\{\\circ\}/g, "°")
+    .replace(/\\prime/g, "′")
+    .replace(/\\,/g, " ")
+    .replace(/[{}]/g, "")
+    .trim();
+}
+
+function exponentialToLatex(value: number): string {
+  const [mantissa, exponent] = value.toExponential(6).split("e");
+  return `${mantissa}\\times 10^{${Number(exponent)}}`;
+}
+
 function isFractionLatex(latex: string | null | undefined): boolean {
   return latex !== null && latex !== undefined && latex.includes("\\frac");
 }
@@ -69,7 +88,7 @@ function CopyButton({ text, label }: { text: string | null; label: string }) {
       type="button"
       onClick={handleClick}
       disabled={text === null}
-      className="rounded border border-paper-line px-3 py-1 text-xs text-muted hover:bg-paper-line/40 disabled:cursor-not-allowed disabled:opacity-40"
+      className="rounded-md px-2 py-1 text-[11px] font-medium text-muted hover:bg-paper-line/40 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
     >
       {justCopied ? "¡Copiado!" : label}
     </button>
@@ -189,6 +208,31 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
   }) as AnswerFormat[];
   const activeFormat = availableFormats.includes(format) ? format : (availableFormats[0] ?? "exact");
 
+  let activeCopyLatex = exactLatex ?? result.result_text ?? "";
+  let activeCopyText = result.result_text ?? approxText ?? "";
+  if (activeFormat === "dd" && dmsDegrees !== null) {
+    const cleanDegrees = Math.round((dmsDegrees + Number.EPSILON) * 1e12) / 1e12;
+    activeCopyLatex = `${cleanDegrees}^{\\circ}`;
+    activeCopyText = `${cleanDegrees}°`;
+  } else if (activeFormat === "dms" && dmsValue) {
+    activeCopyLatex = dmsValue.latex;
+    activeCopyText = dmsValue.text;
+  } else if (activeFormat === "dec" && approxText) {
+    activeCopyLatex = inverseAngleResult ? `{${approxText}}^{\\circ}` : approxText;
+    activeCopyText = `${approxText}${inverseAngleResult ? "°" : ""}`;
+  } else if (activeFormat === "scn" && Number.isFinite(numericApprox)) {
+    activeCopyLatex = inverseAngleResult
+      ? `{${exponentialToLatex(numericApprox)}}^{\\circ}`
+      : exponentialToLatex(numericApprox);
+    activeCopyText = `${numericApprox.toExponential(6)}${inverseAngleResult ? "°" : ""}`;
+  } else if (activeFormat === "frac" && isFractionLatex(result.result_latex)) {
+    const raw = mixedLatex && showMixed ? mixedLatex : result.result_latex!;
+    activeCopyLatex = inverseAngleResult ? `{${raw}}^{\\circ}` : raw;
+    activeCopyText = mathLatexToPlainText(activeCopyLatex);
+  } else if (activeCopyLatex) {
+    activeCopyText = result.result_text ?? mathLatexToPlainText(activeCopyLatex);
+  }
+
   return (
     <div aria-live="polite" className="space-y-4 fade-in">
       {matrixData && (
@@ -230,14 +274,18 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
             {(() => {
             if (activeFormat === "dd" && dmsDegrees !== null) {
               const cleanDegrees = Math.round((dmsDegrees + Number.EPSILON) * 1e12) / 1e12;
-              return <p className="a11y-scale-result-3xl font-mono font-semibold tracking-tight text-ink">{cleanDegrees}°</p>;
+              return <MathRenderer latex={`${cleanDegrees}^{\\circ}`} fallbackText={`${cleanDegrees}°`} className="a11y-scale-result-3xl text-ink" />;
             }
             if (activeFormat === "dms" && dmsValue) {
-              return <MathRenderer latex={dmsValue.latex} fallbackText={dmsValue.text} className="a11y-scale-result-3xl font-mono" />;
+              return <MathRenderer latex={dmsValue.latex} fallbackText={dmsValue.text} className="a11y-scale-result-3xl text-ink" />;
             }
             if (activeFormat === "dec") {
               return approxText ? (
-                <p className="a11y-scale-result-3xl font-mono font-semibold tracking-tight text-ink">{approxText}{inverseAngleResult ? "°" : ""}</p>
+                <MathRenderer
+                  latex={inverseAngleResult ? `{${approxText}}^{\\circ}` : approxText}
+                  fallbackText={`${approxText}${inverseAngleResult ? "°" : ""}`}
+                  className="a11y-scale-result-3xl text-ink"
+                />
               ) : (
                 <p className="text-sm text-muted">No hay aproximación decimal disponible.</p>
               );
@@ -245,7 +293,11 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
             if (activeFormat === "scn") {
               const n = result.result_approx != null ? Number(result.result_approx) : NaN;
               return Number.isFinite(n) ? (
-                <p className="a11y-scale-result-3xl font-mono font-semibold tracking-tight text-ink">{n.toExponential(6)}{inverseAngleResult ? "°" : ""}</p>
+                <MathRenderer
+                  latex={inverseAngleResult ? `{${exponentialToLatex(n)}}^{\\circ}` : exponentialToLatex(n)}
+                  fallbackText={`${n.toExponential(6)}${inverseAngleResult ? "°" : ""}`}
+                  className="a11y-scale-result-3xl text-ink"
+                />
               ) : (
                 <p className="text-sm text-muted">No hay un valor numérico para notación científica.</p>
               );
@@ -263,7 +315,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
                 <MathRenderer
                   latex={displayLatex}
                   fallbackText={result.result_text ?? undefined}
-                  className="a11y-scale-result-3xl font-mono"
+                  className="a11y-scale-result-3xl text-ink"
                 />
               );
             }
@@ -273,10 +325,10 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
               <MathRenderer
                 latex={exactLatex}
                 fallbackText={result.result_text ?? undefined}
-                className="a11y-scale-result-3xl font-mono"
+                className="a11y-scale-result-3xl text-ink"
               />
             ) : (
-              <p className="a11y-scale-result-3xl font-mono font-semibold tracking-tight text-ink">{result.result_text}</p>
+              <MathRenderer latex={result.result_text ?? ""} fallbackText={result.result_text ?? undefined} className="a11y-scale-result-3xl text-ink" />
             );
             })()}
             </div>
@@ -323,10 +375,10 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
         </ul>
       )}
 
-      {(copyText || result.result_latex) && (
-        <div className="flex gap-2">
-          <CopyButton text={copyText ?? null} label="Copiar resultado" />
-          <CopyButton text={result.result_latex ?? null} label="Copiar como LaTeX" />
+      {(activeCopyText || activeCopyLatex) && (
+        <div className="flex justify-end gap-1">
+          <CopyButton text={activeCopyText || null} label="Copiar" />
+          <CopyButton text={activeCopyLatex || null} label="LaTeX" />
         </div>
       )}
 
