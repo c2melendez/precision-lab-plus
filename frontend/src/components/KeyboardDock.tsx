@@ -90,7 +90,7 @@ export function KeyboardDock({ sidebarExpanded }: { sidebarExpanded: boolean }) 
     if (!dock) return;
     const measure = () => {
       const rect = dock.getBoundingClientRect();
-      setDockBottomOffset(Math.max(0, window.innerHeight - rect.top + 12));
+      setDockBottomOffset(Math.max(0, window.innerHeight - rect.top));
     };
     measure();
     const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
@@ -137,7 +137,7 @@ export function KeyboardDock({ sidebarExpanded }: { sidebarExpanded: boolean }) 
         </KeyboardPanel>
       )}
 
-      <div ref={dockRef} data-testid="keyboard-dock" className={`fixed bottom-0 right-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2 dt:bottom-4 dt:right-8 dt:rounded-2xl dt:border dt:border-paper-line dt:bg-paper-soft dt:px-4 dt:py-2 dt:shadow-xl ${sidebarExpanded ? "left-60 dt:left-[17rem]" : "left-[72px] dt:left-[104px]"}`}>
+      <div ref={dockRef} data-testid="keyboard-dock" className={`fixed bottom-0 right-0 z-30 border-t border-chrome-soft bg-chrome px-3 pb-[env(safe-area-inset-bottom)] pt-2 ${sidebarExpanded ? "left-60" : "left-[72px]"}`}>
 
         {/* Fila compacta — móvil siempre, y cualquier breakpoint en Focus. */}
         <div className={forceCompactDock ? "grid grid-cols-3 gap-1.5" : "grid grid-cols-3 gap-1.5 md:hidden"}>
