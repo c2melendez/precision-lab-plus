@@ -45,9 +45,9 @@ test("suite original módulo 5: Argand 3+4i usa ejes Re e Im", async ({ page }) 
   await openComplex(page);
   await page.getByLabel("Subcategorías de Complejos").getByRole("button", { name: "Avanzado", exact: true }).click();
   await setExpression(page, "3+4i");
-  // BasicMode usa el estado React `latex` para construir la petición.
-  // "Graficar" se habilita solo cuando React ya consumió el evento input.
-  await expect(page.getByRole("button", { name: "Graficar", exact: true }).first()).toBeVisible();
+  // B7 retiró el botón "Graficar" de Científica. Esta prueba usa la
+  // acción Argand del teclado y valida la respuesta y los ejes reales.
+  await expect(page.locator("math-field").first()).toBeVisible();
 
   // El contenido del teclado se registra en un store mediante useEffect.
   // Cerrarlo y reabrirlo después de la actualización de `latex` garantiza

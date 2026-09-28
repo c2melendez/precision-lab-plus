@@ -29,7 +29,8 @@ test("S26.3R B5: shell global del teclado abre, cierra y respeta el viewport", a
     expect(dock).not.toBeNull();
     expect(bounds!.x).toBeGreaterThanOrEqual(sidebar!.x + sidebar!.width);
     expect(bounds!.height).toBeLessThanOrEqual(viewport!.height * 0.45 + 1);
-    expect(dock!.y - (bounds!.y + bounds!.height)).toBeCloseTo(12, 0);
+    // B7 integra el panel con el dock, sin el margen flotante de B5.
+    expect(dock!.y - (bounds!.y + bounds!.height)).toBeCloseTo(0, 0);
   } else if (viewport!.width >= 1024) {
     expect(bounds!.height).toBeLessThanOrEqual(viewport!.height * 0.45 + 1);
   } else if (viewport!.width >= 768) {

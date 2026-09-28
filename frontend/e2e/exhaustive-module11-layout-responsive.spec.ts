@@ -63,13 +63,21 @@ test("M11/B7: el dock del teclado está anclado al borde inferior y abre sin cub
   await expect(keyboard).toBeVisible();
   await expect(keyboard.getByRole("button", { name: "7", exact: true }).first()).toBeVisible();
 
-  const graphBox = await page.getByTestId("scientific-graph").boundingBox();
-  const keyboardBox = await keyboard.boundingBox();
-  expect(graphBox).not.toBeNull();
-  expect(keyboardBox).not.toBeNull();
-  if (graphBox && keyboardBox) {
-    expect(graphBox.y + graphBox.height).toBeLessThanOrEqual(keyboardBox.y + 2);
-  }
+  // En tablet/móvil las cuatro superficies se apilan: la gráfica puede
+  // empezar debajo del viewport. Debe poder desplazarse hasta la zona
+  // visible sin quedar tapada por el teclado fijo.
+  await page.getByTestId("scientific-graph").evaluate((graph) => {
+    const keyboardTop = document.querySelector('[role="dialog"][aria-label="Teclado matemático"]')?.getBoundingClientRect().top;
+    if (keyboardTop === undefined) return;
+    const graphBottom = graph.getBoundingClientRect().bottom;
+    if (graphBottom > keyboardTop - 8) window.scrollBy(0, graphBottom - keyboardTop + 8);
+  });
+  await expect.poll(async () => {
+    const graphBox = await page.getByTestId("scientific-graph").boundingBox();
+    const keyboardBox = await keyboard.boundingBox();
+    if (!graphBox || !keyboardBox) return Infinity;
+    return graphBox.y + graphBox.height - keyboardBox.y;
+  }).toBeLessThanOrEqual(2);
 });
 
 test("M11/B7: Balanceada usa gráfica a la derecha en desktop y se apila fuera de desktop ancho", async ({ page }) => {
