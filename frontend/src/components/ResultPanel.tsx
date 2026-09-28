@@ -128,7 +128,7 @@ function MatrixResult({ matrix }: { matrix: string[][] }) {
           ))}
         </tbody>
       </table>
-    </div>
+    </section>
   );
 }
 
@@ -167,26 +167,32 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
 
   if (isLoading) {
     return (
-      <div role="status" aria-live="polite" className="text-sm text-muted">
-        Calculando…
-      </div>
+      <section aria-label="Resultado">
+        <div role="status" aria-live="polite" className="text-sm text-muted">
+          Calculando…
+        </div>
+      </section>
     );
   }
 
   if (result === null) {
     return (
-      <p className="text-sm text-muted">
-        Introduce una expresión y envía el formulario para ver el resultado aquí.
-      </p>
+      <section aria-label="Resultado">
+        <p className="text-sm text-muted">
+          Introduce una expresión y envía el formulario para ver el resultado aquí.
+        </p>
+      </section>
     );
   }
 
   if (!result.success) {
     return (
-      <div role="alert" aria-live="assertive" className="text-sm text-red-600">
-        <p className="font-medium">{result.error_code}</p>
-        <p>{result.error_message}</p>
-      </div>
+      <section aria-label="Resultado">
+        <div role="alert" aria-live="assertive" className="text-sm text-red-600">
+          <p className="font-medium">{result.error_code}</p>
+          <p>{result.error_message}</p>
+        </div>
+      </section>
     );
   }
 
@@ -233,7 +239,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
   }
 
   return (
-    <div aria-live="polite" className="space-y-4 fade-in">
+    <section aria-label="Resultado" aria-live="polite" className="space-y-4 fade-in">
       {matrixData && (
         <section aria-label="Resultado estructurado" className="space-y-3">
           <div className="flex items-center justify-between gap-3">
