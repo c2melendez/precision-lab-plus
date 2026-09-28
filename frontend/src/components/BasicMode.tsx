@@ -67,13 +67,6 @@ interface SubstitutionRow {
   value: string;
 }
 
-const EXAMPLES: { display: string; latex: string }[] = [
-  { display: "2x + √9", latex: "2x+\\sqrt{9}" },
-  { display: "sin(π/4)", latex: "\\sin\\left(\\frac{\\pi}{4}\\right)" },
-  { display: "(3+4)²", latex: "(3+4)^{2}" },
-  { display: "log(100)", latex: "\\log\\left(100\\right)" },
-];
-
 // Mismo patrón que EquationMode.tsx — se reusa el criterio de detección
 // tal cual para que "escribo < o >, se resuelve como desigualdad" se
 // comporte igual sin importar desde qué pantalla se escribió.
@@ -240,19 +233,6 @@ export function BasicMode() {
 
   const systemRows = splitSystemLatex(latex);
 
-  function addSubstitutionRow(): void {
-    setSubstitutions((rows) => [...rows, { name: "", value: "" }]);
-  }
-
-  function updateSubstitutionRow(index: number, field: keyof SubstitutionRow, value: string): void {
-    setSubstitutions((rows) =>
-      rows.map((row, i) => (i === index ? { ...row, [field]: value } : row)),
-    );
-  }
-
-  function removeSubstitutionRow(index: number): void {
-    setSubstitutions((rows) => rows.filter((_, i) => i !== index));
-  }
 
   // Corrección post-auditoría (Módulo C, spec_motor_matematico_pendiente.md
   // §4): antes esta función SIEMPRE rechazaba una fila que no tuviera "=",
@@ -816,63 +796,7 @@ export function BasicMode() {
         )}
       </div>
 
-      <div className="space-y-3 lg:col-span-2">
-        <div data-testid="scientific-examples" className="flex flex-wrap items-center gap-2 rounded-xl border border-paper-line bg-paper/50 px-3 py-2">
-          <span className="pt-1.5 text-xs font-medium text-muted">Ejemplos:</span>
-          {EXAMPLES.map((example) => (
-            <button
-              key={example.display}
-              type="button"
-              onClick={() => setLatex(example.latex)}
-              className="rounded-full border border-paper-line bg-paper-soft px-3 py-1 text-xs text-muted hover:border-marker/40 hover:text-marker"
-            >
-              {example.display}
-            </button>
-          ))}
-        </div>
 
-        <details data-testid="scientific-advanced-options" className="group rounded-xl border border-paper-line bg-paper-soft open:pb-3">
-          <summary className="cursor-pointer list-none px-4 py-2.5 text-sm font-medium text-muted marker:content-none">
-            Opciones avanzadas (sustituciones)
-          </summary>
-          <div className="space-y-4 px-4 pt-1">
-            <div className="space-y-2">
-              <span className="block text-sm text-muted">Sustituciones (opcional, solo aplica a expresiones simples)</span>
-              {substitutions.map((row, index) => (
-                <div key={index} className="flex gap-2">
-                  <input
-                    aria-label={`Nombre de la variable ${index + 1}`}
-                    value={row.name}
-                    onChange={(e) => updateSubstitutionRow(index, "name", e.target.value)}
-                    className="w-24 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm text-ink"
-                  />
-                  <input
-                    aria-label={`Valor de la variable ${index + 1}`}
-                    value={row.value}
-                    onChange={(e) => updateSubstitutionRow(index, "value", e.target.value)}
-                    className="w-24 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm text-ink"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeSubstitutionRow(index)}
-                    aria-label={`Eliminar sustitución ${index + 1}`}
-                    className="text-sm text-muted hover:text-muted"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addSubstitutionRow}
-                className="text-sm text-marker hover:text-marker-text"
-              >
-                + Añadir sustitución
-              </button>
-            </div>
-          </div>
-        </details>
-      </div>
     </form>
   );
 }
