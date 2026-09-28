@@ -23,6 +23,7 @@ import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useUIStore } from "../store/useUIStore";
 import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStore";
 import type { HistoryEntry } from "../store/useHistoryStore";
+import type { ScientificGraphContext } from "./scientificGraphContext";
 import { latexToBackendSyntax, NaturalMathField } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
@@ -197,12 +198,29 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   const [angleUnit, setAngleUnit] = useState<"rad" | "deg">("rad");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<MathResponse | null>(null);
+  const [sourceContext, setSourceContext] = useState<ScientificGraphContext | null>(null);
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
   const pendingGraphResult = useUIStore((state) => state.pendingGraphResult);
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
+  const pendingGraphContext = useUIStore((state) => state.pendingGraphContext);
+  const setPendingGraphContext = useUIStore((state) => state.setPendingGraphContext);
+
+  useEffect(() => {
+    if (!pendingGraphContext || pendingGraphContext.operation !== "function") return;
+    setLatexRows([pendingGraphContext.inputLatex]);
+    setMathFields([null]);
+    setActiveRow(0);
+    setVariable(pendingGraphContext.variables[0] ?? "x");
+    setAngleUnit(pendingGraphContext.metadata.angleUnit === "deg" ? "deg" : "rad");
+    setXMin("");
+    setXMax("");
+    setSamples("");
+    setSourceContext(pendingGraphContext);
+    setPendingGraphContext(null);
+  }, [pendingGraphContext, setPendingGraphContext]);
 
   useEffect(() => {
     if (!reuseEntry?.endpointUrl.includes("/graph/2d")) return;
@@ -265,6 +283,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   }
 
   function updateExpression(index: number, value: string): void {
+    setSourceContext(null);
     setLatexRows((current) => current.map((expr, i) => (i === index ? value : expr)));
   }
 
@@ -282,6 +301,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    setSourceContext(null);
     const trimmedExpressions = latexRows.map((row) => latexToBackendSyntax(row)).filter(Boolean);
 
     if (trimmedExpressions.length === 0) {
@@ -322,6 +342,12 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
       <aside aria-label="Controles de gráfica 2D" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
+        {sourceContext && (
+          <p className="rounded-md bg-paper-soft px-2 py-1 text-xs text-muted" data-testid="scientific-graph-context">
+            Desde Científica · función de {sourceContext.variables[0]}
+            {sourceContext.canonicalResult && " · resultado conservado"}
+          </p>
+        )}
         <div className="flex items-center justify-between gap-2">
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Expresiones</h3>

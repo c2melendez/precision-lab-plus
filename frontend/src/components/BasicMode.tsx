@@ -62,6 +62,7 @@ import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
+import { directFunctionGraphContext } from "./scientificGraphContext";
 
 interface SubstitutionRow {
   name: string;
@@ -101,6 +102,12 @@ function classifyScientificGraphState(sourceLatex: string): ScientificGraphState
   if (variables.size === 0) return "not-needed";
   if (variables.size === 1) return "available";
   return "advanced";
+}
+
+function directGraphVariable(expression: string): string | null {
+  const identifiers = expression.match(/[A-Za-z_][A-Za-z0-9_]*/g) ?? [];
+  const variables = [...new Set(identifiers.filter((identifier) => !GRAPH_NON_VARIABLE_IDENTIFIERS.has(identifier.toLowerCase())))];
+  return variables.length === 1 ? variables[0] : null;
 }
 
 function backendExpressionToLatex(value: unknown): string {
@@ -232,17 +239,32 @@ export function BasicMode() {
   const [systemVariables, setSystemVariables] = useState("x, y");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<MathResponse | null>(null);
+  const [lastEvaluated, setLastEvaluated] = useState<{
+    expression: string;
+    angleUnit: "rad" | "deg";
+    result: MathResponse;
+  } | null>(null);
 
   const graphState = useMemo<ScientificGraphState>(
     () => classifyScientificGraphState(latex),
     [latex],
   );
+  const graphContext = useMemo(() => {
+    if (graphState !== "available") return null;
+    const expression = latexToBackendSyntax(latex);
+    const variable = directGraphVariable(expression);
+    if (!variable) return null;
+    const result = lastEvaluated?.expression === expression && lastEvaluated.angleUnit === angleUnit
+      ? lastEvaluated.result : null;
+    return directFunctionGraphContext(expression, variable, angleUnit, result, latex);
+  }, [graphState, latex, angleUnit, lastEvaluated]);
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
   const setActiveMode = useUIStore((state) => state.setActiveMode);
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
+  const setPendingGraphContext = useUIStore((state) => state.setPendingGraphContext);
   const pendingHistoryReuse = usePendingHistoryReuseStore((s) => s.pending);
   const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
 
@@ -264,6 +286,7 @@ export function BasicMode() {
       );
     }
     setLastResult(null);
+    setLastEvaluated(null);
     setValidationError(null);
   }, [pendingHistoryReuse, takePendingHistoryReuse]);
 
@@ -482,6 +505,7 @@ export function BasicMode() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    setLastEvaluated(null);
 
     if (systemRows) {
       await submitSystem(systemRows);
@@ -531,6 +555,9 @@ export function BasicMode() {
               latex,
             );
       setLastResult(result);
+      setLastEvaluated(!isInequality && !isEquation && !substitutionsPayload && result.success
+        ? { expression: trimmed, angleUnit, result }
+        : null);
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
@@ -682,21 +709,22 @@ export function BasicMode() {
   // Reutiliza el mismo puente pendingGraphResult que Graph2DForm ya
   // consume.
   async function handleGraphExpression(): Promise<void> {
-    const trimmed = latexToBackendSyntax(latex);
-    if (!trimmed) return;
+    const context = graphContext;
+    if (!context?.graphRequest) return;
     setLoading(true);
     setErrorMessage(null);
     try {
       const result = await submitScientific(
-        "/graph/2d",
-        { expressions: [trimmed], variable: "x" },
-        `Graficar(${trimmed})`,
+        context.graphRequest.endpoint,
+        context.graphRequest.payload,
+        `Graficar(${context.originalExpression})`,
       );
       if (!result.success) {
         setLastResult(result);
         setErrorMessage(result.error_message ?? "No se pudo graficar esa expresión.");
         return;
       }
+      setPendingGraphContext(context);
       setPendingGraphResult(result);
       setActiveMode("graph");
     } finally {
@@ -809,6 +837,7 @@ export function BasicMode() {
           layoutMode={layoutMode}
           onGraphExpression={handleGraphExpression}
           graphState={graphState}
+          graphContext={graphContext}
           onReuseRecent={(entry) => {
             const payload = entry.requestPayload;
             setLatex(scientificHistoryEntryToLatex(entry));
@@ -825,6 +854,7 @@ export function BasicMode() {
               setSubstitutions([]);
             }
             setLastResult(null);
+            setLastEvaluated(null);
             setValidationError(null);
             requestAnimationFrame(() => mathField?.focus());
           }}

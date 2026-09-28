@@ -44,6 +44,7 @@ import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import type { LayoutMode } from "../store/useLayoutModeStore";
 import { FloatingWindow } from "./FloatingWindow";
 import { GraphPlaceholder, type ScientificGraphState } from "./GraphPlaceholder";
+import type { ScientificGraphContext } from "./scientificGraphContext";
 import { KeyboardIcon } from "./KeyboardIcon";
 import { MathRenderer } from "./MathRenderer";
 import { NaturalMathField } from "./NaturalMathField";
@@ -84,6 +85,7 @@ interface CalculatorScreenProps {
    * estado vacío de siempre. */
   onGraphExpression?: () => void;
   graphState?: ScientificGraphState;
+  graphContext?: ScientificGraphContext | null;
   onReuseRecent?: (entry: HistoryEntry) => void;
 }
 
@@ -102,6 +104,7 @@ export function CalculatorScreen({
   layoutMode = "fused",
   onGraphExpression,
   graphState,
+  graphContext,
   onReuseRecent,
 }: CalculatorScreenProps) {
   // Botón "Graficar" (cuadrante de gráfica, las 6 disposiciones): solo
@@ -230,7 +233,7 @@ export function CalculatorScreen({
 
   const graphSurface = (
     <div className="flex h-full min-h-[240px]">
-      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} context={graphContext} />
     </div>
   );
 
@@ -320,7 +323,7 @@ export function CalculatorScreen({
         {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
         {inputSurface}
         {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} context={graphContext} />
         <StackedKeyboardSection />
       </div>
     );
@@ -338,6 +341,7 @@ export function CalculatorScreen({
         resultBlock={resultBlock}
         canGraph={canGraph}
         onGraphExpression={onGraphExpression}
+        graphContext={graphContext}
       />
     );
   }
@@ -353,6 +357,7 @@ export function CalculatorScreen({
         resultBlock={resultBlock}
         canGraph={canGraph}
         onGraphExpression={onGraphExpression}
+        graphContext={graphContext}
       />
     );
   }
@@ -364,7 +369,7 @@ export function CalculatorScreen({
         {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
         {inputSurface}
         {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} context={graphContext} />
       </div>
     );
   }
@@ -386,7 +391,7 @@ export function CalculatorScreen({
           </div>
           <div className="flex flex-col gap-3">
             {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-            <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
+            <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} context={graphContext} />
           </div>
         </div>
       </div>
@@ -406,7 +411,7 @@ export function CalculatorScreen({
 
         {resultBlock && <div className="mt-3 border-t border-paper-line pt-3">{resultBlock}</div>}
       </div>
-      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} context={graphContext} />
     </div>
   );
 }
@@ -457,17 +462,18 @@ interface FocusLikeContentProps {
   resultBlock: ReactNode;
   canGraph: boolean;
   onGraphExpression?: () => void;
+  graphContext?: ScientificGraphContext | null;
 }
 
 /** Módulo P2 ("Enfoque"). Reusado tal cual por Flotante cuando degrada
  * (P0/P4). Ver Screen.tsx (Lite) para el mismo criterio. */
-function FocusScreenContent({ angleBadge, inputField, resultBlock, canGraph, onGraphExpression }: FocusLikeContentProps) {
+function FocusScreenContent({ angleBadge, inputField, resultBlock, canGraph, onGraphExpression, graphContext }: FocusLikeContentProps) {
   return (
     <div className="flex flex-1 flex-col gap-3">
       {angleBadge}
       {inputField}
       {resultBlock && <div className="rounded-xl bg-paper-soft px-5 py-4 text-center shadow-sm">{resultBlock}</div>}
-      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} context={graphContext} />
     </div>
   );
 }
@@ -477,7 +483,7 @@ function FocusScreenContent({ angleBadge, inputField, resultBlock, canGraph, onG
  * Screen.tsx (Lite) — ver ese archivo para el comentario completo sobre
  * el gating por breakpoint y la persistencia/clamp de las ventanas.
  */
-function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, onGraphExpression }: FocusLikeContentProps) {
+function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, onGraphExpression, graphContext }: FocusLikeContentProps) {
   const isWideEnough = useMinWidthMediaQuery(FLOATING_MIN_WIDTH_PX);
 
   const keyboardWindow = useFloatingLayoutStore((s) => s.keyboardWindow);
@@ -510,6 +516,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
         resultBlock={resultBlock}
         canGraph={canGraph}
         onGraphExpression={onGraphExpression}
+        graphContext={graphContext}
       />
     );
   }
@@ -556,7 +563,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
         </button>
       )}
       <FloatingWindow title="Gráfica" rect={graphWindow} onChange={(rect) => setWindow("graph", rect)}>
-        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} context={graphContext} />
       </FloatingWindow>
     </div>
   );

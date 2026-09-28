@@ -108,6 +108,34 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expectNoHorizontalOverflow(page);
   });
 
+  test("función directa transfiere entrada y variable a Gráficas", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "y^2+1");
+    const evaluation = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/evaluate") && response.request().method() === "POST",
+    );
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    expect((await evaluation).ok()).toBeTruthy();
+    await expect(page.getByTestId("scientific-graph")).toContainText("con resultado conservado");
+
+    const graphResponse = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/graph/2d") && response.request().method() === "POST",
+    );
+    await page.getByTestId("scientific-graph").getByRole("button", { name: "Abrir en Gráficas" }).click();
+    const response = await graphResponse;
+    const payload = response.request().postDataJSON();
+    expect(payload.variable).toBe("y");
+    expect(payload.expressions).toHaveLength(1);
+    expect(payload.expressions[0]).toContain("y");
+    expect(response.ok()).toBeTruthy();
+    await expect(page.getByRole("region", { name: "Gráficas", exact: true })).toBeVisible();
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("función de y · resultado conservado");
+    await expect.poll(() => page.locator('math-field[aria-label="Expresión 1"]').evaluate(
+      (field) => (field as HTMLElement & { value: string }).value,
+    )).toContain("y");
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

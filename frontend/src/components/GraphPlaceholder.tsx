@@ -11,12 +11,14 @@ export type ScientificGraphState =
   | "not-needed"
   | "advanced"
   | "unavailable";
+import type { ScientificGraphContext } from "./scientificGraphContext";
 
 interface GraphPlaceholderProps {
   canGraph?: boolean;
   onGraph?: () => void;
   state?: ScientificGraphState;
   message?: string;
+  context?: ScientificGraphContext | null;
 }
 
 const STATE_COPY: Record<Exclude<ScientificGraphState, "available">, string> = {
@@ -31,6 +33,7 @@ export function GraphPlaceholder({
   onGraph,
   state = canGraph ? "available" : "empty",
   message,
+  context,
 }: GraphPlaceholderProps) {
   const canOpenGraphing = Boolean(onGraph) && canGraph && (state === "available" || state === "advanced");
 
@@ -56,7 +59,9 @@ export function GraphPlaceholder({
               <span className="text-[11px] text-muted">Vista previa contextual</span>
             </div>
             <p className="max-w-md text-[11px] text-muted">
-              La vista ampliada conserva la expresión y el contexto matemático de la operación.
+              {context?.operation === "function"
+                ? `Función de ${context.variables[0]} preparada para Gráficas${context.canonicalResult ? " con resultado conservado" : ""}.`
+                : "La vista ampliada conserva la expresión y el contexto matemático de la operación."}
             </p>
           </>
         ) : (
