@@ -223,13 +223,13 @@ export function CalculatorScreen({
   );
 
   const resultSurface = (
-    <section aria-label="Resultado" className="min-h-[120px] rounded-xl border border-paper-line bg-paper-soft px-4 py-3 shadow-sm">
+    <div className="min-h-[120px] rounded-xl border border-paper-line bg-paper-soft px-4 py-3 shadow-sm">
       {resultBlock}
-    </section>
+    </div>
   );
 
   const graphSurface = (
-    <div className="flex min-h-[240px]">
+    <div className="flex h-full min-h-[240px]">
       <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
     </div>
   );
