@@ -113,25 +113,7 @@ test("S16 REG-004 Plus: log base 2 de 8 => 3", async ({ page }) => {
   await clear(dialog);
   await category(dialog, "Álgebra");
   await subcategory(dialog, "Logaritmos");
-  await page.evaluate(() => {
-    (window as Window & { __s16EscapeEvents?: string[] }).__s16EscapeEvents = [];
-    window.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        (window as Window & { __s16EscapeEvents?: string[] }).__s16EscapeEvents?.push(
-          `${event.isTrusted ? "trusted" : "synthetic"}:${(event.target as Element | null)?.tagName ?? "none"}`,
-        );
-      }
-    }, true);
-  });
   await press(dialog, "logaritmo base 2");
-  if (await dialog.count() === 0) {
-    const diagnostic = await page.evaluate(() => ({
-      escapes: (window as Window & { __s16EscapeEvents?: string[] }).__s16EscapeEvents,
-      fallback: document.body.innerText.includes("No se pudo mostrar el resultado"),
-      field: document.querySelector("math-field")?.getAttribute("value"),
-    }));
-    console.log("S16 log₂ keyboard diagnostic", diagnostic);
-  }
   // El núcleo numérico B6 debe seguir montado al insertar una plantilla.
   await expect(dialog).toBeVisible();
   await expect(dialog.getByTestId("keyboard-b6-core")).toBeVisible();

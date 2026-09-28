@@ -2,6 +2,15 @@ import { describe, expect, it } from "vitest";
 import { detectCalculusIntent } from "../components/calculusIntent";
 
 describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backend Python)", () => {
+  it("no interpreta plantillas logarítmicas incompletas como cálculo", () => {
+    for (const latex of [
+      "\\log_{2}\\left(\\right)",
+      "\\log_{2}\\left(\\placeholder{}\\right)",
+      "\\log_{2}\\left(\\square\\right)",
+    ]) {
+      expect(detectCalculusIntent(latex)).toBeNull();
+    }
+  });
   describe("derivada (escáner propio — nunca toca el validador de AST del backend)", () => {
     it("detecta el template de orden 1 que inserta el teclado", () => {
       expect(detectCalculusIntent("\\frac{d}{dx}\\left(x^2+3x\\right)")).toEqual({

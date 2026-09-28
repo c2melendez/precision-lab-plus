@@ -281,15 +281,15 @@ function getComputeEngine(): ComputeEngine {
 
 function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integral" }> | null {
   const trimmed = latex.trim();
-  if (trimmed.length === 0) return null;
+  if (!trimmed.startsWith("\\int")) return null;
 
-  let expr;
+  let json;
   try {
-    expr = getComputeEngine().parse(trimmed);
+    json = getComputeEngine().parse(trimmed)?.json;
   } catch {
     return null;
   }
-  if (!expr || !Array.isArray(expr.json) || expr.json[0] !== "Integrate") return null;
+  if (!Array.isArray(json) || json[0] !== "Integrate") return null;
 
   // ["Integrate", ["Function", ["Block", <cuerpo>], var], ["Limits", var, lowerOrNothing, upperOrNothing]]
   // Se navega solo por .json (no por .ops — la interfaz `Expression` de
@@ -297,7 +297,7 @@ function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integra
   // operandos como propiedad; se probó y confirmó contra el paquete
   // real, ver comentario de cabecera). Para volver a obtener LaTeX de un
   // fragmento de JSON se usa ce.box(fragment).latex.
-  const [, fnJson, limitsJson] = expr.json;
+  const [, fnJson, limitsJson] = json;
   if (!Array.isArray(fnJson) || fnJson[0] !== "Function") return null;
   let bodyJson = fnJson[1];
   if (Array.isArray(bodyJson) && bodyJson[0] === "Block") bodyJson = bodyJson[1];
@@ -365,21 +365,21 @@ function detectLateralLimit(latex: string): Extract<CalculusIntent, { kind: "lim
 
 function detectLimit(latex: string): Extract<CalculusIntent, { kind: "limit" }> | null {
   const trimmed = latex.trim();
-  if (trimmed.length === 0) return null;
+  if (!trimmed.startsWith("\\lim")) return null;
 
   const lateral = detectLateralLimit(trimmed);
   if (lateral) return lateral;
 
-  let expr;
+  let json;
   try {
-    expr = getComputeEngine().parse(trimmed);
+    json = getComputeEngine().parse(trimmed)?.json;
   } catch {
     return null;
   }
-  if (!expr || !Array.isArray(expr.json) || expr.json[0] !== "Limit") return null;
+  if (!Array.isArray(json) || json[0] !== "Limit") return null;
 
   // ["Limit", ["Function", ["Block", <cuerpo>], var], puntoONúmeroOSímboloInfinito]
-  const [, fnJson, pointJson] = expr.json;
+  const [, fnJson, pointJson] = json;
   if (!Array.isArray(fnJson) || fnJson[0] !== "Function") return null;
   let bodyJson = fnJson[1];
   if (Array.isArray(bodyJson) && bodyJson[0] === "Block") bodyJson = bodyJson[1];
