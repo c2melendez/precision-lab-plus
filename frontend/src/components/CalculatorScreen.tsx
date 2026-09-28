@@ -467,7 +467,7 @@ function FocusScreenContent({ angleBadge, inputField, resultBlock, canGraph, onG
       {angleBadge}
       {inputField}
       {resultBlock && <div className="rounded-xl bg-paper-soft px-5 py-4 text-center shadow-sm">{resultBlock}</div>}
-      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
     </div>
   );
 }
@@ -556,7 +556,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
         </button>
       )}
       <FloatingWindow title="Gráfica" rect={graphWindow} onChange={(rect) => setWindow("graph", rect)}>
-        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
       </FloatingWindow>
     </div>
   );
