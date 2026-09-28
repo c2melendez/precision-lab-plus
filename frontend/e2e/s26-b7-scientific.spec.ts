@@ -31,3 +31,76 @@ test.describe("S26 B7 — Científica", () => {
     });
   }
 });
+
+
+  test("orden visual Entrada → Resultado → Gráfica y shell contenido", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("./");
+    await page.evaluate(() => localStorage.setItem("precision-lab-layout-mode", "fused"));
+    await page.reload();
+
+    const scientific = page.locator("nav").getByRole("button", { name: "Científica", exact: true });
+    await scientific.click();
+
+    const shell = page.getByTestId("scientific-mode-shell");
+    const input = page.getByRole("region", { name: "Entrada" });
+    const resultText = page.getByText(/Introduce una expresión y envía el formulario para ver el resultado aquí\./i);
+    const graph = page.getByRole("note", { name: /Gráfica:/i });
+
+    await expect(shell).toBeVisible();
+    await expect(input).toBeVisible();
+    await expect(resultText).toBeVisible();
+    await expect(graph).toBeVisible();
+
+    const [shellBox, inputBox, resultBox, graphBox] = await Promise.all([
+      shell.boundingBox(),
+      input.boundingBox(),
+      resultText.boundingBox(),
+      graph.boundingBox(),
+    ]);
+
+    expect(shellBox).not.toBeNull();
+    expect(inputBox).not.toBeNull();
+    expect(resultBox).not.toBeNull();
+    expect(graphBox).not.toBeNull();
+
+    if (shellBox && inputBox && resultBox && graphBox) {
+      expect(shellBox.x).toBeGreaterThanOrEqual(-1);
+      expect(shellBox.x + shellBox.width).toBeLessThanOrEqual(1441);
+      expect(inputBox.y).toBeLessThan(resultBox.y);
+      expect(resultBox.y).toBeLessThan(graphBox.y);
+    }
+  });
+
+
+  test("superficies secundarias quedan subordinadas al flujo científico", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("./");
+    await page.evaluate(() => localStorage.setItem("precision-lab-layout-mode", "fused"));
+    await page.reload();
+
+    await page.locator("nav").getByRole("button", { name: "Científica", exact: true }).click();
+
+    const graph = page.getByRole("note", { name: /Gráfica:/i });
+    const examples = page.getByTestId("scientific-examples");
+    const advanced = page.getByTestId("scientific-advanced-options");
+
+    await expect(graph).toBeVisible();
+    await expect(examples).toBeVisible();
+    await expect(advanced).toBeVisible();
+    await expect(advanced).not.toHaveAttribute("open", "");
+
+    const [graphBox, examplesBox, advancedBox] = await Promise.all([
+      graph.boundingBox(),
+      examples.boundingBox(),
+      advanced.boundingBox(),
+    ]);
+    expect(graphBox).not.toBeNull();
+    expect(examplesBox).not.toBeNull();
+    expect(advancedBox).not.toBeNull();
+
+    if (graphBox && examplesBox && advancedBox) {
+      expect(graphBox.y + graphBox.height).toBeLessThanOrEqual(examplesBox.y + 1);
+      expect(examplesBox.y + examplesBox.height).toBeLessThanOrEqual(advancedBox.y + 1);
+    }
+  });
