@@ -40,6 +40,7 @@ interface ResultPanelProps {
   isLoading: boolean;
   inputLatex?: string;
   angleUnit?: "rad" | "deg";
+  showSteps?: boolean;
 }
 
 async function copyToClipboard(text: string): Promise<boolean> {
@@ -128,7 +129,7 @@ function SolutionListResult({ solutions }: { solutions: EquationSolution[] }) {
   );
 }
 
-export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "rad" }: ResultPanelProps) {
+export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "rad", showSteps = true }: ResultPanelProps) {
   const [format, setFormat] = useState<AnswerFormat>("dec");
   // Modo fracción propia/impropia (pedido explícito) — mismo criterio
   // que el toggle equivalente en Lite: default mixta cuando corresponde,
@@ -329,7 +330,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
         </div>
       )}
 
-      {result.has_detailed_steps && (
+      {showSteps && result.has_detailed_steps && (
         <section className="border-t border-paper-line pt-4" aria-label="Pasos">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-ink">Pasos</h3>
