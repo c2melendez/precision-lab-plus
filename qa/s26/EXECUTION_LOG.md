@@ -616,3 +616,4 @@ La próxima sesión debe iniciar con revisión visual, no con nueva implementaci
 - La envoltura de `App` ahora es un `div` neutro. `ResultPanel` conserva su región `Resultado` y su anuncio de cambios.
 - Los botones mantienen texto compacto `Copiar` / `LaTeX` y exponen nombres accesibles `Copiar resultado` / `Copiar como LaTeX`. Se actualizaron las aserciones unitarias que dependían del nombre anterior.
 - Verificación local: `npm run build` PASS; `ResultPanel.test.tsx` 25/25 PASS. Pendiente certificar S23, S21 y Playwright completos en Actions; B7 sigue EN CURSO.
+- Primer commit remoto `d4a8666`: S21 PASS. S23 falló en una aserción heredada que exigía un descendiente `aria-live`; tras eliminar la región externa redundante, la propia región Resultado lleva `aria-live="polite"`. Se ajusta la prueba para comprobar el atributo del elemento semántico real. Playwright completo seguía en ejecución al momento de este ajuste.
