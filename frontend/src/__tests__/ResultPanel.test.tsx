@@ -30,16 +30,18 @@ describe("ResultPanel", () => {
   });
 
   it("has_detailed_steps: false y result_latex: null — caso explícito del Módulo 11B", () => {
-    render(<ResultPanel result={baseResult} isLoading={false} />);
+    const { container } = render(<ResultPanel result={baseResult} isLoading={false} />);
 
     // Se muestra "procedimiento resumido", no un error ni un vacío.
     expect(screen.getByText(/Procedimiento resumido/)).toBeInTheDocument();
-    // Sin result_latex, cae a texto plano (result_text/result_approx).
-    expect(screen.getByText("3.14159")).toBeInTheDocument();
-    // "Copiar como LaTeX" debe estar deshabilitado porque result_latex es null.
-    expect(screen.getByRole("button", { name: "Copiar como LaTeX" })).toBeDisabled();
-    // "Copiar resultado" sigue habilitado (hay result_text/result_approx).
-    expect(screen.getByRole("button", { name: "Copiar resultado" })).toBeEnabled();
+    // Decimal también usa el renderer matemático; KaTeX puede duplicar el
+    // valor entre su capa visual y MathML, por eso se valida el contenedor.
+    expect(container.textContent).toContain("3.14159");
+    // B7: ambas acciones son compactas y copian la representación activa.
+    // Un número plano también es LaTeX canónico válido aunque result_latex
+    // original sea null.
+    expect(screen.getByRole("button", { name: "LaTeX" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Copiar" })).toBeEnabled();
     // Sin pasos detallados, StepList no debe renderizar nada.
     expect(screen.queryByLabelText("Procedimiento paso a paso")).not.toBeInTheDocument();
   });
@@ -98,7 +100,7 @@ describe("ResultPanel", () => {
     );
     expect(screen.getByLabelText("Procedimiento paso a paso")).toBeInTheDocument();
     expect(screen.getByText("Regla de la potencia")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Copiar como LaTeX" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "LaTeX" })).toBeEnabled();
   });
 
   it("renderiza una matriz (result_type: matrix, result_data: string[][])", () => {
@@ -199,15 +201,18 @@ describe("ResultPanel", () => {
     });
 
     it("formato 'dec' muestra la aproximación decimal", () => {
-      render(<ResultPanel result={fractionResult} isLoading={false} />);
+      const { container } = render(<ResultPanel result={fractionResult} isLoading={false} />);
       fireEvent.click(screen.getByRole("button", { name: "Decimal" }));
-      expect(screen.getByText(/0\.888/)).toBeInTheDocument();
+      expect(container.textContent).toContain("0.888");
     });
 
-    it("formato 'scn' muestra notación científica", () => {
-      render(<ResultPanel result={fractionResult} isLoading={false} />);
+    it("formato 'scn' muestra notación científica con tipografía matemática", () => {
+      const { container } = render(<ResultPanel result={fractionResult} isLoading={false} />);
       fireEvent.click(screen.getByRole("button", { name: "Científica" }));
-      expect(screen.getByText(/8\.888889e-1/)).toBeInTheDocument();
+      const text = container.textContent?.replace(/\s+/g, "") ?? "";
+      expect(text).toContain("8.888889");
+      expect(text).toContain("10");
+      expect(text).toContain("-1");
     });
 
     it("formato 'frac' muestra la fracción cuando result_latex ya es \\frac{}{}", () => {
@@ -322,9 +327,12 @@ describe("ResultPanel", () => {
     });
 
     it("DD conserva el valor en grados decimales con símbolo de grado", () => {
-      render(<ResultPanel result={baseResult} isLoading={false} inputLatex="56.55°" />);
+      const { container } = render(<ResultPanel result={baseResult} isLoading={false} inputLatex="56.55°" />);
       fireEvent.click(screen.getByRole("button", { name: "DD" }));
-      expect(screen.getByText("56.55°")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "DD" })).toHaveAttribute("aria-pressed", "true");
+      const text = container.textContent ?? "";
+      expect(text).toContain("56.55");
+      expect(text).toMatch(/[°∘]|circ/);
     });
 
     it("30.525° se presenta como 30° 31′ 30.0″", () => {
@@ -359,7 +367,8 @@ describe("ResultPanel", () => {
       expect(screen.queryByRole("button", { name: "Científica" })).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByRole("button", { name: "DD" }));
-      expect(screen.getByText("30°")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "DD" })).toHaveAttribute("aria-pressed", "true");
+      expect(container.textContent).toContain("30");
 
       fireEvent.click(screen.getByRole("button", { name: "DMS" }));
       const text = container.textContent?.replace(/\s+/g, "") ?? "";
