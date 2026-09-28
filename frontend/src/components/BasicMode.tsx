@@ -38,7 +38,7 @@
  * uso real.
  */
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { MathfieldElement } from "mathlive";
 
 import type { MathResponse } from "../api/client";
@@ -56,6 +56,7 @@ import { useLayoutModeStore } from "../store/useLayoutModeStore";
 import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStore";
 import type { HistoryEntry } from "../store/useHistoryStore";
 import { CalculatorScreen } from "./CalculatorScreen";
+import type { ScientificGraphState } from "./GraphPlaceholder";
 import { detectCalculusIntent, type CalculusIntent } from "./calculusIntent";
 import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
@@ -71,6 +72,36 @@ interface SubstitutionRow {
 // tal cual para que "escribo < o >, se resuelve como desigualdad" se
 // comporte igual sin importar desde qué pantalla se escribió.
 const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
+
+const GRAPH_NON_VARIABLE_IDENTIFIERS = new Set([
+  "sin", "cos", "tan", "sec", "csc", "cot",
+  "asin", "acos", "atan", "asec", "acsc", "acot",
+  "sinh", "cosh", "tanh", "sech", "csch", "coth",
+  "sqrt", "abs", "ln", "log", "exp",
+  "pi", "e", "i", "inf", "infinity", "oo",
+]);
+
+function classifyScientificGraphState(sourceLatex: string): ScientificGraphState {
+  const source = sourceLatex.trim();
+  if (!source) return "empty";
+
+  if (splitSystemLatex(source)) return "advanced";
+  if (detectCalculusIntent(source)) return "advanced";
+  if (/(^|[^A-Za-z])i([^A-Za-z]|$)/.test(source)) return "advanced";
+
+  const backend = latexToBackendSyntax(source);
+  if (!backend) return "empty";
+  if (INEQUALITY_OPERATOR_PATTERN.test(backend) || backend.includes("=")) return "advanced";
+
+  const identifiers = backend.match(/[A-Za-z_][A-Za-z0-9_]*/g) ?? [];
+  const variables = new Set(
+    identifiers.filter((identifier) => !GRAPH_NON_VARIABLE_IDENTIFIERS.has(identifier.toLowerCase())),
+  );
+
+  if (variables.size === 0) return "not-needed";
+  if (variables.size === 1) return "available";
+  return "advanced";
+}
 
 function backendExpressionToLatex(value: unknown): string {
   const source = String(value ?? "").trim();
@@ -201,6 +232,11 @@ export function BasicMode() {
   const [systemVariables, setSystemVariables] = useState("x, y");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<MathResponse | null>(null);
+
+  const graphState = useMemo<ScientificGraphState>(
+    () => classifyScientificGraphState(latex),
+    [latex],
+  );
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
@@ -772,6 +808,7 @@ export function BasicMode() {
           onClearField={() => setLatex("")}
           layoutMode={layoutMode}
           onGraphExpression={handleGraphExpression}
+          graphState={graphState}
           onReuseRecent={(entry) => {
             const payload = entry.requestPayload;
             setLatex(scientificHistoryEntryToLatex(entry));
