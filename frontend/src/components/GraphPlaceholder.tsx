@@ -5,13 +5,17 @@
  * semántico del orquestador y ofrece el puente explícito al módulo
  * Gráficas cuando existe contexto reutilizable.
  */
+import { useEffect, useState } from "react";
+import { callApi, type MathResponse } from "../api/client";
+import { graphPreviewGeometry } from "./graphPreviewGeometry";
+import type { ScientificGraphContext } from "./scientificGraphContext";
+
 export type ScientificGraphState =
   | "empty"
   | "available"
   | "not-needed"
   | "advanced"
   | "unavailable";
-import type { ScientificGraphContext } from "./scientificGraphContext";
 
 interface GraphPlaceholderProps {
   canGraph?: boolean;
@@ -36,6 +40,30 @@ export function GraphPlaceholder({
   context,
 }: GraphPlaceholderProps) {
   const canOpenGraphing = Boolean(onGraph) && canGraph && (state === "available" || state === "advanced");
+  const [preview, setPreview] = useState<MathResponse | null>(null);
+  const [isPreviewLoading, setPreviewLoading] = useState(false);
+
+  useEffect(() => {
+    const request = context?.operation === "function" && context.canonicalResult
+      ? context.graphRequest : null;
+    setPreview(null);
+    if (!request) {
+      setPreviewLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setPreviewLoading(true);
+    void callApi(request.endpoint, request.payload).then((response) => {
+      if (!cancelled) {
+        setPreview(response);
+        setPreviewLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [context]);
+
+  const geometry = preview?.success && preview.graph_data
+    ? graphPreviewGeometry(preview.graph_data) : null;
 
   return (
     <section
@@ -53,10 +81,24 @@ export function GraphPlaceholder({
           <>
             <div
               role="img"
-              aria-label="Vista previa pendiente de renderizado contextual"
-              className="grid h-24 w-full max-w-md place-items-center rounded-lg border border-dashed border-paper-line bg-paper/50"
+              aria-label={geometry
+                ? `Vista previa de función de ${context?.variables[0] ?? "x"}`
+                : "Vista previa pendiente de renderizado contextual"}
+              className="grid h-24 w-full max-w-md place-items-center overflow-hidden rounded-lg border border-paper-line bg-paper/50"
             >
-              <span className="text-[11px] text-muted">Vista previa contextual</span>
+              {geometry ? (
+                <svg data-testid="scientific-preview-plot" viewBox="0 0 320 120" preserveAspectRatio="none" className="h-full w-full text-graph" aria-hidden="true">
+                  {geometry.zeroX !== null && <line x1={geometry.zeroX} x2={geometry.zeroX} y1="0" y2="120" stroke="currentColor" opacity="0.2" />}
+                  {geometry.zeroY !== null && <line x1="0" x2="320" y1={geometry.zeroY} y2={geometry.zeroY} stroke="currentColor" opacity="0.2" />}
+                  {geometry.paths.map((path, index) => <path key={index} d={path} fill="none" stroke="currentColor" strokeWidth="2" vectorEffect="non-scaling-stroke" />)}
+                </svg>
+              ) : (
+                <span className="text-[11px] text-muted">
+                  {isPreviewLoading ? "Preparando vista previa…" : preview && !preview.success
+                    ? "Vista previa no disponible para esta función" : preview?.success
+                      ? "No hay curva real visible en este rango" : "Vista previa contextual"}
+                </span>
+              )}
             </div>
             <p className="max-w-md text-[11px] text-muted">
               {context?.operation === "function"

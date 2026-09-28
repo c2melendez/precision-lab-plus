@@ -118,6 +118,8 @@ test.describe("S26 B7 — Científica Plus", () => {
       .getByRole("button", { name: /calcular|evaluar/i }).first().click();
     expect((await evaluation).ok()).toBeTruthy();
     await expect(page.getByTestId("scientific-graph")).toContainText("con resultado conservado");
+    await expect(page.getByTestId("scientific-preview-plot")).toBeVisible();
+    await expect(page.getByTestId("scientific-preview-plot").locator("path")).toHaveCount(1);
 
     const graphResponse = page.waitForResponse((response) =>
       response.url().includes("/api/v1/graph/2d") && response.request().method() === "POST",
