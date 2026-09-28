@@ -111,7 +111,10 @@ export function CalculatorScreen({
   // tiene sentido ofrecerlo cuando hay algo escrito. El backend valida
   // de verdad si es graficable al recibir el click.
   const resolvedGraphState: ScientificGraphState = graphState ?? (latex.trim() ? "available" : "empty");
-  const canGraph = Boolean(onGraphExpression) && resolvedGraphState === "available";
+  const canGraph = Boolean(onGraphExpression) && (
+    resolvedGraphState === "available" ||
+    (resolvedGraphState === "advanced" && Boolean(graphContext?.graphRequest))
+  );
   // B7: la tarjeta "Entradas previas" representa la sesión actual de la
   // app, no el Historial persistente completo.
   const recentEntries = useHistoryStore((state) => state.entries)

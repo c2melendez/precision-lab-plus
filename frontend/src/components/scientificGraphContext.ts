@@ -5,6 +5,7 @@ export interface ScientificGraphContext {
   operation: "function" | "derivative" | "integral" | "limit" | "equation" | "system" | "inequality" | "complex" | "ode";
   originalExpression: string;
   inputLatex: string;
+  graphInputLatex: string[] | null;
   canonicalResult: {
     text: string | null;
     data: MathResponse["result_data"];
@@ -28,6 +29,7 @@ export function directFunctionGraphContext(
     operation: "function",
     originalExpression: expression,
     inputLatex,
+    graphInputLatex: [inputLatex],
     canonicalResult: result?.success
       ? { text: result.result_text ?? null, data: result.result_data ?? null }
       : null,
@@ -39,5 +41,35 @@ export function directFunctionGraphContext(
       endpoint: "/graph/2d",
       payload: { expressions: [expression], variable, angle_unit: angleUnit },
     },
+  };
+}
+
+export function derivativeGraphContext(
+  expression: string,
+  innerLatex: string,
+  inputLatex: string,
+  variable: string,
+  order: number,
+  angleUnit: "rad" | "deg",
+  result: MathResponse,
+  graphable: boolean,
+): ScientificGraphContext {
+  const derived = result.success ? result.result_text?.trim() : null;
+  const canGraph = graphable && Boolean(derived) && Boolean(result.result_latex);
+  return {
+    operation: "derivative",
+    originalExpression: expression,
+    inputLatex,
+    graphInputLatex: canGraph ? [innerLatex, result.result_latex!] : null,
+    canonicalResult: result.success
+      ? { text: derived ?? null, data: result.result_data ?? null } : null,
+    variables: [variable],
+    metadata: { order, angleUnit },
+    restrictions: null,
+    visualization: canGraph ? "cartesian-2d" : "advanced",
+    graphRequest: canGraph ? {
+      endpoint: "/graph/2d",
+      payload: { expressions: [expression, derived!], variable, angle_unit: angleUnit },
+    } : null,
   };
 }

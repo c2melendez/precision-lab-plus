@@ -44,7 +44,7 @@ export function GraphPlaceholder({
   const [isPreviewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
-    const request = context?.operation === "function" && context.canonicalResult
+    const request = (context?.operation === "function" || context?.operation === "derivative") && context.canonicalResult
       ? context.graphRequest : null;
     setPreview(null);
     if (!request) {
@@ -77,12 +77,12 @@ export function GraphPlaceholder({
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 py-6 text-center">
-        {state === "available" ? (
+        {(state === "available" || (state === "advanced" && context?.graphRequest)) ? (
           <>
             <div
               role="img"
               aria-label={geometry
-                ? `Vista previa de función de ${context?.variables[0] ?? "x"}`
+                ? `Vista previa de ${context?.operation === "derivative" ? "función y derivada" : "función"} de ${context?.variables[0] ?? "x"}`
                 : "Vista previa pendiente de renderizado contextual"}
               className="grid h-24 w-full max-w-md place-items-center overflow-hidden rounded-lg border border-paper-line bg-paper/50"
             >
@@ -90,7 +90,7 @@ export function GraphPlaceholder({
                 <svg data-testid="scientific-preview-plot" viewBox="0 0 320 120" preserveAspectRatio="none" className="h-full w-full text-graph" aria-hidden="true">
                   {geometry.zeroX !== null && <line x1={geometry.zeroX} x2={geometry.zeroX} y1="0" y2="120" stroke="currentColor" opacity="0.2" />}
                   {geometry.zeroY !== null && <line x1="0" x2="320" y1={geometry.zeroY} y2={geometry.zeroY} stroke="currentColor" opacity="0.2" />}
-                  {geometry.paths.map((path, index) => <path key={index} d={path} fill="none" stroke="currentColor" strokeWidth="2" vectorEffect="non-scaling-stroke" />)}
+                  {geometry.paths.map((path, index) => <path key={index} d={path} fill="none" stroke="currentColor" opacity={context?.operation === "derivative" && index === 0 ? 0.5 : 1} strokeWidth={context?.operation === "derivative" && index === 0 ? 1.5 : 2.5} vectorEffect="non-scaling-stroke" />)}
                 </svg>
               ) : (
                 <span className="text-[11px] text-muted">
@@ -101,7 +101,9 @@ export function GraphPlaceholder({
               )}
             </div>
             <p className="max-w-md text-[11px] text-muted">
-              {context?.operation === "function"
+              {context?.operation === "derivative"
+                ? `Función original y derivada de orden ${context.metadata.order} respecto de ${context.variables[0]}.`
+                : context?.operation === "function"
                 ? `Función de ${context.variables[0]} preparada para Gráficas${context.canonicalResult ? " con resultado conservado" : ""}.`
                 : "La vista ampliada conserva la expresión y el contexto matemático de la operación."}
             </p>

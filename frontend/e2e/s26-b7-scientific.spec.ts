@@ -138,6 +138,30 @@ test.describe("S26 B7 — Científica Plus", () => {
     )).toContain("y");
   });
 
+  test("derivada muestra dos curvas y transfiere ambas a Gráficas", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\frac{d}{dx}\\left(x^2+1\\right)");
+    const derivative = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/derivative") && response.request().method() === "POST",
+    );
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    expect((await derivative).ok()).toBeTruthy();
+
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("Función original y derivada de orden 1");
+    await expect(preview.getByTestId("scientific-preview-plot").locator("path")).toHaveCount(2);
+    const graphResponse = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/graph/2d") && response.request().method() === "POST",
+    );
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    const response = await graphResponse;
+    expect(response.ok()).toBeTruthy();
+    expect(response.request().postDataJSON().expressions).toHaveLength(2);
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("derivada de x");
+    await expect(page.locator('math-field[aria-label^="Expresión "]')).toHaveCount(2);
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

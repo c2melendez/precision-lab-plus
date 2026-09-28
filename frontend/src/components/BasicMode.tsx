@@ -62,7 +62,7 @@ import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
-import { directFunctionGraphContext } from "./scientificGraphContext";
+import { directFunctionGraphContext, derivativeGraphContext } from "./scientificGraphContext";
 
 interface SubstitutionRow {
   name: string;
@@ -108,6 +108,11 @@ function directGraphVariable(expression: string): string | null {
   const identifiers = expression.match(/[A-Za-z_][A-Za-z0-9_]*/g) ?? [];
   const variables = [...new Set(identifiers.filter((identifier) => !GRAPH_NON_VARIABLE_IDENTIFIERS.has(identifier.toLowerCase())))];
   return variables.length === 1 ? variables[0] : null;
+}
+
+function usesOnlyGraphVariable(expression: string, variable: string): boolean {
+  const identifiers = expression.match(/[A-Za-z_][A-Za-z0-9_]*/g) ?? [];
+  return identifiers.every((name) => GRAPH_NON_VARIABLE_IDENTIFIERS.has(name.toLowerCase()) || name === variable);
 }
 
 function backendExpressionToLatex(value: unknown): string {
@@ -244,12 +249,30 @@ export function BasicMode() {
     angleUnit: "rad" | "deg";
     result: MathResponse;
   } | null>(null);
+  const [lastDerived, setLastDerived] = useState<{
+    sourceLatex: string;
+    expression: string;
+    innerLatex: string;
+    variable: string;
+    order: number;
+    angleUnit: "rad" | "deg";
+    result: MathResponse;
+  } | null>(null);
 
   const graphState = useMemo<ScientificGraphState>(
     () => classifyScientificGraphState(latex),
     [latex],
   );
   const graphContext = useMemo(() => {
+    if (lastDerived?.sourceLatex === latex && lastDerived.angleUnit === angleUnit && lastDerived.result.success) {
+      const derived = lastDerived.result.result_text ?? "";
+      const graphable = usesOnlyGraphVariable(lastDerived.expression, lastDerived.variable)
+        && usesOnlyGraphVariable(derived, lastDerived.variable);
+      return derivativeGraphContext(
+        lastDerived.expression, lastDerived.innerLatex, latex, lastDerived.variable,
+        lastDerived.order, angleUnit, lastDerived.result, graphable,
+      );
+    }
     if (graphState !== "available") return null;
     const expression = latexToBackendSyntax(latex);
     const variable = directGraphVariable(expression);
@@ -257,7 +280,7 @@ export function BasicMode() {
     const result = lastEvaluated?.expression === expression && lastEvaluated.angleUnit === angleUnit
       ? lastEvaluated.result : null;
     return directFunctionGraphContext(expression, variable, angleUnit, result, latex);
-  }, [graphState, latex, angleUnit, lastEvaluated]);
+  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived]);
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
@@ -287,6 +310,7 @@ export function BasicMode() {
     }
     setLastResult(null);
     setLastEvaluated(null);
+    setLastDerived(null);
     setValidationError(null);
   }, [pendingHistoryReuse, takePendingHistoryReuse]);
 
@@ -495,6 +519,12 @@ export function BasicMode() {
                       latex,
                     );
       setLastResult(result);
+      if (intent.kind === "derivative" && result.success) {
+        setLastDerived({
+          sourceLatex: latex, expression: trimmedInner, innerLatex: intent.innerLatex,
+          variable: intent.variable, order: intent.order, angleUnit, result,
+        });
+      }
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
@@ -506,6 +536,7 @@ export function BasicMode() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     setLastEvaluated(null);
+    setLastDerived(null);
 
     if (systemRows) {
       await submitSystem(systemRows);
@@ -855,6 +886,7 @@ export function BasicMode() {
             }
             setLastResult(null);
             setLastEvaluated(null);
+            setLastDerived(null);
             setValidationError(null);
             requestAnimationFrame(() => mathField?.focus());
           }}
