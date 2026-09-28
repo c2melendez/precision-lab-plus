@@ -76,25 +76,11 @@ describe("BasicMode", () => {
     });
   });
 
-  it("incluye substitutions cuando el usuario añade una fila", async () => {
+  it("no muestra Sustituciones como bloque permanente en Científica", () => {
     render(<BasicMode />);
-    fireEvent.change(screen.getByLabelText("Expresión"), { target: { value: "x+1" } });
-    fireEvent.click(screen.getByRole("button", { name: "+ Añadir sustitución" }));
-    fireEvent.change(screen.getByLabelText("Nombre de la variable 1"), {
-      target: { value: "x" },
-    });
-    fireEvent.change(screen.getByLabelText("Valor de la variable 1"), {
-      target: { value: "3" },
-    });
-    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
-
-    await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
-
-    expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
-      expression: "x+1",
-      angle_unit: "rad",
-      substitutions: { x: "3" },
-    });
+    expect(screen.queryByRole("button", { name: "+ Añadir sustitución" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Nombre de la variable/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Valor de la variable/)).not.toBeInTheDocument();
   });
 
   it("no llama a la API con una expresión vacía (payload inválido)", () => {
