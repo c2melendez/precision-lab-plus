@@ -609,3 +609,10 @@ La próxima sesión debe iniciar con revisión visual, no con nueva implementaci
 - B6: **PASS DEFINITIVO**.
 - B7 — Científica: **EN CURSO**.
 - Política B7: no tocar motor matemático salvo defecto reproducible.
+
+## 2026-09-28 — B7 Plus: regiones y acciones de copia
+
+- En el HEAD `11fc106`, `App.tsx` nombraba `Resultado` a la envoltura de todo el modo activo y `ResultPanel` nombraba igual a su propia región. Esto explica la duplicación detectada por S23 y Playwright; no dependía de un merge ref distinto.
+- La envoltura de `App` ahora es un `div` neutro. `ResultPanel` conserva su región `Resultado` y su anuncio de cambios.
+- Los botones mantienen texto compacto `Copiar` / `LaTeX` y exponen nombres accesibles `Copiar resultado` / `Copiar como LaTeX`. Se actualizaron las aserciones unitarias que dependían del nombre anterior.
+- Verificación local: `npm run build` PASS; `ResultPanel.test.tsx` 25/25 PASS. Pendiente certificar S23, S21 y Playwright completos en Actions; B7 sigue EN CURSO.

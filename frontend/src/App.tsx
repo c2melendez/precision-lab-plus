@@ -249,11 +249,11 @@ export default function App() {
             </p>
           )}
 
-          <section aria-live="polite" aria-label="Resultado" className="min-w-0">
+          <div className="min-w-0">
             <ErrorBoundary fallbackLabel="No se pudo mostrar el resultado.">
               <ActiveModeForm mode={activeMode} />
             </ErrorBoundary>
-          </section>
+          </div>
         </main>
 
         <HistoryDrawer isOpen={showHistory} onClose={() => setShowHistory(false)}>

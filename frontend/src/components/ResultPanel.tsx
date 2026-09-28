@@ -71,7 +71,7 @@ async function copyToClipboard(text: string): Promise<boolean> {
   }
 }
 
-function CopyButton({ text, label }: { text: string | null; label: string }) {
+function CopyButton({ text, label, accessibleLabel }: { text: string | null; label: string; accessibleLabel: string }) {
   const [justCopied, setJustCopied] = useState(false);
 
   async function handleClick(): Promise<void> {
@@ -88,6 +88,7 @@ function CopyButton({ text, label }: { text: string | null; label: string }) {
       type="button"
       onClick={handleClick}
       disabled={text === null}
+      aria-label={accessibleLabel}
       className="rounded-md px-2 py-1 text-[11px] font-medium text-muted hover:bg-paper-line/40 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
     >
       {justCopied ? "¡Copiado!" : label}
@@ -382,8 +383,8 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
 
       {(activeCopyText || activeCopyLatex) && (
         <div className="flex justify-end gap-1">
-          <CopyButton text={activeCopyText || null} label="Copiar" />
-          <CopyButton text={activeCopyLatex || null} label="LaTeX" />
+          <CopyButton text={activeCopyText || null} label="Copiar" accessibleLabel="Copiar resultado" />
+          <CopyButton text={activeCopyLatex || null} label="LaTeX" accessibleLabel="Copiar como LaTeX" />
         </div>
       )}
 

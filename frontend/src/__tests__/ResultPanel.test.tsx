@@ -40,8 +40,8 @@ describe("ResultPanel", () => {
     // B7: ambas acciones son compactas y copian la representación activa.
     // Un número plano también es LaTeX canónico válido aunque result_latex
     // original sea null.
-    expect(screen.getByRole("button", { name: "LaTeX" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Copiar" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Copiar como LaTeX" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Copiar resultado" })).toBeEnabled();
     // Sin pasos detallados, StepList no debe renderizar nada.
     expect(screen.queryByLabelText("Procedimiento paso a paso")).not.toBeInTheDocument();
   });
@@ -100,7 +100,7 @@ describe("ResultPanel", () => {
     );
     expect(screen.getByLabelText("Procedimiento paso a paso")).toBeInTheDocument();
     expect(screen.getByText("Regla de la potencia")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "LaTeX" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Copiar como LaTeX" })).toBeEnabled();
   });
 
   it("renderiza una matriz (result_type: matrix, result_data: string[][])", () => {
