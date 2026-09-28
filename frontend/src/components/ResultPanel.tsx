@@ -396,6 +396,6 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
           <StepList steps={result.steps} />
         </section>
       )}
-    </div>
+    </section>
   );
 }
