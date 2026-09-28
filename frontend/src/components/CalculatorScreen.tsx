@@ -39,7 +39,7 @@ import type { ReactNode } from "react";
 
 import type { MathResponse } from "../api/client";
 import { useFloatingLayoutStore } from "../store/useFloatingLayoutStore";
-import { useHistoryStore } from "../store/useHistoryStore";
+import { useHistoryStore, type HistoryEntry } from "../store/useHistoryStore";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import type { LayoutMode } from "../store/useLayoutModeStore";
 import { FloatingWindow } from "./FloatingWindow";
@@ -48,7 +48,10 @@ import { KeyboardIcon } from "./KeyboardIcon";
 import { MathRenderer } from "./MathRenderer";
 import { NaturalMathField } from "./NaturalMathField";
 import { ResultPanel } from "./ResultPanel";
+import { StepList } from "./StepList";
 import { useMinWidthMediaQuery, FLOATING_MIN_WIDTH_PX } from "../hooks/useMinWidthMediaQuery";
+
+const SCIENTIFIC_SESSION_STARTED_AT = Date.now();
 
 interface CalculatorScreenProps {
   latex: string;
@@ -80,6 +83,7 @@ interface CalculatorScreenProps {
    * solo BasicMode.tsx). Sin esta prop, GraphPlaceholder muestra el
    * estado vacío de siempre. */
   onGraphExpression?: () => void;
+  onReuseRecent?: (entry: HistoryEntry) => void;
 }
 
 export function CalculatorScreen({
@@ -96,17 +100,17 @@ export function CalculatorScreen({
   onClearField,
   layoutMode = "fused",
   onGraphExpression,
+  onReuseRecent,
 }: CalculatorScreenProps) {
   // Botón "Graficar" (cuadrante de gráfica, las 6 disposiciones): solo
   // tiene sentido ofrecerlo cuando hay algo escrito. El backend valida
   // de verdad si es graficable al recibir el click.
   const canGraph = Boolean(onGraphExpression) && latex.trim().length > 0;
-  // Las entradas se guardan más-nuevo-primero (ver useHistoryStore.ts:
-  // `[newEntry, ...get().entries]`) — se toman las 2 más recientes y se
-  // invierten para que la cinta crezca hacia arriba, como en Lite.
+  // B7: la tarjeta "Entradas previas" representa la sesión actual de la
+  // app, no el Historial persistente completo.
   const recentEntries = useHistoryStore((state) => state.entries)
-    .slice(0, 2)
-    .reverse();
+    .filter((entry) => entry.timestamp >= SCIENTIFIC_SESSION_STARTED_AT)
+    .slice(0, 5);
 
   const angleBadge = angleUnit && onToggleAngleUnit && (
     <div className="flex justify-end">
@@ -121,28 +125,42 @@ export function CalculatorScreen({
     </div>
   );
 
-  const historyRibbon = recentEntries.length > 0 && (
-    <div className="flex max-h-24 flex-col gap-1.5 overflow-y-auto">
-      {recentEntries.map((entry, i) => (
-        <div key={entry.id} className={i === recentEntries.length - 1 ? "opacity-70" : "opacity-40"}>
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="truncate font-mono text-sm text-muted">{entry.inputText ?? entry.label}</span>
-            {entry.resultLatex ? (
-              <MathRenderer
-                latex={entry.resultLatex}
-                fallbackText={entry.resultText}
-                className="shrink-0 font-mono text-sm font-semibold text-marker-text"
-              />
-            ) : (
-              <span className="shrink-0 font-mono text-sm font-semibold text-marker-text">
-                {entry.resultText ?? "—"}
-              </span>
-            )}
-          </div>
-        </div>
+  const historyRibbon = recentEntries.length > 0 ? (
+    <div className="flex min-w-0 flex-col gap-1.5">
+      {recentEntries.map((entry, index) => (
+        <button
+          key={entry.id}
+          type="button"
+          onClick={() => onReuseRecent?.(entry)}
+          disabled={!onReuseRecent}
+          aria-label={`Reusar entrada ${index + 1}`}
+          title="Reusar en Entrada"
+          className={`flex min-w-0 items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-left hover:bg-paper-line/40 disabled:cursor-default ${
+            index === 0 ? "opacity-100" : index < 3 ? "opacity-80" : "opacity-65"
+          }`}
+        >
+          <span className="min-w-0 flex-1 overflow-hidden">
+            <MathRenderer
+              latex={entry.inputText ?? entry.label}
+              fallbackText={entry.label}
+              className="text-sm text-ink"
+            />
+          </span>
+          {entry.resultLatex ? (
+            <MathRenderer
+              latex={entry.resultLatex}
+              fallbackText={entry.resultText}
+              className="max-w-[45%] shrink-0 overflow-hidden text-sm font-medium text-marker-text"
+            />
+          ) : (
+            <span className="max-w-[45%] shrink-0 truncate text-xs text-muted">
+              {entry.resultText ?? "—"}
+            </span>
+          )}
+        </button>
       ))}
     </div>
-  );
+  ) : null;
 
   const inputField = (
     <div className="relative">
@@ -187,7 +205,107 @@ export function CalculatorScreen({
   );
 
 
-  const resultBlock = <ResultPanel result={result} isLoading={isLoading} inputLatex={latex} angleUnit={angleUnit} />;
+  const resultBlock = <ResultPanel result={result} isLoading={isLoading} inputLatex={latex} angleUnit={angleUnit} showSteps={false} />;
+
+  const recentSurface = (
+    <section aria-label="Entradas previas" className="min-h-[120px] rounded-xl border border-paper-line bg-paper-soft shadow-sm">
+      <div className="flex items-center justify-between border-b border-paper-line px-4 py-2.5">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Entradas previas</p>
+        <span className="text-[11px] text-muted">Sesión actual · hasta 5</span>
+      </div>
+      <div className="px-3 py-2">
+        {historyRibbon ?? <p className="px-1 py-3 text-xs text-muted">Tus cálculos recientes de esta sesión aparecerán aquí.</p>}
+      </div>
+    </section>
+  );
+
+  const resultSurface = (
+    <section aria-label="Resultado" className="min-h-[120px] rounded-xl border border-paper-line bg-paper-soft px-4 py-3 shadow-sm">
+      {resultBlock}
+    </section>
+  );
+
+  const graphSurface = (
+    <div className="flex min-h-[240px]">
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+    </div>
+  );
+
+  const isB7Layout =
+    layoutMode === "fused" ||
+    layoutMode === "split" ||
+    layoutMode === "focus" ||
+    layoutMode === "separated";
+
+  if (isB7Layout) {
+    const gridClass =
+      layoutMode === "fused"
+        ? "lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,1.1fr)] lg:grid-rows-[auto_auto_minmax(140px,1fr)]"
+        : layoutMode === "split"
+          ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.75fr)_minmax(340px,1fr)] lg:grid-rows-[auto_minmax(180px,1fr)]"
+          : layoutMode === "focus"
+            ? "lg:grid-cols-[minmax(230px,0.8fr)_minmax(0,1.35fr)_minmax(340px,1fr)] lg:grid-rows-[auto_minmax(180px,1fr)]"
+            : "lg:grid-cols-2 lg:grid-rows-[auto_minmax(220px,1fr)]";
+
+    const inputPlacement =
+      layoutMode === "fused"
+        ? "lg:col-start-1 lg:row-start-1"
+        : layoutMode === "split"
+          ? "lg:col-start-1 lg:col-span-2 lg:row-start-1"
+          : layoutMode === "focus"
+            ? "lg:col-start-1 lg:row-start-1"
+            : "lg:col-start-1 lg:row-start-1";
+
+    const resultPlacement =
+      layoutMode === "fused"
+        ? "lg:col-start-1 lg:row-start-2"
+        : layoutMode === "split"
+          ? "lg:col-start-1 lg:row-start-2"
+          : layoutMode === "focus"
+            ? "lg:col-start-2 lg:row-start-1 lg:row-span-2"
+            : "lg:col-start-2 lg:row-start-1";
+
+    const recentPlacement =
+      layoutMode === "fused"
+        ? "lg:col-start-1 lg:row-start-3"
+        : layoutMode === "split"
+          ? "lg:col-start-2 lg:row-start-2"
+          : layoutMode === "focus"
+            ? "lg:col-start-1 lg:row-start-2"
+            : "lg:col-start-1 lg:row-start-2";
+
+    const graphPlacement =
+      layoutMode === "fused"
+        ? "lg:col-start-2 lg:row-start-1 lg:row-span-3"
+        : layoutMode === "split"
+          ? "lg:col-start-3 lg:row-start-1 lg:row-span-2"
+          : layoutMode === "focus"
+            ? "lg:col-start-3 lg:row-start-1 lg:row-span-2"
+            : "lg:col-start-2 lg:row-start-2";
+
+    return (
+      <div className="flex min-w-0 flex-col gap-3">
+        {angleBadge}
+        <div className={`grid min-w-0 grid-cols-1 gap-3 ${gridClass}`}>
+          <div className={`min-w-0 ${inputPlacement}`}>{inputSurface}</div>
+          <div className={`min-w-0 ${resultPlacement}`}>{resultSurface}</div>
+          <div className={`min-w-0 ${recentPlacement}`}>{recentSurface}</div>
+          <div className={`min-w-0 ${graphPlacement}`}>{graphSurface}</div>
+        </div>
+
+        {result?.success && result.has_detailed_steps && result.steps.length > 0 && (
+          <section aria-label="Pasos de solución" className="rounded-xl border border-paper-line bg-paper-soft p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-ink">Pasos de solución</h3>
+              <span className="text-xs text-muted">{result.steps.length} {result.steps.length === 1 ? "paso" : "pasos"}</span>
+            </div>
+            <StepList steps={result.steps} />
+          </section>
+        )}
+      </div>
+    );
+  }
+
 
   // "stacked" (Apilado, Módulo P3): una sola columna, teclado como
   // sección colapsada inline (no overlay). Ver Screen.tsx (Lite) para el
