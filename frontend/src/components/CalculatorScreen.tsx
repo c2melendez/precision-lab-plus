@@ -43,7 +43,7 @@ import { useHistoryStore, type HistoryEntry } from "../store/useHistoryStore";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import type { LayoutMode } from "../store/useLayoutModeStore";
 import { FloatingWindow } from "./FloatingWindow";
-import { GraphPlaceholder } from "./GraphPlaceholder";
+import { GraphPlaceholder, type ScientificGraphState } from "./GraphPlaceholder";
 import { KeyboardIcon } from "./KeyboardIcon";
 import { MathRenderer } from "./MathRenderer";
 import { NaturalMathField } from "./NaturalMathField";
@@ -83,6 +83,7 @@ interface CalculatorScreenProps {
    * solo BasicMode.tsx). Sin esta prop, GraphPlaceholder muestra el
    * estado vacío de siempre. */
   onGraphExpression?: () => void;
+  graphState?: ScientificGraphState;
   onReuseRecent?: (entry: HistoryEntry) => void;
 }
 
@@ -100,12 +101,14 @@ export function CalculatorScreen({
   onClearField,
   layoutMode = "fused",
   onGraphExpression,
+  graphState,
   onReuseRecent,
 }: CalculatorScreenProps) {
   // Botón "Graficar" (cuadrante de gráfica, las 6 disposiciones): solo
   // tiene sentido ofrecerlo cuando hay algo escrito. El backend valida
   // de verdad si es graficable al recibir el click.
-  const canGraph = Boolean(onGraphExpression) && latex.trim().length > 0;
+  const resolvedGraphState: ScientificGraphState = graphState ?? (latex.trim() ? "available" : "empty");
+  const canGraph = Boolean(onGraphExpression) && resolvedGraphState === "available";
   // B7: la tarjeta "Entradas previas" representa la sesión actual de la
   // app, no el Historial persistente completo.
   const recentEntries = useHistoryStore((state) => state.entries)
@@ -227,7 +230,7 @@ export function CalculatorScreen({
 
   const graphSurface = (
     <div className="flex min-h-[240px]">
-      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
     </div>
   );
 
@@ -317,7 +320,7 @@ export function CalculatorScreen({
         {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
         {inputSurface}
         {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
         <StackedKeyboardSection />
       </div>
     );
@@ -361,7 +364,7 @@ export function CalculatorScreen({
         {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
         {inputSurface}
         {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
       </div>
     );
   }
@@ -383,7 +386,7 @@ export function CalculatorScreen({
           </div>
           <div className="flex flex-col gap-3">
             {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-            <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+            <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
           </div>
         </div>
       </div>
@@ -403,7 +406,7 @@ export function CalculatorScreen({
 
         {resultBlock && <div className="mt-3 border-t border-paper-line pt-3">{resultBlock}</div>}
       </div>
-      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
     </div>
   );
 }
@@ -464,7 +467,7 @@ function FocusScreenContent({ angleBadge, inputField, resultBlock, canGraph, onG
       {angleBadge}
       {inputField}
       {resultBlock && <div className="rounded-xl bg-paper-soft px-5 py-4 text-center shadow-sm">{resultBlock}</div>}
-      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
     </div>
   );
 }
@@ -553,7 +556,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
         </button>
       )}
       <FloatingWindow title="Gráfica" rect={graphWindow} onChange={(rect) => setWindow("graph", rect)}>
-        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} />
       </FloatingWindow>
     </div>
   );
