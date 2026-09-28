@@ -162,6 +162,34 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(page.locator('math-field[aria-label^="Expresión "]')).toHaveCount(2);
   });
 
+  test("integral indefinida conserva +C y grafica la antiderivada con C=0", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\int x^2\\,dx");
+    const integral = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/integral") && response.request().method() === "POST",
+    );
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const integralResponse = await integral;
+    expect(integralResponse.ok()).toBeTruthy();
+    expect((await integralResponse.json()).result_text).toBe("x**3/3 + C");
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("C=0 solo en la gráfica");
+    await expect(preview.getByTestId("scientific-preview-plot").locator("path")).toHaveCount(2);
+    const graphResponse = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/graph/2d") && response.request().method() === "POST",
+    );
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    const graph = await graphResponse;
+    expect(graph.ok()).toBeTruthy();
+    const expressions = graph.request().postDataJSON().expressions;
+    expect(expressions).toHaveLength(2);
+    expect(expressions[0]).toContain("x");
+    expect(expressions[1]).toBe("x**3/3");
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("integral de x");
+    await expect(page.locator('math-field[aria-label^="Expresión "]')).toHaveCount(2);
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

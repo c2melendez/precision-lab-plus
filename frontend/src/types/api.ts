@@ -1079,6 +1079,10 @@ export interface components {
             result_latex?: string | null;
             /** Result Text */
             result_text?: string | null;
+            /** Canonical antiderivative without + C, for graphing. */
+            antiderivative_expression?: string | null;
+            /** Antiderivative LaTeX without + C, for editing in Graphs. */
+            antiderivative_latex?: string | null;
             /** Result Approx */
             result_approx?: number | null;
             /** Result Data */

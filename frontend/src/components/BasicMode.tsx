@@ -62,7 +62,7 @@ import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
-import { directFunctionGraphContext, derivativeGraphContext } from "./scientificGraphContext";
+import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext } from "./scientificGraphContext";
 
 interface SubstitutionRow {
   name: string;
@@ -258,12 +258,29 @@ export function BasicMode() {
     angleUnit: "rad" | "deg";
     result: MathResponse;
   } | null>(null);
+  const [lastIntegral, setLastIntegral] = useState<{
+    sourceLatex: string;
+    expression: string;
+    innerLatex: string;
+    variable: string;
+    angleUnit: "rad" | "deg";
+    result: MathResponse;
+  } | null>(null);
 
   const graphState = useMemo<ScientificGraphState>(
     () => classifyScientificGraphState(latex),
     [latex],
   );
   const graphContext = useMemo(() => {
+    if (lastIntegral?.sourceLatex === latex && lastIntegral.angleUnit === angleUnit && lastIntegral.result.success) {
+      const antiderivative = lastIntegral.result.antiderivative_expression ?? "";
+      const graphable = usesOnlyGraphVariable(lastIntegral.expression, lastIntegral.variable)
+        && usesOnlyGraphVariable(antiderivative, lastIntegral.variable);
+      return indefiniteIntegralGraphContext(
+        lastIntegral.expression, lastIntegral.innerLatex, latex, lastIntegral.variable,
+        angleUnit, lastIntegral.result, graphable,
+      );
+    }
     if (lastDerived?.sourceLatex === latex && lastDerived.angleUnit === angleUnit && lastDerived.result.success) {
       const derived = lastDerived.result.result_text ?? "";
       const graphable = usesOnlyGraphVariable(lastDerived.expression, lastDerived.variable)
@@ -280,7 +297,7 @@ export function BasicMode() {
     const result = lastEvaluated?.expression === expression && lastEvaluated.angleUnit === angleUnit
       ? lastEvaluated.result : null;
     return directFunctionGraphContext(expression, variable, angleUnit, result, latex);
-  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived]);
+  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral]);
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
@@ -311,6 +328,7 @@ export function BasicMode() {
     setLastResult(null);
     setLastEvaluated(null);
     setLastDerived(null);
+    setLastIntegral(null);
     setValidationError(null);
   }, [pendingHistoryReuse, takePendingHistoryReuse]);
 
@@ -525,6 +543,12 @@ export function BasicMode() {
           variable: intent.variable, order: intent.order, angleUnit, result,
         });
       }
+      if (intent.kind === "integral" && intent.lowerBound === null && result.success) {
+        setLastIntegral({
+          sourceLatex: latex, expression: trimmedInner, innerLatex: intent.innerLatex,
+          variable: intent.variable, angleUnit, result,
+        });
+      }
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
@@ -537,6 +561,7 @@ export function BasicMode() {
     event.preventDefault();
     setLastEvaluated(null);
     setLastDerived(null);
+    setLastIntegral(null);
 
     if (systemRows) {
       await submitSystem(systemRows);
@@ -887,6 +912,7 @@ export function BasicMode() {
             setLastResult(null);
             setLastEvaluated(null);
             setLastDerived(null);
+            setLastIntegral(null);
             setValidationError(null);
             requestAnimationFrame(() => mathField?.focus());
           }}

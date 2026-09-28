@@ -64,12 +64,41 @@ export function derivativeGraphContext(
     canonicalResult: result.success
       ? { text: derived ?? null, data: result.result_data ?? null } : null,
     variables: [variable],
-    metadata: { order, angleUnit },
+    metadata: { order, angleUnit: "rad", inputAngleUnit: angleUnit },
     restrictions: null,
     visualization: canGraph ? "cartesian-2d" : "advanced",
     graphRequest: canGraph ? {
       endpoint: "/graph/2d",
-      payload: { expressions: [expression, derived!], variable, angle_unit: angleUnit },
+      payload: { expressions: [expression, derived!], variable, angle_unit: "rad" },
+    } : null,
+  };
+}
+
+export function indefiniteIntegralGraphContext(
+  expression: string,
+  innerLatex: string,
+  inputLatex: string,
+  variable: string,
+  angleUnit: "rad" | "deg",
+  result: MathResponse,
+  graphable: boolean,
+): ScientificGraphContext {
+  const antiderivative = result.antiderivative_expression?.trim();
+  const canGraph = result.success && graphable && Boolean(antiderivative) && Boolean(result.antiderivative_latex);
+  return {
+    operation: "integral",
+    originalExpression: expression,
+    inputLatex,
+    graphInputLatex: canGraph ? [innerLatex, result.antiderivative_latex!] : null,
+    canonicalResult: result.success
+      ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
+    variables: [variable],
+    metadata: { kind: "indefinite", visualConstant: 0, angleUnit: "rad", inputAngleUnit: angleUnit },
+    restrictions: null,
+    visualization: canGraph ? "cartesian-2d" : "advanced",
+    graphRequest: canGraph ? {
+      endpoint: "/graph/2d",
+      payload: { expressions: [expression, antiderivative!], variable, angle_unit: "rad" },
     } : null,
   };
 }

@@ -246,6 +246,10 @@ class MathResponse(BaseModel):
     input_latex: Optional[str] = None
     result_latex: Optional[str] = None
     result_text: Optional[str] = None
+    # B7: expresión reutilizable de una integral, sin la constante de
+    # integración. `result_text` y `result_latex` siguen mostrando + C.
+    antiderivative_expression: Optional[str] = None
+    antiderivative_latex: Optional[str] = None
     result_approx: Optional[float] = None
     result_data: Optional[Union[List[EquationSolution], List[List[str]]]] = None
     steps: List[Step] = []

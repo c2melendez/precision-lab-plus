@@ -32,6 +32,9 @@ def test_indefinite_sin_x_includes_plus_c():
     assert body["has_detailed_steps"] is True
     assert body["result_text"].endswith("+ C")
     assert body["result_latex"].endswith("+ C")
+    assert body["antiderivative_expression"] == "-cos(x)"
+    assert "\\cos" in body["antiderivative_latex"]
+    assert not body["antiderivative_latex"].endswith("+ C")
     assert any(step["rule"] == "SinRule" for step in body["steps"])
 
 
@@ -46,6 +49,7 @@ def test_definite_integral_minimum_three_steps():
     assert "EvaluateBounds" in rule_names
     # ∫[0,2] x**2 dx = 8/3
     assert body["result_text"] == "8/3"
+    assert body["antiderivative_expression"] == "x**3/3"
 
 
 def test_fallback_for_unmapped_rule_sin_of_sin():

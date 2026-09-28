@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MathResponse } from "../api/client";
-import { directFunctionGraphContext, derivativeGraphContext } from "../components/scientificGraphContext";
+import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext } from "../components/scientificGraphContext";
 
 describe("contexto canónico de función directa", () => {
   it("conserva la expresión de entrada y el resultado del motor, sin leer texto visual", () => {
@@ -30,6 +30,40 @@ describe("contexto canónico de función directa", () => {
   });
 });
 
+describe("contexto canónico de integral indefinida", () => {
+  it("grafica C=0 desde campos estructurados y conserva +C en Resultado", () => {
+    const result = {
+      success: true,
+      result_text: "x**3/3 + C",
+      result_latex: "\\frac{x^{3}}{3} + C",
+      antiderivative_expression: "x**3/3",
+      antiderivative_latex: "\\frac{x^{3}}{3}",
+    } as MathResponse;
+    const context = indefiniteIntegralGraphContext("x^2", "x^2", "\\int x^2\\,dx", "x", "rad", result, true);
+    expect(context.canonicalResult?.text).toBe("x**3/3 + C");
+    expect(context.metadata).toMatchObject({ kind: "indefinite", visualConstant: 0 });
+    expect(context.graphRequest?.payload.expressions).toEqual(["x^2", "x**3/3"]);
+    expect(context.graphInputLatex).toEqual(["x^2", "\\frac{x^{3}}{3}"]);
+  });
+
+  it("usa la semántica en radianes del endpoint aunque la UI esté en grados", () => {
+    const result = {
+      success: true, result_text: "-cos(x) + C",
+      antiderivative_expression: "-cos(x)", antiderivative_latex: "-\\cos(x)",
+    } as MathResponse;
+    const context = indefiniteIntegralGraphContext("sin(x)", "\\sin(x)", "\\int\\sin(x)\\,dx", "x", "deg", result, true);
+    expect(context.graphRequest?.payload.angle_unit).toBe("rad");
+    expect(context.metadata.inputAngleUnit).toBe("deg");
+  });
+
+  it("no usa el texto mostrado para deducir una antiderivada ausente", () => {
+    const result = { success: true, result_text: "x**3/3 + C", result_latex: "\\frac{x^3}{3}+C" } as MathResponse;
+    const context = indefiniteIntegralGraphContext("x^2", "x^2", "integral", "x", "rad", result, true);
+    expect(context.graphRequest).toBeNull();
+    expect(context.visualization).toBe("advanced");
+  });
+});
+
 describe("contexto canónico de derivada", () => {
   it("transfiere original y resultado del motor con orden y variable", () => {
     const result = {
@@ -39,7 +73,7 @@ describe("contexto canónico de derivada", () => {
     expect(context.canonicalResult?.text).toBe("2*x");
     expect(context.graphRequest?.payload.expressions).toEqual(["x^2+1", "2*x"]);
     expect(context.graphInputLatex).toEqual(["x^2+1", "2 x"]);
-    expect(context.metadata).toEqual({ order: 1, angleUnit: "rad" });
+    expect(context.metadata).toEqual({ order: 1, angleUnit: "rad", inputAngleUnit: "rad" });
   });
 
   it("no ofrece una curva cartesiana cuando el resultado depende de otro parámetro", () => {
