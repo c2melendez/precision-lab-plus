@@ -32,7 +32,7 @@ test.describe("S26 B7 — Científica", () => {
 
       await expect(page.getByRole("region", { name: "Entrada" })).toBeVisible();
       await expect(page.getByText(/Introduce una expresión y envía el formulario para ver el resultado aquí\./i)).toBeVisible();
-      await expect(page.getByRole("note", { name: /Gráfica:/i })).toBeVisible();
+      await expect(page.getByTestId("scientific-graph")).toBeVisible();
 
       const metrics = await page.evaluate(() => ({
         viewport: document.documentElement.clientWidth,
@@ -56,7 +56,7 @@ test.describe("S26 B7 — Científica", () => {
     const shell = page.getByTestId("scientific-mode-shell");
     const input = page.getByRole("region", { name: "Entrada" });
     const resultText = page.getByText(/Introduce una expresión y envía el formulario para ver el resultado aquí\./i);
-    const graph = page.getByRole("note", { name: /Gráfica:/i });
+    const graph = page.getByTestId("scientific-graph");
 
     await expect(shell).toBeVisible();
     await expect(input).toBeVisible();
@@ -92,7 +92,7 @@ test.describe("S26 B7 — Científica", () => {
 
     await page.locator("nav").getByRole("button", { name: "Científica", exact: true }).click();
 
-    const graph = page.getByRole("note", { name: /Gráfica:/i });
+    const graph = page.getByTestId("scientific-graph");
     const examples = page.getByTestId("scientific-examples");
     const advanced = page.getByTestId("scientific-advanced-options");
 
@@ -132,7 +132,7 @@ test("resultado real conserva Resultado antes de Gráfica", async ({ page }) => 
   await calculate.click();
 
   const result = page.getByRole("region", { name: "Resultado", exact: true });
-  const graph = page.getByRole("note", { name: /Gráfica:/i });
+  const graph = page.getByTestId("scientific-graph");
   await expect(result).toContainText("4");
   await expect(graph).toBeVisible();
 
@@ -166,7 +166,7 @@ test("error controlado conserva la Científica utilizable", async ({ page }) => 
 
   await expect(page.locator('[role="alert"][aria-live="assertive"]').first()).toBeVisible({ timeout: 15000 });
   await expect(entry).toBeVisible();
-  await expect(page.getByRole("note", { name: /Gráfica:/i })).toBeVisible();
+  await expect(page.getByTestId("scientific-graph")).toBeVisible();
 
   const metrics = await page.evaluate(() => ({
     viewport: document.documentElement.clientWidth,
