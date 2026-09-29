@@ -219,6 +219,14 @@ class ComplexGraphPoint(BaseModel):
     label: str
 
 
+class ComplexGraphComponents(BaseModel):
+    variable: str
+    re_expression: str
+    im_expression: str
+    re_latex: str
+    im_latex: str
+
+
 class Trace(BaseModel):
     type: str
     name: str
@@ -294,6 +302,7 @@ class MathResponse(BaseModel):
     inequality_preview_polygon: Optional[List[List[float]]] = None
     inequality_viewport: Optional[List[float]] = None
     complex_graph_points: Optional[List[ComplexGraphPoint]] = None
+    complex_graph_components: Optional[ComplexGraphComponents] = None
     result_approx: Optional[float] = None
     result_data: Optional[Union[List[EquationSolution], List[List[str]]]] = None
     steps: List[Step] = []

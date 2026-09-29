@@ -355,7 +355,7 @@ export function BasicMode() {
     return directFunctionGraphContext(expression, variable, angleUnit, result, latex);
   }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra, lastOde, lastSystem, lastInequality, lastInequalitySystem, lastComplex]);
   const resolvedGraphState: ScientificGraphState = graphContext?.operation === "complex"
-    ? graphContext.visualization === "argand" ? "available" : "advanced"
+    ? graphContext.visualization === "argand" || Boolean(graphContext.graphRequest) ? "available" : "advanced"
     : graphContext?.operation === "inequality"
     ? graphContext.visualization === "number-line" || graphContext.visualization === "region-2d" ? "available" : "advanced"
     : graphContext?.operation === "simplify" || graphContext?.operation === "factor" || graphContext?.operation === "ode" || graphContext?.operation === "system"
@@ -684,7 +684,7 @@ export function BasicMode() {
               latex,
             );
       setLastResult(result);
-      if (result.success && result.complex_graph_points?.length) {
+      if (result.success && (result.complex_graph_points?.length || result.complex_graph_components)) {
         setLastComplex({ sourceLatex: latex, expression: trimmed, result });
       }
       if (isInequality && result.success) {

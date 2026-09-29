@@ -12,6 +12,17 @@ def test_concrete_complex_number_and_symbolic_function():
     function = client.post("/api/v1/evaluate", json={"expression": "exp(I*x)"}).json()
     assert function["success"] is True
     assert function["complex_graph_points"] is None
+    assert function["complex_graph_components"]["variable"] == "x"
+    assert function["complex_graph_components"]["re_expression"] == "cos(x)"
+    assert function["complex_graph_components"]["im_expression"] == "sin(x)"
+    curves = client.post("/api/v1/graph/2d", json={
+        "expressions": [function["complex_graph_components"]["re_expression"],
+                        function["complex_graph_components"]["im_expression"]], "variable": "x",
+    }).json()
+    assert curves["success"] is True
+    assert len(curves["graph_data"]["traces"]) == 2
+    genuine_complex_variable = client.post("/api/v1/evaluate", json={"expression": "z^2+I*z"}).json()
+    assert genuine_complex_variable["complex_graph_components"] is None
     for expression in ("sec(0)", "csc(pi/2)"):
         real = client.post("/api/v1/evaluate", json={"expression": expression})
         assert real.status_code == 200

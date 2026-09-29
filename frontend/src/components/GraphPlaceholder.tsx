@@ -47,7 +47,7 @@ export function GraphPlaceholder({
   const [isPreviewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
-    const request = (context?.operation === "function" || context?.operation === "derivative" || context?.operation === "integral" || context?.operation === "limit" || context?.operation === "simplify" || context?.operation === "factor" || context?.operation === "ode" || context?.operation === "system") && context.canonicalResult
+    const request = (context?.operation === "function" || context?.operation === "derivative" || context?.operation === "integral" || context?.operation === "limit" || context?.operation === "simplify" || context?.operation === "factor" || context?.operation === "ode" || context?.operation === "system" || context?.operation === "complex") && context.canonicalResult
       ? context.graphRequest : null;
     setPreview(null);
     if (!request) {
@@ -125,10 +125,10 @@ export function GraphPlaceholder({
                   {region && [region.lowerX, region.upperX].map((x, index) => <line key={index} x1={x} x2={x} y1="0" y2="120" stroke="currentColor" strokeDasharray="3 3" opacity="0.4" />)}
                   {approach?.pointX !== null && approach?.pointX !== undefined && <line x1={approach.pointX} x2={approach.pointX} y1="0" y2="120" stroke="#9b6a18" strokeDasharray="3 3" opacity="0.7" />}
                   {geometry.paths.map((path, index) => <path key={index} d={path} fill="none"
-                    stroke={context?.operation === "system" ? ["#2862b8", "#b65d20"][(context.metadata.componentIndices as number[] | null)?.[index] ?? index] : context?.operation === "ode" && context.metadata.kind === "one-parameter-family"
+                    stroke={context?.operation === "complex" ? ["#2862b8", "#b65d20"][index] : context?.operation === "system" ? ["#2862b8", "#b65d20"][(context.metadata.componentIndices as number[] | null)?.[index] ?? index] : context?.operation === "ode" && context.metadata.kind === "one-parameter-family"
                       ? ["#2862b8", "#737b89", "#b65d20"][index] : "currentColor"}
-                    opacity={context?.operation !== "ode" && context?.operation !== "function" && index === 0 ? 0.5 : 1}
-                    strokeWidth={context?.operation !== "ode" && context?.operation !== "function" && index === 0 ? 1.5 : 2.5}
+                    opacity={context?.operation !== "ode" && context?.operation !== "function" && context?.operation !== "complex" && index === 0 ? 0.5 : 1}
+                    strokeWidth={context?.operation !== "ode" && context?.operation !== "function" && context?.operation !== "complex" && index === 0 ? 1.5 : 2.5}
                     vectorEffect="non-scaling-stroke" />)}
                   {context?.operation === "system" && (context.metadata.intersections as number[][]).map(([x, y], index) =>
                     Number.isFinite(x) && Number.isFinite(y) && x >= preview!.graph_data!.x_range[0]
@@ -154,6 +154,8 @@ export function GraphPlaceholder({
                 ? `${context.metadata.point === "oo" || context.metadata.point === "-oo"
                   ? `Comportamiento hacia ${context.metadata.point === "oo" ? "+∞" : "−∞"}`
                   : `Aproximación ${context.metadata.direction === "left" ? "por la izquierda" : context.metadata.direction === "right" ? "por la derecha" : "por ambos lados"} a ${context.metadata.point}`}${context.metadata.bilateralDoesNotExist ? "; los límites laterales difieren" : ""}. Resultado: ${context.canonicalResult?.text ?? "—"}.`
+                : context?.operation === "complex"
+                ? `Función compleja de variable real ${context.variables[0]}: Re en azul e Im en naranja. El resultado conserva la función original.`
                 : context?.operation === "simplify" || context?.operation === "factor"
                 ? `Curva de la expresión original; forma ${context.operation === "simplify" ? "simplificada" : "factorizada"} conservada en Resultado. Ambas formas son polinomios con dominio real completo.`
                 : context?.operation === "ode"

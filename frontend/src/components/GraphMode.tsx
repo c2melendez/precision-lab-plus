@@ -210,6 +210,8 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   const [sourceContext, setSourceContext] = useState<ScientificGraphContext | null>(null);
   const displayColors = sourceContext?.operation === "system" && sourceContext.metadata.componentIndices
     ? (sourceContext.metadata.componentIndices as number[]).map((index) => ["#2862b8", "#b65d20"][index])
+    : sourceContext?.operation === "complex" && sourceContext.metadata.kind === "real-input-function"
+      ? ["#2862b8", "#b65d20"]
     : colors;
 
   const setLoading = useUIStore((state) => state.setLoading);
@@ -398,8 +400,9 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
       <aside aria-label="Controles de gráfica 2D" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
         {sourceContext && (
           <p className="rounded-md bg-paper-soft px-2 py-1 text-xs text-muted" data-testid="scientific-graph-context">
-            Desde Científica · {sourceContext.operation === "derivative" ? "derivada" : sourceContext.operation === "integral" ? "integral" : sourceContext.operation === "limit" ? "límite" : sourceContext.operation === "simplify" ? "simplificación" : sourceContext.operation === "factor" ? "factorización" : sourceContext.operation === "ode" ? "solución EDO" : sourceContext.operation === "system" ? "sistema" : "función"} de {sourceContext.variables[0]}
+            Desde Científica · {sourceContext.operation === "derivative" ? "derivada" : sourceContext.operation === "integral" ? "integral" : sourceContext.operation === "limit" ? "límite" : sourceContext.operation === "simplify" ? "simplificación" : sourceContext.operation === "factor" ? "factorización" : sourceContext.operation === "ode" ? "solución EDO" : sourceContext.operation === "system" ? "sistema" : sourceContext.operation === "complex" ? "partes Re e Im" : "función"} de {sourceContext.variables[0]}
             {sourceContext.canonicalResult && " · resultado conservado"}
+            {sourceContext.operation === "complex" && sourceContext.metadata.kind === "real-input-function" && ` · original ${sourceContext.originalExpression} · Re azul · Im naranja`}
             {sourceContext.operation === "integral" && (sourceContext.metadata.kind === "definite"
               ? ` · límites ${sourceContext.metadata.lowerBound} → ${sourceContext.metadata.upperBound} · valor firmado ${sourceContext.canonicalResult?.text ?? "—"}`
               : " · C=0 solo en la gráfica")}

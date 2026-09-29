@@ -544,6 +544,22 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(page.getByTestId("scientific-graph").getByTestId("complex-point")).toHaveCount(2);
   });
 
+  test("función compleja de variable real muestra curvas Re e Im", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\sin(x)+i\\cos(x)");
+    const evaluate = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/evaluate") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const components = (await (await evaluate).json()).complex_graph_components;
+    expect(components).toMatchObject({ variable: "x", re_expression: "sin(x)", im_expression: "cos(x)" });
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("scientific-preview-plot")).toBeVisible();
+    await expect(preview).toContainText("Re en azul e Im en naranja");
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("partes Re e Im");
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

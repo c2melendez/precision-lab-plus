@@ -315,11 +315,20 @@ export function complexGraphContext(
   expression: string, inputLatex: string, result: MathResponse,
 ): ScientificGraphContext {
   const points = result.complex_graph_points;
+  const components = result.complex_graph_components;
   const graphable = result.success && Boolean(points?.length);
+  const curves = result.success && Boolean(components);
   return {
-    operation: "complex", originalExpression: expression, inputLatex, graphInputLatex: null,
+    operation: "complex", originalExpression: expression, inputLatex,
+    graphInputLatex: curves ? [components!.re_latex, components!.im_latex] : null,
     canonicalResult: result.success ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
-    variables: [], metadata: { points: points ?? null, kind: result.operation === "solve" ? "roots" : "single" },
-    restrictions: null, visualization: graphable ? "argand" : "advanced", graphRequest: null,
+    variables: components ? [components.variable] : [],
+    metadata: { points: points ?? null, components: components ?? null,
+      kind: components ? "real-input-function" : result.operation === "solve" ? "roots" : "single", angleUnit: "rad" },
+    restrictions: null, visualization: graphable ? "argand" : curves ? "cartesian-2d" : "advanced",
+    graphRequest: curves ? { endpoint: "/graph/2d", payload: {
+      expressions: [components!.re_expression, components!.im_expression], variable: components!.variable,
+      angle_unit: "rad",
+    } } : null,
   };
 }

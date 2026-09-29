@@ -794,6 +794,13 @@ export interface components {
             im: number;
             label: string;
         };
+        ComplexGraphComponents: {
+            variable: string;
+            re_expression: string;
+            im_expression: string;
+            re_latex: string;
+            im_latex: string;
+        };
         /**
          * ErrorCode
          * @description Enum central — el backend NUNCA usa un string de error fuera de esta lista.
@@ -1123,6 +1130,7 @@ export interface components {
             inequality_preview_polygon?: number[][] | null;
             inequality_viewport?: number[] | null;
             complex_graph_points?: components["schemas"]["ComplexGraphPoint"][] | null;
+            complex_graph_components?: components["schemas"]["ComplexGraphComponents"] | null;
             /** Result Approx */
             result_approx?: number | null;
             /** Result Data */

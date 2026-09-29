@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MathResponse } from "../api/client";
+import { latexToBackendSyntax } from "../components/NaturalMathField";
 import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext, inequalitySystemGraphContext, complexGraphContext } from "../components/scientificGraphContext";
 
 describe("contexto canónico de función directa", () => {
@@ -31,6 +32,20 @@ describe("contexto canónico de función directa", () => {
 });
 
 describe("datos complejos canónicos", () => {
+  it("transfiere partes Re e Im de una función de variable real", () => {
+    expect(latexToBackendSyntax("\\sin(x)+i\\cos(x)")).toMatch(/sin.*[Ii].*cos/);
+    const result = { success: true, operation: "evaluate", result_text: "exp(I*x)",
+      complex_graph_components: { variable: "x", re_expression: "cos(x)", im_expression: "sin(x)",
+        re_latex: "\\cos(x)", im_latex: "\\sin(x)" } } as MathResponse;
+    const context = complexGraphContext("exp(I*x)", "e^{ix}", result);
+    expect(context.visualization).toBe("cartesian-2d");
+    expect(context.metadata.kind).toBe("real-input-function");
+    expect(context.graphRequest).toEqual({ endpoint: "/graph/2d", payload: {
+      expressions: ["cos(x)", "sin(x)"], variable: "x", angle_unit: "rad",
+    } });
+    expect(context.originalExpression).toBe("exp(I*x)");
+  });
+
   it("transfiere todas las raíces y el resultado sin forzar una curva real", () => {
     const result = { success: true, operation: "solve", result_data: [
       { text: "I", latex: "i", is_complex: true }, { text: "-I", latex: "-i", is_complex: true }],
