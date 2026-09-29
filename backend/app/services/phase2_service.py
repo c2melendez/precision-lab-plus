@@ -16,7 +16,7 @@ from typing import List
 
 import sympy
 
-from app.schemas.responses import EquationSolution
+from app.schemas.responses import EquationSolution, GraphData, Trace
 from app.services import parsing
 
 _DIRECTION_MAP = {"both": "+-", "left": "-", "right": "+"}
@@ -60,6 +60,7 @@ class SolveSystemResult:
     graph_latex: List[str] | None = None
     graph_intersections: List[List[float]] | None = None
     graph_coincident: bool = False
+    graph_data: GraphData | None = None
 
 
 def _validate_variable(variable: str) -> sympy.Symbol:
@@ -120,6 +121,52 @@ def _format_solution_tuple(
     )
     is_complex = any(val.has(sympy.I) for val in values)
     return EquationSolution(text=assignments_text, latex=assignments_latex, is_complex=is_complex)
+
+
+def _vertical_system_graph(equations, variables, solution_set) -> tuple[GraphData | None, bool, List[List[float]]]:
+    """Exact affine coefficients produce actual vertical traces, never fake functions."""
+    x, y = variables
+    polynomials = [sympy.Poly(eq.lhs - eq.rhs, x, y) for eq in equations]
+    coefficients = [(poly.coeff_monomial(x), poly.coeff_monomial(y), poly.coeff_monomial(1))
+                    for poly in polynomials]
+    if not any(b == 0 for _, b, _ in coefficients) or any(
+        a == b == 0 or any(value.is_real is not True for value in (a, b, c))
+        for a, b, c in coefficients
+    ):
+        return None, False, []
+    # A vertical line may be paired with another vertical or an oblique line.
+    coincident = all(sympy.simplify(coefficients[0][i] * coefficients[1][j]
+                                    - coefficients[1][i] * coefficients[0][j]) == 0
+                     for i, j in ((0, 1), (0, 2), (1, 2)))
+    intersections = []
+    if not coincident and solution_set:
+        for point in solution_set:
+            if all(value.is_real is True and not value.free_symbols for value in point):
+                intersections.append([float(sympy.N(value)) for value in point])
+    center_x = intersections[0][0] if intersections else float(-coefficients[0][2] / coefficients[0][0]) if coefficients[0][1] == 0 else 0.0
+    center_y = intersections[0][1] if intersections else 0.0
+    if not all(sympy.Float(value).is_finite and abs(value) <= 1e6 for value in (center_x, center_y)):
+        return None, False, []
+    x_min, x_max = center_x - 10, center_x + 10
+    y_min, y_max = center_y - 10, center_y + 10
+    traces = []
+    for index, (a, b, c) in enumerate(coefficients[:1] if coincident else coefficients):
+        if b == 0:
+            fixed_x = float(-c / a)
+            traces.append(Trace(type="line", name=str(equations[index]),
+                                x=[fixed_x, fixed_x], y=[y_min, y_max]))
+        else:
+            traces.append(Trace(type="line", name=str(equations[index]),
+                                x=[x_min, x_max], y=[float((-a * xx - c) / b) for xx in (x_min, x_max)]))
+    if intersections:
+        traces.append(Trace(type="point", name="Intersección común",
+                            x=[point[0] for point in intersections],
+                            y=[point[1] for point in intersections]))
+    all_y = [value for trace in traces for value in trace.y] + [y_min, y_max]
+    if not all(sympy.Float(value).is_finite and abs(value) <= 1e9 for value in all_y):
+        return None, False, []
+    return GraphData(traces=traces, x_range=[x_min, x_max],
+                     y_range=[min(all_y), max(all_y)]), coincident, intersections
 
 
 @dataclass
@@ -292,6 +339,7 @@ def compute_solve_system(equations: List[str], variables: List[str]) -> SolveSys
         graph_latex = None
         graph_intersections = None
         graph_coincident = False
+        graph_data = None
         if len(var_symbols) == 2 and len(parsed_equations) == 2:
             x, y = var_symbols
             # Only explicit, nonvertical affine lines belong in /graph/2d.
@@ -317,9 +365,12 @@ def compute_solve_system(equations: List[str], variables: List[str]) -> SolveSys
                     for point in solution_set:
                         if all(value.is_real is True and not value.free_symbols for value in point):
                             graph_intersections.append([float(sympy.N(value)) for value in point])
+            else:
+                graph_data, graph_coincident, graph_intersections = _vertical_system_graph(
+                    parsed_equations, var_symbols, solution_set)
         if not solution_set:
             return SolveSystemResult([], False, ["El sistema no tiene solución (inconsistente)."],
-                                     graph_expressions, graph_latex, graph_intersections, graph_coincident)
+                                     graph_expressions, graph_latex, graph_intersections, graph_coincident, graph_data)
         solutions = [
             _format_solution_tuple(var_symbols, tuple(values))
             for values in list(solution_set)[:MAX_SYSTEM_SOLUTIONS]
@@ -327,7 +378,7 @@ def compute_solve_system(equations: List[str], variables: List[str]) -> SolveSys
         # linsolve deja cualquier parámetro libre (tau_i) visible directamente
         # en el texto/latex de la solución cuando el sistema es indeterminado.
         return SolveSystemResult(solutions, True, [], graph_expressions, graph_latex,
-                                 graph_intersections, graph_coincident)
+                                 graph_intersections, graph_coincident, graph_data)
 
     raw_solutions = sympy.solve(parsed_equations, var_symbols, dict=True)
     if not raw_solutions:

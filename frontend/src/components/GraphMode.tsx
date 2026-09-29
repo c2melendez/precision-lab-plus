@@ -307,6 +307,8 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    const systemVariables = sourceContext?.operation === "system" && sourceContext.graphRequest?.endpoint === "/solve/system"
+      ? sourceContext.variables : null;
     setSourceContext(null);
     const trimmedExpressions = latexRows.map((row) => latexToBackendSyntax(row)).filter(Boolean);
 
@@ -326,8 +328,8 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
     setErrorMessage(null);
     try {
       const result = await submitGraphs(
-        "/graph/2d",
-        {
+        systemVariables ? "/solve/system" : "/graph/2d",
+        systemVariables ? { equations: trimmedExpressions, variables: systemVariables } : {
           expressions: trimmedExpressions,
           variable: variable.trim() || "x",
           angle_unit: angleUnit,
@@ -529,7 +531,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
           limitFocus={sourceContext?.operation === "limit"
             ? { point: String(sourceContext.metadata.point), direction: sourceContext.metadata.direction as "both" | "left" | "right" }
             : undefined}
-          systemIntersections={sourceContext?.operation === "system"
+          systemIntersections={sourceContext?.operation === "system" && sourceContext.graphRequest?.endpoint === "/graph/2d"
             ? sourceContext.metadata.intersections as number[][] : undefined} />
       </section>
     </form>

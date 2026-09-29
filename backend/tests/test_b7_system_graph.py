@@ -28,10 +28,22 @@ def test_intersection_parallel_and_coincident_lines():
     assert coincident["system_graph_intersections"] == []
 
 
-def test_vertical_and_higher_dimensional_systems_have_no_cartesian_certificate():
+def test_vertical_lines_are_real_traces_and_higher_dimensions_stay_advanced():
     vertical = solve(["x=1", "y=2"])
     assert vertical["result_data"]
     assert vertical["system_graph_expressions"] is None
+    assert [(trace["type"], trace["x"]) for trace in vertical["graph_data"]["traces"]] == [
+        ("line", [1.0, 1.0]), ("line", [-9.0, 11.0]), ("point", [1.0])]
+    assert vertical["system_graph_intersections"] == [[1.0, 2.0]]
+
+    parallel = solve(["x=1", "x=2"])
+    assert len(parallel["graph_data"]["traces"]) == 2
+    assert parallel["system_graph_intersections"] == []
+
+    coincident = solve(["x=1", "2*x=2"])
+    assert len(coincident["graph_data"]["traces"]) == 1
+    assert coincident["system_graph_coincident"] is True
 
     higher = solve(["x=1", "y=2", "z=3"], ("x", "y", "z"))
     assert higher["system_graph_expressions"] is None
+    assert higher["graph_data"] is None

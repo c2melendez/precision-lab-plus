@@ -405,6 +405,26 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(preview.getByTestId("system-intersection")).toHaveCount(0);
   });
 
+  test("recta vertical y horizontal conservan su cruce al abrir Gráficas", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\begin{cases}x=1\\\\y=2\\end{cases}");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/solve/system") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const result = await (await solve).json();
+    expect(result.system_graph_intersections).toEqual([[1, 2]]);
+    expect(result.graph_data.traces.map((trace: { type: string }) => trace.type)).toEqual(["line", "line", "point"]);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("scientific-preview-plot").locator("path")).toHaveCount(2);
+    await expect(preview.getByTestId("system-intersection")).toHaveCount(1);
+    const bridge = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/solve/system") && response.request().method() === "POST");
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    expect((await bridge).request().postDataJSON().equations).toEqual(["x=1", "y=2"]);
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("1 intersección común");
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

@@ -15,7 +15,10 @@ export interface ScientificGraphContext {
   /** null: aún no calculadas; []: dominio confirmado sin restricciones. */
   restrictions: string[] | null;
   visualization: "cartesian-2d" | "number-line" | "region-2d" | "argand" | "advanced";
-  graphRequest: { endpoint: "/graph/2d"; payload: { expressions: string[]; variable: string; angle_unit: "rad" | "deg"; x_min?: number; x_max?: number } } | null;
+  graphRequest: { endpoint: "/graph/2d" | "/solve/system"; payload: {
+    expressions?: string[]; variable?: string; angle_unit?: "rad" | "deg";
+    equations?: string[]; variables?: string[]; x_min?: number; x_max?: number;
+  } } | null;
 }
 
 export function directFunctionGraphContext(
@@ -240,6 +243,8 @@ export function systemGraphContext(
   const latex = result.system_graph_latex;
   const graphable = result.success && variables.length === 2 && variables[0] === "x"
     && variables[1] === "y" && Boolean(expressions?.length) && expressions?.length === latex?.length;
+  const verticalGraph = result.success && variables.length === 2 && variables[0] === "x"
+    && variables[1] === "y" && Boolean(result.graph_data?.traces.length);
   const intersectionX = result.system_graph_intersections?.[0]?.[0];
   const centerOnIntersection = Number.isFinite(intersectionX) && Math.abs(intersectionX!) <= 1e6
     && Math.abs(intersectionX!) > 8;
@@ -247,14 +252,15 @@ export function systemGraphContext(
     operation: "system",
     originalExpression: equations.join(" ; "),
     inputLatex,
-    graphInputLatex: graphable ? latex! : null,
+    graphInputLatex: graphable ? latex! : verticalGraph ? equations : null,
     canonicalResult: result.success ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
     variables,
     metadata: { equations, intersections: result.system_graph_intersections ?? [],
       coincident: result.system_graph_coincident === true, angleUnit: "rad" },
     restrictions: null,
-    visualization: graphable ? "cartesian-2d" : "advanced",
-    graphRequest: graphable ? { endpoint: "/graph/2d", payload: {
+    visualization: graphable || verticalGraph ? "cartesian-2d" : "advanced",
+    graphRequest: verticalGraph ? { endpoint: "/solve/system", payload: { equations, variables } }
+      : graphable ? { endpoint: "/graph/2d", payload: {
       expressions: expressions!, variable: "x", angle_unit: "rad",
       ...(centerOnIntersection ? { x_min: intersectionX! - 10, x_max: intersectionX! + 10 } : {}),
     } } : null,

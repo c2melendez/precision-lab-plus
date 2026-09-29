@@ -42,12 +42,16 @@ describe("sistema lineal certificado", () => {
     expect(context.canonicalResult?.data).toEqual(result.result_data);
   });
 
-  it("no envía rectas verticales a un motor y=f(x)", () => {
+  it("conserva rectas verticales como trazas del sistema, sin fingir y=f(x)", () => {
     const context = systemGraphContext(["x=1", "y=2"], ["x", "y"], "system", {
       success: true, system_graph_expressions: null, system_graph_latex: null,
+      graph_data: { traces: [{ type: "line", name: "x=1", x: [1, 1], y: [-10, 10] }],
+        x_range: [-9, 11], y_range: [-10, 10] }, system_graph_intersections: [[1, 2]],
     } as MathResponse);
-    expect(context.graphRequest).toBeNull();
-    expect(context.visualization).toBe("advanced");
+    expect(context.graphRequest).toEqual({ endpoint: "/solve/system",
+      payload: { equations: ["x=1", "y=2"], variables: ["x", "y"] } });
+    expect(context.visualization).toBe("cartesian-2d");
+    expect(context.metadata.intersections).toEqual([[1, 2]]);
   });
 });
 
