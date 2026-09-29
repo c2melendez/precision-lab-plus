@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MathResponse } from "../api/client";
-import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext } from "../components/scientificGraphContext";
+import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext, inequalitySystemGraphContext } from "../components/scientificGraphContext";
 
 describe("contexto canónico de función directa", () => {
   it("conserva la expresión de entrada y el resultado del motor, sin leer texto visual", () => {
@@ -27,6 +27,22 @@ describe("contexto canónico de función directa", () => {
     expect(context.canonicalResult).toBeNull();
     expect(context.variables).toEqual(["y"]);
     expect(context.graphRequest?.payload.variable).toBe("y");
+  });
+});
+
+describe("sistema de inecuaciones en dos variables", () => {
+  it("conserva restricciones, región y vértices para Gráficas", () => {
+    const result = { success: true, result_text: "Región no acotada", result_data: [["0", "0"]],
+      inequality_region_kind: "unbounded", inequality_constraints: [
+        { a: 1, b: 0, c: 0, operator: ">", label: "x>0" }],
+      inequality_preview_polygon: [[0, -4], [4, -4], [4, 4], [0, 4]],
+      inequality_viewport: [-4, 4, -4, 4] } as MathResponse;
+    const context = inequalitySystemGraphContext(["x>0"], ["x", "y"], "cases", result);
+    expect(context.visualization).toBe("region-2d");
+    expect(context.metadata.constraints).toEqual(result.inequality_constraints);
+    expect(context.metadata.polygon).toEqual(result.inequality_preview_polygon);
+    expect(context.metadata.vertices).toEqual(result.result_data);
+    expect(context.graphRequest).toBeNull();
   });
 });
 

@@ -482,6 +482,40 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(page.getByTestId("scientific-graph")).toContainText("Conjunto solución vacío");
   });
 
+  test("sistema de inecuaciones dibuja solo la región común y fronteras estrictas", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\begin{cases}x>0\\\\y\\ge 0\\\\x+y<4\\end{cases}");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/inequality/system") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const result = await (await solve).json();
+    expect(result.inequality_region_kind).toBe("bounded");
+    expect(result.inequality_constraints.map((item: { operator: string }) => item.operator)).toEqual([">", ">=", "<"]);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("feasible-region")).toBeVisible();
+    const boundaries = preview.getByTestId("inequality-boundary");
+    await expect(boundaries).toHaveCount(3);
+    await expect(boundaries.nth(0)).toHaveAttribute("stroke-dasharray", "6 5");
+    await expect(boundaries.nth(1)).not.toHaveAttribute("stroke-dasharray");
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    await expect(page.getByRole("region", { name: "Análisis de región de inecuaciones" }))
+      .toContainText("x>0 ; y>=0 ; x+y<4");
+  });
+
+  test("sistema estrictamente imposible muestra región vacía", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\begin{cases}x>0\\\\x<0\\end{cases}");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/inequality/system") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    expect((await (await solve).json()).inequality_region_kind).toBe("empty");
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("Región factible vacía");
+    await expect(preview.getByTestId("feasible-region")).toHaveCount(0);
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

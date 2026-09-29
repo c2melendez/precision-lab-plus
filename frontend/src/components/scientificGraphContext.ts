@@ -292,3 +292,21 @@ export function inequalityGraphContext(
     graphRequest: null,
   };
 }
+
+export function inequalitySystemGraphContext(
+  inequalities: string[], variables: string[], inputLatex: string, result: MathResponse,
+): ScientificGraphContext {
+  const graphable = result.success && variables.length === 2
+    && result.inequality_constraints != null && result.inequality_preview_polygon != null
+    && result.inequality_viewport?.length === 4;
+  return {
+    operation: "inequality", originalExpression: inequalities.join(" ; "), inputLatex,
+    graphInputLatex: null,
+    canonicalResult: result.success ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
+    variables,
+    metadata: { inequalities, constraints: result.inequality_constraints ?? null,
+      polygon: result.inequality_preview_polygon ?? null, viewport: result.inequality_viewport ?? null,
+      kind: result.inequality_region_kind ?? null, vertices: result.result_data ?? null },
+    restrictions: null, visualization: graphable ? "region-2d" : "advanced", graphRequest: null,
+  };
+}

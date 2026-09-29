@@ -10,6 +10,7 @@ import { callApi, type MathResponse } from "../api/client";
 import { graphPreviewGeometry, integralRegionGeometry, limitApproachGeometry } from "./graphPreviewGeometry";
 import type { ScientificGraphContext } from "./scientificGraphContext";
 import { NumberLine } from "./NumberLine";
+import { InequalityRegion } from "./InequalityRegion";
 
 export type ScientificGraphState =
   | "empty"
@@ -88,7 +89,14 @@ export function GraphPlaceholder({
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 py-6 text-center">
-        {state === "available" && context?.visualization === "number-line" ? (
+        {state === "available" && context?.visualization === "region-2d" ? (
+          <>
+            <InequalityRegion boundaries={context.metadata.constraints as NonNullable<MathResponse["inequality_constraints"]>}
+              polygon={context.metadata.polygon as number[][]} viewport={context.metadata.viewport as number[]}
+              kind={String(context.metadata.kind)} />
+            <p className="text-[11px] text-muted">{context.metadata.kind === "empty" ? "Región factible vacía" : context.metadata.kind === "bounded" ? "Región factible acotada" : "Región factible no acotada"}. Frontera discontinua: excluida; continua: incluida.</p>
+          </>
+        ) : state === "available" && context?.visualization === "number-line" ? (
           <>
             <NumberLine intervals={context.metadata.intervals as NonNullable<MathResponse["inequality_intervals"]>} />
             <p className="text-[11px] text-muted">Conjunto solución: {context.canonicalResult?.text ?? "—"}. Los extremos huecos se excluyen; los rellenos se incluyen.</p>
@@ -167,6 +175,8 @@ export function GraphPlaceholder({
               ? "Esta familia necesita una vista avanzada para elegir sus parámetros antes de graficarla."
               : context?.operation === "system" && !context.graphRequest
                 ? "Este sistema requiere una representación implícita o de más dimensiones en Gráficas."
+                : context?.operation === "inequality" && context.visualization === "advanced"
+                  ? "La región requiere una representación especializada para conservar exactamente sus fronteras."
               : STATE_COPY[state])}</p>
         )}
 

@@ -29,6 +29,7 @@ import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { ResultPanel } from "./ResultPanel";
 import { NumberLine } from "./NumberLine";
+import { InequalityRegion } from "./InequalityRegion";
 
 const GraphViewer = lazy(() => import("./GraphViewer"));
 
@@ -220,7 +221,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
 
   useEffect(() => {
     if (!pendingGraphContext) return;
-    if (pendingGraphContext.visualization === "number-line") {
+    if (pendingGraphContext.visualization === "number-line" || pendingGraphContext.visualization === "region-2d") {
       setSourceContext(pendingGraphContext);
       setPendingGraphContext(null);
       return;
@@ -364,6 +365,18 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
       <NumberLine intervals={sourceContext.metadata.intervals as NonNullable<MathResponse["inequality_intervals"]>} />
       <p className="text-sm">Conjunto exacto: {sourceContext.canonicalResult?.text ?? "—"}</p>
       <p className="text-xs text-muted">Extremo hueco: excluido. Extremo relleno: incluido. Las flechas indican prolongación sin límite.</p>
+    </section>;
+  }
+
+  if (sourceContext?.visualization === "region-2d") {
+    return <section aria-label="Análisis de región de inecuaciones" className="space-y-4 rounded-xl border border-paper-line bg-paper p-5">
+      <h2 className="text-lg font-semibold">Intersección factible</h2>
+      <p className="text-sm text-muted">Desde Científica · {sourceContext.originalExpression}</p>
+      <InequalityRegion boundaries={sourceContext.metadata.constraints as NonNullable<MathResponse["inequality_constraints"]>}
+        polygon={sourceContext.metadata.polygon as number[][]} viewport={sourceContext.metadata.viewport as number[]}
+        kind={String(sourceContext.metadata.kind)} />
+      <p className="text-sm">{sourceContext.canonicalResult?.text ?? "—"}</p>
+      <p className="text-xs text-muted">Fronteras discontinuas excluidas; continuas incluidas. La zona azul cumple todas las restricciones.</p>
     </section>;
   }
 

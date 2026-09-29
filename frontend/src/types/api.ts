@@ -782,6 +782,13 @@ export interface components {
             lower_included: boolean;
             upper_included: boolean;
         };
+        InequalityBoundary: {
+            a: number;
+            b: number;
+            c: number;
+            operator: string;
+            label: string;
+        };
         /**
          * ErrorCode
          * @description Enum central — el backend NUNCA usa un string de error fuera de esta lista.
@@ -1106,6 +1113,10 @@ export interface components {
             system_graph_component_indices?: number[] | null;
             inequality_intervals?: components["schemas"]["InequalityInterval"][] | null;
             inequality_variable?: string | null;
+            inequality_region_kind?: string | null;
+            inequality_constraints?: components["schemas"]["InequalityBoundary"][] | null;
+            inequality_preview_polygon?: number[][] | null;
+            inequality_viewport?: number[] | null;
             /** Result Approx */
             result_approx?: number | null;
             /** Result Data */

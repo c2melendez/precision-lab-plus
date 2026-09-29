@@ -205,6 +205,14 @@ class InequalityInterval(BaseModel):
     upper_included: bool = False
 
 
+class InequalityBoundary(BaseModel):
+    a: float
+    b: float
+    c: float
+    operator: str
+    label: str
+
+
 class Trace(BaseModel):
     type: str
     name: str
@@ -275,6 +283,10 @@ class MathResponse(BaseModel):
     system_graph_component_indices: Optional[List[int]] = None
     inequality_intervals: Optional[List[InequalityInterval]] = None
     inequality_variable: Optional[str] = None
+    inequality_region_kind: Optional[str] = None
+    inequality_constraints: Optional[List[InequalityBoundary]] = None
+    inequality_preview_polygon: Optional[List[List[float]]] = None
+    inequality_viewport: Optional[List[float]] = None
     result_approx: Optional[float] = None
     result_data: Optional[Union[List[EquationSolution], List[List[str]]]] = None
     steps: List[Step] = []

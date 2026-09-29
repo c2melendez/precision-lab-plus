@@ -62,7 +62,7 @@ import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
-import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext, limitGraphContext, algebraTransformationGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext } from "./scientificGraphContext";
+import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext, limitGraphContext, algebraTransformationGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext, inequalitySystemGraphContext } from "./scientificGraphContext";
 
 interface SubstitutionRow {
   name: string;
@@ -288,12 +288,17 @@ export function BasicMode() {
   const [lastOde, setLastOde] = useState<{ sourceLatex: string; expression: string; result: MathResponse } | null>(null);
   const [lastSystem, setLastSystem] = useState<{ sourceLatex: string; equations: string[]; variables: string[]; result: MathResponse } | null>(null);
   const [lastInequality, setLastInequality] = useState<{ sourceLatex: string; expression: string; variable: string; result: MathResponse } | null>(null);
+  const [lastInequalitySystem, setLastInequalitySystem] = useState<{ sourceLatex: string; inequalities: string[]; variables: string[]; result: MathResponse } | null>(null);
 
   const graphState = useMemo<ScientificGraphState>(
     () => classifyScientificGraphState(latex),
     [latex],
   );
   const graphContext = useMemo(() => {
+    if (lastInequalitySystem?.sourceLatex === latex && lastInequalitySystem.result.success) {
+      return inequalitySystemGraphContext(lastInequalitySystem.inequalities, lastInequalitySystem.variables,
+        latex, lastInequalitySystem.result);
+    }
     if (lastInequality?.sourceLatex === latex && lastInequality.result.success) {
       return inequalityGraphContext(lastInequality.expression, lastInequality.variable, latex, lastInequality.result);
     }
@@ -344,9 +349,9 @@ export function BasicMode() {
     const result = lastEvaluated?.expression === expression && lastEvaluated.angleUnit === angleUnit
       ? lastEvaluated.result : null;
     return directFunctionGraphContext(expression, variable, angleUnit, result, latex);
-  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra, lastOde, lastSystem, lastInequality]);
+  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra, lastOde, lastSystem, lastInequality, lastInequalitySystem]);
   const resolvedGraphState: ScientificGraphState = graphContext?.operation === "inequality"
-    ? graphContext.visualization === "number-line" ? "available" : "advanced"
+    ? graphContext.visualization === "number-line" || graphContext.visualization === "region-2d" ? "available" : "advanced"
     : graphContext?.operation === "simplify" || graphContext?.operation === "factor" || graphContext?.operation === "ode" || graphContext?.operation === "system"
       ? graphContext.graphRequest ? "available" : "advanced" : graphState;
 
@@ -491,6 +496,8 @@ export function BasicMode() {
               : `Vértices del polígono factible: ${verticesText}`;
       }
       setLastResult(result);
+      if (result.success) setLastInequalitySystem({ sourceLatex: latex,
+        inequalities: inequalitiesBackend, variables: variableList, result });
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
@@ -832,7 +839,7 @@ export function BasicMode() {
   // consume.
   async function handleGraphExpression(): Promise<void> {
     const context = graphContext;
-    if (context?.visualization === "number-line") {
+    if (context?.visualization === "number-line" || context?.visualization === "region-2d") {
       setPendingGraphContext(context);
       setActiveMode("graph");
       return;

@@ -687,3 +687,10 @@ La próxima sesión debe iniciar con revisión visual, no con nueva implementaci
 - `/inequality` conserva conjunto exacto y LaTeX, y añade variable e intervalos estructurados con extremos numéricos, etiquetas exactas e inclusión. Union de intervalos, conjunto vacío, toda la recta y puntos aislados se representan sin reparsear Resultado. Conjuntos que no admiten intervalos reales finitos representables quedan en estado avanzado sin inventar gráfica.
 - Científica usa recta real con segmento, extremos huecos/rellenos y flechas al infinito. Abrir en Gráficas conserva entrada, variable, intervalos y conjunto exacto, con una vista ampliada de la misma recta. Dos pruebas backend, 21 pruebas frontend de contexto/recta, TypeScript y lint focalizado PASS. E2E de estricta, inclusiva y vacía añadido; pendiente Actions y revisión visual.
 - Sistemas de inecuaciones bidimensionales y complejos permanecen pendientes. B7 EN CURSO.
+- Commit `b69c8500395f294abdf0125b5cff35d2a292a482`: nueve workflows PASS, incluidos E2E de `x>0`, `x≥0`, vacío y puente a Gráficas. Recta real univariada certificada técnicamente.
+
+## 2026-09-29 — B7 Plus: región de sistemas de inecuaciones lineales 2D
+
+- El backend expone tipo de región, restricciones con operador original, vértices, polígono de la intersección recortado para la vista y rango. Si una intersección solo contenía frontera excluida (`x>0`, `x<0`), se clasifica como vacía. Una solución de dimensión menor que dos queda sin relleno previo y requiere vista especializada.
+- Científica y Gráficas comparten la misma región semántica. La zona factible se rellena una vez; cada frontera inclusiva es continua y cada estricta discontinua. Región vacía sin relleno; no acotada se recorta al marco de la vista y se indica como tal. Se conservan entrada, variables, restricciones, tipo y vértices.
+- 15 pruebas backend focalizadas/auditoría, 22 frontend, TypeScript y lint focalizado PASS; E2E de región mixta y sistema estricto imposible añadido. Pendiente Actions, revisión visual y complejos. B7 EN CURSO.
