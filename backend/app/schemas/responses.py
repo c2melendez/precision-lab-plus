@@ -253,6 +253,12 @@ class MathResponse(BaseModel):
     # B7: certificado conservador para graficar una transformación algebraica
     # en R sin perder puntos excluidos del dominio original.
     graph_polynomial_comparison: Optional[bool] = None
+    # B7: lado derecho explícito de y(x)=... y miembros representativos
+    # de una familia de un único parámetro; nunca se extraen del texto UI.
+    ode_solution_expression: Optional[str] = None
+    ode_solution_latex: Optional[str] = None
+    ode_representative_expressions: Optional[List[str]] = None
+    ode_representative_latex: Optional[List[str]] = None
     result_approx: Optional[float] = None
     result_data: Optional[Union[List[EquationSolution], List[List[str]]]] = None
     steps: List[Step] = []

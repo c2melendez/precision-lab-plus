@@ -348,7 +348,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
       <aside aria-label="Controles de gráfica 2D" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
         {sourceContext && (
           <p className="rounded-md bg-paper-soft px-2 py-1 text-xs text-muted" data-testid="scientific-graph-context">
-            Desde Científica · {sourceContext.operation === "derivative" ? "derivada" : sourceContext.operation === "integral" ? "integral" : sourceContext.operation === "limit" ? "límite" : sourceContext.operation === "simplify" ? "simplificación" : sourceContext.operation === "factor" ? "factorización" : "función"} de {sourceContext.variables[0]}
+            Desde Científica · {sourceContext.operation === "derivative" ? "derivada" : sourceContext.operation === "integral" ? "integral" : sourceContext.operation === "limit" ? "límite" : sourceContext.operation === "simplify" ? "simplificación" : sourceContext.operation === "factor" ? "factorización" : sourceContext.operation === "ode" ? "solución EDO" : "función"} de {sourceContext.variables[0]}
             {sourceContext.canonicalResult && " · resultado conservado"}
             {sourceContext.operation === "integral" && (sourceContext.metadata.kind === "definite"
               ? ` · límites ${sourceContext.metadata.lowerBound} → ${sourceContext.metadata.upperBound} · valor firmado ${sourceContext.canonicalResult?.text ?? "—"}`
@@ -357,6 +357,8 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
               ? `hacia ${sourceContext.metadata.point === "oo" ? "+∞" : "−∞"}`
               : `${sourceContext.metadata.direction === "left" ? "desde la izquierda" : sourceContext.metadata.direction === "right" ? "desde la derecha" : "ambos lados"} → ${sourceContext.metadata.point}`} · resultado ${sourceContext.canonicalResult?.text ?? "—"}`}
             {(sourceContext.operation === "simplify" || sourceContext.operation === "factor") && ` · forma transformada ${sourceContext.metadata.transformedExpression} · dominio real completo`}
+            {sourceContext.operation === "ode" && (sourceContext.metadata.kind === "particular"
+              ? " · solución particular" : " · familia representativa C₁=−1, 0, 1")}
           </p>
         )}
         <div className="flex items-center justify-between gap-2">

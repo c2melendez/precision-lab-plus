@@ -202,3 +202,33 @@ export function algebraTransformationGraphContext(
     } } : null,
   };
 }
+
+export function odeGraphContext(
+  expression: string,
+  inputLatex: string,
+  result: MathResponse,
+): ScientificGraphContext {
+  const particular = result.ode_solution_expression && result.ode_solution_latex;
+  const family = result.ode_representative_expressions?.length === 3
+    && result.ode_representative_latex?.length === 3;
+  const graphExpressions = particular ? [result.ode_solution_expression!] : family
+    ? result.ode_representative_expressions! : null;
+  const graphLatex = particular ? [result.ode_solution_latex!] : family
+    ? result.ode_representative_latex! : null;
+  const canGraph = result.success && Boolean(graphExpressions) && Boolean(graphLatex);
+  return {
+    operation: "ode",
+    originalExpression: expression,
+    inputLatex,
+    graphInputLatex: canGraph ? graphLatex : null,
+    canonicalResult: result.success ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
+    variables: ["x"],
+    metadata: { kind: particular ? "particular" : family ? "one-parameter-family" : "advanced-family",
+      representativeConstants: family ? [-1, 0, 1] : null, angleUnit: "rad" },
+    restrictions: null,
+    visualization: canGraph ? "cartesian-2d" : "advanced",
+    graphRequest: canGraph ? { endpoint: "/graph/2d", payload: {
+      expressions: graphExpressions!, variable: "x", angle_unit: "rad",
+    } } : null,
+  };
+}

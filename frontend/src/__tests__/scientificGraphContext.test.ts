@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MathResponse } from "../api/client";
-import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext } from "../components/scientificGraphContext";
+import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext, odeGraphContext } from "../components/scientificGraphContext";
 
 describe("contexto canónico de función directa", () => {
   it("conserva la expresión de entrada y el resultado del motor, sin leer texto visual", () => {
@@ -129,6 +129,35 @@ describe("transformación algebraica y dominio", () => {
       graph_polynomial_comparison: false } as MathResponse;
     const context = algebraTransformationGraphContext("simplify", "x/x", "\\frac{x}{x}", "x", "rad", result);
     expect(context.restrictions).toBeNull();
+    expect(context.graphRequest).toBeNull();
+    expect(context.visualization).toBe("advanced");
+  });
+});
+
+describe("solución EDO estructurada", () => {
+  it("grafica solo el lado derecho de una solución particular", () => {
+    const result = { success: true, result_text: "Eq(y(x), exp(x))", result_latex: "y(x)=e^x",
+      ode_solution_expression: "exp(x)", ode_solution_latex: "e^{x}" } as MathResponse;
+    const context = odeGraphContext("y'=y, y(0)=1", "y'=y, y(0)=1", result);
+    expect(context.graphRequest?.payload.expressions).toEqual(["exp(x)"]);
+    expect(context.graphInputLatex).toEqual(["e^{x}"]);
+    expect(context.canonicalResult?.text).toBe("Eq(y(x), exp(x))");
+    expect(context.metadata.kind).toBe("particular");
+  });
+
+  it("conserva la familia original y grafica solo tres representantes", () => {
+    const result = { success: true, result_text: "Eq(y(x), C1*exp(x))",
+      ode_representative_expressions: ["-exp(x)", "0", "exp(x)"],
+      ode_representative_latex: ["-e^x", "0", "e^x"] } as MathResponse;
+    const context = odeGraphContext("y'=y", "y'=y", result);
+    expect(context.graphRequest?.payload.expressions).toEqual(["-exp(x)", "0", "exp(x)"]);
+    expect(context.metadata.representativeConstants).toEqual([-1, 0, 1]);
+    expect(context.canonicalResult?.text).toContain("C1");
+  });
+
+  it("no inventa curvas para una familia de dos parámetros", () => {
+    const context = odeGraphContext("y''=-y", "y''=-y", { success: true,
+      result_text: "Eq(y(x), C1*sin(x)+C2*cos(x))" } as MathResponse);
     expect(context.graphRequest).toBeNull();
     expect(context.visualization).toBe("advanced");
   });

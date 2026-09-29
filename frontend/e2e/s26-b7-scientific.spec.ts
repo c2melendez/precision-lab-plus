@@ -330,6 +330,50 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(preview.getByRole("button", { name: "Abrir en Gráficas" })).toHaveCount(0);
   });
 
+  test("EDO particular grafica la solución explícita y conserva la ecuación", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "y'=y, y(0)=1");
+    const ode = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/ode") && response.request().method() === "POST",
+    );
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const response = await ode;
+    expect(response.ok()).toBeTruthy();
+    expect((await response.json()).ode_solution_expression).toBe("exp(x)");
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("Solución particular y(x)");
+    await expect(preview.getByTestId("scientific-preview-plot").locator("path")).toHaveCount(1);
+    const graphResponse = page.waitForResponse((next) =>
+      next.url().includes("/api/v1/graph/2d") && next.request().method() === "POST",
+    );
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    expect((await graphResponse).request().postDataJSON().expressions).toEqual(["exp(x)"]);
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("solución EDO de x · resultado conservado · solución particular");
+  });
+
+  test("EDO general muestra tres representantes sin perder C₁", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "y'=y");
+    const ode = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/ode") && response.request().method() === "POST",
+    );
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const response = await ode;
+    expect(response.ok()).toBeTruthy();
+    expect((await response.json()).ode_representative_expressions).toEqual(["-exp(x)", "0", "exp(x)"]);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("C₁=−1, 0, 1");
+    await expect(preview.getByTestId("scientific-preview-plot").locator("path")).toHaveCount(3);
+    const graphResponse = page.waitForResponse((next) =>
+      next.url().includes("/api/v1/graph/2d") && next.request().method() === "POST",
+    );
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    expect((await graphResponse).request().postDataJSON().expressions).toEqual(["-exp(x)", "0", "exp(x)"]);
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("familia representativa C₁=−1, 0, 1");
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

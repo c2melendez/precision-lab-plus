@@ -662,3 +662,10 @@ La próxima sesión debe iniciar con revisión visual, no con nueva implementaci
 - `/simplify` y `/factor` agregan `graph_polynomial_comparison` al contrato de respuesta: verdadero solo si entrada y salida son polinomios de una única variable. El motor de cálculo no cambia. La prueba `x²−4` confirma el caso seguro; `x/x → 1` no se certifica porque el original excluye cero.
 - Científica conserva operación, expresión original, forma transformada y resultado canónico. En el caso seguro grafica una sola curva, porque ambas formas comparten el mismo dominio real y superponer dos curvas idénticas no aporta información. El puente a Gráficas conserva ambas formas en el contexto. Para un caso sin certificación de dominio, la vista indica que hay que comprobar restricciones y no ofrece una comparación gráfica engañosa.
 - 11 pruebas de álgebra backend, 12 pruebas de contexto frontend, TypeScript y lint focalizado PASS. E2E de factorización y de `x/x` añadidos; pendiente Actions y revisión visual. B7 permanece EN CURSO.
+- Commit `680c465295c50ea9fa586576a276fd5088406be1`: nueve workflows PASS, incluyendo ambos E2E de álgebra y S19. Tramo polinómico conservador certificado técnicamente; expresiones con restricciones de dominio aún requieren representación avanzada.
+
+## 2026-09-29 — B7 Plus: soluciones EDO
+
+- `/ode` expone campos opcionales estructurados para el lado derecho de una solución particular y para tres miembros representativos de una familia con exactamente una constante arbitraria. El resultado canónico `Eq(y(x), ...)` permanece intacto; no se extrae el lado derecho del texto mostrado.
+- Científica grafica solo la solución particular, o tres miembros `C₁=−1, 0, 1` de una familia de un parámetro, marcados explícitamente como representantes. Una familia de dos constantes conserva estado avanzado sin inventar un corte 2D ni elegir parámetros silenciosamente. Gráficas recibe expresiones, resultado y origen EDO.
+- 6 pruebas EDO backend, 15 pruebas de contexto frontend, TypeScript y lint focalizado PASS. E2E particular y familia añadidos; pendiente Actions, visual final y demás operaciones de B7.

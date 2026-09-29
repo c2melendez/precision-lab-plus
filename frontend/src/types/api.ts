@@ -1085,6 +1085,12 @@ export interface components {
             antiderivative_latex?: string | null;
             /** B7: both algebraic forms are univariate real polynomials. */
             graph_polynomial_comparison?: boolean | null;
+            /** Explicit particular solution RHS, if graphable. */
+            ode_solution_expression?: string | null;
+            ode_solution_latex?: string | null;
+            /** Representative members of a one-parameter ODE family. */
+            ode_representative_expressions?: string[] | null;
+            ode_representative_latex?: string[] | null;
             /** Result Approx */
             result_approx?: number | null;
             /** Result Data */

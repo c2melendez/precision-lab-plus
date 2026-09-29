@@ -34,6 +34,18 @@ def test_m4_plus_extended_first_order_depends_on_y():
     b = r.json()
     assert r.status_code == 200 and b["success"] is True
     assert "exp(x)" in b["result_text"]
+    assert b["ode_solution_expression"] is None
+    assert b["ode_representative_expressions"] == ["-exp(x)", "0", "exp(x)"]
+
+    particular = ode("y'=y, y(0)=1").json()
+    assert particular["ode_solution_expression"] == "exp(x)"
+    assert particular["ode_solution_latex"] == "e^{x}"
+    assert particular["ode_representative_expressions"] is None
+
+    two_parameters = ode("y''=-y").json()
+    assert two_parameters["success"] is True
+    assert two_parameters["ode_solution_expression"] is None
+    assert two_parameters["ode_representative_expressions"] is None
 
 def test_m4_second_order_one_ic_warns_remaining_constant():
     r = ode("y''+3y'+2y=0, y(0)=1")

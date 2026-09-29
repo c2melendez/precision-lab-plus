@@ -69,6 +69,16 @@ async def solve_ode(payload: ODERequest, request: Request) -> MathResponse:
         if remaining_constants
         else []
     )
+    rhs = result.solution.rhs
+    x_symbol = sympy.Symbol("x")
+    graph_symbols = rhs.free_symbols - {x_symbol}
+    graphable = result.solution.lhs == sympy.Function("y")(x_symbol) and not rhs.has(sympy.I)
+    particular = graphable and not graph_symbols
+    one_parameter = graphable and len(graph_symbols) == 1 and str(next(iter(graph_symbols))) in remaining_constants
+    representatives = (
+        [rhs.subs(next(iter(graph_symbols)), value) for value in (-1, 0, 1)]
+        if one_parameter else None
+    )
 
     return MathResponse(
         success=True,
@@ -78,6 +88,10 @@ async def solve_ode(payload: ODERequest, request: Request) -> MathResponse:
         input_text=payload.expression,
         result_text=str(result.solution),
         result_latex=sympy.latex(result.solution),
+        ode_solution_expression=str(rhs) if particular else None,
+        ode_solution_latex=sympy.latex(rhs) if particular else None,
+        ode_representative_expressions=[str(expr) for expr in representatives] if representatives else None,
+        ode_representative_latex=[sympy.latex(expr) for expr in representatives] if representatives else None,
         warnings=warnings,
         has_detailed_steps=False,
         duration_ms=_duration_ms(request),

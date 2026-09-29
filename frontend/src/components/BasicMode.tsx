@@ -62,7 +62,7 @@ import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
-import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext, limitGraphContext, algebraTransformationGraphContext } from "./scientificGraphContext";
+import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext, limitGraphContext, algebraTransformationGraphContext, odeGraphContext } from "./scientificGraphContext";
 
 interface SubstitutionRow {
   name: string;
@@ -285,12 +285,16 @@ export function BasicMode() {
     angleUnit: "rad" | "deg";
     result: MathResponse;
   } | null>(null);
+  const [lastOde, setLastOde] = useState<{ sourceLatex: string; expression: string; result: MathResponse } | null>(null);
 
   const graphState = useMemo<ScientificGraphState>(
     () => classifyScientificGraphState(latex),
     [latex],
   );
   const graphContext = useMemo(() => {
+    if (lastOde?.sourceLatex === latex && lastOde.result.success) {
+      return odeGraphContext(lastOde.expression, latex, lastOde.result);
+    }
     if (lastAlgebra?.sourceLatex === latex && lastAlgebra.angleUnit === angleUnit && lastAlgebra.result.success) {
       return algebraTransformationGraphContext(lastAlgebra.operation, lastAlgebra.expression, latex,
         directGraphVariable(lastAlgebra.expression), angleUnit, lastAlgebra.result);
@@ -332,8 +336,8 @@ export function BasicMode() {
     const result = lastEvaluated?.expression === expression && lastEvaluated.angleUnit === angleUnit
       ? lastEvaluated.result : null;
     return directFunctionGraphContext(expression, variable, angleUnit, result, latex);
-  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra]);
-  const resolvedGraphState: ScientificGraphState = graphContext?.operation === "simplify" || graphContext?.operation === "factor"
+  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra, lastOde]);
+  const resolvedGraphState: ScientificGraphState = graphContext?.operation === "simplify" || graphContext?.operation === "factor" || graphContext?.operation === "ode"
     ? graphContext.graphRequest ? "available" : "advanced" : graphState;
 
   const setLoading = useUIStore((state) => state.setLoading);
@@ -590,6 +594,9 @@ export function BasicMode() {
       if (intent.kind === "limit" && result.success) {
         setLastLimit({ sourceLatex: latex, expression: trimmedInner, innerLatex: intent.innerLatex,
           variable: intent.variable, point: intent.point, direction: intent.direction, angleUnit, result });
+      }
+      if (intent.kind === "ode" && result.success) {
+        setLastOde({ sourceLatex: latex, expression: trimmedInner, result });
       }
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
