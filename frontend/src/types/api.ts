@@ -1091,6 +1091,10 @@ export interface components {
             /** Representative members of a one-parameter ODE family. */
             ode_representative_expressions?: string[] | null;
             ode_representative_latex?: string[] | null;
+            system_graph_expressions?: string[] | null;
+            system_graph_latex?: string[] | null;
+            system_graph_intersections?: number[][] | null;
+            system_graph_coincident?: boolean;
             /** Result Approx */
             result_approx?: number | null;
             /** Result Data */

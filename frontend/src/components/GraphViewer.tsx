@@ -100,9 +100,10 @@ interface GraphViewerProps {
   colors?: string[];
   integralBounds?: [number, number];
   limitFocus?: { point: string; direction: "both" | "left" | "right" };
+  systemIntersections?: number[][];
 }
 
-export default function GraphViewer({ data, colors, integralBounds, limitFocus }: GraphViewerProps) {
+export default function GraphViewer({ data, colors, integralBounds, limitFocus, systemIntersections }: GraphViewerProps) {
   const lowerBound = integralBounds?.[0];
   const upperBound = integralBounds?.[1];
   const limitPoint = limitFocus?.point;
@@ -154,7 +155,10 @@ export default function GraphViewer({ data, colors, integralBounds, limitFocus }
 
         await Plotly.newPlot(
           safeContainer,
-          [...regionTraces, ...data.traces.map((trace, i) => traceToPlotly(trace, colors?.[i], finiteLimitPoint ?? undefined)), ...approachTraces],
+          [...regionTraces, ...data.traces.map((trace, i) => traceToPlotly(trace, colors?.[i], finiteLimitPoint ?? undefined)), ...approachTraces,
+            ...(systemIntersections?.length ? [{ type: "scatter", mode: "markers", name: "Intersección común",
+              x: systemIntersections.map(([x]) => x), y: systemIntersections.map(([, y]) => y),
+              marker: { color: "#16865d", size: 11, line: { color: "white", width: 2 } } }] : [])],
           isSurface(data)
             ? {
                 scene: {
@@ -200,7 +204,7 @@ export default function GraphViewer({ data, colors, integralBounds, limitFocus }
         plotlyRef.current.purge(safeContainer);
       }
     };
-  }, [data, colors, lowerBound, upperBound, limitPoint, limitDirection]);
+  }, [data, colors, lowerBound, upperBound, limitPoint, limitDirection, systemIntersections]);
 
   async function handleDownloadPng(): Promise<void> {
     if (!containerRef.current || !plotlyRef.current) return;

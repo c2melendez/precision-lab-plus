@@ -259,6 +259,10 @@ class MathResponse(BaseModel):
     ode_solution_latex: Optional[str] = None
     ode_representative_expressions: Optional[List[str]] = None
     ode_representative_latex: Optional[List[str]] = None
+    system_graph_expressions: Optional[List[str]] = None
+    system_graph_latex: Optional[List[str]] = None
+    system_graph_intersections: Optional[List[List[float]]] = None
+    system_graph_coincident: bool = False
     result_approx: Optional[float] = None
     result_data: Optional[Union[List[EquationSolution], List[List[str]]]] = None
     steps: List[Step] = []

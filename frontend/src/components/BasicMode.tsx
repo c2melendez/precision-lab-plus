@@ -62,7 +62,7 @@ import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
-import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext, limitGraphContext, algebraTransformationGraphContext, odeGraphContext } from "./scientificGraphContext";
+import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext, limitGraphContext, algebraTransformationGraphContext, odeGraphContext, systemGraphContext } from "./scientificGraphContext";
 
 interface SubstitutionRow {
   name: string;
@@ -286,12 +286,16 @@ export function BasicMode() {
     result: MathResponse;
   } | null>(null);
   const [lastOde, setLastOde] = useState<{ sourceLatex: string; expression: string; result: MathResponse } | null>(null);
+  const [lastSystem, setLastSystem] = useState<{ sourceLatex: string; equations: string[]; variables: string[]; result: MathResponse } | null>(null);
 
   const graphState = useMemo<ScientificGraphState>(
     () => classifyScientificGraphState(latex),
     [latex],
   );
   const graphContext = useMemo(() => {
+    if (lastSystem?.sourceLatex === latex && lastSystem.result.success) {
+      return systemGraphContext(lastSystem.equations, lastSystem.variables, latex, lastSystem.result);
+    }
     if (lastOde?.sourceLatex === latex && lastOde.result.success) {
       return odeGraphContext(lastOde.expression, latex, lastOde.result);
     }
@@ -336,8 +340,8 @@ export function BasicMode() {
     const result = lastEvaluated?.expression === expression && lastEvaluated.angleUnit === angleUnit
       ? lastEvaluated.result : null;
     return directFunctionGraphContext(expression, variable, angleUnit, result, latex);
-  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra, lastOde]);
-  const resolvedGraphState: ScientificGraphState = graphContext?.operation === "simplify" || graphContext?.operation === "factor" || graphContext?.operation === "ode"
+  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra, lastOde, lastSystem]);
+  const resolvedGraphState: ScientificGraphState = graphContext?.operation === "simplify" || graphContext?.operation === "factor" || graphContext?.operation === "ode" || graphContext?.operation === "system"
     ? graphContext.graphRequest ? "available" : "advanced" : graphState;
 
   const setLoading = useUIStore((state) => state.setLoading);
@@ -428,6 +432,7 @@ export function BasicMode() {
         latex,
       );
       setLastResult(result);
+      if (result.success) setLastSystem({ sourceLatex: latex, equations, variables: variableList, result });
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }

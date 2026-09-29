@@ -374,6 +374,37 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(page.getByTestId("scientific-graph-context")).toContainText("familia representativa C₁=−1, 0, 1");
   });
 
+  test("sistema lineal muestra dos curvas y su intersección calculada", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\begin{cases}x+y=3\\\\x-y=1\\end{cases}");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/solve/system") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    expect((await (await solve).json()).system_graph_intersections).toEqual([[2, 1]]);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("scientific-preview-plot").locator("path")).toHaveCount(2);
+    await expect(preview.getByTestId("system-intersection")).toHaveCount(1);
+    const graphResponse = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/graph/2d") && response.request().method() === "POST");
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    expect((await graphResponse).request().postDataJSON().expressions).toEqual(["3 - x", "x - 1"]);
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("1 intersección común");
+  });
+
+  test("rectas paralelas no inventan intersección", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\begin{cases}x+y=3\\\\x+y=4\\end{cases}");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/solve/system") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    expect((await (await solve).json()).system_graph_intersections).toEqual([]);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("no tiene solución");
+    await expect(preview.getByTestId("system-intersection")).toHaveCount(0);
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

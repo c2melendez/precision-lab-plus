@@ -232,3 +232,31 @@ export function odeGraphContext(
     } } : null,
   };
 }
+
+export function systemGraphContext(
+  equations: string[], variables: string[], inputLatex: string, result: MathResponse,
+): ScientificGraphContext {
+  const expressions = result.system_graph_expressions;
+  const latex = result.system_graph_latex;
+  const graphable = result.success && variables.length === 2 && variables[0] === "x"
+    && variables[1] === "y" && Boolean(expressions?.length) && expressions?.length === latex?.length;
+  const intersectionX = result.system_graph_intersections?.[0]?.[0];
+  const centerOnIntersection = Number.isFinite(intersectionX) && Math.abs(intersectionX!) <= 1e6
+    && Math.abs(intersectionX!) > 8;
+  return {
+    operation: "system",
+    originalExpression: equations.join(" ; "),
+    inputLatex,
+    graphInputLatex: graphable ? latex! : null,
+    canonicalResult: result.success ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
+    variables,
+    metadata: { equations, intersections: result.system_graph_intersections ?? [],
+      coincident: result.system_graph_coincident === true, angleUnit: "rad" },
+    restrictions: null,
+    visualization: graphable ? "cartesian-2d" : "advanced",
+    graphRequest: graphable ? { endpoint: "/graph/2d", payload: {
+      expressions: expressions!, variable: "x", angle_unit: "rad",
+      ...(centerOnIntersection ? { x_min: intersectionX! - 10, x_max: intersectionX! + 10 } : {}),
+    } } : null,
+  };
+}

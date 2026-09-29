@@ -669,3 +669,10 @@ La próxima sesión debe iniciar con revisión visual, no con nueva implementaci
 - `/ode` expone campos opcionales estructurados para el lado derecho de una solución particular y para tres miembros representativos de una familia con exactamente una constante arbitraria. El resultado canónico `Eq(y(x), ...)` permanece intacto; no se extrae el lado derecho del texto mostrado.
 - Científica grafica solo la solución particular, o tres miembros `C₁=−1, 0, 1` de una familia de un parámetro, marcados explícitamente como representantes. Una familia de dos constantes conserva estado avanzado sin inventar un corte 2D ni elegir parámetros silenciosamente. Gráficas recibe expresiones, resultado y origen EDO.
 - 6 pruebas EDO backend, 15 pruebas de contexto frontend, TypeScript y lint focalizado PASS. E2E particular y familia añadidos; pendiente Actions, visual final y demás operaciones de B7.
+- Commit `87360a2eec89523c8c8d8f576eac691e788c5f40`: nueve workflows PASS, incluidos Playwright E2E y S19. Tramo EDO certificado técnicamente; revisión visual y demás operaciones pendientes.
+
+## 2026-09-29 — B7 Plus: sistemas lineales, primer tramo
+
+- `/solve/system` expone curvas explícitas certificadas solo para dos ecuaciones lineales reales en `x,y` con coeficiente no nulo de `y`; conserva `result_data` canónico. Entrega puntos comunes reales desde `linsolve`, no desde muestreo gráfico. Paralelas muestran ambas curvas sin punto; coincidentes muestran una curva e infinitas soluciones. Rectas verticales, no lineales y sistemas de tres variables no reciben un certificado cartesiano engañoso.
+- Científica muestra las curvas y puntos certificados; Gráficas recibe ambas ecuaciones, soluciones y marcas de intersección. Dos pruebas de backend y 17 pruebas de contexto frontend PASS; TypeScript y lint focalizado PASS. E2E de cruce y paralelas añadidos, pendiente Actions: el navegador Playwright no está instalado en este entorno local.
+- Quedan pendientes la representación implícita de rectas verticales/no lineales, las inecuaciones, complejos y la revisión visual humana. B7 EN CURSO.

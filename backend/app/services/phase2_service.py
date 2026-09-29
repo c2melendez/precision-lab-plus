@@ -56,6 +56,10 @@ class SolveSystemResult:
     solutions: List[EquationSolution]
     has_solutions: bool
     warnings: List[str]
+    graph_expressions: List[str] | None = None
+    graph_latex: List[str] | None = None
+    graph_intersections: List[List[float]] | None = None
+    graph_coincident: bool = False
 
 
 def _validate_variable(variable: str) -> sympy.Symbol:
@@ -284,15 +288,46 @@ def compute_solve_system(equations: List[str], variables: List[str]) -> SolveSys
 
     if is_linear:
         solution_set = sympy.linsolve(parsed_equations, var_symbols)
+        graph_expressions = None
+        graph_latex = None
+        graph_intersections = None
+        graph_coincident = False
+        if len(var_symbols) == 2 and len(parsed_equations) == 2:
+            x, y = var_symbols
+            # Only explicit, nonvertical affine lines belong in /graph/2d.
+            curves = []
+            for eq in parsed_equations:
+                polynomial = sympy.Poly(eq.lhs - eq.rhs, x, y)
+                y_coefficient = polynomial.coeff_monomial(y)
+                if y_coefficient == 0 or any(coefficient.is_real is not True
+                                             for coefficient in polynomial.coeffs()):
+                    break
+                curve = sympy.cancel(-polynomial.coeff_monomial(x) * x / y_coefficient
+                                     - polynomial.coeff_monomial(1) / y_coefficient)
+                if curve.free_symbols - {x}:
+                    break
+                curves.append(curve)
+            if len(curves) == 2:
+                graph_coincident = sympy.simplify(curves[0] - curves[1]) == 0
+                visible = curves[:1] if graph_coincident else curves
+                graph_expressions = [str(curve) for curve in visible]
+                graph_latex = [sympy.latex(curve) for curve in visible]
+                graph_intersections = []
+                if not graph_coincident and solution_set:
+                    for point in solution_set:
+                        if all(value.is_real is True and not value.free_symbols for value in point):
+                            graph_intersections.append([float(sympy.N(value)) for value in point])
         if not solution_set:
-            return SolveSystemResult([], False, ["El sistema no tiene solución (inconsistente)."])
+            return SolveSystemResult([], False, ["El sistema no tiene solución (inconsistente)."],
+                                     graph_expressions, graph_latex, graph_intersections, graph_coincident)
         solutions = [
             _format_solution_tuple(var_symbols, tuple(values))
             for values in list(solution_set)[:MAX_SYSTEM_SOLUTIONS]
         ]
         # linsolve deja cualquier parámetro libre (tau_i) visible directamente
         # en el texto/latex de la solución cuando el sistema es indeterminado.
-        return SolveSystemResult(solutions, True, [])
+        return SolveSystemResult(solutions, True, [], graph_expressions, graph_latex,
+                                 graph_intersections, graph_coincident)
 
     raw_solutions = sympy.solve(parsed_equations, var_symbols, dict=True)
     if not raw_solutions:

@@ -166,18 +166,20 @@ function ResultArea({
   colors,
   integralBounds,
   limitFocus,
+  systemIntersections,
 }: {
   result: MathResponse | null;
   isLoading: boolean;
   colors?: string[];
   integralBounds?: [number, number];
   limitFocus?: { point: string; direction: "both" | "left" | "right" };
+  systemIntersections?: number[][];
 }) {
   if (!isLoading && result?.success && result.graph_data) {
     return (
       <div className="space-y-4">
         <Suspense fallback={<p className="text-sm text-muted">Cargando visor de gráficas…</p>}>
-          <GraphViewer data={result.graph_data} colors={colors} integralBounds={integralBounds} limitFocus={limitFocus} />
+          <GraphViewer data={result.graph_data} colors={colors} integralBounds={integralBounds} limitFocus={limitFocus} systemIntersections={systemIntersections} />
         </Suspense>
         <AnalysisPanel result={result} />
       </div>
@@ -348,7 +350,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
       <aside aria-label="Controles de gráfica 2D" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
         {sourceContext && (
           <p className="rounded-md bg-paper-soft px-2 py-1 text-xs text-muted" data-testid="scientific-graph-context">
-            Desde Científica · {sourceContext.operation === "derivative" ? "derivada" : sourceContext.operation === "integral" ? "integral" : sourceContext.operation === "limit" ? "límite" : sourceContext.operation === "simplify" ? "simplificación" : sourceContext.operation === "factor" ? "factorización" : sourceContext.operation === "ode" ? "solución EDO" : "función"} de {sourceContext.variables[0]}
+            Desde Científica · {sourceContext.operation === "derivative" ? "derivada" : sourceContext.operation === "integral" ? "integral" : sourceContext.operation === "limit" ? "límite" : sourceContext.operation === "simplify" ? "simplificación" : sourceContext.operation === "factor" ? "factorización" : sourceContext.operation === "ode" ? "solución EDO" : sourceContext.operation === "system" ? "sistema" : "función"} de {sourceContext.variables[0]}
             {sourceContext.canonicalResult && " · resultado conservado"}
             {sourceContext.operation === "integral" && (sourceContext.metadata.kind === "definite"
               ? ` · límites ${sourceContext.metadata.lowerBound} → ${sourceContext.metadata.upperBound} · valor firmado ${sourceContext.canonicalResult?.text ?? "—"}`
@@ -359,6 +361,8 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
             {(sourceContext.operation === "simplify" || sourceContext.operation === "factor") && ` · forma transformada ${sourceContext.metadata.transformedExpression} · dominio real completo`}
             {sourceContext.operation === "ode" && (sourceContext.metadata.kind === "particular"
               ? " · solución particular" : " · familia representativa C₁=−1, 0, 1")}
+            {sourceContext.operation === "system" && (sourceContext.metadata.coincident
+              ? " · curvas coincidentes, infinitas soluciones" : ` · ${(sourceContext.metadata.intersections as number[][]).length} intersección común · ecuaciones ${String((sourceContext.metadata.equations as string[]).join(" ; "))}`)}
           </p>
         )}
         <div className="flex items-center justify-between gap-2">
@@ -524,7 +528,9 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
             ? [Number(sourceContext.metadata.lowerBound), Number(sourceContext.metadata.upperBound)] : undefined}
           limitFocus={sourceContext?.operation === "limit"
             ? { point: String(sourceContext.metadata.point), direction: sourceContext.metadata.direction as "both" | "left" | "right" }
-            : undefined} />
+            : undefined}
+          systemIntersections={sourceContext?.operation === "system"
+            ? sourceContext.metadata.intersections as number[][] : undefined} />
       </section>
     </form>
   );

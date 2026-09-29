@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MathResponse } from "../api/client";
-import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext, odeGraphContext } from "../components/scientificGraphContext";
+import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext, odeGraphContext, systemGraphContext } from "../components/scientificGraphContext";
 
 describe("contexto canónico de función directa", () => {
   it("conserva la expresión de entrada y el resultado del motor, sin leer texto visual", () => {
@@ -27,6 +27,27 @@ describe("contexto canónico de función directa", () => {
     expect(context.canonicalResult).toBeNull();
     expect(context.variables).toEqual(["y"]);
     expect(context.graphRequest?.payload.variable).toBe("y");
+  });
+});
+
+describe("sistema lineal certificado", () => {
+  it("conserva ecuaciones y soluciones, y marca solo la intersección calculada", () => {
+    const result = { success: true, result_data: [{ text: "x=2, y=1", latex: "x=2,y=1" }],
+      system_graph_expressions: ["3 - x", "x - 1"], system_graph_latex: ["3-x", "x-1"],
+      system_graph_intersections: [[2, 1]] } as MathResponse;
+    const context = systemGraphContext(["x+y=3", "x-y=1"], ["x", "y"], "\\begin{cases}...", result);
+    expect(context.graphRequest?.payload.expressions).toEqual(["3 - x", "x - 1"]);
+    expect(context.metadata.intersections).toEqual([[2, 1]]);
+    expect(context.metadata.equations).toEqual(["x+y=3", "x-y=1"]);
+    expect(context.canonicalResult?.data).toEqual(result.result_data);
+  });
+
+  it("no envía rectas verticales a un motor y=f(x)", () => {
+    const context = systemGraphContext(["x=1", "y=2"], ["x", "y"], "system", {
+      success: true, system_graph_expressions: null, system_graph_latex: null,
+    } as MathResponse);
+    expect(context.graphRequest).toBeNull();
+    expect(context.visualization).toBe("advanced");
   });
 });
 

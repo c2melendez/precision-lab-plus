@@ -44,7 +44,7 @@ export function GraphPlaceholder({
   const [isPreviewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
-    const request = (context?.operation === "function" || context?.operation === "derivative" || context?.operation === "integral" || context?.operation === "limit" || context?.operation === "simplify" || context?.operation === "factor" || context?.operation === "ode") && context.canonicalResult
+    const request = (context?.operation === "function" || context?.operation === "derivative" || context?.operation === "integral" || context?.operation === "limit" || context?.operation === "simplify" || context?.operation === "factor" || context?.operation === "ode" || context?.operation === "system") && context.canonicalResult
       ? context.graphRequest : null;
     setPreview(null);
     if (!request) {
@@ -105,11 +105,17 @@ export function GraphPlaceholder({
                   {region && [region.lowerX, region.upperX].map((x, index) => <line key={index} x1={x} x2={x} y1="0" y2="120" stroke="currentColor" strokeDasharray="3 3" opacity="0.4" />)}
                   {approach?.pointX !== null && approach?.pointX !== undefined && <line x1={approach.pointX} x2={approach.pointX} y1="0" y2="120" stroke="#9b6a18" strokeDasharray="3 3" opacity="0.7" />}
                   {geometry.paths.map((path, index) => <path key={index} d={path} fill="none"
-                    stroke={context?.operation === "ode" && context.metadata.kind === "one-parameter-family"
+                    stroke={context?.operation === "system" ? ["#2862b8", "#b65d20"][index] : context?.operation === "ode" && context.metadata.kind === "one-parameter-family"
                       ? ["#2862b8", "#737b89", "#b65d20"][index] : "currentColor"}
                     opacity={context?.operation !== "ode" && context?.operation !== "function" && index === 0 ? 0.5 : 1}
                     strokeWidth={context?.operation !== "ode" && context?.operation !== "function" && index === 0 ? 1.5 : 2.5}
                     vectorEffect="non-scaling-stroke" />)}
+                  {context?.operation === "system" && (context.metadata.intersections as number[][]).map(([x, y], index) =>
+                    Number.isFinite(x) && Number.isFinite(y) && x >= preview!.graph_data!.x_range[0]
+                    && x <= preview!.graph_data!.x_range[1] && y >= preview!.graph_data!.y_range![0]
+                    && y <= preview!.graph_data!.y_range![1]
+                      ? <circle key={index} data-testid="system-intersection" cx={geometry.projectX(x)}
+                        cy={geometry.projectY(y)} r="4" fill="#16865d" stroke="white" strokeWidth="1.5" /> : null)}
                   {approach?.leftPath && <path data-testid="limit-left-approach" d={approach.leftPath} fill="none" stroke="#2862b8" strokeWidth="3" vectorEffect="non-scaling-stroke" />}
                   {approach?.rightPath && <path data-testid="limit-right-approach" d={approach.rightPath} fill="none" stroke="#b65d20" strokeWidth="3" vectorEffect="non-scaling-stroke" />}
                 </svg>
@@ -134,6 +140,11 @@ export function GraphPlaceholder({
                 ? context.metadata.kind === "particular"
                   ? "Solución particular y(x) obtenida de la EDO; se grafica la solución, no la ecuación diferencial original."
                   : "Tres miembros representativos de la familia de soluciones (C₁=−1, 0, 1); el resultado conserva la constante arbitraria."
+                : context?.operation === "system"
+                ? context.metadata.coincident ? "Las ecuaciones coinciden: una curva representa infinitas soluciones."
+                  : (context.metadata.intersections as number[][]).length
+                    ? "Curvas componentes y su intersección común marcada en verde."
+                    : "Curvas componentes sin intersección común; el sistema no tiene solución."
                 : context?.operation === "integral"
                 ? "Integrando y antiderivada representativa (C=0 solo en la gráfica); el resultado conserva +C."
                 : context?.operation === "derivative"
@@ -148,6 +159,8 @@ export function GraphPlaceholder({
             ? "Esta transformación requiere comprobar restricciones de dominio antes de comparar gráficas."
             : context?.operation === "ode" && !context.graphRequest
               ? "Esta familia necesita una vista avanzada para elegir sus parámetros antes de graficarla."
+              : context?.operation === "system" && !context.graphRequest
+                ? "Este sistema requiere una representación implícita o de más dimensiones en Gráficas."
               : STATE_COPY[state])}</p>
         )}
 
