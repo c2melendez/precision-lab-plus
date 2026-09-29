@@ -346,11 +346,12 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
       <aside aria-label="Controles de gráfica 2D" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
         {sourceContext && (
           <p className="rounded-md bg-paper-soft px-2 py-1 text-xs text-muted" data-testid="scientific-graph-context">
-            Desde Científica · {sourceContext.operation === "derivative" ? "derivada" : sourceContext.operation === "integral" ? "integral" : "función"} de {sourceContext.variables[0]}
+            Desde Científica · {sourceContext.operation === "derivative" ? "derivada" : sourceContext.operation === "integral" ? "integral" : sourceContext.operation === "limit" ? "límite" : "función"} de {sourceContext.variables[0]}
             {sourceContext.canonicalResult && " · resultado conservado"}
             {sourceContext.operation === "integral" && (sourceContext.metadata.kind === "definite"
               ? ` · límites ${sourceContext.metadata.lowerBound} → ${sourceContext.metadata.upperBound} · valor firmado ${sourceContext.canonicalResult?.text ?? "—"}`
               : " · C=0 solo en la gráfica")}
+            {sourceContext.operation === "limit" && ` · ${sourceContext.metadata.direction === "left" ? "desde la izquierda" : sourceContext.metadata.direction === "right" ? "desde la derecha" : "ambos lados"} → ${sourceContext.metadata.point} · resultado ${sourceContext.canonicalResult?.text ?? "—"}`}
           </p>
         )}
         <div className="flex items-center justify-between gap-2">

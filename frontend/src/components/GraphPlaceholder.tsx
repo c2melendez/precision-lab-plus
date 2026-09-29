@@ -7,7 +7,7 @@
  */
 import { useEffect, useState } from "react";
 import { callApi, type MathResponse } from "../api/client";
-import { graphPreviewGeometry, integralRegionGeometry } from "./graphPreviewGeometry";
+import { graphPreviewGeometry, integralRegionGeometry, limitApproachGeometry } from "./graphPreviewGeometry";
 import type { ScientificGraphContext } from "./scientificGraphContext";
 
 export type ScientificGraphState =
@@ -44,7 +44,7 @@ export function GraphPlaceholder({
   const [isPreviewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
-    const request = (context?.operation === "function" || context?.operation === "derivative" || context?.operation === "integral") && context.canonicalResult
+    const request = (context?.operation === "function" || context?.operation === "derivative" || context?.operation === "integral" || context?.operation === "limit") && context.canonicalResult
       ? context.graphRequest : null;
     setPreview(null);
     if (!request) {
@@ -68,6 +68,9 @@ export function GraphPlaceholder({
   const region = definite && geometry && preview?.graph_data
     ? integralRegionGeometry(preview.graph_data, Number(context?.metadata.lowerBound), Number(context?.metadata.upperBound), geometry)
     : null;
+  const approach = context?.operation === "limit" && geometry && preview?.graph_data
+    ? limitApproachGeometry(preview.graph_data, String(context.metadata.point),
+      context.metadata.direction as "both" | "left" | "right", geometry) : null;
 
   return (
     <section
@@ -86,7 +89,7 @@ export function GraphPlaceholder({
             <div
               role="img"
               aria-label={geometry
-                ? `Vista previa de ${context?.operation === "derivative" ? "función y derivada" : definite ? "integrando y región con signo" : context?.operation === "integral" ? "integrando y antiderivada" : "función"} de ${context?.variables[0] ?? "x"}`
+                ? `Vista previa de ${context?.operation === "derivative" ? "función y derivada" : definite ? "integrando y región con signo" : context?.operation === "integral" ? "integrando y antiderivada" : context?.operation === "limit" ? "aproximación al límite" : "función"} de ${context?.variables[0] ?? "x"}`
                 : "Vista previa pendiente de renderizado contextual"}
               className="grid h-24 w-full max-w-md place-items-center overflow-hidden rounded-lg border border-paper-line bg-paper/50"
             >
@@ -97,7 +100,10 @@ export function GraphPlaceholder({
                   {region?.positivePath && <path data-testid="integral-positive-region" d={region.positivePath} fill="#16865d" opacity="0.35" />}
                   {region?.negativePath && <path data-testid="integral-negative-region" d={region.negativePath} fill="#c34a4a" opacity="0.35" />}
                   {region && [region.lowerX, region.upperX].map((x, index) => <line key={index} x1={x} x2={x} y1="0" y2="120" stroke="currentColor" strokeDasharray="3 3" opacity="0.4" />)}
+                  {approach?.pointX !== null && approach?.pointX !== undefined && <line x1={approach.pointX} x2={approach.pointX} y1="0" y2="120" stroke="#9b6a18" strokeDasharray="3 3" opacity="0.7" />}
                   {geometry.paths.map((path, index) => <path key={index} d={path} fill="none" stroke="currentColor" opacity={context?.operation !== "function" && index === 0 ? 0.5 : 1} strokeWidth={context?.operation !== "function" && index === 0 ? 1.5 : 2.5} vectorEffect="non-scaling-stroke" />)}
+                  {approach?.leftPath && <path data-testid="limit-left-approach" d={approach.leftPath} fill="none" stroke="#2862b8" strokeWidth="3" vectorEffect="non-scaling-stroke" />}
+                  {approach?.rightPath && <path data-testid="limit-right-approach" d={approach.rightPath} fill="none" stroke="#b65d20" strokeWidth="3" vectorEffect="non-scaling-stroke" />}
                 </svg>
               ) : (
                 <span className="text-[11px] text-muted">
@@ -110,6 +116,8 @@ export function GraphPlaceholder({
             <p className="max-w-md text-[11px] text-muted">
               {definite
                 ? `Región con signo de ${context?.metadata.lowerBound} a ${context?.metadata.upperBound}; verde suma, rojo resta${Number(context?.metadata.orientation) < 0 ? " (sentido inverso)" : ""}. Valor exacto: ${context?.canonicalResult?.text ?? "—"}.`
+                : context?.operation === "limit"
+                ? `Aproximación ${context.metadata.direction === "left" ? "por la izquierda" : context.metadata.direction === "right" ? "por la derecha" : "por ambos lados"} a ${context.metadata.point === "oo" ? "+∞" : context.metadata.point === "-oo" ? "−∞" : context.metadata.point}${context.metadata.bilateralDoesNotExist ? "; los límites laterales difieren" : ""}. Resultado: ${context.canonicalResult?.text ?? "—"}.`
                 : context?.operation === "integral"
                 ? "Integrando y antiderivada representativa (C=0 solo en la gráfica); el resultado conserva +C."
                 : context?.operation === "derivative"

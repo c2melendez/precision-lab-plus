@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { components } from "../types/api";
-import { graphPreviewGeometry, integralRegionGeometry, integralRegionSegments } from "../components/graphPreviewGeometry";
+import { graphPreviewGeometry, integralRegionGeometry, integralRegionSegments, limitApproachGeometry } from "../components/graphPreviewGeometry";
 
 type GraphData = components["schemas"]["GraphData"];
 
@@ -23,6 +23,30 @@ describe("vista previa de curva", () => {
       x_range: [-1, 1], y_range: null, points_truncated: false,
     };
     expect(graphPreviewGeometry(data)).toBeNull();
+  });
+});
+
+describe("aproximación a un límite", () => {
+  const data: GraphData = {
+    traces: [{ type: "line", name: "x", x: [-2, -1, -0.5, 0, 0.5, 1, 2], y: [-2, -1, -0.5, 0, 0.5, 1, 2] }],
+    x_range: [-2, 2], y_range: [-2, 2], points_truncated: false,
+  };
+  it("bilateral separa lados y marca el punto", () => {
+    const result = limitApproachGeometry(data, "0", "both", graphPreviewGeometry(data)!);
+    expect(result.leftPath).toContain("M");
+    expect(result.rightPath).toContain("M");
+    expect(result.pointX).toBe(160);
+  });
+  it("lateral derecho no resalta el lado izquierdo", () => {
+    const result = limitApproachGeometry(data, "0", "right", graphPreviewGeometry(data)!);
+    expect(result.leftPath).toBe("");
+    expect(result.rightPath).toContain("L");
+  });
+  it("al infinito enfatiza el extremo lejano", () => {
+    const result = limitApproachGeometry(data, "oo", "both", graphPreviewGeometry(data)!);
+    expect(result.leftPath).toBe("");
+    expect(result.rightPath).toContain("M");
+    expect(result.pointX).toBeNull();
   });
 });
 

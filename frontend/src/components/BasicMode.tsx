@@ -62,7 +62,7 @@ import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
-import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext } from "./scientificGraphContext";
+import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext, limitGraphContext } from "./scientificGraphContext";
 
 interface SubstitutionRow {
   name: string;
@@ -268,12 +268,27 @@ export function BasicMode() {
     upperBound: string | null;
     result: MathResponse;
   } | null>(null);
+  const [lastLimit, setLastLimit] = useState<{
+    sourceLatex: string;
+    expression: string;
+    innerLatex: string;
+    variable: string;
+    point: string;
+    direction: "both" | "left" | "right";
+    angleUnit: "rad" | "deg";
+    result: MathResponse;
+  } | null>(null);
 
   const graphState = useMemo<ScientificGraphState>(
     () => classifyScientificGraphState(latex),
     [latex],
   );
   const graphContext = useMemo(() => {
+    if (lastLimit?.sourceLatex === latex && lastLimit.angleUnit === angleUnit && lastLimit.result.success) {
+      return limitGraphContext(lastLimit.expression, lastLimit.innerLatex, latex,
+        lastLimit.variable, lastLimit.point, lastLimit.direction, angleUnit, lastLimit.result,
+        usesOnlyGraphVariable(lastLimit.expression, lastLimit.variable));
+    }
     if (lastIntegral?.sourceLatex === latex && lastIntegral.angleUnit === angleUnit && lastIntegral.result.success) {
       if (lastIntegral.lowerBound !== null && lastIntegral.upperBound !== null) {
         return definiteIntegralGraphContext(
@@ -306,7 +321,7 @@ export function BasicMode() {
     const result = lastEvaluated?.expression === expression && lastEvaluated.angleUnit === angleUnit
       ? lastEvaluated.result : null;
     return directFunctionGraphContext(expression, variable, angleUnit, result, latex);
-  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral]);
+  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit]);
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
@@ -558,6 +573,10 @@ export function BasicMode() {
           variable: intent.variable, angleUnit, lowerBound: intent.lowerBound,
           upperBound: intent.upperBound, result,
         });
+      }
+      if (intent.kind === "limit" && result.success) {
+        setLastLimit({ sourceLatex: latex, expression: trimmedInner, innerLatex: intent.innerLatex,
+          variable: intent.variable, point: intent.point, direction: intent.direction, angleUnit, result });
       }
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");

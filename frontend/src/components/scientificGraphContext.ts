@@ -140,3 +140,38 @@ export function definiteIntegralGraphContext(
     } : null,
   };
 }
+
+export function limitGraphContext(
+  expression: string,
+  innerLatex: string,
+  inputLatex: string,
+  variable: string,
+  point: string,
+  direction: "both" | "left" | "right",
+  angleUnit: "rad" | "deg",
+  result: MathResponse,
+  graphable: boolean,
+): ScientificGraphContext {
+  const finitePoint = Number(point);
+  const isInfinite = point === "oo" || point === "-oo";
+  const validPoint = isInfinite || (point.trim() !== "" && Number.isFinite(finitePoint) && Math.abs(finitePoint) <= 1e6);
+  const span = isInfinite ? 16 : Math.max(2, Math.abs(finitePoint) * 0.25);
+  const xMin = point === "oo" ? 4 : point === "-oo" ? -20 : finitePoint - span;
+  const xMax = point === "oo" ? 20 : point === "-oo" ? -4 : finitePoint + span;
+  const canGraph = result.success && graphable && validPoint;
+  return {
+    operation: "limit",
+    originalExpression: expression,
+    inputLatex,
+    graphInputLatex: canGraph ? [innerLatex] : null,
+    canonicalResult: result.success ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
+    variables: [variable],
+    metadata: { point, direction, angleUnit: "rad", inputAngleUnit: angleUnit,
+      behavior: isInfinite ? "far-field" : "near-point", bilateralDoesNotExist: result.result_text === "DNE" },
+    restrictions: null,
+    visualization: canGraph ? "cartesian-2d" : "advanced",
+    graphRequest: canGraph ? { endpoint: "/graph/2d", payload: {
+      expressions: [expression], variable, angle_unit: "rad", x_min: xMin, x_max: xMax,
+    } } : null,
+  };
+}

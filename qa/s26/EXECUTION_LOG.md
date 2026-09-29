@@ -644,3 +644,9 @@ La próxima sesión debe iniciar con revisión visual, no con nueva implementaci
 - Segundo tramo: Gráficas dibuja los mismos segmentos firmados con relleno Plotly detrás de la curva, guías de límites y eje vertical que incluye cero. La geometría compartida evita unir áreas a través de discontinuidades. TypeScript, pruebas de geometría y lint focalizado PASS; certificación remota pendiente.
 - Commit `1efc63fa325f9445dff1b7ed8d35e320d03dd247`: CI, Playwright E2E, S17, S18, S20, S21, S23 y S25 PASS; S19 aún en ejecución. El caso E2E `∫₂⁰x²dx = -8/3` pasó.
 - Commit `ab291ad8744da98eb2d3423e5f49e1df99fbe25c`: ampliación Plotly; CI, S17, S18, S20, S21, S23 y S25 PASS, Playwright y S19 en ejecución. Se estabilizan las dependencias del visor por los límites numéricos para evitar redibujados durante rerenders del padre.
+
+## 2026-09-29 — B7 Plus: integral definida certificada y límites en desarrollo
+
+- HEAD `0ab1446b22d6b90458dcaca7093f5e972baa4012`: CI, Playwright E2E, S17 API fuzzing, S18 Differential Properties, S19 Mutation Baseline, S20 Performance Robustness, S21 Cross-browser Compatibility, S23 Accessibility y S25 Security PASS. La integral definida, la región firmada y el puente a Gráficas quedan certificados técnicamente. B7 completo sigue EN CURSO; falta revisión visual humana y operaciones posteriores.
+- Límite: snapshot canónico de expresión, punto, dirección, variable y resultado de `/limit`. La vista previa usa `/graph/2d` en un rango cercano al punto finito o lejano para ±∞; traza la aproximación bilateral o solo el lado solicitado y marca DNE cuando el backend lo devuelve. Gráficas conserva punto, dirección, rango y resultado sin analizar el LaTeX de Resultado.
+- TypeScript, lint focalizado y 18 pruebas unitarias focalizadas PASS. Dos casos E2E añadidos para bilateral DNE y lateral derecho; pendientes Actions y verificación visual. No declarar cierre de límites ni B7 todavía.

@@ -97,3 +97,37 @@ export function integralRegionGeometry(
   return { positivePath: segments.positive.map(draw).join(" "), negativePath: segments.negative.map(draw).join(" "),
     lowerX: geometry.projectX(lower), upperX: geometry.projectX(upper) };
 }
+
+/** Resalta únicamente las muestras que se acercan al punto desde cada lado. */
+export function limitApproachGeometry(
+  data: GraphData,
+  point: string,
+  direction: "both" | "left" | "right",
+  geometry: NonNullable<ReturnType<typeof graphPreviewGeometry>>,
+): { leftPath: string; rightPath: string; pointX: number | null } {
+  const trace = data.traces.find((item) => item.type === "line");
+  const [xMin, xMax] = data.x_range;
+  const finite = point !== "oo" && point !== "-oo" && Number.isFinite(Number(point));
+  const target = Number(point);
+  const radius = (xMax - xMin) * 0.35;
+  const draw = (side: "left" | "right") => {
+    if (!trace || (direction !== "both" && direction !== side)) return "";
+    let connected = false;
+    return trace.x.map((x, index) => {
+      const y = trace.y[index];
+      const selected = finite
+        ? side === "left" ? x < target && x >= target - radius : x > target && x <= target + radius
+        : point === "oo" ? side === "right" && x >= xMax - radius
+          : side === "left" && x <= xMin + radius;
+      if (!selected || !Number.isFinite(x) || y == null || !Number.isFinite(y)) {
+        connected = false;
+        return "";
+      }
+      const command = connected ? "L" : "M";
+      connected = true;
+      return `${command}${geometry.projectX(x).toFixed(2)} ${geometry.projectY(y).toFixed(2)}`;
+    }).filter(Boolean).join(" ");
+  };
+  return { leftPath: draw("left"), rightPath: draw("right"),
+    pointX: finite && target >= xMin && target <= xMax ? geometry.projectX(target) : null };
+}

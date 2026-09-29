@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MathResponse } from "../api/client";
-import { directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext } from "../components/scientificGraphContext";
+import { directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext } from "../components/scientificGraphContext";
 
 describe("contexto canónico de función directa", () => {
   it("conserva la expresión de entrada y el resultado del motor, sin leer texto visual", () => {
@@ -92,5 +92,23 @@ describe("contexto canónico de integral definida", () => {
     expect(context.canonicalResult?.text).toBe("-8/3");
     expect(context.graphRequest?.payload).toMatchObject({ expressions: ["x^2"], variable: "x", x_min: -1, x_max: 3 });
     expect(context.graphInputLatex).toEqual(["x^2"]);
+  });
+});
+
+describe("contexto canónico de límite", () => {
+  it("conserva punto, dirección y DNE sin inferir laterales desde LaTeX de Resultado", () => {
+    const result = { success: true, result_text: "DNE", result_latex: "texto con laterales" } as MathResponse;
+    const context = limitGraphContext("1/x", "\\frac{1}{x}", "\\lim_{x\\to0}\\frac{1}{x}", "x", "0", "both", "deg", result, true);
+    expect(context.metadata).toMatchObject({ point: "0", direction: "both", bilateralDoesNotExist: true, inputAngleUnit: "deg" });
+    expect(context.canonicalResult?.text).toBe("DNE");
+    expect(context.graphRequest?.payload).toMatchObject({ expressions: ["1/x"], x_min: -2, x_max: 2, angle_unit: "rad" });
+    expect(JSON.stringify(context)).not.toContain("texto con laterales");
+  });
+
+  it("encuadra el comportamiento lejano en dirección al infinito", () => {
+    const context = limitGraphContext("1/x", "1/x", "límite", "x", "oo", "both", "rad",
+      { success: true, result_text: "0" } as MathResponse, true);
+    expect(context.graphRequest?.payload).toMatchObject({ x_min: 4, x_max: 20 });
+    expect(context.metadata.behavior).toBe("far-field");
   });
 });

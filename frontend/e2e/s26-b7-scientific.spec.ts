@@ -220,6 +220,46 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(page.locator(".legendtext").filter({ hasText: "Aporte negativo" })).toBeVisible();
   });
 
+  test("límite bilateral inexistente muestra ambos lados y transfiere punto y resultado", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\lim_{x\\to0}\\frac{1}{x}");
+    const limit = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/limit") && response.request().method() === "POST",
+    );
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const result = await limit;
+    expect(result.ok()).toBeTruthy();
+    expect((await result.json()).result_text).toBe("DNE");
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("Aproximación por ambos lados a 0; los límites laterales difieren");
+    await expect(preview.getByTestId("limit-left-approach")).toBeVisible();
+    await expect(preview.getByTestId("limit-right-approach")).toBeVisible();
+    const graphResponse = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/graph/2d") && response.request().method() === "POST",
+    );
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    const graph = await graphResponse;
+    expect(graph.ok()).toBeTruthy();
+    expect(graph.request().postDataJSON()).toMatchObject({ variable: "x", x_min: -2, x_max: 2 });
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("ambos lados → 0 · resultado DNE");
+  });
+
+  test("límite lateral derecho enfatiza solo x→0+", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\lim_{x\\to0^{+}}\\frac{1}{x}");
+    const limit = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/limit") && response.request().method() === "POST",
+    );
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    expect((await limit).request().postDataJSON().direction).toBe("right");
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("Aproximación por la derecha a 0");
+    await expect(preview.getByTestId("limit-right-approach")).toBeVisible();
+    await expect(preview.getByTestId("limit-left-approach")).toHaveCount(0);
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);
