@@ -169,6 +169,20 @@ describe("ResultPanel", () => {
     expect(screen.getByText("El sistema no tiene solución.")).toBeInTheDocument();
   });
 
+  it("presenta una región 2D como conjunto matemático compacto, sin cursivar el resumen", () => {
+    const { container } = render(<ResultPanel result={{ ...baseResult,
+      operation: "inequality", result_type: "inequality_region", result_approx: null,
+      result_text: "Exterior y frontera de la elipse",
+      result_latex: "\\{(x,y)\\in\\mathbb{R}^{2}\\mid x^{2}+2y^{2}\\geq 1\\}",
+    }} isLoading={false} />);
+    const math = container.querySelector(".katex");
+    expect(math?.textContent).toContain("≥");
+    expect(math?.textContent).toContain("∈");
+    expect(math?.textContent).not.toContain("Exterior");
+    expect(container.querySelector(".a11y-scale-result-lg")).toBeInTheDocument();
+    expect(container.querySelector(".overflow-x-auto")).toBeInTheDocument();
+  });
+
   it("Exacto muestra la representación original y el decimal juntos cuando aplica", () => {
     render(
       <ResultPanel

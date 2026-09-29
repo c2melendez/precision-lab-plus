@@ -201,8 +201,9 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
   const solutionData = isEquationSolutionData(result.result_data, result.result_type)
     ? result.result_data
     : null;
+  const isRegion = result.result_type === "inequality_region";
   const approxText = result.result_approx != null ? formatResultApprox(result.result_approx) : null;
-  const parsedFraction = isFractionLatex(result.result_latex) ? parseFracLatex(result.result_latex!) : null;
+  const parsedFraction = !isRegion && isFractionLatex(result.result_latex) ? parseFracLatex(result.result_latex!) : null;
   const mixedLatex = parsedFraction ? toMixedFracLatex(parsedFraction.n, parsedFraction.d) : null;
   const numericApprox = result.result_approx != null ? Number(result.result_approx) : NaN;
   const hasNumericApprox = Number.isFinite(numericApprox);
@@ -275,7 +276,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
             )}
           </div>
 
-          <div className="min-h-14 rounded-xl border border-paper-line bg-paper px-4 py-3">
+          <div className="min-h-14 min-w-0 overflow-x-auto rounded-xl border border-paper-line bg-paper px-4 py-3">
             <div className="flex min-h-8 items-center justify-end text-right">
             {(() => {
             if (activeFormat === "dd" && dmsDegrees !== null) {
@@ -331,10 +332,10 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
               <MathRenderer
                 latex={exactLatex}
                 fallbackText={result.result_text ?? undefined}
-                className="a11y-scale-result-3xl text-ink"
+                className={`${isRegion ? "a11y-scale-result-lg" : "a11y-scale-result-3xl"} text-ink`}
               />
             ) : (
-              <MathRenderer latex={result.result_text ?? ""} fallbackText={result.result_text ?? undefined} className="a11y-scale-result-3xl text-ink" />
+              <MathRenderer latex={result.result_text ?? ""} fallbackText={result.result_text ?? undefined} className={`${isRegion ? "a11y-scale-result-lg" : "a11y-scale-result-3xl"} text-ink`} />
             );
             })()}
             </div>

@@ -540,6 +540,7 @@ test.describe("S26 B7 — Científica Plus", () => {
     const result = await (await solve).json();
     expect(result.inequality_ellipse.inside).toBe(false);
     expect(result.inequality_ellipse.boundary_included).toBe(true);
+    expect(result.result_latex).toContain("\\mathbb{R}^{2}");
     const preview = page.getByTestId("scientific-graph");
     await expect(preview.getByTestId("ellipse-exterior-region")).toBeAttached();
     await expect(preview.getByTestId("ellipse-boundary")).not.toHaveAttribute("stroke-dasharray");

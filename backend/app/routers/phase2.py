@@ -58,6 +58,14 @@ def _error(request: Request, operation: OperationType, error_code: ErrorCode, me
     )
 
 
+def _region_latex(relations: list[sympy.Rel], variables: list[str], empty: bool = False) -> str:
+    if empty:
+        return r"\varnothing"
+    coordinates = ",".join(sympy.latex(sympy.Symbol(name)) for name in variables)
+    conditions = r" \land ".join(sympy.latex(relation) for relation in relations)
+    return rf"\{{({coordinates})\in\mathbb{{R}}^{{2}}\mid {conditions}\}}"
+
+
 def _stub_response(request: Request, operation: OperationType) -> MathResponse:
     return _error(request, operation, ErrorCode.UNSUPPORTED_IN_PHASE_1, _STUB_MESSAGE)
 
@@ -196,6 +204,7 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
                     success=True, operation=OperationType.INEQUALITY,
                     request_id=request.state.request_id, result_type=ResultType.INEQUALITY_REGION,
                     input_text=payload.inequality,
+                    result_latex=_region_latex([parsed], ["x", "y"]),
                     result_text=("Interior" if inside else "Exterior")
                     + (" y frontera" if included else " sin frontera") + " del círculo",
                     inequality_region_kind="bounded" if inside else "unbounded",
@@ -210,6 +219,7 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
                     success=True, operation=OperationType.INEQUALITY,
                     request_id=request.state.request_id, result_type=ResultType.INEQUALITY_REGION,
                     input_text=payload.inequality,
+                    result_latex=_region_latex([parsed], ["x", "y"]),
                     result_text=("Interior" if inside else "Exterior")
                     + (" y frontera" if included else " sin frontera") + " de la elipse",
                     inequality_region_kind="bounded" if inside else "unbounded",
@@ -228,6 +238,7 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
                 success=True, operation=OperationType.INEQUALITY,
                 request_id=request.state.request_id, result_type=ResultType.INEQUALITY_REGION,
                 input_text=payload.inequality, result_text=description[region.kind],
+                result_latex=_region_latex([parsed], ["x", "y"], region.kind == "empty"),
                 result_data=vertices, inequality_region_kind=region.kind,
                 inequality_constraints=region.constraints,
                 inequality_preview_polygon=region.preview_polygon,
@@ -277,6 +288,7 @@ async def inequality_system(payload: InequalitySystemRequest, request: Request) 
     log_request_event(request.state.request_id, "inequality_system_request")
 
     parsed_constraints = []
+    parsed_relations = []
     for text in payload.inequalities:
         try:
             rel = parsing.parse_inequality_tree(text)
@@ -285,6 +297,7 @@ async def inequality_system(payload: InequalitySystemRequest, request: Request) 
         except ComplexityLimitError as exc:
             return _error(request, OperationType.INEQUALITY_SYSTEM, ErrorCode.COMPLEXITY_LIMIT, str(exc))
         parsed_constraints.append((rel.lhs - rel.rhs, rel.rel_op))
+        parsed_relations.append(rel)
 
     try:
         result = linear_inequality_system.solve_linear_inequality_system(
@@ -303,6 +316,7 @@ async def inequality_system(payload: InequalitySystemRequest, request: Request) 
         request_id=request.state.request_id,
         result_type=ResultType.INEQUALITY_REGION,
         result_text=result.kind,
+        result_latex=_region_latex(parsed_relations, payload.variables, result.kind == "empty"),
         result_data=vertices_data,
         inequality_region_kind=result.kind,
         inequality_constraints=result.constraints,

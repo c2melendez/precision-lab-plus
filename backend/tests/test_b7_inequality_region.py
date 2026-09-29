@@ -76,6 +76,7 @@ def test_direct_circle_inequalities_preserve_region_and_boundary():
         "center_x_exact": "0", "center_y_exact": "0", "radius_exact": "1",
         "inside": True, "boundary_included": False,
     }
+    assert r"\mathbb{R}^{2}\mid x^{2} + y^{2} < 1" in interior["result_latex"]
     exterior = client.post("/api/v1/inequality", json={"inequality": "x^2+y^2>=1"}).json()
     assert exterior["inequality_region_kind"] == "unbounded"
     assert exterior["inequality_circle"]["inside"] is False
@@ -98,6 +99,7 @@ def test_direct_circle_inequalities_preserve_region_and_boundary():
     assert ellipse["inequality_ellipse"]["boundary_included"] is False
     assert ellipse["inequality_ellipse"]["radius_x_exact"] == "1"
     assert ellipse["inequality_ellipse"]["radius_y_exact"] == "sqrt(2)/2"
+    assert r"\mathbb{R}^{2}\mid x^{2} + 2 y^{2} < 1" in ellipse["result_latex"]
 
 
 def test_ellipse_exterior_shift_and_non_ellipse_rejection():
@@ -109,6 +111,7 @@ def test_ellipse_exterior_shift_and_non_ellipse_rejection():
     assert exterior["inequality_ellipse"]["radius_x_exact"] == "3"
     assert exterior["inequality_ellipse"]["radius_y_exact"] == "2"
     assert exterior["inequality_ellipse"]["boundary_included"] is True
+    assert r"\geq 1" in exterior["result_latex"]
     flipped = client.post("/api/v1/inequality", json={"inequality": "-x^2-2*y^2+1>0"}).json()
     assert flipped["inequality_ellipse"]["inside"] is True
     assert flipped["inequality_ellipse"]["boundary_included"] is False
