@@ -9,6 +9,7 @@ import os
 os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
 
 from fastapi.testclient import TestClient
+import sympy as sp
 
 from app.main import app
 from app.services.integral_service import UNSUPPORTED_INFINITE_BOUNDS_MESSAGE
@@ -36,6 +37,26 @@ def test_indefinite_sin_x_includes_plus_c():
     assert "\\cos" in body["antiderivative_latex"]
     assert not body["antiderivative_latex"].endswith("+ C")
     assert any(step["rule"] == "SinRule" for step in body["steps"])
+
+
+def test_trigonometric_integer_powers_are_actual_antiderivatives():
+    x = sp.Symbol("x")
+    for function in ("sin", "cos", "tan"):
+        for exponent in (0, 1, 2, 3, 5):
+            expression = f"{function}(x)^{exponent}"
+            body = _integral(expression).json()
+            assert body["success"] is True, expression
+            antiderivative = sp.sympify(body["antiderivative_expression"])
+            assert not antiderivative.has(sp.Integral), expression
+            assert sp.simplify(sp.diff(antiderivative, x) - getattr(sp, function)(x)**exponent) == 0, expression
+
+
+def test_symbolic_trig_power_does_not_claim_an_unevaluated_integral_is_solved():
+    for function in ("sin", "cos", "tan"):
+        body = _integral(f"{function}(x)^n").json()
+        assert body["success"] is False
+        assert body["error_code"] == "UNSUPPORTED_OPERATION"
+        assert "exponente simbólico" in body["error_message"]
 
 
 def test_definite_integral_minimum_three_steps():

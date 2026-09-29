@@ -37,6 +37,10 @@ class UnsupportedInfiniteBoundsError(ValueError):
     """Límite `oo`/`-oo` en Fase 1 -> `ErrorCode.UNSUPPORTED_IN_PHASE_1`."""
 
 
+class UnsupportedTrigPowerError(ValueError):
+    """Una potencia trigonométrica con n simbólico sigue sin antiderivada."""
+
+
 _RULE_LABELS = {
     mi.PowerRule: "Integral de potencia",
     mi.ExpRule: "Integral de exponencial",
@@ -164,6 +168,17 @@ def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
     steps = _walk_rule(rule)
     antiderivative = mi.manualintegrate(input_expr, var_symbol)
 
+    # manualintegrate conserva potencias con exponente 0/1 sin evaluar
+    # (p. ej. tan(x)^1 -> Integral(tan(x), x)). SymPy sí las resuelve
+    # después de simplificar la potencia; no mostrar una integral pendiente
+    # como si fuera la antiderivada.
+    if antiderivative.has(sympy.Integral):
+        direct = sympy.integrate(sympy.simplify(input_expr), var_symbol)
+        if not direct.has(sympy.Integral) and verify_step_equivalence(
+            sympy.diff(direct, var_symbol), input_expr
+        ) == "VERIFIED":
+            return direct, [], False, ["Se usó el resultado directo de SymPy."]
+
     # Sección 8.4: cada paso verificado comparando la derivada del resultado
     # acumulado contra el integrando original.
     check = verify_step_equivalence(sympy.diff(antiderivative, var_symbol), input_expr)
@@ -189,6 +204,16 @@ def integrate_expression(
     antiderivative, steps, has_detailed_steps, warnings = _compute_indefinite(
         input_expr, var_symbol
     )
+    if (
+        antiderivative.has(sympy.Integral)
+        and input_expr.is_Pow
+        and input_expr.base.func in (sympy.sin, sympy.cos, sympy.tan)
+        and input_expr.exp.free_symbols
+    ):
+        raise UnsupportedTrigPowerError(
+            "El exponente simbólico n no se resuelve como una antiderivada cerrada; "
+            "usa un exponente entero concreto."
+        )
 
     if lower_bound is None and upper_bound is None:
         for index, step in enumerate(steps):

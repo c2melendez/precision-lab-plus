@@ -114,6 +114,8 @@ async def integral(payload: IntegralRequest, request: Request) -> MathResponse:
         return _error(request, OperationType.INTEGRAL, ErrorCode.COMPLEXITY_LIMIT, str(exc))
     except integral_service.UnsupportedInfiniteBoundsError as exc:
         return _error(request, OperationType.INTEGRAL, ErrorCode.UNSUPPORTED_IN_PHASE_1, str(exc))
+    except integral_service.UnsupportedTrigPowerError as exc:
+        return _error(request, OperationType.INTEGRAL, ErrorCode.UNSUPPORTED_OPERATION, str(exc))
 
     warnings = list(result.warnings)
 
