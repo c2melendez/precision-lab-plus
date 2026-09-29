@@ -545,7 +545,7 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(preview.getByTestId("ellipse-boundary")).not.toHaveAttribute("stroke-dasharray");
     await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
     const graph = page.getByRole("region", { name: "Análisis de inecuación elíptica" });
-    await expect(graph).toContainText("x^2+2*y^2>=1");
+    await expect(graph).toContainText("x^2+2y^2>=1");
     await expect(graph.getByTestId("ellipse-exterior-region")).toBeAttached();
   });
 
