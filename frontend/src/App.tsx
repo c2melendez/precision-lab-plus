@@ -246,7 +246,7 @@ export default function App() {
         <main
           id="main-content"
           tabIndex={-1}
-          className={`mx-auto min-h-screen min-w-0 flex-1 overflow-x-hidden px-3 py-5 sm:px-4 sm:py-6 lg:px-6 ${activeMode === "basic" ? "dt:max-w-none dt:px-10" : "max-w-[1376px] dt:px-8"} ${mainBottomPadding} focus:outline-none`}
+          className={`mx-auto min-h-screen min-w-0 flex-1 overflow-x-hidden ${activeMode === "basic" ? "px-0 py-0" : "max-w-[1376px] px-3 py-5 sm:px-4 sm:py-6 lg:px-6 dt:px-8"} ${mainBottomPadding} focus:outline-none`}
         >
           {lastErrorMessage && (
             <p role="alert" className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">

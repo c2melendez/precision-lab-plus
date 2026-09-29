@@ -93,8 +93,8 @@ test.describe("S26 B7 — Científica Plus", () => {
     }
   });
 
-  test("Científica usa márgenes laterales de Lite en escritorio", async ({ page }) => {
-    await page.setViewportSize({ width: 1920, height: 1080 });
+  test("Científica conserva el ancho y los márgenes de Lite", async ({ page }) => {
+    await page.setViewportSize({ width: 1536, height: 960 });
     await openScientific(page, "fused");
 
     const sidebar = page.getByRole("complementary", { name: "Navegación principal" });
@@ -105,8 +105,21 @@ test.describe("S26 B7 — Científica Plus", () => {
     ]);
     expect(sidebarBox && inputBox && graphBox).toBeTruthy();
     if (sidebarBox && inputBox && graphBox) {
-      expect(inputBox.x - (sidebarBox.x + sidebarBox.width)).toBeCloseTo(40, 0);
-      expect(1920 - (graphBox.x + graphBox.width)).toBeCloseTo(40, 0);
+      expect(inputBox.x - (sidebarBox.x + sidebarBox.width)).toBeCloseTo(32, 0);
+      expect(1536 - (graphBox.x + graphBox.width)).toBeCloseTo(32, 0);
+    }
+  });
+
+  test("Científica mantiene el ancho contenido de Lite antes de 1440 px", async ({ page }) => {
+    await page.setViewportSize({ width: 1363, height: 936 });
+    await openScientific(page, "fused");
+    const inputBox = await page.getByRole("region", { name: "Entrada", exact: true }).boundingBox();
+    const graphBox = await page.getByTestId("scientific-graph").boundingBox();
+    expect(inputBox).not.toBeNull();
+    expect(graphBox).not.toBeNull();
+    if (inputBox && graphBox) {
+      expect(inputBox.x).toBeCloseTo(433.5, 0);
+      expect(graphBox.x + graphBox.width).toBeCloseTo(1169.5, 0);
     }
   });
 
