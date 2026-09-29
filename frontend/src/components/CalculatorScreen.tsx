@@ -122,7 +122,7 @@ export function CalculatorScreen({
     .slice(0, 5);
 
   const angleBadge = angleUnit && onToggleAngleUnit && (
-    <div className="flex justify-end">
+    <div className="flex justify-end pt-[3px]">
       <button
         type="button"
         onClick={onToggleAngleUnit}

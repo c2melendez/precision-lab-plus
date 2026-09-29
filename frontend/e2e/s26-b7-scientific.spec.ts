@@ -119,7 +119,9 @@ test.describe("S26 B7 — Científica Plus", () => {
     expect(graphBox).not.toBeNull();
     if (inputBox && graphBox) {
       expect(inputBox.x).toBeCloseTo(433.5, 0);
+      expect(inputBox.y).toBeCloseTo(54, 0);
       expect(graphBox.x + graphBox.width).toBeCloseTo(1169.5, 0);
+      expect(graphBox.y).toBeCloseTo(54, 0);
     }
   });
 
