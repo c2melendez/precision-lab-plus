@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { components } from "../types/api";
-import { graphPreviewGeometry, integralRegionGeometry, integralRegionSegments, limitApproachGeometry } from "../components/graphPreviewGeometry";
+import { graphPreviewGeometry, integralRegionGeometry, integralRegionSegments, limitApproachGeometry, limitApproachSeries } from "../components/graphPreviewGeometry";
 
 type GraphData = components["schemas"]["GraphData"];
 
@@ -41,6 +41,7 @@ describe("aproximación a un límite", () => {
     const result = limitApproachGeometry(data, "0", "right", graphPreviewGeometry(data)!);
     expect(result.leftPath).toBe("");
     expect(result.rightPath).toContain("L");
+    expect(limitApproachSeries(data, "0", "right").left).toEqual([]);
   });
   it("al infinito enfatiza el extremo lejano", () => {
     const result = limitApproachGeometry(data, "oo", "both", graphPreviewGeometry(data)!);

@@ -165,17 +165,19 @@ function ResultArea({
   isLoading,
   colors,
   integralBounds,
+  limitFocus,
 }: {
   result: MathResponse | null;
   isLoading: boolean;
   colors?: string[];
   integralBounds?: [number, number];
+  limitFocus?: { point: string; direction: "both" | "left" | "right" };
 }) {
   if (!isLoading && result?.success && result.graph_data) {
     return (
       <div className="space-y-4">
         <Suspense fallback={<p className="text-sm text-muted">Cargando visor de gráficas…</p>}>
-          <GraphViewer data={result.graph_data} colors={colors} integralBounds={integralBounds} />
+          <GraphViewer data={result.graph_data} colors={colors} integralBounds={integralBounds} limitFocus={limitFocus} />
         </Suspense>
         <AnalysisPanel result={result} />
       </div>
@@ -514,7 +516,10 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
         </div>
         <ResultArea result={lastResult} isLoading={isLoading} colors={colors}
           integralBounds={sourceContext?.operation === "integral" && sourceContext.metadata.kind === "definite"
-            ? [Number(sourceContext.metadata.lowerBound), Number(sourceContext.metadata.upperBound)] : undefined} />
+            ? [Number(sourceContext.metadata.lowerBound), Number(sourceContext.metadata.upperBound)] : undefined}
+          limitFocus={sourceContext?.operation === "limit"
+            ? { point: String(sourceContext.metadata.point), direction: sourceContext.metadata.direction as "both" | "left" | "right" }
+            : undefined} />
       </section>
     </form>
   );

@@ -243,6 +243,8 @@ test.describe("S26 B7 — Científica Plus", () => {
     expect(graph.ok()).toBeTruthy();
     expect(graph.request().postDataJSON()).toMatchObject({ variable: "x", x_min: -2, x_max: 2 });
     await expect(page.getByTestId("scientific-graph-context")).toContainText("ambos lados → 0 · resultado DNE");
+    await expect(page.locator(".legendtext").filter({ hasText: "Aproximación izquierda" })).toBeVisible();
+    await expect(page.locator(".legendtext").filter({ hasText: "Aproximación derecha" })).toBeVisible();
   });
 
   test("límite lateral derecho enfatiza solo x→0+", async ({ page }) => {

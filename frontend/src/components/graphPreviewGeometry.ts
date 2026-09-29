@@ -99,35 +99,48 @@ export function integralRegionGeometry(
 }
 
 /** Resalta únicamente las muestras que se acercan al punto desde cada lado. */
+export function limitApproachSeries(
+  data: GraphData,
+  point: string,
+  direction: "both" | "left" | "right",
+): { left: Array<[number, number] | null>; right: Array<[number, number] | null> } {
+  const trace = data.traces.find((item) => item.type === "line");
+  const [xMin, xMax] = data.x_range;
+  const finite = point !== "oo" && point !== "-oo" && Number.isFinite(Number(point));
+  const target = Number(point);
+  const radius = (xMax - xMin) * 0.35;
+  const samples = (side: "left" | "right") => {
+    if (!trace || (direction !== "both" && direction !== side)) return [];
+    return trace.x.map((x, index): [number, number] | null => {
+      const y = trace.y[index];
+      const selected = finite
+        ? side === "left" ? x < target && x >= target - radius : x > target && x <= target + radius
+        : point === "oo" ? side === "right" && x >= xMax - radius
+          : side === "left" && x <= xMin + radius;
+      return selected && Number.isFinite(x) && y != null && Number.isFinite(y) ? [x, y] : null;
+    });
+  };
+  return { left: samples("left"), right: samples("right") };
+}
+
 export function limitApproachGeometry(
   data: GraphData,
   point: string,
   direction: "both" | "left" | "right",
   geometry: NonNullable<ReturnType<typeof graphPreviewGeometry>>,
 ): { leftPath: string; rightPath: string; pointX: number | null } {
-  const trace = data.traces.find((item) => item.type === "line");
-  const [xMin, xMax] = data.x_range;
-  const finite = point !== "oo" && point !== "-oo" && Number.isFinite(Number(point));
-  const target = Number(point);
-  const radius = (xMax - xMin) * 0.35;
-  const draw = (side: "left" | "right") => {
-    if (!trace || (direction !== "both" && direction !== side)) return "";
+  const series = limitApproachSeries(data, point, direction);
+  const draw = (samples: Array<[number, number] | null>) => {
     let connected = false;
-    return trace.x.map((x, index) => {
-      const y = trace.y[index];
-      const selected = finite
-        ? side === "left" ? x < target && x >= target - radius : x > target && x <= target + radius
-        : point === "oo" ? side === "right" && x >= xMax - radius
-          : side === "left" && x <= xMin + radius;
-      if (!selected || !Number.isFinite(x) || y == null || !Number.isFinite(y)) {
-        connected = false;
-        return "";
-      }
+    return samples.map((sample) => {
+      if (!sample) { connected = false; return ""; }
       const command = connected ? "L" : "M";
       connected = true;
-      return `${command}${geometry.projectX(x).toFixed(2)} ${geometry.projectY(y).toFixed(2)}`;
+      return `${command}${geometry.projectX(sample[0]).toFixed(2)} ${geometry.projectY(sample[1]).toFixed(2)}`;
     }).filter(Boolean).join(" ");
   };
-  return { leftPath: draw("left"), rightPath: draw("right"),
-    pointX: finite && target >= xMin && target <= xMax ? geometry.projectX(target) : null };
+  const target = Number(point);
+  return { leftPath: draw(series.left), rightPath: draw(series.right),
+    pointX: point !== "oo" && point !== "-oo" && Number.isFinite(target)
+      && target >= data.x_range[0] && target <= data.x_range[1] ? geometry.projectX(target) : null };
 }

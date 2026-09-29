@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { components } from "../types/api";
-import { integralRegionSegments } from "./graphPreviewGeometry";
+import { integralRegionSegments, limitApproachSeries } from "./graphPreviewGeometry";
 
 type GraphData = components["schemas"]["GraphData"];
 
@@ -89,11 +89,14 @@ interface GraphViewerProps {
    * ciclo de color por defecto (comportamiento anterior, sin cambios). */
   colors?: string[];
   integralBounds?: [number, number];
+  limitFocus?: { point: string; direction: "both" | "left" | "right" };
 }
 
-export default function GraphViewer({ data, colors, integralBounds }: GraphViewerProps) {
+export default function GraphViewer({ data, colors, integralBounds, limitFocus }: GraphViewerProps) {
   const lowerBound = integralBounds?.[0];
   const upperBound = integralBounds?.[1];
+  const limitPoint = limitFocus?.point;
+  const limitDirection = limitFocus?.direction;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const plotlyRef = useRef<PlotlyModule | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -126,10 +129,22 @@ export default function GraphViewer({ data, colors, integralBounds }: GraphViewe
           x: pieces.flatMap(([a, , b]) => [a, b, null]),
           y: pieces.flatMap(([, ya, , yb]) => [ya, yb, null]),
         })) : [];
+        const approach = limitPoint && limitDirection ? limitApproachSeries(data, limitPoint, limitDirection) : null;
+        const approachTraces = approach ? ([
+          { samples: approach.left, name: "Aproximación izquierda", color: "#2862b8" },
+          { samples: approach.right, name: "Aproximación derecha", color: "#b65d20" },
+        ]).filter(({ samples }) => samples.some(Boolean)).map(({ samples, name, color }) => ({
+          type: "scatter", mode: "lines", name, connectgaps: false,
+          x: samples.map((sample) => sample?.[0] ?? null),
+          y: samples.map((sample) => sample?.[1] ?? null),
+          line: { color, width: 4 },
+        })) : [];
+        const finiteLimitPoint = limitPoint && limitPoint !== "oo" && limitPoint !== "-oo"
+          && Number.isFinite(Number(limitPoint)) ? Number(limitPoint) : null;
 
         await Plotly.newPlot(
           safeContainer,
-          [...regionTraces, ...data.traces.map((trace, i) => traceToPlotly(trace, colors?.[i]))],
+          [...regionTraces, ...data.traces.map((trace, i) => traceToPlotly(trace, colors?.[i])), ...approachTraces],
           isSurface(data)
             ? {
                 scene: {
@@ -148,7 +163,8 @@ export default function GraphViewer({ data, colors, integralBounds }: GraphViewe
                     ? [Math.min(0, data.y_range[0]), Math.max(0, data.y_range[1])]
                     : data.y_range, title: { text: data.y_axis_label ?? "y" } }
                   : { title: { text: data.y_axis_label ?? "y" } },
-                shapes: [lowerBound, upperBound].filter((bound): bound is number => bound !== undefined).map((bound) => ({
+                shapes: [...[lowerBound, upperBound].filter((bound): bound is number => bound !== undefined),
+                  ...(finiteLimitPoint !== null ? [finiteLimitPoint] : [])].map((bound) => ({
                   type: "line", x0: bound, x1: bound, y0: 0, y1: 1,
                   yref: "paper", line: { color: "#747b87", width: 1, dash: "dot" },
                 })),
@@ -174,7 +190,7 @@ export default function GraphViewer({ data, colors, integralBounds }: GraphViewe
         plotlyRef.current.purge(safeContainer);
       }
     };
-  }, [data, colors, lowerBound, upperBound]);
+  }, [data, colors, lowerBound, upperBound, limitPoint, limitDirection]);
 
   async function handleDownloadPng(): Promise<void> {
     if (!containerRef.current || !plotlyRef.current) return;
