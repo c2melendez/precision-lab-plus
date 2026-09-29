@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { components } from "../types/api";
-import { graphPreviewGeometry, integralRegionGeometry } from "../components/graphPreviewGeometry";
+import { graphPreviewGeometry, integralRegionGeometry, integralRegionSegments } from "../components/graphPreviewGeometry";
 
 type GraphData = components["schemas"]["GraphData"];
 
@@ -49,5 +49,14 @@ describe("región de integral definida", () => {
     expect(forward.negativePath).toBe("");
     expect(reverse.positivePath).toBe("");
     expect(reverse.negativePath).toContain("Z");
+    expect(integralRegionSegments(data, 2, 0).negative).toHaveLength(2);
+  });
+
+  it("no une áreas a través de discontinuidades", () => {
+    const broken: GraphData = {
+      traces: [{ type: "line", name: "1/x", x: [-1, 0, 1], y: [-1, null, 1] }],
+      x_range: [-1, 1], y_range: [-1, 1], points_truncated: false,
+    };
+    expect(integralRegionSegments(broken, -1, 1)).toEqual({ positive: [], negative: [] });
   });
 });

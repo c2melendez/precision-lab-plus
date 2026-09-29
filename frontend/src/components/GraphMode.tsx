@@ -164,16 +164,18 @@ function ResultArea({
   result,
   isLoading,
   colors,
+  integralBounds,
 }: {
   result: MathResponse | null;
   isLoading: boolean;
   colors?: string[];
+  integralBounds?: [number, number];
 }) {
   if (!isLoading && result?.success && result.graph_data) {
     return (
       <div className="space-y-4">
         <Suspense fallback={<p className="text-sm text-muted">Cargando visor de gráficas…</p>}>
-          <GraphViewer data={result.graph_data} colors={colors} />
+          <GraphViewer data={result.graph_data} colors={colors} integralBounds={integralBounds} />
         </Suspense>
         <AnalysisPanel result={result} />
       </div>
@@ -509,7 +511,9 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
           </div>
           <span className="text-[11px] text-muted">{latexRows.filter((row) => row.trim() !== "").length} activas</span>
         </div>
-        <ResultArea result={lastResult} isLoading={isLoading} colors={colors} />
+        <ResultArea result={lastResult} isLoading={isLoading} colors={colors}
+          integralBounds={sourceContext?.operation === "integral" && sourceContext.metadata.kind === "definite"
+            ? [Number(sourceContext.metadata.lowerBound), Number(sourceContext.metadata.upperBound)] : undefined} />
       </section>
     </form>
   );

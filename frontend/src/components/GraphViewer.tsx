@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { components } from "../types/api";
+import { integralRegionSegments } from "./graphPreviewGeometry";
 
 type GraphData = components["schemas"]["GraphData"];
 
@@ -87,9 +88,10 @@ interface GraphViewerProps {
    * de expresiones (spec §6). Opcional — sin esto, Plotly usa su propio
    * ciclo de color por defecto (comportamiento anterior, sin cambios). */
   colors?: string[];
+  integralBounds?: [number, number];
 }
 
-export default function GraphViewer({ data, colors }: GraphViewerProps) {
+export default function GraphViewer({ data, colors, integralBounds }: GraphViewerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const plotlyRef = useRef<PlotlyModule | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -111,9 +113,20 @@ export default function GraphViewer({ data, colors }: GraphViewerProps) {
         if (cancelled) return;
         plotlyRef.current = Plotly;
 
+        const region = integralBounds ? integralRegionSegments(data, ...integralBounds) : null;
+        const regionTraces = region ? ([
+          { pieces: region.positive, name: "Aporte positivo", color: "rgba(22,134,93,0.35)" },
+          { pieces: region.negative, name: "Aporte negativo", color: "rgba(195,74,74,0.35)" },
+        ]).filter(({ pieces }) => pieces.length > 0).map(({ pieces, name, color }) => ({
+          type: "scatter", mode: "lines", fill: "tozeroy", fillcolor: color,
+          line: { width: 0 }, hoverinfo: "skip", showlegend: true, name,
+          x: pieces.flatMap(([a, , b]) => [a, b, null]),
+          y: pieces.flatMap(([, ya, , yb]) => [ya, yb, null]),
+        })) : [];
+
         await Plotly.newPlot(
           safeContainer,
-          data.traces.map((trace, i) => traceToPlotly(trace, colors?.[i])),
+          [...regionTraces, ...data.traces.map((trace, i) => traceToPlotly(trace, colors?.[i]))],
           isSurface(data)
             ? {
                 scene: {
@@ -128,8 +141,14 @@ export default function GraphViewer({ data, colors }: GraphViewerProps) {
             : {
                 xaxis: { range: data.x_range, title: { text: data.x_axis_label ?? "x" } },
                 yaxis: data.y_range
-                  ? { range: data.y_range, title: { text: data.y_axis_label ?? "y" } }
+                  ? { range: integralBounds
+                    ? [Math.min(0, data.y_range[0]), Math.max(0, data.y_range[1])]
+                    : data.y_range, title: { text: data.y_axis_label ?? "y" } }
                   : { title: { text: data.y_axis_label ?? "y" } },
+                shapes: integralBounds?.map((bound) => ({
+                  type: "line", x0: bound, x1: bound, y0: 0, y1: 1,
+                  yref: "paper", line: { color: "#747b87", width: 1, dash: "dot" },
+                })),
                 paper_bgcolor: "transparent",
                 plot_bgcolor: "transparent",
                 font: { color: "#1C1F26" },
@@ -152,7 +171,7 @@ export default function GraphViewer({ data, colors }: GraphViewerProps) {
         plotlyRef.current.purge(safeContainer);
       }
     };
-  }, [data, colors]);
+  }, [data, colors, integralBounds]);
 
   async function handleDownloadPng(): Promise<void> {
     if (!containerRef.current || !plotlyRef.current) return;

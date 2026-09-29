@@ -216,6 +216,8 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(page.getByTestId("scientific-graph-context")).toContainText("límites 2 → 0 · valor firmado -8/3");
     await expect(page.getByLabel("x mínimo (opcional)")).toHaveValue("-1");
     await expect(page.getByLabel("x máximo (opcional)")).toHaveValue("3");
+    await expect(page.getByRole("img", { name: "Gráfica de las expresiones ingresadas" })).toBeVisible();
+    await expect(page.locator(".legendtext").filter({ hasText: "Aporte negativo" })).toBeVisible();
   });
 
   test("error controlado conserva la Científica utilizable", async ({ page }) => {

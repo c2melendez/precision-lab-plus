@@ -49,22 +49,17 @@ export function graphPreviewGeometry(data: GraphData, includeZero = false): {
 }
 
 /** Área con signo: cada tramo se recorta a los límites y se parte en sus cruces por cero. */
-export function integralRegionGeometry(
-  data: GraphData,
-  lower: number,
-  upper: number,
-  geometry: NonNullable<ReturnType<typeof graphPreviewGeometry>>,
-): { positivePath: string; negativePath: string; lowerX: number; upperX: number } | null {
+export function integralRegionSegments(data: GraphData, lower: number, upper: number): {
+  positive: Array<[number, number, number, number]>;
+  negative: Array<[number, number, number, number]>;
+} {
+  const positive: Array<[number, number, number, number]> = [];
+  const negative: Array<[number, number, number, number]> = [];
   const trace = data.traces.find((item) => item.type === "line");
-  if (!trace || !Number.isFinite(lower) || !Number.isFinite(upper)) return null;
+  if (!trace || !Number.isFinite(lower) || !Number.isFinite(upper)) return { positive, negative };
   const start = Math.max(Math.min(lower, upper), data.x_range[0]);
   const end = Math.min(Math.max(lower, upper), data.x_range[1]);
-  if (end < start || geometry.zeroY === null) return null;
-  const positive: string[] = [];
-  const negative: string[] = [];
   const orientation = upper >= lower ? 1 : -1;
-  const baseline = geometry.zeroY.toFixed(2);
-
   for (let index = 1; index < trace.x.length; index++) {
     const x0 = trace.x[index - 1], x1 = trace.x[index];
     const y0 = trace.y[index - 1], y1 = trace.y[index];
@@ -80,11 +75,25 @@ export function integralRegionGeometry(
       const a = knots[part - 1], b = knots[part];
       const ya = valueAt(a), yb = valueAt(b);
       if (ya === 0 && yb === 0) continue;
-      const ax = geometry.projectX(a).toFixed(2), bx = geometry.projectX(b).toFixed(2);
-      const path = `M${ax} ${baseline} L${ax} ${geometry.projectY(ya).toFixed(2)} L${bx} ${geometry.projectY(yb).toFixed(2)} L${bx} ${baseline} Z`;
-      (orientation * (ya + yb) >= 0 ? positive : negative).push(path);
+      (orientation * (ya + yb) >= 0 ? positive : negative).push([a, ya, b, yb]);
     }
   }
-  return { positivePath: positive.join(" "), negativePath: negative.join(" "),
+  return { positive, negative };
+}
+
+export function integralRegionGeometry(
+  data: GraphData,
+  lower: number,
+  upper: number,
+  geometry: NonNullable<ReturnType<typeof graphPreviewGeometry>>,
+): { positivePath: string; negativePath: string; lowerX: number; upperX: number } | null {
+  if (!Number.isFinite(lower) || !Number.isFinite(upper) || geometry.zeroY === null) return null;
+  const segments = integralRegionSegments(data, lower, upper);
+  const baseline = geometry.zeroY.toFixed(2);
+  const draw = ([a, ya, b, yb]: [number, number, number, number]) => {
+      const ax = geometry.projectX(a).toFixed(2), bx = geometry.projectX(b).toFixed(2);
+      return `M${ax} ${baseline} L${ax} ${geometry.projectY(ya).toFixed(2)} L${bx} ${geometry.projectY(yb).toFixed(2)} L${bx} ${baseline} Z`;
+  };
+  return { positivePath: segments.positive.map(draw).join(" "), negativePath: segments.negative.map(draw).join(" "),
     lowerX: geometry.projectX(lower), upperX: geometry.projectX(upper) };
 }

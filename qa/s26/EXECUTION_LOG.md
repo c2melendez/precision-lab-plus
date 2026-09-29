@@ -641,3 +641,4 @@ La próxima sesión debe iniciar con revisión visual, no con nueva implementaci
 - La preview traza el integrando y colorea cada tramo entre la curva y el eje según su aporte firmado. Recorta los tramos a los límites, separa los cruces por cero y respeta la inversión de límites. El valor mostrado procede del backend, no de la suma numérica de polígonos.
 - El puente a Gráficas conserva límites, valor firmado y rango de vista; las pruebas cubren el caso invertido `2 → 0` de `x²`, cuyo resultado exacto es `-8/3`.
 - TypeScript y 12 pruebas unitarias focalizadas PASS. Pendiente certificar E2E y los nueve workflows en Actions; B7 permanece EN CURSO.
+- Segundo tramo: Gráficas dibuja los mismos segmentos firmados con relleno Plotly detrás de la curva, guías de límites y eje vertical que incluye cero. La geometría compartida evita unir áreas a través de discontinuidades. TypeScript, pruebas de geometría y lint focalizado PASS; certificación remota pendiente.
