@@ -22,7 +22,7 @@ from typing import List, Optional, Tuple
 import sympy
 from sympy import cos, cot, csc, sec, sin, tan
 
-from app.schemas.responses import EquationSolution, ResultType, Step
+from app.schemas.responses import ComplexGraphPoint, EquationSolution, ResultType, Step
 from app.services import parsing
 from app.services.step_verification import verify_equation_step_equivalence
 
@@ -42,6 +42,7 @@ class SolveResult:
     steps: List[Step]
     has_detailed_steps: bool
     warnings: List[str]
+    graph_points: Optional[List[ComplexGraphPoint]] = None
 
 
 def _equation_has_direct_trig_of_variable(eq: sympy.Eq, var: sympy.Symbol) -> bool:
@@ -226,6 +227,22 @@ def solve_equation(
         step.index = index
 
     equation_solutions = [_to_equation_solution(solution) for solution in solutions]
+    graph_points = None
+    if solutions and len(solutions) <= 20 and any(value.is_real is False or value.has(sympy.I) for value in solutions):
+        points = []
+        for value in solutions:
+            if value.free_symbols or value.is_number is not True:
+                break
+            try:
+                re_value = float(sympy.N(sympy.re(value)))
+                im_value = float(sympy.N(sympy.im(value)))
+            except (TypeError, ValueError, OverflowError):
+                break
+            if not all(sympy.Float(v).is_finite and abs(v) <= 1e6 for v in (re_value, im_value)):
+                break
+            points.append(ComplexGraphPoint(re=re_value, im=im_value, label=str(value)))
+        if len(points) == len(solutions):
+            graph_points = points
 
     return SolveResult(
         eq,
@@ -235,4 +252,5 @@ def solve_equation(
         steps,
         has_detailed_steps,
         warnings,
+        graph_points,
     )

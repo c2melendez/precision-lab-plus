@@ -156,6 +156,7 @@ async def solve(payload: SolveRequest, request: Request) -> MathResponse:
         input_text=payload.equation,
         input_latex=_safe_latex(result.input_eq),
         result_data=result_data,
+        complex_graph_points=result.graph_points,
         steps=result.steps,
         has_detailed_steps=result.has_detailed_steps,
         warnings=warnings,

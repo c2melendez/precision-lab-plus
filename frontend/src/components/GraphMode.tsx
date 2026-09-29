@@ -30,6 +30,7 @@ import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { ResultPanel } from "./ResultPanel";
 import { NumberLine } from "./NumberLine";
 import { InequalityRegion } from "./InequalityRegion";
+import { ArgandPlane, argandGraphData } from "./ArgandPlane";
 
 const GraphViewer = lazy(() => import("./GraphViewer"));
 
@@ -221,7 +222,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
 
   useEffect(() => {
     if (!pendingGraphContext) return;
-    if (pendingGraphContext.visualization === "number-line" || pendingGraphContext.visualization === "region-2d") {
+    if (pendingGraphContext.visualization === "number-line" || pendingGraphContext.visualization === "region-2d" || pendingGraphContext.visualization === "argand") {
       setSourceContext(pendingGraphContext);
       setPendingGraphContext(null);
       return;
@@ -377,6 +378,18 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
         kind={String(sourceContext.metadata.kind)} />
       <p className="text-sm">{sourceContext.canonicalResult?.text ?? "—"}</p>
       <p className="text-xs text-muted">Fronteras discontinuas excluidas; continuas incluidas. La zona azul cumple todas las restricciones.</p>
+    </section>;
+  }
+
+  if (sourceContext?.visualization === "argand") {
+    const points = sourceContext.metadata.points as NonNullable<MathResponse["complex_graph_points"]>;
+    return <section aria-label="Análisis de plano complejo" className="space-y-4 rounded-xl border border-paper-line bg-paper p-5">
+      <h2 className="text-lg font-semibold">Plano de Argand</h2>
+      <p className="text-sm text-muted">Desde Científica · {sourceContext.originalExpression} · {points.length} {points.length === 1 ? "punto" : "puntos"}</p>
+      <div className="max-w-2xl"><Suspense fallback={<ArgandPlane points={points} />}>
+        <GraphViewer data={argandGraphData(points)} />
+      </Suspense></div>
+      <ul className="text-sm">{points.map((point, index) => <li key={index}>{point.label}: Re={point.re}, Im={point.im}</li>)}</ul>
     </section>;
   }
 

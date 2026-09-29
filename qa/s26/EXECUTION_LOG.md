@@ -694,3 +694,10 @@ La próxima sesión debe iniciar con revisión visual, no con nueva implementaci
 - El backend expone tipo de región, restricciones con operador original, vértices, polígono de la intersección recortado para la vista y rango. Si una intersección solo contenía frontera excluida (`x>0`, `x<0`), se clasifica como vacía. Una solución de dimensión menor que dos queda sin relleno previo y requiere vista especializada.
 - Científica y Gráficas comparten la misma región semántica. La zona factible se rellena una vez; cada frontera inclusiva es continua y cada estricta discontinua. Región vacía sin relleno; no acotada se recorta al marco de la vista y se indica como tal. Se conservan entrada, variables, restricciones, tipo y vértices.
 - 15 pruebas backend focalizadas/auditoría, 22 frontend, TypeScript y lint focalizado PASS; E2E de región mixta y sistema estricto imposible añadido. Pendiente Actions, revisión visual y complejos. B7 EN CURSO.
+- Commit `c8193347639bf17823269fa8ab285c67b30f5118`: nueve workflows PASS, incluidos Playwright E2E y S19. Región factible lineal 2D certificada técnicamente.
+
+## 2026-09-29 — B7 Plus: plano de Argand
+
+- `/evaluate` expone coordenadas Re/Im solo para un número complejo concreto, finito y acotado; `/solve` expone todas las raíces numéricas de una ecuación cuando aparece alguna compleja, incluidos los puntos reales del mismo conjunto. Las expresiones con variable libre no se reducen a un punto.
+- Científica presenta una vista previa de Argand y Gráficas recibe el contexto original y los puntos estructurados. Dos pruebas backend, 22 pruebas frontend focalizadas, TypeScript y lint focalizado PASS. E2E de punto aislado y raíces complejas añadidos; pendiente Actions y revisión visual.
+- Permanecen pendientes las curvas Re/Im de función compleja de variable real y una representación apropiada de función genuina de variable compleja. B7 EN CURSO.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MathResponse } from "../api/client";
-import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext, inequalitySystemGraphContext } from "../components/scientificGraphContext";
+import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext, inequalitySystemGraphContext, complexGraphContext } from "../components/scientificGraphContext";
 
 describe("contexto canónico de función directa", () => {
   it("conserva la expresión de entrada y el resultado del motor, sin leer texto visual", () => {
@@ -27,6 +27,20 @@ describe("contexto canónico de función directa", () => {
     expect(context.canonicalResult).toBeNull();
     expect(context.variables).toEqual(["y"]);
     expect(context.graphRequest?.payload.variable).toBe("y");
+  });
+});
+
+describe("datos complejos canónicos", () => {
+  it("transfiere todas las raíces y el resultado sin forzar una curva real", () => {
+    const result = { success: true, operation: "solve", result_data: [
+      { text: "I", latex: "i", is_complex: true }, { text: "-I", latex: "-i", is_complex: true }],
+      complex_graph_points: [{ re: 0, im: 1, label: "I" }, { re: 0, im: -1, label: "-I" }] } as MathResponse;
+    const context = complexGraphContext("x^2+1=0", "x^2+1=0", result);
+    expect(context.visualization).toBe("argand");
+    expect(context.metadata.kind).toBe("roots");
+    expect(context.metadata.points).toEqual(result.complex_graph_points);
+    expect(context.canonicalResult?.data).toEqual(result.result_data);
+    expect(context.graphRequest).toBeNull();
   });
 });
 

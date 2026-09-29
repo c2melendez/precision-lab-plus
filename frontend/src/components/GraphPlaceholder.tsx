@@ -11,6 +11,7 @@ import { graphPreviewGeometry, integralRegionGeometry, limitApproachGeometry } f
 import type { ScientificGraphContext } from "./scientificGraphContext";
 import { NumberLine } from "./NumberLine";
 import { InequalityRegion } from "./InequalityRegion";
+import { ArgandPlane } from "./ArgandPlane";
 
 export type ScientificGraphState =
   | "empty"
@@ -89,7 +90,12 @@ export function GraphPlaceholder({
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 py-6 text-center">
-        {state === "available" && context?.visualization === "region-2d" ? (
+        {state === "available" && context?.visualization === "argand" ? (
+          <>
+            <ArgandPlane points={context.metadata.points as NonNullable<MathResponse["complex_graph_points"]>} />
+            <p className="text-[11px] text-muted">{context.metadata.kind === "roots" ? "Soluciones en el plano complejo" : "Número complejo en el plano de Argand"}. Ejes: parte real e imaginaria.</p>
+          </>
+        ) : state === "available" && context?.visualization === "region-2d" ? (
           <>
             <InequalityRegion boundaries={context.metadata.constraints as NonNullable<MathResponse["inequality_constraints"]>}
               polygon={context.metadata.polygon as number[][]} viewport={context.metadata.viewport as number[]}
@@ -175,8 +181,10 @@ export function GraphPlaceholder({
               ? "Esta familia necesita una vista avanzada para elegir sus parámetros antes de graficarla."
               : context?.operation === "system" && !context.graphRequest
                 ? "Este sistema requiere una representación implícita o de más dimensiones en Gráficas."
-                : context?.operation === "inequality" && context.visualization === "advanced"
+              : context?.operation === "inequality" && context.visualization === "advanced"
                   ? "La región requiere una representación especializada para conservar exactamente sus fronteras."
+                : context?.operation === "complex" && context.visualization === "advanced"
+                  ? "Esta función requiere una representación compleja avanzada en Gráficas."
               : STATE_COPY[state])}</p>
         )}
 

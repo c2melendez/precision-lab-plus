@@ -213,6 +213,12 @@ class InequalityBoundary(BaseModel):
     label: str
 
 
+class ComplexGraphPoint(BaseModel):
+    re: float
+    im: float
+    label: str
+
+
 class Trace(BaseModel):
     type: str
     name: str
@@ -287,6 +293,7 @@ class MathResponse(BaseModel):
     inequality_constraints: Optional[List[InequalityBoundary]] = None
     inequality_preview_polygon: Optional[List[List[float]]] = None
     inequality_viewport: Optional[List[float]] = None
+    complex_graph_points: Optional[List[ComplexGraphPoint]] = None
     result_approx: Optional[float] = None
     result_data: Optional[Union[List[EquationSolution], List[List[str]]]] = None
     steps: List[Step] = []

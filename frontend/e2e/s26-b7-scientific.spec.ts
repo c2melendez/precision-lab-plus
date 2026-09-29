@@ -516,6 +516,34 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(preview.getByTestId("feasible-region")).toHaveCount(0);
   });
 
+  test("complejo aislado conserva sus coordenadas en Argand y Gráficas", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "3+4i");
+    const evaluate = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/evaluate") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    expect((await (await evaluate).json()).complex_graph_points).toEqual([{ re: 3, im: 4, label: "3 + 4*I" }]);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("complex-argand")).toBeVisible();
+    await expect(preview.getByTestId("complex-point")).toHaveCount(1);
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    await expect(page.getByRole("region", { name: "Análisis de plano complejo" })).toContainText("3+4i");
+  });
+
+  test("raíces complejas se presentan como puntos de Argand", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "x^2+1=0");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/solve") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const points = (await (await solve).json()).complex_graph_points;
+    expect(points).toHaveLength(2);
+    expect(points.map((point: { im: number }) => point.im).sort()).toEqual([-1, 1]);
+    await expect(page.getByTestId("scientific-graph").getByTestId("complex-point")).toHaveCount(2);
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

@@ -310,3 +310,16 @@ export function inequalitySystemGraphContext(
     restrictions: null, visualization: graphable ? "region-2d" : "advanced", graphRequest: null,
   };
 }
+
+export function complexGraphContext(
+  expression: string, inputLatex: string, result: MathResponse,
+): ScientificGraphContext {
+  const points = result.complex_graph_points;
+  const graphable = result.success && Boolean(points?.length);
+  return {
+    operation: "complex", originalExpression: expression, inputLatex, graphInputLatex: null,
+    canonicalResult: result.success ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
+    variables: [], metadata: { points: points ?? null, kind: result.operation === "solve" ? "roots" : "single" },
+    restrictions: null, visualization: graphable ? "argand" : "advanced", graphRequest: null,
+  };
+}

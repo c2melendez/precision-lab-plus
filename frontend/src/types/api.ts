@@ -789,6 +789,11 @@ export interface components {
             operator: string;
             label: string;
         };
+        ComplexGraphPoint: {
+            re: number;
+            im: number;
+            label: string;
+        };
         /**
          * ErrorCode
          * @description Enum central — el backend NUNCA usa un string de error fuera de esta lista.
@@ -1117,6 +1122,7 @@ export interface components {
             inequality_constraints?: components["schemas"]["InequalityBoundary"][] | null;
             inequality_preview_polygon?: number[][] | null;
             inequality_viewport?: number[] | null;
+            complex_graph_points?: components["schemas"]["ComplexGraphPoint"][] | null;
             /** Result Approx */
             result_approx?: number | null;
             /** Result Data */

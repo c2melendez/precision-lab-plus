@@ -62,7 +62,7 @@ import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
-import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext, limitGraphContext, algebraTransformationGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext, inequalitySystemGraphContext } from "./scientificGraphContext";
+import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext, limitGraphContext, algebraTransformationGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext, inequalitySystemGraphContext, complexGraphContext } from "./scientificGraphContext";
 
 interface SubstitutionRow {
   name: string;
@@ -289,12 +289,16 @@ export function BasicMode() {
   const [lastSystem, setLastSystem] = useState<{ sourceLatex: string; equations: string[]; variables: string[]; result: MathResponse } | null>(null);
   const [lastInequality, setLastInequality] = useState<{ sourceLatex: string; expression: string; variable: string; result: MathResponse } | null>(null);
   const [lastInequalitySystem, setLastInequalitySystem] = useState<{ sourceLatex: string; inequalities: string[]; variables: string[]; result: MathResponse } | null>(null);
+  const [lastComplex, setLastComplex] = useState<{ sourceLatex: string; expression: string; result: MathResponse } | null>(null);
 
   const graphState = useMemo<ScientificGraphState>(
     () => classifyScientificGraphState(latex),
     [latex],
   );
   const graphContext = useMemo(() => {
+    if (lastComplex?.sourceLatex === latex && lastComplex.result.success) {
+      return complexGraphContext(lastComplex.expression, latex, lastComplex.result);
+    }
     if (lastInequalitySystem?.sourceLatex === latex && lastInequalitySystem.result.success) {
       return inequalitySystemGraphContext(lastInequalitySystem.inequalities, lastInequalitySystem.variables,
         latex, lastInequalitySystem.result);
@@ -349,8 +353,10 @@ export function BasicMode() {
     const result = lastEvaluated?.expression === expression && lastEvaluated.angleUnit === angleUnit
       ? lastEvaluated.result : null;
     return directFunctionGraphContext(expression, variable, angleUnit, result, latex);
-  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra, lastOde, lastSystem, lastInequality, lastInequalitySystem]);
-  const resolvedGraphState: ScientificGraphState = graphContext?.operation === "inequality"
+  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra, lastOde, lastSystem, lastInequality, lastInequalitySystem, lastComplex]);
+  const resolvedGraphState: ScientificGraphState = graphContext?.operation === "complex"
+    ? graphContext.visualization === "argand" ? "available" : "advanced"
+    : graphContext?.operation === "inequality"
     ? graphContext.visualization === "number-line" || graphContext.visualization === "region-2d" ? "available" : "advanced"
     : graphContext?.operation === "simplify" || graphContext?.operation === "factor" || graphContext?.operation === "ode" || graphContext?.operation === "system"
       ? graphContext.graphRequest ? "available" : "advanced" : graphState;
@@ -678,6 +684,9 @@ export function BasicMode() {
               latex,
             );
       setLastResult(result);
+      if (result.success && result.complex_graph_points?.length) {
+        setLastComplex({ sourceLatex: latex, expression: trimmed, result });
+      }
       if (isInequality && result.success) {
         const variable = result.inequality_variable ?? "x";
         setLastInequality({ sourceLatex: latex, expression: trimmed, variable, result });
@@ -839,7 +848,7 @@ export function BasicMode() {
   // consume.
   async function handleGraphExpression(): Promise<void> {
     const context = graphContext;
-    if (context?.visualization === "number-line" || context?.visualization === "region-2d") {
+    if (context?.visualization === "number-line" || context?.visualization === "region-2d" || context?.visualization === "argand") {
       setPendingGraphContext(context);
       setActiveMode("graph");
       return;

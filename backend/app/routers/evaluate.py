@@ -9,7 +9,7 @@ from fastapi import APIRouter, Request
 
 from app.core.logging import log_request_event
 from app.schemas.requests import EvaluateRequest
-from app.schemas.responses import ErrorCode, MathResponse, OperationType, ResultType
+from app.schemas.responses import ComplexGraphPoint, ErrorCode, MathResponse, OperationType, ResultType
 from app.services import evaluate_service, parsing
 from app.services.ast_validator import ComplexityLimitError
 
@@ -91,6 +91,16 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
     except ValueError:
         input_latex = None
 
+    complex_points = None
+    if not result.expr.free_symbols and result.expr.is_number and result.expr.is_real is False:
+        try:
+            re_value = float(sympy.N(sympy.re(result.expr)))
+            im_value = float(sympy.N(sympy.im(result.expr)))
+            if all(sympy.Float(v).is_finite and abs(v) <= 1e6 for v in (re_value, im_value)):
+                complex_points = [ComplexGraphPoint(re=re_value, im=im_value, label=result_text)]
+        except (TypeError, ValueError, OverflowError):
+            pass
+
     return MathResponse(
         success=True,
         operation=OperationType.EVALUATE,
@@ -100,6 +110,7 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         input_latex=input_latex,
         result_latex=result_latex,
         result_text=result_text,
+        complex_graph_points=complex_points,
         result_approx=result.approx_value,
         steps=[],
         has_detailed_steps=False,
