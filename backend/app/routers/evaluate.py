@@ -9,7 +9,7 @@ from fastapi import APIRouter, Request
 
 from app.core.logging import log_request_event
 from app.schemas.requests import EvaluateRequest
-from app.schemas.responses import ComplexGraphComponents, ComplexGraphPoint, ErrorCode, MathResponse, OperationType, ResultType
+from app.schemas.responses import ComplexGraphComponents, ComplexGraphPoint, ComplexGraphSample, ErrorCode, MathResponse, OperationType, ResultType
 from app.services import evaluate_service, parsing
 from app.services.ast_validator import ComplexityLimitError
 
@@ -93,6 +93,7 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
 
     complex_points = None
     complex_components = None
+    complex_mapping = None
     if not result.expr.free_symbols and result.expr.is_number and result.expr.has(sympy.I):
         try:
             re_value = float(sympy.N(sympy.re(result.expr)))
@@ -102,6 +103,27 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         except (AttributeError, TypeError, ValueError, OverflowError):
             pass
     symbols = result.expr.free_symbols
+    if len(symbols) == 1 and sympy.count_ops(result.expr) <= 30:
+        source_symbol = next(iter(symbols))
+        if source_symbol.name == "z":
+            samples = []
+            for z_value, label in ((sympy.S.Zero, "0"), (sympy.S.One, "1"), (sympy.I, "i"), (1 + sympy.I, "1+i")):
+                try:
+                    value = sympy.N(result.expr.subs(source_symbol, z_value))
+                    if value.free_symbols or value.is_finite is not True:
+                        continue
+                    re_value = float(sympy.re(value))
+                    im_value = float(sympy.im(value))
+                    if not all(sympy.Float(v).is_finite and abs(v) <= 1e6 for v in (re_value, im_value)):
+                        continue
+                    samples.append(ComplexGraphSample(
+                        source=ComplexGraphPoint(re=float(sympy.re(z_value)), im=float(sympy.im(z_value)), label=label),
+                        target=ComplexGraphPoint(re=re_value, im=im_value, label=f"f({label})"),
+                    ))
+                except (AttributeError, TypeError, ValueError, OverflowError, ZeroDivisionError):
+                    continue
+            if len(samples) >= 2:
+                complex_mapping = samples
     if len(symbols) == 1 and result.expr.has(sympy.I) and sympy.count_ops(result.expr) <= 30:
         source_symbol = next(iter(symbols))
         if source_symbol.name in ("x", "t"):
@@ -133,6 +155,7 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         result_text=result_text,
         complex_graph_points=complex_points,
         complex_graph_components=complex_components,
+        complex_graph_mapping=complex_mapping,
         result_approx=result.approx_value,
         steps=[],
         has_detailed_steps=False,

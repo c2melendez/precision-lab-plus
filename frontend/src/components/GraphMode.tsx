@@ -31,6 +31,7 @@ import { ResultPanel } from "./ResultPanel";
 import { NumberLine } from "./NumberLine";
 import { InequalityRegion } from "./InequalityRegion";
 import { ArgandPlane, argandGraphData } from "./ArgandPlane";
+import { ComplexMapping } from "./ComplexMapping";
 
 const GraphViewer = lazy(() => import("./GraphViewer"));
 
@@ -224,7 +225,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
 
   useEffect(() => {
     if (!pendingGraphContext) return;
-    if (pendingGraphContext.visualization === "number-line" || pendingGraphContext.visualization === "region-2d" || pendingGraphContext.visualization === "argand") {
+    if (pendingGraphContext.visualization === "number-line" || pendingGraphContext.visualization === "region-2d" || pendingGraphContext.visualization === "argand" || pendingGraphContext.visualization === "complex-map") {
       setSourceContext(pendingGraphContext);
       setPendingGraphContext(null);
       return;
@@ -392,6 +393,16 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
         <GraphViewer data={argandGraphData(points)} />
       </Suspense></div>
       <ul className="text-sm">{points.map((point, index) => <li key={index}>{point.label}: Re={point.re}, Im={point.im}</li>)}</ul>
+    </section>;
+  }
+
+  if (sourceContext?.visualization === "complex-map") {
+    const samples = sourceContext.metadata.mapping as NonNullable<MathResponse["complex_graph_mapping"]>;
+    return <section aria-label="Análisis de mapeo complejo" className="space-y-4 rounded-xl border border-paper-line bg-paper p-5">
+      <h2 className="text-lg font-semibold">Mapeo complejo de muestras</h2>
+      <p className="text-sm text-muted">Desde Científica · f(z) = {sourceContext.originalExpression}</p>
+      <ComplexMapping samples={samples} detailed />
+      <p className="text-xs text-muted">Esta muestra no representa todo el dominio complejo. El análisis continuo requiere una vista especializada.</p>
     </section>;
   }
 

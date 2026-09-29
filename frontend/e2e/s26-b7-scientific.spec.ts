@@ -560,6 +560,25 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(page.getByTestId("scientific-graph-context")).toContainText("partes Re e Im");
   });
 
+  test("función f(z) muestra muestras del mapeo complejo sin curva cartesiana", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "z^2");
+    const evaluate = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/evaluate") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const result = await (await evaluate).json();
+    expect(result.complex_graph_mapping).toHaveLength(4);
+    expect(result.complex_graph_components).toBeNull();
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("complex-mapping")).toBeVisible();
+    await expect(preview.getByTestId("scientific-preview-plot")).toHaveCount(0);
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    const analysis = page.getByRole("region", { name: "Análisis de mapeo complejo" });
+    await expect(analysis).toContainText("z^2");
+    await expect(analysis).toContainText("f(i) = -1 + 0i");
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

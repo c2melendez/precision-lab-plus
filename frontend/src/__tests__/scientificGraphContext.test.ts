@@ -32,6 +32,19 @@ describe("contexto canónico de función directa", () => {
 });
 
 describe("datos complejos canónicos", () => {
+  it("transfiere muestras z→f(z) sin fabricar una curva cartesiana", () => {
+    const result = { success: true, operation: "evaluate", result_text: "z**2",
+      complex_graph_mapping: [
+        { source: { re: 0, im: 1, label: "i" }, target: { re: -1, im: 0, label: "f(i)" } },
+        { source: { re: 1, im: 0, label: "1" }, target: { re: 1, im: 0, label: "f(1)" } },
+      ] } as MathResponse;
+    const context = complexGraphContext("z^2", "z^2", result);
+    expect(context.visualization).toBe("complex-map");
+    expect(context.metadata.mapping).toEqual(result.complex_graph_mapping);
+    expect(context.originalExpression).toBe("z^2");
+    expect(context.graphRequest).toBeNull();
+  });
+
   it("transfiere partes Re e Im de una función de variable real", () => {
     expect(latexToBackendSyntax("\\sin(x)+i\\cos(x)")).toMatch(/sin.*[Ii].*cos/);
     const result = { success: true, operation: "evaluate", result_text: "exp(I*x)",

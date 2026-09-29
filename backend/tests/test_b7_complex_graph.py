@@ -40,3 +40,17 @@ def test_complex_roots_include_real_roots_in_the_same_plane():
     real = client.post("/api/v1/solve", json={"equation": "x^2-1=0"}).json()
     assert real["success"] is True
     assert real["complex_graph_points"] is None
+
+
+def test_genuine_complex_variable_mapping_samples_do_not_claim_a_2d_curve():
+    mapped = client.post("/api/v1/evaluate", json={"expression": "z^2"}).json()
+    assert mapped["success"] is True
+    assert mapped["complex_graph_components"] is None
+    samples = mapped["complex_graph_mapping"]
+    assert len(samples) == 4
+    assert next(s for s in samples if s["source"]["label"] == "i")["target"] == {
+        "re": -1.0, "im": 0.0, "label": "f(i)",
+    }
+    reciprocal = client.post("/api/v1/evaluate", json={"expression": "1/z"}).json()
+    assert reciprocal["success"] is True
+    assert {s["source"]["label"] for s in reciprocal["complex_graph_mapping"]} == {"1", "i", "1+i"}

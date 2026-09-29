@@ -12,6 +12,7 @@ import type { ScientificGraphContext } from "./scientificGraphContext";
 import { NumberLine } from "./NumberLine";
 import { InequalityRegion } from "./InequalityRegion";
 import { ArgandPlane } from "./ArgandPlane";
+import { ComplexMapping } from "./ComplexMapping";
 
 export type ScientificGraphState =
   | "empty"
@@ -90,7 +91,9 @@ export function GraphPlaceholder({
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 py-6 text-center">
-        {state === "available" && context?.visualization === "argand" ? (
+        {state === "available" && context?.visualization === "complex-map" ? (
+          <ComplexMapping samples={context.metadata.mapping as NonNullable<MathResponse["complex_graph_mapping"]>} />
+        ) : state === "available" && context?.visualization === "argand" ? (
           <>
             <ArgandPlane points={context.metadata.points as NonNullable<MathResponse["complex_graph_points"]>} />
             <p className="text-[11px] text-muted">{context.metadata.kind === "roots" ? "Soluciones en el plano complejo" : "Número complejo en el plano de Argand"}. Ejes: parte real e imaginaria.</p>

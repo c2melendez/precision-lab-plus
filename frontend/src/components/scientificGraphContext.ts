@@ -14,7 +14,7 @@ export interface ScientificGraphContext {
   metadata: Record<string, unknown>;
   /** null: aún no calculadas; []: dominio confirmado sin restricciones. */
   restrictions: string[] | null;
-  visualization: "cartesian-2d" | "number-line" | "region-2d" | "argand" | "advanced";
+  visualization: "cartesian-2d" | "number-line" | "region-2d" | "argand" | "complex-map" | "advanced";
   graphRequest: { endpoint: "/graph/2d" | "/solve/system"; payload: {
     expressions?: string[]; variable?: string; angle_unit?: "rad" | "deg";
     equations?: string[]; variables?: string[]; x_min?: number; x_max?: number;
@@ -316,6 +316,7 @@ export function complexGraphContext(
 ): ScientificGraphContext {
   const points = result.complex_graph_points;
   const components = result.complex_graph_components;
+  const mapping = result.complex_graph_mapping;
   const graphable = result.success && Boolean(points?.length);
   const curves = result.success && Boolean(components);
   return {
@@ -323,9 +324,9 @@ export function complexGraphContext(
     graphInputLatex: curves ? [components!.re_latex, components!.im_latex] : null,
     canonicalResult: result.success ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
     variables: components ? [components.variable] : [],
-    metadata: { points: points ?? null, components: components ?? null,
-      kind: components ? "real-input-function" : result.operation === "solve" ? "roots" : "single", angleUnit: "rad" },
-    restrictions: null, visualization: graphable ? "argand" : curves ? "cartesian-2d" : "advanced",
+    metadata: { points: points ?? null, components: components ?? null, mapping: mapping ?? null,
+      kind: mapping?.length ? "complex-variable-function" : components ? "real-input-function" : result.operation === "solve" ? "roots" : "single", angleUnit: "rad" },
+    restrictions: null, visualization: graphable ? "argand" : curves ? "cartesian-2d" : mapping?.length ? "complex-map" : "advanced",
     graphRequest: curves ? { endpoint: "/graph/2d", payload: {
       expressions: [components!.re_expression, components!.im_expression], variable: components!.variable,
       angle_unit: "rad",

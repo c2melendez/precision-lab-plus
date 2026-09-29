@@ -355,7 +355,7 @@ export function BasicMode() {
     return directFunctionGraphContext(expression, variable, angleUnit, result, latex);
   }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra, lastOde, lastSystem, lastInequality, lastInequalitySystem, lastComplex]);
   const resolvedGraphState: ScientificGraphState = graphContext?.operation === "complex"
-    ? graphContext.visualization === "argand" || Boolean(graphContext.graphRequest) ? "available" : "advanced"
+    ? graphContext.visualization === "argand" || graphContext.visualization === "complex-map" || Boolean(graphContext.graphRequest) ? "available" : "advanced"
     : graphContext?.operation === "inequality"
     ? graphContext.visualization === "number-line" || graphContext.visualization === "region-2d" ? "available" : "advanced"
     : graphContext?.operation === "simplify" || graphContext?.operation === "factor" || graphContext?.operation === "ode" || graphContext?.operation === "system"
@@ -684,7 +684,7 @@ export function BasicMode() {
               latex,
             );
       setLastResult(result);
-      if (result.success && (result.complex_graph_points?.length || result.complex_graph_components)) {
+      if (result.success && (result.complex_graph_points?.length || result.complex_graph_components || result.complex_graph_mapping?.length)) {
         setLastComplex({ sourceLatex: latex, expression: trimmed, result });
       }
       if (isInequality && result.success) {
@@ -848,7 +848,7 @@ export function BasicMode() {
   // consume.
   async function handleGraphExpression(): Promise<void> {
     const context = graphContext;
-    if (context?.visualization === "number-line" || context?.visualization === "region-2d" || context?.visualization === "argand") {
+    if (context?.visualization === "number-line" || context?.visualization === "region-2d" || context?.visualization === "argand" || context?.visualization === "complex-map") {
       setPendingGraphContext(context);
       setActiveMode("graph");
       return;
