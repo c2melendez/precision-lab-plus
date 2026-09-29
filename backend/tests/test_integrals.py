@@ -131,3 +131,12 @@ def test_integral_parse_error_propagates():
     assert body["success"] is False
     assert body["error_code"] == "PARSE_ERROR"
     assert body["operation"] == "integral"
+
+
+def test_trig_power_notations_share_canonical_result():
+    for function in ("sin", "cos", "tan"):
+        conventional = _integral(f"{function}^3(x)").json()
+        postfix = _integral(f"{function}(x)^3").json()
+        assert conventional["success"] is True
+        assert conventional["antiderivative_expression"] == postfix["antiderivative_expression"]
+        assert conventional["result_latex"] == postfix["result_latex"]

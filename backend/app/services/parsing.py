@@ -279,6 +279,7 @@ def normalize_unicode(text: str) -> str:
     argumento ya contiene pi.
     """
     text = text.replace("π", "pi").replace("∞", "oo").replace("°", "*pi/180")
+    text = _rewrite_trig_function_powers(text)
     text = _expand_sqrt_tokens(text)
     # Porcentaje postfix de calculadora: 50% -> (50)/100. Se limita a
     # átomos simples o un único grupo parentizado para no inventar una
@@ -290,6 +291,31 @@ def normalize_unicode(text: str) -> str:
             break
         text = updated
     return text
+
+
+def _rewrite_trig_function_powers(text: str) -> str:
+    """Interpret sin^n(x) as (sin(x))^n, including nested arguments."""
+    pattern = re.compile(r"\b(sin|cos|tan)\s*\^\s*(?:\{(\d+)\}|(\d+))\s*\(")
+    parts = []
+    offset = 0
+    for match in pattern.finditer(text):
+        if match.start() < offset:
+            continue
+        depth = 1
+        end = match.end()
+        while end < len(text) and depth:
+            if text[end] == "(":
+                depth += 1
+            elif text[end] == ")":
+                depth -= 1
+            end += 1
+        if depth:
+            continue
+        parts.append(text[offset:match.start()])
+        parts.append(f"({match.group(1)}({text[match.end():end - 1]}))^{match.group(2) or match.group(3)}")
+        offset = end
+    parts.append(text[offset:])
+    return "".join(parts)
 
 
 def _expand_sqrt_tokens(text: str) -> str:

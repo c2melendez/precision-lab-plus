@@ -85,7 +85,7 @@ export function GraphPlaceholder({
     <section
       data-testid="scientific-graph"
       aria-label="Vista previa de gráfica"
-      className="flex min-h-[110px] flex-1 flex-col rounded-xl border border-paper-line bg-paper-soft/60"
+      className="flex min-h-[360px] flex-1 flex-col rounded-xl border border-paper-line bg-paper-soft/60"
     >
       <div className="flex items-center justify-between border-b border-paper-line px-4 py-2.5">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Vista previa de gráfica</p>
@@ -129,7 +129,7 @@ export function GraphPlaceholder({
               aria-label={geometry
                 ? `Vista previa de ${context?.operation === "derivative" ? "función y derivada" : definite ? "integrando y región con signo" : context?.operation === "integral" ? "integrando y antiderivada" : context?.operation === "limit" ? "aproximación al límite" : "función"} de ${context?.variables[0] ?? "x"}`
                 : "Vista previa pendiente de renderizado contextual"}
-              className="grid h-24 w-full max-w-md place-items-center overflow-hidden rounded-lg border border-paper-line bg-paper/50"
+              className="grid h-[min(52vh,420px)] min-h-[270px] w-full place-items-center overflow-hidden rounded-lg border border-paper-line bg-paper/50"
             >
               {geometry ? (
                 <svg data-testid="scientific-preview-plot" viewBox="0 0 320 120" preserveAspectRatio="none" className="h-full w-full text-graph" aria-hidden="true">
