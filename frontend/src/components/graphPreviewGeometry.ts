@@ -7,7 +7,7 @@ const HEIGHT = 120;
 const PAD = 12;
 
 /** Curvas SVG compactas a partir de los puntos ya calculados por el motor. */
-export function graphPreviewGeometry(data: GraphData, includeZero = false): {
+export function graphPreviewGeometry(data: GraphData, includeZero = false, breakAtX?: number): {
   paths: string[];
   zeroX: number | null;
   zeroY: number | null;
@@ -26,14 +26,19 @@ export function graphPreviewGeometry(data: GraphData, includeZero = false): {
   const yPixel = (y: number) => HEIGHT - PAD - ((y - yMin) / (yMax - yMin)) * (HEIGHT - 2 * PAD);
   const paths = data.traces.filter((trace) => trace.type === "line").map((trace) => {
     let connected = false;
+    let previousX: number | null = null;
     return trace.x.map((x, index) => {
       const y = trace.y[index];
       if (!Number.isFinite(x) || y == null || !Number.isFinite(y)) {
         connected = false;
+        previousX = null;
         return "";
       }
+      if (previousX !== null && breakAtX !== undefined
+        && previousX <= breakAtX && x > breakAtX) connected = false;
       const command = connected ? "L" : "M";
       connected = true;
+      previousX = x;
       return `${command}${xPixel(x).toFixed(2)} ${yPixel(y).toFixed(2)}`;
     }).filter(Boolean).join(" ");
   }).filter(Boolean);

@@ -40,7 +40,7 @@ interface PlotlyModule {
 // color de cada curva sigue llegando por el prop `colors` de
 // `<GraphViewer>`, sin cambios en ese contrato.
 
-function traceToPlotly(trace: GraphData["traces"][number], color?: string) {
+function traceToPlotly(trace: GraphData["traces"][number], color?: string, breakAtX?: number) {
   if (trace.type === "surface") {
     return {
       x: trace.x,
@@ -67,9 +67,19 @@ function traceToPlotly(trace: GraphData["traces"][number], color?: string) {
       marker: color ? { color, size: 10 } : { size: 10 },
     };
   }
+  const x: Array<number | null> = [];
+  const y: Array<number | null> = [];
+  trace.x.forEach((value, index) => {
+    if (breakAtX !== undefined && index > 0 && trace.x[index - 1] <= breakAtX && value > breakAtX) {
+      x.push(null);
+      y.push(null);
+    }
+    x.push(value);
+    y.push(trace.y[index] ?? null);
+  });
   return {
-    x: trace.x,
-    y: trace.y,
+    x,
+    y,
     type: "scatter" as const,
     mode: "lines" as const,
     name: trace.name,
@@ -144,7 +154,7 @@ export default function GraphViewer({ data, colors, integralBounds, limitFocus }
 
         await Plotly.newPlot(
           safeContainer,
-          [...regionTraces, ...data.traces.map((trace, i) => traceToPlotly(trace, colors?.[i])), ...approachTraces],
+          [...regionTraces, ...data.traces.map((trace, i) => traceToPlotly(trace, colors?.[i], finiteLimitPoint ?? undefined)), ...approachTraces],
           isSurface(data)
             ? {
                 scene: {

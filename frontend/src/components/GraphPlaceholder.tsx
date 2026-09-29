@@ -63,8 +63,11 @@ export function GraphPlaceholder({
   }, [context]);
 
   const definite = context?.operation === "integral" && context.metadata.kind === "definite";
+  const finiteLimitPoint = context?.operation === "limit"
+    && context.metadata.point !== "oo" && context.metadata.point !== "-oo"
+    && Number.isFinite(Number(context.metadata.point)) ? Number(context.metadata.point) : undefined;
   const geometry = preview?.success && preview.graph_data
-    ? graphPreviewGeometry(preview.graph_data, definite) : null;
+    ? graphPreviewGeometry(preview.graph_data, definite, finiteLimitPoint) : null;
   const region = definite && geometry && preview?.graph_data
     ? integralRegionGeometry(preview.graph_data, Number(context?.metadata.lowerBound), Number(context?.metadata.upperBound), geometry)
     : null;

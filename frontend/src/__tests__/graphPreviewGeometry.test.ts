@@ -36,6 +36,10 @@ describe("aproximación a un límite", () => {
     expect(result.leftPath).toContain("M");
     expect(result.rightPath).toContain("M");
     expect(result.pointX).toBe(160);
+    const withoutSampleAtPoint: GraphData = {
+      ...data, traces: [{ type: "line", name: "1/x", x: [-1, -0.1, 0.1, 1], y: [-1, -10, 10, 1] }],
+    };
+    expect(graphPreviewGeometry(withoutSampleAtPoint, false, 0)?.paths[0].match(/M/g)).toHaveLength(2);
   });
   it("lateral derecho no resalta el lado izquierdo", () => {
     const result = limitApproachGeometry(data, "0", "right", graphPreviewGeometry(data)!);
