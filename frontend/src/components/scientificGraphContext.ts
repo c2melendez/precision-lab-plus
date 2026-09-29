@@ -262,6 +262,8 @@ export function systemGraphContext(
     variables,
     metadata: { equations, intersections: result.system_graph_intersections ?? [],
       coincident: result.system_graph_coincident === true,
+      hasComplexSolutions: Array.isArray(result.result_data) && result.result_data.some((item) =>
+        !Array.isArray(item) && "is_complex" in item && item.is_complex === true),
       componentIndices: result.system_graph_component_indices ?? null, angleUnit: "rad" },
     restrictions: null,
     visualization: graphable || verticalGraph ? "cartesian-2d" : "advanced",

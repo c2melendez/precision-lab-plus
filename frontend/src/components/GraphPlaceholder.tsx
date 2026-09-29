@@ -169,7 +169,9 @@ export function GraphPlaceholder({
                 ? context.metadata.coincident ? "Las ecuaciones coinciden: una curva representa infinitas soluciones."
                   : (context.metadata.intersections as number[][]).length
                     ? "Curvas componentes y sus intersecciones comunes marcadas en verde."
-                    : "Curvas componentes sin intersección real visible; revisa Resultado para posibles soluciones complejas."
+                    : context.metadata.hasComplexSolutions
+                      ? "Curvas sin intersección real; Resultado conserva las soluciones complejas."
+                      : "Curvas componentes sin intersección común; el sistema no tiene solución."
                 : context?.operation === "integral"
                 ? "Integrando y antiderivada representativa (C=0 solo en la gráfica); el resultado conserva +C."
                 : context?.operation === "derivative"

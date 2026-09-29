@@ -424,7 +424,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
             {sourceContext.operation === "ode" && (sourceContext.metadata.kind === "particular"
               ? " · solución particular" : " · familia representativa C₁=−1, 0, 1")}
             {sourceContext.operation === "system" && (sourceContext.metadata.coincident
-              ? " · curvas coincidentes, infinitas soluciones" : ` · ${(sourceContext.metadata.intersections as number[][]).length} ${(sourceContext.metadata.intersections as number[][]).length === 1 ? "intersección común" : "intersecciones comunes"} · ecuaciones ${String((sourceContext.metadata.equations as string[]).join(" ; "))}`)}
+              ? " · curvas coincidentes, infinitas soluciones" : ` · ${(sourceContext.metadata.intersections as number[][]).length} ${(sourceContext.metadata.intersections as number[][]).length === 1 ? "intersección común" : "intersecciones comunes"}${sourceContext.metadata.hasComplexSolutions ? " · sin cruce real, soluciones complejas conservadas" : ""} · ecuaciones ${String((sourceContext.metadata.equations as string[]).join(" ; "))}`)}
           </p>
         )}
         <div className="flex items-center justify-between gap-2">

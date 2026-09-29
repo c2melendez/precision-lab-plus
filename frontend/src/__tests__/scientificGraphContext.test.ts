@@ -118,7 +118,7 @@ describe("sistema lineal certificado", () => {
       success: true, system_graph_expressions: null, system_graph_latex: null,
       graph_data: { traces: [{ type: "line", name: "x=1", x: [1, 1], y: [-10, 10] }],
         x_range: [-9, 11], y_range: [-10, 10] }, system_graph_intersections: [[1, 2]],
-    } as MathResponse);
+    } as unknown as MathResponse);
     expect(context.graphRequest).toEqual({ endpoint: "/solve/system",
       payload: { equations: ["x=1", "y=2"], variables: ["x", "y"] } });
     expect(context.visualization).toBe("cartesian-2d");
@@ -141,6 +141,21 @@ describe("sistema lineal certificado", () => {
     } });
     expect(context.metadata.intersections).toHaveLength(2);
     expect(context.metadata.componentIndices).toEqual([1, 1, 0]);
+  });
+
+  it("distingue soluciones complejas de un sistema paralelo sin solución", () => {
+    const complex = systemGraphContext(["x^2+y^2=1", "x=2"], ["x", "y"], "cases", {
+      success: true, system_graph_intersections: [], result_data: [
+        { text: "x=2, y=sqrt(3)*I", latex: "", is_complex: true },
+      ], graph_data: { traces: [{ type: "line", name: "x=2", x: [2, 2], y: [-2, 2] }],
+        x_range: [-2, 4], y_range: [-2, 2] },
+    } as unknown as MathResponse);
+    expect(complex.metadata.hasComplexSolutions).toBe(true);
+    const parallel = systemGraphContext(["x+y=3", "x+y=4"], ["x", "y"], "cases", {
+      success: true, result_data: [], system_graph_intersections: [],
+      system_graph_expressions: ["3-x", "4-x"], system_graph_latex: ["3-x", "4-x"],
+    } as unknown as MathResponse);
+    expect(parallel.metadata.hasComplexSolutions).toBe(false);
   });
 
   it("agrupa ambas ramas del círculo y conserva sus dos cruces exactos", () => {

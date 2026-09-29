@@ -461,6 +461,21 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(page.getByTestId("scientific-graph-context")).toContainText("2 intersecciones comunes");
   });
 
+  test("círculo y vertical disjuntos conservan soluciones complejas sin marcador real", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\begin{cases}x^2+y^2=1\\\\x=2\\end{cases}");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/solve/system") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const result = await (await solve).json();
+    expect(result.system_graph_intersections).toEqual([]);
+    expect(result.result_data).toHaveLength(2);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("soluciones complejas");
+    await expect(preview.getByTestId("system-intersection")).toHaveCount(0);
+  });
+
   test("inecuación estricta muestra extremo hueco y conserva el conjunto en Gráficas", async ({ page }) => {
     await openScientific(page);
     await setExpression(page, "x>0");
