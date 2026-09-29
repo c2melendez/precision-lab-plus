@@ -92,6 +92,8 @@ interface GraphViewerProps {
 }
 
 export default function GraphViewer({ data, colors, integralBounds }: GraphViewerProps) {
+  const lowerBound = integralBounds?.[0];
+  const upperBound = integralBounds?.[1];
   const containerRef = useRef<HTMLDivElement | null>(null);
   const plotlyRef = useRef<PlotlyModule | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -113,7 +115,8 @@ export default function GraphViewer({ data, colors, integralBounds }: GraphViewe
         if (cancelled) return;
         plotlyRef.current = Plotly;
 
-        const region = integralBounds ? integralRegionSegments(data, ...integralBounds) : null;
+        const region = lowerBound !== undefined && upperBound !== undefined
+          ? integralRegionSegments(data, lowerBound, upperBound) : null;
         const regionTraces = region ? ([
           { pieces: region.positive, name: "Aporte positivo", color: "rgba(22,134,93,0.35)" },
           { pieces: region.negative, name: "Aporte negativo", color: "rgba(195,74,74,0.35)" },
@@ -141,11 +144,11 @@ export default function GraphViewer({ data, colors, integralBounds }: GraphViewe
             : {
                 xaxis: { range: data.x_range, title: { text: data.x_axis_label ?? "x" } },
                 yaxis: data.y_range
-                  ? { range: integralBounds
+                  ? { range: region
                     ? [Math.min(0, data.y_range[0]), Math.max(0, data.y_range[1])]
                     : data.y_range, title: { text: data.y_axis_label ?? "y" } }
                   : { title: { text: data.y_axis_label ?? "y" } },
-                shapes: integralBounds?.map((bound) => ({
+                shapes: [lowerBound, upperBound].filter((bound): bound is number => bound !== undefined).map((bound) => ({
                   type: "line", x0: bound, x1: bound, y0: 0, y1: 1,
                   yref: "paper", line: { color: "#747b87", width: 1, dash: "dot" },
                 })),
@@ -171,7 +174,7 @@ export default function GraphViewer({ data, colors, integralBounds }: GraphViewe
         plotlyRef.current.purge(safeContainer);
       }
     };
-  }, [data, colors, integralBounds]);
+  }, [data, colors, lowerBound, upperBound]);
 
   async function handleDownloadPng(): Promise<void> {
     if (!containerRef.current || !plotlyRef.current) return;

@@ -642,3 +642,5 @@ La próxima sesión debe iniciar con revisión visual, no con nueva implementaci
 - El puente a Gráficas conserva límites, valor firmado y rango de vista; las pruebas cubren el caso invertido `2 → 0` de `x²`, cuyo resultado exacto es `-8/3`.
 - TypeScript y 12 pruebas unitarias focalizadas PASS. Pendiente certificar E2E y los nueve workflows en Actions; B7 permanece EN CURSO.
 - Segundo tramo: Gráficas dibuja los mismos segmentos firmados con relleno Plotly detrás de la curva, guías de límites y eje vertical que incluye cero. La geometría compartida evita unir áreas a través de discontinuidades. TypeScript, pruebas de geometría y lint focalizado PASS; certificación remota pendiente.
+- Commit `1efc63fa325f9445dff1b7ed8d35e320d03dd247`: CI, Playwright E2E, S17, S18, S20, S21, S23 y S25 PASS; S19 aún en ejecución. El caso E2E `∫₂⁰x²dx = -8/3` pasó.
+- Commit `ab291ad8744da98eb2d3423e5f49e1df99fbe25c`: ampliación Plotly; CI, S17, S18, S20, S21, S23 y S25 PASS, Playwright y S19 en ejecución. Se estabilizan las dependencias del visor por los límites numéricos para evitar redibujados durante rerenders del padre.
