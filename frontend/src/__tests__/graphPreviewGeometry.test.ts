@@ -52,6 +52,9 @@ describe("aproximación a un límite", () => {
     expect(result.leftPath).toBe("");
     expect(result.rightPath).toContain("M");
     expect(result.pointX).toBeNull();
+    const negative = limitApproachGeometry(data, "-oo", "both", graphPreviewGeometry(data)!);
+    expect(negative.leftPath).toContain("M");
+    expect(negative.rightPath).toBe("");
   });
 });
 

@@ -353,7 +353,9 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
             {sourceContext.operation === "integral" && (sourceContext.metadata.kind === "definite"
               ? ` · límites ${sourceContext.metadata.lowerBound} → ${sourceContext.metadata.upperBound} · valor firmado ${sourceContext.canonicalResult?.text ?? "—"}`
               : " · C=0 solo en la gráfica")}
-            {sourceContext.operation === "limit" && ` · ${sourceContext.metadata.direction === "left" ? "desde la izquierda" : sourceContext.metadata.direction === "right" ? "desde la derecha" : "ambos lados"} → ${sourceContext.metadata.point} · resultado ${sourceContext.canonicalResult?.text ?? "—"}`}
+            {sourceContext.operation === "limit" && ` · ${sourceContext.metadata.behavior === "far-field"
+              ? `hacia ${sourceContext.metadata.point === "oo" ? "+∞" : "−∞"}`
+              : `${sourceContext.metadata.direction === "left" ? "desde la izquierda" : sourceContext.metadata.direction === "right" ? "desde la derecha" : "ambos lados"} → ${sourceContext.metadata.point}`} · resultado ${sourceContext.canonicalResult?.text ?? "—"}`}
           </p>
         )}
         <div className="flex items-center justify-between gap-2">

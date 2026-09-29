@@ -262,6 +262,29 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(preview.getByTestId("limit-left-approach")).toHaveCount(0);
   });
 
+  test("límite al infinito enfoca el comportamiento lejano", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\lim_{x\\to\\infty}\\frac{1}{x}");
+    const limit = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/limit") && response.request().method() === "POST",
+    );
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const response = await limit;
+    expect(response.request().postDataJSON().point).toBe("oo");
+    expect((await response.json()).result_text).toBe("0");
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("Comportamiento hacia +∞");
+    await expect(preview.getByTestId("limit-right-approach")).toBeVisible();
+    await expect(preview.getByTestId("limit-left-approach")).toHaveCount(0);
+    const graphResponse = page.waitForResponse((next) =>
+      next.url().includes("/api/v1/graph/2d") && next.request().method() === "POST",
+    );
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    expect((await graphResponse).request().postDataJSON()).toMatchObject({ x_min: 4, x_max: 20 });
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("hacia +∞ · resultado 0");
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

@@ -120,7 +120,9 @@ export function GraphPlaceholder({
               {definite
                 ? `Región con signo de ${context?.metadata.lowerBound} a ${context?.metadata.upperBound}; verde suma, rojo resta${Number(context?.metadata.orientation) < 0 ? " (sentido inverso)" : ""}. Valor exacto: ${context?.canonicalResult?.text ?? "—"}.`
                 : context?.operation === "limit"
-                ? `Aproximación ${context.metadata.direction === "left" ? "por la izquierda" : context.metadata.direction === "right" ? "por la derecha" : "por ambos lados"} a ${context.metadata.point === "oo" ? "+∞" : context.metadata.point === "-oo" ? "−∞" : context.metadata.point}${context.metadata.bilateralDoesNotExist ? "; los límites laterales difieren" : ""}. Resultado: ${context.canonicalResult?.text ?? "—"}.`
+                ? `${context.metadata.point === "oo" || context.metadata.point === "-oo"
+                  ? `Comportamiento hacia ${context.metadata.point === "oo" ? "+∞" : "−∞"}`
+                  : `Aproximación ${context.metadata.direction === "left" ? "por la izquierda" : context.metadata.direction === "right" ? "por la derecha" : "por ambos lados"} a ${context.metadata.point}`}${context.metadata.bilateralDoesNotExist ? "; los límites laterales difieren" : ""}. Resultado: ${context.canonicalResult?.text ?? "—"}.`
                 : context?.operation === "integral"
                 ? "Integrando y antiderivada representativa (C=0 solo en la gráfica); el resultado conserva +C."
                 : context?.operation === "derivative"
