@@ -30,6 +30,7 @@ import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { ResultPanel } from "./ResultPanel";
 import { NumberLine } from "./NumberLine";
 import { InequalityRegion } from "./InequalityRegion";
+import { CircleInequality } from "./CircleInequality";
 import { ArgandPlane, argandGraphData } from "./ArgandPlane";
 import { ComplexMapping } from "./ComplexMapping";
 
@@ -381,6 +382,17 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
         kind={String(sourceContext.metadata.kind)} />
       <p className="text-sm">{sourceContext.canonicalResult?.text ?? "—"}</p>
       <p className="text-xs text-muted">Fronteras discontinuas excluidas; continuas incluidas. El trazo azul muestra la solución común; los extremos huecos se excluyen.</p>
+    </section>;
+  }
+
+  if (sourceContext?.visualization === "circle-region") {
+    const circle = sourceContext.metadata.circle as NonNullable<MathResponse["inequality_circle"]>;
+    return <section aria-label="Análisis de inecuación circular" className="space-y-4 rounded-xl border border-paper-line bg-paper p-5">
+      <h2 className="text-lg font-semibold">Región circular</h2>
+      <p className="text-sm text-muted">Desde Científica · {sourceContext.originalExpression}</p>
+      <CircleInequality circle={circle} />
+      <p className="text-sm">{sourceContext.canonicalResult?.text}. Centro ({circle.center_x_exact}, {circle.center_y_exact}); radio {circle.radius_exact}.</p>
+      <p className="text-xs text-muted">Frontera discontinua excluida; continua incluida. La zona azul cumple la inecuación.</p>
     </section>;
   }
 

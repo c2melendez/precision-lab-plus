@@ -89,6 +89,19 @@ describe("sistema de inecuaciones en dos variables", () => {
 });
 
 describe("inecuación univariada", () => {
+  it("transfiere centro, radio y frontera circular sin reparsear el resultado", () => {
+    const circle = { center_x: 2, center_y: -1, radius: 3,
+      center_x_exact: "2", center_y_exact: "-1", radius_exact: "3",
+      inside: true, boundary_included: false };
+    const result = { success: true, result_text: "Interior sin frontera del círculo",
+      inequality_circle: circle } as MathResponse;
+    const context = inequalityGraphContext("(x-2)^2+(y+1)^2<9", "x", "circle", result);
+    expect(context.visualization).toBe("circle-region");
+    expect(context.variables).toEqual(["x", "y"]);
+    expect(context.metadata.circle).toEqual(circle);
+    expect(context.graphRequest).toBeNull();
+  });
+
   it("redirige una inecuación 2D directa a la región canónica", () => {
     const result = { success: true, result_text: "Región no acotada", result_data: null,
       inequality_region_kind: "unbounded", inequality_constraints: [

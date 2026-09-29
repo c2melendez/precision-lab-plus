@@ -31,7 +31,7 @@ from app.schemas.requests import (
     SolveSystemRequest,
 )
 from app.schemas.responses import ErrorCode, MathResponse, OperationType, ResultType
-from app.services import graph_service, linear_inequality_system, parsing, phase2_service
+from app.services import circle_inequality, graph_service, linear_inequality_system, parsing, phase2_service
 from app.services.ast_validator import ComplexityLimitError
 
 router = APIRouter(tags=["phase2"])
@@ -188,6 +188,20 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
     if variable is None:
         free_symbols = parsed.free_symbols
         if free_symbols == {sympy.Symbol("x"), sympy.Symbol("y")}:
+            circle = circle_inequality.circle_region(parsed.lhs - parsed.rhs, parsed.rel_op)
+            if circle is not None:
+                inside = circle["inside"]
+                included = circle["boundary_included"]
+                return MathResponse(
+                    success=True, operation=OperationType.INEQUALITY,
+                    request_id=request.state.request_id, result_type=ResultType.INEQUALITY_REGION,
+                    input_text=payload.inequality,
+                    result_text=("Interior" if inside else "Exterior")
+                    + (" y frontera" if included else " sin frontera") + " del círculo",
+                    inequality_region_kind="bounded" if inside else "unbounded",
+                    inequality_region_dimension=2, inequality_circle=circle,
+                    has_detailed_steps=False, duration_ms=_duration_ms(request),
+                )
             try:
                 region = linear_inequality_system.solve_linear_inequality_system(
                     [(parsed.lhs - parsed.rhs, parsed.rel_op)], ["x", "y"]

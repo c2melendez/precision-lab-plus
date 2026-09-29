@@ -65,3 +65,32 @@ def test_single_two_variable_inequality_uses_same_semiplane_semantics():
     one_variable = client.post("/api/v1/inequality", json={"inequality": "x>0"}).json()
     assert one_variable["inequality_intervals"]
     assert one_variable["inequality_region_kind"] is None
+
+
+def test_direct_circle_inequalities_preserve_region_and_boundary():
+    interior = client.post("/api/v1/inequality", json={"inequality": "x^2+y^2<1"}).json()
+    assert interior["success"] is True
+    assert interior["inequality_region_kind"] == "bounded"
+    assert interior["inequality_circle"] == {
+        "center_x": 0, "center_y": 0, "radius": 1,
+        "center_x_exact": "0", "center_y_exact": "0", "radius_exact": "1",
+        "inside": True, "boundary_included": False,
+    }
+    exterior = client.post("/api/v1/inequality", json={"inequality": "x^2+y^2>=1"}).json()
+    assert exterior["inequality_region_kind"] == "unbounded"
+    assert exterior["inequality_circle"]["inside"] is False
+    assert exterior["inequality_circle"]["boundary_included"] is True
+
+    shifted = client.post("/api/v1/inequality", json={
+        "inequality": "(x-2)^2+(y+1)^2<=9"}).json()
+    assert shifted["inequality_circle"]["center_x_exact"] == "2"
+    assert shifted["inequality_circle"]["center_y_exact"] == "-1"
+    assert shifted["inequality_circle"]["radius_exact"] == "3"
+    flipped = client.post("/api/v1/inequality", json={
+        "inequality": "-x^2-y^2+1>0"}).json()
+    assert flipped["inequality_circle"]["inside"] is True
+    assert flipped["inequality_circle"]["boundary_included"] is False
+
+    ellipse = client.post("/api/v1/inequality", json={"inequality": "x^2+2*y^2<1"}).json()
+    assert ellipse["success"] is False
+    assert ellipse["inequality_circle"] is None

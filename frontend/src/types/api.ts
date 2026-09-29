@@ -1134,6 +1134,16 @@ export interface components {
             inequality_constraints?: components["schemas"]["InequalityBoundary"][] | null;
             inequality_preview_polygon?: number[][] | null;
             inequality_viewport?: number[] | null;
+            inequality_circle?: {
+                center_x: number;
+                center_y: number;
+                radius: number;
+                center_x_exact: string;
+                center_y_exact: string;
+                radius_exact: string;
+                inside: boolean;
+                boundary_included: boolean;
+            } | null;
             complex_graph_points?: components["schemas"]["ComplexGraphPoint"][] | null;
             complex_graph_components?: components["schemas"]["ComplexGraphComponents"] | null;
             complex_graph_mapping?: components["schemas"]["ComplexGraphSample"][] | null;

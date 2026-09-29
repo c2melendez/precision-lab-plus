@@ -511,6 +511,25 @@ test.describe("S26 B7 — Científica Plus", () => {
       .toContainText("x+y>0");
   });
 
+  test("inecuación circular conserva interior abierto y contexto en Gráficas", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "x^2+y^2<1");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/inequality") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const result = await (await solve).json();
+    expect(result.inequality_circle.inside).toBe(true);
+    expect(result.inequality_circle.boundary_included).toBe(false);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("circle-interior-region")).toBeAttached();
+    await expect(preview.getByTestId("circle-boundary")).toHaveAttribute("stroke-dasharray", "6 5");
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    const graph = page.getByRole("region", { name: "Análisis de inecuación circular" });
+    await expect(graph).toContainText("x^2+y^2<1");
+    await expect(graph.getByTestId("circle-interior-region")).toBeAttached();
+  });
+
   test("inecuación inclusiva y conjunto vacío respetan su semántica", async ({ page }) => {
     await openScientific(page);
     await setExpression(page, "x>=0");
