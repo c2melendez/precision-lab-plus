@@ -12,6 +12,10 @@ def test_concrete_complex_number_and_symbolic_function():
     function = client.post("/api/v1/evaluate", json={"expression": "exp(I*x)"}).json()
     assert function["success"] is True
     assert function["complex_graph_points"] is None
+    for expression in ("sec(0)", "csc(pi/2)"):
+        real = client.post("/api/v1/evaluate", json={"expression": expression})
+        assert real.status_code == 200
+        assert real.json()["complex_graph_points"] is None
 
 
 def test_complex_roots_include_real_roots_in_the_same_plane():

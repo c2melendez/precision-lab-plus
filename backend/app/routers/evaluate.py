@@ -92,13 +92,13 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         input_latex = None
 
     complex_points = None
-    if not result.expr.free_symbols and result.expr.is_number and result.expr.is_real is False:
+    if not result.expr.free_symbols and result.expr.is_number and result.expr.has(sympy.I):
         try:
             re_value = float(sympy.N(sympy.re(result.expr)))
             im_value = float(sympy.N(sympy.im(result.expr)))
             if all(sympy.Float(v).is_finite and abs(v) <= 1e6 for v in (re_value, im_value)):
                 complex_points = [ComplexGraphPoint(re=re_value, im=im_value, label=result_text)]
-        except (TypeError, ValueError, OverflowError):
+        except (AttributeError, TypeError, ValueError, OverflowError):
             pass
 
     return MathResponse(

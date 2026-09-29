@@ -228,7 +228,7 @@ def solve_equation(
 
     equation_solutions = [_to_equation_solution(solution) for solution in solutions]
     graph_points = None
-    if solutions and len(solutions) <= 20 and any(value.is_real is False or value.has(sympy.I) for value in solutions):
+    if solutions and len(solutions) <= 20 and any(value.has(sympy.I) for value in solutions):
         points = []
         for value in solutions:
             if value.free_symbols or value.is_number is not True:
@@ -236,7 +236,7 @@ def solve_equation(
             try:
                 re_value = float(sympy.N(sympy.re(value)))
                 im_value = float(sympy.N(sympy.im(value)))
-            except (TypeError, ValueError, OverflowError):
+            except (AttributeError, TypeError, ValueError, OverflowError):
                 break
             if not all(sympy.Float(v).is_finite and abs(v) <= 1e6 for v in (re_value, im_value)):
                 break
