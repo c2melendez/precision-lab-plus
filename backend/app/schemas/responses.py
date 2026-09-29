@@ -303,6 +303,7 @@ class MathResponse(BaseModel):
     inequality_intervals: Optional[List[InequalityInterval]] = None
     inequality_variable: Optional[str] = None
     inequality_region_kind: Optional[str] = None
+    inequality_region_dimension: Optional[int] = None
     inequality_constraints: Optional[List[InequalityBoundary]] = None
     inequality_preview_polygon: Optional[List[List[float]]] = None
     inequality_viewport: Optional[List[float]] = None

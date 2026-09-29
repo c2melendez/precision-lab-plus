@@ -204,6 +204,7 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
                 inequality_constraints=region.constraints,
                 inequality_preview_polygon=region.preview_polygon,
                 inequality_viewport=region.viewport, has_detailed_steps=False,
+                inequality_region_dimension=region.dimension,
                 warnings=region.steps, duration_ms=_duration_ms(request),
             )
         if len(free_symbols) != 1:
@@ -279,6 +280,7 @@ async def inequality_system(payload: InequalitySystemRequest, request: Request) 
         inequality_constraints=result.constraints,
         inequality_preview_polygon=result.preview_polygon,
         inequality_viewport=result.viewport,
+        inequality_region_dimension=result.dimension,
         has_detailed_steps=False,
         warnings=result.steps,
         duration_ms=_duration_ms(request),

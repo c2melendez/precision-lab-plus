@@ -565,6 +565,23 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(preview.getByTestId("feasible-region")).toHaveCount(0);
   });
 
+  test("intersección sobre un rayo dibuja trazo factible y origen excluido", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\begin{cases}x\\ge 0\\\\x\\le 0\\\\y>0\\end{cases}");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/inequality/system") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    expect((await (await solve).json()).inequality_region_dimension).toBe(1);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("feasible-line")).toBeVisible();
+    await expect(preview.getByTestId("feasible-region")).toHaveCount(0);
+    await expect(preview.getByTestId("feasible-endpoint")).toHaveAttribute("fill", "white");
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    await expect(page.getByRole("region", { name: "Análisis de región de inecuaciones" })
+      .getByTestId("feasible-line")).toBeVisible();
+  });
+
   test("complejo aislado conserva sus coordenadas en Argand y Gráficas", async ({ page }) => {
     await openScientific(page);
     await setExpression(page, "3+4i");

@@ -34,10 +34,23 @@ def test_empty_strict_intersection_and_unbounded_halfplane():
     assert open_halfplane["inequality_constraints"][0]["operator"] == ">"
 
 
-def test_lower_dimensional_region_avoids_false_area_fill():
+def test_lower_dimensional_region_retains_only_feasible_geometry():
     line = solve(["x>=0", "x<=0", "y>0"])
     assert line["inequality_region_kind"] == "unbounded"
-    assert line["inequality_preview_polygon"] is None
+    assert line["inequality_region_dimension"] == 1
+    assert line["inequality_preview_polygon"] == [[0.0, 0.0], [0.0, 4.0]]
+
+    segment = solve(["x>=0", "x<=0", "y>=0", "y<2"])
+    assert segment["inequality_region_kind"] == "bounded"
+    assert segment["inequality_region_dimension"] == 1
+    assert {tuple(p) for p in segment["inequality_preview_polygon"]} == {(0.0, 0.0), (0.0, 2.0)}
+
+    point = solve(["x>=1", "x<=1", "y>=2", "y<=2"])
+    assert point["inequality_region_dimension"] == 0
+    assert point["inequality_preview_polygon"] == [[1.0, 2.0]]
+
+    excluded_point = solve(["x>=1", "x<=1", "y>=2", "y<2"])
+    assert excluded_point["inequality_region_kind"] == "empty"
 
 
 def test_single_two_variable_inequality_uses_same_semiplane_semantics():

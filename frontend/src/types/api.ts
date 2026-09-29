@@ -1130,6 +1130,7 @@ export interface components {
             inequality_intervals?: components["schemas"]["InequalityInterval"][] | null;
             inequality_variable?: string | null;
             inequality_region_kind?: string | null;
+            inequality_region_dimension?: number | null;
             inequality_constraints?: components["schemas"]["InequalityBoundary"][] | null;
             inequality_preview_polygon?: number[][] | null;
             inequality_viewport?: number[] | null;

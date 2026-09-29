@@ -65,6 +65,7 @@ class InequalitySystemSolution:
     constraints: Optional[List[dict]] = None
     preview_polygon: Optional[List[List[float]]] = None
     viewport: Optional[List[float]] = None
+    dimension: Optional[int] = None
 
 
 @dataclass
@@ -152,8 +153,8 @@ def _strictly_feasible(polygon: List[Point], constraints: List[_Constraint]) -> 
     candidates.append(Point(sum(p.x for p in polygon) / len(polygon),
                             sum(p.y for p in polygon) / len(polygon)))
     for p in candidates:
-        if all((c.a * p.x + c.b * p.y < c.c if c.operator == "<" else
-                c.a * p.x + c.b * p.y > c.c if c.operator == ">" else
+        if all((c.a * p.x + c.b * p.y < c.c - EPS if c.operator == "<" else
+                c.a * p.x + c.b * p.y > c.c + EPS if c.operator == ">" else
                 _satisfies(p, c)) for c in constraints):
             return True
     return False
@@ -183,7 +184,14 @@ def _preview_region(constraints: List[_Constraint], vertices: Optional[List[Poin
                              - polygon[(i + 1) % len(polygon)].x * p.y
                              for i, p in enumerate(polygon)))
         if twice_area < 1e-9:
-            return None, [x_min, x_max, y_min, y_max]
+            unique = _dedupe_points(polygon)
+            if not unique:
+                return [], [x_min, x_max, y_min, y_max]
+            endpoints = max(((p, q) for p in unique for q in unique),
+                            key=lambda pair: (pair[0].x - pair[1].x) ** 2
+                            + (pair[0].y - pair[1].y) ** 2)
+            points = [endpoints[0]] if endpoints[0] == endpoints[1] else list(endpoints)
+            return [[p.x, p.y] for p in points], [x_min, x_max, y_min, y_max]
     return [[p.x, p.y] for p in polygon], [x_min, x_max, y_min, y_max]
 
 
@@ -294,4 +302,6 @@ def solve_linear_inequality_system(
                              "operator": c.operator, "label": c.label} for c in constraints]
     solution.preview_polygon, solution.viewport = _preview_region(
         constraints, solution.vertices, solution.kind)
+    solution.dimension = (0 if solution.kind == "empty" else
+                          min(2, max(0, len(solution.preview_polygon or []) - 1)))
     return solution

@@ -380,7 +380,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
         polygon={sourceContext.metadata.polygon as number[][]} viewport={sourceContext.metadata.viewport as number[]}
         kind={String(sourceContext.metadata.kind)} />
       <p className="text-sm">{sourceContext.canonicalResult?.text ?? "—"}</p>
-      <p className="text-xs text-muted">Fronteras discontinuas excluidas; continuas incluidas. La zona azul cumple todas las restricciones.</p>
+      <p className="text-xs text-muted">Fronteras discontinuas excluidas; continuas incluidas. El trazo azul muestra la solución común; los extremos huecos se excluyen.</p>
     </section>;
   }
 

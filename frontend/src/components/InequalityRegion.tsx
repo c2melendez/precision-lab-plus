@@ -8,6 +8,13 @@ export function InequalityRegion({ boundaries, polygon, viewport, kind }: {
   const [xMin, xMax, yMin, yMax] = viewport;
   const px = (x: number) => 12 + (x - xMin) / (xMax - xMin) * 296;
   const py = (y: number) => 148 - (y - yMin) / (yMax - yMin) * 136;
+  const atFrame = ([x, y]: number[]) => Math.abs(x - xMin) < 1e-7 || Math.abs(x - xMax) < 1e-7
+    || Math.abs(y - yMin) < 1e-7 || Math.abs(y - yMax) < 1e-7;
+  const included = ([x, y]: number[]) => boundaries.every(({ a, b, c, operator }) => {
+    const delta = a * x + b * y - c;
+    return operator === "<" ? delta < -1e-7 : operator === ">" ? delta > 1e-7
+      : operator === "<=" ? delta <= 1e-7 : delta >= -1e-7;
+  });
   const clip = ({ a, b, c }: Boundary): number[][] => {
     const candidates = [
       ...(b !== 0 ? [[xMin, (c - a * xMin) / b], [xMax, (c - a * xMax) / b]] : []),
@@ -35,6 +42,16 @@ export function InequalityRegion({ boundaries, polygon, viewport, kind }: {
           stroke={["#2862b8", "#b65d20", "#16865d"][index % 3]}
           strokeWidth="2.5" strokeDasharray={boundary.operator.length === 1 ? "6 5" : undefined} /> : null;
       })}
+      {kind !== "empty" && polygon.length === 2 && <line data-testid="feasible-line"
+        x1={px(polygon[0][0])} y1={py(polygon[0][1])}
+        x2={px(polygon[1][0])} y2={py(polygon[1][1])}
+        stroke="#174a9c" strokeWidth="5" />}
+      {kind !== "empty" && polygon.length <= 2 && polygon.map((point, index) =>
+        atFrame(point) ? <circle key={index} data-testid="feasible-continuation"
+          cx={px(point[0])} cy={py(point[1])} r="4" fill="#174a9c" />
+          : <circle key={index} data-testid="feasible-endpoint"
+            cx={px(point[0])} cy={py(point[1])} r="5" stroke="#174a9c" strokeWidth="2"
+            fill={included(point) ? "#174a9c" : "white"} />)}
       {kind === "empty" && <text x="160" y="83" textAnchor="middle" fill="currentColor" fontSize="13">Región vacía ∅</text>}
     </svg>
   </div>;

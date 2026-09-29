@@ -103,7 +103,7 @@ export function GraphPlaceholder({
             <InequalityRegion boundaries={context.metadata.constraints as NonNullable<MathResponse["inequality_constraints"]>}
               polygon={context.metadata.polygon as number[][]} viewport={context.metadata.viewport as number[]}
               kind={String(context.metadata.kind)} />
-            <p className="text-[11px] text-muted">{context.metadata.kind === "empty" ? "Región factible vacía" : context.metadata.kind === "bounded" ? "Región factible acotada" : "Región factible no acotada"}. Frontera discontinua: excluida; continua: incluida.</p>
+            <p className="text-[11px] text-muted">{context.metadata.kind === "empty" ? "Región factible vacía" : (context.metadata.polygon as number[][]).length === 1 ? "Solución: un punto" : (context.metadata.polygon as number[][]).length === 2 ? "Solución sobre una línea" : context.metadata.kind === "bounded" ? "Región factible acotada" : "Región factible no acotada"}. Frontera discontinua: excluida; continua: incluida.</p>
           </>
         ) : state === "available" && context?.visualization === "number-line" ? (
           <>

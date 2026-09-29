@@ -26,4 +26,27 @@ describe("región factible B7", () => {
     expect(screen.queryByTestId("feasible-region")).toBeNull();
     expect(screen.getByText(/Región vacía/)).toBeInTheDocument();
   });
+
+  it("dibuja un rayo con origen hueco y sin relleno de área", () => {
+    render(<InequalityRegion boundaries={[
+      { a: 1, b: 0, c: 0, operator: ">=", label: "x>=0" },
+      { a: 1, b: 0, c: 0, operator: "<=", label: "x<=0" },
+      { a: 0, b: 1, c: 0, operator: ">", label: "y>0" },
+    ]} polygon={[[0, 0], [0, 4]]} viewport={[-4, 4, -4, 4]} kind="unbounded" />);
+    expect(screen.queryByTestId("feasible-region")).toBeNull();
+    expect(screen.getByTestId("feasible-line")).toBeInTheDocument();
+    expect(screen.getByTestId("feasible-endpoint")).toHaveAttribute("fill", "white");
+    expect(screen.getByTestId("feasible-continuation")).toBeInTheDocument();
+  });
+
+  it("marca el punto factible incluido", () => {
+    render(<InequalityRegion boundaries={[
+      { a: 1, b: 0, c: 1, operator: ">=", label: "x>=1" },
+      { a: 1, b: 0, c: 1, operator: "<=", label: "x<=1" },
+      { a: 0, b: 1, c: 2, operator: ">=", label: "y>=2" },
+      { a: 0, b: 1, c: 2, operator: "<=", label: "y<=2" },
+    ]} polygon={[[1, 2]]} viewport={[-3, 5, -2, 6]} kind="bounded" />);
+    expect(screen.queryByTestId("feasible-region")).toBeNull();
+    expect(screen.getByTestId("feasible-endpoint")).toHaveAttribute("fill", "#174a9c");
+  });
 });
