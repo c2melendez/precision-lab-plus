@@ -226,7 +226,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
 
   useEffect(() => {
     if (!pendingGraphContext) return;
-    if (pendingGraphContext.visualization === "number-line" || pendingGraphContext.visualization === "region-2d" || pendingGraphContext.visualization === "argand" || pendingGraphContext.visualization === "complex-map") {
+    if (pendingGraphContext.visualization === "number-line" || pendingGraphContext.visualization === "region-2d" || pendingGraphContext.visualization === "circle-region" || pendingGraphContext.visualization === "argand" || pendingGraphContext.visualization === "complex-map") {
       setSourceContext(pendingGraphContext);
       setPendingGraphContext(null);
       return;

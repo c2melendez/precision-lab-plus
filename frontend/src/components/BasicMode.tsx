@@ -357,7 +357,7 @@ export function BasicMode() {
   const resolvedGraphState: ScientificGraphState = graphContext?.operation === "complex"
     ? graphContext.visualization === "argand" || graphContext.visualization === "complex-map" || Boolean(graphContext.graphRequest) ? "available" : "advanced"
     : graphContext?.operation === "inequality"
-    ? graphContext.visualization === "number-line" || graphContext.visualization === "region-2d" ? "available" : "advanced"
+    ? graphContext.visualization === "number-line" || graphContext.visualization === "region-2d" || graphContext.visualization === "circle-region" ? "available" : "advanced"
     : graphContext?.operation === "simplify" || graphContext?.operation === "factor" || graphContext?.operation === "ode" || graphContext?.operation === "system"
       ? graphContext.graphRequest ? "available" : "advanced" : graphState;
 
@@ -848,7 +848,7 @@ export function BasicMode() {
   // consume.
   async function handleGraphExpression(): Promise<void> {
     const context = graphContext;
-    if (context?.visualization === "number-line" || context?.visualization === "region-2d" || context?.visualization === "argand" || context?.visualization === "complex-map") {
+    if (context?.visualization === "number-line" || context?.visualization === "region-2d" || context?.visualization === "circle-region" || context?.visualization === "argand" || context?.visualization === "complex-map") {
       setPendingGraphContext(context);
       setActiveMode("graph");
       return;
