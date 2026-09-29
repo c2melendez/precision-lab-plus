@@ -12,6 +12,7 @@ import type { ScientificGraphContext } from "./scientificGraphContext";
 import { NumberLine } from "./NumberLine";
 import { InequalityRegion } from "./InequalityRegion";
 import { CircleInequality } from "./CircleInequality";
+import { EllipseInequality } from "./EllipseInequality";
 import { ArgandPlane } from "./ArgandPlane";
 import { ComplexMapping } from "./ComplexMapping";
 
@@ -98,6 +99,11 @@ export function GraphPlaceholder({
           <>
             <ArgandPlane points={context.metadata.points as NonNullable<MathResponse["complex_graph_points"]>} />
             <p className="text-[11px] text-muted">{context.metadata.kind === "roots" ? "Soluciones en el plano complejo" : "Número complejo en el plano de Argand"}. Ejes: parte real e imaginaria.</p>
+          </>
+        ) : state === "available" && context?.visualization === "ellipse-region" ? (
+          <>
+            <EllipseInequality ellipse={context.metadata.ellipse as NonNullable<MathResponse["inequality_ellipse"]>} />
+            <p className="text-[11px] text-muted">{context.canonicalResult?.text}. Frontera discontinua: excluida; continua: incluida.</p>
           </>
         ) : state === "available" && context?.visualization === "circle-region" ? (
           <>

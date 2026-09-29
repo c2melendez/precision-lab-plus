@@ -92,5 +92,27 @@ def test_direct_circle_inequalities_preserve_region_and_boundary():
     assert flipped["inequality_circle"]["boundary_included"] is False
 
     ellipse = client.post("/api/v1/inequality", json={"inequality": "x^2+2*y^2<1"}).json()
-    assert ellipse["success"] is False
+    assert ellipse["success"] is True
     assert ellipse["inequality_circle"] is None
+    assert ellipse["inequality_ellipse"]["inside"] is True
+    assert ellipse["inequality_ellipse"]["boundary_included"] is False
+    assert ellipse["inequality_ellipse"]["radius_x_exact"] == "1"
+    assert ellipse["inequality_ellipse"]["radius_y_exact"] == "sqrt(2)/2"
+
+
+def test_ellipse_exterior_shift_and_non_ellipse_rejection():
+    exterior = client.post("/api/v1/inequality", json={
+        "inequality": "(x-2)^2/9+(y+1)^2/4>=1"}).json()
+    assert exterior["inequality_region_kind"] == "unbounded"
+    assert exterior["inequality_ellipse"]["center_x_exact"] == "2"
+    assert exterior["inequality_ellipse"]["center_y_exact"] == "-1"
+    assert exterior["inequality_ellipse"]["radius_x_exact"] == "3"
+    assert exterior["inequality_ellipse"]["radius_y_exact"] == "2"
+    assert exterior["inequality_ellipse"]["boundary_included"] is True
+    flipped = client.post("/api/v1/inequality", json={"inequality": "-x^2-2*y^2+1>0"}).json()
+    assert flipped["inequality_ellipse"]["inside"] is True
+    assert flipped["inequality_ellipse"]["boundary_included"] is False
+    for text in ("x^2-y^2<1", "x^2+x*y+y^2<1"):
+        unsupported = client.post("/api/v1/inequality", json={"inequality": text}).json()
+        assert unsupported["success"] is False
+        assert unsupported["inequality_ellipse"] is None

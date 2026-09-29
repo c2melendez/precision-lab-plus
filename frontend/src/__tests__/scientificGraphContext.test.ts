@@ -89,6 +89,19 @@ describe("sistema de inecuaciones en dos variables", () => {
 });
 
 describe("inecuación univariada", () => {
+  it("transfiere la elipse estructurada y conserva ambas variables", () => {
+    const ellipse = { center_x: 0, center_y: 0, radius_x: 1, radius_y: 0.7,
+      center_x_exact: "0", center_y_exact: "0", radius_x_exact: "1", radius_y_exact: "sqrt(2)/2",
+      inside: true, boundary_included: false };
+    const result = { success: true, result_text: "Interior sin frontera de la elipse",
+      inequality_ellipse: ellipse } as MathResponse;
+    const context = inequalityGraphContext("x^2+2*y^2<1", "x", "ellipse", result);
+    expect(context.visualization).toBe("ellipse-region");
+    expect(context.variables).toEqual(["x", "y"]);
+    expect(context.metadata.ellipse).toEqual(ellipse);
+    expect(context.graphRequest).toBeNull();
+  });
+
   it("transfiere centro, radio y frontera circular sin reparsear el resultado", () => {
     const circle = { center_x: 2, center_y: -1, radius: 3,
       center_x_exact: "2", center_y_exact: "-1", radius_exact: "3",

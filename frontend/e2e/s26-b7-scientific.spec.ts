@@ -530,6 +530,25 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(graph.getByTestId("circle-interior-region")).toBeAttached();
   });
 
+  test("inecuación elíptica conserva exterior y frontera inclusiva en Gráficas", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "x^2+2y^2>=1");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/inequality") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const result = await (await solve).json();
+    expect(result.inequality_ellipse.inside).toBe(false);
+    expect(result.inequality_ellipse.boundary_included).toBe(true);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("ellipse-exterior-region")).toBeAttached();
+    await expect(preview.getByTestId("ellipse-boundary")).not.toHaveAttribute("stroke-dasharray");
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    const graph = page.getByRole("region", { name: "Análisis de inecuación elíptica" });
+    await expect(graph).toContainText("x^2+2*y^2>=1");
+    await expect(graph.getByTestId("ellipse-exterior-region")).toBeAttached();
+  });
+
   test("inecuación inclusiva y conjunto vacío respetan su semántica", async ({ page }) => {
     await openScientific(page);
     await setExpression(page, "x>=0");

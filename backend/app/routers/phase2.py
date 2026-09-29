@@ -202,6 +202,20 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
                     inequality_region_dimension=2, inequality_circle=circle,
                     has_detailed_steps=False, duration_ms=_duration_ms(request),
                 )
+            ellipse = circle_inequality.ellipse_region(parsed.lhs - parsed.rhs, parsed.rel_op)
+            if ellipse is not None:
+                inside = ellipse["inside"]
+                included = ellipse["boundary_included"]
+                return MathResponse(
+                    success=True, operation=OperationType.INEQUALITY,
+                    request_id=request.state.request_id, result_type=ResultType.INEQUALITY_REGION,
+                    input_text=payload.inequality,
+                    result_text=("Interior" if inside else "Exterior")
+                    + (" y frontera" if included else " sin frontera") + " de la elipse",
+                    inequality_region_kind="bounded" if inside else "unbounded",
+                    inequality_region_dimension=2, inequality_ellipse=ellipse,
+                    has_detailed_steps=False, duration_ms=_duration_ms(request),
+                )
             try:
                 region = linear_inequality_system.solve_linear_inequality_system(
                     [(parsed.lhs - parsed.rhs, parsed.rel_op)], ["x", "y"]

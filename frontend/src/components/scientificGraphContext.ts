@@ -14,7 +14,7 @@ export interface ScientificGraphContext {
   metadata: Record<string, unknown>;
   /** null: aún no calculadas; []: dominio confirmado sin restricciones. */
   restrictions: string[] | null;
-  visualization: "cartesian-2d" | "number-line" | "region-2d" | "circle-region" | "argand" | "complex-map" | "advanced";
+  visualization: "cartesian-2d" | "number-line" | "region-2d" | "circle-region" | "ellipse-region" | "argand" | "complex-map" | "advanced";
   graphRequest: { endpoint: "/graph/2d" | "/solve/system"; payload: {
     expressions?: string[]; variable?: string; angle_unit?: "rad" | "deg";
     equations?: string[]; variables?: string[]; x_min?: number; x_max?: number;
@@ -288,6 +288,16 @@ export function inequalityGraphContext(
       variables: ["x", "y"],
       metadata: { circle: result.inequality_circle, angleUnit: "rad" },
       restrictions: null, visualization: "circle-region", graphRequest: null,
+    };
+  }
+  if (result.success && result.inequality_ellipse) {
+    return {
+      operation: "inequality", originalExpression: expression, inputLatex,
+      graphInputLatex: null,
+      canonicalResult: { text: result.result_text ?? null, data: result.result_data ?? null },
+      variables: ["x", "y"],
+      metadata: { ellipse: result.inequality_ellipse, angleUnit: "rad" },
+      restrictions: null, visualization: "ellipse-region", graphRequest: null,
     };
   }
   if (result.success && result.inequality_constraints != null

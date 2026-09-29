@@ -1144,6 +1144,18 @@ export interface components {
                 inside: boolean;
                 boundary_included: boolean;
             } | null;
+            inequality_ellipse?: {
+                center_x: number;
+                center_y: number;
+                radius_x: number;
+                radius_y: number;
+                center_x_exact: string;
+                center_y_exact: string;
+                radius_x_exact: string;
+                radius_y_exact: string;
+                inside: boolean;
+                boundary_included: boolean;
+            } | null;
             complex_graph_points?: components["schemas"]["ComplexGraphPoint"][] | null;
             complex_graph_components?: components["schemas"]["ComplexGraphComponents"] | null;
             complex_graph_mapping?: components["schemas"]["ComplexGraphSample"][] | null;

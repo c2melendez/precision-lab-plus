@@ -224,6 +224,19 @@ class InequalityCircle(BaseModel):
     boundary_included: bool
 
 
+class InequalityEllipse(BaseModel):
+    center_x: float
+    center_y: float
+    radius_x: float
+    radius_y: float
+    center_x_exact: str
+    center_y_exact: str
+    radius_x_exact: str
+    radius_y_exact: str
+    inside: bool
+    boundary_included: bool
+
+
 class ComplexGraphPoint(BaseModel):
     re: float
     im: float
@@ -319,6 +332,7 @@ class MathResponse(BaseModel):
     inequality_preview_polygon: Optional[List[List[float]]] = None
     inequality_viewport: Optional[List[float]] = None
     inequality_circle: Optional[InequalityCircle] = None
+    inequality_ellipse: Optional[InequalityEllipse] = None
     complex_graph_points: Optional[List[ComplexGraphPoint]] = None
     complex_graph_components: Optional[ComplexGraphComponents] = None
     complex_graph_mapping: Optional[List[ComplexGraphSample]] = None

@@ -31,6 +31,7 @@ import { ResultPanel } from "./ResultPanel";
 import { NumberLine } from "./NumberLine";
 import { InequalityRegion } from "./InequalityRegion";
 import { CircleInequality } from "./CircleInequality";
+import { EllipseInequality } from "./EllipseInequality";
 import { ArgandPlane, argandGraphData } from "./ArgandPlane";
 import { ComplexMapping } from "./ComplexMapping";
 
@@ -226,7 +227,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
 
   useEffect(() => {
     if (!pendingGraphContext) return;
-    if (pendingGraphContext.visualization === "number-line" || pendingGraphContext.visualization === "region-2d" || pendingGraphContext.visualization === "circle-region" || pendingGraphContext.visualization === "argand" || pendingGraphContext.visualization === "complex-map") {
+    if (pendingGraphContext.visualization === "number-line" || pendingGraphContext.visualization === "region-2d" || pendingGraphContext.visualization === "circle-region" || pendingGraphContext.visualization === "ellipse-region" || pendingGraphContext.visualization === "argand" || pendingGraphContext.visualization === "complex-map") {
       setSourceContext(pendingGraphContext);
       setPendingGraphContext(null);
       return;
@@ -392,6 +393,17 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
       <p className="text-sm text-muted">Desde Científica · {sourceContext.originalExpression}</p>
       <CircleInequality circle={circle} />
       <p className="text-sm">{sourceContext.canonicalResult?.text}. Centro ({circle.center_x_exact}, {circle.center_y_exact}); radio {circle.radius_exact}.</p>
+      <p className="text-xs text-muted">Frontera discontinua excluida; continua incluida. La zona azul cumple la inecuación.</p>
+    </section>;
+  }
+
+  if (sourceContext?.visualization === "ellipse-region") {
+    const ellipse = sourceContext.metadata.ellipse as NonNullable<MathResponse["inequality_ellipse"]>;
+    return <section aria-label="Análisis de inecuación elíptica" className="space-y-4 rounded-xl border border-paper-line bg-paper p-5">
+      <h2 className="text-lg font-semibold">Región elíptica</h2>
+      <p className="text-sm text-muted">Desde Científica · {sourceContext.originalExpression}</p>
+      <EllipseInequality ellipse={ellipse} />
+      <p className="text-sm">{sourceContext.canonicalResult?.text}. Centro ({ellipse.center_x_exact}, {ellipse.center_y_exact}); radios {ellipse.radius_x_exact} y {ellipse.radius_y_exact}.</p>
       <p className="text-xs text-muted">Frontera discontinua excluida; continua incluida. La zona azul cumple la inecuación.</p>
     </section>;
   }
