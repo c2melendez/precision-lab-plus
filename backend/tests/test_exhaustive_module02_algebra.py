@@ -105,11 +105,15 @@ def test_module02_one_variable_inequalities():
         assert body["success"] is True, body
         assert body["result_text"] == expected
 
-def test_module02_rejections_are_explicit():
+def test_module02_rejections_and_b7_two_variable_region():
     bad_log = post("evaluate", {"expression": "log(8,2,3)", "angle_unit": "rad"}).json()
     assert bad_log["success"] is False
     assert bad_log["error_code"] == "PARSE_ERROR"
 
     multivar_ineq = post("inequality", {"inequality": "x+y<5"}).json()
-    assert multivar_ineq["success"] is False
-    assert multivar_ineq["error_code"] == "VALIDATION_ERROR"
+    assert multivar_ineq["success"] is True
+    assert multivar_ineq["inequality_region_kind"] == "unbounded"
+    assert multivar_ineq["inequality_constraints"][0]["operator"] == "<"
+    unsupported = post("inequality", {"inequality": "x+y+z<5"}).json()
+    assert unsupported["success"] is False
+    assert unsupported["error_code"] == "VALIDATION_ERROR"

@@ -280,6 +280,10 @@ export function systemGraphContext(
 export function inequalityGraphContext(
   expression: string, variable: string, inputLatex: string, result: MathResponse,
 ): ScientificGraphContext {
+  if (result.success && result.inequality_constraints != null
+      && result.inequality_preview_polygon != null && result.inequality_viewport?.length === 4) {
+    return inequalitySystemGraphContext([expression], ["x", "y"], inputLatex, result);
+  }
   const intervals = result.inequality_intervals;
   const graphable = result.success && intervals != null;
   return {

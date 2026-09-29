@@ -493,6 +493,24 @@ test.describe("S26 B7 — Científica Plus", () => {
       .toHaveAttribute("fill", "white");
   });
 
+  test("inecuación 2D directa dibuja el semiplano y su frontera estricta", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "x+y>0");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/inequality") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const result = await (await solve).json();
+    expect(result.inequality_region_kind).toBe("unbounded");
+    expect(result.inequality_constraints[0].operator).toBe(">");
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("feasible-region")).toBeVisible();
+    await expect(preview.getByTestId("inequality-boundary")).toHaveAttribute("stroke-dasharray", "6 5");
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    await expect(page.getByRole("region", { name: "Análisis de región de inecuaciones" }))
+      .toContainText("x+y>0");
+  });
+
   test("inecuación inclusiva y conjunto vacío respetan su semántica", async ({ page }) => {
     await openScientific(page);
     await setExpression(page, "x>=0");

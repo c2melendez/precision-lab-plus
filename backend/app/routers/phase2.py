@@ -187,6 +187,25 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
     variable = payload.variable
     if variable is None:
         free_symbols = parsed.free_symbols
+        if free_symbols == {sympy.Symbol("x"), sympy.Symbol("y")}:
+            try:
+                region = linear_inequality_system.solve_linear_inequality_system(
+                    [(parsed.lhs - parsed.rhs, parsed.rel_op)], ["x", "y"]
+                )
+            except ValueError as exc:
+                return _error(request, OperationType.INEQUALITY, ErrorCode.VALIDATION_ERROR, str(exc))
+            vertices = [[str(p.x), str(p.y)] for p in region.vertices] if region.vertices is not None else None
+            description = {"bounded": "Región acotada", "unbounded": "Región no acotada", "empty": "Región vacía"}
+            return MathResponse(
+                success=True, operation=OperationType.INEQUALITY,
+                request_id=request.state.request_id, result_type=ResultType.INEQUALITY_REGION,
+                input_text=payload.inequality, result_text=description[region.kind],
+                result_data=vertices, inequality_region_kind=region.kind,
+                inequality_constraints=region.constraints,
+                inequality_preview_polygon=region.preview_polygon,
+                inequality_viewport=region.viewport, has_detailed_steps=False,
+                warnings=region.steps, duration_ms=_duration_ms(request),
+            )
         if len(free_symbols) != 1:
             return _error(
                 request,

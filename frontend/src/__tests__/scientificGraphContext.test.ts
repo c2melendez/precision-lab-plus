@@ -89,6 +89,19 @@ describe("sistema de inecuaciones en dos variables", () => {
 });
 
 describe("inecuación univariada", () => {
+  it("redirige una inecuación 2D directa a la región canónica", () => {
+    const result = { success: true, result_text: "Región no acotada", result_data: null,
+      inequality_region_kind: "unbounded", inequality_constraints: [
+        { a: 1, b: 1, c: 0, operator: ">", label: "x+y>0" }],
+      inequality_preview_polygon: [[-4, 4], [4, -4], [4, 4]],
+      inequality_viewport: [-4, 4, -4, 4] } as MathResponse;
+    const context = inequalityGraphContext("x+y>0", "x", "x+y>0", result);
+    expect(context.visualization).toBe("region-2d");
+    expect(context.originalExpression).toBe("x+y>0");
+    expect(context.metadata.constraints).toEqual(result.inequality_constraints);
+    expect(context.graphRequest).toBeNull();
+  });
+
   it("transfiere conjunto canónico y extremos sin fabricar una curva cartesiana", () => {
     const result = { success: true, result_text: "Interval.open(0, oo)", result_latex: "(0, \\infty)",
       inequality_intervals: [{ lower: 0, upper: null, lower_text: "0",
