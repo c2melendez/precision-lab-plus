@@ -2,7 +2,7 @@ import type { MathResponse } from "../api/client";
 
 /** Datos matemáticos de Científica que sobreviven al cambio de módulo. */
 export interface ScientificGraphContext {
-  operation: "function" | "derivative" | "integral" | "limit" | "equation" | "system" | "inequality" | "complex" | "ode";
+  operation: "function" | "derivative" | "integral" | "limit" | "simplify" | "factor" | "equation" | "system" | "inequality" | "complex" | "ode";
   originalExpression: string;
   inputLatex: string;
   graphInputLatex: string[] | null;
@@ -172,6 +172,33 @@ export function limitGraphContext(
     visualization: canGraph ? "cartesian-2d" : "advanced",
     graphRequest: canGraph ? { endpoint: "/graph/2d", payload: {
       expressions: [expression], variable, angle_unit: "rad", x_min: xMin, x_max: xMax,
+    } } : null,
+  };
+}
+
+export function algebraTransformationGraphContext(
+  operation: "simplify" | "factor",
+  expression: string,
+  inputLatex: string,
+  variable: string | null,
+  angleUnit: "rad" | "deg",
+  result: MathResponse,
+): ScientificGraphContext {
+  const safe = result.success && result.graph_polynomial_comparison === true
+    && variable !== null && Boolean(result.result_text) && Boolean(result.result_latex);
+  return {
+    operation,
+    originalExpression: expression,
+    inputLatex,
+    graphInputLatex: safe ? [inputLatex] : null,
+    canonicalResult: result.success ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
+    variables: variable ? [variable] : [],
+    metadata: { angleUnit, transformedExpression: result.result_text ?? null,
+      transformedLatex: result.result_latex ?? null, polynomialDomainCertified: safe },
+    restrictions: safe ? [] : null,
+    visualization: safe ? "cartesian-2d" : "advanced",
+    graphRequest: safe ? { endpoint: "/graph/2d", payload: {
+      expressions: [expression], variable, angle_unit: angleUnit,
     } } : null,
   };
 }

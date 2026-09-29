@@ -250,6 +250,9 @@ class MathResponse(BaseModel):
     # integración. `result_text` y `result_latex` siguen mostrando + C.
     antiderivative_expression: Optional[str] = None
     antiderivative_latex: Optional[str] = None
+    # B7: certificado conservador para graficar una transformación algebraica
+    # en R sin perder puntos excluidos del dominio original.
+    graph_polynomial_comparison: Optional[bool] = None
     result_approx: Optional[float] = None
     result_data: Optional[Union[List[EquationSolution], List[List[str]]]] = None
     steps: List[Step] = []

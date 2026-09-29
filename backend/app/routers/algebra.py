@@ -71,6 +71,12 @@ def _build_response(
         warnings.append("Resultado LaTeX omitido: excede los 10,000 caracteres (sección 4).")
 
     input_latex = _safe_latex(result.input_expr)
+    symbols = result.input_expr.free_symbols | result.result_expr.free_symbols
+    graph_polynomial_comparison = (
+        len(symbols) == 1
+        and result.input_expr.is_polynomial(*symbols) is True
+        and result.result_expr.is_polynomial(*symbols) is True
+    )
 
     return MathResponse(
         success=True,
@@ -81,6 +87,7 @@ def _build_response(
         input_latex=input_latex,
         result_latex=result_latex,
         result_text=_safe_text(result.result_expr),
+        graph_polynomial_comparison=graph_polynomial_comparison,
         steps=result.steps,
         has_detailed_steps=result.has_detailed_steps,
         warnings=warnings,

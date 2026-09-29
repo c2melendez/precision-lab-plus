@@ -1083,6 +1083,8 @@ export interface components {
             antiderivative_expression?: string | null;
             /** Antiderivative LaTeX without + C, for editing in Graphs. */
             antiderivative_latex?: string | null;
+            /** B7: both algebraic forms are univariate real polynomials. */
+            graph_polynomial_comparison?: boolean | null;
             /** Result Approx */
             result_approx?: number | null;
             /** Result Data */

@@ -44,7 +44,7 @@ export function GraphPlaceholder({
   const [isPreviewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
-    const request = (context?.operation === "function" || context?.operation === "derivative" || context?.operation === "integral" || context?.operation === "limit") && context.canonicalResult
+    const request = (context?.operation === "function" || context?.operation === "derivative" || context?.operation === "integral" || context?.operation === "limit" || context?.operation === "simplify" || context?.operation === "factor") && context.canonicalResult
       ? context.graphRequest : null;
     setPreview(null);
     if (!request) {
@@ -123,6 +123,8 @@ export function GraphPlaceholder({
                 ? `${context.metadata.point === "oo" || context.metadata.point === "-oo"
                   ? `Comportamiento hacia ${context.metadata.point === "oo" ? "+∞" : "−∞"}`
                   : `Aproximación ${context.metadata.direction === "left" ? "por la izquierda" : context.metadata.direction === "right" ? "por la derecha" : "por ambos lados"} a ${context.metadata.point}`}${context.metadata.bilateralDoesNotExist ? "; los límites laterales difieren" : ""}. Resultado: ${context.canonicalResult?.text ?? "—"}.`
+                : context?.operation === "simplify" || context?.operation === "factor"
+                ? `Curva de la expresión original; forma ${context.operation === "simplify" ? "simplificada" : "factorizada"} conservada en Resultado. Ambas formas son polinomios con dominio real completo.`
                 : context?.operation === "integral"
                 ? "Integrando y antiderivada representativa (C=0 solo en la gráfica); el resultado conserva +C."
                 : context?.operation === "derivative"
@@ -133,7 +135,8 @@ export function GraphPlaceholder({
             </p>
           </>
         ) : (
-          <p className="max-w-md text-xs leading-relaxed text-muted">{message ?? STATE_COPY[state]}</p>
+          <p className="max-w-md text-xs leading-relaxed text-muted">{message ?? ((context?.operation === "simplify" || context?.operation === "factor") && !context.graphRequest
+            ? "Esta transformación requiere comprobar restricciones de dominio antes de comparar gráficas." : STATE_COPY[state])}</p>
         )}
 
         {canOpenGraphing && (

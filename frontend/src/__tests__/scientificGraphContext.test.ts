@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MathResponse } from "../api/client";
-import { directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext } from "../components/scientificGraphContext";
+import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext } from "../components/scientificGraphContext";
 
 describe("contexto canónico de función directa", () => {
   it("conserva la expresión de entrada y el resultado del motor, sin leer texto visual", () => {
@@ -110,5 +110,26 @@ describe("contexto canónico de límite", () => {
       { success: true, result_text: "0" } as MathResponse, true);
     expect(context.graphRequest?.payload).toMatchObject({ x_min: 4, x_max: 20 });
     expect(context.metadata.behavior).toBe("far-field");
+  });
+});
+
+describe("transformación algebraica y dominio", () => {
+  it("grafica una sola curva para dos formas polinómicas con dominio real completo", () => {
+    const result = { success: true, result_text: "(x - 2)*(x + 2)", result_latex: "(x-2)(x+2)",
+      graph_polynomial_comparison: true } as MathResponse;
+    const context = algebraTransformationGraphContext("factor", "x^2-4", "x^2-4", "x", "rad", result);
+    expect(context.restrictions).toEqual([]);
+    expect(context.graphRequest?.payload.expressions).toEqual(["x^2-4"]);
+    expect(context.graphInputLatex).toEqual(["x^2-4"]);
+    expect(context.metadata.transformedExpression).toBe("(x - 2)*(x + 2)");
+  });
+
+  it("no atribuye dominio real completo a x/x simplificado como 1", () => {
+    const result = { success: true, result_text: "1", result_latex: "1",
+      graph_polynomial_comparison: false } as MathResponse;
+    const context = algebraTransformationGraphContext("simplify", "x/x", "\\frac{x}{x}", "x", "rad", result);
+    expect(context.restrictions).toBeNull();
+    expect(context.graphRequest).toBeNull();
+    expect(context.visualization).toBe("advanced");
   });
 });

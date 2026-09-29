@@ -44,6 +44,14 @@ async function expectNoHorizontalOverflow(page: import("@playwright/test").Page)
   expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewport + 2);
 }
 
+async function runAlgebraKeyboardAction(page: import("@playwright/test").Page, name: string) {
+  await page.getByRole("button", { name: /abrir teclado|expandir teclado/i }).first().click();
+  const dialog = page.getByRole("dialog", { name: "Teclado matemático" });
+  await dialog.getByRole("tab", { name: "Álgebra", exact: true }).click();
+  await dialog.getByLabel("Subcategorías de Álgebra").getByRole("button", { name: "Ecuaciones", exact: true }).click();
+  await dialog.getByRole("button", { name, exact: true }).first().click();
+}
+
 test.describe("S26 B7 — Científica Plus", () => {
   for (const viewport of VIEWPORTS) {
     test(`cuatro superficies sin overflow (${viewport.id})`, async ({ page }) => {
@@ -283,6 +291,43 @@ test.describe("S26 B7 — Científica Plus", () => {
     await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
     expect((await graphResponse).request().postDataJSON()).toMatchObject({ x_min: 4, x_max: 20 });
     await expect(page.getByTestId("scientific-graph-context")).toContainText("hacia +∞ · resultado 0");
+  });
+
+  test("factorización polinómica conserva forma transformada y una curva de dominio completo", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "x^2-4");
+    const factor = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/factor") && response.request().method() === "POST",
+    );
+    await runAlgebraKeyboardAction(page, "Factorizar expresión");
+    const response = await factor;
+    expect(response.ok()).toBeTruthy();
+    expect((await response.json()).graph_polynomial_comparison).toBe(true);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("Ambas formas son polinomios con dominio real completo");
+    await expect(preview.getByTestId("scientific-preview-plot").locator("path")).toHaveCount(1);
+    const graphResponse = page.waitForResponse((next) =>
+      next.url().includes("/api/v1/graph/2d") && next.request().method() === "POST",
+    );
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    expect((await graphResponse).request().postDataJSON().expressions).toHaveLength(1);
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("factorización de x · resultado conservado");
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("dominio real completo");
+  });
+
+  test("simplificar x/x no afirma equivalencia gráfica en el punto excluido", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\frac{x}{x}");
+    const simplify = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/simplify") && response.request().method() === "POST",
+    );
+    await runAlgebraKeyboardAction(page, "Simplificar expresión");
+    const response = await simplify;
+    expect(response.ok()).toBeTruthy();
+    expect((await response.json()).graph_polynomial_comparison).toBe(false);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("restricciones de dominio");
+    await expect(preview.getByRole("button", { name: "Abrir en Gráficas" })).toHaveCount(0);
   });
 
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
