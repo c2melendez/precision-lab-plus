@@ -574,12 +574,13 @@ test.describe("S26 B7 — Científica Plus", () => {
       .getByRole("button", { name: /calcular|evaluar/i }).first().click();
     expect((await (await solve).json()).inequality_region_dimension).toBe(1);
     const preview = page.getByTestId("scientific-graph");
-    await expect(preview.getByTestId("feasible-line")).toBeVisible();
+    await expect(preview.getByTestId("inequality-region")).toBeVisible();
+    await expect(preview.getByTestId("feasible-line")).toHaveAttribute("stroke-width", "5");
     await expect(preview.getByTestId("feasible-region")).toHaveCount(0);
     await expect(preview.getByTestId("feasible-endpoint")).toHaveAttribute("fill", "white");
     await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
     await expect(page.getByRole("region", { name: "Análisis de región de inecuaciones" })
-      .getByTestId("feasible-line")).toBeVisible();
+      .getByTestId("feasible-line")).toHaveAttribute("stroke-width", "5");
   });
 
   test("complejo aislado conserva sus coordenadas en Argand y Gráficas", async ({ page }) => {
