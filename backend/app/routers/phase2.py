@@ -160,6 +160,7 @@ async def solve_system(payload: SolveSystemRequest, request: Request) -> MathRes
         system_graph_latex=result.graph_latex,
         system_graph_intersections=result.graph_intersections,
         system_graph_coincident=result.graph_coincident,
+        system_graph_component_indices=result.graph_component_indices,
         graph_data=result.graph_data,
         has_detailed_steps=False,
         warnings=result.warnings,

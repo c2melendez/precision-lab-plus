@@ -105,7 +105,7 @@ export function GraphPlaceholder({
                   {region && [region.lowerX, region.upperX].map((x, index) => <line key={index} x1={x} x2={x} y1="0" y2="120" stroke="currentColor" strokeDasharray="3 3" opacity="0.4" />)}
                   {approach?.pointX !== null && approach?.pointX !== undefined && <line x1={approach.pointX} x2={approach.pointX} y1="0" y2="120" stroke="#9b6a18" strokeDasharray="3 3" opacity="0.7" />}
                   {geometry.paths.map((path, index) => <path key={index} d={path} fill="none"
-                    stroke={context?.operation === "system" ? ["#2862b8", "#b65d20"][index] : context?.operation === "ode" && context.metadata.kind === "one-parameter-family"
+                    stroke={context?.operation === "system" ? ["#2862b8", "#b65d20"][(context.metadata.componentIndices as number[] | null)?.[index] ?? index] : context?.operation === "ode" && context.metadata.kind === "one-parameter-family"
                       ? ["#2862b8", "#737b89", "#b65d20"][index] : "currentColor"}
                     opacity={context?.operation !== "ode" && context?.operation !== "function" && index === 0 ? 0.5 : 1}
                     strokeWidth={context?.operation !== "ode" && context?.operation !== "function" && index === 0 ? 1.5 : 2.5}
@@ -143,7 +143,7 @@ export function GraphPlaceholder({
                 : context?.operation === "system"
                 ? context.metadata.coincident ? "Las ecuaciones coinciden: una curva representa infinitas soluciones."
                   : (context.metadata.intersections as number[][]).length
-                    ? "Curvas componentes y su intersección común marcada en verde."
+                    ? "Curvas componentes y sus intersecciones comunes marcadas en verde."
                     : "Curvas componentes sin intersección común; el sistema no tiene solución."
                 : context?.operation === "integral"
                 ? "Integrando y antiderivada representativa (C=0 solo en la gráfica); el resultado conserva +C."

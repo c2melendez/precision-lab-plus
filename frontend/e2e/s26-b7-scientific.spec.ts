@@ -425,6 +425,26 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(page.getByTestId("scientific-graph-context")).toContainText("1 intersección común");
   });
 
+  test("círculo y recta muestran dos cruces simbólicos, con ramas agrupadas", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\begin{cases}x^2+y^2=1\\\\y=x\\end{cases}");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/solve/system") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const result = await (await solve).json();
+    expect(result.system_graph_component_indices).toEqual([0, 0, 1]);
+    expect(result.system_graph_intersections).toHaveLength(2);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("scientific-preview-plot").locator("path")).toHaveCount(3);
+    await expect(preview.getByTestId("system-intersection")).toHaveCount(2);
+    const graphResponse = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/graph/2d") && response.request().method() === "POST");
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    expect((await graphResponse).request().postDataJSON().expressions).toHaveLength(3);
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("2 intersecciones comunes");
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

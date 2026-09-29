@@ -1095,6 +1095,7 @@ export interface components {
             system_graph_latex?: string[] | null;
             system_graph_intersections?: number[][] | null;
             system_graph_coincident?: boolean;
+            system_graph_component_indices?: number[] | null;
             /** Result Approx */
             result_approx?: number | null;
             /** Result Data */

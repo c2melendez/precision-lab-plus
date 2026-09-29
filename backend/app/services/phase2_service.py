@@ -61,6 +61,7 @@ class SolveSystemResult:
     graph_intersections: List[List[float]] | None = None
     graph_coincident: bool = False
     graph_data: GraphData | None = None
+    graph_component_indices: List[int] | None = None
 
 
 def _validate_variable(variable: str) -> sympy.Symbol:
@@ -167,6 +168,44 @@ def _vertical_system_graph(equations, variables, solution_set) -> tuple[GraphDat
         return None, False, []
     return GraphData(traces=traces, x_range=[x_min, x_max],
                      y_range=[min(all_y), max(all_y)]), coincident, intersections
+
+
+def _explicit_nonlinear_system_graph(equations, variables, raw_solutions):
+    """Graph every real polynomial branch y=f(x), or decline the whole system."""
+    if len(variables) != 2 or len(equations) != 2:
+        return None
+    x, y = variables
+    polynomials = [(eq.lhs - eq.rhs).as_poly(x, y) for eq in equations]
+    if any(poly is None or poly.total_degree() > 4 or poly.degree(y) > 2
+           or poly.degree(y) < 1 or any(coefficient.is_real is not True for coefficient in poly.coeffs())
+           for poly in polynomials):
+        return None
+    coincident = sympy.cancel(polynomials[0].as_expr() / polynomials[1].as_expr())
+    coincident = coincident.is_number and coincident.is_finite is True and coincident != 0
+    expressions, latex, groups = [], [], []
+    for index, equation in enumerate(equations[:1] if coincident else equations):
+        branches = sympy.solve(equation, y)
+        if not 1 <= len(branches) <= 2:
+            return None
+        for branch in branches:
+            if branch.free_symbols - {x} or branch.has(sympy.I):
+                return None
+            expressions.append(str(branch))
+            latex.append(sympy.latex(branch))
+            groups.append(index)
+    if len(expressions) > 5:
+        return None
+    intersections = []
+    if not coincident:
+        for solution in raw_solutions:
+            values = [solution.get(symbol, symbol) for symbol in variables]
+            if any(value.free_symbols or value.is_real is not True for value in values):
+                continue
+            point = [float(sympy.N(value)) for value in values]
+            if (all(abs(value) <= 1e6 and sympy.Float(value).is_finite for value in point)
+                    and point not in intersections):
+                intersections.append(point)
+    return expressions, latex, groups, intersections, bool(coincident)
 
 
 @dataclass
@@ -381,12 +420,15 @@ def compute_solve_system(equations: List[str], variables: List[str]) -> SolveSys
                                  graph_intersections, graph_coincident, graph_data)
 
     raw_solutions = sympy.solve(parsed_equations, var_symbols, dict=True)
+    graph = _explicit_nonlinear_system_graph(parsed_equations, var_symbols, raw_solutions)
+    graph_fields = (graph[0], graph[1], graph[3], graph[4], None, graph[2]) if graph else (
+        None, None, None, False, None, None)
     if not raw_solutions:
         return SolveSystemResult(
-            [], False, ["No se encontraron soluciones para este sistema no lineal."]
+            [], False, ["No se encontraron soluciones para este sistema no lineal."], *graph_fields
         )
     solutions = [
         _format_solution_tuple(var_symbols, tuple(sol.get(v, v) for v in var_symbols))
         for sol in raw_solutions[:MAX_SYSTEM_SOLUTIONS]
     ]
-    return SolveSystemResult(solutions, True, [])
+    return SolveSystemResult(solutions, True, [], *graph_fields)

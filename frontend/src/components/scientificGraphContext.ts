@@ -248,6 +248,11 @@ export function systemGraphContext(
   const intersectionX = result.system_graph_intersections?.[0]?.[0];
   const centerOnIntersection = Number.isFinite(intersectionX) && Math.abs(intersectionX!) <= 1e6
     && Math.abs(intersectionX!) > 8;
+  const nonlinearXs = result.system_graph_component_indices
+    ? (result.system_graph_intersections ?? []).map(([x]) => x).filter((x) => Number.isFinite(x) && Math.abs(x) <= 1e6)
+    : [];
+  const nonlinearSpan = nonlinearXs.length
+    ? Math.max(1, Math.max(...nonlinearXs) - Math.min(...nonlinearXs)) : 0;
   return {
     operation: "system",
     originalExpression: equations.join(" ; "),
@@ -256,13 +261,16 @@ export function systemGraphContext(
     canonicalResult: result.success ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
     variables,
     metadata: { equations, intersections: result.system_graph_intersections ?? [],
-      coincident: result.system_graph_coincident === true, angleUnit: "rad" },
+      coincident: result.system_graph_coincident === true,
+      componentIndices: result.system_graph_component_indices ?? null, angleUnit: "rad" },
     restrictions: null,
     visualization: graphable || verticalGraph ? "cartesian-2d" : "advanced",
     graphRequest: verticalGraph ? { endpoint: "/solve/system", payload: { equations, variables } }
       : graphable ? { endpoint: "/graph/2d", payload: {
       expressions: expressions!, variable: "x", angle_unit: "rad",
-      ...(centerOnIntersection ? { x_min: intersectionX! - 10, x_max: intersectionX! + 10 } : {}),
+      ...(nonlinearXs.length ? { x_min: Math.min(...nonlinearXs) - nonlinearSpan,
+        x_max: Math.max(...nonlinearXs) + nonlinearSpan }
+        : centerOnIntersection ? { x_min: intersectionX! - 10, x_max: intersectionX! + 10 } : {}),
     } } : null,
   };
 }

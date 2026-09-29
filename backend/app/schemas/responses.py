@@ -263,6 +263,7 @@ class MathResponse(BaseModel):
     system_graph_latex: Optional[List[str]] = None
     system_graph_intersections: Optional[List[List[float]]] = None
     system_graph_coincident: bool = False
+    system_graph_component_indices: Optional[List[int]] = None
     result_approx: Optional[float] = None
     result_data: Optional[Union[List[EquationSolution], List[List[str]]]] = None
     steps: List[Step] = []

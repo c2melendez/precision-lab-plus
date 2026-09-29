@@ -205,6 +205,9 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<MathResponse | null>(null);
   const [sourceContext, setSourceContext] = useState<ScientificGraphContext | null>(null);
+  const displayColors = sourceContext?.operation === "system" && sourceContext.metadata.componentIndices
+    ? (sourceContext.metadata.componentIndices as number[]).map((index) => ["#2862b8", "#b65d20"][index])
+    : colors;
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
@@ -364,7 +367,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
             {sourceContext.operation === "ode" && (sourceContext.metadata.kind === "particular"
               ? " · solución particular" : " · familia representativa C₁=−1, 0, 1")}
             {sourceContext.operation === "system" && (sourceContext.metadata.coincident
-              ? " · curvas coincidentes, infinitas soluciones" : ` · ${(sourceContext.metadata.intersections as number[][]).length} intersección común · ecuaciones ${String((sourceContext.metadata.equations as string[]).join(" ; "))}`)}
+              ? " · curvas coincidentes, infinitas soluciones" : ` · ${(sourceContext.metadata.intersections as number[][]).length} ${(sourceContext.metadata.intersections as number[][]).length === 1 ? "intersección común" : "intersecciones comunes"} · ecuaciones ${String((sourceContext.metadata.equations as string[]).join(" ; "))}`)}
           </p>
         )}
         <div className="flex items-center justify-between gap-2">
@@ -379,7 +382,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
           <div key={index} className="flex items-center gap-2">
             <span
               className="h-3 w-3 shrink-0 rounded-full"
-              style={{ backgroundColor: colors[index % colors.length] }}
+              style={{ backgroundColor: displayColors[index % displayColors.length] }}
               aria-hidden="true"
             />
             <div className="flex-1">
@@ -525,7 +528,7 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
           </div>
           <span className="text-[11px] text-muted">{latexRows.filter((row) => row.trim() !== "").length} activas</span>
         </div>
-        <ResultArea result={lastResult} isLoading={isLoading} colors={colors}
+        <ResultArea result={lastResult} isLoading={isLoading} colors={displayColors}
           integralBounds={sourceContext?.operation === "integral" && sourceContext.metadata.kind === "definite"
             ? [Number(sourceContext.metadata.lowerBound), Number(sourceContext.metadata.upperBound)] : undefined}
           limitFocus={sourceContext?.operation === "limit"

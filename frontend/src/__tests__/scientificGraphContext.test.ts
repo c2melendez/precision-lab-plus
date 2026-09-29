@@ -53,6 +53,18 @@ describe("sistema lineal certificado", () => {
     expect(context.visualization).toBe("cartesian-2d");
     expect(context.metadata.intersections).toEqual([[1, 2]]);
   });
+
+  it("agrupa ambas ramas del círculo y conserva sus dos cruces exactos", () => {
+    const context = systemGraphContext(["x**2+y**2=1", "y=x"], ["x", "y"], "system", {
+      success: true, system_graph_expressions: ["-sqrt(1-x**2)", "sqrt(1-x**2)", "x"],
+      system_graph_latex: ["-\\sqrt{1-x^2}", "\\sqrt{1-x^2}", "x"],
+      system_graph_component_indices: [0, 0, 1],
+      system_graph_intersections: [[-0.707, -0.707], [0.707, 0.707]],
+    } as MathResponse);
+    expect(context.graphRequest?.payload.expressions).toHaveLength(3);
+    expect(context.metadata.componentIndices).toEqual([0, 0, 1]);
+    expect(context.metadata.intersections).toHaveLength(2);
+  });
 });
 
 describe("contexto canónico de integral indefinida", () => {
