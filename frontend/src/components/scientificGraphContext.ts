@@ -15,7 +15,7 @@ export interface ScientificGraphContext {
   /** null: aún no calculadas; []: dominio confirmado sin restricciones. */
   restrictions: string[] | null;
   visualization: "cartesian-2d" | "number-line" | "region-2d" | "argand" | "advanced";
-  graphRequest: { endpoint: "/graph/2d"; payload: { expressions: string[]; variable: string; angle_unit: "rad" | "deg" } } | null;
+  graphRequest: { endpoint: "/graph/2d"; payload: { expressions: string[]; variable: string; angle_unit: "rad" | "deg"; x_min?: number; x_max?: number } } | null;
 }
 
 export function directFunctionGraphContext(
@@ -99,6 +99,44 @@ export function indefiniteIntegralGraphContext(
     graphRequest: canGraph ? {
       endpoint: "/graph/2d",
       payload: { expressions: [expression, antiderivative!], variable, angle_unit: "rad" },
+    } : null,
+  };
+}
+
+export function definiteIntegralGraphContext(
+  expression: string,
+  innerLatex: string,
+  inputLatex: string,
+  variable: string,
+  lowerBound: string,
+  upperBound: string,
+  angleUnit: "rad" | "deg",
+  result: MathResponse,
+  graphable: boolean,
+): ScientificGraphContext {
+  const lower = Number(lowerBound);
+  const upper = Number(upperBound);
+  const validBounds = Number.isFinite(lower) && Number.isFinite(upper)
+    && Math.abs(lower) <= 1e6 && Math.abs(upper) <= 1e6;
+  const span = Math.abs(upper - lower);
+  const margin = Math.max(span * 0.25, 1);
+  const canGraph = result.success && graphable && validBounds;
+  return {
+    operation: "integral",
+    originalExpression: expression,
+    inputLatex,
+    graphInputLatex: canGraph ? [innerLatex] : null,
+    canonicalResult: result.success
+      ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
+    variables: [variable],
+    metadata: { kind: "definite", lowerBound, upperBound, orientation: upper >= lower ? 1 : -1,
+      angleUnit: "rad", inputAngleUnit: angleUnit },
+    restrictions: null,
+    visualization: canGraph ? "cartesian-2d" : "advanced",
+    graphRequest: canGraph ? {
+      endpoint: "/graph/2d",
+      payload: { expressions: [expression], variable, angle_unit: "rad",
+        x_min: Math.min(lower, upper) - margin, x_max: Math.max(lower, upper) + margin },
     } : null,
   };
 }

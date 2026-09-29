@@ -190,6 +190,34 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(page.locator('math-field[aria-label^="Expresión "]')).toHaveCount(2);
   });
 
+  test("integral definida muestra región firmada y conserva límites invertidos en Gráficas", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\int_{2}^{0} x^2\\,dx");
+    const integral = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/integral") && response.request().method() === "POST",
+    );
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const response = await integral;
+    expect(response.ok()).toBeTruthy();
+    expect(response.request().postDataJSON()).toMatchObject({ lower_bound: "2", upper_bound: "0" });
+    expect((await response.json()).result_text).toBe("-8/3");
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview).toContainText("Región con signo de 2 a 0");
+    await expect(preview).toContainText("Valor exacto: -8/3");
+    await expect(preview.getByTestId("integral-negative-region")).toBeVisible();
+    const graphResponse = page.waitForResponse((next) =>
+      next.url().includes("/api/v1/graph/2d") && next.request().method() === "POST",
+    );
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    const graph = await graphResponse;
+    expect(graph.ok()).toBeTruthy();
+    expect(graph.request().postDataJSON()).toMatchObject({ expressions: ["x^2"], x_min: -1, x_max: 3 });
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("límites 2 → 0 · valor firmado -8/3");
+    await expect(page.getByLabel("x mínimo (opcional)")).toHaveValue("-1");
+    await expect(page.getByLabel("x máximo (opcional)")).toHaveValue("3");
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

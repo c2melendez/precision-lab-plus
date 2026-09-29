@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MathResponse } from "../api/client";
-import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext } from "../components/scientificGraphContext";
+import { directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext } from "../components/scientificGraphContext";
 
 describe("contexto canónico de función directa", () => {
   it("conserva la expresión de entrada y el resultado del motor, sin leer texto visual", () => {
@@ -81,5 +81,16 @@ describe("contexto canónico de derivada", () => {
     const context = derivativeGraphContext("a*x^2", "a x^2", "derivada", "x", 1, "rad", result, false);
     expect(context.visualization).toBe("advanced");
     expect(context.graphRequest).toBeNull();
+  });
+});
+
+describe("contexto canónico de integral definida", () => {
+  it("mantiene límites, orientación y valor exacto sin deducir el área del muestreo", () => {
+    const result = { success: true, result_text: "-8/3", result_data: null } as MathResponse;
+    const context = definiteIntegralGraphContext("x^2", "x^2", "\\int_{2}^{0}x^2\\,dx", "x", "2", "0", "rad", result, true);
+    expect(context.metadata).toMatchObject({ kind: "definite", lowerBound: "2", upperBound: "0", orientation: -1 });
+    expect(context.canonicalResult?.text).toBe("-8/3");
+    expect(context.graphRequest?.payload).toMatchObject({ expressions: ["x^2"], variable: "x", x_min: -1, x_max: 3 });
+    expect(context.graphInputLatex).toEqual(["x^2"]);
   });
 });

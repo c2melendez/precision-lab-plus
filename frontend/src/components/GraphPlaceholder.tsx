@@ -7,7 +7,7 @@
  */
 import { useEffect, useState } from "react";
 import { callApi, type MathResponse } from "../api/client";
-import { graphPreviewGeometry } from "./graphPreviewGeometry";
+import { graphPreviewGeometry, integralRegionGeometry } from "./graphPreviewGeometry";
 import type { ScientificGraphContext } from "./scientificGraphContext";
 
 export type ScientificGraphState =
@@ -62,8 +62,12 @@ export function GraphPlaceholder({
     return () => { cancelled = true; };
   }, [context]);
 
+  const definite = context?.operation === "integral" && context.metadata.kind === "definite";
   const geometry = preview?.success && preview.graph_data
-    ? graphPreviewGeometry(preview.graph_data) : null;
+    ? graphPreviewGeometry(preview.graph_data, definite) : null;
+  const region = definite && geometry && preview?.graph_data
+    ? integralRegionGeometry(preview.graph_data, Number(context?.metadata.lowerBound), Number(context?.metadata.upperBound), geometry)
+    : null;
 
   return (
     <section
@@ -82,7 +86,7 @@ export function GraphPlaceholder({
             <div
               role="img"
               aria-label={geometry
-                ? `Vista previa de ${context?.operation === "derivative" ? "función y derivada" : context?.operation === "integral" ? "integrando y antiderivada" : "función"} de ${context?.variables[0] ?? "x"}`
+                ? `Vista previa de ${context?.operation === "derivative" ? "función y derivada" : definite ? "integrando y región con signo" : context?.operation === "integral" ? "integrando y antiderivada" : "función"} de ${context?.variables[0] ?? "x"}`
                 : "Vista previa pendiente de renderizado contextual"}
               className="grid h-24 w-full max-w-md place-items-center overflow-hidden rounded-lg border border-paper-line bg-paper/50"
             >
@@ -90,6 +94,9 @@ export function GraphPlaceholder({
                 <svg data-testid="scientific-preview-plot" viewBox="0 0 320 120" preserveAspectRatio="none" className="h-full w-full text-graph" aria-hidden="true">
                   {geometry.zeroX !== null && <line x1={geometry.zeroX} x2={geometry.zeroX} y1="0" y2="120" stroke="currentColor" opacity="0.2" />}
                   {geometry.zeroY !== null && <line x1="0" x2="320" y1={geometry.zeroY} y2={geometry.zeroY} stroke="currentColor" opacity="0.2" />}
+                  {region?.positivePath && <path data-testid="integral-positive-region" d={region.positivePath} fill="#16865d" opacity="0.35" />}
+                  {region?.negativePath && <path data-testid="integral-negative-region" d={region.negativePath} fill="#c34a4a" opacity="0.35" />}
+                  {region && [region.lowerX, region.upperX].map((x, index) => <line key={index} x1={x} x2={x} y1="0" y2="120" stroke="currentColor" strokeDasharray="3 3" opacity="0.4" />)}
                   {geometry.paths.map((path, index) => <path key={index} d={path} fill="none" stroke="currentColor" opacity={context?.operation !== "function" && index === 0 ? 0.5 : 1} strokeWidth={context?.operation !== "function" && index === 0 ? 1.5 : 2.5} vectorEffect="non-scaling-stroke" />)}
                 </svg>
               ) : (
@@ -101,7 +108,9 @@ export function GraphPlaceholder({
               )}
             </div>
             <p className="max-w-md text-[11px] text-muted">
-              {context?.operation === "integral"
+              {definite
+                ? `Región con signo de ${context?.metadata.lowerBound} a ${context?.metadata.upperBound}; verde suma, rojo resta${Number(context?.metadata.orientation) < 0 ? " (sentido inverso)" : ""}. Valor exacto: ${context?.canonicalResult?.text ?? "—"}.`
+                : context?.operation === "integral"
                 ? "Integrando y antiderivada representativa (C=0 solo en la gráfica); el resultado conserva +C."
                 : context?.operation === "derivative"
                 ? `Función original y derivada de orden ${context.metadata.order} respecto de ${context.variables[0]}.`

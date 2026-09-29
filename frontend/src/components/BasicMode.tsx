@@ -62,7 +62,7 @@ import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
-import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext } from "./scientificGraphContext";
+import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext } from "./scientificGraphContext";
 
 interface SubstitutionRow {
   name: string;
@@ -264,6 +264,8 @@ export function BasicMode() {
     innerLatex: string;
     variable: string;
     angleUnit: "rad" | "deg";
+    lowerBound: string | null;
+    upperBound: string | null;
     result: MathResponse;
   } | null>(null);
 
@@ -273,6 +275,13 @@ export function BasicMode() {
   );
   const graphContext = useMemo(() => {
     if (lastIntegral?.sourceLatex === latex && lastIntegral.angleUnit === angleUnit && lastIntegral.result.success) {
+      if (lastIntegral.lowerBound !== null && lastIntegral.upperBound !== null) {
+        return definiteIntegralGraphContext(
+          lastIntegral.expression, lastIntegral.innerLatex, latex, lastIntegral.variable,
+          lastIntegral.lowerBound, lastIntegral.upperBound, angleUnit, lastIntegral.result,
+          usesOnlyGraphVariable(lastIntegral.expression, lastIntegral.variable),
+        );
+      }
       const antiderivative = lastIntegral.result.antiderivative_expression ?? "";
       const graphable = usesOnlyGraphVariable(lastIntegral.expression, lastIntegral.variable)
         && usesOnlyGraphVariable(antiderivative, lastIntegral.variable);
@@ -543,10 +552,11 @@ export function BasicMode() {
           variable: intent.variable, order: intent.order, angleUnit, result,
         });
       }
-      if (intent.kind === "integral" && intent.lowerBound === null && result.success) {
+      if (intent.kind === "integral" && result.success) {
         setLastIntegral({
           sourceLatex: latex, expression: trimmedInner, innerLatex: intent.innerLatex,
-          variable: intent.variable, angleUnit, result,
+          variable: intent.variable, angleUnit, lowerBound: intent.lowerBound,
+          upperBound: intent.upperBound, result,
         });
       }
       if (!result.success) {
