@@ -125,6 +125,24 @@ describe("sistema lineal certificado", () => {
     expect(context.metadata.intersections).toEqual([[1, 2]]);
   });
 
+  it("conserva dos ramas no lineales y la recta vertical con dos cruces", () => {
+    const context = systemGraphContext(["x=0", "x^2+y^2=1"], ["x", "y"], "cases", {
+      success: true, graph_data: { traces: [
+        { type: "line", name: "rama 1", x: [-1, 0, 1], y: [0, -1, 0] },
+        { type: "line", name: "rama 2", x: [-1, 0, 1], y: [0, 1, 0] },
+        { type: "line", name: "x=0", x: [0, 0], y: [-2, 2] },
+      ], x_range: [-2, 2], y_range: [-2, 2] },
+      system_graph_component_indices: [1, 1, 0],
+      system_graph_intersections: [[0, -1], [0, 1]],
+    } as MathResponse);
+    expect(context.visualization).toBe("cartesian-2d");
+    expect(context.graphRequest).toEqual({ endpoint: "/solve/system", payload: {
+      equations: ["x=0", "x^2+y^2=1"], variables: ["x", "y"],
+    } });
+    expect(context.metadata.intersections).toHaveLength(2);
+    expect(context.metadata.componentIndices).toEqual([1, 1, 0]);
+  });
+
   it("agrupa ambas ramas del círculo y conserva sus dos cruces exactos", () => {
     const context = systemGraphContext(["x**2+y**2=1", "y=x"], ["x", "y"], "system", {
       success: true, system_graph_expressions: ["-sqrt(1-x**2)", "sqrt(1-x**2)", "x"],

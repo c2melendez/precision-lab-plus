@@ -445,6 +445,22 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(page.getByTestId("scientific-graph-context")).toContainText("2 intersecciones comunes");
   });
 
+  test("círculo con recta vertical muestra sus dos cruces comunes", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "\\begin{cases}x=0\\\\x^2+y^2=1\\end{cases}");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/solve/system") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const result = await (await solve).json();
+    expect(result.system_graph_intersections).toEqual([[0, -1], [0, 1]]);
+    expect(result.graph_data.traces.map((trace: { type: string }) => trace.type)).toEqual(["line", "line", "line", "point"]);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("system-intersection")).toHaveCount(2);
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    await expect(page.getByTestId("scientific-graph-context")).toContainText("2 intersecciones comunes");
+  });
+
   test("inecuación estricta muestra extremo hueco y conserva el conjunto en Gráficas", async ({ page }) => {
     await openScientific(page);
     await setExpression(page, "x>0");

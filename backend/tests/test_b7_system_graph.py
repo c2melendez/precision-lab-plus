@@ -71,4 +71,17 @@ def test_real_nonlinear_branches_and_exact_common_points():
     implicit = solve(["x**2+y**2=1", "x=1"])
     assert implicit["result_data"]
     assert implicit["system_graph_expressions"] is None
-    assert implicit["graph_data"] is None
+    assert implicit["system_graph_intersections"] == [[1.0, 0.0]]
+    assert [trace["type"] for trace in implicit["graph_data"]["traces"]] == ["line", "line", "line", "point"]
+    assert implicit["graph_data"]["traces"][2]["x"] == [1.0, 1.0]
+    assert implicit["system_graph_component_indices"] == [0, 0, 1]
+
+    two_crossings = solve(["x=0", "x**2+y**2=1"])
+    assert two_crossings["system_graph_intersections"] == [[0.0, -1.0], [0.0, 1.0]]
+    assert two_crossings["system_graph_component_indices"] == [1, 1, 0]
+
+    disjoint_vertical = solve(["x**2+y**2=1", "x=2"])
+    assert len(disjoint_vertical["result_data"]) == 2
+    assert all(item["is_complex"] for item in disjoint_vertical["result_data"])
+    assert disjoint_vertical["system_graph_intersections"] == []
+    assert len(disjoint_vertical["graph_data"]["traces"]) == 3

@@ -17,7 +17,7 @@ from typing import List
 import sympy
 
 from app.schemas.responses import EquationSolution, GraphData, InequalityInterval, Trace
-from app.services import parsing
+from app.services import graph_service, parsing
 
 _DIRECTION_MAP = {"both": "+-", "left": "-", "right": "+"}
 
@@ -206,6 +206,69 @@ def _explicit_nonlinear_system_graph(equations, variables, raw_solutions):
                     and point not in intersections):
                 intersections.append(point)
     return expressions, latex, groups, intersections, bool(coincident)
+
+
+def _mixed_vertical_nonlinear_graph(equations, variables, raw_solutions):
+    """Finite real branches of one polynomial plus an actual vertical line."""
+    if len(equations) != 2 or len(variables) != 2:
+        return None
+    x, y = variables
+    polynomials = [(eq.lhs - eq.rhs).as_poly(x, y) for eq in equations]
+    if any(poly is None for poly in polynomials):
+        return None
+    vertical_indices = [i for i, poly in enumerate(polynomials)
+                        if poly.total_degree() == 1 and poly.degree(y) == 0
+                        and all(coefficient.is_real is True for coefficient in poly.coeffs())]
+    if len(vertical_indices) != 1:
+        return None
+    vertical_index = vertical_indices[0]
+    curve_index = 1 - vertical_index
+    curve_poly = polynomials[curve_index]
+    if (curve_poly.total_degree() > 4 or not 1 <= curve_poly.degree(y) <= 2
+            or any(coefficient.is_real is not True for coefficient in curve_poly.coeffs())):
+        return None
+    branches = sympy.solve(equations[curve_index], y)
+    if not 1 <= len(branches) <= 2 or any(branch.free_symbols - {x} or branch.has(sympy.I)
+                                               for branch in branches):
+        return None
+    vertical_poly = polynomials[vertical_index]
+    fixed = sympy.cancel(-vertical_poly.coeff_monomial(1) / vertical_poly.coeff_monomial(x))
+    if fixed.is_real is not True or fixed.free_symbols:
+        return None
+    fixed_x = float(sympy.N(fixed))
+    if not sympy.Float(fixed_x).is_finite or abs(fixed_x) > 1e6:
+        return None
+    intersections = []
+    for solution in raw_solutions:
+        values = [solution.get(symbol, symbol) for symbol in variables]
+        if any(value.free_symbols or value.is_real is not True for value in values):
+            continue
+        point = [float(sympy.N(value)) for value in values]
+        if all(sympy.Float(value).is_finite and abs(value) <= 1e6 for value in point) and point not in intersections:
+            intersections.append(point)
+    span = max(2.0, *(abs(point[1]) * 1.5 for point in intersections)) if intersections else 10.0
+    span = min(span, 1e4)
+    x_min, x_max = fixed_x - span, fixed_x + span
+    x_values = [x_min + i * (x_max - x_min) / 200 for i in range(201)]
+    curve_traces = [Trace(type="line", name=str(equations[curve_index]) + f" · rama {i+1}",
+                          x=x_values, y=[graph_service._evaluate_at(branch, x, xx) for xx in x_values])
+                    for i, branch in enumerate(branches)]
+    visible_y = [value for trace in curve_traces for value in trace.y if value is not None]
+    visible_y.extend(point[1] for point in intersections)
+    if not visible_y:
+        visible_y = [-span, span]
+    y_span = max(1.0, max(visible_y) - min(visible_y))
+    y_min, y_max = min(visible_y) - y_span * 0.15, max(visible_y) + y_span * 0.15
+    if not all(sympy.Float(value).is_finite and abs(value) <= 1e6 for value in (y_min, y_max)):
+        return None
+    vertical_trace = Trace(type="line", name=str(equations[vertical_index]),
+                           x=[fixed_x, fixed_x], y=[y_min, y_max])
+    traces = curve_traces + [vertical_trace]
+    if intersections:
+        traces.append(Trace(type="point", name="Intersección común",
+                            x=[point[0] for point in intersections],
+                            y=[point[1] for point in intersections]))
+    return GraphData(traces=traces, x_range=[x_min, x_max], y_range=[y_min, y_max]), intersections, [curve_index] * len(branches) + [vertical_index]
 
 
 @dataclass
@@ -462,6 +525,10 @@ def compute_solve_system(equations: List[str], variables: List[str]) -> SolveSys
     graph = _explicit_nonlinear_system_graph(parsed_equations, var_symbols, raw_solutions)
     graph_fields = (graph[0], graph[1], graph[3], graph[4], None, graph[2]) if graph else (
         None, None, None, False, None, None)
+    if not graph:
+        mixed = _mixed_vertical_nonlinear_graph(parsed_equations, var_symbols, raw_solutions)
+        if mixed:
+            graph_fields = (None, None, mixed[1], False, mixed[0], mixed[2])
     if not raw_solutions:
         return SolveSystemResult(
             [], False, ["No se encontraron soluciones para este sistema no lineal."], *graph_fields
