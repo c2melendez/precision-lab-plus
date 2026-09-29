@@ -445,6 +445,43 @@ test.describe("S26 B7 — Científica Plus", () => {
     await expect(page.getByTestId("scientific-graph-context")).toContainText("2 intersecciones comunes");
   });
 
+  test("inecuación estricta muestra extremo hueco y conserva el conjunto en Gráficas", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "x>0");
+    const solve = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/inequality") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    const result = await (await solve).json();
+    expect(result.inequality_intervals[0].lower_included).toBe(false);
+    const preview = page.getByTestId("scientific-graph");
+    await expect(preview.getByTestId("inequality-endpoint")).toHaveAttribute("fill", "white");
+    await preview.getByRole("button", { name: "Abrir en Gráficas" }).click();
+    await expect(page.getByRole("region", { name: "Análisis de inecuación" })).toContainText("Interval.open(0, oo)");
+    await expect(page.getByRole("region", { name: "Análisis de inecuación" }).getByTestId("inequality-endpoint"))
+      .toHaveAttribute("fill", "white");
+  });
+
+  test("inecuación inclusiva y conjunto vacío respetan su semántica", async ({ page }) => {
+    await openScientific(page);
+    await setExpression(page, "x>=0");
+    const inclusive = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/inequality") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    expect((await (await inclusive).json()).inequality_intervals[0].lower_included).toBe(true);
+    await expect(page.getByTestId("scientific-graph").getByTestId("inequality-endpoint"))
+      .toHaveAttribute("fill", "#2862b8");
+
+    await setExpression(page, "x^2<0");
+    const empty = page.waitForResponse((response) =>
+      response.url().includes("/api/v1/inequality") && response.request().method() === "POST");
+    await page.getByRole("region", { name: "Entrada", exact: true })
+      .getByRole("button", { name: /calcular|evaluar/i }).first().click();
+    expect((await (await empty).json()).inequality_intervals).toEqual([]);
+    await expect(page.getByTestId("scientific-graph")).toContainText("Conjunto solución vacío");
+  });
+
   test("error controlado conserva la Científica utilizable", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openScientific(page);

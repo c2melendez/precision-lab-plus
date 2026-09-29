@@ -274,3 +274,21 @@ export function systemGraphContext(
     } } : null,
   };
 }
+
+export function inequalityGraphContext(
+  expression: string, variable: string, inputLatex: string, result: MathResponse,
+): ScientificGraphContext {
+  const intervals = result.inequality_intervals;
+  const graphable = result.success && intervals != null;
+  return {
+    operation: "inequality", originalExpression: expression, inputLatex,
+    graphInputLatex: null,
+    canonicalResult: result.success ? { text: result.result_text ?? null, data: result.result_data ?? null } : null,
+    variables: [variable],
+    metadata: { intervals: intervals ?? null, solutionLatex: result.result_latex ?? null,
+      angleUnit: "rad" },
+    restrictions: null,
+    visualization: graphable ? "number-line" : "advanced",
+    graphRequest: null,
+  };
+}

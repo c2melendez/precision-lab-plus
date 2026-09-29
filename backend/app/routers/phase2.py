@@ -210,6 +210,8 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
         input_text=payload.inequality,
         result_text=str(result.solution_set),
         result_latex=sympy.latex(result.solution_set),
+        inequality_intervals=phase2_service.inequality_number_line_intervals(result.solution_set),
+        inequality_variable=variable,
         has_detailed_steps=False,
         warnings=result.warnings,
         duration_ms=_duration_ms(request),

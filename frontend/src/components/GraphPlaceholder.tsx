@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { callApi, type MathResponse } from "../api/client";
 import { graphPreviewGeometry, integralRegionGeometry, limitApproachGeometry } from "./graphPreviewGeometry";
 import type { ScientificGraphContext } from "./scientificGraphContext";
+import { NumberLine } from "./NumberLine";
 
 export type ScientificGraphState =
   | "empty"
@@ -87,7 +88,12 @@ export function GraphPlaceholder({
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 py-6 text-center">
-        {(state === "available" || (state === "advanced" && context?.graphRequest)) ? (
+        {state === "available" && context?.visualization === "number-line" ? (
+          <>
+            <NumberLine intervals={context.metadata.intervals as NonNullable<MathResponse["inequality_intervals"]>} />
+            <p className="text-[11px] text-muted">Conjunto solución: {context.canonicalResult?.text ?? "—"}. Los extremos huecos se excluyen; los rellenos se incluyen.</p>
+          </>
+        ) : (state === "available" || (state === "advanced" && context?.graphRequest)) ? (
           <>
             <div
               role="img"

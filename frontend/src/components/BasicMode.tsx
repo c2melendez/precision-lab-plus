@@ -62,7 +62,7 @@ import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
-import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext, limitGraphContext, algebraTransformationGraphContext, odeGraphContext, systemGraphContext } from "./scientificGraphContext";
+import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext, limitGraphContext, algebraTransformationGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext } from "./scientificGraphContext";
 
 interface SubstitutionRow {
   name: string;
@@ -287,12 +287,16 @@ export function BasicMode() {
   } | null>(null);
   const [lastOde, setLastOde] = useState<{ sourceLatex: string; expression: string; result: MathResponse } | null>(null);
   const [lastSystem, setLastSystem] = useState<{ sourceLatex: string; equations: string[]; variables: string[]; result: MathResponse } | null>(null);
+  const [lastInequality, setLastInequality] = useState<{ sourceLatex: string; expression: string; variable: string; result: MathResponse } | null>(null);
 
   const graphState = useMemo<ScientificGraphState>(
     () => classifyScientificGraphState(latex),
     [latex],
   );
   const graphContext = useMemo(() => {
+    if (lastInequality?.sourceLatex === latex && lastInequality.result.success) {
+      return inequalityGraphContext(lastInequality.expression, lastInequality.variable, latex, lastInequality.result);
+    }
     if (lastSystem?.sourceLatex === latex && lastSystem.result.success) {
       return systemGraphContext(lastSystem.equations, lastSystem.variables, latex, lastSystem.result);
     }
@@ -340,9 +344,11 @@ export function BasicMode() {
     const result = lastEvaluated?.expression === expression && lastEvaluated.angleUnit === angleUnit
       ? lastEvaluated.result : null;
     return directFunctionGraphContext(expression, variable, angleUnit, result, latex);
-  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra, lastOde, lastSystem]);
-  const resolvedGraphState: ScientificGraphState = graphContext?.operation === "simplify" || graphContext?.operation === "factor" || graphContext?.operation === "ode" || graphContext?.operation === "system"
-    ? graphContext.graphRequest ? "available" : "advanced" : graphState;
+  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra, lastOde, lastSystem, lastInequality]);
+  const resolvedGraphState: ScientificGraphState = graphContext?.operation === "inequality"
+    ? graphContext.visualization === "number-line" ? "available" : "advanced"
+    : graphContext?.operation === "simplify" || graphContext?.operation === "factor" || graphContext?.operation === "ode" || graphContext?.operation === "system"
+      ? graphContext.graphRequest ? "available" : "advanced" : graphState;
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
@@ -665,6 +671,10 @@ export function BasicMode() {
               latex,
             );
       setLastResult(result);
+      if (isInequality && result.success) {
+        const variable = result.inequality_variable ?? "x";
+        setLastInequality({ sourceLatex: latex, expression: trimmed, variable, result });
+      }
       setLastEvaluated(!isInequality && !isEquation && !substitutionsPayload && result.success
         ? { expression: trimmed, angleUnit, result }
         : null);
@@ -822,6 +832,11 @@ export function BasicMode() {
   // consume.
   async function handleGraphExpression(): Promise<void> {
     const context = graphContext;
+    if (context?.visualization === "number-line") {
+      setPendingGraphContext(context);
+      setActiveMode("graph");
+      return;
+    }
     if (!context?.graphRequest) return;
     setLoading(true);
     setErrorMessage(null);

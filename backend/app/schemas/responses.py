@@ -196,6 +196,15 @@ class EquationSolution(BaseModel):
     is_complex: bool = False
 
 
+class InequalityInterval(BaseModel):
+    lower: Optional[float] = None
+    upper: Optional[float] = None
+    lower_text: Optional[str] = None
+    upper_text: Optional[str] = None
+    lower_included: bool = False
+    upper_included: bool = False
+
+
 class Trace(BaseModel):
     type: str
     name: str
@@ -264,6 +273,8 @@ class MathResponse(BaseModel):
     system_graph_intersections: Optional[List[List[float]]] = None
     system_graph_coincident: bool = False
     system_graph_component_indices: Optional[List[int]] = None
+    inequality_intervals: Optional[List[InequalityInterval]] = None
+    inequality_variable: Optional[str] = None
     result_approx: Optional[float] = None
     result_data: Optional[Union[List[EquationSolution], List[List[str]]]] = None
     steps: List[Step] = []

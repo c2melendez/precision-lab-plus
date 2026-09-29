@@ -28,6 +28,7 @@ import { latexToBackendSyntax, NaturalMathField } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { ResultPanel } from "./ResultPanel";
+import { NumberLine } from "./NumberLine";
 
 const GraphViewer = lazy(() => import("./GraphViewer"));
 
@@ -218,7 +219,13 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   const setPendingGraphContext = useUIStore((state) => state.setPendingGraphContext);
 
   useEffect(() => {
-    if (!pendingGraphContext || !pendingGraphContext.graphInputLatex) return;
+    if (!pendingGraphContext) return;
+    if (pendingGraphContext.visualization === "number-line") {
+      setSourceContext(pendingGraphContext);
+      setPendingGraphContext(null);
+      return;
+    }
+    if (!pendingGraphContext.graphInputLatex) return;
     setLatexRows(pendingGraphContext.graphInputLatex);
     setMathFields(pendingGraphContext.graphInputLatex.map(() => null));
     setActiveRow(0);
@@ -348,6 +355,16 @@ function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (sourceContext?.visualization === "number-line") {
+    return <section aria-label="Análisis de inecuación" className="space-y-4 rounded-xl border border-paper-line bg-paper p-5">
+      <h2 className="text-lg font-semibold">Solución en la recta real</h2>
+      <p className="text-sm text-muted">Desde Científica · {sourceContext.originalExpression} · variable {sourceContext.variables[0]}</p>
+      <NumberLine intervals={sourceContext.metadata.intervals as NonNullable<MathResponse["inequality_intervals"]>} />
+      <p className="text-sm">Conjunto exacto: {sourceContext.canonicalResult?.text ?? "—"}</p>
+      <p className="text-xs text-muted">Extremo hueco: excluido. Extremo relleno: incluido. Las flechas indican prolongación sin límite.</p>
+    </section>;
   }
 
   return (

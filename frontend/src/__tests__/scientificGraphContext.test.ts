@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MathResponse } from "../api/client";
-import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext, odeGraphContext, systemGraphContext } from "../components/scientificGraphContext";
+import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext } from "../components/scientificGraphContext";
 
 describe("contexto canónico de función directa", () => {
   it("conserva la expresión de entrada y el resultado del motor, sin leer texto visual", () => {
@@ -27,6 +27,19 @@ describe("contexto canónico de función directa", () => {
     expect(context.canonicalResult).toBeNull();
     expect(context.variables).toEqual(["y"]);
     expect(context.graphRequest?.payload.variable).toBe("y");
+  });
+});
+
+describe("inecuación univariada", () => {
+  it("transfiere conjunto canónico y extremos sin fabricar una curva cartesiana", () => {
+    const result = { success: true, result_text: "Interval.open(0, oo)", result_latex: "(0, \\infty)",
+      inequality_intervals: [{ lower: 0, upper: null, lower_text: "0",
+        lower_included: false, upper_included: false }] } as MathResponse;
+    const context = inequalityGraphContext("x>0", "x", "x>0", result);
+    expect(context.visualization).toBe("number-line");
+    expect(context.graphRequest).toBeNull();
+    expect(context.metadata.intervals).toEqual(result.inequality_intervals);
+    expect(context.metadata.solutionLatex).toBe(result.result_latex);
   });
 });
 

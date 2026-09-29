@@ -774,6 +774,14 @@ export interface components {
              */
             is_complex: boolean;
         };
+        InequalityInterval: {
+            lower?: number | null;
+            upper?: number | null;
+            lower_text?: string | null;
+            upper_text?: string | null;
+            lower_included: boolean;
+            upper_included: boolean;
+        };
         /**
          * ErrorCode
          * @description Enum central — el backend NUNCA usa un string de error fuera de esta lista.
@@ -1096,6 +1104,8 @@ export interface components {
             system_graph_intersections?: number[][] | null;
             system_graph_coincident?: boolean;
             system_graph_component_indices?: number[] | null;
+            inequality_intervals?: components["schemas"]["InequalityInterval"][] | null;
+            inequality_variable?: string | null;
             /** Result Approx */
             result_approx?: number | null;
             /** Result Data */

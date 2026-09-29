@@ -16,7 +16,7 @@ from typing import List
 
 import sympy
 
-from app.schemas.responses import EquationSolution, GraphData, Trace
+from app.schemas.responses import EquationSolution, GraphData, InequalityInterval, Trace
 from app.services import parsing
 
 _DIRECTION_MAP = {"both": "+-", "left": "-", "right": "+"}
@@ -212,6 +212,45 @@ def _explicit_nonlinear_system_graph(equations, variables, raw_solutions):
 class InequalityResult:
     solution_set: sympy.Set
     warnings: List[str]
+
+
+def inequality_number_line_intervals(solution_set: sympy.Set) -> List[InequalityInterval] | None:
+    """A finite union of real intervals/points, preserving endpoint inclusion."""
+    if solution_set == sympy.S.EmptySet:
+        return []
+    parts = solution_set.args if isinstance(solution_set, sympy.Union) else (solution_set,)
+    if len(parts) > 12:
+        return None
+    intervals = []
+    for part in parts:
+        if isinstance(part, sympy.Interval):
+            lower, upper = part.start, part.end
+            if lower != -sympy.oo and (lower.is_real is not True or lower.free_symbols):
+                return None
+            if upper != sympy.oo and (upper.is_real is not True or upper.free_symbols):
+                return None
+            values = [float(sympy.N(bound)) for bound in (lower, upper) if bound.is_finite]
+            if any(not sympy.Float(value).is_finite or abs(value) > 1e6 for value in values):
+                return None
+            intervals.append(InequalityInterval(
+                lower=None if lower == -sympy.oo else float(sympy.N(lower)),
+                upper=None if upper == sympy.oo else float(sympy.N(upper)),
+                lower_text=None if lower == -sympy.oo else str(lower),
+                upper_text=None if upper == sympy.oo else str(upper),
+                lower_included=not part.left_open, upper_included=not part.right_open))
+        elif isinstance(part, sympy.FiniteSet):
+            for point in part:
+                if point.is_real is not True or point.free_symbols:
+                    return None
+                numeric = float(sympy.N(point))
+                if not sympy.Float(numeric).is_finite or abs(numeric) > 1e6:
+                    return None
+                intervals.append(InequalityInterval(lower=numeric, upper=numeric,
+                    lower_text=str(point), upper_text=str(point),
+                    lower_included=True, upper_included=True))
+        else:
+            return None
+    return intervals
 
 
 def compute_inequality(inequality: sympy.core.relational.Relational, variable: str) -> InequalityResult:
