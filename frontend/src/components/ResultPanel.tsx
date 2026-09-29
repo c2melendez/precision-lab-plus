@@ -179,7 +179,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
   if (result === null) {
     return (
       <section aria-label="Resultado">
-        <p className="text-sm text-muted">
+        <p className="py-1 text-right text-sm text-muted">
           Introduce una expresión y envía el formulario para ver el resultado aquí.
         </p>
       </section>

@@ -125,6 +125,24 @@ test.describe("S26 B7 — Científica Plus", () => {
     }
   });
 
+  test("entrada y textos vacíos usan la escala de Lite", async ({ page }) => {
+    await page.setViewportSize({ width: 1363, height: 936 });
+    await openScientific(page, "fused");
+    const styles = await page.evaluate(() => {
+      const field = document.querySelector("math-field");
+      const result = document.querySelector('[aria-label="Resultado"] p');
+      const previous = document.querySelector('[aria-label="Entradas previas"] p:last-child');
+      return {
+        fieldSize: field && getComputedStyle(field).fontSize,
+        fieldAlign: field && getComputedStyle(field).textAlign,
+        resultSize: result && getComputedStyle(result).fontSize,
+        resultAlign: result && getComputedStyle(result).textAlign,
+        previousSize: previous && getComputedStyle(previous).fontSize,
+      };
+    });
+    expect(styles).toMatchObject({ fieldSize: "24px", fieldAlign: "right", resultSize: "14px", resultAlign: "right", previousSize: "12px" });
+  });
+
   test("Plus no conserva Ejemplos ni Sustituciones en Científica", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await openScientific(page);

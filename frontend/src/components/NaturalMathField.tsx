@@ -402,10 +402,10 @@ export function NaturalMathField({
       math-virtual-keyboard-policy="manual"
       aria-label={ariaLabel}
       placeholder={placeholder}
-      className={
+      class={
         bare
-          ? "w-full bg-transparent px-0 py-1 pr-10 text-right text-2xl text-ink"
-          : "w-full rounded-full border border-paper-line bg-paper-soft px-5 py-2.5 text-base text-ink shadow-sm"
+          ? "block min-w-0 max-w-full w-full bg-transparent px-0 py-1 pr-10 text-right text-2xl text-ink"
+          : "block min-w-0 max-w-full w-full rounded-full border border-paper-line bg-paper-soft px-5 py-2.5 text-base text-ink shadow-sm"
       }
       style={
         {
@@ -414,6 +414,7 @@ export function NaturalMathField({
           "--caret-color": "#E8A33D",
           "--selection-background-color": "#FBEFDA",
           "--selection-color": "#8A5A0E",
+          overflow: "hidden",
         } as React.CSSProperties
       }
     />
