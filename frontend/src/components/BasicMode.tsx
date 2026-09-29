@@ -958,7 +958,7 @@ export function BasicMode() {
       onSubmit={handleSubmit}
       aria-labelledby="basic-mode-heading"
       data-testid="scientific-mode-shell"
-      className="mx-auto w-full max-w-5xl space-y-3 dt:max-w-[1440px] dt:px-8"
+      className="mx-auto w-full max-w-5xl space-y-3 dt:max-w-none"
     >
       <h2 id="basic-mode-heading" className="sr-only">
         Básico

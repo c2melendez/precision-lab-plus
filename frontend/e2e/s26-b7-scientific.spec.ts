@@ -93,6 +93,23 @@ test.describe("S26 B7 — Científica Plus", () => {
     }
   });
 
+  test("Científica usa márgenes laterales de Lite en escritorio", async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await openScientific(page, "fused");
+
+    const sidebar = page.getByRole("complementary", { name: "Navegación principal" });
+    const input = page.getByRole("region", { name: "Entrada", exact: true });
+    const graph = page.getByTestId("scientific-graph");
+    const [sidebarBox, inputBox, graphBox] = await Promise.all([
+      sidebar.boundingBox(), input.boundingBox(), graph.boundingBox(),
+    ]);
+    expect(sidebarBox && inputBox && graphBox).toBeTruthy();
+    if (sidebarBox && inputBox && graphBox) {
+      expect(inputBox.x - (sidebarBox.x + sidebarBox.width)).toBeCloseTo(40, 0);
+      expect(1920 - (graphBox.x + graphBox.width)).toBeCloseTo(40, 0);
+    }
+  });
+
   test("Plus no conserva Ejemplos ni Sustituciones en Científica", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await openScientific(page);
