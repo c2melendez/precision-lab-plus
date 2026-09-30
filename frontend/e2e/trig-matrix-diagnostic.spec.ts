@@ -97,7 +97,17 @@ test.describe("Trig matrix diagnostic " + ENGINE, () => {
           const calculate = page.getByRole("region", { name: "Entrada", exact: true })
             .getByRole("button", { name: /calcular|evaluar/i }).first();
           await expect(calculate).toBeEnabled({ timeout: 5000 });
+          const apiRequestPromise = page.waitForRequest(
+            (request) => request.method() === "POST" && request.url().includes("/api/v1/"),
+            { timeout: 5000 },
+          ).catch(() => null);
           await calculate.click();
+          const apiRequest = await apiRequestPromise;
+          let requestPayload = null;
+          if (apiRequest) {
+            try { requestPayload = apiRequest.postDataJSON(); }
+            catch { requestPayload = apiRequest.postData(); }
+          }
 
           // Do not advance to the next matrix case while the previous
           // symbolic request is still running. A fixed 0.85/1.9s delay
@@ -142,7 +152,7 @@ test.describe("Trig matrix diagnostic " + ENGINE, () => {
         console.log("TRIG_MATRIX_RESULT " + JSON.stringify({
           engine: ENGINE, id: item.id, status,
           exercise: item.exercise_cell, expected: item.expected,
-          output, error, actualLatex, degreeMode, shard: shard + 1
+          output, error, actualLatex, requestPayload, degreeMode, shard: shard + 1
         }));
       }
     });
