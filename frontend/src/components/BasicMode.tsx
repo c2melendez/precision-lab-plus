@@ -74,6 +74,26 @@ interface SubstitutionRow {
 // comporte igual sin importar desde qué pantalla se escribió.
 const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
 
+function extractEquationIntervalRestriction(source: string): {
+  expressionLatex: string;
+  lowerLatex: string;
+  upperLatex: string;
+  lowerInclusive: boolean;
+  upperInclusive: boolean;
+} | null {
+  const match = source.trim().match(
+    /^(.*?),\s*\\quad\s*x\\in\s*(?:\\left\s*)?([\[(])\s*(.+?)\s*,\s*(.+?)\s*(?:\\right\s*)?([\])])\s*$/s,
+  );
+  if (!match) return null;
+  return {
+    expressionLatex: match[1].trim(),
+    lowerLatex: match[3].trim(),
+    upperLatex: match[4].trim(),
+    lowerInclusive: match[2] === "[",
+    upperInclusive: match[5] === "]",
+  };
+}
+
 const GRAPH_NON_VARIABLE_IDENTIFIERS = new Set([
   "sin", "cos", "tan", "sec", "csc", "cot",
   "asin", "acos", "atan", "asec", "acsc", "acot",
@@ -650,7 +670,11 @@ export function BasicMode() {
       return;
     }
 
-    const trimmed = latexToBackendSyntax(latex);
+    const equationInterval = latex.includes("=")
+      ? extractEquationIntervalRestriction(latex)
+      : null;
+    const sourceForBackend = equationInterval?.expressionLatex ?? latex;
+    const trimmed = latexToBackendSyntax(sourceForBackend);
     if (!trimmed) {
       setValidationError("La expresión no puede estar vacía.");
       return;
@@ -677,7 +701,19 @@ export function BasicMode() {
         : isEquation
           ? await submitScientific(
               "/solve",
-              { equation: trimmed, angle_unit: angleUnit, domain: "real" },
+              {
+                equation: trimmed,
+                angle_unit: angleUnit,
+                domain: "real",
+                ...(equationInterval
+                  ? {
+                      domain_lower: latexToBackendSyntax(equationInterval.lowerLatex),
+                      domain_upper: latexToBackendSyntax(equationInterval.upperLatex),
+                      domain_lower_inclusive: equationInterval.lowerInclusive,
+                      domain_upper_inclusive: equationInterval.upperInclusive,
+                    }
+                  : {}),
+              },
               trimmed,
               latex,
             )
