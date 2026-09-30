@@ -156,3 +156,17 @@ def test_definite_integral_crossing_trig_pole_is_domain_error():
     body = response.json()
     assert body["success"] is False
     assert body["error_code"] == "DOMAIN_ERROR"
+
+
+def test_endpoint_singularity_can_be_improper_but_convergent():
+    response = _integral("1/(x*sqrt(x^2-1))", lower_bound="1", upper_bound="2")
+    body = response.json()
+    assert body["success"] is True
+    assert sp.simplify(sp.sympify(body["result_text"]) - sp.pi/3) == 0
+
+
+def test_endpoint_poles_still_reject_divergent_tan_integral():
+    response = _integral("tan(x)", lower_bound="-pi/2", upper_bound="pi/2")
+    body = response.json()
+    assert body["success"] is False
+    assert body["error_code"] == "DOMAIN_ERROR"
