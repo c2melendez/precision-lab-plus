@@ -233,7 +233,7 @@ function rewriteOperatorNameLatex(latex: string): string {
   // input: \\operatorname{sech}^{2}x. Lower to an explicit function call
   // with suffix power so rewriteFunctionPowers can normalize it later.
   out = out.replace(
-    /\\\\(?:operatorname|mathrm)\{(sinh|cosh|tanh|csch|sech|coth)\}\s*\^\{(\d+)\}\s*([A-Za-z])/g,
+    /\\(?:operatorname|mathrm)\{(sinh|cosh|tanh|csch|sech|coth)\}\s*\^\{(\d+)\}\s*([A-Za-z])/g,
     (_match, fn: string, power: string, arg: string) => `${fn}(${arg})^{${power}}`,
   );
 
