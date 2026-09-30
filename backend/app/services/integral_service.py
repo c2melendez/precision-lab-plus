@@ -41,6 +41,10 @@ class UnsupportedTrigPowerError(ValueError):
     """Una potencia trigonométrica con n simbólico sigue sin antiderivada."""
 
 
+class DivergentIntegralError(ValueError):
+    """La integral definida cruza un polo real y no converge como integral propia."""
+
+
 _RULE_LABELS = {
     mi.PowerRule: "Integral de potencia",
     mi.ExpRule: "Integral de exponencial",
@@ -213,6 +217,24 @@ def integrate_expression(
     ):
         lower_expr = _parse_bound(lower_bound)
         upper_expr = _parse_bound(upper_bound)
+
+        # Detect poles introduced by reciprocal trigonometric functions
+        # before applying a definite antiderivative. This prevents false
+        # finite values such as integral(sec(x)**2, 0, pi) -> 0.
+        rewritten = input_expr.rewrite(sympy.sin).rewrite(sympy.cos)
+        denominator = sympy.denom(sympy.together(rewritten))
+        if denominator != 1:
+            interval = sympy.Interval(
+                sympy.Min(lower_expr, upper_expr),
+                sympy.Max(lower_expr, upper_expr),
+            )
+            poles = sympy.solveset(denominator, var_symbol, domain=interval)
+            if poles is not sympy.S.EmptySet and poles != sympy.S.EmptySet:
+                if isinstance(poles, sympy.FiniteSet) and len(poles) > 0:
+                    raise DivergentIntegralError(
+                        "La integral no converge: el integrando tiene una singularidad en el intervalo."
+                    )
+
         reference = sympy.integrate(input_expr, (var_symbol, lower_expr, upper_expr))
         return IntegralResult(
             input_expr=input_expr,
