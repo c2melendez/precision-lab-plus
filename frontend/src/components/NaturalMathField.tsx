@@ -224,36 +224,36 @@ const HYPERBOLIC_INVERSE_NAMES: Record<string, string> = {
 function rewriteOperatorNameLatex(latex: string): string {
   let out = latex;
 
-  const inverseDisplayToBackend: Record<string, string> = {
-    arcsin: "asin",
-    arccos: "acos",
-    arctan: "atan",
-    arccot: "acot",
-    arcsec: "asec",
-    arccsc: "acsc",
-    arsinh: "asinh",
-    arcosh: "acosh",
-    artanh: "atanh",
-    arcsch: "acsch",
-    arsech: "asech",
-    arcoth: "acoth",
+  const inverseDisplayToDirect: Record<string, string> = {
+    arcsin: "sin",
+    arccos: "cos",
+    arctan: "tan",
+    arccot: "cot",
+    arcsec: "sec",
+    arccsc: "csc",
+    arsinh: "sinh",
+    arcosh: "cosh",
+    artanh: "tanh",
+    arcsch: "csch",
+    arsech: "sech",
+    arcoth: "coth",
   };
 
-  // Rewrite operatorname inverses directly to the backend alias. Routing
-  // through sec^{-1}/coth^{-1} made MathLive/ASCII keep a leading slash or
-  // even drop the function name in some B7 cases.
-  for (const [displayName, backendName] of Object.entries(inverseDisplayToBackend)) {
+  // Route display aliases through native function^-1 notation. MathLive
+  // preserves this function identity; the final ASCII cleanup below then
+  // removes any residual leading slash and makes bare arguments explicit.
+  for (const [displayName, directName] of Object.entries(inverseDisplayToDirect)) {
     const bare = new RegExp(
       `\\\\(?:operatorname|mathrm)\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
       "g",
     );
     out = out.replace(
       bare,
-      `\\\\mathrm{${backendName}}\\\\left($1\\\\right)`,
+      `\\\\${directName}^{-1}\\\\left($1\\\\right)`,
     );
     out = out.replace(
       new RegExp(`\\\\(?:operatorname|mathrm)\\{${displayName}\\}`, "g"),
-      `\\\\mathrm{${backendName}}`,
+      `\\\\${directName}^{-1}`,
     );
   }
 
@@ -375,6 +375,35 @@ function rewriteFiniteAggregateAscii(ascii: string): string | null {
   return `${op === "sum" ? "sum" : "product"}(${body.trim()},${variable},${lower.trim()},${upper.trim()})`;
 }
 
+function normalizeBackendFunctionApplications(ascii: string): string {
+  const names = [
+    "sin","cos","tan","sec","csc","cot",
+    "sinh","cosh","tanh","sech","csch","coth",
+    "asin","acos","atan","asec","acsc","acot",
+    "asinh","acosh","atanh","asech","acsch","acoth",
+    "ln","log","sqrt",
+  ].join("|");
+
+  let result = ascii
+    // LaTeX commands that survived convertLatexToAsciiMath.
+    .replace(new RegExp(`\\\\(?=(?:${names})\\b)`, "g"), "");
+
+  // f ^ n x  -> (f(x))**(n), including tan^2x, sech^2x, ...
+  result = result.replace(
+    new RegExp(`\\b(${names})\\s*(?:\\^|\\*\\*)\\s*\\(?(\\d+)\\)?\\s*([A-Za-z])\\b`, "g"),
+    (_m, fn: string, power: string, arg: string) => `(${fn}(${arg}))**(${power})`,
+  );
+
+  // f x -> f(x). Do this only for the calculator's known one-argument
+  // function names so ordinary implicit multiplication is unaffected.
+  result = result.replace(
+    new RegExp(`\\b(${names})\\s+([A-Za-z])\\b`, "g"),
+    (_m, fn: string, arg: string) => `${fn}(${arg})`,
+  );
+
+  return result;
+}
+
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
 
@@ -421,10 +450,7 @@ export function latexToBackendSyntax(latex: string): string {
   // function token produced from \\mathrm/\\operatorname. The backend
   // parser accepts bare identifiers (acsc(...), asinh(...), csch(...)),
   // not LaTeX commands (\\acsc(...)).
-  const backendSafeFunctions = normalizedFunctions.replace(
-    /\\\\(?=(?:sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth|asin|acos|atan|asec|acsc|acot|asinh|acosh|atanh|asech|acsch|acoth|ln|log|sqrt)\\b)/g,
-    "",
-  );
+  const backendSafeFunctions = normalizeBackendFunctionApplications(normalizedFunctions);
   return rewritePostfixPercent(applyDegreeNotation(backendSafeFunctions)).trim();
 }
 
