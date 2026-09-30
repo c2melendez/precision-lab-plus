@@ -254,6 +254,19 @@ function rewritePostfixPercent(ascii: string): string {
   return result;
 }
 
+function rewriteBareFunctionPowerLatex(latex: string): string {
+  const names = "sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth";
+  const pattern = new RegExp(
+    `\\\\(${names})\\s*\\^\\{(\\d+)\\}\\s*([A-Za-z])`,
+    "g",
+  );
+  return latex.replace(
+    pattern,
+    (_match, fn: string, power: string, arg: string) =>
+      `\\\\${fn}\\\\left(${arg}\\\\right)^{${power}}`,
+  );
+}
+
 function rewriteFunctionPowers(ascii: string): string {
   const names = "sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth";
   const pattern = new RegExp(`\\b(${names})\\s*(?:\\^|\\*\\*)\\s*\\(?(\\d+)\\)?\\s*\\(([^()]*)\\)`, "g");
@@ -322,7 +335,7 @@ export function latexToBackendSyntax(latex: string): string {
   // MathLive elimina un signo % literal durante la conversión ASCII.
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
-  const latexWithPercent = rewriteOperatorNameLatex(latex)
+  const latexWithPercent = rewriteBareFunctionPowerLatex(rewriteOperatorNameLatex(latex))
     .replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
   // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
   // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
