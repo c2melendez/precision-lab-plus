@@ -172,7 +172,10 @@ def _quadratic_steps(
 
 
 def solve_equation(
-    equation_text: str, variable_name: Optional[str], angle_unit: str = "rad"
+    equation_text: str,
+    variable_name: Optional[str],
+    angle_unit: str = "rad",
+    domain: str = "complex",
 ) -> SolveResult:
     eq = parsing.parse_expression_tree(equation_text, allow_equation=True)
     free_symbols = sorted(eq.free_symbols, key=lambda s: s.name)
@@ -222,6 +225,31 @@ def solve_equation(
 
     if angle_unit == "deg":
         solutions = _apply_degree_conversion(solutions, has_direct_trig)
+
+    if domain == "real":
+        real_solutions: List[sympy.Expr] = []
+        for solution in solutions:
+            real_flag = solution.is_real
+            if real_flag is True:
+                real_solutions.append(solution)
+                continue
+            if real_flag is False or solution.has(sympy.I):
+                continue
+            # For exact numeric expressions whose assumptions are
+            # inconclusive, inspect a numerical approximation before
+            # deciding. Symbolic unknowns are preserved rather than
+            # discarded speculatively.
+            if solution.free_symbols:
+                real_solutions.append(solution)
+                continue
+            try:
+                numeric = complex(sympy.N(solution))
+            except (TypeError, ValueError, OverflowError):
+                real_solutions.append(solution)
+                continue
+            if abs(numeric.imag) < 1e-12:
+                real_solutions.append(sympy.simplify(sympy.re(solution)))
+        solutions = real_solutions
 
     for index, step in enumerate(steps):
         step.index = index
