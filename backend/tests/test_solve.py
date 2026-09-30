@@ -147,3 +147,12 @@ def test_bounded_real_trig_equation_returns_all_periodic_solutions_in_interval()
     assert body["success"] is True
     solutions = {item["text"] for item in body["result_data"]}
     assert solutions == {"pi/6", "5*pi/6"}
+
+
+def test_real_arccot_equation_uses_calculator_branch():
+    response = _solve("acot(x)=2*pi/3", variable="x", domain="real")
+    body = response.json()
+    assert body["success"] is True
+    solutions = [sympy.sympify(item["text"]) for item in body["result_data"]]
+    assert len(solutions) == 1
+    assert sympy.simplify(solutions[0] + sympy.sqrt(3) / 3) == 0
