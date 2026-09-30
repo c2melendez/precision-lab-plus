@@ -675,7 +675,12 @@ export function BasicMode() {
       const result = isInequality
         ? await submitScientific("/inequality", { inequality: trimmed }, trimmed, latex)
         : isEquation
-          ? await submitScientific("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed, latex)
+          ? await submitScientific(
+              "/solve",
+              { equation: trimmed, angle_unit: angleUnit, domain: "real" },
+              trimmed,
+              latex,
+            )
           : await submitScientific(
               "/evaluate",
               {
