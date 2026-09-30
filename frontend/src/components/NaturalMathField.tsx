@@ -97,6 +97,21 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "acsch",
   "asech",
   "acoth",
+  "asin",
+  "acos",
+  "atan",
+  "asec",
+  "acsc",
+  "acot",
+  "asinh",
+  "acosh",
+  "atanh",
+  "sinh",
+  "cosh",
+  "tanh",
+  "csch",
+  "sech",
+  "coth",
 ];
 
 function collapseKnownFunctionNames(ascii: string): string {
@@ -163,6 +178,43 @@ const HYPERBOLIC_INVERSE_NAMES: Record<string, string> = {
   sech: "asech",
   coth: "acoth",
 };
+
+const OPERATOR_NAME_TO_BACKEND: Record<string, string> = {
+  arcsin: "asin",
+  arccos: "acos",
+  arctan: "atan",
+  arccot: "acot",
+  arcsec: "asec",
+  arccsc: "acsc",
+  arsinh: "asinh",
+  arcosh: "acosh",
+  artanh: "atanh",
+  arcsch: "acsch",
+  arsech: "asech",
+  arcoth: "acoth",
+  sinh: "sinh",
+  cosh: "cosh",
+  tanh: "tanh",
+  csch: "csch",
+  sech: "sech",
+  coth: "coth",
+};
+
+function rewriteOperatorNameLatex(latex: string): string {
+  let out = latex;
+  for (const [displayName, backendName] of Object.entries(OPERATOR_NAME_TO_BACKEND)) {
+    const bare = new RegExp(
+      `\\\\operatorname\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
+      "g",
+    );
+    out = out.replace(bare, `\\\\mathrm{${backendName}}\\\\left($1\\\\right)`);
+    out = out.replace(
+      new RegExp(`\\\\operatorname\\{${displayName}\\}`, "g"),
+      `\\\\mathrm{${backendName}}`,
+    );
+  }
+  return out;
+}
 
 function rewriteHyperbolicInverses(ascii: string): string {
   let result = ascii;
@@ -270,7 +322,8 @@ export function latexToBackendSyntax(latex: string): string {
   // MathLive elimina un signo % literal durante la conversión ASCII.
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
-  const latexWithPercent = latex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
+  const latexWithPercent = rewriteOperatorNameLatex(latex)
+    .replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
   // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
   // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
   // conocido antes de delegar al conversor, y luego collapseKnownFunctionNames
