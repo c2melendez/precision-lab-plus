@@ -86,8 +86,42 @@ def compute_limit(expression: str, variable: str, point: str, direction: str) ->
     var_symbol = _validate_variable(variable)
     point_expr = parsing.parse_expression_tree(point, allow_equation=False)
 
+    # Fast, exact handling for canonical oscillatory limits that otherwise
+    # keep SymPy busy until the client's 15-second timeout.
+    if direction == "both":
+        if point_expr in (sympy.oo, -sympy.oo) and input_expr in (
+            sympy.sin(var_symbol),
+            sympy.cos(var_symbol),
+        ):
+            return LimitResult(
+                input_expr,
+                sympy.nan,
+                dne=True,
+                left_value=sympy.S.NaN,
+                right_value=sympy.S.NaN,
+            )
+        reciprocal = sympy.Pow(var_symbol, -1)
+        if point_expr == 0 and input_expr in (
+            sympy.sin(reciprocal),
+            sympy.cos(reciprocal),
+        ):
+            return LimitResult(
+                input_expr,
+                sympy.nan,
+                dne=True,
+                left_value=sympy.S.NaN,
+                right_value=sympy.S.NaN,
+            )
+
+    # Inverse hyperbolic functions have exact logarithmic forms. Rewriting
+    # them before limit() avoids several expensive heuristic branches while
+    # preserving the same real limit.
+    limit_expr = input_expr
+    if input_expr.has(sympy.asinh, sympy.acosh, sympy.atanh, sympy.acoth, sympy.asech, sympy.acsch):
+        limit_expr = input_expr.rewrite(sympy.log)
+
     try:
-        value = sympy.limit(input_expr, var_symbol, point_expr, dir=_DIRECTION_MAP[direction])
+        value = sympy.limit(limit_expr, var_symbol, point_expr, dir=_DIRECTION_MAP[direction])
         if direction == "both" and value.has(sympy.zoo):
             left = sympy.limit(input_expr, var_symbol, point_expr, dir="-")
             right = sympy.limit(input_expr, var_symbol, point_expr, dir="+")
