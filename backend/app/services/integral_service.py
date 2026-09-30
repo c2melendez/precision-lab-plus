@@ -251,12 +251,20 @@ def integrate_expression(
                     raise DivergentIntegralError(
                         "No se pudo verificar la convergencia de la singularidad en el extremo."
                     )
+                delta = sympy.simplify(upper_expr - lower_expr)
+                forward = delta.is_nonnegative
+                if forward is None:
+                    try:
+                        forward = float(sympy.N(delta)) >= 0
+                    except (TypeError, ValueError):
+                        forward = True
+
                 lower_value = (
                     sympy.limit(
                         antiderivative_for_endpoint,
                         var_symbol,
                         lower_expr,
-                        dir="+" if lower_expr <= upper_expr else "-",
+                        dir="+" if forward else "-",
                     )
                     if lower_expr in poles
                     else antiderivative_for_endpoint.subs(var_symbol, lower_expr)
@@ -266,7 +274,7 @@ def integrate_expression(
                         antiderivative_for_endpoint,
                         var_symbol,
                         upper_expr,
-                        dir="-" if lower_expr <= upper_expr else "+",
+                        dir="-" if forward else "+",
                     )
                     if upper_expr in poles
                     else antiderivative_for_endpoint.subs(var_symbol, upper_expr)
