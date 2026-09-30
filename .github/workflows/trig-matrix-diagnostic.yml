@@ -43,4 +43,4 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run trig matrix only
         working-directory: frontend
-        run: npx playwright test e2e/trig-matrix-diagnostic.spec.ts --project=desktop-chromium --workers=2
+        run: npx playwright test e2e/trig-matrix-diagnostic.spec.ts --project=desktop-chromium --workers=1
