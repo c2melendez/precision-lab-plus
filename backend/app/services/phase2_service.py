@@ -380,6 +380,16 @@ def compute_inequality(
     var_symbol = _validate_variable(variable)
     warnings: List[str] = []
 
+    # Calculator convention for real arccot uses range (0, pi):
+    # arccot(x) = pi/2 - atan(x). SymPy's principal acot branch differs
+    # on negative reals and can therefore add spurious intervals for
+    # inequalities such as arccot(x) < pi/4. Rewrite only for inequality
+    # solving so the rest of the symbolic engine keeps its native forms.
+    inequality = inequality.replace(
+        lambda node: getattr(node, "func", None) == sympy.acot,
+        lambda node: sympy.pi / 2 - sympy.atan(node.args[0]),
+    )
+
     try:
         solution_set = sympy.solve_univariate_inequality(inequality, var_symbol, relational=False)
     except (NotImplementedError, TypeError):
