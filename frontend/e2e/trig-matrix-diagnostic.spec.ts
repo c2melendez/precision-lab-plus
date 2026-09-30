@@ -91,6 +91,7 @@ test.describe("Trig matrix diagnostic " + ENGINE, () => {
         let output = "";
         let error = "";
         let actualLatex = "";
+        let requestPayload = null;
         try {
           await setExpression(page, normalizeMatrixExercise(item.exercise));
           actualLatex = await page.locator("math-field").first().evaluate((node) => node.value || "");
@@ -103,7 +104,6 @@ test.describe("Trig matrix diagnostic " + ENGINE, () => {
           ).catch(() => null);
           await calculate.click();
           const apiRequest = await apiRequestPromise;
-          let requestPayload = null;
           if (apiRequest) {
             try { requestPayload = apiRequest.postDataJSON(); }
             catch { requestPayload = apiRequest.postData(); }
