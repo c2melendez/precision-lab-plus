@@ -90,8 +90,10 @@ test.describe("Trig matrix diagnostic " + ENGINE, () => {
         let status = "RESULT";
         let output = "";
         let error = "";
+        let actualLatex = "";
         try {
           await setExpression(page, normalizeMatrixExercise(item.exercise));
+          actualLatex = await page.locator("math-field").first().evaluate((node) => node.value || "");
           const calculate = page.getByRole("region", { name: "Entrada", exact: true })
             .getByRole("button", { name: /calcular|evaluar/i }).first();
           await expect(calculate).toBeEnabled({ timeout: 5000 });
@@ -140,7 +142,7 @@ test.describe("Trig matrix diagnostic " + ENGINE, () => {
         console.log("TRIG_MATRIX_RESULT " + JSON.stringify({
           engine: ENGINE, id: item.id, status,
           exercise: item.exercise_cell, expected: item.expected,
-          output, error, degreeMode, shard: shard + 1
+          output, error, actualLatex, degreeMode, shard: shard + 1
         }));
       }
     });
