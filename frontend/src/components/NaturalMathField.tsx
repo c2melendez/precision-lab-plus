@@ -129,6 +129,17 @@ function collapseKnownFunctionNames(ascii: string): string {
     .replace(/\br\s+i\s+g\s+h\s+t\s*/g, "");
   for (const name of KNOWN_MULTI_LETTER_FUNCTION_NAMES) {
     const spelled = name.split("").join("\\s+");
+
+    // Native inverse notation such as \\sec^{-1}, \\sinh^{-1} may be
+    // serialized by MathLive as "s e c^(-1)" / "s i n h^(-1)". Collapse
+    // the spelled function name before the exponent so the downstream
+    // inverse-normalization rules can turn it into asec/asinh/etc.
+    const beforeInversePower = new RegExp(
+      `\\b${spelled}(?=\\s*(?:\\^|\\*\\*)\\s*\\(?-1\\)?)`,
+      "g",
+    );
+    result = result.replace(beforeInversePower, name);
+
     const pattern = new RegExp(`\\b${spelled}\\s*\\(`, "g");
     result = result.replace(pattern, `${name}(`);
   }
