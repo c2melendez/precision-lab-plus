@@ -136,7 +136,14 @@ async def solve(payload: SolveRequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "solve_request", input_text=payload.equation)
     try:
         result = solve_service.solve_equation(
-            payload.equation, payload.variable, payload.angle_unit, payload.domain
+            payload.equation,
+            payload.variable,
+            payload.angle_unit,
+            payload.domain,
+            payload.domain_lower,
+            payload.domain_upper,
+            payload.domain_lower_inclusive,
+            payload.domain_upper_inclusive,
         )
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.SOLVE, ErrorCode.PARSE_ERROR, str(exc))
