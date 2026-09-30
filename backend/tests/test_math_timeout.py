@@ -28,3 +28,26 @@ def test_math_timeout_interrupts_cpu_bound_operation():
         run_math_operation(slow, timeout_s=0.05)
 
     assert time.perf_counter() - started < 1.0
+
+
+def test_math_timeout_from_worker_thread_does_not_leak_work():
+    results = []
+
+    def invoke_timeout():
+        started = time.perf_counter()
+
+        def slow():
+            while True:
+                pass
+
+        with pytest.raises(TimeoutError):
+            run_math_operation(slow, timeout_s=0.05)
+        results.append(time.perf_counter() - started)
+
+    worker = threading.Thread(target=invoke_timeout)
+    worker.start()
+    worker.join(timeout=2.0)
+
+    assert not worker.is_alive()
+    assert results and results[0] < 1.0
+    assert run_math_operation(lambda: 7, timeout_s=0.2) == 7
