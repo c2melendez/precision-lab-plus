@@ -51,6 +51,9 @@ class SolveRequest(BaseModel):
     equation: str = Field(..., min_length=1, max_length=500)
     variable: Optional[str] = None
     angle_unit: Literal["rad", "deg"] = "rad"
+    # Backward-compatible: dedicated complex workflows keep the historical
+    # behavior unless they explicitly request the real domain.
+    domain: Literal["real", "complex"] = "complex"
 
 
 class MatrixOperationRequest(BaseModel):
