@@ -116,6 +116,8 @@ async def integral(payload: IntegralRequest, request: Request) -> MathResponse:
         return _error(request, OperationType.INTEGRAL, ErrorCode.UNSUPPORTED_IN_PHASE_1, str(exc))
     except integral_service.UnsupportedTrigPowerError as exc:
         return _error(request, OperationType.INTEGRAL, ErrorCode.UNSUPPORTED_OPERATION, str(exc))
+    except integral_service.DivergentIntegralError as exc:
+        return _error(request, OperationType.INTEGRAL, ErrorCode.DOMAIN_ERROR, str(exc))
 
     warnings = list(result.warnings)
 
