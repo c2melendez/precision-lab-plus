@@ -18,8 +18,8 @@ from app.services import solve_service
 client = TestClient(app)
 
 
-def _solve(equation, variable=None, angle_unit="rad"):
-    payload = {"equation": equation, "angle_unit": angle_unit}
+def _solve(equation, variable=None, angle_unit="rad", **extra):
+    payload = {"equation": equation, "angle_unit": angle_unit, **extra}
     if variable is not None:
         payload["variable"] = variable
     return client.post("/api/v1/solve", json=payload)
@@ -112,3 +112,38 @@ def test_solve_parse_error_propagates():
     assert body["success"] is False
     assert body["error_code"] == "PARSE_ERROR"
     assert body["operation"] == "solve"
+
+
+# ---------------------------------------------------------------------------
+# Matriz trigonométrica — dominio real e intervalo explícito
+# ---------------------------------------------------------------------------
+
+def test_real_domain_filters_complex_solutions():
+    response = _solve("sin(x)=2", variable="x", domain="real")
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_data"] == []
+
+
+def test_complex_domain_keeps_historical_complex_solutions():
+    response = _solve("x**2+1=0", variable="x", domain="complex")
+    body = response.json()
+    assert body["success"] is True
+    assert len(body["result_data"]) == 2
+    assert all(item["is_complex"] for item in body["result_data"])
+
+
+def test_bounded_real_trig_equation_returns_all_periodic_solutions_in_interval():
+    response = _solve(
+        "sin(x)=1/2",
+        variable="x",
+        domain="real",
+        domain_lower="0",
+        domain_upper="2*pi",
+        domain_lower_inclusive=True,
+        domain_upper_inclusive=False,
+    )
+    body = response.json()
+    assert body["success"] is True
+    solutions = {item["text"] for item in body["result_data"]}
+    assert solutions == {"pi/6", "5*pi/6"}
