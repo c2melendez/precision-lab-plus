@@ -251,3 +251,42 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
     });
   });
 });
+
+
+describe("Trig matrix notation coverage", () => {
+  it("detects derivative notation without explicit left/right wrapper", () => {
+    expect(detectCalculusIntent("\\frac{d}{dx}\\sin x")).toEqual({
+      kind: "derivative",
+      variable: "x",
+      order: 1,
+      innerLatex: "\\sin x",
+    });
+  });
+
+  it("detects integrals with differential in the numerator", () => {
+    expect(detectCalculusIntent("\\int\\frac{dx}{1+x^2}")).toEqual({
+      kind: "integral",
+      variable: "x",
+      lowerBound: null,
+      upperBound: null,
+      innerLatex: "\\frac{1}{1+x^2}",
+    });
+  });
+
+  it("detects symbolic definite bounds and ignores trailing real-domain assumptions", () => {
+    expect(detectCalculusIntent("\\int_{0}^{\\pi}\\sin x\\,dx")).toEqual({
+      kind: "integral",
+      variable: "x",
+      lowerBound: "0",
+      upperBound: "\\pi",
+      innerLatex: "\\sin x",
+    });
+    expect(detectCalculusIntent("\\int\\operatorname{arcosh}x\\,dx,\\ x>1")).toEqual({
+      kind: "integral",
+      variable: "x",
+      lowerBound: null,
+      upperBound: null,
+      innerLatex: "\\operatorname{arcosh}x",
+    });
+  });
+});
