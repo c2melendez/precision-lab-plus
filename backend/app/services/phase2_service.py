@@ -38,6 +38,7 @@ class LimitResult:
     dne: bool = False
     left_value: sympy.Expr = None
     right_value: sympy.Expr = None
+    dne_reason: str | None = None
 
 
 @dataclass
@@ -97,8 +98,9 @@ def compute_limit(expression: str, variable: str, point: str, direction: str) ->
                 input_expr,
                 sympy.nan,
                 dne=True,
-                left_value=sympy.S.NaN,
-                right_value=sympy.S.NaN,
+                left_value=None,
+                right_value=None,
+                dne_reason="El límite no existe por oscilación.",
             )
         reciprocal = sympy.Pow(var_symbol, -1)
         if point_expr == 0 and input_expr in (
