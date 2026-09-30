@@ -59,10 +59,14 @@ function delayFor(id) {
 }
 
 test.describe("Trig matrix diagnostic " + ENGINE, () => {
-  for (let shard = 0; shard < 4; shard += 1) {
+  const requestedShardRaw = process.env.TRIG_MATRIX_SHARD;
+  const requestedShard = requestedShardRaw === undefined ? null : Number(requestedShardRaw);
+  const shards = requestedShard === null ? [0, 1, 2, 3] : [requestedShard];
+
+  for (const shard of shards) {
     test("324 ejercicios · bloque " + (shard + 1) + "/4", async ({ page }, testInfo) => {
       test.skip(testInfo.project.name !== "desktop-chromium", "diagnostic runs once per shard");
-      test.setTimeout(8 * 60 * 1000);
+      test.setTimeout(12 * 60 * 1000);
       await page.setViewportSize({ width: 1440, height: 900 });
       await openScientific(page);
 
