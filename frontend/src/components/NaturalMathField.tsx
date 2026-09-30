@@ -463,7 +463,14 @@ export function latexToBackendSyntax(latex: string): string {
   // parser accepts bare identifiers (acsc(...), asinh(...), csch(...)),
   // not LaTeX commands (\\acsc(...)).
   const backendSafeFunctions = normalizeBackendFunctionApplications(normalizedFunctions);
-  return rewritePostfixPercent(applyDegreeNotation(backendSafeFunctions)).trim();
+  // MathLive/ASCII serializes \infty as two standalone letter tokens
+  // ("o o"). The backend contract is SymPy-style "oo". Collapse only
+  // standalone o+o tokens so ordinary identifiers remain untouched.
+  const backendSafeInfinity = backendSafeFunctions.replace(
+    /(^|[^A-Za-z])o\s+o(?=$|[^A-Za-z])/g,
+    "$1oo",
+  );
+  return rewritePostfixPercent(applyDegreeNotation(backendSafeInfinity)).trim();
 }
 
 interface NaturalMathFieldProps {
