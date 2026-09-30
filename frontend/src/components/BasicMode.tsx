@@ -564,6 +564,20 @@ export function BasicMode() {
     }
     setValidationError(null);
 
+    const integralLower =
+      intent.kind === "integral" && intent.lowerBound !== null
+        ? latexToBackendSyntax(intent.lowerBound)
+        : null;
+    const integralUpper =
+      intent.kind === "integral" && intent.upperBound !== null
+        ? latexToBackendSyntax(intent.upperBound)
+        : null;
+    const integralIsImproper =
+      intent.kind === "integral" &&
+      integralLower !== null &&
+      integralUpper !== null &&
+      (integralLower.includes("oo") || integralUpper.includes("oo"));
+
     setLoading(true);
     setErrorMessage(null);
     try {
@@ -584,14 +598,14 @@ export function BasicMode() {
               )
             : intent.kind === "integral"
             ? await submitScientific(
-                "/integral",
+                integralIsImproper ? "/integral/improper" : "/integral",
                 {
                   expression: trimmedInner,
                   variable: intent.variable,
-                  ...(intent.lowerBound !== null
+                  ...(integralLower !== null
                     ? {
-                        lower_bound: latexToBackendSyntax(intent.lowerBound),
-                        upper_bound: latexToBackendSyntax(intent.upperBound ?? ""),
+                        lower_bound: integralLower,
+                        upper_bound: integralUpper ?? "",
                       }
                     : {}),
                 },
