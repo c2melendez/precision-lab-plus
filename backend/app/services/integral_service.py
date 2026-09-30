@@ -219,89 +219,110 @@ def integrate_expression(
         upper_expr = _parse_bound(upper_bound)
 
         # Detect real discontinuities before applying a definite
-        # antiderivative. Do NOT ask solveset/continuous_domain to solve
-        # directly inside a symbolic Interval: SymPy 1.13.3 can raise
-        # "cannot determine truth value of Relational" while reducing
-        # periodic trig solutions against endpoints such as ±pi/2.
+        # antiderivative. SymPy 1.13.3 has a known failure mode when
+        # periodic trig solution sets are intersected with symbolic
+        # endpoints (for example +/-pi/2). Avoid that set-intersection
+        # path entirely:
         #
-        # Instead, solve singularities globally over the reals first and
-        # only then intersect that already-formed set with our interval.
-        # This keeps periodic trig solving independent of symbolic bounds
-        # while retaining endpoint/interior classification below.
-        interval = sympy.Interval(
-            sympy.Min(lower_expr, upper_expr),
-            sympy.Max(lower_expr, upper_expr),
-        )
-        singular_set = sympy.calculus.singularities(input_expr, var_symbol)
-        poles = sympy.Intersection(singular_set, interval)
-        if isinstance(poles, sympy.FiniteSet) and len(poles) > 0:
-                lower_endpoint = interval.start
-                upper_endpoint = interval.end
-                interior_poles = [
-                    pole for pole in poles
-                    if pole != lower_endpoint and pole != upper_endpoint
-                ]
-                if interior_poles:
-                    raise DivergentIntegralError(
-                        "La integral no converge: el integrando tiene una singularidad en el interior del intervalo."
-                    )
+        # 1) classify endpoint singularities by direct substitution;
+        # 2) find only INTERIOR denominator zeros over a numerically
+        #    bounded open interval. Exact endpoint convergence is still
+        #    decided below with one-sided limits of an antiderivative.
+        lower_endpoint = sympy.Min(lower_expr, upper_expr)
+        upper_endpoint = sympy.Max(lower_expr, upper_expr)
 
-                # A pole at an endpoint does not imply divergence by itself.
-                # Validate the corresponding improper one-sided limits of an
-                # antiderivative. This accepts integrable endpoint
-                # singularities such as 1/(x*sqrt(x**2-1)) on [1,2], while
-                # still rejecting tan(x) on [-pi/2,pi/2].
-                antiderivative_for_endpoint = sympy.integrate(input_expr, var_symbol)
-                if antiderivative_for_endpoint.has(sympy.Integral):
-                    raise DivergentIntegralError(
-                        "No se pudo verificar la convergencia de la singularidad en el extremo."
-                    )
-                delta = sympy.simplify(upper_expr - lower_expr)
-                forward = delta.is_nonnegative
-                if forward is None:
-                    try:
-                        forward = float(sympy.N(delta)) >= 0
-                    except (TypeError, ValueError):
-                        forward = True
+        def _is_singular_at(point):
+            value = sympy.simplify(input_expr.subs(var_symbol, point))
+            return (
+                value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan)
+                or value.is_finite is False
+            )
 
-                lower_value = (
-                    sympy.limit(
-                        antiderivative_for_endpoint,
-                        var_symbol,
-                        lower_expr,
-                        dir="+" if forward else "-",
-                    )
-                    if lower_expr in poles
-                    else antiderivative_for_endpoint.subs(var_symbol, lower_expr)
+        lower_is_pole = _is_singular_at(lower_endpoint)
+        upper_is_pole = _is_singular_at(upper_endpoint)
+
+        rewritten = input_expr.rewrite(sympy.cos)
+        denominator = sympy.denom(sympy.together(rewritten))
+        if denominator != 1:
+            try:
+                lower_numeric = sympy.Float(sympy.N(lower_endpoint, 30), 30)
+                upper_numeric = sympy.Float(sympy.N(upper_endpoint, 30), 30)
+                interior_domain = sympy.Interval(
+                    lower_numeric,
+                    upper_numeric,
+                    left_open=True,
+                    right_open=True,
                 )
-                upper_value = (
-                    sympy.limit(
-                        antiderivative_for_endpoint,
-                        var_symbol,
-                        upper_expr,
-                        dir="-" if forward else "+",
-                    )
-                    if upper_expr in poles
-                    else antiderivative_for_endpoint.subs(var_symbol, upper_expr)
+                interior_poles = sympy.solveset(
+                    denominator,
+                    var_symbol,
+                    domain=interior_domain,
                 )
-                endpoint_reference = sympy.simplify(upper_value - lower_value)
-                if endpoint_reference.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
-                    raise DivergentIntegralError(
-                        "La integral no converge: la singularidad del extremo produce un límite infinito o indefinido."
-                    )
-                if endpoint_reference.is_finite is False:
-                    raise DivergentIntegralError(
-                        "La integral no converge en el extremo indicado."
-                    )
-                return IntegralResult(
-                    input_expr=input_expr,
-                    antiderivative=antiderivative_for_endpoint,
-                    steps=[],
-                    has_detailed_steps=False,
-                    warnings=["Integral impropia convergente validada mediante límites laterales en el extremo."],
-                    is_definite=True,
-                    definite_value=endpoint_reference,
+            except (TypeError, ValueError, NotImplementedError):
+                interior_poles = sympy.EmptySet
+
+            if isinstance(interior_poles, sympy.FiniteSet) and len(interior_poles) > 0:
+                raise DivergentIntegralError(
+                    "La integral no converge: el integrando tiene una singularidad en el interior del intervalo."
                 )
+
+        if lower_is_pole or upper_is_pole:
+            # A pole at an endpoint does not imply divergence by itself.
+            # Validate the corresponding improper one-sided limits of an
+            # antiderivative. This accepts integrable endpoint
+            # singularities such as 1/(x*sqrt(x**2-1)) on [1,2], while
+            # still rejecting tan(x) on [-pi/2,pi/2].
+            antiderivative_for_endpoint = sympy.integrate(input_expr, var_symbol)
+            if antiderivative_for_endpoint.has(sympy.Integral):
+                raise DivergentIntegralError(
+                    "No se pudo verificar la convergencia de la singularidad en el extremo."
+                )
+            delta = sympy.simplify(upper_expr - lower_expr)
+            forward = delta.is_nonnegative
+            if forward is None:
+                try:
+                    forward = float(sympy.N(delta)) >= 0
+                except (TypeError, ValueError):
+                    forward = True
+
+            lower_value = (
+                sympy.limit(
+                    antiderivative_for_endpoint,
+                    var_symbol,
+                    lower_expr,
+                    dir="+" if forward else "-",
+                )
+                if _is_singular_at(lower_expr)
+                else antiderivative_for_endpoint.subs(var_symbol, lower_expr)
+            )
+            upper_value = (
+                sympy.limit(
+                    antiderivative_for_endpoint,
+                    var_symbol,
+                    upper_expr,
+                    dir="-" if forward else "+",
+                )
+                if _is_singular_at(upper_expr)
+                else antiderivative_for_endpoint.subs(var_symbol, upper_expr)
+            )
+            endpoint_reference = sympy.simplify(upper_value - lower_value)
+            if endpoint_reference.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
+                raise DivergentIntegralError(
+                    "La integral no converge: la singularidad del extremo produce un límite infinito o indefinido."
+                )
+            if endpoint_reference.is_finite is False:
+                raise DivergentIntegralError(
+                    "La integral no converge en el extremo indicado."
+                )
+            return IntegralResult(
+                input_expr=input_expr,
+                antiderivative=antiderivative_for_endpoint,
+                steps=[],
+                has_detailed_steps=False,
+                warnings=["Integral impropia convergente validada mediante límites laterales en el extremo."],
+                is_definite=True,
+                definite_value=endpoint_reference,
+            )
 
         reference = sympy.integrate(input_expr, (var_symbol, lower_expr, upper_expr))
         return IntegralResult(
