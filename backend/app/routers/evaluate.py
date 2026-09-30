@@ -40,7 +40,7 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
 
     try:
         result = evaluate_service.evaluate(
-            payload.expression, payload.angle_unit, payload.substitutions
+            payload.expression, payload.angle_unit, payload.substitutions, payload.domain
         )
     except parsing.ParseSecurityError as exc:
         return _error(request, ErrorCode.PARSE_ERROR, str(exc))
