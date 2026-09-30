@@ -569,7 +569,10 @@ export function BasicMode() {
                   expression: trimmedInner,
                   variable: intent.variable,
                   ...(intent.lowerBound !== null
-                    ? { lower_bound: intent.lowerBound, upper_bound: intent.upperBound }
+                    ? {
+                        lower_bound: latexToBackendSyntax(intent.lowerBound),
+                        upper_bound: latexToBackendSyntax(intent.upperBound ?? ""),
+                      }
                     : {}),
                 },
                 `∫ ${trimmedInner}`,
