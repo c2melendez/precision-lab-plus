@@ -290,7 +290,7 @@ function getComputeEngine(): ComputeEngine {
 
 function stripTrailingAssumption(latex: string): string {
   return latex.replace(
-    /,\s*(?:\\quad\s*)?(?:\\lvert\s*[A-Za-z]\s*\\rvert|[A-Za-z])\s*[<>]=?\s*.+$/s,
+    /,\s*(?:\\quad\s*)?(?:\\\s*)?(?:\\lvert\s*[A-Za-z]\s*\\rvert|[A-Za-z])\s*[<>]=?\s*.+$/s,
     "",
   ).trim();
 }
