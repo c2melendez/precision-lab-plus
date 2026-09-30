@@ -140,3 +140,12 @@ def test_trig_power_notations_share_canonical_result():
         assert conventional["success"] is True
         assert conventional["antiderivative_expression"] == postfix["antiderivative_expression"]
         assert conventional["result_latex"] == postfix["result_latex"]
+
+
+def test_trig_definite_integral_uses_direct_fast_path():
+    response = _integral("sin(x)", lower_bound="0", upper_bound="pi")
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_text"] == "2"
+    assert body["has_detailed_steps"] is False
+    assert any("directamente" in warning for warning in body["warnings"])
