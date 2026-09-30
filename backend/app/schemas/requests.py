@@ -55,6 +55,10 @@ class SolveRequest(BaseModel):
     # Backward-compatible: dedicated complex workflows keep the historical
     # behavior unless they explicitly request the real domain.
     domain: Literal["real", "complex"] = "complex"
+    domain_lower: Optional[str] = None
+    domain_upper: Optional[str] = None
+    domain_lower_inclusive: bool = True
+    domain_upper_inclusive: bool = True
 
 
 class MatrixOperationRequest(BaseModel):
