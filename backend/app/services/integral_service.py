@@ -219,19 +219,21 @@ def integrate_expression(
         upper_expr = _parse_bound(upper_bound)
 
         # Detect real discontinuities before applying a definite
-        # antiderivative. Using solveset(denominator, domain=Interval)
-        # can raise "cannot determine truth value of Relational" for
-        # symbolic trig endpoints such as [-pi/2, pi/2]. continuous_domain
-        # handles those endpoint/interior exclusions directly and also
-        # covers algebraic endpoint singularities.
+        # antiderivative. Do NOT ask solveset/continuous_domain to solve
+        # directly inside a symbolic Interval: SymPy 1.13.3 can raise
+        # "cannot determine truth value of Relational" while reducing
+        # periodic trig solutions against endpoints such as ±pi/2.
+        #
+        # Instead, solve singularities globally over the reals first and
+        # only then intersect that already-formed set with our interval.
+        # This keeps periodic trig solving independent of symbolic bounds
+        # while retaining endpoint/interior classification below.
         interval = sympy.Interval(
             sympy.Min(lower_expr, upper_expr),
             sympy.Max(lower_expr, upper_expr),
         )
-        real_domain = sympy.calculus.util.continuous_domain(
-            input_expr, var_symbol, interval
-        )
-        poles = sympy.simplify(interval - real_domain)
+        singular_set = sympy.calculus.singularities(input_expr, var_symbol)
+        poles = sympy.Intersection(singular_set, interval)
         if isinstance(poles, sympy.FiniteSet) and len(poles) > 0:
                 lower_endpoint = interval.start
                 upper_endpoint = interval.end
