@@ -218,18 +218,21 @@ def integrate_expression(
         lower_expr = _parse_bound(lower_bound)
         upper_expr = _parse_bound(upper_bound)
 
-        # Detect poles introduced by reciprocal trigonometric functions
-        # before applying a definite antiderivative. This prevents false
-        # finite values such as integral(sec(x)**2, 0, pi) -> 0.
-        rewritten = input_expr.rewrite(sympy.sin).rewrite(sympy.cos)
-        denominator = sympy.denom(sympy.together(rewritten))
-        if denominator != 1:
-            interval = sympy.Interval(
-                sympy.Min(lower_expr, upper_expr),
-                sympy.Max(lower_expr, upper_expr),
-            )
-            poles = sympy.solveset(denominator, var_symbol, domain=interval)
-            if isinstance(poles, sympy.FiniteSet) and len(poles) > 0:
+        # Detect real discontinuities before applying a definite
+        # antiderivative. Using solveset(denominator, domain=Interval)
+        # can raise "cannot determine truth value of Relational" for
+        # symbolic trig endpoints such as [-pi/2, pi/2]. continuous_domain
+        # handles those endpoint/interior exclusions directly and also
+        # covers algebraic endpoint singularities.
+        interval = sympy.Interval(
+            sympy.Min(lower_expr, upper_expr),
+            sympy.Max(lower_expr, upper_expr),
+        )
+        real_domain = sympy.calculus.util.continuous_domain(
+            input_expr, var_symbol, interval
+        )
+        poles = sympy.simplify(interval - real_domain)
+        if isinstance(poles, sympy.FiniteSet) and len(poles) > 0:
                 lower_endpoint = interval.start
                 upper_endpoint = interval.end
                 interior_poles = [
