@@ -176,6 +176,10 @@ def solve_equation(
     variable_name: Optional[str],
     angle_unit: str = "rad",
     domain: str = "complex",
+    domain_lower: Optional[str] = None,
+    domain_upper: Optional[str] = None,
+    domain_lower_inclusive: bool = True,
+    domain_upper_inclusive: bool = True,
 ) -> SolveResult:
     eq = parsing.parse_expression_tree(equation_text, allow_equation=True)
     free_symbols = sorted(eq.free_symbols, key=lambda s: s.name)
@@ -210,18 +214,43 @@ def solve_equation(
 
     has_direct_trig = _equation_has_direct_trig_of_variable(eq, var)
 
-    steps_and_solutions = _linear_steps(eq, var)
-    if steps_and_solutions is None:
-        steps_and_solutions = _quadratic_steps(eq, var)
+    bounded_real_domain = (
+        domain == "real" and domain_lower is not None and domain_upper is not None
+    )
 
-    if steps_and_solutions is not None:
-        steps, solutions = steps_and_solutions
-        has_detailed_steps = True
-    else:
-        raw_solutions = sympy.solve(eq, var)
-        solutions = list(raw_solutions) if isinstance(raw_solutions, (list, tuple)) else []
+    if bounded_real_domain:
+        lower_expr = parsing.parse_expression_tree(domain_lower, allow_equation=False)
+        upper_expr = parsing.parse_expression_tree(domain_upper, allow_equation=False)
+        if lower_expr.free_symbols or upper_expr.free_symbols:
+            raise parsing.ParseSecurityError("Los límites del dominio deben ser valores concretos.")
+        interval = sympy.Interval(
+            lower_expr,
+            upper_expr,
+            left_open=not domain_lower_inclusive,
+            right_open=not domain_upper_inclusive,
+        )
+        solution_set = sympy.solveset(eq, var, domain=interval)
+        if isinstance(solution_set, sympy.FiniteSet):
+            solutions = sorted(list(solution_set), key=sympy.default_sort_key)
+        else:
+            raw_solutions = sympy.solve(eq, var)
+            candidates = list(raw_solutions) if isinstance(raw_solutions, (list, tuple)) else []
+            solutions = [s for s in candidates if interval.contains(s) is sympy.true]
         steps = []
         has_detailed_steps = False
+    else:
+        steps_and_solutions = _linear_steps(eq, var)
+        if steps_and_solutions is None:
+            steps_and_solutions = _quadratic_steps(eq, var)
+
+        if steps_and_solutions is not None:
+            steps, solutions = steps_and_solutions
+            has_detailed_steps = True
+        else:
+            raw_solutions = sympy.solve(eq, var)
+            solutions = list(raw_solutions) if isinstance(raw_solutions, (list, tuple)) else []
+            steps = []
+            has_detailed_steps = False
 
     if angle_unit == "deg":
         solutions = _apply_degree_conversion(solutions, has_direct_trig)
