@@ -92,9 +92,23 @@ test.describe("Trig matrix diagnostic " + ENGINE, () => {
             .getByRole("button", { name: /calcular|evaluar/i }).first();
           await expect(calculate).toBeEnabled({ timeout: 5000 });
           await calculate.click();
-          await page.waitForTimeout(delayFor(item.id));
 
+          // Do not advance to the next matrix case while the previous
+          // symbolic request is still running. A fixed 0.85/1.9s delay
+          // caused requests to overlap, saturating the single backend and
+          // turning valid cases into 15s timeouts/network errors.
+          const resultRegion = page.getByRole("region", { name: "Resultado", exact: true });
           const alert = page.locator('[role="alert"][aria-live="assertive"]').first();
+          await expect.poll(async () => {
+            if (await alert.isVisible().catch(() => false)) return "done";
+            const text = ((await resultRegion.innerText().catch(() => "")) || "").replace(/\s+/g, " ").trim();
+            return text && !/Calculando…|Calculando\.\.\.|Calculando/i.test(text) ? "done" : "pending";
+          }, {
+            timeout: 17_000,
+            intervals: [150, 250, 500, 750],
+          }).toBe("done");
+
+          
           if (await alert.isVisible().catch(() => false)) {
             status = "ERROR";
             error = ((await alert.innerText().catch(() => "")) || "").replace(/\s+/g, " ").trim().slice(0, 700);
