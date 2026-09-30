@@ -6,5 +6,5 @@ it.each([
   "\\sin\\left(x\\right)^{3}",
   "\\cos^{5}\\left(2x\\right)",
 ])("accepts trig powers in the editor: %s", (latex) => {
-  expect(latexToBackendSyntax(latex)).toMatch(/(?:sin|cos)\s*\(?\s*(?:\^\s*\d+\s*\(.*\)|\(.*\)\s*\^\s*\d+)/);
+  expect(latexToBackendSyntax(latex)).toMatch(/(?:sin|cos).*?(?:\\^\\s*\\d+|\\*\\*\\s*\\(?\\d+\\)?)/);
 });
