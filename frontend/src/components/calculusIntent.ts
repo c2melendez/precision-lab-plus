@@ -288,6 +288,22 @@ function getComputeEngine(): ComputeEngine {
   return ce;
 }
 
+function readBalancedLatexGroup(
+  source: string,
+  start: number,
+): { content: string; next: number } | null {
+  if (source[start] !== "{") return null;
+  let depth = 1;
+  let i = start + 1;
+  while (i < source.length && depth > 0) {
+    if (source[i] === "{") depth += 1;
+    else if (source[i] === "}") depth -= 1;
+    i += 1;
+  }
+  if (depth !== 0) return null;
+  return { content: source.slice(start + 1, i - 1), next: i };
+}
+
 function stripTrailingAssumption(latex: string): string {
   return latex.replace(
     /,\s*(?:\\quad\s*)?(?:\\\s*)?(?:\\lvert\s*[A-Za-z]\s*\\rvert|[A-Za-z])\s*[<>]=?\s*.+$/s,
@@ -297,6 +313,47 @@ function stripTrailingAssumption(latex: string): string {
 
 function detectRawIntegral(latex: string): Extract<CalculusIntent, { kind: "integral" }> | null {
   const source = stripTrailingAssumption(latex);
+
+  // Robust parser for definite-integral bounds. MathLive may serialize
+  // a bound such as pi/2 as \\frac{\\pi}{2}, so a regex using [^{}]+
+  // cannot safely read the full group.
+  if (source.startsWith("\\int_")) {
+    let cursor = "\\int_".length;
+    const lower = readBalancedLatexGroup(source, cursor);
+    if (lower) {
+      cursor = lower.next;
+      if (source[cursor] === "^") {
+        cursor += 1;
+        const upper = readBalancedLatexGroup(source, cursor);
+        if (upper) {
+          cursor = upper.next;
+          const tail = source.slice(cursor).trim();
+          const differentialNumerator = tail.match(
+            /^\\frac\{d([a-zA-Z])\}\{(.+)\}$/s,
+          );
+          if (differentialNumerator) {
+            return {
+              kind: "integral",
+              variable: differentialNumerator[1],
+              lowerBound: lower.content,
+              upperBound: upper.content,
+              innerLatex: `\\frac{1}{${differentialNumerator[2]}}`,
+            };
+          }
+          const normal = tail.match(/^(.*?)\s*(?:\\,)?\s*d([a-zA-Z])$/s);
+          if (normal && normal[1].trim()) {
+            return {
+              kind: "integral",
+              variable: normal[2],
+              lowerBound: lower.content,
+              upperBound: upper.content,
+              innerLatex: normal[1].trim(),
+            };
+          }
+        }
+      }
+    }
+  }
 
   let match = source.match(/^\\int_\{([^{}]+)\}\^\{([^{}]+)\}\s*\\frac\{d([a-zA-Z])\}\{(.+)\}$/s);
   if (match) {
@@ -415,6 +472,29 @@ function detectLimit(latex: string): Extract<CalculusIntent, { kind: "limit" }> 
 
   const lateral = detectLateralLimit(trimmed);
   if (lateral) return lateral;
+
+  if (trimmed.startsWith("\\lim_")) {
+    const group = readBalancedLatexGroup(trimmed, "\\lim_".length);
+    if (group) {
+      const condition = group.content.match(/^\s*([a-zA-Z])\s*\\to\s*(.+?)\s*$/s);
+      const body = trimmed.slice(group.next).trim();
+      if (condition && body) {
+        const rawPoint = condition[2].trim();
+        return {
+          kind: "limit",
+          variable: condition[1],
+          point:
+            rawPoint === "\\infty"
+              ? "oo"
+              : rawPoint === "-\\infty"
+                ? "-oo"
+                : rawPoint,
+          innerLatex: body,
+          direction: "both",
+        };
+      }
+    }
+  }
 
   let json;
   try {
