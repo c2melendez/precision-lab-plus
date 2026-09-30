@@ -185,6 +185,10 @@ function collapseKnownFunctionNames(ascii: string): string {
  */
 function applyDegreeNotation(ascii: string): string {
   let result = ascii;
+  // Real MathLive/AsciiMath serialization observed in B7:
+  // 60^{\\circ} -> "60^@" (not a literal °). Normalize this first so
+  // the same radian conversion below handles both representations.
+  result = result.replace(/(-?\d+(?:\.\d+)?)\s*\^@/g, "($1)°");
   result = result.replace(/(-?\d+(?:\.\d+)?)°(\d+(?:\.\d+)?)′(\d+(?:\.\d+)?)″/g, "($1+$2/60+$3/3600)°");
   result = result.replace(/(-?\d+(?:\.\d+)?)°(\d+(?:\.\d+)?)′/g, "($1+$2/60)°");
   result = result.replace(/\(([^()]*)\)°/g, "(($1)*pi/180)");
