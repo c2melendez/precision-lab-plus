@@ -133,6 +133,14 @@ describe("Trig matrix notation normalization", () => {
     expect(latexToBackendSyntax(latex).replace(/\s+/g, "")).toBe(expected);
   });
 
+  it.each([
+    ["\\mathrm{arcsec} x", "asec(x)"],
+    ["\\mathrm{arcosh} x", "acosh(x)"],
+    ["\\mathrm{sech} x", "sech(x)"],
+  ])("normalizes MathLive mathrm serialization %s", (latex, expected) => {
+    expect(latexToBackendSyntax(latex).replace(/\s+/g, "")).toBe(expected);
+  });
+
   it("keeps inverse operator names atomic inside equations and calculus bodies", () => {
     expect(latexToBackendSyntax("\\operatorname{arcsec} x=\\frac{\\pi}{3}").replace(/\s+/g, ""))
       .toBe("asec(x)=(pi)/(3)");
