@@ -149,3 +149,10 @@ def test_trig_definite_integral_uses_direct_fast_path():
     assert body["result_text"] == "2"
     assert body["has_detailed_steps"] is False
     assert any("directamente" in warning for warning in body["warnings"])
+
+
+def test_definite_integral_crossing_trig_pole_is_domain_error():
+    response = _integral("sec(x)^2", lower_bound="0", upper_bound="pi")
+    body = response.json()
+    assert body["success"] is False
+    assert body["error_code"] == "DOMAIN_ERROR"
