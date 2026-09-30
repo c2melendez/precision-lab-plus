@@ -86,3 +86,13 @@ describe("latexToBackendSyntax — Fase 10 (funciones de estadística)", () => {
     expect(latexToBackendSyntax("xyz")).toBe("x y z");
   });
 });
+
+
+describe("Trig matrix notation normalization", () => {
+  it("rewrites function powers that SymPy expects as explicit powers", () => {
+    const value = latexToBackendSyntax("\\cosh^{2}(1)-\\sinh^{2}(1)");
+    expect(value).toContain("cosh");
+    expect(value).toContain("sinh");
+    expect(value).toContain("**(2)");
+  });
+});
