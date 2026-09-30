@@ -170,3 +170,45 @@ def test_endpoint_poles_still_reject_divergent_tan_integral():
     body = response.json()
     assert body["success"] is False
     assert body["error_code"] == "DOMAIN_ERROR"
+
+
+def test_fast_path_common_identities_are_exact_antiderivatives():
+    x = sp.Symbol("x")
+    cases = [
+        ("sec(x)^2", sp.tan(x)),
+        ("csc(x)^2", -sp.cot(x)),
+        ("1/(1+x^2)", sp.atan(x)),
+        ("1/sqrt(1-x^2)", sp.asin(x)),
+        ("cosh(x)", sp.sinh(x)),
+        ("tanh(x)", sp.log(sp.cosh(x))),
+        ("sech(x)^2", sp.tanh(x)),
+        ("csch(x)^2", -sp.coth(x)),
+        ("sinh(x)*cosh(x)", sp.sinh(x) ** 2 / 2),
+        ("x*cos(x)", x * sp.sin(x) + sp.cos(x)),
+        ("x*sinh(x)", x * sp.cosh(x) - sp.sinh(x)),
+        ("sin(x)^2", x / 2 - sp.sin(2 * x) / 4),
+        ("sinh(x)^2", sp.sinh(2 * x) / 4 - x / 2),
+        ("asinh(x)", x * sp.asinh(x) - sp.sqrt(x**2 + 1)),
+        ("acosh(x)", x * sp.acosh(x) - sp.sqrt(x**2 - 1)),
+        ("atanh(x)", x * sp.atanh(x) + sp.log(1 - x**2) / 2),
+    ]
+    for expression, expected in cases:
+        body = _integral(expression).json()
+        assert body["success"] is True, expression
+        antiderivative = sp.sympify(body["antiderivative_expression"])
+        assert sp.simplify(sp.diff(antiderivative, x) - sp.diff(expected, x)) == 0, expression
+        assert not antiderivative.has(sp.Integral), expression
+
+
+def test_fast_path_definite_common_identities():
+    cases = [
+        ("sin(x)", "0", "pi", sp.Integer(2)),
+        ("1/(1+x^2)", "0", "1", sp.pi / 4),
+        ("cosh(x)", "-1", "1", 2 * sp.sinh(1)),
+        ("sech(x)^2", "0", "1", sp.tanh(1)),
+    ]
+    for expression, lower, upper, expected in cases:
+        body = _integral(expression, lower_bound=lower, upper_bound=upper).json()
+        assert body["success"] is True, expression
+        actual = sp.sympify(body["result_text"])
+        assert sp.simplify(actual - expected) == 0, expression
