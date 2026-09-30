@@ -118,6 +118,17 @@ def test_inequality_is_real_passthrough():
     assert "2" in body["result_text"]
 
 
+def test_arccot_inequality_uses_calculator_real_branch():
+    response = client.post(
+        "/api/v1/inequality",
+        json={"inequality": "acot(x)<pi/4"},
+    )
+    body = response.json()
+    assert body["success"] is True
+    assert "1" in body["result_text"]
+    assert "-oo" not in body["result_text"]
+
+
 def test_integral_improper_is_real_passthrough():
     response = client.post(
         "/api/v1/integral/improper",
