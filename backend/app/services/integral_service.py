@@ -201,6 +201,25 @@ def integrate_expression(
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     var_symbol = _validate_variable(variable)
 
+    # Definite integrals used to compute a full manual antiderivative first
+    # and then call sympy.integrate() again for the definite reference.
+    # That duplicated the most expensive symbolic work and caused many
+    # 15-second client timeouts in the trigonometric matrix. For definite
+    # requests, compute the definite value directly in one symbolic pass.
+    if lower_bound is not None and upper_bound is not None:
+        lower_expr = _parse_bound(lower_bound)
+        upper_expr = _parse_bound(upper_bound)
+        reference = sympy.integrate(input_expr, (var_symbol, lower_expr, upper_expr))
+        return IntegralResult(
+            input_expr=input_expr,
+            antiderivative=sympy.Integral(input_expr, var_symbol),
+            steps=[],
+            has_detailed_steps=False,
+            warnings=["Integral definida calculada directamente para evitar trabajo simbólico duplicado."],
+            is_definite=True,
+            definite_value=reference,
+        )
+
     antiderivative, steps, has_detailed_steps, warnings = _compute_indefinite(
         input_expr, var_symbol
     )
