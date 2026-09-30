@@ -95,11 +95,15 @@ async def limit(payload: LimitRequest, request: Request) -> MathResponse:
             result_type=ResultType.SCALAR,
             input_text=payload.expression,
             result_text="DNE",
-            result_latex=r"\text{No existe (límite izquierdo } "
-            + sympy.latex(result.left_value)
-            + r" \neq \text{ límite derecho } "
-            + sympy.latex(result.right_value)
-            + ")",
+            result_latex=(
+                r"\text{No existe}"
+                if result.dne_reason
+                else r"\text{No existe (límite izquierdo } "
+                + sympy.latex(result.left_value)
+                + r" \neq \text{ límite derecho } "
+                + sympy.latex(result.right_value)
+                + ")"
+            ),
             has_detailed_steps=False,
             duration_ms=_duration_ms(request),
         )
