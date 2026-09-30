@@ -202,6 +202,14 @@ function rewritePostfixPercent(ascii: string): string {
   return result;
 }
 
+function rewriteFunctionPowers(ascii: string): string {
+  const names = "sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth";
+  const pattern = new RegExp(`\\b(${names})\\s*(?:\\^|\\*\\*)\\s*\\(?(\\d+)\\)?\\s*\\(([^()]*)\\)`, "g");
+  return ascii.replace(pattern, (_match, fn: string, power: string, arg: string) =>
+    `(${fn}(${arg}))**(${power})`
+  );
+}
+
 function rewriteCommonInverses(ascii: string): string {
   const names: Record<string, string> = {
     sin: "asin", cos: "acos", tan: "atan", csc: "acsc", sec: "asec", cot: "acot",
@@ -278,7 +286,7 @@ export function latexToBackendSyntax(latex: string): string {
   const collapsed = collapseKnownFunctionNames(ascii);
   const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
   return rewritePostfixPercent(applyDegreeNotation(
-    rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii)),
+    rewriteFunctionPowers(rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii))),
   )).trim();
 }
 
