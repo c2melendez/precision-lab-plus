@@ -73,6 +73,7 @@ describe("BasicMode", () => {
     expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
       expression: "2+2",
       angle_unit: "rad",
+      domain: "real",
     });
   });
 
@@ -105,6 +106,7 @@ describe("BasicMode", () => {
     expect(mockedCallApi).toHaveBeenCalledWith("/solve", {
       equation: "2x+3=7",
       angle_unit: "rad",
+      domain: "real",
     });
   });
 
