@@ -110,6 +110,10 @@ class SolveSystemRequest(BaseModel):
 class InequalityRequest(BaseModel):
     inequality: str = Field(..., min_length=1, max_length=500)  # incluye <, >, <=, >=
     variable: Optional[str] = None
+    domain_lower: Optional[str] = None
+    domain_upper: Optional[str] = None
+    domain_lower_inclusive: bool = True
+    domain_upper_inclusive: bool = True
 
 
 class InequalitySystemRequest(BaseModel):
