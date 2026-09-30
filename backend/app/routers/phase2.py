@@ -17,6 +17,7 @@ import sympy
 from fastapi import APIRouter, Request
 
 from app.core.logging import log_request_event
+from app.core.math_timeout import run_math_operation
 from app.schemas.requests import (
     Graph3DRequest,
     GraphParametricRequest,
@@ -79,9 +80,15 @@ def _stub_response(request: Request, operation: OperationType) -> MathResponse:
 async def limit(payload: LimitRequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "limit_request", input_text=payload.expression)
     try:
-        result = phase2_service.compute_limit(
-            payload.expression, payload.variable, payload.point, payload.direction
+        result = run_math_operation(
+            phase2_service.compute_limit,
+            payload.expression,
+            payload.variable,
+            payload.point,
+            payload.direction,
         )
+    except TimeoutError as exc:
+        return _error(request, OperationType.LIMIT, ErrorCode.TIMEOUT, str(exc))
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.LIMIT, ErrorCode.PARSE_ERROR, str(exc))
     except ComplexityLimitError as exc:
