@@ -349,3 +349,10 @@ def test_complex_domain_remains_backward_compatible():
     body = response.json()
     assert body["success"] is True
     assert body["result_latex"]
+
+
+def test_real_domain_allows_nested_inverse_trig_composition():
+    response = _evaluate(expression="sin(acos(3/5))", domain="real")
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_approx"] == pytest.approx(4/5)
