@@ -106,7 +106,10 @@ describe("Trig matrix notation normalization", () => {
   it.each([
     ["\\operatorname{arccot} x", "acot"],
     ["\\operatorname{arcsec} x", "asec"],
+    ["\\operatorname{arccsc} x", "acsc"],
     ["\\operatorname{arsinh} x", "asinh"],
+    ["\\operatorname{arcsch} x", "acsch"],
+    ["\\operatorname{arsech} x", "asech"],
     ["\\operatorname{arcosh} x", "acosh"],
     ["\\operatorname{artanh} x", "atanh"],
     ["\\operatorname{arcoth} x", "acoth"],
@@ -128,5 +131,14 @@ describe("Trig matrix notation normalization", () => {
     ["\\operatorname{arcoth}(2)", "acoth(2)"],
   ])("keeps parenthesized operatorname %s atomic", (latex, expected) => {
     expect(latexToBackendSyntax(latex).replace(/\\s+/g, "")).toBe(expected);
+  });
+
+  it("keeps inverse operator names atomic inside equations and calculus bodies", () => {
+    expect(latexToBackendSyntax("\\operatorname{arcsec} x=\\frac{\\pi}{3}").replace(/\\s+/g, ""))
+      .toBe("asec(x)=(pi)/(3)");
+    expect(latexToBackendSyntax("\\operatorname{arcosh} x=\\ln 2").replace(/\\s+/g, ""))
+      .toBe("acosh(x)=ln2");
+    expect(latexToBackendSyntax("\\operatorname{arccot} x").replace(/\\s+/g, ""))
+      .toBe("acot(x)");
   });
 });
