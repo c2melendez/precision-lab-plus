@@ -74,7 +74,7 @@ interface SubstitutionRow {
 // comporte igual sin importar desde qué pantalla se escribió.
 const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
 
-function extractEquationIntervalRestriction(source: string): {
+function extractIntervalRestriction(source: string): {
   expressionLatex: string;
   lowerLatex: string;
   upperLatex: string;
@@ -670,10 +670,8 @@ export function BasicMode() {
       return;
     }
 
-    const equationInterval = latex.includes("=")
-      ? extractEquationIntervalRestriction(latex)
-      : null;
-    const sourceForBackend = equationInterval?.expressionLatex ?? latex;
+    const intervalRestriction = extractIntervalRestriction(latex);
+    const sourceForBackend = intervalRestriction?.expressionLatex ?? latex;
     const trimmed = latexToBackendSyntax(sourceForBackend);
     if (!trimmed) {
       setValidationError("La expresión no puede estar vacía.");
@@ -697,7 +695,22 @@ export function BasicMode() {
     setErrorMessage(null);
     try {
       const result = isInequality
-        ? await submitScientific("/inequality", { inequality: trimmed }, trimmed, latex)
+        ? await submitScientific(
+            "/inequality",
+            {
+              inequality: trimmed,
+              ...(intervalRestriction
+                ? {
+                    domain_lower: latexToBackendSyntax(intervalRestriction.lowerLatex),
+                    domain_upper: latexToBackendSyntax(intervalRestriction.upperLatex),
+                    domain_lower_inclusive: intervalRestriction.lowerInclusive,
+                    domain_upper_inclusive: intervalRestriction.upperInclusive,
+                  }
+                : {}),
+            },
+            trimmed,
+            latex,
+          )
         : isEquation
           ? await submitScientific(
               "/solve",
@@ -705,12 +718,12 @@ export function BasicMode() {
                 equation: trimmed,
                 angle_unit: angleUnit,
                 domain: "real",
-                ...(equationInterval
+                ...(intervalRestriction
                   ? {
-                      domain_lower: latexToBackendSyntax(equationInterval.lowerLatex),
-                      domain_upper: latexToBackendSyntax(equationInterval.upperLatex),
-                      domain_lower_inclusive: equationInterval.lowerInclusive,
-                      domain_upper_inclusive: equationInterval.upperInclusive,
+                      domain_lower: latexToBackendSyntax(intervalRestriction.lowerLatex),
+                      domain_upper: latexToBackendSyntax(intervalRestriction.upperLatex),
+                      domain_lower_inclusive: intervalRestriction.lowerInclusive,
+                      domain_upper_inclusive: intervalRestriction.upperInclusive,
                     }
                   : {}),
               },
