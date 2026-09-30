@@ -233,20 +233,53 @@ const OPERATOR_NAME_TO_BACKEND: Record<string, string> = {
 
 function rewriteOperatorNameLatex(latex: string): string {
   let out = latex;
-  for (const [displayName, backendName] of Object.entries(OPERATOR_NAME_TO_BACKEND)) {
+
+  const inverseDisplayToDirect: Record<string, string> = {
+    arcsin: "sin",
+    arccos: "cos",
+    arctan: "tan",
+    arccot: "cot",
+    arcsec: "sec",
+    arccsc: "csc",
+    arsinh: "sinh",
+    arcosh: "cosh",
+    artanh: "tanh",
+    arcsch: "csch",
+    arsech: "sech",
+    arcoth: "coth",
+  };
+
+  // MathLive spells \\mathrm{alias} as independent letters in ASCII.
+  // Rewrite operatorname inverses to native function notation first;
+  // downstream inverse normalization then produces backend aliases.
+  for (const [displayName, directName] of Object.entries(inverseDisplayToDirect)) {
     const bare = new RegExp(
       `\\\\operatorname\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
       "g",
     );
-    out = out.replace(bare, `\\\\mathrm{${backendName}}\\\\left($1\\\\right)`);
+    out = out.replace(
+      bare,
+      `\\\\${directName}^{-1}\\\\left($1\\\\right)`,
+    );
     out = out.replace(
       new RegExp(`\\\\operatorname\\{${displayName}\\}`, "g"),
-      `\\\\mathrm{${backendName}}`,
+      `\\\\${directName}^{-1}`,
+    );
+  }
+
+  for (const displayName of ["sinh", "cosh", "tanh", "csch", "sech", "coth"]) {
+    const bare = new RegExp(
+      `\\\\operatorname\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
+      "g",
+    );
+    out = out.replace(bare, `\\\\${displayName}\\\\left($1\\\\right)`);
+    out = out.replace(
+      new RegExp(`\\\\operatorname\\{${displayName}\\}`, "g"),
+      `\\\\${displayName}`,
     );
   }
   return out;
 }
-
 function rewriteHyperbolicInverses(ascii: string): string {
   let result = ascii;
   for (const [name, inverse] of Object.entries(HYPERBOLIC_INVERSE_NAMES)) {
