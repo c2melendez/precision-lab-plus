@@ -124,6 +124,17 @@ def compute_limit(expression: str, variable: str, point: str, direction: str) ->
 
     try:
         value = sympy.limit(limit_expr, var_symbol, point_expr, dir=_DIRECTION_MAP[direction])
+        if direction == "both" and isinstance(
+            value, sympy.calculus.accumulationbounds.AccumBounds
+        ):
+            return LimitResult(
+                input_expr,
+                sympy.nan,
+                dne=True,
+                left_value=None,
+                right_value=None,
+                dne_reason="El límite no existe por oscilación.",
+            )
         if direction == "both" and value.has(sympy.zoo):
             left = sympy.limit(input_expr, var_symbol, point_expr, dir="-")
             right = sympy.limit(input_expr, var_symbol, point_expr, dir="+")
