@@ -139,15 +139,15 @@ function collapseKnownFunctionNames(ascii: string): string {
   // and "a c r csc(" for arccsc. Collapse them after ordinary function
   // names so the recognized tail is already atomic.
   const hybridInverses: Array<[RegExp, string]> = [
-    [/\\ba\\s+r\\s+sinh\\s*\\(/g, "asinh("],
-    [/\\ba\\s+r\\s+cosh\\s*\\(/g, "acosh("],
-    [/\\ba\\s+r\\s+tanh\\s*\\(/g, "atanh("],
-    [/\\ba\\s+r\\s+csch\\s*\\(/g, "acsch("],
-    [/\\ba\\s+r\\s+sech\\s*\\(/g, "asech("],
-    [/\\ba\\s+r\\s+coth\\s*\\(/g, "acoth("],
-    [/\\ba\\s+c\\s+r\\s+csc\\s*\\(/g, "acsc("],
-    [/\\ba\\s+c\\s+r\\s+sec\\s*\\(/g, "asec("],
-    [/\\ba\\s+c\\s+r\\s+cot\\s*\\(/g, "acot("],
+    [/\ba\s+r\s+sinh\s*\(/g, "asinh("],
+    [/\ba\s+r\s+cosh\s*\(/g, "acosh("],
+    [/\ba\s+r\s+tanh\s*\(/g, "atanh("],
+    [/\ba\s+r\s+csch\s*\(/g, "acsch("],
+    [/\ba\s+r\s+sech\s*\(/g, "asech("],
+    [/\ba\s+r\s+coth\s*\(/g, "acoth("],
+    [/\ba\s+c\s+r\s+csc\s*\(/g, "acsc("],
+    [/\ba\s+c\s+r\s+sec\s*\(/g, "asec("],
+    [/\ba\s+c\s+r\s+cot\s*\(/g, "acot("],
   ];
   for (const [pattern, replacement] of hybridInverses) {
     result = result.replace(pattern, replacement);
