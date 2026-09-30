@@ -686,6 +686,7 @@ export function BasicMode() {
               {
                 expression: trimmed,
                 angle_unit: angleUnit,
+                domain: "real",
                 ...(substitutionsPayload ? { substitutions: substitutionsPayload } : {}),
               },
               trimmed,
@@ -801,7 +802,7 @@ export function BasicMode() {
     try {
       const result = await submitScientific(
         "/evaluate",
-        { expression: trimmed, angle_unit: angleUnit, substitutions: { x: point.trim() } },
+        { expression: trimmed, angle_unit: angleUnit, domain: "real", substitutions: { x: point.trim() } },
         `Evaluar ${trimmed} en x=${point.trim()}`,
         latex,
       );
