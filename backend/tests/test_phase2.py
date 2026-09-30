@@ -163,3 +163,40 @@ def test_derivative_implicit_is_real_passthrough():
     body = response.json()
     assert body["success"] is True
     assert body["result_text"] in {"-x/y", "-x/y(x)"}
+
+
+def test_oscillatory_limit_sin_reciprocal_is_dne():
+    response = client.post(
+        "/api/v1/limit",
+        json={"expression": "sin(1/x)", "variable": "x", "point": "0", "direction": "both"},
+    )
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_text"] == "DNE"
+
+
+def test_oscillatory_limit_sin_at_infinity_is_dne():
+    response = client.post(
+        "/api/v1/limit",
+        json={"expression": "sin(x)", "variable": "x", "point": "oo", "direction": "both"},
+    )
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_text"] == "DNE"
+
+
+def test_inverse_hyperbolic_limits_use_fast_log_form():
+    cases = [
+        ("asinh(x)/x", "0", "1"),
+        ("atanh(x)/x", "0", "1"),
+        ("asinh(x)-ln(x)", "oo", "log(2)"),
+        ("acosh(x)-ln(x)", "oo", "log(2)"),
+    ]
+    for expression, point, expected in cases:
+        response = client.post(
+            "/api/v1/limit",
+            json={"expression": expression, "variable": "x", "point": point, "direction": "both"},
+        )
+        body = response.json()
+        assert body["success"] is True, (expression, body)
+        assert body["result_text"] == expected
