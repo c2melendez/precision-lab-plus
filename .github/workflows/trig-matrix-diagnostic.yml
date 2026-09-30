@@ -17,8 +17,12 @@ on:
 
 jobs:
   trig-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -41,6 +45,8 @@ jobs:
       - name: Install Chromium
         working-directory: frontend
         run: npx playwright install --with-deps chromium
-      - name: Run trig matrix only
+      - name: Run trig matrix shard
         working-directory: frontend
+        env:
+          TRIG_MATRIX_SHARD: ${{ matrix.shard }}
         run: npx playwright test e2e/trig-matrix-diagnostic.spec.ts --project=desktop-chromium --workers=1
