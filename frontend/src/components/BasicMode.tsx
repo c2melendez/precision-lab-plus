@@ -678,7 +678,7 @@ export function BasicMode() {
     // latest onInput state; reading stale `latex` caused the B7 matrix to
     // submit the previous/partial expression (lost integral bounds and
     // operatorname function names).
-    const currentLatex = mathField?.getValue("latex-unstyled") ?? latex;
+    const currentLatex = mathField?.value ?? latex;
     const currentSystemRows = splitSystemLatex(currentLatex);
 
     if (currentSystemRows) {
