@@ -119,6 +119,10 @@ describe("Trig matrix notation normalization", () => {
     expect(value.replace(/\s+/g, "")).toContain(expected + "(");
   });
 
+  it("normalizes operatorname hyperbolic powers before MathLive ASCII spacing", () => {
+    expect(latexToBackendSyntax("\\operatorname{sech}^{2}x").replace(/\\s+/g, "")).toBe("(sech(x))**(2)");
+  });
+
   it.each([
     ["\\operatorname{arccot}(-1)", "acot(-1)"],
     ["\\operatorname{arcsec}(2)", "asec(2)"],
