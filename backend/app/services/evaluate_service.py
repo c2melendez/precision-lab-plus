@@ -139,6 +139,7 @@ def evaluate(
     expression: str,
     angle_unit: str = "rad",
     substitutions: Optional[Dict[str, str]] = None,
+    domain: str = "complex",
 ) -> EvaluateResult:
     substitution_map = _validate_and_parse_substitutions(substitutions)
 
@@ -208,6 +209,17 @@ def evaluate(
             raise DomainErrorResult("El resultado no está definido en este dominio.")
     if numeric_value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
         raise DomainErrorResult("El resultado no está definido en este dominio.")
+
+    if domain == "real":
+        if numeric_value.is_real is False or numeric_value.has(sympy.I):
+            raise DomainErrorResult("El resultado no está definido en el dominio real.")
+        if numeric_value.is_real is None:
+            try:
+                numeric_complex = complex(numeric_value)
+            except (TypeError, ValueError, OverflowError):
+                numeric_complex = None
+            if numeric_complex is not None and abs(numeric_complex.imag) >= 1e-12:
+                raise DomainErrorResult("El resultado no está definido en el dominio real.")
 
     approx = float(numeric_value) if numeric_value.is_real else None
 
