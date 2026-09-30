@@ -244,7 +244,7 @@ function rewriteOperatorNameLatex(latex: string): string {
   // downstream inverse normalization then produces backend aliases.
   for (const [displayName, directName] of Object.entries(inverseDisplayToDirect)) {
     const bare = new RegExp(
-      `\\\\operatorname\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
+      `\\\\(?:operatorname|mathrm)\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
       "g",
     );
     out = out.replace(
@@ -252,19 +252,19 @@ function rewriteOperatorNameLatex(latex: string): string {
       `\\\\${directName}^{-1}\\\\left($1\\\\right)`,
     );
     out = out.replace(
-      new RegExp(`\\\\operatorname\\{${displayName}\\}`, "g"),
+      new RegExp(`\\\\(?:operatorname|mathrm)\\{${displayName}\\}`, "g"),
       `\\\\${directName}^{-1}`,
     );
   }
 
   for (const displayName of ["sinh", "cosh", "tanh", "csch", "sech", "coth"]) {
     const bare = new RegExp(
-      `\\\\operatorname\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
+      `\\\\(?:operatorname|mathrm)\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
       "g",
     );
     out = out.replace(bare, `\\\\${displayName}\\\\left($1\\\\right)`);
     out = out.replace(
-      new RegExp(`\\\\operatorname\\{${displayName}\\}`, "g"),
+      new RegExp(`\\\\(?:operatorname|mathrm)\\{${displayName}\\}`, "g"),
       `\\\\${displayName}`,
     );
   }
