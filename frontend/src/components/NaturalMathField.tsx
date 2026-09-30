@@ -228,6 +228,15 @@ const HYPERBOLIC_INVERSE_NAMES: Record<string, string> = {
 function rewriteOperatorNameLatex(latex: string): string {
   let out = latex;
 
+  // Preserve positive powers written on operatorname forms before the
+  // generic operatorname replacement removes the LaTeX command. B7 real
+  // input: \\operatorname{sech}^{2}x. Lower to an explicit function call
+  // with suffix power so rewriteFunctionPowers can normalize it later.
+  out = out.replace(
+    /\\\\(?:operatorname|mathrm)\{(sinh|cosh|tanh|csch|sech|coth)\}\s*\^\{(\d+)\}\s*([A-Za-z])/g,
+    (_match, fn: string, power: string, arg: string) => `${fn}(${arg})^{${power}}`,
+  );
+
   const inverseDisplayToBackend: Record<string, string> = {
     arcsin: "asin",
     arccos: "acos",
