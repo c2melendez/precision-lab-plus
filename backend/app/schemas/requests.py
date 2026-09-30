@@ -27,6 +27,7 @@ class EvaluateRequest(BaseModel):
     expression: str = Field(..., min_length=1, max_length=500)
     angle_unit: Literal["rad", "deg"] = "rad"
     substitutions: Optional[Dict[str, str]] = None
+    domain: Literal["real", "complex"] = "complex"
 
 
 class DerivativeRequest(BaseModel):
