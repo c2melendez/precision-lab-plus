@@ -206,7 +206,11 @@ def integrate_expression(
     # That duplicated the most expensive symbolic work and caused many
     # 15-second client timeouts in the trigonometric matrix. For definite
     # requests, compute the definite value directly in one symbolic pass.
-    if lower_bound is not None and upper_bound is not None:
+    if (
+        lower_bound is not None
+        and upper_bound is not None
+        and input_expr.is_polynomial(var_symbol) is not True
+    ):
         lower_expr = _parse_bound(lower_bound)
         upper_expr = _parse_bound(upper_bound)
         reference = sympy.integrate(input_expr, (var_symbol, lower_expr, upper_expr))
