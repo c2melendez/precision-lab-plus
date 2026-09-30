@@ -95,4 +95,24 @@ describe("Trig matrix notation normalization", () => {
     expect(value).toContain("sinh");
     expect(value).toContain("**(2)");
   });
+
+  it("normalizes bare trig powers before MathLive can split the notation", () => {
+    const value = latexToBackendSyntax("\\sin^{2}x");
+    expect(value).toContain("sin");
+    expect(value).toContain("**(2)");
+    expect(value).toContain("x");
+  });
+
+  it.each([
+    ["\\operatorname{arccot} x", "acot"],
+    ["\\operatorname{arcsec} x", "asec"],
+    ["\\operatorname{arsinh} x", "asinh"],
+    ["\\operatorname{arcosh} x", "acosh"],
+    ["\\operatorname{artanh} x", "atanh"],
+    ["\\operatorname{arcoth} x", "acoth"],
+    ["\\operatorname{sech} x", "sech"],
+  ])("normalizes operatorname %s as one backend function", (latex, expected) => {
+    const value = latexToBackendSyntax(latex);
+    expect(value.replace(/\\s+/g, "")).toContain(expected + "(");
+  });
 });
