@@ -238,7 +238,7 @@ def test_result_latex_truncated_when_too_long(monkeypatch):
     # supera los 10,000 caracteres.
     huge_expr = sympy.Add(*(sympy.Symbol(f"x{i}") for i in range(3000)))
 
-    def _fake_evaluate(expression, angle_unit="rad", substitutions=None):
+    def _fake_evaluate(expression, angle_unit="rad", substitutions=None, domain="complex"):
         return evaluate_service.EvaluateResult(
             expr=huge_expr, input_expr=huge_expr, is_numeric=False, approx_value=None
         )
@@ -330,3 +330,22 @@ def test_standalone_inverse_trig_detector():
 
     assert _is_standalone_inverse_trig_expression("sin(asin(0.5))") is False
     assert _is_standalone_inverse_trig_expression("1+asin(0.5)") is False
+
+
+# ---------------------------------------------------------------------------
+# Matriz trigonométrica — dominio real explícito
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("expression", ["asin(2)", "acosh(1/2)", "atanh(1)", "atanh(2)"])
+def test_real_domain_rejects_inverse_trig_outside_domain(expression):
+    response = _evaluate(expression=expression, domain="real")
+    body = response.json()
+    assert body["success"] is False
+    assert body["error_code"] == "DOMAIN_ERROR"
+
+
+def test_complex_domain_remains_backward_compatible():
+    response = _evaluate(expression="asin(2)", domain="complex")
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_latex"]
