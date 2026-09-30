@@ -115,4 +115,18 @@ describe("Trig matrix notation normalization", () => {
     const value = latexToBackendSyntax(latex);
     expect(value.replace(/\\s+/g, "")).toContain(expected + "(");
   });
+
+  it.each([
+    ["\\operatorname{arccot}(-1)", "acot(-1)"],
+    ["\\operatorname{arcsec}(2)", "asec(2)"],
+    ["\\operatorname{arccsc}(2)", "acsc(2)"],
+    ["\\operatorname{arsinh}(1)", "asinh(1)"],
+    ["\\operatorname{arcosh}(2)", "acosh(2)"],
+    ["\\operatorname{artanh}(0)", "atanh(0)"],
+    ["\\operatorname{arcsch}(1)", "acsch(1)"],
+    ["\\operatorname{arsech}(1/2)", "asech(1/2)"],
+    ["\\operatorname{arcoth}(2)", "acoth(2)"],
+  ])("keeps parenthesized operatorname %s atomic", (latex, expected) => {
+    expect(latexToBackendSyntax(latex).replace(/\\s+/g, "")).toBe(expected);
+  });
 });
