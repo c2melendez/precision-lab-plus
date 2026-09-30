@@ -9,6 +9,7 @@ import sympy
 from fastapi import APIRouter, Request
 
 from app.core.logging import log_request_event
+from app.core.math_timeout import run_math_operation
 from app.schemas.requests import DerivativeRequest, IntegralRequest
 from app.schemas.responses import ErrorCode, MathResponse, OperationType, ResultType
 from app.services import derivative_service, integral_service, parsing
@@ -56,9 +57,14 @@ async def derivative(payload: DerivativeRequest, request: Request) -> MathRespon
     log_request_event(request.state.request_id, "derivative_request", input_text=payload.expression)
 
     try:
-        result = derivative_service.compute_derivative(
-            payload.expression, payload.variable, payload.order
+        result = run_math_operation(
+            derivative_service.compute_derivative,
+            payload.expression,
+            payload.variable,
+            payload.order,
         )
+    except TimeoutError as exc:
+        return _error(request, OperationType.DERIVATIVE, ErrorCode.TIMEOUT, str(exc))
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.DERIVATIVE, ErrorCode.PARSE_ERROR, str(exc))
     except ComplexityLimitError as exc:
@@ -105,9 +111,15 @@ async def integral(payload: IntegralRequest, request: Request) -> MathResponse:
         )
 
     try:
-        result = integral_service.integrate_expression(
-            payload.expression, payload.variable, payload.lower_bound, payload.upper_bound
+        result = run_math_operation(
+            integral_service.integrate_expression,
+            payload.expression,
+            payload.variable,
+            payload.lower_bound,
+            payload.upper_bound,
         )
+    except TimeoutError as exc:
+        return _error(request, OperationType.INTEGRAL, ErrorCode.TIMEOUT, str(exc))
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.INTEGRAL, ErrorCode.PARSE_ERROR, str(exc))
     except ComplexityLimitError as exc:
