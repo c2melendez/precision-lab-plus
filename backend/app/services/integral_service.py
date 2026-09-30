@@ -236,7 +236,14 @@ def _fast_antiderivative(input_expr: sympy.Expr, x: sympy.Symbol) -> Optional[sy
 
 def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
     fast = _fast_antiderivative(input_expr, var_symbol)
-    if fast is not None:
+    # Preserve the existing detailed SinRule/CosRule procedure contract
+    # for the simplest indefinite cases. Definite integrals may still use
+    # the same closed forms below without paying for manualintegrate.
+    preserve_detailed_rule = input_expr in (
+        sympy.sin(var_symbol),
+        sympy.cos(var_symbol),
+    )
+    if fast is not None and not preserve_detailed_rule:
         return (
             fast,
             [],
@@ -424,7 +431,7 @@ def integrate_expression(
                 antiderivative=fast_antiderivative,
                 steps=[],
                 has_detailed_steps=False,
-                warnings=["Integral definida evaluada con una identidad cerrada verificada."],
+                warnings=["Integral definida evaluada directamente con una identidad cerrada verificada."],
                 is_definite=True,
                 definite_value=reference,
             )
