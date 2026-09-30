@@ -116,7 +116,7 @@ describe("Trig matrix notation normalization", () => {
     ["\\operatorname{sech} x", "sech"],
   ])("normalizes operatorname %s as one backend function", (latex, expected) => {
     const value = latexToBackendSyntax(latex);
-    expect(value.replace(/\\s+/g, "")).toContain(expected + "(");
+    expect(value.replace(/\s+/g, "")).toContain(expected + "(");
   });
 
   it.each([
@@ -130,15 +130,15 @@ describe("Trig matrix notation normalization", () => {
     ["\\operatorname{arsech}(1/2)", "asech(1/2)"],
     ["\\operatorname{arcoth}(2)", "acoth(2)"],
   ])("keeps parenthesized operatorname %s atomic", (latex, expected) => {
-    expect(latexToBackendSyntax(latex).replace(/\\s+/g, "")).toBe(expected);
+    expect(latexToBackendSyntax(latex).replace(/\s+/g, "")).toBe(expected);
   });
 
   it("keeps inverse operator names atomic inside equations and calculus bodies", () => {
-    expect(latexToBackendSyntax("\\operatorname{arcsec} x=\\frac{\\pi}{3}").replace(/\\s+/g, ""))
+    expect(latexToBackendSyntax("\\operatorname{arcsec} x=\\frac{\\pi}{3}").replace(/\s+/g, ""))
       .toBe("asec(x)=(pi)/(3)");
-    expect(latexToBackendSyntax("\\operatorname{arcosh} x=\\ln 2").replace(/\\s+/g, ""))
+    expect(latexToBackendSyntax("\\operatorname{arcosh} x=\\ln 2").replace(/\s+/g, ""))
       .toBe("acosh(x)=ln2");
-    expect(latexToBackendSyntax("\\operatorname{arccot} x").replace(/\\s+/g, ""))
+    expect(latexToBackendSyntax("\\operatorname{arccot} x").replace(/\s+/g, ""))
       .toBe("acot(x)");
   });
 });
