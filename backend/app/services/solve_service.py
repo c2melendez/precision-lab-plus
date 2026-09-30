@@ -212,6 +212,16 @@ def solve_equation(
         var = free_symbols[0]
         warnings.append(f"Variable inferida automáticamente: '{var}'.")
 
+    if domain == "real":
+        # Calculator convention for real arccot: range (0, pi), expressed
+        # as pi/2 - atan(x). SymPy's principal acot branch differs for
+        # negative reals and would incorrectly report no solution for
+        # cases such as acot(x)=2*pi/3.
+        eq = eq.replace(
+            lambda node: getattr(node, "func", None) == sympy.acot,
+            lambda node: sympy.pi / 2 - sympy.atan(node.args[0]),
+        )
+
     has_direct_trig = _equation_has_direct_trig_of_variable(eq, var)
 
     bounded_real_domain = (
