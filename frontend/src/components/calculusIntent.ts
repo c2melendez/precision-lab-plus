@@ -231,21 +231,30 @@ function findMatchingRightDelimiter(latex: string, fromIndex: number): number | 
 function detectDerivative(latex: string): Extract<CalculusIntent, { kind: "derivative" }> | null {
   const trimmed = latex.trim();
   const m = DERIVATIVE_PREFIX.exec(trimmed);
-  if (!m) return null;
+  if (m) {
+    const orderRaw = m[1] ?? m[3];
+    const order = orderRaw ? Number(orderRaw) : 1;
+    if (order < 1 || order > 5) return null;
 
-  const orderRaw = m[1] ?? m[3];
+    const variable = m[2];
+    const innerStart = m[0].length;
+    const end = findMatchingRightDelimiter(trimmed, innerStart);
+    if (end === null || end !== trimmed.length) return null;
+
+    const innerLatex = trimmed.slice(innerStart, end - 7).trim();
+    if (innerLatex.length === 0) return null;
+    return { kind: "derivative", variable, order: order as 1 | 2 | 3 | 4 | 5, innerLatex };
+  }
+
+  // Notación estándar sin \left(...\right), p. ej. d/dx sin x.
+  const bare = trimmed.match(/^\\frac\{d(?:\^\{?(\d)\}?)?\}\{d([a-zA-Z])(?:\^\{?(\d)\}?)?\}\s*(.+)$/s);
+  if (!bare) return null;
+  const orderRaw = bare[1] ?? bare[3];
   const order = orderRaw ? Number(orderRaw) : 1;
-  if (order < 1 || order > 5) return null; // fuera de rango de DerivativeRequest.order
-
-  const variable = m[2];
-  const innerStart = m[0].length;
-  const end = findMatchingRightDelimiter(trimmed, innerStart);
-  if (end === null || end !== trimmed.length) return null;
-
-  const innerLatex = trimmed.slice(innerStart, end - 7).trim();
-  if (innerLatex.length === 0) return null;
-
-  return { kind: "derivative", variable, order: order as 1 | 2 | 3 | 4 | 5, innerLatex };
+  if (order < 1 || order > 5) return null;
+  const innerLatex = bare[4].trim();
+  if (!innerLatex) return null;
+  return { kind: "derivative", variable: bare[2], order: order as 1 | 2 | 3 | 4 | 5, innerLatex };
 }
 
 const PARTIAL_DERIVATIVE_PREFIX = /^\\frac\{\\partial\}\{\\partial\s*([a-zA-Z])\}\\left\(/;
@@ -279,9 +288,44 @@ function getComputeEngine(): ComputeEngine {
   return ce;
 }
 
+function stripTrailingAssumption(latex: string): string {
+  return latex.replace(
+    /,\s*(?:\\quad\s*)?(?:\\lvert\s*[A-Za-z]\s*\\rvert|[A-Za-z])\s*[<>]=?\s*.+$/s,
+    "",
+  ).trim();
+}
+
+function detectRawIntegral(latex: string): Extract<CalculusIntent, { kind: "integral" }> | null {
+  const source = stripTrailingAssumption(latex);
+
+  let match = source.match(/^\\int_\{([^{}]+)\}\^\{([^{}]+)\}\s*\\frac\{d([a-zA-Z])\}\{(.+)\}$/s);
+  if (match) {
+    return { kind: "integral", variable: match[3], lowerBound: match[1], upperBound: match[2], innerLatex: `\\frac{1}{${match[4]}}` };
+  }
+
+  match = source.match(/^\\int_\{([^{}]+)\}\^\{([^{}]+)\}\s*(.*?)\s*(?:\\,)?\s*d([a-zA-Z])$/s);
+  if (match && match[3].trim()) {
+    return { kind: "integral", variable: match[4], lowerBound: match[1], upperBound: match[2], innerLatex: match[3].trim() };
+  }
+
+  match = source.match(/^\\int\s*\\frac\{d([a-zA-Z])\}\{(.+)\}$/s);
+  if (match) {
+    return { kind: "integral", variable: match[1], lowerBound: null, upperBound: null, innerLatex: `\\frac{1}{${match[2]}}` };
+  }
+
+  match = source.match(/^\\int\s*(.*?)\s*(?:\\,)?\s*d([a-zA-Z])$/s);
+  if (match && match[1].trim()) {
+    return { kind: "integral", variable: match[2], lowerBound: null, upperBound: null, innerLatex: match[1].trim() };
+  }
+  return null;
+}
+
 function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integral" }> | null {
-  const trimmed = latex.trim();
+  const trimmed = stripTrailingAssumption(latex.trim());
   if (!trimmed.startsWith("\\int")) return null;
+
+  const raw = detectRawIntegral(trimmed);
+  if (raw) return raw;
 
   let json;
   try {
@@ -316,8 +360,10 @@ function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integra
   if (lowerIsNothing) {
     return { kind: "integral", variable, lowerBound: null, upperBound: null, innerLatex };
   }
-  if (typeof lower !== "number" || typeof upper !== "number") return null; // ej. límites simbólicos/infinito: fuera de alcance
-  return { kind: "integral", variable, lowerBound: String(lower), upperBound: String(upper), innerLatex };
+  const lowerLatex = typeof lower === "number" ? String(lower) : getComputeEngine().box(lower).latex;
+  const upperLatex = typeof upper === "number" ? String(upper) : getComputeEngine().box(upper).latex;
+  if (!lowerLatex || !upperLatex) return null;
+  return { kind: "integral", variable, lowerBound: lowerLatex, upperBound: upperLatex, innerLatex };
 }
 
 /**
