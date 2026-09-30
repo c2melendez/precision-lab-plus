@@ -224,36 +224,36 @@ const HYPERBOLIC_INVERSE_NAMES: Record<string, string> = {
 function rewriteOperatorNameLatex(latex: string): string {
   let out = latex;
 
-  const inverseDisplayToDirect: Record<string, string> = {
-    arcsin: "sin",
-    arccos: "cos",
-    arctan: "tan",
-    arccot: "cot",
-    arcsec: "sec",
-    arccsc: "csc",
-    arsinh: "sinh",
-    arcosh: "cosh",
-    artanh: "tanh",
-    arcsch: "csch",
-    arsech: "sech",
-    arcoth: "coth",
+  const inverseDisplayToBackend: Record<string, string> = {
+    arcsin: "asin",
+    arccos: "acos",
+    arctan: "atan",
+    arccot: "acot",
+    arcsec: "asec",
+    arccsc: "acsc",
+    arsinh: "asinh",
+    arcosh: "acosh",
+    artanh: "atanh",
+    arcsch: "acsch",
+    arsech: "asech",
+    arcoth: "acoth",
   };
 
-  // MathLive spells \\mathrm{alias} as independent letters in ASCII.
-  // Rewrite operatorname inverses to native function notation first;
-  // downstream inverse normalization then produces backend aliases.
-  for (const [displayName, directName] of Object.entries(inverseDisplayToDirect)) {
+  // Rewrite operatorname inverses directly to the backend alias. Routing
+  // through sec^{-1}/coth^{-1} made MathLive/ASCII keep a leading slash or
+  // even drop the function name in some B7 cases.
+  for (const [displayName, backendName] of Object.entries(inverseDisplayToBackend)) {
     const bare = new RegExp(
       `\\\\(?:operatorname|mathrm)\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
       "g",
     );
     out = out.replace(
       bare,
-      `\\\\${directName}^{-1}\\\\left($1\\\\right)`,
+      `\\\\mathrm{${backendName}}\\\\left($1\\\\right)`,
     );
     out = out.replace(
       new RegExp(`\\\\(?:operatorname|mathrm)\\{${displayName}\\}`, "g"),
-      `\\\\${directName}^{-1}`,
+      `\\\\mathrm{${backendName}}`,
     );
   }
 
@@ -414,9 +414,18 @@ export function latexToBackendSyntax(latex: string): string {
 
   const collapsed = collapseKnownFunctionNames(ascii);
   const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
-  return rewritePostfixPercent(applyDegreeNotation(
-    rewriteFunctionPowers(rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii))),
-  )).trim();
+  const normalizedFunctions = rewriteFunctionPowers(
+    rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii)),
+  );
+  // convertLatexToAsciiMath can preserve a leading backslash before a
+  // function token produced from \\mathrm/\\operatorname. The backend
+  // parser accepts bare identifiers (acsc(...), asinh(...), csch(...)),
+  // not LaTeX commands (\\acsc(...)).
+  const backendSafeFunctions = normalizedFunctions.replace(
+    /\\\\(?=(?:sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth|asin|acos|atan|asec|acsc|acot|asinh|acosh|atanh|asech|acsch|acoth|ln|log|sqrt)\\b)/g,
+    "",
+  );
+  return rewritePostfixPercent(applyDegreeNotation(backendSafeFunctions)).trim();
 }
 
 interface NaturalMathFieldProps {
