@@ -480,17 +480,21 @@ function detectLimit(latex: string): Extract<CalculusIntent, { kind: "limit" }> 
       const body = trimmed.slice(group.next).trim();
       if (condition && body) {
         const rawPoint = condition[2].trim();
+        const lateralMatch = rawPoint.match(/^(.*)\^([+-])$/);
+        const pointLatex = (lateralMatch ? lateralMatch[1] : rawPoint).trim();
         return {
           kind: "limit",
           variable: condition[1],
           point:
-            rawPoint === "\\infty"
+            pointLatex === "\\infty"
               ? "oo"
-              : rawPoint === "-\\infty"
+              : pointLatex === "-\\infty"
                 ? "-oo"
-                : rawPoint,
+                : pointLatex,
           innerLatex: body,
-          direction: "both",
+          direction: lateralMatch
+            ? (lateralMatch[2] === "+" ? "right" : "left")
+            : "both",
         };
       }
     }
