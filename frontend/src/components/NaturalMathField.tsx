@@ -118,9 +118,9 @@ function collapseKnownFunctionNames(ascii: string): string {
   let result = ascii
     // MathLive may spell wrappers introduced by LaTeX normalization as
     // individual letters: "m a t h r m", "l e f t", "r i g h t".
-    .replace(/\\bm\\s+a\\s+t\\s+h\\s+r\\s+m\\s*/g, "")
-    .replace(/\\bl\\s+e\\s+f\\s+t\\s*/g, "")
-    .replace(/\\br\\s+i\\s+g\\s+h\\s+t\\s*/g, "");
+    .replace(/\bm\s+a\s+t\s+h\s+r\s+m\s*/g, "")
+    .replace(/\bl\s+e\s+f\s+t\s*/g, "")
+    .replace(/\br\s+i\s+g\s+h\s+t\s*/g, "");
   for (const name of KNOWN_MULTI_LETTER_FUNCTION_NAMES) {
     const spelled = name.split("").join("\\s+");
     const pattern = new RegExp(`\\b${spelled}\\s*\\(`, "g");
