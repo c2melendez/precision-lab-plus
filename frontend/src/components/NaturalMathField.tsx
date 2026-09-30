@@ -224,36 +224,35 @@ const HYPERBOLIC_INVERSE_NAMES: Record<string, string> = {
 function rewriteOperatorNameLatex(latex: string): string {
   let out = latex;
 
-  const inverseDisplayToDirect: Record<string, string> = {
-    arcsin: "sin",
-    arccos: "cos",
-    arctan: "tan",
-    arccot: "cot",
-    arcsec: "sec",
-    arccsc: "csc",
-    arsinh: "sinh",
-    arcosh: "cosh",
-    artanh: "tanh",
-    arcsch: "csch",
-    arsech: "sech",
-    arcoth: "coth",
+  const inverseDisplayToBackend: Record<string, string> = {
+    arcsin: "asin",
+    arccos: "acos",
+    arctan: "atan",
+    arccot: "acot",
+    arcsec: "asec",
+    arccsc: "acsc",
+    arsinh: "asinh",
+    arcosh: "acosh",
+    artanh: "atanh",
+    arcsch: "acsch",
+    arsech: "asech",
+    arcoth: "acoth",
   };
 
-  // Route display aliases through native function^-1 notation. MathLive
-  // preserves this function identity; the final ASCII cleanup below then
-  // removes any residual leading slash and makes bare arguments explicit.
-  for (const [displayName, directName] of Object.entries(inverseDisplayToDirect)) {
+  // Convert operatorname aliases to plain calculator identifiers BEFORE
+  // MathLive's ASCII conversion. Plain "acoth(x)" may be letter-spaced by
+  // the converter, but collapseKnownFunctionNames reliably recombines it;
+  // unlike \\mathrm / native unknown macros, the function name is never
+  // dropped or left as a stray backslash.
+  for (const [displayName, backendName] of Object.entries(inverseDisplayToBackend)) {
     const bare = new RegExp(
       `\\\\(?:operatorname|mathrm)\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
       "g",
     );
-    out = out.replace(
-      bare,
-      `\\\\${directName}^{-1}\\\\left($1\\\\right)`,
-    );
+    out = out.replace(bare, `${backendName}($1)`);
     out = out.replace(
       new RegExp(`\\\\(?:operatorname|mathrm)\\{${displayName}\\}`, "g"),
-      `\\\\${directName}^{-1}`,
+      backendName,
     );
   }
 
@@ -262,10 +261,10 @@ function rewriteOperatorNameLatex(latex: string): string {
       `\\\\(?:operatorname|mathrm)\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
       "g",
     );
-    out = out.replace(bare, `\\\\${displayName}\\\\left($1\\\\right)`);
+    out = out.replace(bare, `${displayName}($1)`);
     out = out.replace(
       new RegExp(`\\\\(?:operatorname|mathrm)\\{${displayName}\\}`, "g"),
-      `\\\\${displayName}`,
+      displayName,
     );
   }
   return out;
