@@ -280,10 +280,19 @@ function rewriteBareFunctionPowerLatex(latex: string): string {
 
 function rewriteFunctionPowers(ascii: string): string {
   const names = "sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth";
-  const pattern = new RegExp(`\\b(${names})\\s*(?:\\^|\\*\\*)\\s*\\(?(\\d+)\\)?\\s*\\(([^()]*)\\)`, "g");
-  return ascii.replace(pattern, (_match, fn: string, power: string, arg: string) =>
+  const prefixPower = new RegExp(`\\b(${names})\\s*(?:\\^|\\*\\*)\\s*\\(?(\\d+)\\)?\\s*\\(([^()]*)\\)`, "g");
+  let result = ascii.replace(prefixPower, (_match, fn: string, power: string, arg: string) =>
     `(${fn}(${arg}))**(${power})`
   );
+
+  // rewriteBareFunctionPowerLatex deliberately makes MathLive see the
+  // unambiguous form sin(x)^2. The ASCII converter preserves that suffix
+  // exponent, so normalize it to the backend's explicit ** syntax too.
+  const suffixPower = new RegExp(`\\b(${names})\\s*\\(([^()]*)\\)\\s*(?:\\^|\\*\\*)\\s*\\(?(\\d+)\\)?`, "g");
+  result = result.replace(suffixPower, (_match, fn: string, arg: string, power: string) =>
+    `(${fn}(${arg}))**(${power})`
+  );
+  return result;
 }
 
 function rewriteCommonInverses(ascii: string): string {
