@@ -619,7 +619,12 @@ export function BasicMode() {
                   // reconoce la notación lateral con un escáner propio (ver
                   // detectLateralLimit) en vez de depender de Compute Engine
                   // — intent.direction ya trae "left"/"right" cuando aplica.
-                  { expression: trimmedInner, variable: intent.variable, point: intent.point, direction: intent.direction },
+                  {
+                    expression: trimmedInner,
+                    variable: intent.variable,
+                    point: latexToBackendSyntax(intent.point),
+                    direction: intent.direction,
+                  },
                   `lim[${intent.variable}->${intent.point}] ${trimmedInner}`,
                   latex,
                 )
