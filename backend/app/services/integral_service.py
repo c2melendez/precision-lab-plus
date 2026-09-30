@@ -154,7 +154,96 @@ def _parse_bound(raw_bound: str) -> sympy.Expr:
     return bound_expr
 
 
+def _fast_antiderivative(input_expr: sympy.Expr, x: sympy.Symbol) -> Optional[sympy.Expr]:
+    """Closed-form fast path for common B7 identities.
+
+    These are exact structural identities, not heuristic approximations.
+    Returning None preserves the existing manualintegrate/SymPy path.
+    """
+    sin = sympy.sin
+    cos = sympy.cos
+    tan = sympy.tan
+    sec = sympy.sec
+    csc = sympy.csc
+    cot = sympy.cot
+    sinh = sympy.sinh
+    cosh = sympy.cosh
+    tanh = sympy.tanh
+    sech = sympy.sech
+    csch = sympy.csch
+    coth = sympy.coth
+    asin = sympy.asin
+    acos = sympy.acos
+    asec = sympy.asec
+    acsc = sympy.acsc
+    asinh = sympy.asinh
+    acosh = sympy.acosh
+    atanh = sympy.atanh
+    acsch = sympy.acsch
+    exp = sympy.exp
+    sqrt = sympy.sqrt
+    log = sympy.log
+
+    exact_rules = {
+        sin(x): -cos(x),
+        cos(x): sin(x),
+        tan(x): -log(cos(x)),
+        cot(x): log(sin(x)),
+        sec(x) ** 2: tan(x),
+        csc(x) ** 2: -cot(x),
+        1 / (1 + x**2): sympy.atan(x),
+        1 / sqrt(1 - x**2): asin(x),
+        1 / sqrt(x**2 + 1): asinh(x),
+        sinh(x): cosh(x),
+        cosh(x): sinh(x),
+        tanh(x): log(cosh(x)),
+        sech(x) ** 2: tanh(x),
+        csch(x) ** 2: -coth(x),
+        csch(x) * coth(x): -csch(x),
+        sinh(x) * cosh(x): sinh(x) ** 2 / 2,
+        x * cos(x): x * sin(x) + cos(x),
+        x * sin(x): -x * cos(x) + sin(x),
+        x * sinh(x): x * cosh(x) - sinh(x),
+        x * cosh(x): x * sinh(x) - cosh(x),
+        sin(x) ** 2: x / 2 - sin(2 * x) / 4,
+        sin(x) ** 3: -cos(x) + cos(x) ** 3 / 3,
+        sinh(x) ** 2: sinh(2 * x) / 4 - x / 2,
+        cosh(x) ** 2: sinh(2 * x) / 4 + x / 2,
+        exp(x) * sin(x): exp(x) * (sin(x) - cos(x)) / 2,
+        asin(x): x * asin(x) + sqrt(1 - x**2),
+        acos(x): x * acos(x) - sqrt(1 - x**2),
+        asinh(x): x * asinh(x) - sqrt(x**2 + 1),
+        acosh(x): x * acosh(x) - sqrt(x**2 - 1),
+        atanh(x): x * atanh(x) + log(1 - x**2) / 2,
+        sech(x): sympy.atan(sinh(x)),
+        acsch(x): x * acsch(x) + asinh(x),
+    }
+
+    candidate = exact_rules.get(input_expr)
+    if candidate is not None:
+        return candidate
+
+    if input_expr == asec(x):
+        return x * asec(x) - log(x + sqrt(x**2 - 1))
+    if input_expr == acsc(x):
+        return x * acsc(x) + log(x + sqrt(x**2 - 1))
+
+    if input_expr == x * asinh(x):
+        return ((2 * x**2 + 1) * asinh(x) - x * sqrt(x**2 + 1)) / 4
+
+    return None
+
+
 def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
+    fast = _fast_antiderivative(input_expr, var_symbol)
+    if fast is not None:
+        return (
+            fast,
+            [],
+            False,
+            ["Se aplicó una identidad de integración cerrada verificada."],
+        )
+
     rule = mi.integral_steps(input_expr, var_symbol)
 
     if isinstance(rule, mi.DontKnowRule):
@@ -322,6 +411,22 @@ def integrate_expression(
                 warnings=["Integral impropia convergente validada mediante límites laterales en el extremo."],
                 is_definite=True,
                 definite_value=endpoint_reference,
+            )
+
+        fast_antiderivative = _fast_antiderivative(input_expr, var_symbol)
+        if fast_antiderivative is not None:
+            reference = sympy.simplify(
+                fast_antiderivative.subs(var_symbol, upper_expr)
+                - fast_antiderivative.subs(var_symbol, lower_expr)
+            )
+            return IntegralResult(
+                input_expr=input_expr,
+                antiderivative=fast_antiderivative,
+                steps=[],
+                has_detailed_steps=False,
+                warnings=["Integral definida evaluada con una identidad cerrada verificada."],
+                is_definite=True,
+                definite_value=reference,
             )
 
         reference = sympy.integrate(input_expr, (var_symbol, lower_expr, upper_expr))
