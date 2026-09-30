@@ -210,27 +210,6 @@ const HYPERBOLIC_INVERSE_NAMES: Record<string, string> = {
   coth: "acoth",
 };
 
-const OPERATOR_NAME_TO_BACKEND: Record<string, string> = {
-  arcsin: "asin",
-  arccos: "acos",
-  arctan: "atan",
-  arccot: "acot",
-  arcsec: "asec",
-  arccsc: "acsc",
-  arsinh: "asinh",
-  arcosh: "acosh",
-  artanh: "atanh",
-  arcsch: "acsch",
-  arsech: "asech",
-  arcoth: "acoth",
-  sinh: "sinh",
-  cosh: "cosh",
-  tanh: "tanh",
-  csch: "csch",
-  sech: "sech",
-  coth: "coth",
-};
-
 function rewriteOperatorNameLatex(latex: string): string {
   let out = latex;
 
