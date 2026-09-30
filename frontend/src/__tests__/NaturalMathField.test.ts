@@ -123,6 +123,11 @@ describe("Trig matrix notation normalization", () => {
     expect(latexToBackendSyntax("\\operatorname{sech}^{2}x").replace(/\\s+/g, "")).toBe("(sech(x))**(2)");
   });
 
+  it("normalizes infinity to the backend oo token", () => {
+    expect(latexToBackendSyntax("\\infty")).toBe("oo");
+    expect(latexToBackendSyntax("-\\infty")).toBe("-oo");
+  });
+
   it.each([
     ["\\operatorname{arccot}(-1)", "acot(-1)"],
     ["\\operatorname{arcsec}(2)", "asec(2)"],
