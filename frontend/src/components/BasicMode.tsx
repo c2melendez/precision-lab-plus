@@ -673,19 +673,27 @@ export function BasicMode() {
     setLastDerived(null);
     setLastIntegral(null);
 
-    if (systemRows) {
-      await submitSystem(systemRows);
+    // Evaluate exactly what MathLive currently displays. setValue()/insert()
+    // can update the custom element one render before React propagates the
+    // latest onInput state; reading stale `latex` caused the B7 matrix to
+    // submit the previous/partial expression (lost integral bounds and
+    // operatorname function names).
+    const currentLatex = mathField?.getValue("latex-unstyled") ?? latex;
+    const currentSystemRows = splitSystemLatex(currentLatex);
+
+    if (currentSystemRows) {
+      await submitSystem(currentSystemRows);
       return;
     }
 
-    const calculusIntent = detectCalculusIntent(latex);
+    const calculusIntent = detectCalculusIntent(currentLatex);
     if (calculusIntent) {
       await submitCalculus(calculusIntent);
       return;
     }
 
-    const intervalRestriction = extractIntervalRestriction(latex);
-    const sourceForBackend = intervalRestriction?.expressionLatex ?? latex;
+    const intervalRestriction = extractIntervalRestriction(currentLatex);
+    const sourceForBackend = intervalRestriction?.expressionLatex ?? currentLatex;
     const trimmed = latexToBackendSyntax(sourceForBackend);
     if (!trimmed) {
       setValidationError("La expresión no puede estar vacía.");
@@ -723,7 +731,7 @@ export function BasicMode() {
                 : {}),
             },
             trimmed,
-            latex,
+            currentLatex,
           )
         : isEquation
           ? await submitScientific(
@@ -757,11 +765,11 @@ export function BasicMode() {
             );
       setLastResult(result);
       if (result.success && (result.complex_graph_points?.length || result.complex_graph_components || result.complex_graph_mapping?.length)) {
-        setLastComplex({ sourceLatex: latex, expression: trimmed, result });
+        setLastComplex({ sourceLatex: currentLatex, expression: trimmed, result });
       }
       if (isInequality && result.success) {
         const variable = result.inequality_variable ?? "x";
-        setLastInequality({ sourceLatex: latex, expression: trimmed, variable, result });
+        setLastInequality({ sourceLatex: currentLatex, expression: trimmed, variable, result });
       }
       setLastEvaluated(!isInequality && !isEquation && !substitutionsPayload && result.success
         ? { expression: trimmed, angleUnit, result }
