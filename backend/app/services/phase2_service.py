@@ -316,7 +316,14 @@ def inequality_number_line_intervals(solution_set: sympy.Set) -> List[Inequality
     return intervals
 
 
-def compute_inequality(inequality: sympy.core.relational.Relational, variable: str) -> InequalityResult:
+def compute_inequality(
+    inequality: sympy.core.relational.Relational,
+    variable: str,
+    domain_lower: str | None = None,
+    domain_upper: str | None = None,
+    domain_lower_inclusive: bool = True,
+    domain_upper_inclusive: bool = True,
+) -> InequalityResult:
     """`/inequality` (spec, `InequalityRequest`). Usa
     `sympy.solve_univariate_inequality` (una sola variable, el caso común
     de "resuelve esta desigualdad") con `reduce_inequalities` como
@@ -340,6 +347,19 @@ def compute_inequality(inequality: sympy.core.relational.Relational, variable: s
                 "interpretación manual."
             )
             solution_set = result
+    if domain_lower is not None and domain_upper is not None:
+        lower_expr = parsing.parse_expression_tree(domain_lower, allow_equation=False)
+        upper_expr = parsing.parse_expression_tree(domain_upper, allow_equation=False)
+        if lower_expr.free_symbols or upper_expr.free_symbols:
+            raise parsing.ParseSecurityError("Los límites del dominio deben ser valores concretos.")
+        domain_set = sympy.Interval(
+            lower_expr,
+            upper_expr,
+            left_open=not domain_lower_inclusive,
+            right_open=not domain_upper_inclusive,
+        )
+        solution_set = sympy.Intersection(solution_set, domain_set)
+
     return InequalityResult(solution_set, warnings)
 
 
