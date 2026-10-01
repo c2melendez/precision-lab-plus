@@ -251,6 +251,7 @@ def solve_equation(
         var = free_symbols[0]
         warnings.append(f"Variable inferida automáticamente: '{var}'.")
 
+    original_hyperbolic_eq = None
     if domain == "real":
         # Calculator convention for real arccot: range (0, pi), expressed
         # as pi/2 - atan(x). SymPy's principal acot branch differs for
@@ -280,6 +281,21 @@ def solve_equation(
                 and lhs.args == rhs.args
             ):
                 eq = sympy.Eq(rhs, sympy.pi / 4)
+
+            # Same-argument real principal inverse hyperbolic identities.
+            # atanh(u)-asinh(u) is odd and strictly increasing on (-1,1):
+            # its derivative is 1/(1-u**2)-1/sqrt(1+u**2)>0 except at 0.
+            # Thus equality holds only at u=0. For u>=1, asinh(u)>acosh(u)
+            # since sqrt(u**2+1)>sqrt(u**2-1) in their logarithmic forms.
+            # Only reduce identical arguments; other comparisons continue
+            # through the generic solver, as do complex-domain requests.
+            functions = {getattr(lhs, "func", None), getattr(rhs, "func", None)}
+            if lhs.args == rhs.args and functions == {sympy.atanh, sympy.asinh}:
+                original_hyperbolic_eq = eq
+                eq = sympy.Eq(lhs.args[0], 0, evaluate=False)
+            elif lhs.args == rhs.args and functions == {sympy.acosh, sympy.asinh}:
+                original_hyperbolic_eq = eq
+                eq = sympy.Eq(1, 0, evaluate=False)
 
     has_direct_trig = _equation_has_direct_trig_of_variable(eq, var)
 
@@ -326,6 +342,13 @@ def solve_equation(
 
     if angle_unit == "deg":
         solutions = _apply_degree_conversion(solutions, has_direct_trig)
+
+    if original_hyperbolic_eq is not None:
+        # Retain the user's equation. Algebraic steps for the reduced
+        # condition alone would omit the real-branch identity above.
+        eq = original_hyperbolic_eq
+        steps = []
+        has_detailed_steps = False
 
     if domain == "real":
         real_solutions: List[sympy.Expr] = []
