@@ -210,6 +210,7 @@ def _fast_antiderivative(input_expr: sympy.Expr, x: sympy.Symbol) -> Optional[sy
         sinh(x) ** 2: sinh(2 * x) / 4 - x / 2,
         cosh(x) ** 2: sinh(2 * x) / 4 + x / 2,
         exp(x) * sin(x): exp(x) * (sin(x) - cos(x)) / 2,
+        cos(x) / (1 + sin(x) ** 2): sympy.atan(sin(x)),
         asin(x): x * asin(x) + sqrt(1 - x**2),
         acos(x): x * acos(x) - sqrt(1 - x**2),
         asinh(x): x * asinh(x) - sqrt(x**2 + 1),
