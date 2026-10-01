@@ -1,12 +1,9 @@
 """Hard wall-clock budget for expensive symbolic math operations.
 
-Linux/Unix production and CI use a short-lived forked process for each
-guarded SymPy call. If the budget expires, that process is terminated, so
-no abandoned symbolic calculation can keep consuming CPU after the HTTP
-request has timed out.
-
-On platforms without fork we retain the SIGALRM/direct fallback for
-compatibility.
+The outer API call is isolated in a fresh spawned process so timed-out
+SymPy work can be terminated without inheriting locks from Uvicorn or
+other runtime threads. Nested guarded calls inside that child use SIGALRM
+instead of trying to create another process.
 """
 
 from __future__ import annotations
@@ -21,28 +18,32 @@ from app.core.config import get_settings
 T = TypeVar("T")
 
 
-def _run_in_forked_process(
+def _process_entry(sender, func, args: tuple, kwargs: dict) -> None:
+    try:
+        result = func(*args, **kwargs)
+        sender.send(("ok", result))
+    except BaseException as exc:
+        try:
+            sender.send(("err", exc))
+        except BaseException:
+            sender.send(("err_text", (type(exc).__name__, str(exc))))
+    finally:
+        sender.close()
+
+
+def _run_in_spawned_process(
     func: Callable[..., T],
     args: tuple,
     kwargs: dict,
     budget: float,
 ) -> T:
-    ctx = multiprocessing.get_context("fork")
+    ctx = multiprocessing.get_context("spawn")
     receiver, sender = ctx.Pipe(duplex=False)
-
-    def _child() -> None:
-        try:
-            result = func(*args, **kwargs)
-            sender.send(("ok", result))
-        except BaseException as exc:
-            try:
-                sender.send(("err", exc))
-            except BaseException:
-                sender.send(("err_text", (type(exc).__name__, str(exc))))
-        finally:
-            sender.close()
-
-    process = ctx.Process(target=_child, daemon=True)
+    process = ctx.Process(
+        target=_process_entry,
+        args=(sender, func, args, kwargs),
+        daemon=False,
+    )
     process.start()
     sender.close()
     try:
@@ -112,7 +113,12 @@ def run_math_operation(
     if budget <= 0:
         return func(*args, **kwargs)
 
-    if "fork" in multiprocessing.get_all_start_methods():
-        return _run_in_forked_process(func, args, kwargs, budget)
+    # We are already inside the isolated worker. Do not recursively spawn;
+    # use an interruptible local alarm for nested verification/simplify calls.
+    if multiprocessing.current_process().name != "MainProcess":
+        return _run_with_signal(func, args, kwargs, budget)
+
+    if "spawn" in multiprocessing.get_all_start_methods():
+        return _run_in_spawned_process(func, args, kwargs, budget)
 
     return _run_with_signal(func, args, kwargs, budget)
