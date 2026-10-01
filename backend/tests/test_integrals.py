@@ -206,6 +206,7 @@ def test_fast_path_definite_common_identities():
         ("1/(1+x^2)", "0", "1", sp.pi / 4),
         ("cosh(x)", "-1", "1", 2 * sp.sinh(1)),
         ("sech(x)^2", "0", "1", sp.tanh(1)),
+        ("cos(x)/(1+sin(x)^2)", "0", "pi/2", sp.pi/4),
     ]
     for expression, lower, upper, expected in cases:
         body = _integral(expression, lower_bound=lower, upper_bound=upper).json()
