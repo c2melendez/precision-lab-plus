@@ -15,6 +15,7 @@ import time
 
 import sympy
 from fastapi import APIRouter, Request
+from starlette.concurrency import run_in_threadpool
 
 from app.core.logging import log_request_event
 from app.core.math_timeout import run_math_operation
@@ -80,7 +81,8 @@ def _stub_response(request: Request, operation: OperationType) -> MathResponse:
 async def limit(payload: LimitRequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "limit_request", input_text=payload.expression)
     try:
-        result = run_math_operation(
+        result = await run_in_threadpool(
+            run_math_operation,
             phase2_service.compute_limit,
             payload.expression,
             payload.variable,
@@ -268,7 +270,8 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
         variable = str(next(iter(free_symbols)))
 
     try:
-        result = run_math_operation(
+        result = await run_in_threadpool(
+            run_math_operation,
             phase2_service.compute_inequality,
             parsed,
             variable,
@@ -281,6 +284,11 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
         return _error(request, OperationType.INEQUALITY, ErrorCode.TIMEOUT, str(exc))
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.INEQUALITY, ErrorCode.PARSE_ERROR, str(exc))
+    except (NotImplementedError, TypeError):
+        return _error(
+            request, OperationType.INEQUALITY, ErrorCode.UNSUPPORTED_OPERATION,
+            "El solver no pudo obtener un conjunto solución para esta inecuación.",
+        )
 
     return MathResponse(
         success=True,
@@ -355,7 +363,8 @@ async def integral_improper(payload: ImproperIntegralRequest, request: Request) 
     log_request_event(request.state.request_id, "integral_improper_request")
 
     try:
-        result = run_math_operation(
+        result = await run_in_threadpool(
+            run_math_operation,
             phase2_service.compute_improper_integral,
             payload.expression,
             payload.variable,

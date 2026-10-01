@@ -258,3 +258,55 @@ def test_inequality_timeout_is_controlled_and_next_request_succeeds(monkeypatch)
     body = client.post("/api/v1/inequality", json=payload).json()
     assert body["success"] is True
     assert sympy.sympify(body["result_text"]) == sympy.Interval(0, 1, left_open=True)
+
+
+def test_inequality_solver_exceptions_are_controlled(monkeypatch):
+    from app.routers import phase2 as phase2_router
+
+    for exception in (NotImplementedError("unsupported"), TypeError("relational truth")):
+        def unsupported_solver(*args, **kwargs):
+            raise exception
+
+        with monkeypatch.context() as scoped:
+            scoped.setattr(phase2_router, "run_math_operation", unsupported_solver)
+            response = client.post("/api/v1/inequality", json={"inequality": "x>0", "variable": "x"})
+            assert response.status_code == 200
+            body = response.json()
+            assert body["success"] is False
+            assert body["error_code"] == "UNSUPPORTED_OPERATION"
+
+    body = client.post("/api/v1/inequality", json={"inequality": "x>0", "variable": "x"}).json()
+    assert body["success"] is True
+
+
+def test_health_responds_while_symbolic_request_waits_for_timeout(monkeypatch):
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    from app.routers import phase2 as phase2_router
+
+    entered = threading.Event()
+    release = threading.Event()
+
+    def stalled_operation(*args, **kwargs):
+        entered.set()
+        if not release.wait(timeout=5):
+            raise AssertionError("Test did not release symbolic operation.")
+        raise TimeoutError("Controlled test timeout.")
+
+    monkeypatch.setattr(phase2_router, "run_math_operation", stalled_operation)
+    # A context-managed TestClient shares one server event loop between
+    # both caller threads, as concurrent requests do under Uvicorn.
+    with TestClient(app) as shared_client, ThreadPoolExecutor(max_workers=2) as pool:
+        operation = pool.submit(
+            shared_client.post, "/api/v1/inequality",
+            json={"inequality": "x>0", "variable": "x"},
+        )
+        try:
+            assert entered.wait(timeout=3)
+            health = pool.submit(shared_client.get, "/api/v1/health")
+            assert health.result(timeout=1).status_code == 200
+        finally:
+            release.set()
+        body = operation.result(timeout=3).json()
+        assert body["success"] is False
+        assert body["error_code"] == "TIMEOUT"

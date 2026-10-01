@@ -7,6 +7,7 @@ from typing import Optional
 
 import sympy
 from fastapi import APIRouter, Request
+from starlette.concurrency import run_in_threadpool
 
 from app.core.logging import log_request_event
 from app.core.math_timeout import run_math_operation
@@ -57,7 +58,8 @@ async def derivative(payload: DerivativeRequest, request: Request) -> MathRespon
     log_request_event(request.state.request_id, "derivative_request", input_text=payload.expression)
 
     try:
-        result = run_math_operation(
+        result = await run_in_threadpool(
+            run_math_operation,
             derivative_service.compute_derivative,
             payload.expression,
             payload.variable,
@@ -111,7 +113,8 @@ async def integral(payload: IntegralRequest, request: Request) -> MathResponse:
         )
 
     try:
-        result = run_math_operation(
+        result = await run_in_threadpool(
+            run_math_operation,
             integral_service.integrate_expression,
             payload.expression,
             payload.variable,
