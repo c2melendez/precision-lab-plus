@@ -23,6 +23,9 @@ export function aggregate(base, reports) {
       if (!['Killed', 'Timeout', 'Survived', 'NoCoverage', 'CompileError', 'RuntimeError'].includes(mutant.status)) {
         throw new Error(`Unresolved mutant ${file}:${mutant.id} (${mutant.status})`);
       }
+      if (mutant.status === 'Survived' && mutant.testsCompleted === 0) {
+        throw new Error(`Survived mutant ran zero tests: ${file}:${mutant.id}`);
+      }
       counts[mutant.status] = (counts[mutant.status] ?? 0) + 1;
     }
   }

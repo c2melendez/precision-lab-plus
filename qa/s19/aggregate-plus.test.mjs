@@ -31,3 +31,10 @@ test('resolved mutant errors use the standard Stryker denominator', () => {
 test('global score below the original threshold fails', () => {
   assert.throws(() => aggregate(base, [report('a.ts', ['Survived']), report('b.ts', ['NoCoverage'])]), /Mutation score/);
 });
+test('a survivor with zero executed tests invalidates the report', () => {
+  const survivor = report('b.ts', ['Survived']);
+  survivor.files['b.ts'].mutants[0].testsCompleted = 0;
+  assert.throws(() => aggregate(base, [report('a.ts', ['Killed']), survivor]), /zero tests/);
+  survivor.files['b.ts'].mutants[0].testsCompleted = 1;
+  assert.equal(aggregate(base, [report('a.ts', ['Killed']), survivor]).summary.score, 50);
+});
