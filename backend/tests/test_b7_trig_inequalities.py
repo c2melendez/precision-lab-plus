@@ -86,3 +86,8 @@ def test_non_strict_tangent_includes_roots_but_never_poles():
 
 def test_reciprocal_sine_preserves_negative_denominator_branch():
     assert _solve("1/sin(x)<0") == sp.Interval.open(sp.pi, 2*sp.pi)
+
+
+def test_tangent_principal_interval_accepts_native_negative_fraction_bounds():
+    assert _solve("tan(x)<1", domain_lower="-(pi)/(2)", domain_upper="(pi)/(2)",
+                  domain_lower_inclusive=False) == sp.Interval.open(-sp.pi/2, sp.pi/4)

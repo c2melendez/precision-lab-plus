@@ -511,6 +511,9 @@ def compute_inequality(
         upper_expr = parsing.parse_expression_tree(domain_upper, allow_equation=False)
         if lower_expr.free_symbols or upper_expr.free_symbols:
             raise parsing.ParseSecurityError("Los límites del dominio deben ser valores concretos.")
+        # Normalize constant arithmetic preserved by the secure parser so
+        # periodic intersections resolve exact negative fractional bounds.
+        lower_expr, upper_expr = sympy.simplify(lower_expr), sympy.simplify(upper_expr)
         domain_set = sympy.Interval(
             lower_expr, upper_expr,
             left_open=not domain_lower_inclusive, right_open=not domain_upper_inclusive,
@@ -540,6 +543,9 @@ def compute_inequality(
         upper_expr = parsing.parse_expression_tree(domain_upper, allow_equation=False)
         if lower_expr.free_symbols or upper_expr.free_symbols:
             raise parsing.ParseSecurityError("Los límites del dominio deben ser valores concretos.")
+        # Normalize constant arithmetic preserved by the secure parser so
+        # periodic intersections resolve exact negative fractional bounds.
+        lower_expr, upper_expr = sympy.simplify(lower_expr), sympy.simplify(upper_expr)
         domain_set = sympy.Interval(
             lower_expr,
             upper_expr,
