@@ -233,3 +233,28 @@ def test_inverse_hyperbolic_limits_use_fast_log_form():
         body = response.json()
         assert body["success"] is True, (expression, body)
         assert body["result_text"] == expected
+
+
+def test_inequality_timeout_is_controlled_and_next_request_succeeds(monkeypatch):
+    from app.routers import phase2 as phase2_router
+
+    payload = {
+        "inequality": "x>0", "variable": "x",
+        "domain_lower": "0", "domain_upper": "1",
+        "domain_lower_inclusive": True, "domain_upper_inclusive": True,
+    }
+
+    def exhausted_budget(func, *args, **kwargs):
+        assert func is phase2_router.phase2_service.compute_inequality
+        assert args[1:] == ("x", "0", "1", True, True)
+        raise TimeoutError("Operación matemática excedió el presupuesto.")
+
+    with monkeypatch.context() as scoped:
+        scoped.setattr(phase2_router, "run_math_operation", exhausted_budget)
+        body = client.post("/api/v1/inequality", json=payload).json()
+        assert body["success"] is False
+        assert body["error_code"] == "TIMEOUT"
+
+    body = client.post("/api/v1/inequality", json=payload).json()
+    assert body["success"] is True
+    assert sympy.sympify(body["result_text"]) == sympy.Interval(0, 1, left_open=True)

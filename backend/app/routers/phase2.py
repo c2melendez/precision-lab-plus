@@ -268,7 +268,8 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
         variable = str(next(iter(free_symbols)))
 
     try:
-        result = phase2_service.compute_inequality(
+        result = run_math_operation(
+            phase2_service.compute_inequality,
             parsed,
             variable,
             payload.domain_lower,
@@ -276,6 +277,8 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
             payload.domain_lower_inclusive,
             payload.domain_upper_inclusive,
         )
+    except TimeoutError as exc:
+        return _error(request, OperationType.INEQUALITY, ErrorCode.TIMEOUT, str(exc))
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.INEQUALITY, ErrorCode.PARSE_ERROR, str(exc))
 
