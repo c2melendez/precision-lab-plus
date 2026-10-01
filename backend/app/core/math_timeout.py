@@ -9,6 +9,7 @@ instead of trying to create another process.
 from __future__ import annotations
 
 import multiprocessing
+import pickle
 import signal
 import threading
 from typing import Callable, TypeVar
@@ -119,6 +120,12 @@ def run_math_operation(
         return _run_with_signal(func, args, kwargs, budget)
 
     if "spawn" in multiprocessing.get_all_start_methods():
+        try:
+            pickle.dumps((func, args, kwargs))
+        except Exception:
+            # Local closures/lambdas used by verification helpers are not
+            # spawn-serializable. They are still interruptible with SIGALRM.
+            return _run_with_signal(func, args, kwargs, budget)
         return _run_in_spawned_process(func, args, kwargs, budget)
 
     return _run_with_signal(func, args, kwargs, budget)
