@@ -581,7 +581,7 @@ export function BasicMode() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result =
+      let result =
         intent.kind === "partialDerivative"
           ? await submitScientific(
               "/derivative/partial",
@@ -643,8 +643,28 @@ export function BasicMode() {
                       `Sing(${trimmedInner})`,
                       latex,
                     );
+      if (
+        intent.kind === "derivative"
+        && intent.evaluationPoint
+        && result.success
+        && result.result_text
+      ) {
+        const point = latexToBackendSyntax(intent.evaluationPoint);
+        result = await submitScientific(
+          "/evaluate",
+          {
+            expression: result.result_text,
+            angle_unit: angleUnit,
+            domain: "real",
+            substitutions: { [intent.variable]: point },
+          },
+          `d/d${intent.variable} evaluada en ${intent.variable}=${point}`,
+          latex,
+        );
+      }
+
       setLastResult(result);
-      if (intent.kind === "derivative" && result.success) {
+      if (intent.kind === "derivative" && !intent.evaluationPoint && result.success) {
         setLastDerived({
           sourceLatex: latex, expression: trimmedInner, innerLatex: intent.innerLatex,
           variable: intent.variable, order: intent.order, angleUnit, result,
