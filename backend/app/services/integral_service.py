@@ -160,6 +160,13 @@ def _fast_antiderivative(input_expr: sympy.Expr, x: sympy.Symbol) -> Optional[sy
     These are exact structural identities, not heuristic approximations.
     Returning None preserves the existing manualintegrate/SymPy path.
     """
+    # The parser retains unevaluated arithmetic for input/steps. Rebuild
+    # only arithmetic nodes for structural fast-path matching; ordinary
+    # SymPy evaluation preserves principal branches (no force=True).
+    input_expr = input_expr.replace(
+        lambda node: node.is_Add or node.is_Mul or node.is_Pow,
+        lambda node: node.func(*node.args),
+    )
     sin = sympy.sin
     cos = sympy.cos
     tan = sympy.tan

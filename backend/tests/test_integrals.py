@@ -241,3 +241,12 @@ def test_asech_definite_respects_bounds_and_reversed_orientation():
         assert "+ C" not in body["result_text"]
         actual = float(sp.N(sp.sympify(body["result_text"]), 20))
         assert abs(actual - sign * expected) < 1e-10
+
+def test_fast_path_matches_unevaluated_reciprocal_sqrt_arithmetic():
+    from app.services.integral_service import _fast_antiderivative
+    x = sp.Symbol("x")
+    inner = sp.Add(1, sp.Mul(-1, sp.Pow(x, 2, evaluate=False), evaluate=False), evaluate=False)
+    expression = sp.Pow(sp.Pow(inner, sp.Rational(1, 2), evaluate=False), -1, evaluate=False)
+    actual = _fast_antiderivative(expression, x)
+    assert actual == sp.asin(x)
+    assert sp.simplify(sp.diff(actual, x) - 1/sp.sqrt(1-x**2)) == 0

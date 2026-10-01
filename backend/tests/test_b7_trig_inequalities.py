@@ -4,6 +4,7 @@ os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
 import sympy as sp
 from fastapi.testclient import TestClient
 from app.main import app
+from app.services import parsing, phase2_service
 
 client = TestClient(app)
 
@@ -16,7 +17,16 @@ def _solve(expression, **extra):
         **extra,
     }).json()
     assert body["success"] is True, body
-    return sp.sympify(body["result_text"])
+    # The process boundary keeps service execution out of the parent
+    # coverage process. Verify the service directly as well as the API,
+    # against the same independent expected sets below.
+    result = phase2_service.compute_inequality(
+        parsing.parse_inequality_tree(expression), "x",
+        extra.get("domain_lower", "0"), extra.get("domain_upper", "2*pi"),
+        extra.get("domain_lower_inclusive", True), extra.get("domain_upper_inclusive", False),
+    )
+    assert result.solution_set == sp.sympify(body["result_text"])
+    return result.solution_set
 
 
 def test_quadratic_in_sine_returns_all_three_components():
