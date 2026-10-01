@@ -88,7 +88,7 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 
 export type CalculusIntent =
-  | { kind: "derivative"; variable: string; order: 1 | 2 | 3 | 4 | 5; innerLatex: string }
+  | { kind: "derivative"; variable: string; order: 1 | 2 | 3 | 4 | 5; innerLatex: string; evaluationPoint?: string }
   | { kind: "partialDerivative"; variable: string; innerLatex: string }
   | { kind: "integral"; variable: string; lowerBound: string | null; upperBound: string | null; innerLatex: string }
   | { kind: "limit"; variable: string; point: string; innerLatex: string; direction: "both" | "left" | "right" }
@@ -163,6 +163,21 @@ function detectSingularities(latex: string): Extract<CalculusIntent, { kind: "si
 // fuera la variable — el signo de derivada debe pegar a una 'y' sola).
 const ODE_PRIME_TOKEN = /(?:^|[^a-zA-Z])y'+/;
 
+// MathLive puede serializar una prima escrita como y' de varias formas
+// equivalentes: y', y′, y^{\\prime} e incluso y^\\prime. El backend de
+// EDO usa notación prima ASCII, así que convergemos todas esas variantes
+// ANTES de decidir el intent y antes de mandar la expresión a /ode.
+function normalizeODEPrimeNotation(latex: string): string {
+  return latex
+    // Formas con caret producidas por MathLive:
+    // y^{\\prime}, y^{\\prime\\prime}, y^′, y^′′ y variantes mixtas.
+    .replace(/y\^(?:\{)?(?:\\prime|′)(?:\\prime|′)(?:\})?/g, "y''")
+    .replace(/y\^(?:\{)?(?:\\prime|′)(?:\})?/g, "y'")
+    // Formas Unicode sin caret.
+    .replace(/y′′/g, "y''")
+    .replace(/y′/g, "y'");
+}
+
 // Tecla "dy/dx" (spec 2.3: "notación alternativa, mismo intent que y'").
 // \frac{dy}{dx} NUNCA matchea DERIVATIVE_PREFIX (ese exige numerador
 // exactamente "d", no "dy" -- verificado arriba con los regex reales) así
@@ -174,7 +189,7 @@ const DY_DX_TOKEN = /\\frac\{dy\}\{dx\}/g;
 function detectODE(latex: string): Extract<CalculusIntent, { kind: "ode" }> | null {
   const trimmed = latex.trim();
   if (trimmed.length === 0) return null;
-  const normalized = trimmed.replace(DY_DX_TOKEN, "y'");
+  const normalized = normalizeODEPrimeNotation(trimmed).replace(DY_DX_TOKEN, "y'");
   if (!ODE_PRIME_TOKEN.test(normalized)) return null;
   if (!normalized.includes("=")) return null;
   return { kind: "ode", cleanedExpression: normalized };
@@ -216,21 +231,45 @@ function findMatchingRightDelimiter(latex: string, fromIndex: number): number | 
 function detectDerivative(latex: string): Extract<CalculusIntent, { kind: "derivative" }> | null {
   const trimmed = latex.trim();
   const m = DERIVATIVE_PREFIX.exec(trimmed);
-  if (!m) return null;
+  if (m) {
+    const orderRaw = m[1] ?? m[3];
+    const order = orderRaw ? Number(orderRaw) : 1;
+    if (order < 1 || order > 5) return null;
 
-  const orderRaw = m[1] ?? m[3];
+    const variable = m[2];
+    const innerStart = m[0].length;
+    const end = findMatchingRightDelimiter(trimmed, innerStart);
+    if (end === null || end !== trimmed.length) return null;
+
+    const innerLatex = trimmed.slice(innerStart, end - 7).trim();
+    if (innerLatex.length === 0) return null;
+    return { kind: "derivative", variable, order: order as 1 | 2 | 3 | 4 | 5, innerLatex };
+  }
+
+  // Notación estándar sin \left(...\right), p. ej. d/dx sin x.
+  const bare = trimmed.match(/^\\frac\{d(?:\^\{?(\d)\}?)?\}\{d([a-zA-Z])(?:\^\{?(\d)\}?)?\}\s*(.+)$/s);
+  if (!bare) return null;
+  const orderRaw = bare[1] ?? bare[3];
   const order = orderRaw ? Number(orderRaw) : 1;
-  if (order < 1 || order > 5) return null; // fuera de rango de DerivativeRequest.order
+  if (order < 1 || order > 5) return null;
+  const innerLatex = bare[4].trim();
+  if (!innerLatex) return null;
+  return { kind: "derivative", variable: bare[2], order: order as 1 | 2 | 3 | 4 | 5, innerLatex };
+}
 
-  const variable = m[2];
-  const innerStart = m[0].length;
-  const end = findMatchingRightDelimiter(trimmed, innerStart);
-  if (end === null || end !== trimmed.length) return null;
-
-  const innerLatex = trimmed.slice(innerStart, end - 7).trim();
-  if (innerLatex.length === 0) return null;
-
-  return { kind: "derivative", variable, order: order as 1 | 2 | 3 | 4 | 5, innerLatex };
+function detectEvaluatedDerivative(
+  latex: string,
+): Extract<CalculusIntent, { kind: "derivative" }> | null {
+  const trimmed = latex.trim();
+  const match = trimmed.match(
+    /^\\left\.\s*(.+?)\s*\\right\\rvert_\{\s*([a-zA-Z])\s*=\s*(.+)\}$/s,
+  );
+  if (!match) return null;
+  const base = detectDerivative(match[1].trim());
+  if (!base || base.variable !== match[2]) return null;
+  const evaluationPoint = match[3].trim();
+  if (!evaluationPoint) return null;
+  return { ...base, evaluationPoint };
 }
 
 const PARTIAL_DERIVATIVE_PREFIX = /^\\frac\{\\partial\}\{\\partial\s*([a-zA-Z])\}\\left\(/;
@@ -264,17 +303,112 @@ function getComputeEngine(): ComputeEngine {
   return ce;
 }
 
-function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integral" }> | null {
-  const trimmed = latex.trim();
-  if (trimmed.length === 0) return null;
+function readBalancedLatexGroup(
+  source: string,
+  start: number,
+): { content: string; next: number } | null {
+  if (source[start] !== "{") return null;
+  let depth = 1;
+  let i = start + 1;
+  while (i < source.length && depth > 0) {
+    if (source[i] === "{") depth += 1;
+    else if (source[i] === "}") depth -= 1;
+    i += 1;
+  }
+  if (depth !== 0) return null;
+  return { content: source.slice(start + 1, i - 1), next: i };
+}
 
-  let expr;
+function stripTrailingAssumption(latex: string): string {
+  // Domain assumptions used by the B7 matrix appear after the completed
+  // differential, e.g. ", x>1", ", |x|<1" or ", 0<x<1". Only strip a
+  // trailing comma-clause when it actually contains an inequality sign.
+  return latex.replace(
+    /,\s*(?:\\quad\s*)?(?:\\\s*)?(?=[^,]*[<>])[^,]+$/s,
+    "",
+  ).trim();
+}
+
+function detectRawIntegral(latex: string): Extract<CalculusIntent, { kind: "integral" }> | null {
+  const source = stripTrailingAssumption(latex);
+
+  // Robust parser for definite-integral bounds. MathLive may serialize
+  // a bound such as pi/2 as \\frac{\\pi}{2}, so a regex using [^{}]+
+  // cannot safely read the full group.
+  if (source.startsWith("\\int_")) {
+    let cursor = "\\int_".length;
+    const lower = readBalancedLatexGroup(source, cursor);
+    if (lower) {
+      cursor = lower.next;
+      if (source[cursor] === "^") {
+        cursor += 1;
+        const upper = readBalancedLatexGroup(source, cursor);
+        if (upper) {
+          cursor = upper.next;
+          const tail = source.slice(cursor).trim();
+          const differentialNumerator = tail.match(
+            /^\\frac\{d([a-zA-Z])\}\{(.+)\}$/s,
+          );
+          if (differentialNumerator) {
+            return {
+              kind: "integral",
+              variable: differentialNumerator[1],
+              lowerBound: lower.content,
+              upperBound: upper.content,
+              innerLatex: `\\frac{1}{${differentialNumerator[2]}}`,
+            };
+          }
+          const normal = tail.match(/^(.*?)\s*(?:\\,)?\s*d([a-zA-Z])$/s);
+          if (normal && normal[1].trim()) {
+            return {
+              kind: "integral",
+              variable: normal[2],
+              lowerBound: lower.content,
+              upperBound: upper.content,
+              innerLatex: normal[1].trim(),
+            };
+          }
+        }
+      }
+    }
+  }
+
+  let match = source.match(/^\\int_\{([^{}]+)\}\^\{([^{}]+)\}\s*\\frac\{d([a-zA-Z])\}\{(.+)\}$/s);
+  if (match) {
+    return { kind: "integral", variable: match[3], lowerBound: match[1], upperBound: match[2], innerLatex: `\\frac{1}{${match[4]}}` };
+  }
+
+  match = source.match(/^\\int_\{([^{}]+)\}\^\{([^{}]+)\}\s*(.*?)\s*(?:\\,)?\s*d([a-zA-Z])$/s);
+  if (match && match[3].trim()) {
+    return { kind: "integral", variable: match[4], lowerBound: match[1], upperBound: match[2], innerLatex: match[3].trim() };
+  }
+
+  match = source.match(/^\\int\s*\\frac\{d([a-zA-Z])\}\{(.+)\}$/s);
+  if (match) {
+    return { kind: "integral", variable: match[1], lowerBound: null, upperBound: null, innerLatex: `\\frac{1}{${match[2]}}` };
+  }
+
+  match = source.match(/^\\int\s*(.*?)\s*(?:\\,)?\s*d([a-zA-Z])$/s);
+  if (match && match[1].trim()) {
+    return { kind: "integral", variable: match[2], lowerBound: null, upperBound: null, innerLatex: match[1].trim() };
+  }
+  return null;
+}
+
+function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integral" }> | null {
+  const trimmed = stripTrailingAssumption(latex.trim());
+  if (!trimmed.startsWith("\\int")) return null;
+
+  const raw = detectRawIntegral(trimmed);
+  if (raw) return raw;
+
+  let json;
   try {
-    expr = getComputeEngine().parse(trimmed);
+    json = getComputeEngine().parse(trimmed)?.json;
   } catch {
     return null;
   }
-  if (!expr || !Array.isArray(expr.json) || expr.json[0] !== "Integrate") return null;
+  if (!Array.isArray(json) || json[0] !== "Integrate") return null;
 
   // ["Integrate", ["Function", ["Block", <cuerpo>], var], ["Limits", var, lowerOrNothing, upperOrNothing]]
   // Se navega solo por .json (no por .ops — la interfaz `Expression` de
@@ -282,7 +416,7 @@ function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integra
   // operandos como propiedad; se probó y confirmó contra el paquete
   // real, ver comentario de cabecera). Para volver a obtener LaTeX de un
   // fragmento de JSON se usa ce.box(fragment).latex.
-  const [, fnJson, limitsJson] = expr.json;
+  const [, fnJson, limitsJson] = json;
   if (!Array.isArray(fnJson) || fnJson[0] !== "Function") return null;
   let bodyJson = fnJson[1];
   if (Array.isArray(bodyJson) && bodyJson[0] === "Block") bodyJson = bodyJson[1];
@@ -301,8 +435,10 @@ function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integra
   if (lowerIsNothing) {
     return { kind: "integral", variable, lowerBound: null, upperBound: null, innerLatex };
   }
-  if (typeof lower !== "number" || typeof upper !== "number") return null; // ej. límites simbólicos/infinito: fuera de alcance
-  return { kind: "integral", variable, lowerBound: String(lower), upperBound: String(upper), innerLatex };
+  const lowerLatex = typeof lower === "number" ? String(lower) : getComputeEngine().box(lower).latex;
+  const upperLatex = typeof upper === "number" ? String(upper) : getComputeEngine().box(upper).latex;
+  if (!lowerLatex || !upperLatex) return null;
+  return { kind: "integral", variable, lowerBound: lowerLatex, upperBound: upperLatex, innerLatex };
 }
 
 /**
@@ -350,21 +486,48 @@ function detectLateralLimit(latex: string): Extract<CalculusIntent, { kind: "lim
 
 function detectLimit(latex: string): Extract<CalculusIntent, { kind: "limit" }> | null {
   const trimmed = latex.trim();
-  if (trimmed.length === 0) return null;
+  if (!trimmed.startsWith("\\lim")) return null;
 
   const lateral = detectLateralLimit(trimmed);
   if (lateral) return lateral;
 
-  let expr;
+  if (trimmed.startsWith("\\lim_")) {
+    const group = readBalancedLatexGroup(trimmed, "\\lim_".length);
+    if (group) {
+      const condition = group.content.match(/^\s*([a-zA-Z])\s*\\to\s*(.+?)\s*$/s);
+      const body = trimmed.slice(group.next).trim();
+      if (condition && body) {
+        const rawPoint = condition[2].trim();
+        const lateralMatch = rawPoint.match(/^(.*)\^([+-])$/);
+        const pointLatex = (lateralMatch ? lateralMatch[1] : rawPoint).trim();
+        return {
+          kind: "limit",
+          variable: condition[1],
+          point:
+            pointLatex === "\\infty"
+              ? "oo"
+              : pointLatex === "-\\infty"
+                ? "-oo"
+                : pointLatex,
+          innerLatex: body,
+          direction: lateralMatch
+            ? (lateralMatch[2] === "+" ? "right" : "left")
+            : "both",
+        };
+      }
+    }
+  }
+
+  let json;
   try {
-    expr = getComputeEngine().parse(trimmed);
+    json = getComputeEngine().parse(trimmed)?.json;
   } catch {
     return null;
   }
-  if (!expr || !Array.isArray(expr.json) || expr.json[0] !== "Limit") return null;
+  if (!Array.isArray(json) || json[0] !== "Limit") return null;
 
   // ["Limit", ["Function", ["Block", <cuerpo>], var], puntoONúmeroOSímboloInfinito]
-  const [, fnJson, pointJson] = expr.json;
+  const [, fnJson, pointJson] = json;
   if (!Array.isArray(fnJson) || fnJson[0] !== "Function") return null;
   let bodyJson = fnJson[1];
   if (Array.isArray(bodyJson) && bodyJson[0] === "Block") bodyJson = bodyJson[1];
@@ -397,6 +560,7 @@ function detectLimit(latex: string): Extract<CalculusIntent, { kind: "limit" }> 
 export function detectCalculusIntent(latex: string): CalculusIntent | null {
   return (
     detectPartialDerivative(latex) ??
+    detectEvaluatedDerivative(latex) ??
     detectDerivative(latex) ??
     detectODE(latex) ??
     detectResidue(latex) ??

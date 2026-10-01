@@ -2,8 +2,6 @@
 app/services/graph_service.py — `/graph/2d` (spec, sección 10, `Graph2DRequest`).
 """
 
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import TimeoutError as FutureTimeoutError
 from dataclasses import dataclass, field
 import time
 from typing import List, Optional
@@ -13,6 +11,7 @@ from sympy import S, cos, cot, csc, pi, sec, sin, tan
 from sympy.calculus.util import continuous_domain, function_range
 
 from app.core.config import get_settings
+from app.core.math_timeout import run_math_operation
 from app.schemas.responses import GraphAnalysis, GraphData, Trace
 from app.services import parsing
 
@@ -47,14 +46,13 @@ _MAX_INTERCEPTS_REPORTED = 8
 
 
 def _run_with_timeout(func, timeout_s: float = _ANALYSIS_TIMEOUT_S):
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(func)
-        try:
-            return future.result(timeout=timeout_s)
-        except FutureTimeoutError:
-            return None
-        except Exception:
-            return None
+    # compute_graph runs in an isolated child whose main thread supports
+    # SIGALRM. Unlike an executor context manager, this does not wait for
+    # timed-out symbolic work to finish before returning partial analysis.
+    try:
+        return run_math_operation(func, timeout_s=timeout_s)
+    except Exception:
+        return None
 
 
 def _format_real_roots(expr: sympy.Expr, var_symbol: sympy.Symbol) -> List[sympy.Expr]:

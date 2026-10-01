@@ -18,8 +18,8 @@ from app.services import solve_service
 client = TestClient(app)
 
 
-def _solve(equation, variable=None, angle_unit="rad"):
-    payload = {"equation": equation, "angle_unit": angle_unit}
+def _solve(equation, variable=None, angle_unit="rad", **extra):
+    payload = {"equation": equation, "angle_unit": angle_unit, **extra}
     if variable is not None:
         payload["variable"] = variable
     return client.post("/api/v1/solve", json=payload)
@@ -112,3 +112,79 @@ def test_solve_parse_error_propagates():
     assert body["success"] is False
     assert body["error_code"] == "PARSE_ERROR"
     assert body["operation"] == "solve"
+
+
+# ---------------------------------------------------------------------------
+# Matriz trigonométrica — dominio real e intervalo explícito
+# ---------------------------------------------------------------------------
+
+def test_real_domain_filters_complex_solutions():
+    response = _solve("sin(x)=2", variable="x", domain="real")
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_data"] == []
+
+
+def test_complex_domain_keeps_historical_complex_solutions():
+    response = _solve("x**2+1=0", variable="x", domain="complex")
+    body = response.json()
+    assert body["success"] is True
+    assert len(body["result_data"]) == 2
+    assert all(item["is_complex"] for item in body["result_data"])
+
+
+def test_bounded_real_trig_equation_returns_all_periodic_solutions_in_interval():
+    response = _solve(
+        "sin(x)=1/2",
+        variable="x",
+        domain="real",
+        domain_lower="0",
+        domain_upper="2*pi",
+        domain_lower_inclusive=True,
+        domain_upper_inclusive=False,
+    )
+    body = response.json()
+    assert body["success"] is True
+    solutions = {item["text"] for item in body["result_data"]}
+    assert solutions == {"pi/6", "5*pi/6"}
+
+
+def test_real_arccot_equation_uses_calculator_branch():
+    response = _solve("acot(x)=2*pi/3", variable="x", domain="real")
+    body = response.json()
+    assert body["success"] is True
+    solutions = [sympy.sympify(item["text"]) for item in body["result_data"]]
+    assert len(solutions) == 1
+    assert sympy.simplify(solutions[0] + sympy.sqrt(3) / 3) == 0
+
+
+def test_real_asin_equals_acos_reduces_before_generic_solver():
+    response = _solve("asin(x)=acos(x)", variable="x", domain="real")
+    body = response.json()
+    assert body["success"] is True
+    solutions = [sympy.sympify(item["text"]) for item in body["result_data"]]
+    assert len(solutions) == 1
+    assert sympy.simplify(solutions[0] - sympy.sqrt(2) / 2) == 0
+
+def test_bounded_quadratic_in_sine_keeps_all_algebraic_and_periodic_branches():
+    body = _solve(
+        "2*sin(x)^2-sin(x)-1=0", domain="real",
+        domain_lower="0", domain_upper="2*pi", domain_upper_inclusive=False,
+    ).json()
+    assert body["success"] is True
+    values = {sympy.sympify(item["text"]) for item in body["result_data"]}
+    assert values == {sympy.pi/2, 7*sympy.pi/6, 11*sympy.pi/6}
+    x = sympy.Symbol("x")
+    residual = 2*sympy.sin(x)**2-sympy.sin(x)-1
+    assert all(sympy.simplify(residual.subs(x, value)) == 0 for value in values)
+
+
+def test_bounded_trig_polynomial_preserves_open_endpoints_and_degrees():
+    for angle_unit, expected in (("rad", {"pi/2", "pi"}), ("deg", {"90", "180"})):
+        body = _solve(
+            "sin(x)^2-sin(x)=0", domain="real", angle_unit=angle_unit,
+            domain_lower="0", domain_upper="2*pi",
+            domain_lower_inclusive=False, domain_upper_inclusive=False,
+        ).json()
+        assert body["success"] is True
+        assert {item["text"] for item in body["result_data"]} == expected

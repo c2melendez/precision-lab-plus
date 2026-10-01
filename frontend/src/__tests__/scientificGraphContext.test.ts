@@ -1,0 +1,344 @@
+import { describe, expect, it } from "vitest";
+import type { MathResponse } from "../api/client";
+import { latexToBackendSyntax } from "../components/NaturalMathField";
+import { algebraTransformationGraphContext, directFunctionGraphContext, derivativeGraphContext, definiteIntegralGraphContext, indefiniteIntegralGraphContext, limitGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext, inequalitySystemGraphContext, complexGraphContext } from "../components/scientificGraphContext";
+
+describe("contexto canónico de función directa", () => {
+  it("conserva la expresión de entrada y el resultado del motor, sin leer texto visual", () => {
+    const result = {
+      success: true,
+      result_text: "x**2 + 1",
+      result_latex: "x^{2}+1",
+      result_data: null,
+    } as MathResponse;
+    const context = directFunctionGraphContext("x**2+1", "x", "deg", result, "x^2+1");
+
+    expect(context.originalExpression).toBe("x**2+1");
+    expect(context.inputLatex).toBe("x^2+1");
+    expect(context.canonicalResult).toEqual({ text: "x**2 + 1", data: null });
+    expect(context.graphRequest).toEqual({
+      endpoint: "/graph/2d",
+      payload: { expressions: ["x**2+1"], variable: "x", angle_unit: "deg" },
+    });
+    expect(JSON.stringify(context)).not.toContain("x^{2}");
+  });
+
+  it("representa una función aún no evaluada sin inventar un resultado", () => {
+    const context = directFunctionGraphContext("y**2", "y", "rad", null, "y^2");
+    expect(context.canonicalResult).toBeNull();
+    expect(context.variables).toEqual(["y"]);
+    expect(context.graphRequest?.payload.variable).toBe("y");
+  });
+});
+
+describe("datos complejos canónicos", () => {
+  it("transfiere muestras z→f(z) sin fabricar una curva cartesiana", () => {
+    const result = { success: true, operation: "evaluate", result_text: "z**2",
+      complex_graph_mapping: [
+        { source: { re: 0, im: 1, label: "i" }, target: { re: -1, im: 0, label: "f(i)" } },
+        { source: { re: 1, im: 0, label: "1" }, target: { re: 1, im: 0, label: "f(1)" } },
+      ] } as MathResponse;
+    const context = complexGraphContext("z^2", "z^2", result);
+    expect(context.visualization).toBe("complex-map");
+    expect(context.metadata.mapping).toEqual(result.complex_graph_mapping);
+    expect(context.originalExpression).toBe("z^2");
+    expect(context.graphRequest).toBeNull();
+  });
+
+  it("transfiere partes Re e Im de una función de variable real", () => {
+    expect(latexToBackendSyntax("\\sin(x)+i\\cos(x)")).toMatch(/sin.*[Ii].*cos/);
+    const result = { success: true, operation: "evaluate", result_text: "exp(I*x)",
+      complex_graph_components: { variable: "x", re_expression: "cos(x)", im_expression: "sin(x)",
+        re_latex: "\\cos(x)", im_latex: "\\sin(x)" } } as MathResponse;
+    const context = complexGraphContext("exp(I*x)", "e^{ix}", result);
+    expect(context.visualization).toBe("cartesian-2d");
+    expect(context.metadata.kind).toBe("real-input-function");
+    expect(context.graphRequest).toEqual({ endpoint: "/graph/2d", payload: {
+      expressions: ["cos(x)", "sin(x)"], variable: "x", angle_unit: "rad",
+    } });
+    expect(context.originalExpression).toBe("exp(I*x)");
+  });
+
+  it("transfiere todas las raíces y el resultado sin forzar una curva real", () => {
+    const result = { success: true, operation: "solve", result_data: [
+      { text: "I", latex: "i", is_complex: true }, { text: "-I", latex: "-i", is_complex: true }],
+      complex_graph_points: [{ re: 0, im: 1, label: "I" }, { re: 0, im: -1, label: "-I" }] } as MathResponse;
+    const context = complexGraphContext("x^2+1=0", "x^2+1=0", result);
+    expect(context.visualization).toBe("argand");
+    expect(context.metadata.kind).toBe("roots");
+    expect(context.metadata.points).toEqual(result.complex_graph_points);
+    expect(context.canonicalResult?.data).toEqual(result.result_data);
+    expect(context.graphRequest).toBeNull();
+  });
+});
+
+describe("sistema de inecuaciones en dos variables", () => {
+  it("conserva restricciones, región y vértices para Gráficas", () => {
+    const result = { success: true, result_text: "Región no acotada", result_data: [["0", "0"]],
+      inequality_region_kind: "unbounded", inequality_constraints: [
+        { a: 1, b: 0, c: 0, operator: ">", label: "x>0" }],
+      inequality_preview_polygon: [[0, -4], [4, -4], [4, 4], [0, 4]],
+      inequality_viewport: [-4, 4, -4, 4] } as MathResponse;
+    const context = inequalitySystemGraphContext(["x>0"], ["x", "y"], "cases", result);
+    expect(context.visualization).toBe("region-2d");
+    expect(context.metadata.constraints).toEqual(result.inequality_constraints);
+    expect(context.metadata.polygon).toEqual(result.inequality_preview_polygon);
+    expect(context.metadata.vertices).toEqual(result.result_data);
+    expect(context.graphRequest).toBeNull();
+  });
+});
+
+describe("inecuación univariada", () => {
+  it("transfiere la elipse estructurada y conserva ambas variables", () => {
+    const ellipse = { center_x: 0, center_y: 0, radius_x: 1, radius_y: 0.7,
+      center_x_exact: "0", center_y_exact: "0", radius_x_exact: "1", radius_y_exact: "sqrt(2)/2",
+      inside: true, boundary_included: false };
+    const result = { success: true, result_text: "Interior sin frontera de la elipse",
+      inequality_ellipse: ellipse } as MathResponse;
+    const context = inequalityGraphContext("x^2+2*y^2<1", "x", "ellipse", result);
+    expect(context.visualization).toBe("ellipse-region");
+    expect(context.variables).toEqual(["x", "y"]);
+    expect(context.metadata.ellipse).toEqual(ellipse);
+    expect(context.graphRequest).toBeNull();
+  });
+
+  it("transfiere centro, radio y frontera circular sin reparsear el resultado", () => {
+    const circle = { center_x: 2, center_y: -1, radius: 3,
+      center_x_exact: "2", center_y_exact: "-1", radius_exact: "3",
+      inside: true, boundary_included: false };
+    const result = { success: true, result_text: "Interior sin frontera del círculo",
+      inequality_circle: circle } as MathResponse;
+    const context = inequalityGraphContext("(x-2)^2+(y+1)^2<9", "x", "circle", result);
+    expect(context.visualization).toBe("circle-region");
+    expect(context.variables).toEqual(["x", "y"]);
+    expect(context.metadata.circle).toEqual(circle);
+    expect(context.graphRequest).toBeNull();
+  });
+
+  it("redirige una inecuación 2D directa a la región canónica", () => {
+    const result = { success: true, result_text: "Región no acotada", result_data: null,
+      inequality_region_kind: "unbounded", inequality_constraints: [
+        { a: 1, b: 1, c: 0, operator: ">", label: "x+y>0" }],
+      inequality_preview_polygon: [[-4, 4], [4, -4], [4, 4]],
+      inequality_viewport: [-4, 4, -4, 4] } as MathResponse;
+    const context = inequalityGraphContext("x+y>0", "x", "x+y>0", result);
+    expect(context.visualization).toBe("region-2d");
+    expect(context.originalExpression).toBe("x+y>0");
+    expect(context.metadata.constraints).toEqual(result.inequality_constraints);
+    expect(context.graphRequest).toBeNull();
+  });
+
+  it("transfiere conjunto canónico y extremos sin fabricar una curva cartesiana", () => {
+    const result = { success: true, result_text: "Interval.open(0, oo)", result_latex: "(0, \\infty)",
+      inequality_intervals: [{ lower: 0, upper: null, lower_text: "0",
+        lower_included: false, upper_included: false }] } as MathResponse;
+    const context = inequalityGraphContext("x>0", "x", "x>0", result);
+    expect(context.visualization).toBe("number-line");
+    expect(context.graphRequest).toBeNull();
+    expect(context.metadata.intervals).toEqual(result.inequality_intervals);
+    expect(context.metadata.solutionLatex).toBe(result.result_latex);
+  });
+});
+
+describe("sistema lineal certificado", () => {
+  it("conserva ecuaciones y soluciones, y marca solo la intersección calculada", () => {
+    const result = { success: true, result_data: [{ text: "x=2, y=1", latex: "x=2,y=1" }],
+      system_graph_expressions: ["3 - x", "x - 1"], system_graph_latex: ["3-x", "x-1"],
+      system_graph_intersections: [[2, 1]] } as MathResponse;
+    const context = systemGraphContext(["x+y=3", "x-y=1"], ["x", "y"], "\\begin{cases}...", result);
+    expect(context.graphRequest?.payload.expressions).toEqual(["3 - x", "x - 1"]);
+    expect(context.metadata.intersections).toEqual([[2, 1]]);
+    expect(context.metadata.equations).toEqual(["x+y=3", "x-y=1"]);
+    expect(context.canonicalResult?.data).toEqual(result.result_data);
+  });
+
+  it("conserva rectas verticales como trazas del sistema, sin fingir y=f(x)", () => {
+    const context = systemGraphContext(["x=1", "y=2"], ["x", "y"], "system", {
+      success: true, system_graph_expressions: null, system_graph_latex: null,
+      graph_data: { traces: [{ type: "line", name: "x=1", x: [1, 1], y: [-10, 10] }],
+        x_range: [-9, 11], y_range: [-10, 10] }, system_graph_intersections: [[1, 2]],
+    } as unknown as MathResponse);
+    expect(context.graphRequest).toEqual({ endpoint: "/solve/system",
+      payload: { equations: ["x=1", "y=2"], variables: ["x", "y"] } });
+    expect(context.visualization).toBe("cartesian-2d");
+    expect(context.metadata.intersections).toEqual([[1, 2]]);
+  });
+
+  it("conserva dos ramas no lineales y la recta vertical con dos cruces", () => {
+    const context = systemGraphContext(["x=0", "x^2+y^2=1"], ["x", "y"], "cases", {
+      success: true, graph_data: { traces: [
+        { type: "line", name: "rama 1", x: [-1, 0, 1], y: [0, -1, 0] },
+        { type: "line", name: "rama 2", x: [-1, 0, 1], y: [0, 1, 0] },
+        { type: "line", name: "x=0", x: [0, 0], y: [-2, 2] },
+      ], x_range: [-2, 2], y_range: [-2, 2] },
+      system_graph_component_indices: [1, 1, 0],
+      system_graph_intersections: [[0, -1], [0, 1]],
+    } as MathResponse);
+    expect(context.visualization).toBe("cartesian-2d");
+    expect(context.graphRequest).toEqual({ endpoint: "/solve/system", payload: {
+      equations: ["x=0", "x^2+y^2=1"], variables: ["x", "y"],
+    } });
+    expect(context.metadata.intersections).toHaveLength(2);
+    expect(context.metadata.componentIndices).toEqual([1, 1, 0]);
+  });
+
+  it("distingue soluciones complejas de un sistema paralelo sin solución", () => {
+    const complex = systemGraphContext(["x^2+y^2=1", "x=2"], ["x", "y"], "cases", {
+      success: true, system_graph_intersections: [], result_data: [
+        { text: "x=2, y=sqrt(3)*I", latex: "", is_complex: true },
+      ], graph_data: { traces: [{ type: "line", name: "x=2", x: [2, 2], y: [-2, 2] }],
+        x_range: [-2, 4], y_range: [-2, 2] },
+    } as unknown as MathResponse);
+    expect(complex.metadata.hasComplexSolutions).toBe(true);
+    const parallel = systemGraphContext(["x+y=3", "x+y=4"], ["x", "y"], "cases", {
+      success: true, result_data: [], system_graph_intersections: [],
+      system_graph_expressions: ["3-x", "4-x"], system_graph_latex: ["3-x", "4-x"],
+    } as unknown as MathResponse);
+    expect(parallel.metadata.hasComplexSolutions).toBe(false);
+  });
+
+  it("agrupa ambas ramas del círculo y conserva sus dos cruces exactos", () => {
+    const context = systemGraphContext(["x**2+y**2=1", "y=x"], ["x", "y"], "system", {
+      success: true, system_graph_expressions: ["-sqrt(1-x**2)", "sqrt(1-x**2)", "x"],
+      system_graph_latex: ["-\\sqrt{1-x^2}", "\\sqrt{1-x^2}", "x"],
+      system_graph_component_indices: [0, 0, 1],
+      system_graph_intersections: [[-0.707, -0.707], [0.707, 0.707]],
+    } as MathResponse);
+    expect(context.graphRequest?.payload.expressions).toHaveLength(3);
+    expect(context.metadata.componentIndices).toEqual([0, 0, 1]);
+    expect(context.metadata.intersections).toHaveLength(2);
+  });
+});
+
+describe("contexto canónico de integral indefinida", () => {
+  it("grafica C=0 desde campos estructurados y conserva +C en Resultado", () => {
+    const result = {
+      success: true,
+      result_text: "x**3/3 + C",
+      result_latex: "\\frac{x^{3}}{3} + C",
+      antiderivative_expression: "x**3/3",
+      antiderivative_latex: "\\frac{x^{3}}{3}",
+    } as MathResponse;
+    const context = indefiniteIntegralGraphContext("x^2", "x^2", "\\int x^2\\,dx", "x", "rad", result, true);
+    expect(context.canonicalResult?.text).toBe("x**3/3 + C");
+    expect(context.metadata).toMatchObject({ kind: "indefinite", visualConstant: 0 });
+    expect(context.graphRequest?.payload.expressions).toEqual(["x^2", "x**3/3"]);
+    expect(context.graphInputLatex).toEqual(["x^2", "\\frac{x^{3}}{3}"]);
+  });
+
+  it("usa la semántica en radianes del endpoint aunque la UI esté en grados", () => {
+    const result = {
+      success: true, result_text: "-cos(x) + C",
+      antiderivative_expression: "-cos(x)", antiderivative_latex: "-\\cos(x)",
+    } as MathResponse;
+    const context = indefiniteIntegralGraphContext("sin(x)", "\\sin(x)", "\\int\\sin(x)\\,dx", "x", "deg", result, true);
+    expect(context.graphRequest?.payload.angle_unit).toBe("rad");
+    expect(context.metadata.inputAngleUnit).toBe("deg");
+  });
+
+  it("no usa el texto mostrado para deducir una antiderivada ausente", () => {
+    const result = { success: true, result_text: "x**3/3 + C", result_latex: "\\frac{x^3}{3}+C" } as MathResponse;
+    const context = indefiniteIntegralGraphContext("x^2", "x^2", "integral", "x", "rad", result, true);
+    expect(context.graphRequest).toBeNull();
+    expect(context.visualization).toBe("advanced");
+  });
+});
+
+describe("contexto canónico de derivada", () => {
+  it("transfiere original y resultado del motor con orden y variable", () => {
+    const result = {
+      success: true, result_text: "2*x", result_latex: "2 x", result_data: null,
+    } as MathResponse;
+    const context = derivativeGraphContext("x^2+1", "x^2+1", "\\frac{d}{dx}\\left(x^2+1\\right)", "x", 1, "rad", result, true);
+    expect(context.canonicalResult?.text).toBe("2*x");
+    expect(context.graphRequest?.payload.expressions).toEqual(["x^2+1", "2*x"]);
+    expect(context.graphInputLatex).toEqual(["x^2+1", "2 x"]);
+    expect(context.metadata).toEqual({ order: 1, angleUnit: "rad", inputAngleUnit: "rad" });
+  });
+
+  it("no ofrece una curva cartesiana cuando el resultado depende de otro parámetro", () => {
+    const result = { success: true, result_text: "2*a*x", result_latex: "2 a x" } as MathResponse;
+    const context = derivativeGraphContext("a*x^2", "a x^2", "derivada", "x", 1, "rad", result, false);
+    expect(context.visualization).toBe("advanced");
+    expect(context.graphRequest).toBeNull();
+  });
+});
+
+describe("contexto canónico de integral definida", () => {
+  it("mantiene límites, orientación y valor exacto sin deducir el área del muestreo", () => {
+    const result = { success: true, result_text: "-8/3", result_data: null } as MathResponse;
+    const context = definiteIntegralGraphContext("x^2", "x^2", "\\int_{2}^{0}x^2\\,dx", "x", "2", "0", "rad", result, true);
+    expect(context.metadata).toMatchObject({ kind: "definite", lowerBound: "2", upperBound: "0", orientation: -1 });
+    expect(context.canonicalResult?.text).toBe("-8/3");
+    expect(context.graphRequest?.payload).toMatchObject({ expressions: ["x^2"], variable: "x", x_min: -1, x_max: 3 });
+    expect(context.graphInputLatex).toEqual(["x^2"]);
+  });
+});
+
+describe("contexto canónico de límite", () => {
+  it("conserva punto, dirección y DNE sin inferir laterales desde LaTeX de Resultado", () => {
+    const result = { success: true, result_text: "DNE", result_latex: "texto con laterales" } as MathResponse;
+    const context = limitGraphContext("1/x", "\\frac{1}{x}", "\\lim_{x\\to0}\\frac{1}{x}", "x", "0", "both", "deg", result, true);
+    expect(context.metadata).toMatchObject({ point: "0", direction: "both", bilateralDoesNotExist: true, inputAngleUnit: "deg" });
+    expect(context.canonicalResult?.text).toBe("DNE");
+    expect(context.graphRequest?.payload).toMatchObject({ expressions: ["1/x"], x_min: -2, x_max: 2, angle_unit: "rad" });
+    expect(JSON.stringify(context)).not.toContain("texto con laterales");
+  });
+
+  it("encuadra el comportamiento lejano en dirección al infinito", () => {
+    const context = limitGraphContext("1/x", "1/x", "límite", "x", "oo", "both", "rad",
+      { success: true, result_text: "0" } as MathResponse, true);
+    expect(context.graphRequest?.payload).toMatchObject({ x_min: 4, x_max: 20 });
+    expect(context.metadata.behavior).toBe("far-field");
+  });
+});
+
+describe("transformación algebraica y dominio", () => {
+  it("grafica una sola curva para dos formas polinómicas con dominio real completo", () => {
+    const result = { success: true, result_text: "(x - 2)*(x + 2)", result_latex: "(x-2)(x+2)",
+      graph_polynomial_comparison: true } as MathResponse;
+    const context = algebraTransformationGraphContext("factor", "x^2-4", "x^2-4", "x", "rad", result);
+    expect(context.restrictions).toEqual([]);
+    expect(context.graphRequest?.payload.expressions).toEqual(["x^2-4"]);
+    expect(context.graphInputLatex).toEqual(["x^2-4"]);
+    expect(context.metadata.transformedExpression).toBe("(x - 2)*(x + 2)");
+  });
+
+  it("no atribuye dominio real completo a x/x simplificado como 1", () => {
+    const result = { success: true, result_text: "1", result_latex: "1",
+      graph_polynomial_comparison: false } as MathResponse;
+    const context = algebraTransformationGraphContext("simplify", "x/x", "\\frac{x}{x}", "x", "rad", result);
+    expect(context.restrictions).toBeNull();
+    expect(context.graphRequest).toBeNull();
+    expect(context.visualization).toBe("advanced");
+  });
+});
+
+describe("solución EDO estructurada", () => {
+  it("grafica solo el lado derecho de una solución particular", () => {
+    const result = { success: true, result_text: "Eq(y(x), exp(x))", result_latex: "y(x)=e^x",
+      ode_solution_expression: "exp(x)", ode_solution_latex: "e^{x}" } as MathResponse;
+    const context = odeGraphContext("y'=y, y(0)=1", "y'=y, y(0)=1", result);
+    expect(context.graphRequest?.payload.expressions).toEqual(["exp(x)"]);
+    expect(context.graphInputLatex).toEqual(["e^{x}"]);
+    expect(context.canonicalResult?.text).toBe("Eq(y(x), exp(x))");
+    expect(context.metadata.kind).toBe("particular");
+  });
+
+  it("conserva la familia original y grafica solo tres representantes", () => {
+    const result = { success: true, result_text: "Eq(y(x), C1*exp(x))",
+      ode_representative_expressions: ["-exp(x)", "0", "exp(x)"],
+      ode_representative_latex: ["-e^x", "0", "e^x"] } as MathResponse;
+    const context = odeGraphContext("y'=y", "y'=y", result);
+    expect(context.graphRequest?.payload.expressions).toEqual(["-exp(x)", "0", "exp(x)"]);
+    expect(context.metadata.representativeConstants).toEqual([-1, 0, 1]);
+    expect(context.canonicalResult?.text).toContain("C1");
+  });
+
+  it("no inventa curvas para una familia de dos parámetros", () => {
+    const context = odeGraphContext("y''=-y", "y''=-y", { success: true,
+      result_text: "Eq(y(x), C1*sin(x)+C2*cos(x))" } as MathResponse);
+    expect(context.graphRequest).toBeNull();
+    expect(context.visualization).toBe("advanced");
+  });
+});

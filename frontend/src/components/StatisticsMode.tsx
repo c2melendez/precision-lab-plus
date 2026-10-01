@@ -7,10 +7,14 @@
  * usa MatrixMode.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { submitAndRecord } from "../api/submitWithHistory";
+
+const submitStatistics = (endpoint: Parameters<typeof submitAndRecord>[0], payload: Record<string, unknown>, label: string) =>
+  submitAndRecord(endpoint, payload, label, "Estadística");
 import type { MathResponse } from "../api/client";
 import { ResultPanel } from "./ResultPanel";
+import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStore";
 
 type SubMode = "descriptive" | "combinatorics" | "distribution" | "correlation";
 type VarianceKind = "population" | "sample";
@@ -76,7 +80,7 @@ export function StatisticsMode() {
     }
     setDescriptiveLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/descriptive",
         { values, stat, variance_kind: varianceKind, percentile_p: percentileP },
         `Estadística descriptiva: ${stat}(${values.join(",")})`,
@@ -98,7 +102,7 @@ export function StatisticsMode() {
     const r = Number(rStr);
     setCombinatoricsLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/combinatorics",
         { n, r, fn },
         `Combinatoria: ${fn}(${n}${fn === "factorial" ? "" : `,${r}`})`,
@@ -125,7 +129,7 @@ export function StatisticsMode() {
   async function runBinomial(query: "pmf" | "cdf" | "survival" | "mean" | "variance") {
     setDistributionLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/binomial",
         { n: Number(binN), p: Number(binP), k: Number(binK), query },
         `Binomial(${binN},${binP}) ${query}`,
@@ -139,7 +143,7 @@ export function StatisticsMode() {
   async function runNormal(query: "cdf" | "range" | "zscore") {
     setDistributionLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/normal",
         { mu: Number(mu), sigma: Number(sigma), x: Number(normX), a: Number(normA), b: Number(normB), query },
         `Normal(${mu},${sigma}) ${query}`,
@@ -162,7 +166,7 @@ export function StatisticsMode() {
   async function runPoisson(query: "pmf" | "cdf" | "mean" | "variance") {
     setDistributionLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/poisson",
         { lam: Number(poissonLam), k: Number(poissonK), query },
         `Poisson(${poissonLam}) ${query}`,
@@ -176,7 +180,7 @@ export function StatisticsMode() {
   async function runUniform(query: "cdf" | "mean" | "variance") {
     setDistributionLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/uniform",
         { a: Number(uniformA), b: Number(uniformB), x: Number(uniformX), query },
         `Uniforme(${uniformA},${uniformB}) ${query}`,
@@ -190,7 +194,7 @@ export function StatisticsMode() {
   async function runExponential(query: "cdf" | "mean" | "variance") {
     setDistributionLoading(true);
     try {
-      const result = await submitAndRecord(
+      const result = await submitStatistics(
         "/statistics/exponential",
         { lam: Number(expLam), x: Number(expX), query },
         `Exponencial(${expLam}) ${query}`,
@@ -206,6 +210,72 @@ export function StatisticsMode() {
   const [yRaw, setYRaw] = useState("");
   const [correlationResult, setCorrelationResult] = useState<MathResponse | null>(null);
   const [correlationLoading, setCorrelationLoading] = useState(false);
+  const pendingHistoryReuse = usePendingHistoryReuseStore((s) => s.pending);
+  const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
+
+  useEffect(() => {
+    const entry = takePendingHistoryReuse();
+    if (!entry) return;
+    const payload = entry.requestPayload;
+
+    if (entry.endpointUrl.includes("/descriptive")) {
+      setSubMode("descriptive");
+      if (Array.isArray(payload.values)) setDataRaw(payload.values.join(", "));
+      if (payload.variance_kind === "population" || payload.variance_kind === "sample") setVarianceKind(payload.variance_kind);
+      if (payload.percentile_p !== undefined) setPercentileP(String(payload.percentile_p));
+      setDescriptiveResult(null);
+      return;
+    }
+
+    if (entry.endpointUrl.includes("/correlation")) {
+      setSubMode("correlation");
+      if (Array.isArray(payload.x)) setXRaw(payload.x.join(", "));
+      if (Array.isArray(payload.y)) setYRaw(payload.y.join(", "));
+      setCorrelationResult(null);
+      return;
+    }
+
+    if (entry.endpointUrl.includes("/combinatorics")) {
+      setSubMode("combinatorics");
+      if (payload.n !== undefined) setNStr(String(payload.n));
+      if (payload.r !== undefined) setRStr(String(payload.r));
+      setCombinatoricsResult(null);
+      return;
+    }
+
+    if (entry.endpointUrl.includes("/statistics/")) {
+      setSubMode("distribution");
+      if (typeof payload.distribution === "string" && ["binomial", "normal", "poisson", "uniform", "exponential"].includes(payload.distribution)) {
+        setDistribution(payload.distribution as Distribution);
+      }
+      if (payload.n !== undefined) setBinN(String(payload.n));
+      if (payload.p !== undefined) setBinP(String(payload.p));
+      if (payload.k !== undefined) {
+        setBinK(String(payload.k));
+        setPoissonK(String(payload.k));
+      }
+      if (payload.mu !== undefined) setMu(String(payload.mu));
+      if (payload.sigma !== undefined) setSigma(String(payload.sigma));
+      if (payload.lambda !== undefined) {
+        setPoissonLam(String(payload.lambda));
+        setExpLam(String(payload.lambda));
+      }
+      if (payload.a !== undefined) {
+        setNormA(String(payload.a));
+        setUniformA(String(payload.a));
+      }
+      if (payload.b !== undefined) {
+        setNormB(String(payload.b));
+        setUniformB(String(payload.b));
+      }
+      if (payload.x !== undefined && !Array.isArray(payload.x)) {
+        setNormX(String(payload.x));
+        setUniformX(String(payload.x));
+        setExpX(String(payload.x));
+      }
+      setDistributionResult(null);
+    }
+  }, [pendingHistoryReuse, takePendingHistoryReuse]);
 
   async function runCorrelation(query: "correlation" | "slope" | "intercept") {
     let x: number[];
@@ -235,7 +305,7 @@ export function StatisticsMode() {
     }
     setCorrelationLoading(true);
     try {
-      const result = await submitAndRecord("/statistics/correlation", { x, y, query }, `Correlación: ${query}`);
+      const result = await submitStatistics("/statistics/correlation", { x, y, query }, `Correlación: ${query}`);
       setCorrelationResult(result);
     } finally {
       setCorrelationLoading(false);
@@ -247,7 +317,7 @@ export function StatisticsMode() {
   const btnPrimaryClass = "rounded bg-graph py-2 text-xs font-medium text-white hover:bg-graph/90";
 
   return (
-    <div className="mx-auto max-w-lg space-y-4 rounded-lg border border-paper-line bg-paper-soft p-5 shadow-sm lg:max-w-2xl dt:max-w-3xl">
+    <div className="mx-auto max-w-lg space-y-4 rounded-lg border border-paper-line bg-paper-soft p-5 text-ink shadow-sm lg:max-w-2xl dt:max-w-3xl">
       <div className="flex gap-1 rounded-lg border border-paper-line p-1 text-sm">
         {TABS.map((t) => (
           <button
@@ -257,7 +327,7 @@ export function StatisticsMode() {
             className={
               subMode === t.id
                 ? "flex-1 rounded-md bg-graph py-1.5 text-white"
-                : "flex-1 rounded-md py-1.5 text-muted hover:bg-paper"
+                : "flex-1 rounded-md py-1.5 text-muted hover:bg-paper-line/40"
             }
           >
             {t.label}

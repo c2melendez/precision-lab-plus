@@ -774,6 +774,37 @@ export interface components {
              */
             is_complex: boolean;
         };
+        InequalityInterval: {
+            lower?: number | null;
+            upper?: number | null;
+            lower_text?: string | null;
+            upper_text?: string | null;
+            lower_included: boolean;
+            upper_included: boolean;
+        };
+        InequalityBoundary: {
+            a: number;
+            b: number;
+            c: number;
+            operator: string;
+            label: string;
+        };
+        ComplexGraphPoint: {
+            re: number;
+            im: number;
+            label: string;
+        };
+        ComplexGraphComponents: {
+            variable: string;
+            re_expression: string;
+            im_expression: string;
+            re_latex: string;
+            im_latex: string;
+        };
+        ComplexGraphSample: {
+            source: components["schemas"]["ComplexGraphPoint"];
+            target: components["schemas"]["ComplexGraphPoint"];
+        };
         /**
          * ErrorCode
          * @description Enum central — el backend NUNCA usa un string de error fuera de esta lista.
@@ -1079,6 +1110,55 @@ export interface components {
             result_latex?: string | null;
             /** Result Text */
             result_text?: string | null;
+            /** Canonical antiderivative without + C, for graphing. */
+            antiderivative_expression?: string | null;
+            /** Antiderivative LaTeX without + C, for editing in Graphs. */
+            antiderivative_latex?: string | null;
+            /** B7: both algebraic forms are univariate real polynomials. */
+            graph_polynomial_comparison?: boolean | null;
+            /** Explicit particular solution RHS, if graphable. */
+            ode_solution_expression?: string | null;
+            ode_solution_latex?: string | null;
+            /** Representative members of a one-parameter ODE family. */
+            ode_representative_expressions?: string[] | null;
+            ode_representative_latex?: string[] | null;
+            system_graph_expressions?: string[] | null;
+            system_graph_latex?: string[] | null;
+            system_graph_intersections?: number[][] | null;
+            system_graph_coincident?: boolean;
+            system_graph_component_indices?: number[] | null;
+            inequality_intervals?: components["schemas"]["InequalityInterval"][] | null;
+            inequality_variable?: string | null;
+            inequality_region_kind?: string | null;
+            inequality_region_dimension?: number | null;
+            inequality_constraints?: components["schemas"]["InequalityBoundary"][] | null;
+            inequality_preview_polygon?: number[][] | null;
+            inequality_viewport?: number[] | null;
+            inequality_circle?: {
+                center_x: number;
+                center_y: number;
+                radius: number;
+                center_x_exact: string;
+                center_y_exact: string;
+                radius_exact: string;
+                inside: boolean;
+                boundary_included: boolean;
+            } | null;
+            inequality_ellipse?: {
+                center_x: number;
+                center_y: number;
+                radius_x: number;
+                radius_y: number;
+                center_x_exact: string;
+                center_y_exact: string;
+                radius_x_exact: string;
+                radius_y_exact: string;
+                inside: boolean;
+                boundary_included: boolean;
+            } | null;
+            complex_graph_points?: components["schemas"]["ComplexGraphPoint"][] | null;
+            complex_graph_components?: components["schemas"]["ComplexGraphComponents"] | null;
+            complex_graph_mapping?: components["schemas"]["ComplexGraphSample"][] | null;
             /** Result Approx */
             result_approx?: number | null;
             /** Result Data */

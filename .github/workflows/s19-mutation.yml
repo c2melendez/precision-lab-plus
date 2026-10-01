@@ -13,9 +13,29 @@ permissions:
   contents: read
 
 jobs:
-  plus-frontend-stryker:
+  plus-mutation-plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Test aggregate gate
+        run: node --test qa/s19/aggregate-plus.test.mjs qa/s19/patch-vitest5-runner.test.mjs
+      - id: plan
+        working-directory: frontend
+        run: echo "matrix=$(node ../qa/s19/plus-shards.mjs matrix)" >> "$GITHUB_OUTPUT"
+
+  plus-frontend-stryker:
+    needs: plus-mutation-plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.plus-mutation-plan.outputs.matrix) }}
     defaults:
       run:
         working-directory: frontend
@@ -30,15 +50,44 @@ jobs:
         run: npm ci
       - name: Install pinned mutation tools
         run: npm install --no-save @stryker-mutator/core@10.0.0 @stryker-mutator/vitest-runner@10.0.0
-      - name: Run Plus frontend mutation baseline
-        run: npx stryker run stryker.config.json
-      - name: Upload Plus mutation report
+      - name: Match Vitest native test names
+        run: node ../qa/s19/patch-vitest5-runner.mjs
+      - name: Configure complete source-file shard
+        env:
+          S19_SHARD: ${{ matrix.id }}
+        run: node ../qa/s19/plus-shards.mjs "$S19_SHARD"
+      - name: Run Plus frontend mutation shard
+        run: npx stryker run stryker.shard.json
+      - name: Upload Plus mutation shard
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s19-plus-frontend-shard-${{ matrix.id }}
+          path: frontend/reports/mutation
+          if-no-files-found: error
+
+  plus-frontend-aggregate:
+    needs: [plus-mutation-plan, plus-frontend-stryker]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: s19-plus-frontend-shard-*
+          path: reports/s19-plus
+          merge-multiple: true
+      - name: Enforce original global mutation threshold
+        run: node qa/s19/aggregate-plus.mjs frontend/stryker.config.json reports/s19-plus
+      - name: Upload complete Plus mutation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: s19-plus-frontend-stryker
-          path: frontend/reports/mutation
-          if-no-files-found: warn
+          path: reports/s19-plus
+          if-no-files-found: error
 
   lite-frontend-stryker:
     runs-on: ubuntu-latest
@@ -61,6 +110,8 @@ jobs:
         run: npm ci --prefix lite
       - name: Install pinned mutation tools
         run: npm install --prefix lite --no-save @stryker-mutator/core@10.0.0 @stryker-mutator/vitest-runner@10.0.0
+      - name: Match Vitest native test names
+        run: node qa/s19/patch-vitest5-runner.mjs lite
       - name: Copy certified S19 config
         run: cp qa/s19/stryker-lite.config.json lite/stryker.config.json
       - name: Run Lite frontend mutation baseline

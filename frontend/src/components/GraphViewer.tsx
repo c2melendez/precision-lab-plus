@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { components } from "../types/api";
+import { integralRegionSegments, limitApproachSeries } from "./graphPreviewGeometry";
 
 type GraphData = components["schemas"]["GraphData"];
 
@@ -39,7 +40,7 @@ interface PlotlyModule {
 // color de cada curva sigue llegando por el prop `colors` de
 // `<GraphViewer>`, sin cambios en ese contrato.
 
-function traceToPlotly(trace: GraphData["traces"][number], color?: string) {
+function traceToPlotly(trace: GraphData["traces"][number], color?: string, breakAtX?: number) {
   if (trace.type === "surface") {
     return {
       x: trace.x,
@@ -66,9 +67,19 @@ function traceToPlotly(trace: GraphData["traces"][number], color?: string) {
       marker: color ? { color, size: 10 } : { size: 10 },
     };
   }
+  const x: Array<number | null> = [];
+  const y: Array<number | null> = [];
+  trace.x.forEach((value, index) => {
+    if (breakAtX !== undefined && index > 0 && trace.x[index - 1] <= breakAtX && value > breakAtX) {
+      x.push(null);
+      y.push(null);
+    }
+    x.push(value);
+    y.push(trace.y[index] ?? null);
+  });
   return {
-    x: trace.x,
-    y: trace.y,
+    x,
+    y,
     type: "scatter" as const,
     mode: "lines" as const,
     name: trace.name,
@@ -87,9 +98,16 @@ interface GraphViewerProps {
    * de expresiones (spec §6). Opcional — sin esto, Plotly usa su propio
    * ciclo de color por defecto (comportamiento anterior, sin cambios). */
   colors?: string[];
+  integralBounds?: [number, number];
+  limitFocus?: { point: string; direction: "both" | "left" | "right" };
+  systemIntersections?: number[][];
 }
 
-export default function GraphViewer({ data, colors }: GraphViewerProps) {
+export default function GraphViewer({ data, colors, integralBounds, limitFocus, systemIntersections }: GraphViewerProps) {
+  const lowerBound = integralBounds?.[0];
+  const upperBound = integralBounds?.[1];
+  const limitPoint = limitFocus?.point;
+  const limitDirection = limitFocus?.direction;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const plotlyRef = useRef<PlotlyModule | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -111,9 +129,36 @@ export default function GraphViewer({ data, colors }: GraphViewerProps) {
         if (cancelled) return;
         plotlyRef.current = Plotly;
 
+        const region = lowerBound !== undefined && upperBound !== undefined
+          ? integralRegionSegments(data, lowerBound, upperBound) : null;
+        const regionTraces = region ? ([
+          { pieces: region.positive, name: "Aporte positivo", color: "rgba(22,134,93,0.35)" },
+          { pieces: region.negative, name: "Aporte negativo", color: "rgba(195,74,74,0.35)" },
+        ]).filter(({ pieces }) => pieces.length > 0).map(({ pieces, name, color }) => ({
+          type: "scatter", mode: "lines", fill: "tozeroy", fillcolor: color,
+          line: { width: 0 }, hoverinfo: "skip", showlegend: true, name,
+          x: pieces.flatMap(([a, , b]) => [a, b, null]),
+          y: pieces.flatMap(([, ya, , yb]) => [ya, yb, null]),
+        })) : [];
+        const approach = limitPoint && limitDirection ? limitApproachSeries(data, limitPoint, limitDirection) : null;
+        const approachTraces = approach ? ([
+          { samples: approach.left, name: "Aproximación izquierda", color: "#2862b8" },
+          { samples: approach.right, name: "Aproximación derecha", color: "#b65d20" },
+        ]).filter(({ samples }) => samples.some(Boolean)).map(({ samples, name, color }) => ({
+          type: "scatter", mode: "lines", name, connectgaps: false,
+          x: samples.map((sample) => sample?.[0] ?? null),
+          y: samples.map((sample) => sample?.[1] ?? null),
+          line: { color, width: 4 },
+        })) : [];
+        const finiteLimitPoint = limitPoint && limitPoint !== "oo" && limitPoint !== "-oo"
+          && Number.isFinite(Number(limitPoint)) ? Number(limitPoint) : null;
+
         await Plotly.newPlot(
           safeContainer,
-          data.traces.map((trace, i) => traceToPlotly(trace, colors?.[i])),
+          [...regionTraces, ...data.traces.map((trace, i) => traceToPlotly(trace, colors?.[i], finiteLimitPoint ?? undefined)), ...approachTraces,
+            ...(systemIntersections?.length ? [{ type: "scatter", mode: "markers", name: "Intersección común",
+              x: systemIntersections.map(([x]) => x), y: systemIntersections.map(([, y]) => y),
+              marker: { color: "#16865d", size: 11, line: { color: "white", width: 2 } } }] : [])],
           isSurface(data)
             ? {
                 scene: {
@@ -128,8 +173,15 @@ export default function GraphViewer({ data, colors }: GraphViewerProps) {
             : {
                 xaxis: { range: data.x_range, title: { text: data.x_axis_label ?? "x" } },
                 yaxis: data.y_range
-                  ? { range: data.y_range, title: { text: data.y_axis_label ?? "y" } }
+                  ? { range: region
+                    ? [Math.min(0, data.y_range[0]), Math.max(0, data.y_range[1])]
+                    : data.y_range, title: { text: data.y_axis_label ?? "y" } }
                   : { title: { text: data.y_axis_label ?? "y" } },
+                shapes: [...[lowerBound, upperBound].filter((bound): bound is number => bound !== undefined),
+                  ...(finiteLimitPoint !== null ? [finiteLimitPoint] : [])].map((bound) => ({
+                  type: "line", x0: bound, x1: bound, y0: 0, y1: 1,
+                  yref: "paper", line: { color: "#747b87", width: 1, dash: "dot" },
+                })),
                 paper_bgcolor: "transparent",
                 plot_bgcolor: "transparent",
                 font: { color: "#1C1F26" },
@@ -152,7 +204,7 @@ export default function GraphViewer({ data, colors }: GraphViewerProps) {
         plotlyRef.current.purge(safeContainer);
       }
     };
-  }, [data, colors]);
+  }, [data, colors, lowerBound, upperBound, limitPoint, limitDirection, systemIntersections]);
 
   async function handleDownloadPng(): Promise<void> {
     if (!containerRef.current || !plotlyRef.current) return;

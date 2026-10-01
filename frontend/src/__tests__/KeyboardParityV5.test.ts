@@ -11,18 +11,33 @@ const basicKeys = BASIC_V5_ROWS.flat();
 const byLabel = (label: string) => basicKeys.find((key) => key.ariaLabel === label);
 
 describe("paridad de especificación del teclado V5 de Plus", () => {
-  it("concentra controles en Básico y deja = como inserción", () => {
+  it("B6 mantiene edición/ejecución en el núcleo y mueve lo contextual", () => {
     expect(byLabel("borrar")).toBeDefined();
     expect(byLabel("borrar todo el campo")).toBeDefined();
     expect(byLabel("insertar el último resultado")).toBeDefined();
-    expect(byLabel("grados minutos segundos")?.insertLatex).toBe("#0°#1′#2″");
-    expect(byLabel("prima")?.insertLatex).toBe("'");
-    expect(byLabel("menor que")?.insertLatex).toBe("<");
-    expect(byLabel("mayor que")?.insertLatex).toBe(">");
-    expect(byLabel("menor o igual que")?.insertLatex).toBe("\\le");
-    expect(byLabel("mayor o igual que")?.insertLatex).toBe("\\ge");
     expect(byLabel("igual")?.insertLatex).toBe("=");
     expect(byLabel("calcular")?.insertLatex).toBe("");
+
+    for (const moved of [
+      "grados minutos segundos",
+      "prima",
+      "menor que",
+      "mayor que",
+      "menor o igual que",
+      "mayor o igual que",
+    ]) {
+      expect(byLabel(moved)).toBeUndefined();
+    }
+
+    const units = CATEGORY_MENUS["Unidades"].flatMap((group) => group.keys);
+    expect(units.find((key) => key.ariaLabel === "grados minutos segundos")?.insertLatex).toBe("#0°#1′#2″");
+    expect(units.find((key) => key.ariaLabel === "prima")?.insertLatex).toBe("'");
+
+    const algebra = CATEGORY_MENUS["Álgebra"].flatMap((group) => group.keys);
+    expect(algebra.find((key) => key.ariaLabel === "menor que")?.insertLatex).toBe("<");
+    expect(algebra.find((key) => key.ariaLabel === "mayor que")?.insertLatex).toBe(">");
+    expect(algebra.find((key) => key.ariaLabel === "menor o igual que")?.insertLatex).toBe("\\le");
+    expect(algebra.find((key) => key.ariaLabel === "mayor o igual que")?.insertLatex).toBe("\\ge");
   });
 
   it("no duplica variables ni constantes en Básico", () => {
@@ -54,4 +69,18 @@ describe("paridad de especificación del teclado V5 de Plus", () => {
     expect(algebra.find((key) => key.ariaLabel === "signo de a")?.insertLatex).toContain("sign");
     expect(algebra.find((key) => key.ariaLabel === "módulo o residuo")?.insertLatex).toContain("mod");
   });
+  it("B6 congela el núcleo permanente y exige tooltip real", () => {
+    expect(BASIC_V5_ROWS.map((row) => row.map((key) => String(key.glyph)))).toEqual([
+      ["7", "8", "9", "(", ")", "⌫"],
+      ["4", "5", "6", "×", "÷", "%"],
+      ["1", "2", "3", "+", "−", "."],
+      ["0", "ANS", "DEL", "=", "Enter"],
+    ]);
+    expect(basicKeys).toHaveLength(23);
+    for (const key of basicKeys) {
+      expect(key.description, `tooltip faltante en ${key.ariaLabel}`).toBeTruthy();
+    }
+    expect(byLabel("calcular")?.glyph).toBe("Enter");
+  });
+
 });

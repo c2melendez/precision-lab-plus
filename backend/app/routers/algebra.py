@@ -71,6 +71,12 @@ def _build_response(
         warnings.append("Resultado LaTeX omitido: excede los 10,000 caracteres (sección 4).")
 
     input_latex = _safe_latex(result.input_expr)
+    symbols = result.input_expr.free_symbols | result.result_expr.free_symbols
+    graph_polynomial_comparison = (
+        len(symbols) == 1
+        and result.input_expr.is_polynomial(*symbols) is True
+        and result.result_expr.is_polynomial(*symbols) is True
+    )
 
     return MathResponse(
         success=True,
@@ -81,6 +87,7 @@ def _build_response(
         input_latex=input_latex,
         result_latex=result_latex,
         result_text=_safe_text(result.result_expr),
+        graph_polynomial_comparison=graph_polynomial_comparison,
         steps=result.steps,
         has_detailed_steps=result.has_detailed_steps,
         warnings=warnings,
@@ -129,7 +136,14 @@ async def solve(payload: SolveRequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "solve_request", input_text=payload.equation)
     try:
         result = solve_service.solve_equation(
-            payload.equation, payload.variable, payload.angle_unit
+            payload.equation,
+            payload.variable,
+            payload.angle_unit,
+            payload.domain,
+            payload.domain_lower,
+            payload.domain_upper,
+            payload.domain_lower_inclusive,
+            payload.domain_upper_inclusive,
         )
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.SOLVE, ErrorCode.PARSE_ERROR, str(exc))
@@ -137,6 +151,13 @@ async def solve(payload: SolveRequest, request: Request) -> MathResponse:
         return _error(request, OperationType.SOLVE, ErrorCode.COMPLEXITY_LIMIT, str(exc))
     except solve_service.AmbiguousVariableError as exc:
         return _error(request, OperationType.SOLVE, ErrorCode.AMBIGUOUS_VARIABLE, str(exc))
+    except NotImplementedError as exc:
+        return _error(
+            request,
+            OperationType.SOLVE,
+            ErrorCode.UNSUPPORTED_OPERATION,
+            str(exc),
+        )
 
     warnings = list(result.warnings)
     result_data = result.solutions if result.result_type == ResultType.EQUATION_SOLUTIONS else None
@@ -149,6 +170,7 @@ async def solve(payload: SolveRequest, request: Request) -> MathResponse:
         input_text=payload.equation,
         input_latex=_safe_latex(result.input_eq),
         result_data=result_data,
+        complex_graph_points=result.graph_points,
         steps=result.steps,
         has_detailed_steps=result.has_detailed_steps,
         warnings=warnings,

@@ -39,21 +39,26 @@ import type { ReactNode } from "react";
 
 import type { MathResponse } from "../api/client";
 import { useFloatingLayoutStore } from "../store/useFloatingLayoutStore";
-import { useHistoryStore } from "../store/useHistoryStore";
+import { useHistoryStore, type HistoryEntry } from "../store/useHistoryStore";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import type { LayoutMode } from "../store/useLayoutModeStore";
 import { FloatingWindow } from "./FloatingWindow";
-import { GraphPlaceholder } from "./GraphPlaceholder";
+import { GraphPlaceholder, type ScientificGraphState } from "./GraphPlaceholder";
+import type { ScientificGraphContext } from "./scientificGraphContext";
 import { KeyboardIcon } from "./KeyboardIcon";
 import { MathRenderer } from "./MathRenderer";
 import { NaturalMathField } from "./NaturalMathField";
-import { RecentKeysBar } from "./RecentKeysBar";
 import { ResultPanel } from "./ResultPanel";
+import { StepList } from "./StepList";
 import { useMinWidthMediaQuery, FLOATING_MIN_WIDTH_PX } from "../hooks/useMinWidthMediaQuery";
+
+const SCIENTIFIC_SESSION_STARTED_AT = Date.now();
 
 interface CalculatorScreenProps {
   latex: string;
   onLatexChange: (latex: string) => void;
+  /** B6: callback de evaluación para Enter/Return físico en MathLive. */
+  onEnter?: () => void;
   ariaLabel: string;
   placeholder?: string;
   fieldRef?: (el: MathfieldElement | null) => void;
@@ -79,11 +84,15 @@ interface CalculatorScreenProps {
    * solo BasicMode.tsx). Sin esta prop, GraphPlaceholder muestra el
    * estado vacío de siempre. */
   onGraphExpression?: () => void;
+  graphState?: ScientificGraphState;
+  graphContext?: ScientificGraphContext | null;
+  onReuseRecent?: (entry: HistoryEntry) => void;
 }
 
 export function CalculatorScreen({
   latex,
   onLatexChange,
+  onEnter,
   ariaLabel,
   placeholder,
   fieldRef,
@@ -94,20 +103,26 @@ export function CalculatorScreen({
   onClearField,
   layoutMode = "fused",
   onGraphExpression,
+  graphState,
+  graphContext,
+  onReuseRecent,
 }: CalculatorScreenProps) {
   // Botón "Graficar" (cuadrante de gráfica, las 6 disposiciones): solo
   // tiene sentido ofrecerlo cuando hay algo escrito. El backend valida
   // de verdad si es graficable al recibir el click.
-  const canGraph = Boolean(onGraphExpression) && latex.trim().length > 0;
-  // Las entradas se guardan más-nuevo-primero (ver useHistoryStore.ts:
-  // `[newEntry, ...get().entries]`) — se toman las 2 más recientes y se
-  // invierten para que la cinta crezca hacia arriba, como en Lite.
+  const resolvedGraphState: ScientificGraphState = graphState ?? (latex.trim() ? "available" : "empty");
+  const canGraph = Boolean(onGraphExpression) && (
+    resolvedGraphState === "available" ||
+    (resolvedGraphState === "advanced" && Boolean(graphContext?.graphRequest))
+  );
+  // B7: la tarjeta "Entradas previas" representa la sesión actual de la
+  // app, no el Historial persistente completo.
   const recentEntries = useHistoryStore((state) => state.entries)
-    .slice(0, 2)
-    .reverse();
+    .filter((entry) => entry.timestamp >= SCIENTIFIC_SESSION_STARTED_AT)
+    .slice(0, 5);
 
   const angleBadge = angleUnit && onToggleAngleUnit && (
-    <div className="flex justify-end">
+    <div className="flex justify-end pt-[3px]">
       <button
         type="button"
         onClick={onToggleAngleUnit}
@@ -119,34 +134,49 @@ export function CalculatorScreen({
     </div>
   );
 
-  const historyRibbon = recentEntries.length > 0 && (
-    <div className="flex max-h-24 flex-col gap-1.5 overflow-y-auto">
-      {recentEntries.map((entry, i) => (
-        <div key={entry.id} className={i === recentEntries.length - 1 ? "opacity-70" : "opacity-40"}>
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="truncate font-mono text-sm text-muted">{entry.inputText ?? entry.label}</span>
-            {entry.resultLatex ? (
-              <MathRenderer
-                latex={entry.resultLatex}
-                fallbackText={entry.resultText}
-                className="shrink-0 font-mono text-sm font-semibold text-marker-text"
-              />
-            ) : (
-              <span className="shrink-0 font-mono text-sm font-semibold text-marker-text">
-                {entry.resultText ?? "—"}
-              </span>
-            )}
-          </div>
-        </div>
+  const historyRibbon = recentEntries.length > 0 ? (
+    <div className="flex min-w-0 flex-col gap-1.5">
+      {recentEntries.map((entry, index) => (
+        <button
+          key={entry.id}
+          type="button"
+          onClick={() => onReuseRecent?.(entry)}
+          disabled={!onReuseRecent}
+          aria-label={`Reusar entrada ${index + 1}`}
+          title="Reusar en Entrada"
+          className={`flex min-w-0 items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-left hover:bg-paper-line/40 disabled:cursor-default ${
+            index === 0 ? "opacity-100" : index < 3 ? "opacity-80" : "opacity-65"
+          }`}
+        >
+          <span className="min-w-0 flex-1 overflow-hidden">
+            <MathRenderer
+              latex={entry.inputText ?? entry.label}
+              fallbackText={entry.label}
+              className="text-sm text-ink"
+            />
+          </span>
+          {entry.resultLatex ? (
+            <MathRenderer
+              latex={entry.resultLatex}
+              fallbackText={entry.resultText}
+              className="max-w-[45%] shrink-0 overflow-hidden text-sm font-medium text-marker-text"
+            />
+          ) : (
+            <span className="max-w-[45%] shrink-0 truncate text-xs text-muted">
+              {entry.resultText ?? "—"}
+            </span>
+          )}
+        </button>
       ))}
     </div>
-  );
+  ) : null;
 
   const inputField = (
     <div className="relative">
       <NaturalMathField
         latex={latex}
         onLatexChange={onLatexChange}
+        onEnter={onEnter}
         ariaLabel={ariaLabel}
         placeholder={placeholder}
         fieldRef={fieldRef}
@@ -173,7 +203,118 @@ export function CalculatorScreen({
     </div>
   );
 
-  const resultBlock = (isLoading || result) && <ResultPanel result={result} isLoading={isLoading} />;
+  const inputSurface = (
+    <section aria-label="Entrada" className="rounded-xl border border-paper-line bg-paper-soft shadow-sm">
+      <div className="flex items-center justify-between border-b border-paper-line px-4 py-2.5">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Entrada</p>
+        <span className="text-[11px] text-muted">Expresión matemática</span>
+      </div>
+      <div className="px-4 py-3">{inputField}</div>
+    </section>
+  );
+
+
+  const resultBlock = <ResultPanel result={result} isLoading={isLoading} inputLatex={latex} angleUnit={angleUnit} showSteps={false} />;
+
+  const recentSurface = (
+    <section aria-label="Entradas previas" className="min-h-[120px] rounded-xl border border-paper-line bg-paper-soft shadow-sm">
+      <div className="flex items-center justify-between border-b border-paper-line px-4 py-2.5">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Entradas previas</p>
+        <span className="text-[11px] text-muted">Sesión actual · hasta 5</span>
+      </div>
+      <div className="px-3 py-2">
+        {historyRibbon ?? <p className="px-1 py-3 text-xs text-muted">Tus cálculos recientes de esta sesión aparecerán aquí.</p>}
+      </div>
+    </section>
+  );
+
+  const resultSurface = (
+    <div className="min-h-[120px] rounded-xl border border-paper-line bg-paper-soft px-4 py-3 shadow-sm">
+      {resultBlock}
+    </div>
+  );
+
+  const graphSurface = (
+    <div className="flex h-full min-h-[240px]">
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} context={graphContext} />
+    </div>
+  );
+
+  const isB7Layout =
+    layoutMode === "fused" ||
+    layoutMode === "split" ||
+    layoutMode === "focus" ||
+    layoutMode === "separated";
+
+  if (isB7Layout) {
+    const gridClass =
+      layoutMode === "fused"
+        ? "lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,1.1fr)] lg:grid-rows-[auto_auto_minmax(140px,1fr)]"
+        : layoutMode === "split"
+          ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.75fr)_minmax(340px,1fr)] lg:grid-rows-[auto_minmax(180px,1fr)]"
+          : layoutMode === "focus"
+            ? "lg:grid-cols-[minmax(230px,0.8fr)_minmax(0,1.35fr)_minmax(340px,1fr)] lg:grid-rows-[auto_minmax(180px,1fr)]"
+            : "lg:grid-cols-2 lg:grid-rows-[auto_minmax(220px,1fr)]";
+
+    const inputPlacement =
+      layoutMode === "fused"
+        ? "lg:col-start-1 lg:row-start-1"
+        : layoutMode === "split"
+          ? "lg:col-start-1 lg:col-span-2 lg:row-start-1"
+          : layoutMode === "focus"
+            ? "lg:col-start-1 lg:row-start-1"
+            : "lg:col-start-1 lg:row-start-1";
+
+    const resultPlacement =
+      layoutMode === "fused"
+        ? "lg:col-start-1 lg:row-start-2"
+        : layoutMode === "split"
+          ? "lg:col-start-1 lg:row-start-2"
+          : layoutMode === "focus"
+            ? "lg:col-start-2 lg:row-start-1 lg:row-span-2"
+            : "lg:col-start-2 lg:row-start-1";
+
+    const recentPlacement =
+      layoutMode === "fused"
+        ? "lg:col-start-1 lg:row-start-3"
+        : layoutMode === "split"
+          ? "lg:col-start-2 lg:row-start-2"
+          : layoutMode === "focus"
+            ? "lg:col-start-1 lg:row-start-2"
+            : "lg:col-start-1 lg:row-start-2";
+
+    const graphPlacement =
+      layoutMode === "fused"
+        ? "lg:col-start-2 lg:row-start-1 lg:row-span-3"
+        : layoutMode === "split"
+          ? "lg:col-start-3 lg:row-start-1 lg:row-span-2"
+          : layoutMode === "focus"
+            ? "lg:col-start-3 lg:row-start-1 lg:row-span-2"
+            : "lg:col-start-2 lg:row-start-2";
+
+    return (
+      <div className="flex min-w-0 flex-col gap-3">
+        {angleBadge}
+        <div className={`grid min-w-0 grid-cols-1 gap-3 ${gridClass}`}>
+          <div className={`min-w-0 ${inputPlacement}`}>{inputSurface}</div>
+          <div className={`min-w-0 ${resultPlacement}`}>{resultSurface}</div>
+          <div className={`min-w-0 ${recentPlacement}`}>{recentSurface}</div>
+          <div className={`min-w-0 ${graphPlacement}`}>{graphSurface}</div>
+        </div>
+
+        {result?.success && result.has_detailed_steps && result.steps.length > 0 && (
+          <section aria-label="Pasos de solución" className="rounded-xl border border-paper-line bg-paper-soft p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-ink">Pasos de solución</h3>
+              <span className="text-xs text-muted">{result.steps.length} {result.steps.length === 1 ? "paso" : "pasos"}</span>
+            </div>
+            <StepList steps={result.steps} />
+          </section>
+        )}
+      </div>
+    );
+  }
+
 
   // "stacked" (Apilado, Módulo P3): una sola columna, teclado como
   // sección colapsada inline (no overlay). Ver Screen.tsx (Lite) para el
@@ -183,9 +324,9 @@ export function CalculatorScreen({
       <div className="flex flex-col gap-3">
         {angleBadge}
         {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
-        <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
+        {inputSurface}
         {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} context={graphContext} />
         <StackedKeyboardSection />
       </div>
     );
@@ -199,10 +340,11 @@ export function CalculatorScreen({
     return (
       <FloatingScreenContent
         angleBadge={angleBadge}
-        inputField={inputField}
+        inputField={inputSurface}
         resultBlock={resultBlock}
         canGraph={canGraph}
         onGraphExpression={onGraphExpression}
+        graphContext={graphContext}
       />
     );
   }
@@ -214,10 +356,11 @@ export function CalculatorScreen({
     return (
       <FocusScreenContent
         angleBadge={angleBadge}
-        inputField={inputField}
+        inputField={inputSurface}
         resultBlock={resultBlock}
         canGraph={canGraph}
         onGraphExpression={onGraphExpression}
+        graphContext={graphContext}
       />
     );
   }
@@ -227,9 +370,9 @@ export function CalculatorScreen({
       <div className="flex flex-col gap-3">
         {angleBadge}
         {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
-        <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
+        {inputSurface}
         {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} context={graphContext} />
       </div>
     );
   }
@@ -247,11 +390,11 @@ export function CalculatorScreen({
         <div className="flex flex-col gap-3 dt:grid dt:grid-cols-[1.2fr_1fr] dt:items-start dt:gap-4">
           <div className="flex flex-col gap-3">
             {historyRibbon && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{historyRibbon}</div>}
-            <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
+            {inputSurface}
           </div>
           <div className="flex flex-col gap-3">
             {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-            <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+            <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} context={graphContext} />
           </div>
         </div>
       </div>
@@ -267,11 +410,11 @@ export function CalculatorScreen({
 
         {historyRibbon && <div className="mb-2 border-b border-paper-line pb-2">{historyRibbon}</div>}
 
-        {inputField}
+        {inputSurface}
 
-        {resultBlock && <div className="mt-2 border-t border-paper-line pt-2">{resultBlock}</div>}
+        {resultBlock && <div className="mt-3 border-t border-paper-line pt-3">{resultBlock}</div>}
       </div>
-      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} state={resolvedGraphState} context={graphContext} />
     </div>
   );
 }
@@ -291,17 +434,13 @@ function StackedKeyboardSection() {
 
   return (
     <div className="flex flex-col gap-1.5">
-      {/* Fase X, Módulo X0 — "justo arriba de donde aparecerá el
-          teclado (colapsado o no)": en Apilado, la sección entera
-          (colapsada o expandida) vive dentro de esta caja, así que el
-          dock de recientes va fuera y encima de ella. */}
-      <RecentKeysBar />
       <div className="rounded-xl border border-paper-line bg-paper-soft">
         <button
           type="button"
           onClick={toggle}
           disabled={!canExpand}
           aria-expanded={isOpen}
+          aria-label={isOpen ? "Cerrar teclado" : "Abrir teclado"}
           className="flex w-full items-center justify-between px-4 py-2.5 text-sm font-medium text-ink disabled:text-muted/40"
         >
           <span className="flex items-center gap-2">
@@ -311,9 +450,8 @@ function StackedKeyboardSection() {
           <span aria-hidden="true">{isOpen ? "▾" : "▴"}</span>
         </button>
         {isOpen && canExpand && (
-          <div className="border-t border-paper-line px-3 pb-3 pt-2">
-            {basicContent}
-            {content}
+          <div role="region" aria-label="Teclado matemático" className="border-t border-paper-line px-3 pb-3 pt-2">
+            {content ?? basicContent}
           </div>
         )}
       </div>
@@ -327,17 +465,18 @@ interface FocusLikeContentProps {
   resultBlock: ReactNode;
   canGraph: boolean;
   onGraphExpression?: () => void;
+  graphContext?: ScientificGraphContext | null;
 }
 
 /** Módulo P2 ("Enfoque"). Reusado tal cual por Flotante cuando degrada
  * (P0/P4). Ver Screen.tsx (Lite) para el mismo criterio. */
-function FocusScreenContent({ angleBadge, inputField, resultBlock, canGraph, onGraphExpression }: FocusLikeContentProps) {
+function FocusScreenContent({ angleBadge, inputField, resultBlock, canGraph, onGraphExpression, graphContext }: FocusLikeContentProps) {
   return (
     <div className="flex flex-1 flex-col gap-3">
       {angleBadge}
-      <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
+      {inputField}
       {resultBlock && <div className="rounded-xl bg-paper-soft px-5 py-4 text-center shadow-sm">{resultBlock}</div>}
-      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+      <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} context={graphContext} />
     </div>
   );
 }
@@ -347,7 +486,7 @@ function FocusScreenContent({ angleBadge, inputField, resultBlock, canGraph, onG
  * Screen.tsx (Lite) — ver ese archivo para el comentario completo sobre
  * el gating por breakpoint y la persistencia/clamp de las ventanas.
  */
-function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, onGraphExpression }: FocusLikeContentProps) {
+function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, onGraphExpression, graphContext }: FocusLikeContentProps) {
   const isWideEnough = useMinWidthMediaQuery(FLOATING_MIN_WIDTH_PX);
 
   const keyboardWindow = useFloatingLayoutStore((s) => s.keyboardWindow);
@@ -380,6 +519,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
         resultBlock={resultBlock}
         canGraph={canGraph}
         onGraphExpression={onGraphExpression}
+        graphContext={graphContext}
       />
     );
   }
@@ -392,16 +532,8 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
           Restablecer posición de ventanas
         </button>
       </div>
-      <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{inputField}</div>
+      {inputField}
       {resultBlock && <div className="rounded-xl bg-paper-soft px-4 py-3 shadow-sm">{resultBlock}</div>}
-      {/* Fase X, Módulo X0 — "justo arriba de donde aparecerá el
-          teclado": aquí el teclado vive en su propia FloatingWindow, así
-          que el dock de recientes va fuera de ella, inmediatamente
-          encima. No entra DENTRO de FloatingWindow porque esa ventana es
-          arrastrable/redimensionable de forma independiente (persistida
-          en useFloatingLayoutStore) — el dock de recientes no forma
-          parte de esa superficie, es un elemento fijo del layout. */}
-      <RecentKeysBar />
       {/* Fase Y (spec_rediseno_visual.md sección 11) — restricción dura:
           el teclado SIEMPRE inicia colapsado, en las 6 disposiciones sin
           excepción, Flotante incluida. Antes de este fix, la
@@ -414,8 +546,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
           disposiciones, sobre el mismo store `isOpen`. */}
       {isOpen && canExpand ? (
         <FloatingWindow title="Teclado" rect={keyboardWindow} onChange={(rect) => setWindow("keyboard", rect)}>
-          {basicContent}
-          {content}
+          {content ?? basicContent}
         </FloatingWindow>
       ) : (
         <button
@@ -435,7 +566,7 @@ function FloatingScreenContent({ angleBadge, inputField, resultBlock, canGraph, 
         </button>
       )}
       <FloatingWindow title="Gráfica" rect={graphWindow} onChange={(rect) => setWindow("graph", rect)}>
-        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} />
+        <GraphPlaceholder canGraph={canGraph} onGraph={onGraphExpression} context={graphContext} />
       </FloatingWindow>
     </div>
   );

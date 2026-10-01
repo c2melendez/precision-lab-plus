@@ -73,28 +73,15 @@ describe("BasicMode", () => {
     expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
       expression: "2+2",
       angle_unit: "rad",
+      domain: "real",
     });
   });
 
-  it("incluye substitutions cuando el usuario añade una fila", async () => {
+  it("no muestra Sustituciones como bloque permanente en Científica", () => {
     render(<BasicMode />);
-    fireEvent.change(screen.getByLabelText("Expresión"), { target: { value: "x+1" } });
-    fireEvent.click(screen.getByRole("button", { name: "+ Añadir sustitución" }));
-    fireEvent.change(screen.getByLabelText("Nombre de la variable 1"), {
-      target: { value: "x" },
-    });
-    fireEvent.change(screen.getByLabelText("Valor de la variable 1"), {
-      target: { value: "3" },
-    });
-    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
-
-    await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
-
-    expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
-      expression: "x+1",
-      angle_unit: "rad",
-      substitutions: { x: "3" },
-    });
+    expect(screen.queryByRole("button", { name: "+ Añadir sustitución" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Nombre de la variable/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Valor de la variable/)).not.toBeInTheDocument();
   });
 
   it("no llama a la API con una expresión vacía (payload inválido)", () => {
@@ -119,6 +106,7 @@ describe("BasicMode", () => {
     expect(mockedCallApi).toHaveBeenCalledWith("/solve", {
       equation: "2x+3=7",
       angle_unit: "rad",
+      domain: "complex",
     });
   });
 
@@ -321,7 +309,48 @@ describe("BasicMode", () => {
     // La tecla vive dentro de la categoría colapsable "Cálculo" (rediseño
     // de teclado) — hay que abrirla antes de que "derivada" esté en el DOM.
     fireEvent.click(screen.getByRole("tab", { name: "Cálculo" }));
+    fireEvent.click(screen.getByRole("button", { name: "Derivadas" }));
     fireEvent.click(screen.getByLabelText("derivada"));
     expect(useUIStore.getState().activeMode).toBe("basic");
+  });
+});
+
+describe("B7 complex domain routing", () => {
+  it.each(["3+4i", "3+4I", "sin(x)+i*cos(x)"])("preserves explicit imaginary unit in %s", async (expression) => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), { target: { value: expression } });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
+      expression, angle_unit: "rad", domain: "complex",
+    }));
+  });
+
+  it("requests complex roots for an equation without a real interval", async () => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), { target: { value: "x^2+1=0" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledWith("/solve", {
+      equation: "x^2+1=0", angle_unit: "rad", domain: "complex",
+    }));
+  });
+
+  it("retains real-domain validation for ordinary inverse functions", async () => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), { target: { value: "asin(2)" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
+      expression: "asin(2)", angle_unit: "rad", domain: "real",
+    }));
+  });
+});
+
+describe("B7 function equations retain real branches", () => {
+  it.each(["asin(x)=acos(x)", "cosh(x)=1", "sinh(x)=0", "sech(x)=2"])("keeps %s real", async (equation) => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), { target: { value: equation } });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledWith("/solve", {
+      equation, angle_unit: "rad", domain: "real",
+    }));
   });
 });

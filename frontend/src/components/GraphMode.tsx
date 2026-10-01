@@ -15,11 +15,25 @@ import type { MathfieldElement } from "mathlive";
 
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
+
+const submitGraphs = (endpoint: Parameters<typeof submitAndRecord>[0], payload: Record<string, unknown>, label: string) =>
+  submitAndRecord(endpoint, payload, label, "Gráficas");
 import { useGraphColorPaletteStore } from "../store/useGraphColorPaletteStore";
+import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useUIStore } from "../store/useUIStore";
+import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStore";
+import type { HistoryEntry } from "../store/useHistoryStore";
+import type { ScientificGraphContext } from "./scientificGraphContext";
 import { latexToBackendSyntax, NaturalMathField } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
+import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { ResultPanel } from "./ResultPanel";
+import { NumberLine } from "./NumberLine";
+import { InequalityRegion } from "./InequalityRegion";
+import { CircleInequality } from "./CircleInequality";
+import { EllipseInequality } from "./EllipseInequality";
+import { ArgandPlane, argandGraphData } from "./ArgandPlane";
+import { ComplexMapping } from "./ComplexMapping";
 
 const GraphViewer = lazy(() => import("./GraphViewer"));
 
@@ -32,6 +46,49 @@ const GraphViewer = lazy(() => import("./GraphViewer"));
 // depende de GraphViewer.tsx — sigue sin forzar el bundle eager.
 
 const MAX_EXPRESSIONS = 5;
+
+function useGlobalGraphKeyboard(field: MathfieldElement | null, formRef: { current: HTMLFormElement | null }) {
+  const setContent = useKeyboardPanelStore((s) => s.setContent);
+  const clearContent = useKeyboardPanelStore((s) => s.clearContent);
+  const setBasicContent = useKeyboardPanelStore((s) => s.setBasicContent);
+  const clearBasicContent = useKeyboardPanelStore((s) => s.clearBasicContent);
+  const setCompactActions = useKeyboardPanelStore((s) => s.setCompactActions);
+  const clearCompactActions = useKeyboardPanelStore((s) => s.clearCompactActions);
+
+  useEffect(() => {
+    const submit = () => formRef.current?.requestSubmit();
+    const basic = <KeyboardBasicPanel field={field} onSubmit={submit} lastAnswerLatex={null} />;
+
+    setBasicContent(basic);
+    setContent(
+      <NaturalMathKeyboard
+        field={field}
+        basicContent={basic}
+        onSubmit={submit}
+        onClearField={() => field?.setValue("")}
+        hideCoreGrid
+      />,
+    );
+  }, [field, formRef, setContent, setBasicContent]);
+
+  useEffect(() => {
+    setCompactActions({
+      onEnter: () => formRef.current?.requestSubmit(),
+      onBackspace: () => {
+        field?.focus();
+        field?.executeCommand("deleteBackward");
+      },
+    });
+  }, [field, formRef, setCompactActions]);
+
+  useEffect(() => {
+    return () => {
+      clearContent();
+      clearCompactActions();
+      clearBasicContent();
+    };
+  }, [clearContent, clearCompactActions, clearBasicContent]);
+}
 
 type GraphKind = "2d" | "3d" | "parametric" | "polar";
 
@@ -51,47 +108,61 @@ const GRAPH_KIND_LABELS: Record<GraphKind, string> = {
 function AnalysisPanel({ result }: { result: MathResponse }) {
   if (!result.graph_data?.analysis) return null;
   return (
-    <div className="space-y-3">
-      {result.graph_data.analysis.map((analysis, index) => (
-        <div key={index} className="rounded border border-paper-line bg-paper p-3 text-sm">
-          <p className="mb-2 font-medium text-ink">
-            {result.graph_data!.traces[index]?.name ?? `Expresión ${index + 1}`}
-          </p>
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted sm:grid-cols-3">
-            <dt className="text-muted">Dominio</dt>
-            <dd className="col-span-1 sm:col-span-2">{analysis.domain_text ?? "—"}</dd>
-            <dt className="text-muted">Rango</dt>
-            <dd className="col-span-1 sm:col-span-2">{analysis.range_text ?? "—"}</dd>
-            <dt className="text-muted">Corte en y</dt>
-            <dd className="col-span-1 sm:col-span-2">{analysis.y_intercept ?? "—"}</dd>
-            <dt className="text-muted">Cortes en x</dt>
-            <dd className="col-span-1 sm:col-span-2">
-              {analysis.x_intercepts && analysis.x_intercepts.length > 0
-                ? analysis.x_intercepts.join(", ")
-                : "—"}
-            </dd>
-            <dt className="text-muted">Máximos locales</dt>
-            <dd className="col-span-1 sm:col-span-2">
-              {analysis.local_maxima && analysis.local_maxima.length > 0
-                ? analysis.local_maxima.join(", ")
-                : "—"}
-            </dd>
-            <dt className="text-muted">Mínimos locales</dt>
-            <dd className="col-span-1 sm:col-span-2">
-              {analysis.local_minima && analysis.local_minima.length > 0
-                ? analysis.local_minima.join(", ")
-                : "—"}
-            </dd>
-            <dt className="text-muted">Puntos de inflexión</dt>
-            <dd className="col-span-1 sm:col-span-2">
-              {analysis.inflection_points && analysis.inflection_points.length > 0
-                ? analysis.inflection_points.join(", ")
-                : "—"}
-            </dd>
-          </dl>
+    <section aria-label="Análisis de gráfica" className="space-y-3 rounded-xl border border-paper-line bg-paper-soft p-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Análisis</h4>
+          <p className="mt-0.5 text-[11px] text-muted">Dominio, rango y puntos notables</p>
         </div>
-      ))}
-    </div>
+        <span className="text-[11px] text-muted">
+          {result.graph_data.analysis.length} {result.graph_data.analysis.length === 1 ? "expresión" : "expresiones"}
+        </span>
+      </div>
+      <div className="grid gap-3 xl:grid-cols-2">
+        {result.graph_data.analysis.map((analysis, index) => (
+          <article key={index} className="rounded-xl border border-paper-line bg-paper p-3 text-sm">
+            <div className="mb-3 flex items-center gap-2 border-b border-paper-line pb-2">
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-graph" aria-hidden="true" />
+              <p className="font-medium text-ink">
+                {result.graph_data!.traces[index]?.name ?? `Expresión ${index + 1}`}
+              </p>
+            </div>
+            <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2">
+              <dt className="text-muted">Dominio</dt>
+              <dd className="min-w-0 break-words text-ink">{analysis.domain_text ?? "—"}</dd>
+              <dt className="text-muted">Rango</dt>
+              <dd className="min-w-0 break-words text-ink">{analysis.range_text ?? "—"}</dd>
+              <dt className="text-muted">Corte en y</dt>
+              <dd className="min-w-0 break-words text-ink">{analysis.y_intercept ?? "—"}</dd>
+              <dt className="text-muted">Cortes en x</dt>
+              <dd className="min-w-0 break-words text-ink">
+                {analysis.x_intercepts && analysis.x_intercepts.length > 0
+                  ? analysis.x_intercepts.join(", ")
+                  : "—"}
+              </dd>
+              <dt className="text-muted">Máximos</dt>
+              <dd className="min-w-0 break-words text-ink">
+                {analysis.local_maxima && analysis.local_maxima.length > 0
+                  ? analysis.local_maxima.join(", ")
+                  : "—"}
+              </dd>
+              <dt className="text-muted">Mínimos</dt>
+              <dd className="min-w-0 break-words text-ink">
+                {analysis.local_minima && analysis.local_minima.length > 0
+                  ? analysis.local_minima.join(", ")
+                  : "—"}
+              </dd>
+              <dt className="text-muted">Inflexión</dt>
+              <dd className="min-w-0 break-words text-ink">
+                {analysis.inflection_points && analysis.inflection_points.length > 0
+                  ? analysis.inflection_points.join(", ")
+                  : "—"}
+              </dd>
+            </dl>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -99,16 +170,22 @@ function ResultArea({
   result,
   isLoading,
   colors,
+  integralBounds,
+  limitFocus,
+  systemIntersections,
 }: {
   result: MathResponse | null;
   isLoading: boolean;
   colors?: string[];
+  integralBounds?: [number, number];
+  limitFocus?: { point: string; direction: "both" | "left" | "right" };
+  systemIntersections?: number[][];
 }) {
   if (!isLoading && result?.success && result.graph_data) {
     return (
       <div className="space-y-4">
         <Suspense fallback={<p className="text-sm text-muted">Cargando visor de gráficas…</p>}>
-          <GraphViewer data={result.graph_data} colors={colors} />
+          <GraphViewer data={result.graph_data} colors={colors} integralBounds={integralBounds} limitFocus={limitFocus} systemIntersections={systemIntersections} />
         </Suspense>
         <AnalysisPanel result={result} />
       </div>
@@ -117,7 +194,7 @@ function ResultArea({
   return <ResultPanel result={result} isLoading={isLoading} />;
 }
 
-function Graph2DForm() {
+function Graph2DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   // Fase T, Módulo T0: fuente única de verdad, ver comentario donde
   // antes vivía la constante CURVE_COLORS.
   const colors = useGraphColorPaletteStore((s) => s.colors);
@@ -125,6 +202,7 @@ function Graph2DForm() {
   const [latexRows, setLatexRows] = useState<string[]>([""]);
   const [mathFields, setMathFields] = useState<(MathfieldElement | null)[]>([null]);
   const [activeRow, setActiveRow] = useState(0);
+  useGlobalGraphKeyboard(mathFields[activeRow] ?? null, formRef);
   const [variable, setVariable] = useState("x");
   const [xMin, setXMin] = useState("");
   const [xMax, setXMax] = useState("");
@@ -132,13 +210,58 @@ function Graph2DForm() {
   const [angleUnit, setAngleUnit] = useState<"rad" | "deg">("rad");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<MathResponse | null>(null);
+  const [sourceContext, setSourceContext] = useState<ScientificGraphContext | null>(null);
+  const displayColors = sourceContext?.operation === "system" && sourceContext.metadata.componentIndices
+    ? (sourceContext.metadata.componentIndices as number[]).map((index) => ["#2862b8", "#b65d20"][index])
+    : sourceContext?.operation === "complex" && sourceContext.metadata.kind === "real-input-function"
+      ? ["#2862b8", "#b65d20"]
+    : colors;
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
-  const setActiveMode = useUIStore((state) => state.setActiveMode);
   const pendingGraphResult = useUIStore((state) => state.pendingGraphResult);
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
+  const pendingGraphContext = useUIStore((state) => state.pendingGraphContext);
+  const setPendingGraphContext = useUIStore((state) => state.setPendingGraphContext);
+
+  useEffect(() => {
+    if (!pendingGraphContext) return;
+    if (pendingGraphContext.visualization === "number-line" || pendingGraphContext.visualization === "region-2d" || pendingGraphContext.visualization === "circle-region" || pendingGraphContext.visualization === "ellipse-region" || pendingGraphContext.visualization === "argand" || pendingGraphContext.visualization === "complex-map") {
+      setSourceContext(pendingGraphContext);
+      setPendingGraphContext(null);
+      return;
+    }
+    if (!pendingGraphContext.graphInputLatex) return;
+    setLatexRows(pendingGraphContext.graphInputLatex);
+    setMathFields(pendingGraphContext.graphInputLatex.map(() => null));
+    setActiveRow(0);
+    setVariable(pendingGraphContext.variables[0] ?? "x");
+    setAngleUnit(pendingGraphContext.metadata.angleUnit === "deg" ? "deg" : "rad");
+    setXMin(pendingGraphContext.graphRequest?.payload.x_min?.toString() ?? "");
+    setXMax(pendingGraphContext.graphRequest?.payload.x_max?.toString() ?? "");
+    setSamples("");
+    setSourceContext(pendingGraphContext);
+    setPendingGraphContext(null);
+  }, [pendingGraphContext, setPendingGraphContext]);
+
+  useEffect(() => {
+    if (!reuseEntry?.endpointUrl.includes("/graph/2d")) return;
+    const payload = reuseEntry.requestPayload;
+    if (Array.isArray(payload.expressions)) {
+      const expressions = payload.expressions.map((value) => String(value));
+      setLatexRows(expressions.length ? expressions : [""]);
+      setMathFields(expressions.length ? expressions.map(() => null) : [null]);
+      setActiveRow(0);
+    }
+    if (payload.variable !== undefined) setVariable(String(payload.variable));
+    setXMin(payload.x_min !== undefined ? String(payload.x_min) : "");
+    setXMax(payload.x_max !== undefined ? String(payload.x_max) : "");
+    setSamples(payload.samples !== undefined ? String(payload.samples) : "");
+    if (payload.angle_unit === "rad" || payload.angle_unit === "deg") setAngleUnit(payload.angle_unit);
+    setLastResult(null);
+    setValidationError(null);
+  }, [reuseEntry]);
 
   // Fase F (Módulo F3): consume el "puente" del botón Graficar (ver
   // useUIStore.ts) una sola vez -- si hay un resultado pendiente al
@@ -183,6 +306,7 @@ function Graph2DForm() {
   }
 
   function updateExpression(index: number, value: string): void {
+    setSourceContext(null);
     setLatexRows((current) => current.map((expr, i) => (i === index ? value : expr)));
   }
 
@@ -200,6 +324,9 @@ function Graph2DForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    const systemVariables = sourceContext?.operation === "system" && sourceContext.graphRequest?.endpoint === "/solve/system"
+      ? sourceContext.variables : null;
+    setSourceContext(null);
     const trimmedExpressions = latexRows.map((row) => latexToBackendSyntax(row)).filter(Boolean);
 
     if (trimmedExpressions.length === 0) {
@@ -217,9 +344,9 @@ function Graph2DForm() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
-        "/graph/2d",
-        {
+      const result = await submitGraphs(
+        systemVariables ? "/solve/system" : "/graph/2d",
+        systemVariables ? { equations: trimmedExpressions, variables: systemVariables } : {
           expressions: trimmedExpressions,
           variable: variable.trim() || "x",
           angle_unit: angleUnit,
@@ -237,15 +364,106 @@ function Graph2DForm() {
     }
   }
 
+  if (sourceContext?.visualization === "number-line") {
+    return <section aria-label="Análisis de inecuación" className="space-y-4 rounded-xl border border-paper-line bg-paper p-5">
+      <h2 className="text-lg font-semibold">Solución en la recta real</h2>
+      <p className="text-sm text-muted">Desde Científica · {sourceContext.originalExpression} · variable {sourceContext.variables[0]}</p>
+      <NumberLine intervals={sourceContext.metadata.intervals as NonNullable<MathResponse["inequality_intervals"]>} />
+      <p className="text-sm">Conjunto exacto: {sourceContext.canonicalResult?.text ?? "—"}</p>
+      <p className="text-xs text-muted">Extremo hueco: excluido. Extremo relleno: incluido. Las flechas indican prolongación sin límite.</p>
+    </section>;
+  }
+
+  if (sourceContext?.visualization === "region-2d") {
+    return <section aria-label="Análisis de región de inecuaciones" className="space-y-4 rounded-xl border border-paper-line bg-paper p-5">
+      <h2 className="text-lg font-semibold">Intersección factible</h2>
+      <p className="text-sm text-muted">Desde Científica · {sourceContext.originalExpression}</p>
+      <InequalityRegion boundaries={sourceContext.metadata.constraints as NonNullable<MathResponse["inequality_constraints"]>}
+        polygon={sourceContext.metadata.polygon as number[][]} viewport={sourceContext.metadata.viewport as number[]}
+        kind={String(sourceContext.metadata.kind)} />
+      <p className="text-sm">{sourceContext.canonicalResult?.text ?? "—"}</p>
+      <p className="text-xs text-muted">Fronteras discontinuas excluidas; continuas incluidas. El trazo azul muestra la solución común; los extremos huecos se excluyen.</p>
+    </section>;
+  }
+
+  if (sourceContext?.visualization === "circle-region") {
+    const circle = sourceContext.metadata.circle as NonNullable<MathResponse["inequality_circle"]>;
+    return <section aria-label="Análisis de inecuación circular" className="space-y-4 rounded-xl border border-paper-line bg-paper p-5">
+      <h2 className="text-lg font-semibold">Región circular</h2>
+      <p className="text-sm text-muted">Desde Científica · {sourceContext.originalExpression}</p>
+      <CircleInequality circle={circle} />
+      <p className="text-sm">{sourceContext.canonicalResult?.text}. Centro ({circle.center_x_exact}, {circle.center_y_exact}); radio {circle.radius_exact}.</p>
+      <p className="text-xs text-muted">Frontera discontinua excluida; continua incluida. La zona azul cumple la inecuación.</p>
+    </section>;
+  }
+
+  if (sourceContext?.visualization === "ellipse-region") {
+    const ellipse = sourceContext.metadata.ellipse as NonNullable<MathResponse["inequality_ellipse"]>;
+    return <section aria-label="Análisis de inecuación elíptica" className="space-y-4 rounded-xl border border-paper-line bg-paper p-5">
+      <h2 className="text-lg font-semibold">Región elíptica</h2>
+      <p className="text-sm text-muted">Desde Científica · {sourceContext.originalExpression}</p>
+      <EllipseInequality ellipse={ellipse} />
+      <p className="text-sm">{sourceContext.canonicalResult?.text}. Centro ({ellipse.center_x_exact}, {ellipse.center_y_exact}); radios {ellipse.radius_x_exact} y {ellipse.radius_y_exact}.</p>
+      <p className="text-xs text-muted">Frontera discontinua excluida; continua incluida. La zona azul cumple la inecuación.</p>
+    </section>;
+  }
+
+  if (sourceContext?.visualization === "argand") {
+    const points = sourceContext.metadata.points as NonNullable<MathResponse["complex_graph_points"]>;
+    return <section aria-label="Análisis de plano complejo" className="space-y-4 rounded-xl border border-paper-line bg-paper p-5">
+      <h2 className="text-lg font-semibold">Plano de Argand</h2>
+      <p className="text-sm text-muted">Desde Científica · {sourceContext.originalExpression} · {points.length} {points.length === 1 ? "punto" : "puntos"}</p>
+      <div className="max-w-2xl"><Suspense fallback={<ArgandPlane points={points} />}>
+        <GraphViewer data={argandGraphData(points)} />
+      </Suspense></div>
+      <ul className="text-sm">{points.map((point, index) => <li key={index}>{point.label}: Re={point.re}, Im={point.im}</li>)}</ul>
+    </section>;
+  }
+
+  if (sourceContext?.visualization === "complex-map") {
+    const samples = sourceContext.metadata.mapping as NonNullable<MathResponse["complex_graph_mapping"]>;
+    return <section aria-label="Análisis de mapeo complejo" className="space-y-4 rounded-xl border border-paper-line bg-paper p-5">
+      <h2 className="text-lg font-semibold">Mapeo complejo de muestras</h2>
+      <p className="text-sm text-muted">Desde Científica · f(z) = {sourceContext.originalExpression}</p>
+      <ComplexMapping samples={samples} detailed />
+      <p className="text-xs text-muted">Esta muestra no representa todo el dominio complejo. El análisis continuo requiere una vista especializada.</p>
+    </section>;
+  }
+
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <span className="block text-sm text-muted">Expresiones (hasta {MAX_EXPRESSIONS})</span>
+    <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
+      <aside aria-label="Controles de gráfica 2D" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
+        {sourceContext && (
+          <p className="rounded-md bg-paper-soft px-2 py-1 text-xs text-muted" data-testid="scientific-graph-context">
+            Desde Científica · {sourceContext.operation === "derivative" ? "derivada" : sourceContext.operation === "integral" ? "integral" : sourceContext.operation === "limit" ? "límite" : sourceContext.operation === "simplify" ? "simplificación" : sourceContext.operation === "factor" ? "factorización" : sourceContext.operation === "ode" ? "solución EDO" : sourceContext.operation === "system" ? "sistema" : sourceContext.operation === "complex" ? "partes Re e Im" : "función"} de {sourceContext.variables[0]}
+            {sourceContext.canonicalResult && " · resultado conservado"}
+            {sourceContext.operation === "complex" && sourceContext.metadata.kind === "real-input-function" && ` · original ${sourceContext.originalExpression} · Re azul · Im naranja`}
+            {sourceContext.operation === "integral" && (sourceContext.metadata.kind === "definite"
+              ? ` · límites ${sourceContext.metadata.lowerBound} → ${sourceContext.metadata.upperBound} · valor firmado ${sourceContext.canonicalResult?.text ?? "—"}`
+              : " · C=0 solo en la gráfica")}
+            {sourceContext.operation === "limit" && ` · ${sourceContext.metadata.behavior === "far-field"
+              ? `hacia ${sourceContext.metadata.point === "oo" ? "+∞" : "−∞"}`
+              : `${sourceContext.metadata.direction === "left" ? "desde la izquierda" : sourceContext.metadata.direction === "right" ? "desde la derecha" : "ambos lados"} → ${sourceContext.metadata.point}`} · resultado ${sourceContext.canonicalResult?.text ?? "—"}`}
+            {(sourceContext.operation === "simplify" || sourceContext.operation === "factor") && ` · forma transformada ${sourceContext.metadata.transformedExpression} · dominio real completo`}
+            {sourceContext.operation === "ode" && (sourceContext.metadata.kind === "particular"
+              ? " · solución particular" : " · familia representativa C₁=−1, 0, 1")}
+            {sourceContext.operation === "system" && (sourceContext.metadata.coincident
+              ? " · curvas coincidentes, infinitas soluciones" : ` · ${(sourceContext.metadata.intersections as number[][]).length} ${(sourceContext.metadata.intersections as number[][]).length === 1 ? "intersección común" : "intersecciones comunes"}${sourceContext.metadata.hasComplexSolutions ? " · sin cruce real, soluciones complejas conservadas" : ""} · ecuaciones ${String((sourceContext.metadata.equations as string[]).join(" ; "))}`)}
+          </p>
+        )}
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Expresiones</h3>
+            <p className="mt-0.5 text-[11px] text-muted">Hasta {MAX_EXPRESSIONS} curvas</p>
+          </div>
+          <span className="text-[11px] text-muted">{latexRows.length}/{MAX_EXPRESSIONS}</span>
+        </div>
+        <div className="space-y-2">
         {latexRows.map((row, index) => (
           <div key={index} className="flex items-center gap-2">
             <span
               className="h-3 w-3 shrink-0 rounded-full"
-              style={{ backgroundColor: colors[index % colors.length] }}
+              style={{ backgroundColor: displayColors[index % displayColors.length] }}
               aria-hidden="true"
             />
             <div className="flex-1">
@@ -278,9 +496,9 @@ function Graph2DForm() {
             + Añadir expresión
           </button>
         )}
-      </div>
+        </div>
 
-      <div className="space-y-1">
+        <div className="space-y-1">
         {latexRows.length > 1 && (
           <div className="flex flex-wrap gap-1">
             <span className="pt-1 text-xs font-medium text-muted">Teclado para:</span>
@@ -301,14 +519,9 @@ function Graph2DForm() {
             ))}
           </div>
         )}
-        <NaturalMathKeyboard
-          field={mathFields[activeRow] ?? null}
-          onSubmit={() => formRef.current?.requestSubmit()}
-          onGoToDerivative={() => setActiveMode("derivative")}
-        />
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label htmlFor="graph-variable" className="block text-sm text-muted">
             Variable
@@ -318,7 +531,7 @@ function Graph2DForm() {
             type="text"
             value={variable}
             onChange={(e) => setVariable(e.target.value)}
-            className="w-20 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -330,7 +543,7 @@ function Graph2DForm() {
             type="text"
             value={xMin}
             onChange={(e) => setXMin(e.target.value)}
-            className="w-24 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -342,7 +555,7 @@ function Graph2DForm() {
             type="text"
             value={xMax}
             onChange={(e) => setXMax(e.target.value)}
-            className="w-24 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -354,7 +567,7 @@ function Graph2DForm() {
             type="text"
             value={samples}
             onChange={(e) => setSamples(e.target.value)}
-            className="w-24 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -365,7 +578,7 @@ function Graph2DForm() {
             id="graph-angle-unit"
             value={angleUnit}
             onChange={(e) => setAngleUnit(e.target.value as "rad" | "deg")}
-            className="rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           >
             <option value="rad">Radianes</option>
             <option value="deg">Grados</option>
@@ -381,22 +594,39 @@ function Graph2DForm() {
 
       <button
         type="submit"
-        className="rounded bg-graph px-4 py-2 text-sm font-medium text-white hover:bg-graph/90"
+        className="w-full rounded-lg bg-graph px-4 py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
       >
         Graficar
       </button>
 
-      <div className="border-t border-paper-line pt-4">
-        <ResultArea result={lastResult} isLoading={isLoading} colors={colors} />
-      </div>
+      </aside>
+
+      <section aria-label="Vista y análisis de gráfica 2D" className="min-w-0 rounded-xl border border-paper-line bg-paper p-3 shadow-sm">
+        <div className="mb-3 flex items-center justify-between gap-3 border-b border-paper-line pb-2">
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Vista</h3>
+            <p className="mt-0.5 text-[11px] text-muted">Gráfica cartesiana y análisis</p>
+          </div>
+          <span className="text-[11px] text-muted">{latexRows.filter((row) => row.trim() !== "").length} activas</span>
+        </div>
+        <ResultArea result={lastResult} isLoading={isLoading} colors={displayColors}
+          integralBounds={sourceContext?.operation === "integral" && sourceContext.metadata.kind === "definite"
+            ? [Number(sourceContext.metadata.lowerBound), Number(sourceContext.metadata.upperBound)] : undefined}
+          limitFocus={sourceContext?.operation === "limit"
+            ? { point: String(sourceContext.metadata.point), direction: sourceContext.metadata.direction as "both" | "left" | "right" }
+            : undefined}
+          systemIntersections={sourceContext?.operation === "system" && sourceContext.graphRequest?.endpoint === "/graph/2d"
+            ? sourceContext.metadata.intersections as number[][] : undefined} />
+      </section>
     </form>
   );
 }
 
-function Graph3DForm() {
+function Graph3DForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [latex, setLatex] = useState("");
   const [mathField, setMathField] = useState<MathfieldElement | null>(null);
+  useGlobalGraphKeyboard(mathField, formRef);
   const [xVar, setXVar] = useState("x");
   const [yVar, setYVar] = useState("y");
   const [xMin, setXMin] = useState("-10");
@@ -409,7 +639,26 @@ function Graph3DForm() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
-  const setActiveMode = useUIStore((state) => state.setActiveMode);
+
+  useEffect(() => {
+    if (!reuseEntry?.endpointUrl.includes("/graph/3d")) return;
+    const payload = reuseEntry.requestPayload;
+    if (payload.expression !== undefined) setLatex(String(payload.expression));
+    if (Array.isArray(payload.variables)) {
+      setXVar(String(payload.variables[0] ?? "x"));
+      setYVar(String(payload.variables[1] ?? "y"));
+    }
+    if (Array.isArray(payload.x_range)) {
+      setXMin(String(payload.x_range[0] ?? "-10"));
+      setXMax(String(payload.x_range[1] ?? "10"));
+    }
+    if (Array.isArray(payload.y_range)) {
+      setYMin(String(payload.y_range[0] ?? "-10"));
+      setYMax(String(payload.y_range[1] ?? "10"));
+    }
+    setLastResult(null);
+    setValidationError(null);
+  }, [reuseEntry]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -428,7 +677,7 @@ function Graph3DForm() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitGraphs(
         "/graph/3d",
         {
           expression: trimmedExpression,
@@ -448,8 +697,10 @@ function Graph3DForm() {
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-1">
+    <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
+      <aside aria-label="Controles de gráfica 3D" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
+<div><h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Superficie</h3><p className="mt-0.5 text-[11px] text-muted">Expresión y dominio</p></div>
+<div className="space-y-1">
         <NaturalMathField
           latex={latex}
           onLatexChange={setLatex}
@@ -457,14 +708,9 @@ function Graph3DForm() {
           placeholder="x^2+y^2"
           fieldRef={setMathField}
         />
-        <NaturalMathKeyboard
-          field={mathField}
-          onSubmit={() => formRef.current?.requestSubmit()}
-          onGoToDerivative={() => setActiveMode("derivative")}
-        />
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label htmlFor="graph3d-xvar" className="block text-sm text-muted">
             Variable x
@@ -474,7 +720,7 @@ function Graph3DForm() {
             type="text"
             value={xVar}
             onChange={(e) => setXVar(e.target.value)}
-            className="w-16 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -486,7 +732,7 @@ function Graph3DForm() {
             type="text"
             value={yVar}
             onChange={(e) => setYVar(e.target.value)}
-            className="w-16 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -498,7 +744,7 @@ function Graph3DForm() {
             type="text"
             value={xMin}
             onChange={(e) => setXMin(e.target.value)}
-            className="w-20 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -510,7 +756,7 @@ function Graph3DForm() {
             type="text"
             value={xMax}
             onChange={(e) => setXMax(e.target.value)}
-            className="w-20 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -522,7 +768,7 @@ function Graph3DForm() {
             type="text"
             value={yMin}
             onChange={(e) => setYMin(e.target.value)}
-            className="w-20 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -534,7 +780,7 @@ function Graph3DForm() {
             type="text"
             value={yMax}
             onChange={(e) => setYMax(e.target.value)}
-            className="w-20 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
       </div>
@@ -547,25 +793,32 @@ function Graph3DForm() {
 
       <button
         type="submit"
-        className="rounded bg-graph px-4 py-2 text-sm font-medium text-white hover:bg-graph/90"
+        className="w-full rounded-lg bg-graph px-4 py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
       >
         Graficar superficie
       </button>
 
-      <div className="border-t border-paper-line pt-4">
+      </aside>
+
+      <section aria-label="Vista de gráfica 3D" className="min-w-0 rounded-xl border border-paper-line bg-paper p-3 shadow-sm">
+        <div className="mb-3 border-b border-paper-line pb-2">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Vista</h3>
+          <p className="mt-0.5 text-[11px] text-muted">Superficie y resultado</p>
+        </div>
         <ResultArea result={lastResult} isLoading={isLoading} />
-      </div>
+      </section>
     </form>
   );
 }
 
-function GraphParametricForm() {
+function GraphParametricForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [xLatex, setXLatex] = useState("");
   const [yLatex, setYLatex] = useState("");
   const [xMathField, setXMathField] = useState<MathfieldElement | null>(null);
   const [yMathField, setYMathField] = useState<MathfieldElement | null>(null);
   const [activeField, setActiveField] = useState<"x" | "y">("x");
+  useGlobalGraphKeyboard(activeField === "x" ? xMathField : yMathField, formRef);
   const [parameter, setParameter] = useState("t");
   const [tMin, setTMin] = useState("0");
   const [tMax, setTMax] = useState("6.283185307179586");
@@ -575,7 +828,18 @@ function GraphParametricForm() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
-  const setActiveMode = useUIStore((state) => state.setActiveMode);
+
+  useEffect(() => {
+    if (!reuseEntry?.endpointUrl.includes("/graph/parametric")) return;
+    const payload = reuseEntry.requestPayload;
+    if (payload.x_expression !== undefined) setXLatex(String(payload.x_expression));
+    if (payload.y_expression !== undefined) setYLatex(String(payload.y_expression));
+    if (payload.parameter !== undefined) setParameter(String(payload.parameter));
+    if (payload.t_min !== undefined) setTMin(String(payload.t_min));
+    if (payload.t_max !== undefined) setTMax(String(payload.t_max));
+    setLastResult(null);
+    setValidationError(null);
+  }, [reuseEntry]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -596,7 +860,7 @@ function GraphParametricForm() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitGraphs(
         "/graph/parametric",
         {
           x_expression: trimmedX,
@@ -617,8 +881,10 @@ function GraphParametricForm() {
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-1">
+    <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
+      <aside aria-label="Controles de gráfica paramétrica" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
+<div><h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Paramétrica</h3><p className="mt-0.5 text-[11px] text-muted">Componentes y rango del parámetro</p></div>
+<div className="space-y-1">
         <span className="block text-sm text-muted">x(t)</span>
         <NaturalMathField
           latex={xLatex}
@@ -666,14 +932,9 @@ function GraphParametricForm() {
             Teclado para y(t)
           </button>
         </div>
-        <NaturalMathKeyboard
-          field={activeField === "x" ? xMathField : yMathField}
-          onSubmit={() => formRef.current?.requestSubmit()}
-          onGoToDerivative={() => setActiveMode("derivative")}
-        />
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label htmlFor="param-parameter" className="block text-sm text-muted">
             Parámetro
@@ -683,7 +944,7 @@ function GraphParametricForm() {
             type="text"
             value={parameter}
             onChange={(e) => setParameter(e.target.value)}
-            className="w-16 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -695,7 +956,7 @@ function GraphParametricForm() {
             type="text"
             value={tMin}
             onChange={(e) => setTMin(e.target.value)}
-            className="w-28 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -707,7 +968,7 @@ function GraphParametricForm() {
             type="text"
             value={tMax}
             onChange={(e) => setTMax(e.target.value)}
-            className="w-28 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
       </div>
@@ -720,22 +981,29 @@ function GraphParametricForm() {
 
       <button
         type="submit"
-        className="rounded bg-graph px-4 py-2 text-sm font-medium text-white hover:bg-graph/90"
+        className="w-full rounded-lg bg-graph px-4 py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
       >
         Graficar curva
       </button>
 
-      <div className="border-t border-paper-line pt-4">
+      </aside>
+
+      <section aria-label="Vista de gráfica paramétrica" className="min-w-0 rounded-xl border border-paper-line bg-paper p-3 shadow-sm">
+        <div className="mb-3 border-b border-paper-line pb-2">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Vista</h3>
+          <p className="mt-0.5 text-[11px] text-muted">Curva paramétrica y resultado</p>
+        </div>
         <ResultArea result={lastResult} isLoading={isLoading} />
-      </div>
+      </section>
     </form>
   );
 }
 
-function GraphPolarForm() {
+function GraphPolarForm({ reuseEntry }: { reuseEntry: HistoryEntry | null }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [rLatex, setRLatex] = useState("");
   const [rMathField, setRMathField] = useState<MathfieldElement | null>(null);
+  useGlobalGraphKeyboard(rMathField, formRef);
   const [variable, setVariable] = useState("theta");
   const [thetaMin, setThetaMin] = useState("0");
   const [thetaMax, setThetaMax] = useState("6.283185307179586");
@@ -745,7 +1013,17 @@ function GraphPolarForm() {
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
-  const setActiveMode = useUIStore((state) => state.setActiveMode);
+
+  useEffect(() => {
+    if (!reuseEntry?.endpointUrl.includes("/graph/polar")) return;
+    const payload = reuseEntry.requestPayload;
+    if (payload.r_expression !== undefined) setRLatex(String(payload.r_expression));
+    if (payload.variable !== undefined) setVariable(String(payload.variable));
+    if (payload.theta_min !== undefined) setThetaMin(String(payload.theta_min));
+    if (payload.theta_max !== undefined) setThetaMax(String(payload.theta_max));
+    setLastResult(null);
+    setValidationError(null);
+  }, [reuseEntry]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -765,7 +1043,7 @@ function GraphPolarForm() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitGraphs(
         "/graph/polar",
         {
           r_expression: trimmedR,
@@ -785,8 +1063,10 @@ function GraphPolarForm() {
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-1">
+    <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
+      <aside aria-label="Controles de gráfica polar" className="space-y-4 rounded-xl border border-paper-line bg-paper p-3">
+<div><h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Polar</h3><p className="mt-0.5 text-[11px] text-muted">Radio y rango angular</p></div>
+<div className="space-y-1">
         <span className="block text-sm text-muted">r(θ)</span>
         <NaturalMathField
           latex={rLatex}
@@ -797,13 +1077,8 @@ function GraphPolarForm() {
         />
       </div>
 
-      <NaturalMathKeyboard
-        field={rMathField}
-        onSubmit={() => formRef.current?.requestSubmit()}
-        onGoToDerivative={() => setActiveMode("derivative")}
-      />
 
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label htmlFor="polar-variable" className="block text-sm text-muted">
             Variable
@@ -813,7 +1088,7 @@ function GraphPolarForm() {
             type="text"
             value={variable}
             onChange={(e) => setVariable(e.target.value)}
-            className="w-16 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -825,7 +1100,7 @@ function GraphPolarForm() {
             type="text"
             value={thetaMin}
             onChange={(e) => setThetaMin(e.target.value)}
-            className="w-28 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -837,7 +1112,7 @@ function GraphPolarForm() {
             type="text"
             value={thetaMax}
             onChange={(e) => setThetaMax(e.target.value)}
-            className="w-28 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            className="w-full rounded border border-paper-line bg-paper-soft px-2 py-1.5 text-sm"
           />
         </div>
       </div>
@@ -850,26 +1125,45 @@ function GraphPolarForm() {
 
       <button
         type="submit"
-        className="rounded bg-graph px-4 py-2 text-sm font-medium text-white hover:bg-graph/90"
+        className="w-full rounded-lg bg-graph px-4 py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
       >
         Graficar curva
       </button>
 
-      <div className="border-t border-paper-line pt-4">
+      </aside>
+
+      <section aria-label="Vista de gráfica polar" className="min-w-0 rounded-xl border border-paper-line bg-paper p-3 shadow-sm">
+        <div className="mb-3 border-b border-paper-line pb-2">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Vista</h3>
+          <p className="mt-0.5 text-[11px] text-muted">Curva polar y resultado</p>
+        </div>
         <ResultArea result={lastResult} isLoading={isLoading} />
-      </div>
+      </section>
     </form>
   );
 }
 
 export function GraphMode() {
   const [kind, setKind] = useState<GraphKind>("2d");
+  const [reuseEntry, setReuseEntry] = useState<HistoryEntry | null>(null);
+  const pendingHistoryReuse = usePendingHistoryReuseStore((s) => s.pending);
+  const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
+
+  useEffect(() => {
+    const entry = takePendingHistoryReuse();
+    if (!entry) return;
+    setReuseEntry(entry);
+    if (entry.endpointUrl.includes("/graph/3d")) setKind("3d");
+    else if (entry.endpointUrl.includes("/graph/parametric")) setKind("parametric");
+    else if (entry.endpointUrl.includes("/graph/polar")) setKind("polar");
+    else setKind("2d");
+  }, [pendingHistoryReuse, takePendingHistoryReuse]);
 
   return (
-    <div className="mx-auto max-w-lg space-y-4 rounded-lg border border-paper-line bg-paper-soft p-5 shadow-sm lg:max-w-3xl dt:max-w-4xl">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-muted">Gráficas</h2>
-        <div className="flex gap-1" role="tablist" aria-label="Tipo de gráfica">
+    <section aria-label="Gráficas" className="mx-auto min-w-0 w-full max-w-[1376px] overflow-x-hidden space-y-4 rounded-xl border border-paper-line bg-paper-soft p-4 shadow-sm md:p-5">
+      <div className="flex flex-col gap-3 border-b border-paper-line pb-3 md:flex-row md:items-center md:justify-between">
+        <div><h2 className="text-sm font-semibold text-ink">Gráficas</h2><p className="mt-0.5 text-xs text-muted">Expresiones, visualización y análisis</p></div>
+        <div className="flex gap-1 overflow-x-auto pb-1" role="tablist" aria-label="Tipo de gráfica">
           {(Object.keys(GRAPH_KIND_LABELS) as GraphKind[]).map((k) => (
             <button
               key={k}
@@ -877,7 +1171,7 @@ export function GraphMode() {
               role="tab"
               aria-selected={kind === k}
               onClick={() => setKind(k)}
-              className={`rounded px-3 py-1 text-xs font-medium ${
+              className={`min-h-8 shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
                 kind === k ? "bg-graph text-white" : "text-muted hover:bg-paper-line/40"
               }`}
             >
@@ -887,10 +1181,10 @@ export function GraphMode() {
         </div>
       </div>
 
-      {kind === "2d" && <Graph2DForm />}
-      {kind === "3d" && <Graph3DForm />}
-      {kind === "parametric" && <GraphParametricForm />}
-      {kind === "polar" && <GraphPolarForm />}
-    </div>
+      {kind === "2d" && <Graph2DForm reuseEntry={reuseEntry} />}
+      {kind === "3d" && <Graph3DForm reuseEntry={reuseEntry} />}
+      {kind === "parametric" && <GraphParametricForm reuseEntry={reuseEntry} />}
+      {kind === "polar" && <GraphPolarForm reuseEntry={reuseEntry} />}
+    </section>
   );
 }

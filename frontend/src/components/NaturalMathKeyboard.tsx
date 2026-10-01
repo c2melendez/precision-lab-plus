@@ -107,6 +107,17 @@ export const key = (
   description,
 });
 
+
+const DIRECT_TRIG_ARIA = new Set(["sin", "cos", "tan", "sec", "csc", "cot"]);
+
+export function angleAwareTrigInsertLatex(
+  k: KeyDef,
+  isDegrees: boolean,
+): string {
+  if (!isDegrees || !DIRECT_TRIG_ARIA.has(k.ariaLabel)) return k.insertLatex;
+  return k.insertLatex.replace("#0", "#0^{\\circ}");
+}
+
 export { BOX };
 
 // MÓDULO 1 (paridad con precision-lab-lite): CORE_GRID/RELATIONAL_ROW/
@@ -194,6 +205,11 @@ export const SYMBOL_VARIABLES: KeyDef[] = [
   key("θ", "\\theta", "theta", false, undefined, "variable angular theta"),
   key("Φ", "\\Phi", "Phi mayúscula", false, undefined, "ángulo azimutal Phi mayúscula en coordenadas polares"),
   key({ italic: "r" }, "r", "variable r", false, undefined, "variable radial en coordenadas polares"),
+  key({ italic: "t" }, "t", "variable t", false, undefined, "parámetro t, usado especialmente en gráficas paramétricas"),
+  key({ italic: "a" }, "a", "variable a", false, undefined, "parámetro genérico a"),
+  key({ italic: "b" }, "b", "variable b", false, undefined, "parámetro genérico b"),
+  key({ italic: "c" }, "c", "variable c", false, undefined, "parámetro genérico c"),
+  key({ italic: "n" }, "n", "variable n", false, undefined, "índice entero o contador n"),
 ];
 
 export const SYMBOL_CONSTANTS: KeyDef[] = [
@@ -202,6 +218,13 @@ export const SYMBOL_CONSTANTS: KeyDef[] = [
   key({ italic: "i" }, "i", "número imaginario", false, undefined, "unidad imaginaria (raíz cuadrada de -1)"),
   key("∞", "\\infty", "infinito", false, undefined, "representa infinito"),
   key("φ", "\\frac{1+\\sqrt{5}}{2}", "número áureo phi", false, undefined, "número áureo: (1 + √5) / 2"),
+  key("τ", "2\\pi", "tau", false, undefined, "constante tau, equivalente a 2π"),
+];
+
+export const SYMBOL_FUNCTIONS: KeyDef[] = [
+  key("f(x)", "f\\left(#0\\right)", "función f", false, undefined, "inserta la función f con argumento editable"),
+  key("g(x)", "g\\left(#0\\right)", "función g", false, undefined, "inserta la función g con argumento editable"),
+  key("h(x)", "h\\left(#0\\right)", "función h", false, undefined, "inserta la función h con argumento editable"),
 ];
 
 // GraphMode conserva el inventario histórico completo. BasicMode usa las
@@ -275,19 +298,19 @@ const CALCULUS_ROW_1: KeyDef[] = [
   key("Π", "\\prod_{#0}^{#1}#2", "productoria", false, undefined, "producto de una expresión repetida según un índice, entre un valor inicial y uno final"),
   key(
     "LCM",
-    "\\mathrm{lcm}\\left(#0,#1\\right)",
+    "\\mathrm{lcm}\\left(#0\\right)",
     "mínimo común múltiplo",
     false,
     undefined,
-    "el menor número que es múltiplo de ambos valores a la vez",
+    "mínimo común múltiplo de dos o más valores separados por comas",
   ),
   key(
     "GCD",
-    "\\gcd\\left(#0,#1\\right)",
+    "\\gcd\\left(#0\\right)",
     "máximo común divisor",
     false,
     undefined,
-    "el mayor número que divide a ambos valores sin dejar residuo",
+    "máximo común divisor de dos o más valores separados por comas",
   ),
 ];
 
@@ -320,7 +343,7 @@ const CALCULUS_ROW_2: KeyDef[] = [
   key(
     { frac: ["dⁿ", "dxⁿ"] },
     "\\frac{d^3}{dx^3}\\left(#0\\right)",
-    "derivada de orden n (edita el 3 por el orden que quieras, hasta 5)",
+    "derivada de orden n (edita el 3 por el orden que quieras)",
     false,
     undefined,
     "deriva la expresión repetidamente -- edita el número de orden en la plantilla",
@@ -353,12 +376,20 @@ const CALCULUS_ROW_2: KeyDef[] = [
   // `unavailable` — calculusIntent.ts ahora reconoce esta notación con un
   // escáner propio (ver detectLateralLimit), mismo template que Lite.
   key(
-    { base: "lim", sub: "x→a±" },
-    "\\lim_{#0\\to#1^{#2}}#3",
-    "límite lateral (edita + o - en el exponente)",
+    { base: "lim", sub: "x→a⁻" },
+    "\\lim_{#0\\to#1^{-}}#2",
+    "límite lateral por la izquierda",
     false,
     undefined,
-    "límite acercándose solo por la derecha (+) o solo por la izquierda (-) de un punto",
+    "límite cuando la variable se acerca al punto solo por la izquierda",
+  ),
+  key(
+    { base: "lim", sub: "x→a⁺" },
+    "\\lim_{#0\\to#1^{+}}#2",
+    "límite lateral por la derecha",
+    false,
+    undefined,
+    "límite cuando la variable se acerca al punto solo por la derecha",
   ),
 ];
 
@@ -580,7 +611,7 @@ CATEGORY_MENUS.Álgebra = [
       key({ sup: "n", base: "10" }, "10^{#0}", "10 a la n", false, undefined, "10 elevado a un exponente"),
       key({ sup: "2", base: BOX }, "#0^2", "a al cuadrado", false, undefined, "un valor multiplicado por sí mismo"),
       key({ sup: "n", base: BOX }, "#0^{#1}", "a a la n", false, undefined, "un valor elevado a cualquier exponente editable"),
-      key("exp", "\\exp\\left(#0\\right)", "exponencial", false, undefined, "e elevado al valor ingresado (equivalente a e^x)"),
+      key("^", "^", "operador de potencia", false, undefined, "inserta el operador lineal de potencia, equivalente a la tecla física ^"),
     ],
   },
   {
@@ -598,12 +629,14 @@ CATEGORY_MENUS.Álgebra = [
     ],
   },
   {
-    section: "Generales",
+    section: "Aritmética",
     keys: [
       key("|a|", "\\left|#0\\right|", "valor absoluto de a", false, undefined, "distancia de un número a cero (siempre positiva)"),
       key("a!", "#0!", "factorial de a", false, undefined, "producto de todos los enteros positivos hasta a"),
       key("sgn(a)", "\\mathrm{sign}\\left(#0\\right)", "signo de a", false, undefined, "devuelve -1, 0 o 1 según el signo del valor"),
       key("mod(a,b)", "\\mathrm{mod}\\left(#0,#1\\right)", "módulo o residuo", false, undefined, "residuo de dividir a entre b"),
+      key("LCM", "\\mathrm{lcm}\\left(#0\\right)", "mínimo común múltiplo", false, undefined, "mínimo común múltiplo de dos o más valores separados por comas"),
+      key("GCD", "\\gcd\\left(#0\\right)", "máximo común divisor", false, undefined, "máximo común divisor de dos o más valores separados por comas"),
     ],
   },
   {
@@ -656,7 +689,7 @@ const ODE_ROW: KeyDef[] = [
     "fija el valor de y en un punto específico, separada de la ecuación por una coma",
   ),
   key(
-    "dy/dx",
+    { frac: ["dy", "dx"] },
     "\\frac{dy}{dx}",
     "notación alternativa de derivada para ecuaciones diferenciales",
     false,
@@ -668,18 +701,136 @@ const ODE_ROW: KeyDef[] = [
 // Módulo 4 (spec §5.3 / log §3.3): categoría Cálculo, 4 secciones — todo
 // contenido YA existente (CALCULUS_ROW_1/2), solo reagrupado como
 // pestaña propia. Mismas teclas, sin reescribir plantillas. LCM/GCD NO
-// se repiten aquí (ya viven en Álgebra > Ecuaciones, Módulo 3).
+// se repiten aquí (ya viven en Álgebra > Aritmética, Módulo 3).
 CATEGORY_MENUS.Cálculo = [
   { section: "Integrales", keys: CALCULUS_ROW_1.slice(0, 2) },
   { section: "Sumas y productos", keys: CALCULUS_ROW_1.slice(2, 4) },
   { section: "Derivadas", keys: CALCULUS_ROW_2.slice(0, 4) },
-  { section: "Límites", keys: CALCULUS_ROW_2.slice(4, 7) },
+  { section: "Límites", keys: CALCULUS_ROW_2.slice(4, 8) },
   // Fase E: 5ª sección, spec 2.3 ("NO es una pestaña nueva").
   { section: "Ecuaciones diferenciales", keys: ODE_ROW },
 ];
 
+// S26 B6 — familias contextuales que salen del núcleo permanente.
+// Estas definiciones son canónicas para Científica y se comparten por
+// duplicación de acceso, nunca por cambio de significado.
+const B6_COMMON_CONSTANTS: KeyDef[] = [
+  key("π", "\\pi", "pi", false, undefined, "constante pi (≈3.14159)"),
+  key("e", "e", "e", false, undefined, "constante de Euler (≈2.71828)"),
+  key("∞", "\\infty", "infinito", false, undefined, "representa infinito"),
+];
+
+const B6_COMPLEX_DIRECT: KeyDef[] = [
+  key({ italic: "i" }, "i", "número imaginario", false, undefined, "unidad imaginaria (raíz cuadrada de -1)"),
+  ...B6_COMMON_CONSTANTS,
+];
+
+const B6_RELATIONS: KeyDef[] = [
+  key("<", "<", "menor que", false, undefined, "compara si el valor izquierdo es menor que el derecho"),
+  key(">", ">", "mayor que", false, undefined, "compara si el valor izquierdo es mayor que el derecho"),
+  key("≤", "\\le", "menor o igual que", false, undefined, "compara si el valor izquierdo es menor o igual que el derecho"),
+  key("≥", "\\ge", "mayor o igual que", false, undefined, "compara si el valor izquierdo es mayor o igual que el derecho"),
+  key("=", "=", "igual", false, undefined, "inserta un signo de igualdad sin ejecutar el cálculo"),
+];
+
+const B6_ANGLE_KEYS: KeyDef[] = [
+  key("°", "°", "grados", false, undefined, "inserta el símbolo de grados"),
+  key("′", "'", "prima", false, undefined, "agrega una prima para escribir ecuaciones diferenciales o minutos angulares"),
+  key("DMS", "#0°#1′#2″", "grados minutos segundos", false, undefined, "inserta la plantilla editable grados, minutos y segundos"),
+];
+
+const B6_FRACTIONS: KeyDef[] = [
+  key("a/b", "\\frac{#0}{#1}", "fracción", false, undefined, "inserta una fracción editable con numerador y denominador"),
+  key("a b/c", "#0\\frac{#1}{#2}", "fracción mixta", false, undefined, "inserta una fracción mixta editable"),
+];
+
+CATEGORY_MENUS.Álgebra = [
+  { section: "Constantes", keys: B6_COMMON_CONSTANTS },
+  ...(CATEGORY_MENUS.Álgebra ?? []),
+  { section: "Relaciones", keys: B6_RELATIONS },
+];
+
+CATEGORY_MENUS.Trigonométricas = [
+  { section: "Constantes", keys: B6_COMMON_CONSTANTS },
+  ...(CATEGORY_MENUS.Trigonométricas ?? []),
+];
+
+CATEGORY_MENUS.Cálculo = [
+  { section: "Constantes", keys: B6_COMMON_CONSTANTS },
+  ...(CATEGORY_MENUS.Cálculo ?? []),
+];
+
+CATEGORY_MENUS.Complejos = [
+  { section: "Acceso directo", keys: B6_COMPLEX_DIRECT },
+  ...(CATEGORY_MENUS.Complejos ?? []),
+];
+
+CATEGORY_MENUS.Unidades = [
+  { section: "Ángulos", keys: B6_ANGLE_KEYS },
+  { section: "Fracciones", keys: B6_FRACTIONS },
+  {
+    section: "Constante útil",
+    keys: [key("π", "\\pi", "pi", false, undefined, "constante pi (≈3.14159)")],
+  },
+];
+
+CATEGORY_MENUS.Más = [
+  { section: "Fracciones", keys: B6_FRACTIONS },
+  { section: "Relaciones y ángulos", keys: [...B6_RELATIONS.slice(0, 4), ...B6_ANGLE_KEYS] },
+  {
+    section: "Signos",
+    keys: [key("±()", "\\pm\\left(#0\\right)", "más/menos", false, undefined, "inserta las alternativas positiva y negativa")],
+  },
+];
+
 const CATEGORIES_FULL = ["Trigonométricas", "Símbolos", "Complejos"] as const;
-const CATEGORIES_BASIC_MODE = ["Básico", "Símbolos", "Álgebra", "Trigonométricas", "Cálculo", "Complejos"] as const;
+const CATEGORIES_BASIC_MODE = ["Álgebra", "Trigonométricas", "Cálculo", "Complejos", "Símbolos", "Unidades", "Más"] as const;
+
+const SYMBOL_SUBCATEGORIES = ["Variables", "Constantes y valores", "Funciones"] as const;
+
+const FAMILY_ICONS: Record<(typeof CATEGORIES_BASIC_MODE)[number], string> = {
+  "Álgebra": "x²",
+  "Trigonométricas": "sin",
+  "Cálculo": "∫",
+  "Complejos": "i",
+  "Símbolos": "Ω",
+  "Unidades": "°",
+  "Más": "⋯",
+};
+
+const SUBCATEGORY_ICONS: Record<string, string> = {
+  "Constantes": "π",
+  "Logaritmos": "ln",
+  "Exponenciales": "xⁿ",
+  "Radicales": "√",
+  "Aritmética": "a!",
+  "Ecuaciones": "x=",
+  "Directas": "sin",
+  "Inversas": "sin⁻¹",
+  "Hiperbólicas": "sinh",
+  "Hiperbólicas inversas": "sinh⁻¹",
+  "Integrales": "∫",
+  "Sumas y productos": "Σ",
+  "Derivadas": "d/dx",
+  "Límites": "lim",
+  "Ecuaciones diferenciales": "y′",
+  "Acceso directo": "i",
+  "Funciones": "ƒ",
+  "Avanzado": "zⁿ",
+  "Ángulos": "∠",
+  "Variables": "x",
+  "Constantes y valores": "π",
+  "Relaciones": "≤",
+  "Fracciones": "a/b",
+  "Constante útil": "π",
+  "Relaciones y ángulos": "°",
+  "Signos": "±",
+};
+
+function subcategoriesFor(category: (typeof CATEGORIES_BASIC_MODE)[number]): string[] {
+  if (category === "Símbolos") return [...SYMBOL_SUBCATEGORIES];
+  return (CATEGORY_MENUS[category] ?? []).map((group) => group.section);
+}
 
 interface NaturalMathKeyboardProps {
   field: MathfieldElement | null;
@@ -688,11 +839,15 @@ interface NaturalMathKeyboardProps {
   onSubmit?: () => void;
   onClearField?: () => void;
   onSolveEquation?: () => void;
+  onSolveInequality?: () => void;
   /** Pendiente #2 (revisión post-Módulo D): recibe la cantidad de
    * ecuaciones elegida en el selector 2-5 que se abre al tocar
    * "Sistema" (mismo criterio que Lite, paridad). */
   onSolveSystem?: (rows?: number) => void;
   onSimplify?: () => void;
+  onFactor?: () => void;
+  onEvaluatePoint?: () => void;
+  onSolveInequalitySystem?: () => void;
   // Fase F (spec_edo_complejos_tooltips.md §3.4, Módulo F3): "Graficar"
   // es una acción sobre el resultado ya evaluado, no una plantilla --
   // mismo patrón ya establecido acá para "=" (onSubmit) y "f(x)=0"
@@ -711,6 +866,9 @@ interface NaturalMathKeyboardProps {
    * agrega la pestaña temporal "Funciones". Default false — GraphMode
    * (spec §11, sin tocar) no lo pasa, ve el teclado completo de siempre. */
   hideCoreGrid?: boolean;
+  /** S26.3: en DEG las trigonométricas directas insertan ° dentro
+   * del argumento. En RAD conservan la plantilla normal. */
+  angleUnit?: "rad" | "deg";
 }
 
 /** Cuántas filas puede pedir el selector de "Sistema" — spec §6 (5×5 ya
@@ -723,16 +881,24 @@ export function NaturalMathKeyboard({
   onSubmit,
   onClearField,
   onSolveEquation,
+  onSolveInequality,
   onSolveSystem,
+  onSolveInequalitySystem,
   onSimplify,
+  onFactor,
+  onEvaluatePoint,
   onGraphComplex,
   onGoToDerivative: _onGoToDerivative,
   showCalculusStrip = false,
   hideCoreGrid = false,
+  angleUnit = "rad",
 }: NaturalMathKeyboardProps) {
   const CATEGORIES = hideCoreGrid ? CATEGORIES_BASIC_MODE : CATEGORIES_FULL;
   const [openCategory, setOpenCategory] = useState<(typeof CATEGORIES)[number] | null>(
-    hideCoreGrid && basicContent ? "Básico" : null,
+    hideCoreGrid ? "Álgebra" : null,
+  );
+  const [activeSubcategory, setActiveSubcategory] = useState<string>(() =>
+    hideCoreGrid ? (subcategoriesFor("Álgebra")[0] ?? "") : "",
   );
   const [notice, setNotice] = useState<string | null>(null);
   // Pendiente #2: menú chico "¿cuántas ecuaciones?" al tocar "Sistema".
@@ -755,7 +921,7 @@ export function NaturalMathKeyboard({
     if (k.glyph === "Graficar" && k.insertLatex === "") return onGraphComplex?.();
     field?.focus();
     if (k.insertLatex) {
-      field?.insert(k.insertLatex);
+      field?.insert(angleAwareTrigInsertLatex(k, angleUnit === "deg"));
       // Fase X, Módulo X0: solo se registran teclas que insertan
       // contenido real (excluye "=", "f(x)=0", DEL/⌫, "Graficar" —
       // todas con insertLatex vacío o interceptadas antes de llegar
@@ -812,7 +978,7 @@ export function NaturalMathKeyboard({
 
   return (
     <div
-      className={hideCoreGrid ? "relative rounded-xl bg-paper-soft p-3 text-ink" : "relative rounded-xl bg-chrome p-3"}
+      className={hideCoreGrid ? "relative h-full min-h-0 text-ink" : "relative rounded-xl bg-chrome p-3"}
       onClickCapture={handleKeyboardClickCapture}
     >
       {notice && (
@@ -821,21 +987,60 @@ export function NaturalMathKeyboard({
         </div>
       )}
 
+      <div
+        data-testid={hideCoreGrid ? "keyboard-b6-layout" : undefined}
+        className={hideCoreGrid
+          ? "grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-2"
+          : "contents"}
+      >
       {openCategory && (
         <div
           className={
             hideCoreGrid
-              ? "mb-1.5 rounded-xl border border-paper-line bg-paper p-3 shadow-sm"
+              ? "row-start-2 grid min-h-0 min-w-0 grid-cols-1 gap-2 overflow-y-auto rounded-xl [contain:layout_paint] lg:grid-cols-[10rem_minmax(22rem,1fr)_minmax(14rem,18rem)] lg:overflow-hidden"
               : "mb-1.5 rounded-lg bg-chrome-soft p-3 shadow-lg"
           }
         >
-          {openCategory === "Básico" ? (
-            basicContent
-          ) : openCategory === "Símbolos" ? (
+          {hideCoreGrid && (
+            <div
+              data-testid="keyboard-b6-subcategories"
+              aria-label={`Subcategorías de ${openCategory}`}
+              className="flex min-h-0 gap-1 overflow-x-auto rounded-xl border border-paper-line bg-paper-soft p-1.5 lg:flex-col lg:overflow-x-hidden lg:overflow-y-auto"
+            >
+              {subcategoriesFor(openCategory as (typeof CATEGORIES_BASIC_MODE)[number]).map((section) => (
+                <button
+                  key={section}
+                  type="button"
+                  aria-pressed={activeSubcategory === section}
+                  onClick={() => setActiveSubcategory(section)}
+                  className={
+                    activeSubcategory === section
+                      ? "flex shrink-0 items-center gap-2 rounded-lg border border-marker/30 bg-marker-soft/20 px-2.5 py-2 text-left text-[11px] font-semibold text-ink"
+                      : "flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[11px] font-medium text-muted hover:bg-paper hover:text-ink"
+                  }
+                >
+                  <span aria-hidden="true" className="min-w-8 text-center text-[10px] font-semibold">{SUBCATEGORY_ICONS[section] ?? "·"}</span>
+                  <span>{section}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {hideCoreGrid && basicContent && (
+            <div
+              data-testid="keyboard-b6-core"
+              className="min-h-0 min-w-0 overflow-y-auto rounded-xl border border-paper-line bg-paper p-2"
+            >
+              {basicContent}
+            </div>
+          )}
+          <div
+            data-testid={hideCoreGrid ? "keyboard-b6-context" : undefined}
+            className="min-h-0 min-w-0 overflow-y-auto rounded-xl border border-paper-line bg-paper p-2"
+          >
+          {openCategory === "Símbolos" ? (
             hideCoreGrid ? (
-              <div className="grid grid-cols-1 gap-3 dt:grid-cols-2">
-                <div>
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">Variables</div>
+              <div className="min-h-[3.25rem]">
+                {activeSubcategory === "Variables" && (
                   <div className="grid grid-cols-6 gap-1">
                     {SYMBOL_VARIABLES.map((k, i) => (
                       <button
@@ -851,10 +1056,9 @@ export function NaturalMathKeyboard({
                       </button>
                     ))}
                   </div>
-                </div>
-                <div>
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">Constantes y valores</div>
-                  <div className="grid grid-cols-5 gap-1">
+                )}
+                {activeSubcategory === "Constantes y valores" && (
+                  <div className="grid grid-cols-6 gap-1">
                     {SYMBOL_CONSTANTS.map((k, i) => (
                       <button
                         key={`const-${i}`}
@@ -869,7 +1073,24 @@ export function NaturalMathKeyboard({
                       </button>
                     ))}
                   </div>
-                </div>
+                )}
+                {activeSubcategory === "Funciones" && (
+                  <div className="grid grid-cols-3 gap-1">
+                    {SYMBOL_FUNCTIONS.map((k, i) => (
+                      <button
+                        key={`func-${i}`}
+                        type="button"
+                        onClick={() => pressSymbol(k)}
+                        aria-label={k.ariaLabel}
+                        aria-disabled={k.unavailable ? "true" : undefined}
+                        title={k.description}
+                        className="rounded-md border border-paper-line bg-paper-soft py-2 text-[11px] text-ink hover:border-marker/50 hover:bg-marker-soft/20"
+                      >
+                        <KeyGlyph glyph={k.glyph} />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex flex-col gap-1">
@@ -906,106 +1127,127 @@ export function NaturalMathKeyboard({
               </div>
             )
           ) : (
-            CATEGORY_MENUS[openCategory].map((group) =>
+            (hideCoreGrid
+              ? CATEGORY_MENUS[openCategory].filter((group) => group.section === activeSubcategory)
+              : CATEGORY_MENUS[openCategory]
+            ).map((group) =>
               group.section === "Ecuaciones" ? (
                 <div key={group.section} className="mb-2 last:mb-0">
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">{group.section}</div>
-                  <div className="grid grid-cols-3 gap-1.5 dt:grid-cols-6">
+                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-muted">{group.section}</div>
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => {
                         onSolveEquation?.();
-                        setOpenCategory(null);
+                        if (!hideCoreGrid) setOpenCategory(null);
                       }}
                       aria-label="Resolver ecuación"
-                      title="Resolver ecuación"
-                      className="rounded-md bg-marker-soft/10 py-2 text-xs text-marker hover:bg-marker-soft/20"
+                      title="Ecuación: f(x)=0"
+                      className="rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-sm text-marker shadow-sm hover:border-marker/50"
                     >
                       f(x)=0
                     </button>
                     <button
                       type="button"
                       onClick={() => {
-                        onSolveEquation?.();
-                        setOpenCategory(null);
+                        onSolveInequality?.();
+                        if (!hideCoreGrid) setOpenCategory(null);
                       }}
                       aria-label="Resolver inecuación"
-                      title="Resolver inecuación"
-                      className="rounded-md bg-marker-soft/10 py-2 text-xs text-marker hover:bg-marker-soft/20"
+                      title="Inecuación: f(x)≥0"
+                      className="rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-sm text-marker shadow-sm hover:border-marker/50"
                     >
-                      f(x)&gt;0
+                      f(x)≥0
                     </button>
                     <button
                       type="button"
                       onClick={() => {
-                        setOpenCategory(null);
                         setShowSystemSizeMenu(true);
                       }}
+                      aria-expanded={showSystemSizeMenu}
                       aria-label="Resolver sistema de ecuaciones"
-                      title="Resolver sistema de ecuaciones"
-                      className="rounded-md bg-alpha-soft py-2 text-xs text-alpha hover:bg-alpha-soft/80"
+                      title="Sistema de ecuaciones"
+                      className="flex items-center justify-center gap-2 rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-marker shadow-sm hover:border-marker/50"
                     >
-                      Sistema
+                      <span className="text-2xl font-light leading-none">{"{"}</span>
+                      <span className="text-left text-xs leading-tight">f(x)=0<br />g(x)=0</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => {
-                        // Corrección post-auditoría (Módulo C): BasicMode.tsx
-                        // ya detecta solo si un \begin{cases} es de ecuaciones
-                        // o de inecuaciones (ver submitSystem) — esta tecla usa
-                        // la MISMA plantilla/selector que "Sistema", solo con
-                        // un rótulo que deja claro que también acepta <, >, ≤, ≥.
-                        setOpenCategory(null);
-                        setShowSystemSizeMenu(true);
+                        onSolveInequalitySystem?.();
+                        if (!hideCoreGrid) setOpenCategory(null);
                       }}
-                      aria-label="Sistema de inecuaciones de 2 variables — escribe inecuaciones dentro de las llaves"
-                      className="relative rounded-md bg-alpha-soft py-2 text-[10px] text-alpha hover:bg-alpha-soft/80"
+                      aria-label="Resolver sistema de inecuaciones"
+                      title="Sistema de inecuaciones: f(x)≥0, g(x)≤0"
+                      className="flex items-center justify-center gap-2 rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-marker shadow-sm hover:border-marker/50"
                     >
-                      Sist. inecuaciones
-                      {/* Módulo de cierre (honestidad de alcance): el motor
-                          (linear_inequality_system.py) solo resuelve EXACTAMENTE
-                          2 variables — este botón es funcional (no unavailable),
-                          pero no comunicaba esa limitación real antes de tocarlo. */}
-                      <span className="absolute -bottom-1 right-1 rounded-sm bg-alpha/20 px-1 text-[7px] font-medium leading-tight text-alpha">
-                        2 var.
-                      </span>
+                      <span className="text-2xl font-light leading-none">{"{"}</span>
+                      <span className="text-left text-xs leading-tight">f(x)≥0<br />g(x)≤0</span>
                     </button>
+                    {showSystemSizeMenu && (
+                      <div className="col-span-2 flex flex-wrap items-center gap-1 rounded-md border border-paper-line bg-paper p-2">
+                        <span className="mr-1 text-[10px] font-medium text-muted">Ecuaciones:</span>
+                        {SYSTEM_ROW_OPTIONS.map((n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() => {
+                              onSolveSystem?.(n);
+                              setShowSystemSizeMenu(false);
+                            }}
+                            aria-label={`Sistema de ${n} ecuaciones`}
+                            title={`Insertar sistema de ${n} ecuaciones`}
+                            className="h-7 w-7 rounded-md bg-alpha-soft text-xs font-semibold text-alpha hover:bg-alpha-soft/70"
+                          >
+                            {n}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
                         onSimplify?.();
-                        setOpenCategory(null);
+                        if (!hideCoreGrid) setOpenCategory(null);
                       }}
                       aria-label="Simplificar expresión"
-                      title="Simplificar expresión"
-                      className="rounded-md bg-graph py-2 text-xs font-medium text-paper hover:bg-graph/90"
+                      title="Simplificar"
+                      className="rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-sm text-graph shadow-sm hover:border-graph/50"
                     >
                       a+a → 2a
                     </button>
                     <button
                       type="button"
-                      onClick={() => press(key("LCM", "\\mathrm{lcm}\\left(#0,#1\\right)", "mínimo común múltiplo"))}
-                      aria-label="Mínimo común múltiplo"
-                      title="Mínimo común múltiplo"
-                      className="rounded-md border border-marker bg-marker-soft/10 py-2 text-xs font-medium text-marker hover:bg-marker-soft/20"
+                      onClick={() => {
+                        onFactor?.();
+                        if (!hideCoreGrid) setOpenCategory(null);
+                      }}
+                      aria-label="Factorizar expresión"
+                      title="Factorizar"
+                      className="rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-sm text-graph shadow-sm hover:border-graph/50"
                     >
-                      LCM
+                      x²+2x+1 → (x+1)²
                     </button>
                     <button
                       type="button"
-                      onClick={() => press(key("GCD", "\\gcd\\left(#0,#1\\right)", "máximo común divisor"))}
-                      aria-label="Máximo común divisor"
-                      title="Máximo común divisor"
-                      className="rounded-md border border-marker bg-marker-soft/10 py-2 text-xs font-medium text-marker hover:bg-marker-soft/20"
+                      onClick={() => {
+                        onEvaluatePoint?.();
+                        if (!hideCoreGrid) setOpenCategory(null);
+                      }}
+                      aria-label="Evaluar función en un punto"
+                      title="Evaluar f(x) en x=a"
+                      className="col-span-2 rounded-md border border-paper-line bg-paper-soft px-3 py-2 text-sm text-marker shadow-sm hover:border-marker/50"
                     >
-                      GCD
+                      <span className="font-medium">f(a)</span>
+                      <span className="ml-2 text-[10px] text-muted">(x=a)</span>
                     </button>
                   </div>
                 </div>
               ) : (
                 <div key={group.section} className="mb-2 last:mb-0">
-                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-bone/50">{group.section}</div>
-                  <div className="grid grid-cols-3 gap-1.5 dt:grid-cols-6">
+                  <div className="mb-1.5 text-[9px] uppercase tracking-wide text-muted">{group.section}</div>
+                  <div className="grid grid-cols-3 gap-1.5">
                     {group.keys.map((k, i) => (
                       <button
                         key={`${group.section}-${i}`}
@@ -1013,18 +1255,11 @@ export function NaturalMathKeyboard({
                         onClick={() => press(k)}
                         aria-label={k.ariaLabel}
                         aria-disabled={k.unavailable ? "true" : undefined}
-                    title={k.description}
+                    title={k.description ?? k.ariaLabel}
                         className={
-                          // Módulo de cierre (honestidad visual): mismo patrón
-                          // gris/borde punteado que ya usa KeyboardBasicPanel.tsx
-                          // (este mismo repo) para "°" — antes esta tecla se
-                          // veía idéntica a una activa aunque k.unavailable
-                          // fuera true.
                           k.unavailable
-                            ? "rounded-md border border-dashed border-paper-line bg-paper py-2 text-sm text-muted/60"
-                            : hideCoreGrid
-                              ? "rounded-md border border-paper-line bg-paper-soft py-2 text-sm text-ink shadow-sm hover:border-marker/50 hover:bg-marker-soft/20"
-                              : "rounded-md bg-marker-soft/10 py-2 text-sm text-marker hover:bg-marker-soft/20"
+                            ? "rounded-md border border-dashed border-bone/30 bg-chrome-soft/40 py-2 text-sm text-bone/40"
+                            : "rounded-md bg-marker-soft/10 py-2 text-sm text-marker hover:bg-marker-soft/20"
                         }
                       >
                         <KeyGlyph glyph={k.glyph} />
@@ -1035,9 +1270,11 @@ export function NaturalMathKeyboard({
               ),
             )
           )}
+          </div>
         </div>
       )}
 
+      {!hideCoreGrid && (
       <div className="relative mb-1.5 grid grid-cols-3 gap-1.5">
         <button
           type="button"
@@ -1087,16 +1324,17 @@ export function NaturalMathKeyboard({
           onClick={onSimplify}
           aria-label="Simplificar expresión"
           title="Simplificar expresión"
-          className="rounded-md bg-graph py-2 text-[11px] font-medium text-paper hover:bg-graph/90"
+          className="rounded-md bg-graph py-2 text-[11px] font-medium text-white hover:bg-graph/90"
         >
           a+a → 2a
         </button>
       </div>
+      )}
 
       {/* Módulo 4: además de showCalculusStrip (ya existía, GraphMode
           nunca lo pasa), ahora también se apaga con hideCoreGrid=true
           (BasicMode) — su contenido (menos LCM/GCD, ya en Álgebra >
-          Ecuaciones) vive en la pestaña "Cálculo" nueva. */}
+          Aritmética) vive en la pestaña "Cálculo" nueva. */}
       {showCalculusStrip && !hideCoreGrid && (
         <div className="relative mb-1.5 rounded-lg bg-chrome-soft/60 p-1.5">
           <div className="mb-1 grid grid-cols-6 gap-1">
@@ -1156,35 +1394,48 @@ export function NaturalMathKeyboard({
       <div
         className={
           hideCoreGrid
-            ? "mb-2 flex flex-wrap gap-1 border-b border-paper-line pb-2"
+            ? "row-start-1 flex gap-1 overflow-x-auto rounded-xl border border-paper-line bg-paper-soft p-1.5"
             : "mb-1.5 flex flex-wrap gap-x-3 gap-y-1 px-1"
         }
         role={hideCoreGrid ? "tablist" : undefined}
-        aria-label={hideCoreGrid ? "Categorías del teclado" : undefined}
+        aria-label={hideCoreGrid ? "Familias del teclado matemático" : undefined}
+        aria-orientation={hideCoreGrid ? "horizontal" : undefined}
       >
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
             type="button"
-            onClick={() =>
-              hideCoreGrid ? setOpenCategory(cat) : setOpenCategory((current) => (current === cat ? null : cat))
-            }
+            onClick={() => {
+              if (hideCoreGrid) {
+                setOpenCategory(cat);
+                setActiveSubcategory(subcategoriesFor(cat as (typeof CATEGORIES_BASIC_MODE)[number])[0] ?? "");
+              } else {
+                setOpenCategory((current) => (current === cat ? null : cat));
+              }
+            }}
             aria-expanded={openCategory === cat}
             role={hideCoreGrid ? "tab" : undefined}
             aria-selected={hideCoreGrid ? openCategory === cat : undefined}
             className={
               hideCoreGrid
                 ? openCategory === cat
-                  ? "rounded-lg bg-marker px-3 py-1.5 text-[11px] font-semibold text-chrome"
-                  : "rounded-lg border border-transparent px-3 py-1.5 text-[11px] text-muted hover:border-paper-line hover:bg-paper"
+                  ? "flex shrink-0 items-center gap-1.5 rounded-lg bg-marker px-3 py-2 text-xs font-semibold text-chrome"
+                  : "flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted hover:bg-paper hover:text-ink"
                 : openCategory === cat
                   ? "text-xs font-semibold text-marker"
                   : "text-xs text-bone/70"
             }
           >
-            {cat}
+            {hideCoreGrid && (
+              <span aria-hidden="true" className="min-w-5 text-center text-[11px] font-semibold">
+                {FAMILY_ICONS[cat as (typeof CATEGORIES_BASIC_MODE)[number]]}
+              </span>
+            )}
+            <span>{cat}</span>
           </button>
         ))}
+      </div>
+
       </div>
 
       {/* Núcleo fijo + relacionales — ocultos cuando hideCoreGrid=true
@@ -1201,7 +1452,7 @@ export function NaturalMathKeyboard({
                 const isEquals = glyphStr === "=";
                 const isEnter = glyphStr === "⏎";
                 const className = isEnter
-                  ? "rounded-md bg-graph py-2.5 text-sm font-semibold text-paper hover:bg-graph/90"
+                  ? "rounded-md bg-graph py-2.5 text-sm font-semibold text-white hover:bg-graph/90"
                   : isEquals
                     ? "rounded-md border border-marker py-2.5 text-sm font-medium text-marker hover:bg-marker-soft/10"
                     : isOperator

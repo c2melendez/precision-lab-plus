@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const LAYOUTS = ["fused", "separated", "split", "focus", "floating", "stacked"] as const;
+const LAYOUTS = ["fused", "split", "focus", "separated"] as const;
 
 async function loadLayout(page: import("@playwright/test").Page, layout: typeof LAYOUTS[number]) {
   await page.addInitScript(({ layout }) => {
@@ -20,16 +20,18 @@ async function expectNoHorizontalOverflow(page: import("@playwright/test").Page,
   expect(metrics.bodyScrollWidth, `${layout}: body overflow ${JSON.stringify(metrics)}`).toBeLessThanOrEqual(metrics.innerWidth + 2);
 }
 
-test("M11: las seis disposiciones cargan, conservan entrada/gráfica y no generan overflow horizontal", async ({ page }) => {
+test("M11/B7: los cuatro diseños aprobados cargan y no generan overflow horizontal", async ({ page }) => {
   for (const layout of LAYOUTS) {
     await loadLayout(page, layout);
-    await expect(page.locator("math-field").first(), `${layout}: input`).toBeVisible();
-    await expect(page.getByRole("note", { name: /Gráfica: escribe una expresión/i }).first(), `${layout}: gráfica`).toBeVisible();
+    await expect(page.getByRole("region", { name: "Entrada", exact: true })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Resultado", exact: true })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Entradas previas", exact: true })).toBeVisible();
+    await expect(page.getByTestId("scientific-graph")).toBeVisible();
     await expectNoHorizontalOverflow(page, layout);
   }
 });
 
-test("M11: teclado permanece colapsado al iniciar en todas las disposiciones", async ({ page }) => {
+test("M11/B7: teclado permanece colapsado al iniciar en los cuatro diseños", async ({ page }) => {
   for (const layout of LAYOUTS) {
     await loadLayout(page, layout);
     await expect(page.getByRole("dialog", { name: "Teclado matemático" })).toHaveCount(0);
@@ -38,22 +40,12 @@ test("M11: teclado permanece colapsado al iniciar en todas las disposiciones", a
   }
 });
 
-test("M11: Enfoque usa dock compacto y sigue permitiendo abrir teclado", async ({ page }) => {
-  await loadLayout(page, "focus");
-  await expect(page.getByRole("button", { name: "Calcular", exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Borrar", exact: true })).toBeVisible();
-  const expand = page.getByRole("button", { name: /Expandir teclado/i }).first();
-  await expect(expand).toBeVisible();
-  await expand.click();
-  await expect(page.getByRole("dialog", { name: "Teclado matemático" })).toBeVisible();
-});
-
-test("M11: Apilado usa teclado inline, no un contenedor fixed", async ({ page }) => {
-  await loadLayout(page, "stacked");
-  const toggle = page.getByRole("button", { name: /^(Teclado|Abrir teclado)$/ }).first();
+test("M11/B7: el dock del teclado está anclado al borde inferior y abre sin cubrir el workspace", async ({ page }) => {
+  await loadLayout(page, "fused");
+  const toggle = page.getByRole("button", { name: /Abrir teclado|Expandir teclado|^Teclado$/i }).first();
   await expect(toggle).toBeVisible();
-  await expect(toggle).toHaveAttribute("aria-expanded", "false");
-  const isInsideFixed = await toggle.evaluate((el) => {
+
+  const fixedAncestor = await toggle.evaluate((el) => {
     let node: HTMLElement | null = el as HTMLElement;
     while (node) {
       if (getComputedStyle(node).position === "fixed") return true;
@@ -61,56 +53,67 @@ test("M11: Apilado usa teclado inline, no un contenedor fixed", async ({ page })
     }
     return false;
   });
-  expect(isInsideFixed).toBe(false);
+  expect(fixedAncestor).toBe(true);
+
   await toggle.click();
-  await expect(toggle).toHaveAttribute("aria-expanded", "true");
-  await expect(page.getByRole("button", { name: "7", exact: true }).first()).toBeVisible();
+  const keyboard = page
+    .getByRole("region", { name: "Teclado matemático" })
+    .or(page.getByRole("dialog", { name: /Teclado/ }))
+    .first();
+  await expect(keyboard).toBeVisible();
+  await expect(keyboard.getByRole("button", { name: "7", exact: true }).first()).toBeVisible();
+
+  // En tablet/móvil las cuatro superficies se apilan: la gráfica puede
+  // empezar debajo del viewport. Debe poder desplazarse hasta la zona
+  // visible sin quedar tapada por el teclado fijo.
+  await page.getByTestId("scientific-graph").evaluate((graph) => {
+    const keyboardTop = document.querySelector('[role="dialog"][aria-label="Teclado matemático"]')?.getBoundingClientRect().top;
+    if (keyboardTop === undefined) return;
+    const graphBottom = graph.getBoundingClientRect().bottom;
+    if (graphBottom > keyboardTop - 8) window.scrollBy(0, graphBottom - keyboardTop + 8);
+  });
+  await expect.poll(async () => {
+    const graphBox = await page.getByTestId("scientific-graph").boundingBox();
+    const keyboardBox = await keyboard.boundingBox();
+    if (!graphBox || !keyboardBox) return Infinity;
+    return graphBox.y + graphBox.height - keyboardBox.y;
+  }).toBeLessThanOrEqual(2);
 });
 
-test("M11: Flotante respeta breakpoint y mantiene ventanas dentro del viewport", async ({ page }) => {
-  await loadLayout(page, "floating");
-  const viewport = page.viewportSize();
-  expect(viewport).not.toBeNull();
-
-  if ((viewport?.width ?? 0) >= 1024) {
-    const graph = page.getByRole("dialog", { name: "Gráfica" });
-    await expect(graph).toBeVisible();
-    const openKeyboard = page.getByRole("button", { name: "Abrir teclado", exact: true });
-    await expect(openKeyboard).toBeVisible();
-    await openKeyboard.click();
-    const keyboard = page.getByRole("dialog", { name: "Teclado" });
-    await expect(keyboard).toBeVisible();
-
-    for (const [name, locator] of [["gráfica", graph], ["teclado", keyboard]] as const) {
-      const box = await locator.boundingBox();
-      expect(box, name).not.toBeNull();
-      expect(box!.x, name).toBeGreaterThanOrEqual(0);
-      expect(box!.y, name).toBeGreaterThanOrEqual(0);
-      expect(box!.x + box!.width, name).toBeLessThanOrEqual((viewport?.width ?? 0) + 1);
-      expect(box!.y + box!.height, name).toBeLessThanOrEqual((viewport?.height ?? 0) + 1);
-    }
-  } else {
-    await expect(page.getByRole("dialog", { name: "Gráfica" })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Calcular", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Borrar", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Expandir teclado/i }).first()).toBeVisible();
-  }
-});
-
-test("M11: Dividida es dos columnas en desktop y colapsa verticalmente fuera de desktop ancho", async ({ page }) => {
-  await loadLayout(page, "split");
-  const input = page.locator("math-field").first();
-  const graph = page.getByRole("note", { name: /Gráfica: escribe una expresión/i }).first();
+test("M11/B7: Balanceada usa gráfica a la derecha en desktop y se apila fuera de desktop ancho", async ({ page }) => {
+  await loadLayout(page, "fused");
+  const input = page.getByRole("region", { name: "Entrada", exact: true });
+  const graph = page.getByTestId("scientific-graph");
   const inputBox = await input.boundingBox();
   const graphBox = await graph.boundingBox();
   expect(inputBox).not.toBeNull();
   expect(graphBox).not.toBeNull();
 
   const width = page.viewportSize()?.width ?? 0;
-  if (width >= 1440) {
-    expect(graphBox!.x).toBeGreaterThan(inputBox!.x + 100);
+  if (width >= 1024) {
+    expect(graphBox!.x).toBeGreaterThan(inputBox!.x + inputBox!.width - 2);
   } else {
     expect(Math.abs(graphBox!.x - inputBox!.x)).toBeLessThan(80);
     expect(graphBox!.y).toBeGreaterThan(inputBox!.y);
+  }
+});
+
+test("M11/B7: solo layouts retirados migran a Balanceada", async ({ page }) => {
+  for (const legacy of ["stacked", "floating"] as const) {
+    await page.addInitScript(({ legacy }) => {
+      localStorage.setItem("precision-lab-layout-mode", legacy);
+    }, { legacy });
+    await page.goto("./");
+    await expect(page.locator("math-field").first()).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem("precision-lab-layout-mode"))).toBe("fused");
+  }
+
+  for (const current of ["focus", "separated"] as const) {
+    await page.addInitScript(({ current }) => {
+      localStorage.setItem("precision-lab-layout-mode", current);
+    }, { current });
+    await page.goto("./");
+    await expect(page.locator("math-field").first()).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem("precision-lab-layout-mode"))).toBe(current);
   }
 });

@@ -15,8 +15,10 @@ import time
 
 import sympy
 from fastapi import APIRouter, Request
+from starlette.concurrency import run_in_threadpool
 
 from app.core.logging import log_request_event
+from app.core.math_timeout import run_math_operation
 from app.schemas.requests import (
     Graph3DRequest,
     GraphParametricRequest,
@@ -31,7 +33,7 @@ from app.schemas.requests import (
     SolveSystemRequest,
 )
 from app.schemas.responses import ErrorCode, MathResponse, OperationType, ResultType
-from app.services import graph_service, linear_inequality_system, parsing, phase2_service
+from app.services import circle_inequality, graph_service, linear_inequality_system, parsing, phase2_service
 from app.services.ast_validator import ComplexityLimitError
 
 router = APIRouter(tags=["phase2"])
@@ -58,6 +60,14 @@ def _error(request: Request, operation: OperationType, error_code: ErrorCode, me
     )
 
 
+def _region_latex(relations: list[sympy.Rel], variables: list[str], empty: bool = False) -> str:
+    if empty:
+        return r"\varnothing"
+    coordinates = ",".join(sympy.latex(sympy.Symbol(name)) for name in variables)
+    conditions = r" \land ".join(sympy.latex(relation) for relation in relations)
+    return rf"\{{({coordinates})\in\mathbb{{R}}^{{2}}\mid {conditions}\}}"
+
+
 def _stub_response(request: Request, operation: OperationType) -> MathResponse:
     return _error(request, operation, ErrorCode.UNSUPPORTED_IN_PHASE_1, _STUB_MESSAGE)
 
@@ -71,9 +81,16 @@ def _stub_response(request: Request, operation: OperationType) -> MathResponse:
 async def limit(payload: LimitRequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "limit_request", input_text=payload.expression)
     try:
-        result = phase2_service.compute_limit(
-            payload.expression, payload.variable, payload.point, payload.direction
+        result = await run_in_threadpool(
+            run_math_operation,
+            phase2_service.compute_limit,
+            payload.expression,
+            payload.variable,
+            payload.point,
+            payload.direction,
         )
+    except TimeoutError as exc:
+        return _error(request, OperationType.LIMIT, ErrorCode.TIMEOUT, str(exc))
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.LIMIT, ErrorCode.PARSE_ERROR, str(exc))
     except ComplexityLimitError as exc:
@@ -87,11 +104,15 @@ async def limit(payload: LimitRequest, request: Request) -> MathResponse:
             result_type=ResultType.SCALAR,
             input_text=payload.expression,
             result_text="DNE",
-            result_latex=r"\text{No existe (límite izquierdo } "
-            + sympy.latex(result.left_value)
-            + r" \neq \text{ límite derecho } "
-            + sympy.latex(result.right_value)
-            + ")",
+            result_latex=(
+                r"\text{No existe}"
+                if result.dne_reason
+                else r"\text{No existe (límite izquierdo } "
+                + sympy.latex(result.left_value)
+                + r" \neq \text{ límite derecho } "
+                + sympy.latex(result.right_value)
+                + ")"
+            ),
             has_detailed_steps=False,
             duration_ms=_duration_ms(request),
         )
@@ -156,6 +177,12 @@ async def solve_system(payload: SolveSystemRequest, request: Request) -> MathRes
         request_id=request.state.request_id,
         result_type=ResultType.EQUATION_SOLUTIONS,
         result_data=result.solutions,
+        system_graph_expressions=result.graph_expressions,
+        system_graph_latex=result.graph_latex,
+        system_graph_intersections=result.graph_intersections,
+        system_graph_coincident=result.graph_coincident,
+        system_graph_component_indices=result.graph_component_indices,
+        graph_data=result.graph_data,
         has_detailed_steps=False,
         warnings=result.warnings,
         duration_ms=_duration_ms(request),
@@ -181,6 +208,57 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
     variable = payload.variable
     if variable is None:
         free_symbols = parsed.free_symbols
+        if free_symbols == {sympy.Symbol("x"), sympy.Symbol("y")}:
+            circle = circle_inequality.circle_region(parsed.lhs - parsed.rhs, parsed.rel_op)
+            if circle is not None:
+                inside = circle["inside"]
+                included = circle["boundary_included"]
+                return MathResponse(
+                    success=True, operation=OperationType.INEQUALITY,
+                    request_id=request.state.request_id, result_type=ResultType.INEQUALITY_REGION,
+                    input_text=payload.inequality,
+                    result_latex=_region_latex([parsed], ["x", "y"]),
+                    result_text=("Interior" if inside else "Exterior")
+                    + (" y frontera" if included else " sin frontera") + " del círculo",
+                    inequality_region_kind="bounded" if inside else "unbounded",
+                    inequality_region_dimension=2, inequality_circle=circle,
+                    has_detailed_steps=False, duration_ms=_duration_ms(request),
+                )
+            ellipse = circle_inequality.ellipse_region(parsed.lhs - parsed.rhs, parsed.rel_op)
+            if ellipse is not None:
+                inside = ellipse["inside"]
+                included = ellipse["boundary_included"]
+                return MathResponse(
+                    success=True, operation=OperationType.INEQUALITY,
+                    request_id=request.state.request_id, result_type=ResultType.INEQUALITY_REGION,
+                    input_text=payload.inequality,
+                    result_latex=_region_latex([parsed], ["x", "y"]),
+                    result_text=("Interior" if inside else "Exterior")
+                    + (" y frontera" if included else " sin frontera") + " de la elipse",
+                    inequality_region_kind="bounded" if inside else "unbounded",
+                    inequality_region_dimension=2, inequality_ellipse=ellipse,
+                    has_detailed_steps=False, duration_ms=_duration_ms(request),
+                )
+            try:
+                region = linear_inequality_system.solve_linear_inequality_system(
+                    [(parsed.lhs - parsed.rhs, parsed.rel_op)], ["x", "y"]
+                )
+            except ValueError as exc:
+                return _error(request, OperationType.INEQUALITY, ErrorCode.VALIDATION_ERROR, str(exc))
+            vertices = [[str(p.x), str(p.y)] for p in region.vertices] if region.vertices is not None else None
+            description = {"bounded": "Región acotada", "unbounded": "Región no acotada", "empty": "Región vacía"}
+            return MathResponse(
+                success=True, operation=OperationType.INEQUALITY,
+                request_id=request.state.request_id, result_type=ResultType.INEQUALITY_REGION,
+                input_text=payload.inequality, result_text=description[region.kind],
+                result_latex=_region_latex([parsed], ["x", "y"], region.kind == "empty"),
+                result_data=vertices, inequality_region_kind=region.kind,
+                inequality_constraints=region.constraints,
+                inequality_preview_polygon=region.preview_polygon,
+                inequality_viewport=region.viewport, has_detailed_steps=False,
+                inequality_region_dimension=region.dimension,
+                warnings=region.steps, duration_ms=_duration_ms(request),
+            )
         if len(free_symbols) != 1:
             return _error(
                 request,
@@ -192,9 +270,25 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
         variable = str(next(iter(free_symbols)))
 
     try:
-        result = phase2_service.compute_inequality(parsed, variable)
+        result = await run_in_threadpool(
+            run_math_operation,
+            phase2_service.compute_inequality,
+            parsed,
+            variable,
+            payload.domain_lower,
+            payload.domain_upper,
+            payload.domain_lower_inclusive,
+            payload.domain_upper_inclusive,
+        )
+    except TimeoutError as exc:
+        return _error(request, OperationType.INEQUALITY, ErrorCode.TIMEOUT, str(exc))
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.INEQUALITY, ErrorCode.PARSE_ERROR, str(exc))
+    except (NotImplementedError, TypeError):
+        return _error(
+            request, OperationType.INEQUALITY, ErrorCode.UNSUPPORTED_OPERATION,
+            "El solver no pudo obtener un conjunto solución para esta inecuación.",
+        )
 
     return MathResponse(
         success=True,
@@ -204,6 +298,8 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
         input_text=payload.inequality,
         result_text=str(result.solution_set),
         result_latex=sympy.latex(result.solution_set),
+        inequality_intervals=phase2_service.inequality_number_line_intervals(result.solution_set),
+        inequality_variable=variable,
         has_detailed_steps=False,
         warnings=result.warnings,
         duration_ms=_duration_ms(request),
@@ -221,6 +317,7 @@ async def inequality_system(payload: InequalitySystemRequest, request: Request) 
     log_request_event(request.state.request_id, "inequality_system_request")
 
     parsed_constraints = []
+    parsed_relations = []
     for text in payload.inequalities:
         try:
             rel = parsing.parse_inequality_tree(text)
@@ -229,6 +326,7 @@ async def inequality_system(payload: InequalitySystemRequest, request: Request) 
         except ComplexityLimitError as exc:
             return _error(request, OperationType.INEQUALITY_SYSTEM, ErrorCode.COMPLEXITY_LIMIT, str(exc))
         parsed_constraints.append((rel.lhs - rel.rhs, rel.rel_op))
+        parsed_relations.append(rel)
 
     try:
         result = linear_inequality_system.solve_linear_inequality_system(
@@ -247,7 +345,13 @@ async def inequality_system(payload: InequalitySystemRequest, request: Request) 
         request_id=request.state.request_id,
         result_type=ResultType.INEQUALITY_REGION,
         result_text=result.kind,
+        result_latex=_region_latex(parsed_relations, payload.variables, result.kind == "empty"),
         result_data=vertices_data,
+        inequality_region_kind=result.kind,
+        inequality_constraints=result.constraints,
+        inequality_preview_polygon=result.preview_polygon,
+        inequality_viewport=result.viewport,
+        inequality_region_dimension=result.dimension,
         has_detailed_steps=False,
         warnings=result.steps,
         duration_ms=_duration_ms(request),
@@ -259,9 +363,16 @@ async def integral_improper(payload: ImproperIntegralRequest, request: Request) 
     log_request_event(request.state.request_id, "integral_improper_request")
 
     try:
-        result = phase2_service.compute_improper_integral(
-            payload.expression, payload.variable, payload.lower_bound, payload.upper_bound
+        result = await run_in_threadpool(
+            run_math_operation,
+            phase2_service.compute_improper_integral,
+            payload.expression,
+            payload.variable,
+            payload.lower_bound,
+            payload.upper_bound,
         )
+    except TimeoutError as exc:
+        return _error(request, OperationType.INTEGRAL_IMPROPER, ErrorCode.TIMEOUT, str(exc))
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.INTEGRAL_IMPROPER, ErrorCode.PARSE_ERROR, str(exc))
     except ComplexityLimitError as exc:

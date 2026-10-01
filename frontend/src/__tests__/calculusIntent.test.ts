@@ -2,6 +2,15 @@ import { describe, expect, it } from "vitest";
 import { detectCalculusIntent } from "../components/calculusIntent";
 
 describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backend Python)", () => {
+  it("no interpreta plantillas logarítmicas incompletas como cálculo", () => {
+    for (const latex of [
+      "\\log_{2}\\left(\\right)",
+      "\\log_{2}\\left(\\placeholder{}\\right)",
+      "\\log_{2}\\left(\\square\\right)",
+    ]) {
+      expect(detectCalculusIntent(latex)).toBeNull();
+    }
+  });
   describe("derivada (escáner propio — nunca toca el validador de AST del backend)", () => {
     it("detecta el template de orden 1 que inserta el teclado", () => {
       expect(detectCalculusIntent("\\frac{d}{dx}\\left(x^2+3x\\right)")).toEqual({
@@ -40,6 +49,18 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
       });
     });
 
+    it("detecta derivada evaluada en un punto y conserva el punto", () => {
+      expect(
+        detectCalculusIntent("\\left.\\frac{d}{dx}\\tan x\\right\\rvert_{x=\\pi/4}"),
+      ).toEqual({
+        kind: "derivative",
+        variable: "x",
+        order: 1,
+        innerLatex: "\\tan x",
+        evaluationPoint: "\\pi/4",
+      });
+    });
+
     it("NO matchea si la derivada es solo parte de una expresión más grande", () => {
       expect(detectCalculusIntent("2+\\frac{d}{dx}\\left(x^2\\right)")).toBeNull();
       expect(detectCalculusIntent("\\frac{d}{dx}\\left(x^2\\right)+1")).toBeNull();
@@ -66,6 +87,18 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
         lowerBound: null,
         upperBound: null,
         innerLatex: "x^2+3x",
+      });
+    });
+
+    it("ignora condición de dominio encadenada después del diferencial", () => {
+      expect(
+        detectCalculusIntent("\\int\\operatorname{arsech} x\\,dx,\\ 0<x<1"),
+      ).toEqual({
+        kind: "integral",
+        variable: "x",
+        lowerBound: null,
+        upperBound: null,
+        innerLatex: "\\operatorname{arsech} x",
       });
     });
 
@@ -117,8 +150,14 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
     // utilizable. Se verifica que NO se detecte como límite en vez de
     // fabricar un resultado con datos rotos — cae al flujo normal
     // (probablemente /evaluate, que fallará con un error claro).
-    it("NO detecta límite lateral escrito a mano sin llaves en el exponente (notación rota en Compute Engine 0.58.0 para esta forma)", () => {
-      expect(detectCalculusIntent("\\lim_{x\\to 0^+} \\frac{1}{x}")).toBeNull();
+    it("detecta límite lateral derecho escrito a mano sin llaves en el exponente", () => {
+      expect(detectCalculusIntent("\\lim_{x\\to 0^+} \\frac{1}{x}")).toEqual({
+        kind: "limit",
+        variable: "x",
+        point: "0",
+        innerLatex: "\\frac{1}{x}",
+        direction: "right",
+      });
     });
 
     // Corrección post-auditoría (hallazgo de paridad Lite/Full): la tecla
@@ -147,8 +186,90 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
       });
     });
 
-    it("NO detecta límite lateral izquierdo (notación rota en esta versión del motor)", () => {
-      expect(detectCalculusIntent("\\lim_{x\\to 0^-} \\frac{1}{x}")).toBeNull();
+    it("detecta límite lateral izquierdo escrito a mano sin llaves", () => {
+      expect(detectCalculusIntent("\\lim_{x\\to 0^-} \\frac{1}{x}")).toEqual({
+        kind: "limit",
+        variable: "x",
+        point: "0",
+        innerLatex: "\\frac{1}{x}",
+        direction: "left",
+      });
+    });
+  });
+
+  describe("EDO (notación prima normalizada)", () => {
+    it("detecta y' ASCII", () => {
+      expect(detectCalculusIntent("y'=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("normaliza prima Unicode de MathLive", () => {
+      expect(detectCalculusIntent("y′=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("normaliza \\prime en superíndice", () => {
+      expect(detectCalculusIntent("y^{\\prime}=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("normaliza prima Unicode con caret, forma real observada en MathLive E2E", () => {
+      expect(detectCalculusIntent("y^′=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("normaliza segundo orden Unicode con caret", () => {
+      expect(detectCalculusIntent("y^′′+y=0")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y''+y=0",
+      });
+    });
+
+    it("normaliza \\prime sin llaves", () => {
+      expect(detectCalculusIntent("y^\\prime=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("normaliza doble \\prime sin llaves", () => {
+      expect(detectCalculusIntent("y^\\prime\\prime+y=0")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y''+y=0",
+      });
+    });
+
+    it("preserva la condición inicial al normalizar primas", () => {
+      expect(detectCalculusIntent("y^′=2x, y(0)=1")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x, y(0)=1",
+      });
+    });
+
+    it("normaliza segundo orden con primas LaTeX", () => {
+      expect(detectCalculusIntent("y^{\\prime\\prime}+y=0")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y''+y=0",
+      });
+    });
+
+    it("mantiene la notación alternativa dy/dx", () => {
+      expect(detectCalculusIntent("\\frac{dy}{dx}=2x")).toEqual({
+        kind: "ode",
+        cleanedExpression: "y'=2x",
+      });
+    });
+
+    it("no confunde una ecuación ordinaria con EDO", () => {
+      expect(detectCalculusIntent("y=2x")).toBeNull();
     });
   });
 
@@ -163,6 +284,45 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
 
     it("un sistema no es cálculo", () => {
       expect(detectCalculusIntent("\\begin{cases}x=1\\\\y=2\\end{cases}")).toBeNull();
+    });
+  });
+});
+
+
+describe("Trig matrix notation coverage", () => {
+  it("detects derivative notation without explicit left/right wrapper", () => {
+    expect(detectCalculusIntent("\\frac{d}{dx}\\sin x")).toEqual({
+      kind: "derivative",
+      variable: "x",
+      order: 1,
+      innerLatex: "\\sin x",
+    });
+  });
+
+  it("detects integrals with differential in the numerator", () => {
+    expect(detectCalculusIntent("\\int\\frac{dx}{1+x^2}")).toEqual({
+      kind: "integral",
+      variable: "x",
+      lowerBound: null,
+      upperBound: null,
+      innerLatex: "\\frac{1}{1+x^2}",
+    });
+  });
+
+  it("detects symbolic definite bounds and ignores trailing real-domain assumptions", () => {
+    expect(detectCalculusIntent("\\int_{0}^{\\pi}\\sin x\\,dx")).toEqual({
+      kind: "integral",
+      variable: "x",
+      lowerBound: "0",
+      upperBound: "\\pi",
+      innerLatex: "\\sin x",
+    });
+    expect(detectCalculusIntent("\\int\\operatorname{arcosh}x\\,dx,\\ x>1")).toEqual({
+      kind: "integral",
+      variable: "x",
+      lowerBound: null,
+      upperBound: null,
+      innerLatex: "\\operatorname{arcosh}x",
     });
   });
 });

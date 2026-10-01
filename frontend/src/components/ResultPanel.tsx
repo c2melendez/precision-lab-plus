@@ -15,6 +15,9 @@ import { formatResultApprox } from "./formatNumber";
 import { parseFracLatex, toMixedFracLatex } from "./fractionDisplay";
 import { MathRenderer } from "./MathRenderer";
 import { StepList } from "./StepList";
+import { decimalDegreesToDms, isInverseTrigAngleExpression, parseDecimalDegreesInput } from "./dmsDisplay";
+import { ResultFormatSelector, type ResultFormatId } from "./ResultFormatSelector";
+import { getAvailableResultFormats } from "./resultFormatPolicy";
 
 // Fase 2.5 (bug reportado por el usuario): antes se mostraban SIEMPRE
 // "exacto" (result_latex) y "≈ aproximado" (result_approx) juntos, sin
@@ -26,7 +29,26 @@ import { StepList } from "./StepList";
 // aproximado (sería fabricar precisión falsa) — solo muestra
 // result_latex cuando SymPy ya lo devolvió como \frac{...}{...} de
 // forma exacta; si no, dice explícitamente que no aplica.
-type AnswerFormat = "exact" | "dec" | "scn" | "frac";
+type AnswerFormat = ResultFormatId;
+
+function mathLatexToPlainText(value: string): string {
+  return value
+    .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, "($1)/($2)")
+    .replace(/\\sqrt\{([^{}]+)\}/g, "√($1)")
+    .replace(/\\pi/g, "π")
+    .replace(/\\infty/g, "∞")
+    .replace(/\\cdot|\\times/g, "×")
+    .replace(/\^\{\\circ\}/g, "°")
+    .replace(/\\prime/g, "′")
+    .replace(/\\,/g, " ")
+    .replace(/[{}]/g, "")
+    .trim();
+}
+
+function exponentialToLatex(value: number): string {
+  const [mantissa, exponent] = value.toExponential(6).split("e");
+  return `${mantissa}\\times 10^{${Number(exponent)}}`;
+}
 
 function isFractionLatex(latex: string | null | undefined): boolean {
   return latex !== null && latex !== undefined && latex.includes("\\frac");
@@ -35,6 +57,9 @@ function isFractionLatex(latex: string | null | undefined): boolean {
 interface ResultPanelProps {
   result: MathResponse | null;
   isLoading: boolean;
+  inputLatex?: string;
+  angleUnit?: "rad" | "deg";
+  showSteps?: boolean;
 }
 
 async function copyToClipboard(text: string): Promise<boolean> {
@@ -46,7 +71,7 @@ async function copyToClipboard(text: string): Promise<boolean> {
   }
 }
 
-function CopyButton({ text, label }: { text: string | null; label: string }) {
+function CopyButton({ text, label, accessibleLabel }: { text: string | null; label: string; accessibleLabel: string }) {
   const [justCopied, setJustCopied] = useState(false);
 
   async function handleClick(): Promise<void> {
@@ -63,7 +88,8 @@ function CopyButton({ text, label }: { text: string | null; label: string }) {
       type="button"
       onClick={handleClick}
       disabled={text === null}
-      className="rounded border border-paper-line px-3 py-1 text-xs text-muted hover:bg-paper-line/40 disabled:cursor-not-allowed disabled:opacity-40"
+      aria-label={accessibleLabel}
+      className="rounded-md px-2 py-1 text-[11px] font-medium text-muted hover:bg-paper-line/40 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
     >
       {justCopied ? "¡Copiado!" : label}
     </button>
@@ -82,6 +108,13 @@ function isEquationSolutionData(
   resultType: MathResponse["result_type"],
 ): data is EquationSolution[] {
   return resultType === "equation_solutions" && Array.isArray(data);
+}
+
+function isDirectTrigEquationAngleExpression(input: string): boolean {
+  if (!input.includes("=")) return false;
+  const value = input.replace(/\\left|\\right/g, " ");
+  return /\\(?:sin|cos|tan|sec|csc|cot)\b/.test(value)
+    || /(?:^|[^A-Za-z])(?:sin|cos|tan|sec|csc|cot)\s*\(/.test(value);
 }
 
 function MatrixResult({ matrix }: { matrix: string[][] }) {
@@ -107,15 +140,24 @@ function MatrixResult({ matrix }: { matrix: string[][] }) {
   );
 }
 
-function SolutionListResult({ solutions }: { solutions: EquationSolution[] }) {
+function SolutionListResult({
+  solutions,
+  appendDegreeSymbol = false,
+}: {
+  solutions: EquationSolution[];
+  appendDegreeSymbol?: boolean;
+}) {
   if (solutions.length === 0) {
-    return <p className="text-sm text-muted">El sistema no tiene solución.</p>;
+    return <p className="text-sm text-muted">No hay soluciones.</p>;
   }
   return (
     <ul className="space-y-2">
       {solutions.map((solution, index) => (
         <li key={index} className="a11y-scale-result-lg text-ink">
-          <MathRenderer latex={solution.latex} fallbackText={solution.text} />
+          <MathRenderer
+            latex={appendDegreeSymbol ? `{${solution.latex}}^{\\circ}` : solution.latex}
+            fallbackText={appendDegreeSymbol ? `${solution.text}°` : solution.text}
+          />
           {solution.is_complex && <span className="ml-2 text-xs text-muted">(compleja)</span>}
         </li>
       ))}
@@ -123,35 +165,51 @@ function SolutionListResult({ solutions }: { solutions: EquationSolution[] }) {
   );
 }
 
-export function ResultPanel({ result, isLoading }: ResultPanelProps) {
-  const [format, setFormat] = useState<AnswerFormat>("exact");
+export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "rad", showSteps = true }: ResultPanelProps) {
+  const [format, setFormat] = useState<AnswerFormat>("dec");
   // Modo fracción propia/impropia (pedido explícito) — mismo criterio
   // que el toggle equivalente en Lite: default mixta cuando corresponde,
   // el usuario puede pedir la impropia.
   const [showMixed, setShowMixed] = useState(true);
+  const explicitDegreeInput = parseDecimalDegreesInput(inputLatex);
+  const inverseAngleResult = angleUnit === "deg" && isInverseTrigAngleExpression(inputLatex);
+  const inverseDegrees = inverseAngleResult && result?.result_approx != null && Number.isFinite(Number(result.result_approx))
+    ? Number(result.result_approx)
+    : null;
+  const dmsDegrees = explicitDegreeInput ?? inverseDegrees;
+  const dmsValue = dmsDegrees === null ? null : decimalDegreesToDms(dmsDegrees);
+  const exactLatex = inverseAngleResult && result?.result_latex
+    ? `{${result.result_latex}}^{\\circ}`
+    : result?.result_latex;
 
   if (isLoading) {
     return (
-      <div role="status" aria-live="polite" className="text-sm text-muted">
-        Calculando…
-      </div>
+      <section aria-label="Resultado">
+        <div role="status" aria-live="polite" className="text-sm text-muted">
+          Calculando…
+        </div>
+      </section>
     );
   }
 
   if (result === null) {
     return (
-      <p className="text-sm text-muted">
-        Introduce una expresión y envía el formulario para ver el resultado aquí.
-      </p>
+      <section aria-label="Resultado">
+        <p className="py-1 text-right text-sm text-muted">
+          Introduce una expresión y envía el formulario para ver el resultado aquí.
+        </p>
+      </section>
     );
   }
 
   if (!result.success) {
     return (
-      <div role="alert" aria-live="assertive" className="text-sm text-red-600">
-        <p className="font-medium">{result.error_code}</p>
-        <p>{result.error_message}</p>
-      </div>
+      <section aria-label="Resultado">
+        <div role="alert" aria-live="assertive" className="text-sm text-red-600">
+          <p className="font-medium">{result.error_code}</p>
+          <p>{result.error_message}</p>
+        </div>
+      </section>
     );
   }
 
@@ -159,96 +217,183 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
   const solutionData = isEquationSolutionData(result.result_data, result.result_type)
     ? result.result_data
     : null;
+  const equationSolutionsAreDegrees = Boolean(
+    solutionData
+    && result.operation === "solve"
+    && angleUnit === "deg"
+    && isDirectTrigEquationAngleExpression(inputLatex),
+  );
+  const isRegion = result.result_type === "inequality_region";
   const approxText = result.result_approx != null ? formatResultApprox(result.result_approx) : null;
-  const copyText = result.result_text ?? approxText;
-  const parsedFraction = isFractionLatex(result.result_latex) ? parseFracLatex(result.result_latex!) : null;
+  const parsedFraction = !isRegion && isFractionLatex(result.result_latex) ? parseFracLatex(result.result_latex!) : null;
   const mixedLatex = parsedFraction ? toMixedFracLatex(parsedFraction.n, parsedFraction.d) : null;
+  const numericApprox = result.result_approx != null ? Number(result.result_approx) : NaN;
+  const hasNumericApprox = Number.isFinite(numericApprox);
+  const availableFormats = getAvailableResultFormats({
+    hasExact: Boolean(result.result_latex ?? result.result_text),
+    hasDecimal: hasNumericApprox,
+    hasFraction: Boolean(parsedFraction),
+    hasDms: Boolean(dmsValue),
+  }) as AnswerFormat[];
+  const activeFormat = availableFormats.includes(format) ? format : (availableFormats[0] ?? "exact");
+
+  let activeCopyLatex = exactLatex ?? result.result_text ?? "";
+  let activeCopyText = result.result_text ?? approxText ?? "";
+  if (activeFormat === "dd" && dmsDegrees !== null) {
+    const cleanDegrees = Math.round((dmsDegrees + Number.EPSILON) * 1e12) / 1e12;
+    activeCopyLatex = `${cleanDegrees}^{\\circ}`;
+    activeCopyText = `${cleanDegrees}°`;
+  } else if (activeFormat === "dms" && dmsValue) {
+    activeCopyLatex = dmsValue.latex;
+    activeCopyText = dmsValue.text;
+  } else if (activeFormat === "dec" && approxText) {
+    activeCopyLatex = inverseAngleResult ? `{${approxText}}^{\\circ}` : approxText;
+    activeCopyText = `${approxText}${inverseAngleResult ? "°" : ""}`;
+  } else if (activeFormat === "scn" && Number.isFinite(numericApprox)) {
+    activeCopyLatex = inverseAngleResult
+      ? `{${exponentialToLatex(numericApprox)}}^{\\circ}`
+      : exponentialToLatex(numericApprox);
+    activeCopyText = `${numericApprox.toExponential(6)}${inverseAngleResult ? "°" : ""}`;
+  } else if (activeFormat === "frac" && isFractionLatex(result.result_latex)) {
+    const raw = mixedLatex && showMixed ? mixedLatex : result.result_latex!;
+    activeCopyLatex = inverseAngleResult ? `{${raw}}^{\\circ}` : raw;
+    activeCopyText = mathLatexToPlainText(activeCopyLatex);
+  } else if (activeCopyLatex) {
+    activeCopyText = result.result_text ?? mathLatexToPlainText(activeCopyLatex);
+  }
 
   return (
-    <div aria-live="polite" className="space-y-4 fade-in">
-      {matrixData && <MatrixResult matrix={matrixData} />}
-      {solutionData && <SolutionListResult solutions={solutionData} />}
+    <section aria-label="Resultado" aria-live="polite" className="space-y-4 fade-in">
+      {matrixData && (
+        <section aria-label="Resultado estructurado" className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Resultado</p>
+            <span className="rounded-md bg-paper-line/50 px-2 py-1 text-[11px] font-medium text-muted">Matriz</span>
+          </div>
+          <div className="min-h-14 rounded-xl border border-paper-line bg-paper px-4 py-3">
+            <MatrixResult matrix={matrixData} />
+          </div>
+        </section>
+      )}
+      {solutionData && (
+        <section aria-label="Resultado estructurado" className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Resultado</p>
+            <span className="rounded-md bg-paper-line/50 px-2 py-1 text-[11px] font-medium text-muted">Soluciones</span>
+          </div>
+          <div className="min-h-14 rounded-xl border border-paper-line bg-paper px-4 py-3">
+            <SolutionListResult solutions={solutionData} appendDegreeSymbol={equationSolutionsAreDegrees} />
+          </div>
+        </section>
+      )}
 
       {!matrixData && !solutionData && (result.result_latex || result.result_text) && (
-        <div className="space-y-1">
-          {(() => {
-            if (format === "dec") {
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Resultado</p>
+            {!result.has_detailed_steps && (
+              <span className="rounded-md bg-paper-line/50 px-2 py-1 text-[11px] font-medium text-muted">
+                Resumen
+              </span>
+            )}
+          </div>
+
+          <div className="min-h-14 min-w-0 overflow-x-auto rounded-xl border border-paper-line bg-paper px-4 py-3">
+            <div className="flex min-h-8 items-center justify-end text-right">
+            {(() => {
+            if (activeFormat === "dd" && dmsDegrees !== null) {
+              const cleanDegrees = Math.round((dmsDegrees + Number.EPSILON) * 1e12) / 1e12;
+              return <MathRenderer latex={`${cleanDegrees}^{\\circ}`} fallbackText={`${cleanDegrees}°`} className="a11y-scale-result-3xl text-ink" />;
+            }
+            if (activeFormat === "dms" && dmsValue) {
+              return <MathRenderer latex={dmsValue.latex} fallbackText={dmsValue.text} className="a11y-scale-result-3xl text-ink" />;
+            }
+            if (activeFormat === "dec") {
               return approxText ? (
-                <p className="a11y-scale-result-lg text-ink">{approxText}</p>
+                <MathRenderer
+                  latex={inverseAngleResult ? `{${approxText}}^{\\circ}` : approxText}
+                  fallbackText={`${approxText}${inverseAngleResult ? "°" : ""}`}
+                  className="a11y-scale-result-3xl text-ink"
+                />
               ) : (
                 <p className="text-sm text-muted">No hay aproximación decimal disponible.</p>
               );
             }
-            if (format === "scn") {
+            if (activeFormat === "scn") {
               const n = result.result_approx != null ? Number(result.result_approx) : NaN;
               return Number.isFinite(n) ? (
-                <p className="a11y-scale-result-lg text-ink">{n.toExponential(6)}</p>
+                <MathRenderer
+                  latex={inverseAngleResult ? `{${exponentialToLatex(n)}}^{\\circ}` : exponentialToLatex(n)}
+                  fallbackText={`${n.toExponential(6)}${inverseAngleResult ? "°" : ""}`}
+                  className="a11y-scale-result-3xl text-ink"
+                />
               ) : (
                 <p className="text-sm text-muted">No hay un valor numérico para notación científica.</p>
               );
             }
-            if (format === "frac") {
+            if (activeFormat === "frac") {
               // No se fabrica una fracción a partir de un decimal
               // aproximado — solo se muestra cuando SymPy ya la dio
               // exacta (ver isFractionLatex arriba).
               if (!isFractionLatex(result.result_latex)) {
                 return <p className="text-sm text-muted">El resultado no es una fracción exacta.</p>;
               }
-              const displayLatex = mixedLatex && showMixed ? mixedLatex : result.result_latex!;
+              const rawDisplayLatex = mixedLatex && showMixed ? mixedLatex : result.result_latex!;
+              const displayLatex = inverseAngleResult ? `{${rawDisplayLatex}}^{\\circ}` : rawDisplayLatex;
               return (
                 <MathRenderer
                   latex={displayLatex}
                   fallbackText={result.result_text ?? undefined}
-                  className="a11y-scale-result-lg"
+                  className="a11y-scale-result-3xl text-ink"
                 />
               );
             }
             // "exact": comportamiento original, sin cambios (salvo
             // Módulo R0: a11y-scale-result-lg reemplaza a text-lg).
-            return result.result_latex ? (
+            return exactLatex ? (
               <MathRenderer
-                latex={result.result_latex}
+                latex={exactLatex}
                 fallbackText={result.result_text ?? undefined}
-                className="a11y-scale-result-lg"
+                className={`${isRegion ? "a11y-scale-result-lg" : "a11y-scale-result-3xl"} text-ink`}
               />
             ) : (
-              <p className="a11y-scale-result-lg text-ink">{result.result_text}</p>
+              <MathRenderer latex={result.result_text ?? ""} fallbackText={result.result_text ?? undefined} className={`${isRegion ? "a11y-scale-result-lg" : "a11y-scale-result-3xl"} text-ink`} />
             );
-          })()}
+            })()}
+            </div>
           {/* Fracción exacta (arriba) y decimal (abajo) mostrados juntos —
               nunca uno oculta al otro (sección 9: fracciones + su
               equivalente decimal) — solo en el formato "exact", que es el
               que ya traía este comportamiento antes de Fase 2.5. */}
-          {format === "exact" && approxText && approxText !== result.result_text && (
-            <p className="text-sm text-muted">≈ {approxText}</p>
-          )}
-          {format === "frac" && mixedLatex && (
-            <button
-              type="button"
-              onClick={() => setShowMixed((v) => !v)}
-              className="text-xs text-muted underline decoration-dotted hover:text-marker"
-            >
-              {showMixed ? "ver como impropia" : "ver como mixta"}
-            </button>
-          )}
-          <div className="flex gap-3 pt-1 text-xs text-muted">
-            {(["exact", "dec", "frac", "scn"] as AnswerFormat[]).map((f) => (
+            {activeFormat === "exact" && approxText && approxText !== result.result_text && (
+              <p className="mt-1 text-right text-sm text-muted">≈ {approxText}{inverseAngleResult ? "°" : ""}</p>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <ResultFormatSelector
+              formats={availableFormats}
+              value={activeFormat}
+              onChange={setFormat}
+            />
+
+            {activeFormat === "frac" && mixedLatex && (
               <button
-                key={f}
                 type="button"
-                onClick={() => setFormat(f)}
-                aria-pressed={format === f}
-                className={format === f ? "font-semibold text-marker" : "hover:text-ink"}
+                onClick={() => setShowMixed((v) => !v)}
+                className="min-h-8 rounded-full px-2 text-xs text-muted underline decoration-dotted hover:text-marker"
               >
-                {f === "exact" ? "exacto" : f}
+                {showMixed ? "ver como impropia" : "ver como mixta"}
               </button>
-            ))}
+            )}
           </div>
         </div>
       )}
 
       {!result.has_detailed_steps && (
-        <p className="text-xs text-amber-600">Procedimiento resumido (sin desglose paso a paso).</p>
+        <p className="rounded-lg border border-paper-line bg-paper px-3 py-2 text-xs text-muted">
+          Procedimiento resumido: este resultado no incluye desglose paso a paso.
+        </p>
       )}
 
       {result.warnings.length > 0 && (
@@ -259,14 +404,22 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
         </ul>
       )}
 
-      {(copyText || result.result_latex) && (
-        <div className="flex gap-2">
-          <CopyButton text={copyText ?? null} label="Copiar resultado" />
-          <CopyButton text={result.result_latex ?? null} label="Copiar como LaTeX" />
+      {(activeCopyText || activeCopyLatex) && (
+        <div className="flex justify-end gap-1">
+          <CopyButton text={activeCopyText || null} label="Copiar" accessibleLabel="Copiar resultado" />
+          <CopyButton text={activeCopyLatex || null} label="LaTeX" accessibleLabel="Copiar como LaTeX" />
         </div>
       )}
 
-      {result.has_detailed_steps && <StepList steps={result.steps} />}
-    </div>
+      {showSteps && result.has_detailed_steps && (
+        <section className="border-t border-paper-line pt-4" aria-label="Pasos">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-ink">Pasos</h3>
+            <span className="text-xs text-muted">{result.steps.length} {result.steps.length === 1 ? "paso" : "pasos"}</span>
+          </div>
+          <StepList steps={result.steps} />
+        </section>
+      )}
+    </section>
   );
 }

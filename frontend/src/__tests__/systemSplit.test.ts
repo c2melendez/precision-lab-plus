@@ -30,4 +30,14 @@ describe("splitSystemLatex (Fase 1 — fusión de modos, proyecto con backend Py
     const latex = "algo\\begin{cases}x=1\\\\y=2\\end{cases}más";
     expect(splitSystemLatex(latex)).toEqual(["x=1", "y=2"]);
   });
+
+  it("descarta renglones vacíos sin perder ecuaciones multilínea", () => {
+    expect(splitSystemLatex("\\begin{cases}\n  \\\\ x=1 \\\\ \n \\\\ y=2 \\\\ \\end{cases}"))
+      .toEqual(["x=1", "y=2"]);
+  });
+
+  it("rechaza entornos incompletos", () => {
+    expect(splitSystemLatex("\\begin{cases}x=1\\\\y=2")).toBeNull();
+    expect(splitSystemLatex("x=1\\\\y=2\\end{cases}")).toBeNull();
+  });
 });

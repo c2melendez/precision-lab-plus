@@ -21,11 +21,15 @@ mismo significado (sección 7, "Uso común a las tres funciones"):
 
 import itertools
 import random
+import signal
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeoutError
 from typing import Dict, List, Literal, Optional, Sequence
 
 import sympy
+
+from app.core.math_timeout import run_math_operation
 
 VerificationResult = Literal["VERIFIED", "REJECTED", "INCONCLUSIVE"]
 
@@ -45,23 +49,37 @@ _MAX_SOLUTIONS_FOR_EXACT_MATCHING = 6
 
 
 def _run_with_timeout(func, timeout_s: float):
-    """Ejecuta `func` (sin argumentos) en un hilo separado; devuelve su
-    resultado o `None` si excede `timeout_s`.
+    """Ejecuta una verificación simbólica con presupuesto real.
 
-    Nota (igual que el `# NOTE` de la sección 6 sobre el timeout HTTP): esto
-    NO cancela el cálculo de SymPy ya en curso — SymPy no expone puntos de
-    interrupción cooperativa — solo se deja de esperar su resultado y se
-    continúa con el fallback numérico. El hilo huérfano libera sus recursos
-    cuando SymPy termina por su cuenta.
+    En Linux/main-thread se usa SIGALRM mediante run_math_operation, que
+    interrumpe el cálculo de SymPy en curso. En entornos donde las señales
+    no pueden usarse (por ejemplo TestClient en un hilo auxiliar), se
+    conserva el fallback de ThreadPool, pero sin esperar al hilo después
+    del timeout.
     """
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(func)
+    if (
+        threading.current_thread() is threading.main_thread()
+        and hasattr(signal, "SIGALRM")
+        and hasattr(signal, "setitimer")
+    ):
         try:
-            return future.result(timeout=timeout_s)
-        except FutureTimeoutError:
+            return run_math_operation(func, timeout_s=timeout_s)
+        except TimeoutError:
             return None
         except Exception:
             return None
+
+    executor = ThreadPoolExecutor(max_workers=1)
+    future = executor.submit(func)
+    try:
+        return future.result(timeout=timeout_s)
+    except FutureTimeoutError:
+        future.cancel()
+        return None
+    except Exception:
+        return None
+    finally:
+        executor.shutdown(wait=False, cancel_futures=True)
 
 
 def _is_invalid_numeric(value: Optional[sympy.Expr]) -> bool:

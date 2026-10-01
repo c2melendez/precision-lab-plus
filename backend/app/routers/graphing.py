@@ -5,8 +5,10 @@ app/routers/graphing.py — `POST /graph/2d` (spec, secciones 4, 5, 9, 10).
 import time
 
 from fastapi import APIRouter, Request
+from starlette.concurrency import run_in_threadpool
 
 from app.core.logging import log_request_event
+from app.core.math_timeout import run_math_operation
 from app.schemas.requests import ComplexPointRequest, Graph2DRequest
 from app.schemas.responses import ErrorCode, MathResponse, OperationType, ResultType
 from app.services import graph_service, parsing
@@ -36,7 +38,9 @@ async def graph_2d(payload: Graph2DRequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "graph_2d_request")
 
     try:
-        result = graph_service.compute_graph(
+        result = await run_in_threadpool(
+            run_math_operation,
+            graph_service.compute_graph,
             payload.expressions,
             payload.variable,
             payload.x_min,
@@ -44,6 +48,8 @@ async def graph_2d(payload: Graph2DRequest, request: Request) -> MathResponse:
             payload.samples,
             payload.angle_unit,
         )
+    except TimeoutError as exc:
+        return _error(request, ErrorCode.TIMEOUT, str(exc))
     except parsing.ParseSecurityError as exc:
         return _error(request, ErrorCode.PARSE_ERROR, str(exc))
     except ComplexityLimitError as exc:

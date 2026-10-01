@@ -62,6 +62,10 @@ class InequalitySystemSolution:
     kind: str  # "bounded" | "unbounded" | "empty"
     vertices: Optional[List[Point]]
     steps: List[str]
+    constraints: Optional[List[dict]] = None
+    preview_polygon: Optional[List[List[float]]] = None
+    viewport: Optional[List[float]] = None
+    dimension: Optional[int] = None
 
 
 @dataclass
@@ -136,6 +140,59 @@ def _feasible_region(constraints: List[_Constraint]) -> List[Point]:
         if not polygon:
             break
     return polygon
+
+
+def _strictly_feasible(polygon: List[Point], constraints: List[_Constraint]) -> bool:
+    """Check relative interiors as well as vertices for lower-dimensional regions."""
+    if not polygon:
+        return False
+    candidates = list(polygon)
+    candidates += [Point((p.x + polygon[(i + 1) % len(polygon)].x) / 2,
+                         (p.y + polygon[(i + 1) % len(polygon)].y) / 2)
+                   for i, p in enumerate(polygon)]
+    candidates.append(Point(sum(p.x for p in polygon) / len(polygon),
+                            sum(p.y for p in polygon) / len(polygon)))
+    for p in candidates:
+        if all((c.a * p.x + c.b * p.y < c.c - EPS if c.operator == "<" else
+                c.a * p.x + c.b * p.y > c.c + EPS if c.operator == ">" else
+                _satisfies(p, c)) for c in constraints):
+            return True
+    return False
+
+
+def _preview_region(constraints: List[_Constraint], vertices: Optional[List[Point]], kind: str):
+    finite = vertices or []
+    xs = [p.x for p in finite]
+    ys = [p.y for p in finite]
+    cx = (min(xs) + max(xs)) / 2 if xs else 0.0
+    cy = (min(ys) + max(ys)) / 2 if ys else 0.0
+    span = max([4.0] + [abs(value - center) * 2.5 for value, center in
+                        [(x, cx) for x in xs] + [(y, cy) for y in ys]])
+    if not all(math.isfinite(value) and abs(value) < 1e6 for value in (cx, cy, span)):
+        return None, None
+    x_min, x_max, y_min, y_max = cx - span, cx + span, cy - span, cy + span
+    polygon = [Point(x_min, y_min), Point(x_max, y_min),
+               Point(x_max, y_max), Point(x_min, y_max)]
+    if kind != "empty":
+        for c in constraints:
+            a, b, rhs = (c.a, c.b, c.c) if c.operator in ("<", "<=") else (-c.a, -c.b, -c.c)
+            polygon = _clip_by_halfplane(polygon, a, b, rhs)
+    else:
+        polygon = []
+    if kind != "empty" and len(polygon) >= 3:
+        twice_area = abs(sum(p.x * polygon[(i + 1) % len(polygon)].y
+                             - polygon[(i + 1) % len(polygon)].x * p.y
+                             for i, p in enumerate(polygon)))
+        if twice_area < 1e-9:
+            unique = _dedupe_points(polygon)
+            if not unique:
+                return [], [x_min, x_max, y_min, y_max]
+            endpoints = max(((p, q) for p in unique for q in unique),
+                            key=lambda pair: (pair[0].x - pair[1].x) ** 2
+                            + (pair[0].y - pair[1].y) ** 2)
+            points = [endpoints[0]] if endpoints[0] == endpoints[1] else list(endpoints)
+            return [[p.x, p.y] for p in points], [x_min, x_max, y_min, y_max]
+    return [[p.x, p.y] for p in polygon], [x_min, x_max, y_min, y_max]
 
 
 def _order_by_angle(vertices: List[Point]) -> List[Point]:
@@ -235,4 +292,16 @@ def solve_linear_inequality_system(
         )
     x, y = sympy.symbols(variable_names)
     constraints = [_extract_constraint(expr, operator, (x, y)) for expr, operator in inequalities]
-    return solve_inequality_system_numeric(constraints)
+    solution = solve_inequality_system_numeric(constraints)
+    if (solution.kind != "empty" and any(c.operator in ("<", ">") for c in constraints)
+            and not _strictly_feasible(_feasible_region(constraints), constraints)):
+        solution.kind = "empty"
+        solution.vertices = None
+        solution.steps.append("Las fronteras estrictas excluyen todos los puntos restantes.")
+    solution.constraints = [{"a": c.a, "b": c.b, "c": c.c,
+                             "operator": c.operator, "label": c.label} for c in constraints]
+    solution.preview_polygon, solution.viewport = _preview_region(
+        constraints, solution.vertices, solution.kind)
+    solution.dimension = (0 if solution.kind == "empty" else
+                          min(2, max(0, len(solution.preview_polygon or []) - 1)))
+    return solution

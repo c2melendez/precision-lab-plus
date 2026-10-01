@@ -27,6 +27,7 @@ class EvaluateRequest(BaseModel):
     expression: str = Field(..., min_length=1, max_length=500)
     angle_unit: Literal["rad", "deg"] = "rad"
     substitutions: Optional[Dict[str, str]] = None
+    domain: Literal["real", "complex"] = "complex"
 
 
 class DerivativeRequest(BaseModel):
@@ -51,6 +52,13 @@ class SolveRequest(BaseModel):
     equation: str = Field(..., min_length=1, max_length=500)
     variable: Optional[str] = None
     angle_unit: Literal["rad", "deg"] = "rad"
+    # Backward-compatible: dedicated complex workflows keep the historical
+    # behavior unless they explicitly request the real domain.
+    domain: Literal["real", "complex"] = "complex"
+    domain_lower: Optional[str] = None
+    domain_upper: Optional[str] = None
+    domain_lower_inclusive: bool = True
+    domain_upper_inclusive: bool = True
 
 
 class MatrixOperationRequest(BaseModel):
@@ -102,6 +110,10 @@ class SolveSystemRequest(BaseModel):
 class InequalityRequest(BaseModel):
     inequality: str = Field(..., min_length=1, max_length=500)  # incluye <, >, <=, >=
     variable: Optional[str] = None
+    domain_lower: Optional[str] = None
+    domain_upper: Optional[str] = None
+    domain_lower_inclusive: bool = True
+    domain_upper_inclusive: bool = True
 
 
 class InequalitySystemRequest(BaseModel):

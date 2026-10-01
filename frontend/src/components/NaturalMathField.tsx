@@ -97,14 +97,71 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "acsch",
   "asech",
   "acoth",
+  "asin",
+  "acos",
+  "atan",
+  "asec",
+  "acsc",
+  "acot",
+  "asinh",
+  "acosh",
+  "atanh",
+  "sin",
+  "cos",
+  "tan",
+  "csc",
+  "sec",
+  "cot",
+  "sinh",
+  "cosh",
+  "tanh",
+  "csch",
+  "sech",
+  "coth",
 ];
 
 function collapseKnownFunctionNames(ascii: string): string {
-  let result = ascii;
+  let result = ascii
+    // MathLive may spell wrappers introduced by LaTeX normalization as
+    // individual letters: "m a t h r m", "l e f t", "r i g h t".
+    .replace(/\bm\s+a\s+t\s+h\s+r\s+m\s*/g, "")
+    .replace(/\bl\s+e\s+f\s+t\s*/g, "")
+    .replace(/\br\s+i\s+g\s+h\s+t\s*/g, "");
   for (const name of KNOWN_MULTI_LETTER_FUNCTION_NAMES) {
     const spelled = name.split("").join("\\s+");
-    const pattern = new RegExp(`\\b${spelled}\\s*\\(`, "g");
+
+    // Native inverse notation such as \\sec^{-1}, \\sinh^{-1} may be
+    // serialized by MathLive as "s e c^(-1)" / "s i n h^(-1)". Collapse
+    // the spelled function name before the exponent so the downstream
+    // inverse-normalization rules can turn it into asec/asinh/etc.
+    const beforeInversePower = new RegExp(
+      `(?<![A-Za-z_])${spelled}(?=\\s*(?:\\^|\\*\\*)\\s*\\(?-1\\)?)`,
+      "g",
+    );
+    result = result.replace(beforeInversePower, name);
+
+    const pattern = new RegExp(`(?<![A-Za-z_])${spelled}\\s*\\(`, "g");
     result = result.replace(pattern, `${name}(`);
+  }
+
+  // MathLive can partially recognize the tail of an inverse function and
+  // leave only the prefix spelled as separate variables. These exact
+  // hybrids were observed in the B7 matrix, e.g. "a r sinh(" for arsinh
+  // and "a c r csc(" for arccsc. Collapse them after ordinary function
+  // names so the recognized tail is already atomic.
+  const hybridInverses: Array<[RegExp, string]> = [
+    [/\ba\s+r\s+sinh\s*\(/g, "asinh("],
+    [/\ba\s+r\s+cosh\s*\(/g, "acosh("],
+    [/\ba\s+r\s+tanh\s*\(/g, "atanh("],
+    [/\ba\s+r\s+csch\s*\(/g, "acsch("],
+    [/\ba\s+r\s+sech\s*\(/g, "asech("],
+    [/\ba\s+r\s+coth\s*\(/g, "acoth("],
+    [/\ba\s+c\s+r\s+csc\s*\(/g, "acsc("],
+    [/\ba\s+c\s+r\s+sec\s*\(/g, "asec("],
+    [/\ba\s+c\s+r\s+cot\s*\(/g, "acot("],
+  ];
+  for (const [pattern, replacement] of hybridInverses) {
+    result = result.replace(pattern, replacement);
   }
   return result;
 }
@@ -128,6 +185,10 @@ function collapseKnownFunctionNames(ascii: string): string {
  */
 function applyDegreeNotation(ascii: string): string {
   let result = ascii;
+  // Real MathLive/AsciiMath serialization observed in B7:
+  // 60^{\\circ} -> "60^@" (not a literal °). Normalize this first so
+  // the same radian conversion below handles both representations.
+  result = result.replace(/(-?\d+(?:\.\d+)?)\s*\^@/g, "($1)°");
   result = result.replace(/(-?\d+(?:\.\d+)?)°(\d+(?:\.\d+)?)′(\d+(?:\.\d+)?)″/g, "($1+$2/60+$3/3600)°");
   result = result.replace(/(-?\d+(?:\.\d+)?)°(\d+(?:\.\d+)?)′/g, "($1+$2/60)°");
   result = result.replace(/\(([^()]*)\)°/g, "(($1)*pi/180)");
@@ -164,6 +225,63 @@ const HYPERBOLIC_INVERSE_NAMES: Record<string, string> = {
   coth: "acoth",
 };
 
+function rewriteOperatorNameLatex(latex: string): string {
+  let out = latex;
+
+  // Preserve positive powers written on operatorname forms before the
+  // generic operatorname replacement removes the LaTeX command. B7 real
+  // input: \\operatorname{sech}^{2}x. Lower to an explicit function call
+  // with suffix power so rewriteFunctionPowers can normalize it later.
+  out = out.replace(
+    /\\(?:operatorname|mathrm)\{(sinh|cosh|tanh|csch|sech|coth)\}\s*\^\{(\d+)\}\s*([A-Za-z])/g,
+    (_match, fn: string, power: string, arg: string) => `${fn}(${arg})^{${power}}`,
+  );
+
+  const inverseDisplayToBackend: Record<string, string> = {
+    arcsin: "asin",
+    arccos: "acos",
+    arctan: "atan",
+    arccot: "acot",
+    arcsec: "asec",
+    arccsc: "acsc",
+    arsinh: "asinh",
+    arcosh: "acosh",
+    artanh: "atanh",
+    arcsch: "acsch",
+    arsech: "asech",
+    arcoth: "acoth",
+  };
+
+  // Convert operatorname aliases to plain calculator identifiers BEFORE
+  // MathLive's ASCII conversion. Plain "acoth(x)" may be letter-spaced by
+  // the converter, but collapseKnownFunctionNames reliably recombines it;
+  // unlike \\mathrm / native unknown macros, the function name is never
+  // dropped or left as a stray backslash.
+  for (const [displayName, backendName] of Object.entries(inverseDisplayToBackend)) {
+    const bare = new RegExp(
+      `\\\\(?:operatorname|mathrm)\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
+      "g",
+    );
+    out = out.replace(bare, `${backendName}($1)`);
+    out = out.replace(
+      new RegExp(`\\\\(?:operatorname|mathrm)\\{${displayName}\\}`, "g"),
+      backendName,
+    );
+  }
+
+  for (const displayName of ["sinh", "cosh", "tanh", "csch", "sech", "coth"]) {
+    const bare = new RegExp(
+      `\\\\(?:operatorname|mathrm)\\{${displayName}\\}\\s*([A-Za-z](?:\\^\\{[^{}]+\\})?)`,
+      "g",
+    );
+    out = out.replace(bare, `${displayName}($1)`);
+    out = out.replace(
+      new RegExp(`\\\\(?:operatorname|mathrm)\\{${displayName}\\}`, "g"),
+      displayName,
+    );
+  }
+  return out;
+}
 function rewriteHyperbolicInverses(ascii: string): string {
   let result = ascii;
   for (const [name, inverse] of Object.entries(HYPERBOLIC_INVERSE_NAMES)) {
@@ -199,6 +317,67 @@ function rewritePostfixPercent(ascii: string): string {
     if (next === result) break;
     result = next;
   }
+  return result;
+}
+
+function rewriteBareFractionFunctionLatex(latex: string): string {
+  const pattern = /\\(sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth|arcsin|arccos|arctan|ln|log)\s*\\(?:dfrac|tfrac|frac)\s*/g;
+  let result = latex;
+  // Work from the innermost/rightmost application so nested fractions
+  // keep their grouping before MathLive converts them to ASCII division.
+  for (const match of [...latex.matchAll(pattern)].reverse()) {
+    let cursor = match.index! + match[0].length;
+    const fractionStart = match.index! + match[0].indexOf("\\", 1);
+    let complete = true;
+    for (let group = 0; group < 2; group++) {
+      while (/\s/.test(result[cursor] ?? "") && cursor < result.length) cursor++;
+      if (result[cursor] !== "{") { complete = false; break; }
+      let depth = 0;
+      do {
+        if (result[cursor] === "{") depth++;
+        if (result[cursor] === "}") depth--;
+        cursor++;
+      } while (depth > 0 && cursor < result.length);
+      if (depth !== 0) { complete = false; break; }
+    }
+    if (complete) {
+      result = result.slice(0, match.index!) + `\\${match[1]}\\left(${result.slice(fractionStart, cursor)}\\right)` + result.slice(cursor);
+    }
+  }
+  return result;
+}
+
+function rewriteBareFunctionPowerLatex(latex: string): string {
+  const names = "sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth";
+  const pattern = new RegExp(
+    `\\\\(${names})\\s*\\^\\{(\\d+)\\}\\s*([A-Za-z])`,
+    "g",
+  );
+  return latex.replace(
+    pattern,
+    (_match, fn: string, power: string, arg: string) =>
+      `\\\\${fn}\\\\left(${arg}\\\\right)^{${power}}`,
+  );
+}
+
+function rewriteFunctionPowers(ascii: string): string {
+  const names = "sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth";
+  // Exponent parentheses must be paired: an optional closing ')' used
+  // to consume the enclosing fraction after a bare ^2.
+  const prefixPower = new RegExp(
+    `(?<![A-Za-z_])(${names})\\s*(?:\\^|\\*\\*)\\s*(?:\\((\\d+)\\)|(\\d+))\\s*\\(([^()]*)\\)`,
+    "g",
+  );
+  let result = ascii.replace(prefixPower, (_match, fn: string, grouped: string, bare: string, arg: string) =>
+    `(${fn}(${arg}))**(${grouped ?? bare})`
+  );
+  const suffixPower = new RegExp(
+    `(?<![A-Za-z_])(${names})\\s*\\(([^()]*)\\)\\s*(?:\\^|\\*\\*)\\s*(?:\\((\\d+)\\)|(\\d+))`,
+    "g",
+  );
+  result = result.replace(suffixPower, (_match, fn: string, arg: string, grouped: string, bare: string) =>
+    `(${fn}(${arg}))**(${grouped ?? bare})`
+  );
   return result;
 }
 
@@ -239,6 +418,36 @@ function rewriteFiniteAggregateAscii(ascii: string): string | null {
   return `${op === "sum" ? "sum" : "product"}(${body.trim()},${variable},${lower.trim()},${upper.trim()})`;
 }
 
+function normalizeBackendFunctionApplications(ascii: string): string {
+  const names = [
+    "sin","cos","tan","sec","csc","cot",
+    "sinh","cosh","tanh","sech","csch","coth",
+    "asin","acos","atan","asec","acsc","acot",
+    "arcsin","arccos","arctan",
+    "asinh","acosh","atanh","asech","acsch","acoth",
+    "ln","log","sqrt",
+  ].join("|");
+
+  let result = ascii
+    // LaTeX commands that survived convertLatexToAsciiMath.
+    .replace(new RegExp(`\\\\(?=(?:${names})\\b)`, "g"), "");
+
+  // f ^ n x  -> (f(x))**(n), including tan^2x, sech^2x, ...
+  result = result.replace(
+    new RegExp(`\\b(${names})\\s*(?:\\^|\\*\\*)\\s*\\(?(\\d+)\\)?\\s*([A-Za-z])\\b`, "g"),
+    (_m, fn: string, power: string, arg: string) => `(${fn}(${arg}))**(${power})`,
+  );
+
+  // f x -> f(x). Do this only for the calculator's known one-argument
+  // function names so ordinary implicit multiplication is unaffected.
+  result = result.replace(
+    new RegExp(`\\b(${names})\\s+([A-Za-z])\\b`, "g"),
+    (_m, fn: string, arg: string) => `${fn}(${arg})`,
+  );
+
+  return result;
+}
+
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
 
@@ -262,7 +471,8 @@ export function latexToBackendSyntax(latex: string): string {
   // MathLive elimina un signo % literal durante la conversión ASCII.
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
-  const latexWithPercent = latex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
+  const latexWithPercent = rewriteBareFunctionPowerLatex(rewriteBareFractionFunctionLatex(rewriteOperatorNameLatex(latex)))
+    .replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
   // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
   // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
   // conocido antes de delegar al conversor, y luego collapseKnownFunctionNames
@@ -276,15 +486,30 @@ export function latexToBackendSyntax(latex: string): string {
   if (asciiAggregate) return asciiAggregate;
 
   const collapsed = collapseKnownFunctionNames(ascii);
-  const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
-  return rewritePostfixPercent(applyDegreeNotation(
+  const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed.replace(/∣([^∣]+)∣|\|([^|]+)\|/g, (_match, unicodeBody: string, asciiBody: string) => `abs(${unicodeBody ?? asciiBody})`)));
+  const normalizedFunctions = rewriteFunctionPowers(
     rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii)),
-  )).trim();
+  );
+  // convertLatexToAsciiMath can preserve a leading backslash before a
+  // function token produced from \\mathrm/\\operatorname. The backend
+  // parser accepts bare identifiers (acsc(...), asinh(...), csch(...)),
+  // not LaTeX commands (\\acsc(...)).
+  const backendSafeFunctions = normalizeBackendFunctionApplications(normalizedFunctions);
+  // MathLive/ASCII serializes \infty as two standalone letter tokens
+  // ("o o"). The backend contract is SymPy-style "oo". Collapse only
+  // standalone o+o tokens so ordinary identifiers remain untouched.
+  const backendSafeInfinity = backendSafeFunctions.replace(
+    /(^|[^A-Za-z])o\s+o(?=$|[^A-Za-z])/g,
+    "$1oo",
+  );
+  return rewritePostfixPercent(applyDegreeNotation(backendSafeInfinity)).trim();
 }
 
 interface NaturalMathFieldProps {
   latex: string;
   onLatexChange: (latex: string) => void;
+  /** B6: Enter/Return físico comparte exactamente la acción del Enter virtual. */
+  onEnter?: () => void;
   ariaLabel: string;
   placeholder?: string;
   fieldRef?: (el: MathfieldElement | null) => void;
@@ -299,6 +524,7 @@ interface NaturalMathFieldProps {
 export function NaturalMathField({
   latex,
   onLatexChange,
+  onEnter,
   ariaLabel,
   placeholder,
   fieldRef,
@@ -321,6 +547,22 @@ export function NaturalMathField({
     return () => el.removeEventListener("input", handleInput);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onLatexChange]);
+
+  useEffect(() => {
+    const el = elRef.current;
+    const enter = onEnter;
+    if (!el || !enter) return;
+
+    function handleKeyDown(event: KeyboardEvent): void {
+      if (event.key !== "Enter" || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) return;
+      event.preventDefault();
+      event.stopPropagation();
+      enter?.();
+    }
+
+    el.addEventListener("keydown", handleKeyDown);
+    return () => el.removeEventListener("keydown", handleKeyDown);
+  }, [onEnter]);
 
   // Fase Y (spec_rediseno_visual.md sección 11) — restricción dura: el
   // teclado SIEMPRE inicia colapsado, y uno de los 2 mecanismos
@@ -383,10 +625,10 @@ export function NaturalMathField({
       math-virtual-keyboard-policy="manual"
       aria-label={ariaLabel}
       placeholder={placeholder}
-      className={
+      class={
         bare
-          ? "w-full bg-transparent px-0 py-1 pr-10 text-right text-2xl text-ink"
-          : "w-full rounded-full border border-paper-line bg-paper-soft px-5 py-2.5 text-base text-ink shadow-sm"
+          ? "block min-w-0 max-w-full w-full bg-transparent px-0 py-1 pr-10 text-right text-2xl text-ink"
+          : "block min-w-0 max-w-full w-full rounded-full border border-paper-line bg-paper-soft px-5 py-2.5 text-base text-ink shadow-sm"
       }
       style={
         {
@@ -395,6 +637,7 @@ export function NaturalMathField({
           "--caret-color": "#E8A33D",
           "--selection-background-color": "#FBEFDA",
           "--selection-color": "#8A5A0E",
+          overflow: "hidden",
         } as React.CSSProperties
       }
     />

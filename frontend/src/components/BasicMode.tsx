@@ -38,37 +38,222 @@
  * uso real.
  */
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { MathfieldElement } from "mathlive";
 
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
+
+const submitScientific = (
+  endpoint: Parameters<typeof submitAndRecord>[0],
+  payload: Record<string, unknown>,
+  label: string,
+  historyInputText?: string,
+) => submitAndRecord(endpoint, payload, label, "Científica", historyInputText);
 import { useUIStore } from "../store/useUIStore";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useLayoutModeStore } from "../store/useLayoutModeStore";
+import { usePendingHistoryReuseStore } from "../store/usePendingHistoryReuseStore";
+import type { HistoryEntry } from "../store/useHistoryStore";
 import { CalculatorScreen } from "./CalculatorScreen";
+import type { ScientificGraphState } from "./GraphPlaceholder";
 import { detectCalculusIntent, type CalculusIntent } from "./calculusIntent";
 import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
+import { directFunctionGraphContext, derivativeGraphContext, indefiniteIntegralGraphContext, definiteIntegralGraphContext, limitGraphContext, algebraTransformationGraphContext, odeGraphContext, systemGraphContext, inequalityGraphContext, inequalitySystemGraphContext, complexGraphContext } from "./scientificGraphContext";
 
 interface SubstitutionRow {
   name: string;
   value: string;
 }
 
-const EXAMPLES: { display: string; latex: string }[] = [
-  { display: "2x + √9", latex: "2x+\\sqrt{9}" },
-  { display: "sin(π/4)", latex: "\\sin\\left(\\frac{\\pi}{4}\\right)" },
-  { display: "(3+4)²", latex: "(3+4)^{2}" },
-  { display: "log(100)", latex: "\\log\\left(100\\right)" },
-];
-
 // Mismo patrón que EquationMode.tsx — se reusa el criterio de detección
 // tal cual para que "escribo < o >, se resuelve como desigualdad" se
 // comporte igual sin importar desde qué pantalla se escribió.
 const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
+
+function extractIntervalRestriction(source: string): {
+  expressionLatex: string;
+  lowerLatex: string;
+  upperLatex: string;
+  lowerInclusive: boolean;
+  upperInclusive: boolean;
+} | null {
+  const match = source.trim().match(
+    /^(.*?),\s*\\quad\s*x\\in\s*(?:\\left\s*)?([\[(])\s*(.+?)\s*,\s*(.+?)\s*(?:\\right\s*)?([\])])\s*$/s,
+  );
+  if (!match) return null;
+  return {
+    expressionLatex: match[1].trim(),
+    lowerLatex: match[3].trim(),
+    upperLatex: match[4].trim(),
+    lowerInclusive: match[2] === "[",
+    upperInclusive: match[5] === "]",
+  };
+}
+
+const GRAPH_NON_VARIABLE_IDENTIFIERS = new Set([
+  "sin", "cos", "tan", "sec", "csc", "cot",
+  "asin", "acos", "atan", "asec", "acsc", "acot",
+  "sinh", "cosh", "tanh", "sech", "csch", "coth",
+  "sqrt", "abs", "ln", "log", "exp",
+  "pi", "e", "i", "inf", "infinity", "oo",
+]);
+
+function classifyScientificGraphState(sourceLatex: string): ScientificGraphState {
+  const source = sourceLatex.trim();
+  if (!source) return "empty";
+
+  if (splitSystemLatex(source)) return "advanced";
+  if (detectCalculusIntent(source)) return "advanced";
+  if (/(^|[^A-Za-z])i([^A-Za-z]|$)/.test(source)) return "advanced";
+
+  const backend = latexToBackendSyntax(source);
+  if (!backend) return "empty";
+  if (INEQUALITY_OPERATOR_PATTERN.test(backend) || backend.includes("=")) return "advanced";
+
+  const identifiers = backend.match(/[A-Za-z_][A-Za-z0-9_]*/g) ?? [];
+  const variables = new Set(
+    identifiers.filter((identifier) => !GRAPH_NON_VARIABLE_IDENTIFIERS.has(identifier.toLowerCase())),
+  );
+
+  if (variables.size === 0) return "not-needed";
+  if (variables.size === 1) return "available";
+  return "advanced";
+}
+
+function directGraphVariable(expression: string): string | null {
+  const identifiers = expression.match(/[A-Za-z_][A-Za-z0-9_]*/g) ?? [];
+  const variables = [...new Set(identifiers.filter((identifier) => !GRAPH_NON_VARIABLE_IDENTIFIERS.has(identifier.toLowerCase())))];
+  return variables.length === 1 ? variables[0] : null;
+}
+
+function usesOnlyGraphVariable(expression: string, variable: string): boolean {
+  const identifiers = expression.match(/[A-Za-z_][A-Za-z0-9_]*/g) ?? [];
+  return identifiers.every((name) => GRAPH_NON_VARIABLE_IDENTIFIERS.has(name.toLowerCase()) || name === variable);
+}
+
+function backendExpressionToLatex(value: unknown): string {
+  const source = String(value ?? "").trim();
+  if (!source) return "";
+
+  function convert(expr: string): string {
+    let text = expr.trim();
+    if (!text) return "";
+
+    while (text.startsWith("(") && text.endsWith(")")) {
+      let depth = 0;
+      let wrapsAll = true;
+      for (let i = 0; i < text.length; i += 1) {
+        const ch = text[i];
+        if (ch === "(") depth += 1;
+        else if (ch === ")") depth -= 1;
+        if (depth === 0 && i < text.length - 1) {
+          wrapsAll = false;
+          break;
+        }
+      }
+      if (!wrapsAll) break;
+      text = text.slice(1, -1).trim();
+    }
+
+    let depth = 0;
+    for (let i = 0; i < text.length; i += 1) {
+      const ch = text[i];
+      if (ch === "(") depth += 1;
+      else if (ch === ")") depth -= 1;
+      else if (ch === "/" && depth === 0) {
+        return `\\frac{${convert(text.slice(0, i))}}{${convert(text.slice(i + 1))}}`;
+      }
+    }
+
+    text = text
+      .replace(/\b(asin|acos|atan|asec|acsc|acot)\s*\(([^()]*)\)/g, (_match, fn: string, body: string) => {
+        const direct = fn === "asin" ? "sin" : fn === "acos" ? "cos" : fn === "atan" ? "tan" : fn === "asec" ? "sec" : fn === "acsc" ? "csc" : "cot";
+        return `\\${direct}^{-1}\\left(${convert(body)}\\right)`;
+      })
+      .replace(/\bpi\b/g, "\\pi")
+      .replace(/\boo\b|\binf(?:inity)?\b/g, "\\infty")
+      .replace(/\*\*\s*\(?(-?\d+(?:\.\d+)?)\)?/g, "^{$1}")
+      .replace(/\bsqrt\s*\(([^()]+)\)/g, (_m, body: string) => `\\sqrt{${convert(body)}}`)
+      .replace(/\b(sin|cos|tan|sec|csc|cot|ln|log|exp)\s*\(([^()]*)\)/g, (_m, fn: string, body: string) =>
+        `\\${fn}\\left(${convert(body)}\\right)`,
+      );
+
+    return text;
+  }
+
+  return convert(source);
+}
+
+function scientificHistoryEntryToLatex(entry: HistoryEntry): string {
+  const payload = entry.requestPayload;
+  const preservedInput = String(entry.inputText ?? "").trim();
+  if (preservedInput) {
+    // Nuevas entradas guardan el LaTeX visual completo y pueden
+    // reutilizarse literalmente. Entradas históricas de operaciones
+    // estructuradas podían guardar etiquetas parciales como "∫ x**2/4"
+    // sin dx/límites; en esos casos NO debemos devolver la etiqueta
+    // parcial: se reconstruye la operación completa desde requestPayload.
+    const structuredEndpoint = [
+      "/integral",
+      "/derivative",
+      "/derivative/partial",
+      "/limit",
+      "/solve/system",
+      "/inequality/system",
+    ].includes(entry.endpointUrl);
+    const hasFullLatex = preservedInput.includes("\\");
+    const hasNaturalSymbols = /[√π∞°′″≤≥]/.test(preservedInput);
+    if (hasFullLatex || (!structuredEndpoint && hasNaturalSymbols)) return preservedInput;
+  }
+  const expression = backendExpressionToLatex(
+    payload.expression ?? payload.equation ?? payload.inequality ?? entry.inputText ?? entry.label,
+  );
+  const variable = String(payload.variable ?? "x");
+
+  if (entry.endpointUrl === "/integral") {
+    const lower = payload.lower_bound;
+    const upper = payload.upper_bound;
+    if (lower !== undefined && upper !== undefined) {
+      return `\\int_{${backendExpressionToLatex(lower)}}^{${backendExpressionToLatex(upper)}} ${expression}\\,d${variable}`;
+    }
+    return `\\int ${expression}\\,d${variable}`;
+  }
+
+  if (entry.endpointUrl === "/derivative") {
+    const order = Number(payload.order ?? 1);
+    return order > 1
+      ? `\\frac{d^{${order}}}{d${variable}^{${order}}}\\left(${expression}\\right)`
+      : `\\frac{d}{d${variable}}\\left(${expression}\\right)`;
+  }
+
+  if (entry.endpointUrl === "/derivative/partial") {
+    return `\\frac{\\partial}{\\partial ${variable}}\\left(${expression}\\right)`;
+  }
+
+  if (entry.endpointUrl === "/limit") {
+    const point = backendExpressionToLatex(payload.point ?? "0");
+    const direction =
+      payload.direction === "left" ? "^{-}" :
+      payload.direction === "right" ? "^{+}" : "";
+    return `\\lim_{${variable}\\to ${point}${direction}} ${expression}`;
+  }
+
+  if (entry.endpointUrl === "/solve/system" && Array.isArray(payload.equations)) {
+    const rows = payload.equations.map((row: unknown) => backendExpressionToLatex(row)).join("\\\\");
+    return `\\begin{cases}${rows}\\end{cases}`;
+  }
+
+  if (entry.endpointUrl === "/inequality/system" && Array.isArray(payload.inequalities)) {
+    const rows = payload.inequalities.map((row: unknown) => backendExpressionToLatex(row)).join("\\\\");
+    return `\\begin{cases}${rows}\\end{cases}`;
+  }
+
+  return expression;
+}
 
 export function BasicMode() {
   const formRef = useRef<HTMLFormElement>(null);
@@ -79,28 +264,158 @@ export function BasicMode() {
   const [systemVariables, setSystemVariables] = useState("x, y");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<MathResponse | null>(null);
+  const [lastEvaluated, setLastEvaluated] = useState<{
+    expression: string;
+    angleUnit: "rad" | "deg";
+    result: MathResponse;
+  } | null>(null);
+  const [lastDerived, setLastDerived] = useState<{
+    sourceLatex: string;
+    expression: string;
+    innerLatex: string;
+    variable: string;
+    order: number;
+    angleUnit: "rad" | "deg";
+    result: MathResponse;
+  } | null>(null);
+  const [lastIntegral, setLastIntegral] = useState<{
+    sourceLatex: string;
+    expression: string;
+    innerLatex: string;
+    variable: string;
+    angleUnit: "rad" | "deg";
+    lowerBound: string | null;
+    upperBound: string | null;
+    result: MathResponse;
+  } | null>(null);
+  const [lastLimit, setLastLimit] = useState<{
+    sourceLatex: string;
+    expression: string;
+    innerLatex: string;
+    variable: string;
+    point: string;
+    direction: "both" | "left" | "right";
+    angleUnit: "rad" | "deg";
+    result: MathResponse;
+  } | null>(null);
+  const [lastAlgebra, setLastAlgebra] = useState<{
+    sourceLatex: string;
+    expression: string;
+    operation: "simplify" | "factor";
+    angleUnit: "rad" | "deg";
+    result: MathResponse;
+  } | null>(null);
+  const [lastOde, setLastOde] = useState<{ sourceLatex: string; expression: string; result: MathResponse } | null>(null);
+  const [lastSystem, setLastSystem] = useState<{ sourceLatex: string; equations: string[]; variables: string[]; result: MathResponse } | null>(null);
+  const [lastInequality, setLastInequality] = useState<{ sourceLatex: string; expression: string; variable: string; result: MathResponse } | null>(null);
+  const [lastInequalitySystem, setLastInequalitySystem] = useState<{ sourceLatex: string; inequalities: string[]; variables: string[]; result: MathResponse } | null>(null);
+  const [lastComplex, setLastComplex] = useState<{ sourceLatex: string; expression: string; result: MathResponse } | null>(null);
+
+  const graphState = useMemo<ScientificGraphState>(
+    () => classifyScientificGraphState(latex),
+    [latex],
+  );
+  const graphContext = useMemo(() => {
+    if (lastComplex?.sourceLatex === latex && lastComplex.result.success) {
+      return complexGraphContext(lastComplex.expression, latex, lastComplex.result);
+    }
+    if (lastInequalitySystem?.sourceLatex === latex && lastInequalitySystem.result.success) {
+      return inequalitySystemGraphContext(lastInequalitySystem.inequalities, lastInequalitySystem.variables,
+        latex, lastInequalitySystem.result);
+    }
+    if (lastInequality?.sourceLatex === latex && lastInequality.result.success) {
+      return inequalityGraphContext(lastInequality.expression, lastInequality.variable, latex, lastInequality.result);
+    }
+    if (lastSystem?.sourceLatex === latex && lastSystem.result.success) {
+      return systemGraphContext(lastSystem.equations, lastSystem.variables, latex, lastSystem.result);
+    }
+    if (lastOde?.sourceLatex === latex && lastOde.result.success) {
+      return odeGraphContext(lastOde.expression, latex, lastOde.result);
+    }
+    if (lastAlgebra?.sourceLatex === latex && lastAlgebra.angleUnit === angleUnit && lastAlgebra.result.success) {
+      return algebraTransformationGraphContext(lastAlgebra.operation, lastAlgebra.expression, latex,
+        directGraphVariable(lastAlgebra.expression), angleUnit, lastAlgebra.result);
+    }
+    if (lastLimit?.sourceLatex === latex && lastLimit.angleUnit === angleUnit && lastLimit.result.success) {
+      return limitGraphContext(lastLimit.expression, lastLimit.innerLatex, latex,
+        lastLimit.variable, lastLimit.point, lastLimit.direction, angleUnit, lastLimit.result,
+        usesOnlyGraphVariable(lastLimit.expression, lastLimit.variable));
+    }
+    if (lastIntegral?.sourceLatex === latex && lastIntegral.angleUnit === angleUnit && lastIntegral.result.success) {
+      if (lastIntegral.lowerBound !== null && lastIntegral.upperBound !== null) {
+        return definiteIntegralGraphContext(
+          lastIntegral.expression, lastIntegral.innerLatex, latex, lastIntegral.variable,
+          lastIntegral.lowerBound, lastIntegral.upperBound, angleUnit, lastIntegral.result,
+          usesOnlyGraphVariable(lastIntegral.expression, lastIntegral.variable),
+        );
+      }
+      const antiderivative = lastIntegral.result.antiderivative_expression ?? "";
+      const graphable = usesOnlyGraphVariable(lastIntegral.expression, lastIntegral.variable)
+        && usesOnlyGraphVariable(antiderivative, lastIntegral.variable);
+      return indefiniteIntegralGraphContext(
+        lastIntegral.expression, lastIntegral.innerLatex, latex, lastIntegral.variable,
+        angleUnit, lastIntegral.result, graphable,
+      );
+    }
+    if (lastDerived?.sourceLatex === latex && lastDerived.angleUnit === angleUnit && lastDerived.result.success) {
+      const derived = lastDerived.result.result_text ?? "";
+      const graphable = usesOnlyGraphVariable(lastDerived.expression, lastDerived.variable)
+        && usesOnlyGraphVariable(derived, lastDerived.variable);
+      return derivativeGraphContext(
+        lastDerived.expression, lastDerived.innerLatex, latex, lastDerived.variable,
+        lastDerived.order, angleUnit, lastDerived.result, graphable,
+      );
+    }
+    if (graphState !== "available") return null;
+    const expression = latexToBackendSyntax(latex);
+    const variable = directGraphVariable(expression);
+    if (!variable) return null;
+    const result = lastEvaluated?.expression === expression && lastEvaluated.angleUnit === angleUnit
+      ? lastEvaluated.result : null;
+    return directFunctionGraphContext(expression, variable, angleUnit, result, latex);
+  }, [graphState, latex, angleUnit, lastEvaluated, lastDerived, lastIntegral, lastLimit, lastAlgebra, lastOde, lastSystem, lastInequality, lastInequalitySystem, lastComplex]);
+  const resolvedGraphState: ScientificGraphState = graphContext?.operation === "complex"
+    ? graphContext.visualization === "argand" || graphContext.visualization === "complex-map" || Boolean(graphContext.graphRequest) ? "available" : "advanced"
+    : graphContext?.operation === "inequality"
+    ? graphContext.visualization === "number-line" || graphContext.visualization === "region-2d" || graphContext.visualization === "circle-region" || graphContext.visualization === "ellipse-region" ? "available" : "advanced"
+    : graphContext?.operation === "simplify" || graphContext?.operation === "factor" || graphContext?.operation === "ode" || graphContext?.operation === "system"
+      ? graphContext.graphRequest ? "available" : "advanced" : graphState;
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
   const isLoading = useUIStore((state) => state.isLoading);
   const setActiveMode = useUIStore((state) => state.setActiveMode);
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
+  const setPendingGraphContext = useUIStore((state) => state.setPendingGraphContext);
+  const pendingHistoryReuse = usePendingHistoryReuseStore((s) => s.pending);
+  const takePendingHistoryReuse = usePendingHistoryReuseStore((s) => s.takePending);
+
+  useEffect(() => {
+    const entry = takePendingHistoryReuse();
+    if (!entry) return;
+    const payload = entry.requestPayload;
+    setLatex(scientificHistoryEntryToLatex(entry));
+    if (Array.isArray(payload.variables)) {
+      setSystemVariables(payload.variables.join(", "));
+    }
+    if (payload.angle_unit === "deg" || payload.angle_unit === "rad") setAngleUnit(payload.angle_unit);
+    if (payload.substitutions && typeof payload.substitutions === "object" && !Array.isArray(payload.substitutions)) {
+      setSubstitutions(
+        Object.entries(payload.substitutions as Record<string, unknown>).map(([name, value]) => ({
+          name,
+          value: String(value),
+        })),
+      );
+    }
+    setLastResult(null);
+    setLastEvaluated(null);
+    setLastDerived(null);
+    setLastIntegral(null);
+    setValidationError(null);
+  }, [pendingHistoryReuse, takePendingHistoryReuse]);
 
   const systemRows = splitSystemLatex(latex);
 
-  function addSubstitutionRow(): void {
-    setSubstitutions((rows) => [...rows, { name: "", value: "" }]);
-  }
-
-  function updateSubstitutionRow(index: number, field: keyof SubstitutionRow, value: string): void {
-    setSubstitutions((rows) =>
-      rows.map((row, i) => (i === index ? { ...row, [field]: value } : row)),
-    );
-  }
-
-  function removeSubstitutionRow(index: number): void {
-    setSubstitutions((rows) => rows.filter((_, i) => i !== index));
-  }
 
   // Corrección post-auditoría (Módulo C, spec_motor_matematico_pendiente.md
   // §4): antes esta función SIEMPRE rechazaba una fila que no tuviera "=",
@@ -147,12 +462,14 @@ export function BasicMode() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitScientific(
         "/solve/system",
         { equations, variables: variableList },
         `Sistema: ${equations.join(" ; ")}`,
+        latex,
       );
       setLastResult(result);
+      if (result.success) setLastSystem({ sourceLatex: latex, equations, variables: variableList, result });
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
@@ -181,10 +498,11 @@ export function BasicMode() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitScientific(
         "/inequality/system",
         { inequalities: inequalitiesBackend, variables: variableList },
         `Sistema: ${inequalitiesBackend.join(" ; ")}`,
+        latex,
       );
       if (result.success) {
         // El backend devuelve result_text = "bounded"/"unbounded"/"empty"
@@ -204,6 +522,8 @@ export function BasicMode() {
               : `Vértices del polígono factible: ${verticesText}`;
       }
       setLastResult(result);
+      if (result.success) setLastInequalitySystem({ sourceLatex: latex,
+        inequalities: inequalitiesBackend, variables: variableList, result });
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
@@ -232,65 +552,138 @@ export function BasicMode() {
         : intent.kind === "residue" || intent.kind === "singularities"
           ? intent.expressionLatex
           : intent.innerLatex;
-    const trimmedInner = latexToBackendSyntax(rawInner);
+    // EDO ya viene normalizada por detectODE() a notación prima ASCII.
+    // No debe pasar otra vez por MathLive -> ASCII porque esa conversión
+    // puede reserializar y' como y^′ y romper el contrato del backend.
+    const trimmedInner = intent.kind === "ode"
+      ? rawInner.trim()
+      : latexToBackendSyntax(rawInner);
     if (!trimmedInner) {
       setValidationError("La expresión no puede estar vacía.");
       return;
     }
     setValidationError(null);
 
+    const integralLower =
+      intent.kind === "integral" && intent.lowerBound !== null
+        ? latexToBackendSyntax(intent.lowerBound)
+        : null;
+    const integralUpper =
+      intent.kind === "integral" && intent.upperBound !== null
+        ? latexToBackendSyntax(intent.upperBound)
+        : null;
+    const integralIsImproper =
+      intent.kind === "integral" &&
+      integralLower !== null &&
+      integralUpper !== null &&
+      (integralLower.includes("oo") || integralUpper.includes("oo"));
+
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result =
+      let result =
         intent.kind === "partialDerivative"
-          ? await submitAndRecord(
+          ? await submitScientific(
               "/derivative/partial",
               { expression: trimmedInner, variable: intent.variable },
               `∂/∂${intent.variable} [${trimmedInner}]`,
+              latex,
             )
           : intent.kind === "derivative"
-            ? await submitAndRecord(
+            ? await submitScientific(
                 "/derivative",
                 { expression: trimmedInner, variable: intent.variable, order: intent.order },
                 `d/d${intent.variable} [${trimmedInner}]`,
+                latex,
               )
             : intent.kind === "integral"
-            ? await submitAndRecord(
-                "/integral",
+            ? await submitScientific(
+                integralIsImproper ? "/integral/improper" : "/integral",
                 {
                   expression: trimmedInner,
                   variable: intent.variable,
-                  ...(intent.lowerBound !== null
-                    ? { lower_bound: intent.lowerBound, upper_bound: intent.upperBound }
+                  ...(integralLower !== null
+                    ? {
+                        lower_bound: integralLower,
+                        upper_bound: integralUpper ?? "",
+                      }
                     : {}),
                 },
                 `∫ ${trimmedInner}`,
+                latex,
               )
             : intent.kind === "limit"
-              ? await submitAndRecord(
+              ? await submitScientific(
                   "/limit",
                   // Corrección post-auditoría: calculusIntent.ts ahora
                   // reconoce la notación lateral con un escáner propio (ver
                   // detectLateralLimit) en vez de depender de Compute Engine
                   // — intent.direction ya trae "left"/"right" cuando aplica.
-                  { expression: trimmedInner, variable: intent.variable, point: intent.point, direction: intent.direction },
+                  {
+                    expression: trimmedInner,
+                    variable: intent.variable,
+                    point: latexToBackendSyntax(intent.point),
+                    direction: intent.direction,
+                  },
                   `lim[${intent.variable}->${intent.point}] ${trimmedInner}`,
+                  latex,
                 )
               : intent.kind === "ode"
-                ? await submitAndRecord("/ode", { expression: trimmedInner }, trimmedInner)
+                ? await submitScientific("/ode", { expression: trimmedInner }, trimmedInner, latex)
                 : intent.kind === "residue"
-                  ? await submitAndRecord(
+                  ? await submitScientific(
                       "/complex/residue",
                       { expression: trimmedInner, point: latexToBackendSyntax(intent.pointLatex) },
                       `Res(${trimmedInner}, z=${intent.pointLatex})`,
+                      latex,
                     )
-                  : await submitAndRecord(
+                  : await submitScientific(
                       "/complex/singularities",
                       { expression: trimmedInner },
                       `Sing(${trimmedInner})`,
+                      latex,
                     );
+      if (
+        intent.kind === "derivative"
+        && intent.evaluationPoint
+        && result.success
+        && result.result_text
+      ) {
+        const point = latexToBackendSyntax(intent.evaluationPoint);
+        result = await submitScientific(
+          "/evaluate",
+          {
+            expression: result.result_text,
+            angle_unit: angleUnit,
+            domain: "real",
+            substitutions: { [intent.variable]: point },
+          },
+          `d/d${intent.variable} evaluada en ${intent.variable}=${point}`,
+          latex,
+        );
+      }
+
       setLastResult(result);
+      if (intent.kind === "derivative" && !intent.evaluationPoint && result.success) {
+        setLastDerived({
+          sourceLatex: latex, expression: trimmedInner, innerLatex: intent.innerLatex,
+          variable: intent.variable, order: intent.order, angleUnit, result,
+        });
+      }
+      if (intent.kind === "integral" && result.success) {
+        setLastIntegral({
+          sourceLatex: latex, expression: trimmedInner, innerLatex: intent.innerLatex,
+          variable: intent.variable, angleUnit, lowerBound: intent.lowerBound,
+          upperBound: intent.upperBound, result,
+        });
+      }
+      if (intent.kind === "limit" && result.success) {
+        setLastLimit({ sourceLatex: latex, expression: trimmedInner, innerLatex: intent.innerLatex,
+          variable: intent.variable, point: intent.point, direction: intent.direction, angleUnit, result });
+      }
+      if (intent.kind === "ode" && result.success) {
+        setLastOde({ sourceLatex: latex, expression: trimmedInner, result });
+      }
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
@@ -301,19 +694,32 @@ export function BasicMode() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    setLastEvaluated(null);
+    setLastDerived(null);
+    setLastIntegral(null);
 
-    if (systemRows) {
-      await submitSystem(systemRows);
+    // Evaluate exactly what MathLive currently displays. setValue()/insert()
+    // can update the custom element one render before React propagates the
+    // latest onInput state; reading stale `latex` caused the B7 matrix to
+    // submit the previous/partial expression (lost integral bounds and
+    // operatorname function names).
+    const currentLatex = mathField?.value ?? latex;
+    const currentSystemRows = splitSystemLatex(currentLatex);
+
+    if (currentSystemRows) {
+      await submitSystem(currentSystemRows);
       return;
     }
 
-    const calculusIntent = detectCalculusIntent(latex);
+    const calculusIntent = detectCalculusIntent(currentLatex);
     if (calculusIntent) {
       await submitCalculus(calculusIntent);
       return;
     }
 
-    const trimmed = latexToBackendSyntax(latex);
+    const intervalRestriction = extractIntervalRestriction(currentLatex);
+    const sourceForBackend = intervalRestriction?.expressionLatex ?? currentLatex;
+    const trimmed = latexToBackendSyntax(sourceForBackend);
     if (!trimmed) {
       setValidationError("La expresión no puede estar vacía.");
       return;
@@ -336,19 +742,68 @@ export function BasicMode() {
     setErrorMessage(null);
     try {
       const result = isInequality
-        ? await submitAndRecord("/inequality", { inequality: trimmed }, trimmed)
+        ? await submitScientific(
+            "/inequality",
+            {
+              inequality: trimmed,
+              ...(intervalRestriction
+                ? {
+                    domain_lower: latexToBackendSyntax(intervalRestriction.lowerLatex),
+                    domain_upper: latexToBackendSyntax(intervalRestriction.upperLatex),
+                    domain_lower_inclusive: intervalRestriction.lowerInclusive,
+                    domain_upper_inclusive: intervalRestriction.upperInclusive,
+                  }
+                : {}),
+            },
+            trimmed,
+            currentLatex,
+          )
         : isEquation
-          ? await submitAndRecord("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed)
-          : await submitAndRecord(
+          ? await submitScientific(
+              "/solve",
+              {
+                equation: trimmed,
+                angle_unit: angleUnit,
+                // Keep function equations on their real calculator branches.
+                // Unrestricted algebraic equations retain complex roots.
+                domain: intervalRestriction || /[A-Za-z_]\w*\s*\(/.test(trimmed)
+                  ? "real" : "complex",
+                ...(intervalRestriction
+                  ? {
+                      domain_lower: latexToBackendSyntax(intervalRestriction.lowerLatex),
+                      domain_upper: latexToBackendSyntax(intervalRestriction.upperLatex),
+                      domain_lower_inclusive: intervalRestriction.lowerInclusive,
+                      domain_upper_inclusive: intervalRestriction.upperInclusive,
+                    }
+                  : {}),
+              },
+              trimmed,
+              latex,
+            )
+          : await submitScientific(
               "/evaluate",
               {
                 expression: trimmed,
                 angle_unit: angleUnit,
+                // Explicit imaginary units opt into complex evaluation;
+                // ordinary inverse-function domain checks remain real.
+                domain: /(?:^|[^A-Za-z_])[iI](?=$|[^A-Za-z_])/.test(trimmed) ? "complex" : "real",
                 ...(substitutionsPayload ? { substitutions: substitutionsPayload } : {}),
               },
               trimmed,
+              latex,
             );
       setLastResult(result);
+      if (result.success && (result.complex_graph_points?.length || result.complex_graph_components || result.complex_graph_mapping?.length)) {
+        setLastComplex({ sourceLatex: currentLatex, expression: trimmed, result });
+      }
+      if (isInequality && result.success) {
+        const variable = result.inequality_variable ?? "x";
+        setLastInequality({ sourceLatex: currentLatex, expression: trimmed, variable, result });
+      }
+      setLastEvaluated(!isInequality && !isEquation && !substitutionsPayload && result.success
+        ? { expression: trimmed, angleUnit, result }
+        : null);
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
@@ -372,6 +827,15 @@ export function BasicMode() {
     formRef.current?.requestSubmit();
   }
 
+  function handleSolveInequality(): void {
+    if (!/[<>]|\\\\(?:le|ge)/.test(latex)) {
+      mathField?.focus();
+      mathField?.insert("\\ge0");
+      return;
+    }
+    formRef.current?.requestSubmit();
+  }
+
   // Pendiente #2 (revisión post-Módulo D, pedido por el usuario): recibe
   // la cantidad de ecuaciones elegida en el selector 2-5 de
   // NaturalMathKeyboard.tsx. Solo se usa para la plantilla nueva — si el
@@ -388,8 +852,66 @@ export function BasicMode() {
     formRef.current?.requestSubmit();
   }
 
-  function handleSimplify(): void {
+  function handleSolveInequalitySystem(): void {
+    if (!splitSystemLatex(latex)) {
+      mathField?.focus();
+      mathField?.insert("\\begin{cases}#0\\ge0\\\\#1\\le0\\end{cases}");
+      return;
+    }
     formRef.current?.requestSubmit();
+  }
+
+  async function runAlgebraAction(endpoint: "/simplify" | "/factor", label: string): Promise<void> {
+    const trimmed = latexToBackendSyntax(latex);
+    if (!trimmed) {
+      setValidationError("La expresión no puede estar vacía.");
+      return;
+    }
+    setValidationError(null);
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const result = await submitScientific(endpoint, { expression: trimmed }, label, latex);
+      setLastResult(result);
+      if (result.success) setLastAlgebra({ sourceLatex: latex, expression: trimmed,
+        operation: endpoint === "/simplify" ? "simplify" : "factor", angleUnit, result });
+      if (!result.success) setErrorMessage(result.error_message ?? "Ocurrió un error.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleSimplify(): void {
+    void runAlgebraAction("/simplify", `Simplificar(${latex})`);
+  }
+
+  function handleFactor(): void {
+    void runAlgebraAction("/factor", `Factorizar(${latex})`);
+  }
+
+  async function handleEvaluatePoint(): Promise<void> {
+    const point = window.prompt("Valor del punto para x =", "a");
+    if (point === null || point.trim() === "") return;
+    const trimmed = latexToBackendSyntax(latex);
+    if (!trimmed) {
+      setValidationError("La expresión no puede estar vacía.");
+      return;
+    }
+    setValidationError(null);
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const result = await submitScientific(
+        "/evaluate",
+        { expression: trimmed, angle_unit: angleUnit, domain: "real", substitutions: { x: point.trim() } },
+        `Evaluar ${trimmed} en x=${point.trim()}`,
+        latex,
+      );
+      setLastResult(result);
+      if (!result.success) setErrorMessage(result.error_message ?? "Ocurrió un error.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   // Fase F (spec_edo_complejos_tooltips.md §3.4, Módulo F3): "Graficar"
@@ -408,7 +930,7 @@ export function BasicMode() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
+      const result = await submitScientific(
         "/graph/complex_point",
         { expression: trimmed },
         `Graficar(${trimmed})`,
@@ -435,21 +957,27 @@ export function BasicMode() {
   // Reutiliza el mismo puente pendingGraphResult que Graph2DForm ya
   // consume.
   async function handleGraphExpression(): Promise<void> {
-    const trimmed = latexToBackendSyntax(latex);
-    if (!trimmed) return;
+    const context = graphContext;
+    if (context?.visualization === "number-line" || context?.visualization === "region-2d" || context?.visualization === "circle-region" || context?.visualization === "ellipse-region" || context?.visualization === "argand" || context?.visualization === "complex-map") {
+      setPendingGraphContext(context);
+      setActiveMode("graph");
+      return;
+    }
+    if (!context?.graphRequest) return;
     setLoading(true);
     setErrorMessage(null);
     try {
-      const result = await submitAndRecord(
-        "/graph/2d",
-        { expressions: [trimmed], variable: "x" },
-        `Graficar(${trimmed})`,
+      const result = await submitScientific(
+        context.graphRequest.endpoint,
+        context.graphRequest.payload,
+        `Graficar(${context.originalExpression})`,
       );
       if (!result.success) {
         setLastResult(result);
         setErrorMessage(result.error_message ?? "No se pudo graficar esa expresión.");
         return;
       }
+      setPendingGraphContext(context);
       setPendingGraphResult(result);
       setActiveMode("graph");
     } finally {
@@ -497,9 +1025,14 @@ export function BasicMode() {
         onSubmit={() => formRef.current?.requestSubmit()}
         onClearField={() => setLatex("")}
         onSolveEquation={handleSolveEquation}
+        onSolveInequality={handleSolveInequality}
         onSolveSystem={handleSolveSystem}
+        onSolveInequalitySystem={handleSolveInequalitySystem}
         onSimplify={handleSimplify}
+        onFactor={handleFactor}
+        onEvaluatePoint={handleEvaluatePoint}
         onGraphComplex={handleGraphComplex}
+        angleUnit={angleUnit}
         showCalculusStrip
         hideCoreGrid
       />,
@@ -534,16 +1067,18 @@ export function BasicMode() {
       ref={formRef}
       onSubmit={handleSubmit}
       aria-labelledby="basic-mode-heading"
-      className="mx-auto w-full max-w-5xl space-y-6 dt:max-w-[1280px]"
+      data-testid="scientific-mode-shell"
+      className="mx-auto w-full max-w-md p-4 md:max-w-lg lg:max-w-3xl dt:max-w-[1440px] dt:px-8"
     >
       <h2 id="basic-mode-heading" className="sr-only">
         Básico
       </h2>
 
-      <div className="space-y-6">
+      <div className="space-y-3">
         <CalculatorScreen
           latex={latex}
           onLatexChange={setLatex}
+          onEnter={() => formRef.current?.requestSubmit()}
           ariaLabel="Expresión"
           placeholder="2x + √9"
           fieldRef={setMathField}
@@ -554,6 +1089,30 @@ export function BasicMode() {
           onClearField={() => setLatex("")}
           layoutMode={layoutMode}
           onGraphExpression={handleGraphExpression}
+          graphState={resolvedGraphState}
+          graphContext={graphContext}
+          onReuseRecent={(entry) => {
+            const payload = entry.requestPayload;
+            setLatex(scientificHistoryEntryToLatex(entry));
+            if (Array.isArray(payload.variables)) setSystemVariables(payload.variables.join(", "));
+            if (payload.angle_unit === "deg" || payload.angle_unit === "rad") setAngleUnit(payload.angle_unit);
+            if (payload.substitutions && typeof payload.substitutions === "object" && !Array.isArray(payload.substitutions)) {
+              setSubstitutions(
+                Object.entries(payload.substitutions as Record<string, unknown>).map(([name, value]) => ({
+                  name,
+                  value: String(value),
+                })),
+              );
+            } else {
+              setSubstitutions([]);
+            }
+            setLastResult(null);
+            setLastEvaluated(null);
+            setLastDerived(null);
+            setLastIntegral(null);
+            setValidationError(null);
+            requestAnimationFrame(() => mathField?.focus());
+          }}
         />
 
         {systemRows && (
@@ -578,63 +1137,7 @@ export function BasicMode() {
         )}
       </div>
 
-      <div className="space-y-6 lg:col-span-2">
-        <div className="flex flex-wrap gap-2">
-          <span className="pt-1.5 text-xs font-medium text-muted">Ejemplos:</span>
-          {EXAMPLES.map((example) => (
-            <button
-              key={example.display}
-              type="button"
-              onClick={() => setLatex(example.latex)}
-              className="rounded-full border border-paper-line bg-paper-soft px-3 py-1 text-xs text-muted hover:border-marker/40 hover:text-marker"
-            >
-              {example.display}
-            </button>
-          ))}
-        </div>
 
-        <details className="group rounded-lg border border-paper-line bg-paper-soft open:pb-3">
-          <summary className="cursor-pointer list-none px-4 py-2.5 text-sm font-medium text-muted marker:content-none">
-            Opciones avanzadas (sustituciones)
-          </summary>
-          <div className="space-y-4 px-4 pt-1">
-            <div className="space-y-2">
-              <span className="block text-sm text-muted">Sustituciones (opcional, solo aplica a expresiones simples)</span>
-              {substitutions.map((row, index) => (
-                <div key={index} className="flex gap-2">
-                  <input
-                    aria-label={`Nombre de la variable ${index + 1}`}
-                    value={row.name}
-                    onChange={(e) => updateSubstitutionRow(index, "name", e.target.value)}
-                    className="w-24 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm text-ink"
-                  />
-                  <input
-                    aria-label={`Valor de la variable ${index + 1}`}
-                    value={row.value}
-                    onChange={(e) => updateSubstitutionRow(index, "value", e.target.value)}
-                    className="w-24 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm text-ink"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeSubstitutionRow(index)}
-                    aria-label={`Eliminar sustitución ${index + 1}`}
-                    className="text-sm text-muted hover:text-muted"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addSubstitutionRow}
-                className="text-sm text-marker hover:text-marker-text"
-              >
-                + Añadir sustitución
-              </button>
-            </div>
-          </div>
-        </details>
-      </div>
     </form>
   );
 }

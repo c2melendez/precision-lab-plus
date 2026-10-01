@@ -32,6 +32,14 @@ def test_factor_difference_of_squares():
     assert len(body["steps"]) == 1
     assert body["steps"][0]["title"] == "Diferencia de cuadrados"
     assert body["result_text"] in ("(x - 2)*(x + 2)", "(x + 2)*(x - 2)")
+    assert body["graph_polynomial_comparison"] is True
+
+
+def test_simplification_with_excluded_point_is_not_certified_as_polynomial_comparison():
+    body = _post("simplify", "x/x").json()
+    assert body["success"] is True
+    assert body["result_text"] == "1"
+    assert body["graph_polynomial_comparison"] is False
 
 
 # ---------------------------------------------------------------------------

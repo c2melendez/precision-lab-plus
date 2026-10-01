@@ -30,15 +30,17 @@ describe("ResultPanel", () => {
   });
 
   it("has_detailed_steps: false y result_latex: null — caso explícito del Módulo 11B", () => {
-    render(<ResultPanel result={baseResult} isLoading={false} />);
+    const { container } = render(<ResultPanel result={baseResult} isLoading={false} />);
 
     // Se muestra "procedimiento resumido", no un error ni un vacío.
     expect(screen.getByText(/Procedimiento resumido/)).toBeInTheDocument();
-    // Sin result_latex, cae a texto plano (result_text/result_approx).
-    expect(screen.getByText("3.14159")).toBeInTheDocument();
-    // "Copiar como LaTeX" debe estar deshabilitado porque result_latex es null.
-    expect(screen.getByRole("button", { name: "Copiar como LaTeX" })).toBeDisabled();
-    // "Copiar resultado" sigue habilitado (hay result_text/result_approx).
+    // Decimal también usa el renderer matemático; KaTeX puede duplicar el
+    // valor entre su capa visual y MathML, por eso se valida el contenedor.
+    expect(container.textContent).toContain("3.14159");
+    // B7: ambas acciones son compactas y copian la representación activa.
+    // Un número plano también es LaTeX canónico válido aunque result_latex
+    // original sea null.
+    expect(screen.getByRole("button", { name: "Copiar como LaTeX" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Copiar resultado" })).toBeEnabled();
     // Sin pasos detallados, StepList no debe renderizar nada.
     expect(screen.queryByLabelText("Procedimiento paso a paso")).not.toBeInTheDocument();
@@ -164,17 +166,80 @@ describe("ResultPanel", () => {
         isLoading={false}
       />,
     );
-    expect(screen.getByText("El sistema no tiene solución.")).toBeInTheDocument();
+    expect(screen.getByText("No hay soluciones.")).toBeInTheDocument();
   });
 
-  it("muestra la fracción exacta y el decimal juntos, sin que uno oculte al otro", () => {
+  it("marca con grados las soluciones de una ecuación trigonométrica resuelta en DEG", () => {
+    const { container } = render(
+      <ResultPanel
+        result={{
+          ...baseResult,
+          operation: "solve",
+          result_type: "equation_solutions",
+          result_text: null,
+          result_latex: null,
+          result_approx: null,
+          result_data: [
+            { text: "30", latex: "30", is_complex: false },
+            { text: "150", latex: "150", is_complex: false },
+          ],
+        }}
+        isLoading={false}
+        inputLatex="\\sin x=\\frac{1}{2}"
+        angleUnit="deg"
+      />,
+    );
+    expect(container.textContent).toMatch(/[°∘]/);
+    expect(container.textContent).toContain("30");
+    expect(container.textContent).toContain("150");
+  });
+
+  it("no marca como grados una ecuación algebraica aunque el selector esté en DEG", () => {
+    const { container } = render(
+      <ResultPanel
+        result={{
+          ...baseResult,
+          operation: "solve",
+          result_type: "equation_solutions",
+          result_text: null,
+          result_latex: null,
+          result_approx: null,
+          result_data: [
+            { text: "2", latex: "2", is_complex: false },
+            { text: "-2", latex: "-2", is_complex: false },
+          ],
+        }}
+        isLoading={false}
+        inputLatex="x^2=4"
+        angleUnit="deg"
+      />,
+    );
+    expect(container.textContent).not.toMatch(/[°∘]/);
+  });
+
+
+  it("presenta una región 2D como conjunto matemático compacto, sin cursivar el resumen", () => {
+    const { container } = render(<ResultPanel result={{ ...baseResult,
+      operation: "inequality", result_type: "inequality_region", result_approx: null,
+      result_text: "Exterior y frontera de la elipse",
+      result_latex: "\\{(x,y)\\in\\mathbb{R}^{2}\\mid x^{2}+2y^{2}\\geq 1\\}",
+    }} isLoading={false} />);
+    const math = container.querySelector(".katex");
+    expect(math?.textContent).toContain("≥");
+    expect(math?.textContent).toContain("∈");
+    expect(math?.textContent).not.toContain("Exterior");
+    expect(container.querySelector(".a11y-scale-result-lg")).toBeInTheDocument();
+    expect(container.querySelector(".overflow-x-auto")).toBeInTheDocument();
+  });
+
+  it("Exacto muestra la representación original y el decimal juntos cuando aplica", () => {
     render(
       <ResultPanel
-        result={{ ...baseResult, result_text: "63/4", result_approx: 15.75 }}
+        result={{ ...baseResult, result_latex: "\\frac{63}{4}", result_text: "63/4", result_approx: 15.75 }}
         isLoading={false}
       />,
     );
-    expect(screen.getByText("63/4")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Exacto" }));
     expect(screen.getByText("≈ 15.75")).toBeInTheDocument();
   });
 
@@ -190,21 +255,32 @@ describe("ResultPanel", () => {
       result_approx: 0.8888888888888888,
     };
 
-    it("formato 'dec' muestra la aproximación decimal", () => {
+    it("usa etiquetas naturales para los formatos", () => {
       render(<ResultPanel result={fractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "dec" }));
-      expect(screen.getByText(/0\.888/)).toBeInTheDocument();
+      expect(screen.getByText("Exacto")).toBeInTheDocument();
+      expect(screen.getByText("Decimal")).toBeInTheDocument();
+      expect(screen.getByText("Fracción")).toBeInTheDocument();
+      expect(screen.getByText("Científica")).toBeInTheDocument();
     });
 
-    it("formato 'scn' muestra notación científica", () => {
-      render(<ResultPanel result={fractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "scn" }));
-      expect(screen.getByText(/8\.888889e-1/)).toBeInTheDocument();
+    it("formato 'dec' muestra la aproximación decimal", () => {
+      const { container } = render(<ResultPanel result={fractionResult} isLoading={false} />);
+      fireEvent.click(screen.getByRole("button", { name: "Decimal" }));
+      expect(container.textContent).toContain("0.888");
+    });
+
+    it("formato 'scn' muestra notación científica con tipografía matemática", () => {
+      const { container } = render(<ResultPanel result={fractionResult} isLoading={false} />);
+      fireEvent.click(screen.getByRole("button", { name: "Científica" }));
+      const text = container.textContent?.replace(/\s+/g, "") ?? "";
+      expect(text).toContain("8.888889");
+      expect(text).toContain("10");
+      expect(text).toContain("-1");
     });
 
     it("formato 'frac' muestra la fracción cuando result_latex ya es \\frac{}{}", () => {
       const { container } = render(<ResultPanel result={fractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "frac" }));
+      fireEvent.click(screen.getByRole("button", { name: "Fracción" }));
       // KaTeX descompone el LaTeX en spans (y duplica texto en su capa de
       // accesibilidad) — se compara el texto renderizado del contenedor
       // en vez de buscar nodos de texto exactos.
@@ -213,21 +289,23 @@ describe("ResultPanel", () => {
       expect(text).toContain("9");
     });
 
-    it("formato 'frac' NO fabrica una fracción cuando el resultado no es exacto (ej. sqrt(7))", () => {
+    it("oculta Fracción cuando el resultado no tiene forma racional exacta (ej. sqrt(7))", () => {
       render(
         <ResultPanel
           result={{ ...baseResult, result_latex: "\\sqrt{7}", result_text: "sqrt(7)", result_approx: 2.6457513 }}
           isLoading={false}
         />,
       );
-      fireEvent.click(screen.getByRole("button", { name: "frac" }));
-      expect(screen.getByText(/no es una fracción exacta/)).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Fracción" })).not.toBeInTheDocument();
+      expect(screen.getByText("Exacto")).toBeInTheDocument();
+      expect(screen.getByText("Decimal")).toBeInTheDocument();
+      expect(screen.getByText("Científica")).toBeInTheDocument();
     });
 
     it("volver a 'exacto' muestra de nuevo el resultado original con el aproximado debajo", () => {
       render(<ResultPanel result={fractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "dec" }));
-      fireEvent.click(screen.getByRole("button", { name: "exacto" }));
+      fireEvent.click(screen.getByRole("button", { name: "Decimal" }));
+      fireEvent.click(screen.getByRole("button", { name: "Exacto" }));
       expect(screen.getByText(/≈ 0\.888/)).toBeInTheDocument();
     });
   });
@@ -252,13 +330,13 @@ describe("ResultPanel", () => {
         result_approx: 0.888,
       };
       render(<ResultPanel result={fractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "frac" }));
+      fireEvent.click(screen.getByRole("button", { name: "Fracción" }));
       expect(screen.queryByText(/ver como/)).not.toBeInTheDocument();
     });
 
     it("una fracción impropia (57/2) se muestra mixta por defecto (28 y 1/2)", () => {
       const { container } = render(<ResultPanel result={improperFractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "frac" }));
+      fireEvent.click(screen.getByRole("button", { name: "Fracción" }));
       const text = container.textContent?.replace(/\s+/g, "") ?? "";
       expect(text).toContain("28");
       expect(text).toContain("1");
@@ -268,7 +346,7 @@ describe("ResultPanel", () => {
 
     it("el toggle cambia a la forma impropia (57/2) y de vuelta a mixta", () => {
       const { container } = render(<ResultPanel result={improperFractionResult} isLoading={false} />);
-      fireEvent.click(screen.getByRole("button", { name: "frac" }));
+      fireEvent.click(screen.getByRole("button", { name: "Fracción" }));
 
       fireEvent.click(screen.getByText("ver como impropia"));
       expect(screen.getByText("ver como mixta")).toBeInTheDocument();
@@ -289,9 +367,89 @@ describe("ResultPanel", () => {
           isLoading={false}
         />,
       );
-      fireEvent.click(screen.getByRole("button", { name: "frac" }));
+      fireEvent.click(screen.getByRole("button", { name: "Fracción" }));
       const text = container.textContent?.replace(/\s+/g, "") ?? "";
       expect(text).toContain("-28");
+    });
+  });
+  describe("S26.3 — formato DMS contextual", () => {
+    it("cuando la entrada usa grados solo ofrece DD y DMS", () => {
+      const { rerender } = render(
+        <ResultPanel result={baseResult} isLoading={false} inputLatex="30.525°" />,
+      );
+      expect(screen.getByRole("button", { name: "DD" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "DMS" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Exacto" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Decimal" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Fracción" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Científica" })).not.toBeInTheDocument();
+
+      rerender(<ResultPanel result={baseResult} isLoading={false} inputLatex="30.525" />);
+      expect(screen.queryByRole("button", { name: "DD" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "DMS" })).not.toBeInTheDocument();
+    });
+
+    it("DD conserva el valor en grados decimales con símbolo de grado", () => {
+      const { container } = render(<ResultPanel result={baseResult} isLoading={false} inputLatex="56.55°" />);
+      fireEvent.click(screen.getByRole("button", { name: "DD" }));
+      expect(screen.getByRole("button", { name: "DD" })).toHaveAttribute("aria-pressed", "true");
+      const text = container.textContent ?? "";
+      expect(text).toContain("56.55");
+      expect(text).toMatch(/[°∘]|circ/);
+    });
+
+    it("30.525° se presenta como 30° 31′ 30.0″", () => {
+      const { container } = render(
+        <ResultPanel result={baseResult} isLoading={false} inputLatex="30.525°" />,
+      );
+      fireEvent.click(screen.getByRole("button", { name: "DMS" }));
+      const text = container.textContent?.replace(/\s+/g, "") ?? "";
+      expect(text).toContain("30");
+      expect(text).toContain("31");
+      expect(text).toContain("30.0");
+    });
+  });
+
+
+  describe("S26.3 — trig inversa en DEG", () => {
+    const angleResult: MathResponse = {
+      ...baseResult,
+      result_latex: "30",
+      result_text: "30",
+      result_approx: 30,
+    };
+
+    it("asin(0.5) en DEG solo ofrece DD/DMS y muestra grados", () => {
+      const { container } = render(
+        <ResultPanel result={angleResult} isLoading={false} inputLatex="asin(0.5)" angleUnit="deg" />,
+      );
+      expect(screen.getByRole("button", { name: "DD" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "DMS" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Exacto" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Decimal" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Científica" })).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "DD" }));
+      expect(screen.getByRole("button", { name: "DD" })).toHaveAttribute("aria-pressed", "true");
+      expect(container.textContent).toContain("30");
+
+      fireEvent.click(screen.getByRole("button", { name: "DMS" }));
+      const text = container.textContent?.replace(/\s+/g, "") ?? "";
+      expect(text).toContain("30");
+      expect(text).toContain("0.0");
+    });
+
+    it("asin(0.5) en RAD conserva radianes", () => {
+      const { container } = render(
+        <ResultPanel
+          result={{ ...angleResult, result_latex: "\\frac{\\pi}{6}", result_text: "pi/6", result_approx: 0.523599 }}
+          isLoading={false}
+          inputLatex="asin(0.5)"
+          angleUnit="rad"
+        />,
+      );
+      expect(screen.queryByRole("button", { name: "DMS" })).not.toBeInTheDocument();
+      expect(container.textContent).not.toMatch(/[°∘]/);
     });
   });
 });

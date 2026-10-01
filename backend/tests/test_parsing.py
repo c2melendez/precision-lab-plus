@@ -29,6 +29,11 @@ def test_normalize_unicode_sqrt_parenthesized():
     assert parsing.normalize_unicode("√(x+1)") == "sqrt(x+1)"
 
 
+def test_normalize_unicode_degree_symbol():
+    assert parsing.normalize_unicode("30°") == "30*pi/180"
+    assert parsing.normalize_unicode("sin(30°)") == "sin(30*pi/180)"
+
+
 # ---------------------------------------------------------------------------
 # Etapa 4: punto decimal y notación científica
 # ---------------------------------------------------------------------------

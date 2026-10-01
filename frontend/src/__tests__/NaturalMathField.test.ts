@@ -86,3 +86,117 @@ describe("latexToBackendSyntax — Fase 10 (funciones de estadística)", () => {
     expect(latexToBackendSyntax("xyz")).toBe("x y z");
   });
 });
+
+
+describe("Trig matrix notation normalization", () => {
+  it("rewrites function powers that SymPy expects as explicit powers", () => {
+    const value = latexToBackendSyntax("\\cosh^{2}(1)-\\sinh^{2}(1)");
+    expect(value).toContain("cosh");
+    expect(value).toContain("sinh");
+    expect(value).toContain("**(2)");
+  });
+
+  it("normalizes bare trig powers before MathLive can split the notation", () => {
+    const value = latexToBackendSyntax("\\sin^{2}x");
+    expect(value).toContain("sin");
+    expect(value).toContain("**(2)");
+    expect(value).toContain("x");
+  });
+
+  it.each([
+    ["\\operatorname{arccot} x", "acot"],
+    ["\\operatorname{arcsec} x", "asec"],
+    ["\\operatorname{arccsc} x", "acsc"],
+    ["\\operatorname{arsinh} x", "asinh"],
+    ["\\operatorname{arcsch} x", "acsch"],
+    ["\\operatorname{arsech} x", "asech"],
+    ["\\operatorname{arcosh} x", "acosh"],
+    ["\\operatorname{artanh} x", "atanh"],
+    ["\\operatorname{arcoth} x", "acoth"],
+    ["\\operatorname{sech} x", "sech"],
+  ])("normalizes operatorname %s as one backend function", (latex, expected) => {
+    const value = latexToBackendSyntax(latex);
+    expect(value.replace(/\s+/g, "")).toContain(expected + "(");
+  });
+
+  it("normalizes operatorname hyperbolic powers before MathLive ASCII spacing", () => {
+    expect(latexToBackendSyntax("\\operatorname{sech}^{2}x").replace(/\\s+/g, "")).toBe("(sech(x))**(2)");
+  });
+
+  it("normalizes infinity to the backend oo token", () => {
+    expect(latexToBackendSyntax("\\infty")).toBe("oo");
+    expect(latexToBackendSyntax("-\\infty")).toBe("-oo");
+  });
+
+  it.each([
+    ["\\operatorname{arccot}(-1)", "acot(-1)"],
+    ["\\operatorname{arcsec}(2)", "asec(2)"],
+    ["\\operatorname{arccsc}(2)", "acsc(2)"],
+    ["\\operatorname{arsinh}(1)", "asinh(1)"],
+    ["\\operatorname{arcosh}(2)", "acosh(2)"],
+    ["\\operatorname{artanh}(0)", "atanh(0)"],
+    ["\\operatorname{arcsch}(1)", "acsch(1)"],
+    ["\\operatorname{arsech}(1/2)", "asech(1/2)"],
+    ["\\operatorname{arcoth}(2)", "acoth(2)"],
+  ])("keeps parenthesized operatorname %s atomic", (latex, expected) => {
+    expect(latexToBackendSyntax(latex).replace(/\s+/g, "")).toBe(expected);
+  });
+
+  it.each([
+    ["\\mathrm{arcsec} x", "asec(x)"],
+    ["\\mathrm{arcosh} x", "acosh(x)"],
+    ["\\mathrm{sech} x", "sech(x)"],
+  ])("normalizes MathLive mathrm serialization %s", (latex, expected) => {
+    expect(latexToBackendSyntax(latex).replace(/\s+/g, "")).toBe(expected);
+  });
+
+  it("keeps inverse operator names atomic inside equations and calculus bodies", () => {
+    expect(latexToBackendSyntax("\\operatorname{arcsec} x=\\frac{\\pi}{3}").replace(/\s+/g, ""))
+      .toBe("asec(x)=(pi)/(3)");
+    expect(latexToBackendSyntax("\\operatorname{arcosh} x=\\ln 2").replace(/\s+/g, ""))
+      .toBe("acosh(x)=ln2");
+    expect(latexToBackendSyntax("\\operatorname{arccot} x").replace(/\s+/g, ""))
+      .toBe("acot(x)");
+  });
+});
+
+
+describe("B7 matrix parser regressions", () => {
+  it("keeps a function atomic after a numerical coefficient", () => {
+    expect(latexToBackendSyntax("2\\sin^{2}x-\\sin x-1=0").replace(/\s+/g, ""))
+      .toBe("2(sin(x))**(2)-sin(x)-1=0");
+  });
+
+  it("preserves the enclosing fraction after a bare function exponent", () => {
+    expect(latexToBackendSyntax("\\frac{\\cos x}{1+\\sin^{2}x}").replace(/\s+/g, ""))
+      .toBe("(cos(x))/(1+(sin(x))**(2))");
+  });
+
+  it("converts absolute value inside an inequality", () => {
+    expect(latexToBackendSyntax("\\lvert\\sin x\\rvert\\ge\\frac{\\sqrt{2}}{2}").replace(/\s+/g, ""))
+      .toBe("abs(sin(x))>=(sqrt(2))/(2)");
+  });
+});
+
+
+describe("Native inverse functions retain explicit application syntax", () => {
+  it("keeps the complete bare fraction inside the inverse application", () => {
+    expect(latexToBackendSyntax("\\sin\\left(\\arccos\\frac{3}{5}\\right)").replace(/\s+/g, ""))
+      .toBe("sin(arccos((3)/(5)))");
+  });
+
+  it("preserves nested braces in a bare fractional function argument", () => {
+    expect(latexToBackendSyntax("\\arccos\\frac{\\sqrt{3}}{2}").replace(/\s+/g, ""))
+      .toBe("arccos((sqrt(3))/(2))");
+  });
+
+  it("preserves a fraction inside another bare fractional application", () => {
+    expect(latexToBackendSyntax("\\sin\\frac{\\arccos\\frac{3}{5}}{2}").replace(/\s+/g, ""))
+      .toBe("sin((arccos((3)/(5)))/(2))");
+  });
+
+  it("normalizes a native inverse-function equation before domain routing", () => {
+    expect(latexToBackendSyntax("\\arcsin x=\\arccos x").replace(/\s+/g, ""))
+      .toBe("arcsin(x)=arccos(x)");
+  });
+});

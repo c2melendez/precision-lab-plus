@@ -196,6 +196,66 @@ class EquationSolution(BaseModel):
     is_complex: bool = False
 
 
+class InequalityInterval(BaseModel):
+    lower: Optional[float] = None
+    upper: Optional[float] = None
+    lower_text: Optional[str] = None
+    upper_text: Optional[str] = None
+    lower_included: bool = False
+    upper_included: bool = False
+
+
+class InequalityBoundary(BaseModel):
+    a: float
+    b: float
+    c: float
+    operator: str
+    label: str
+
+
+class InequalityCircle(BaseModel):
+    center_x: float
+    center_y: float
+    radius: float
+    center_x_exact: str
+    center_y_exact: str
+    radius_exact: str
+    inside: bool
+    boundary_included: bool
+
+
+class InequalityEllipse(BaseModel):
+    center_x: float
+    center_y: float
+    radius_x: float
+    radius_y: float
+    center_x_exact: str
+    center_y_exact: str
+    radius_x_exact: str
+    radius_y_exact: str
+    inside: bool
+    boundary_included: bool
+
+
+class ComplexGraphPoint(BaseModel):
+    re: float
+    im: float
+    label: str
+
+
+class ComplexGraphComponents(BaseModel):
+    variable: str
+    re_expression: str
+    im_expression: str
+    re_latex: str
+    im_latex: str
+
+
+class ComplexGraphSample(BaseModel):
+    source: ComplexGraphPoint
+    target: ComplexGraphPoint
+
+
 class Trace(BaseModel):
     type: str
     name: str
@@ -246,6 +306,36 @@ class MathResponse(BaseModel):
     input_latex: Optional[str] = None
     result_latex: Optional[str] = None
     result_text: Optional[str] = None
+    # B7: expresión reutilizable de una integral, sin la constante de
+    # integración. `result_text` y `result_latex` siguen mostrando + C.
+    antiderivative_expression: Optional[str] = None
+    antiderivative_latex: Optional[str] = None
+    # B7: certificado conservador para graficar una transformación algebraica
+    # en R sin perder puntos excluidos del dominio original.
+    graph_polynomial_comparison: Optional[bool] = None
+    # B7: lado derecho explícito de y(x)=... y miembros representativos
+    # de una familia de un único parámetro; nunca se extraen del texto UI.
+    ode_solution_expression: Optional[str] = None
+    ode_solution_latex: Optional[str] = None
+    ode_representative_expressions: Optional[List[str]] = None
+    ode_representative_latex: Optional[List[str]] = None
+    system_graph_expressions: Optional[List[str]] = None
+    system_graph_latex: Optional[List[str]] = None
+    system_graph_intersections: Optional[List[List[float]]] = None
+    system_graph_coincident: bool = False
+    system_graph_component_indices: Optional[List[int]] = None
+    inequality_intervals: Optional[List[InequalityInterval]] = None
+    inequality_variable: Optional[str] = None
+    inequality_region_kind: Optional[str] = None
+    inequality_region_dimension: Optional[int] = None
+    inequality_constraints: Optional[List[InequalityBoundary]] = None
+    inequality_preview_polygon: Optional[List[List[float]]] = None
+    inequality_viewport: Optional[List[float]] = None
+    inequality_circle: Optional[InequalityCircle] = None
+    inequality_ellipse: Optional[InequalityEllipse] = None
+    complex_graph_points: Optional[List[ComplexGraphPoint]] = None
+    complex_graph_components: Optional[ComplexGraphComponents] = None
+    complex_graph_mapping: Optional[List[ComplexGraphSample]] = None
     result_approx: Optional[float] = None
     result_data: Optional[Union[List[EquationSolution], List[List[str]]]] = None
     steps: List[Step] = []

@@ -7,6 +7,8 @@ resto) — para al menos un endpoint de cada tipo.
 
 import os
 
+import sympy
+
 os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
 
 from fastapi.testclient import TestClient
@@ -41,6 +43,16 @@ def test_limit_at_infinity():
     body = response.json()
     assert body["success"] is True
     assert body["result_text"] == "0"
+
+
+def test_limit_x_cot_x_at_zero_fast_path():
+    response = client.post(
+        "/api/v1/limit",
+        json={"expression": "x*cot(x)", "variable": "x", "point": "0", "direction": "both"},
+    )
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_text"] == "1"
 
 
 def test_series_passthrough_real():
@@ -118,6 +130,17 @@ def test_inequality_is_real_passthrough():
     assert "2" in body["result_text"]
 
 
+def test_arccot_inequality_uses_calculator_real_branch():
+    response = client.post(
+        "/api/v1/inequality",
+        json={"inequality": "acot(x)<pi/4"},
+    )
+    body = response.json()
+    assert body["success"] is True
+    assert "1" in body["result_text"]
+    assert "-oo" not in body["result_text"]
+
+
 def test_integral_improper_is_real_passthrough():
     response = client.post(
         "/api/v1/integral/improper",
@@ -126,6 +149,16 @@ def test_integral_improper_is_real_passthrough():
     body = response.json()
     assert body["success"] is True
     assert body["result_text"] == "1"
+
+
+def test_integral_improper_sech_squared_uses_closed_form_fast_path():
+    response = client.post(
+        "/api/v1/integral/improper",
+        json={"expression": "sech(x)^2", "variable": "x", "lower_bound": "0", "upper_bound": "oo"},
+    )
+    body = response.json()
+    assert body["success"] is True
+    assert sympy.simplify(sympy.sympify(body["result_text"]) - 1) == 0
 
 
 def test_graph_3d_is_real_passthrough():
@@ -163,3 +196,117 @@ def test_derivative_implicit_is_real_passthrough():
     body = response.json()
     assert body["success"] is True
     assert body["result_text"] in {"-x/y", "-x/y(x)"}
+
+
+def test_oscillatory_limit_sin_reciprocal_is_dne():
+    response = client.post(
+        "/api/v1/limit",
+        json={"expression": "sin(1/x)", "variable": "x", "point": "0", "direction": "both"},
+    )
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_text"] == "DNE"
+
+
+def test_oscillatory_limit_sin_at_infinity_is_dne():
+    response = client.post(
+        "/api/v1/limit",
+        json={"expression": "sin(x)", "variable": "x", "point": "oo", "direction": "both"},
+    )
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_text"] == "DNE"
+
+
+def test_inverse_hyperbolic_limits_use_fast_log_form():
+    cases = [
+        ("asinh(x)/x", "0", "1"),
+        ("atanh(x)/x", "0", "1"),
+        ("asinh(x)-ln(x)", "oo", "log(2)"),
+        ("acosh(x)-ln(x)", "oo", "log(2)"),
+    ]
+    for expression, point, expected in cases:
+        response = client.post(
+            "/api/v1/limit",
+            json={"expression": expression, "variable": "x", "point": point, "direction": "both"},
+        )
+        body = response.json()
+        assert body["success"] is True, (expression, body)
+        assert body["result_text"] == expected
+
+
+def test_inequality_timeout_is_controlled_and_next_request_succeeds(monkeypatch):
+    from app.routers import phase2 as phase2_router
+
+    payload = {
+        "inequality": "x>0", "variable": "x",
+        "domain_lower": "0", "domain_upper": "1",
+        "domain_lower_inclusive": True, "domain_upper_inclusive": True,
+    }
+
+    def exhausted_budget(func, *args, **kwargs):
+        assert func is phase2_router.phase2_service.compute_inequality
+        assert args[1:] == ("x", "0", "1", True, True)
+        raise TimeoutError("Operación matemática excedió el presupuesto.")
+
+    with monkeypatch.context() as scoped:
+        scoped.setattr(phase2_router, "run_math_operation", exhausted_budget)
+        body = client.post("/api/v1/inequality", json=payload).json()
+        assert body["success"] is False
+        assert body["error_code"] == "TIMEOUT"
+
+    body = client.post("/api/v1/inequality", json=payload).json()
+    assert body["success"] is True
+    assert sympy.sympify(body["result_text"]) == sympy.Interval(0, 1, left_open=True)
+
+
+def test_inequality_solver_exceptions_are_controlled(monkeypatch):
+    from app.routers import phase2 as phase2_router
+
+    for exception in (NotImplementedError("unsupported"), TypeError("relational truth")):
+        def unsupported_solver(*args, **kwargs):
+            raise exception
+
+        with monkeypatch.context() as scoped:
+            scoped.setattr(phase2_router, "run_math_operation", unsupported_solver)
+            response = client.post("/api/v1/inequality", json={"inequality": "x>0", "variable": "x"})
+            assert response.status_code == 200
+            body = response.json()
+            assert body["success"] is False
+            assert body["error_code"] == "UNSUPPORTED_OPERATION"
+
+    body = client.post("/api/v1/inequality", json={"inequality": "x>0", "variable": "x"}).json()
+    assert body["success"] is True
+
+
+def test_health_responds_while_symbolic_request_waits_for_timeout(monkeypatch):
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    from app.routers import phase2 as phase2_router
+
+    entered = threading.Event()
+    release = threading.Event()
+
+    def stalled_operation(*args, **kwargs):
+        entered.set()
+        if not release.wait(timeout=5):
+            raise AssertionError("Test did not release symbolic operation.")
+        raise TimeoutError("Controlled test timeout.")
+
+    monkeypatch.setattr(phase2_router, "run_math_operation", stalled_operation)
+    # A context-managed TestClient shares one server event loop between
+    # both caller threads, as concurrent requests do under Uvicorn.
+    with TestClient(app) as shared_client, ThreadPoolExecutor(max_workers=2) as pool:
+        operation = pool.submit(
+            shared_client.post, "/api/v1/inequality",
+            json={"inequality": "x>0", "variable": "x"},
+        )
+        try:
+            assert entered.wait(timeout=3)
+            health = pool.submit(shared_client.get, "/api/v1/health")
+            assert health.result(timeout=1).status_code == 200
+        finally:
+            release.set()
+        body = operation.result(timeout=3).json()
+        assert body["success"] is False
+        assert body["error_code"] == "TIMEOUT"

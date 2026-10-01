@@ -9,7 +9,7 @@ from fastapi import APIRouter, Request
 
 from app.core.logging import log_request_event
 from app.schemas.requests import EvaluateRequest
-from app.schemas.responses import ErrorCode, MathResponse, OperationType, ResultType
+from app.schemas.responses import ComplexGraphComponents, ComplexGraphPoint, ComplexGraphSample, ErrorCode, MathResponse, OperationType, ResultType
 from app.services import evaluate_service, parsing
 from app.services.ast_validator import ComplexityLimitError
 
@@ -40,7 +40,7 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
 
     try:
         result = evaluate_service.evaluate(
-            payload.expression, payload.angle_unit, payload.substitutions
+            payload.expression, payload.angle_unit, payload.substitutions, payload.domain
         )
     except parsing.ParseSecurityError as exc:
         return _error(request, ErrorCode.PARSE_ERROR, str(exc))
@@ -91,6 +91,59 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
     except ValueError:
         input_latex = None
 
+    complex_points = None
+    complex_components = None
+    complex_mapping = None
+    if not result.expr.free_symbols and result.expr.is_number and result.expr.has(sympy.I):
+        try:
+            re_value = float(sympy.N(sympy.re(result.expr)))
+            im_value = float(sympy.N(sympy.im(result.expr)))
+            if all(sympy.Float(v).is_finite and abs(v) <= 1e6 for v in (re_value, im_value)):
+                complex_points = [ComplexGraphPoint(re=re_value, im=im_value, label=result_text)]
+        except (AttributeError, TypeError, ValueError, OverflowError):
+            pass
+    symbols = result.expr.free_symbols
+    if len(symbols) == 1 and sympy.count_ops(result.expr) <= 30:
+        source_symbol = next(iter(symbols))
+        if source_symbol.name == "z":
+            samples = []
+            for z_value, label in ((sympy.S.Zero, "0"), (sympy.S.One, "1"), (sympy.I, "i"), (1 + sympy.I, "1+i")):
+                try:
+                    value = sympy.N(result.expr.subs(source_symbol, z_value))
+                    if value.free_symbols or value.is_finite is not True:
+                        continue
+                    re_value = float(sympy.re(value))
+                    im_value = float(sympy.im(value))
+                    if not all(sympy.Float(v).is_finite and abs(v) <= 1e6 for v in (re_value, im_value)):
+                        continue
+                    samples.append(ComplexGraphSample(
+                        source=ComplexGraphPoint(re=float(sympy.re(z_value)), im=float(sympy.im(z_value)), label=label),
+                        target=ComplexGraphPoint(re=re_value, im=im_value, label=f"f({label})"),
+                    ))
+                except (AttributeError, TypeError, ValueError, OverflowError, ZeroDivisionError):
+                    continue
+            if len(samples) >= 2:
+                complex_mapping = samples
+    if len(symbols) == 1 and result.expr.has(sympy.I) and sympy.count_ops(result.expr) <= 30:
+        source_symbol = next(iter(symbols))
+        if source_symbol.name in ("x", "t"):
+            real_symbol = sympy.Symbol(source_symbol.name, real=True)
+            try:
+                real_expr = result.expr.subs(source_symbol, real_symbol)
+                re_part = sympy.expand_complex(sympy.re(real_expr))
+                im_part = sympy.expand_complex(sympy.im(real_expr))
+                if (re_part.is_real is True and im_part.is_real is True
+                        and not re_part.has(sympy.re, sympy.im, sympy.I)
+                        and not im_part.has(sympy.re, sympy.im, sympy.I)
+                        and sympy.count_ops(re_part) + sympy.count_ops(im_part) <= 80):
+                    complex_components = ComplexGraphComponents(
+                        variable=source_symbol.name,
+                        re_expression=str(re_part), im_expression=str(im_part),
+                        re_latex=sympy.latex(re_part), im_latex=sympy.latex(im_part),
+                    )
+            except (AttributeError, TypeError, ValueError, OverflowError, NotImplementedError):
+                pass
+
     return MathResponse(
         success=True,
         operation=OperationType.EVALUATE,
@@ -100,6 +153,9 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         input_latex=input_latex,
         result_latex=result_latex,
         result_text=result_text,
+        complex_graph_points=complex_points,
+        complex_graph_components=complex_components,
+        complex_graph_mapping=complex_mapping,
         result_approx=result.approx_value,
         steps=[],
         has_detailed_steps=False,

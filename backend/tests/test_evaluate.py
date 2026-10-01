@@ -170,7 +170,7 @@ def test_multiletter_xyz_single_identifier_not_x_times_y_times_z():
 
 
 # ---------------------------------------------------------------------------
-# Modo grados con substitutions / inversas siempre en radianes
+# Modo grados con substitutions / inversas devuelven la unidad activa
 # ---------------------------------------------------------------------------
 
 
@@ -196,11 +196,11 @@ def test_evaluate_without_substitutions_is_symbolic():
     assert body["result_text"] == "sin(x)"
 
 
-def test_inverse_trig_always_radians_regardless_of_angle_unit():
+def test_inverse_trig_returns_degrees_when_angle_unit_is_deg():
     response = _evaluate(expression="asin(1)", angle_unit="deg")
     body = response.json()
     assert body["success"] is True
-    assert body["result_approx"] == pytest.approx(math.pi / 2)
+    assert body["result_approx"] == pytest.approx(90.0)
 
 
 # ---------------------------------------------------------------------------
@@ -238,7 +238,7 @@ def test_result_latex_truncated_when_too_long(monkeypatch):
     # supera los 10,000 caracteres.
     huge_expr = sympy.Add(*(sympy.Symbol(f"x{i}") for i in range(3000)))
 
-    def _fake_evaluate(expression, angle_unit="rad", substitutions=None):
+    def _fake_evaluate(expression, angle_unit="rad", substitutions=None, domain="complex"):
         return evaluate_service.EvaluateResult(
             expr=huge_expr, input_expr=huge_expr, is_numeric=False, approx_value=None
         )
@@ -312,3 +312,47 @@ def test_stdev_with_single_value_is_parse_error():
     body = response.json()
     assert body["success"] is False
     assert body["error_code"] == "PARSE_ERROR"
+
+
+def test_standalone_inverse_trig_detector():
+    from app.services.evaluate_service import _is_standalone_inverse_trig_expression
+
+    for expression in [
+        "asin(0.5)",
+        "arcsin(0.5)",
+        "acos(0)",
+        "atan(1)",
+        "asec(2)",
+        "acsc(2)",
+        "acot(1)",
+    ]:
+        assert _is_standalone_inverse_trig_expression(expression) is True
+
+    assert _is_standalone_inverse_trig_expression("sin(asin(0.5))") is False
+    assert _is_standalone_inverse_trig_expression("1+asin(0.5)") is False
+
+
+# ---------------------------------------------------------------------------
+# Matriz trigonométrica — dominio real explícito
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("expression", ["asin(2)", "acosh(1/2)", "atanh(1)", "atanh(2)"])
+def test_real_domain_rejects_inverse_trig_outside_domain(expression):
+    response = _evaluate(expression=expression, domain="real")
+    body = response.json()
+    assert body["success"] is False
+    assert body["error_code"] == "DOMAIN_ERROR"
+
+
+def test_complex_domain_remains_backward_compatible():
+    response = _evaluate(expression="asin(2)", domain="complex")
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_latex"]
+
+
+def test_real_domain_allows_nested_inverse_trig_composition():
+    response = _evaluate(expression="sin(acos(3/5))", domain="real")
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_approx"] == pytest.approx(4/5)

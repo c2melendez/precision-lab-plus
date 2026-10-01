@@ -6,8 +6,9 @@
 
 import { create } from "zustand";
 import type { MathResponse } from "../api/client";
+import type { ScientificGraphContext } from "../components/scientificGraphContext";
 
-export type CalculatorMode = "basic" | "simple" | "derivative" | "integral" | "equation" | "system" | "matrix" | "graph" | "limit" | "statistics" | "units";
+export type CalculatorMode = "basic" | "simple" | "derivative" | "integral" | "equation" | "system" | "matrix" | "graph" | "limit" | "statistics" | "geometry" | "units";
 export type Theme = "dark" | "light";
 
 interface UIState {
@@ -23,12 +24,14 @@ interface UIState {
   // componente. Este campo es el puente: BasicMode lo llena y cambia de
   // modo; Graph2DForm lo consume una vez (useEffect) y lo vacía.
   pendingGraphResult: MathResponse | null;
+  pendingGraphContext: ScientificGraphContext | null;
   setActiveMode: (mode: CalculatorMode) => void;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
   setLoading: (isLoading: boolean) => void;
   setErrorMessage: (message: string | null) => void;
   setPendingGraphResult: (result: MathResponse | null) => void;
+  setPendingGraphContext: (context: ScientificGraphContext | null) => void;
 }
 
 function readPersistedTheme(): Theme {
@@ -58,6 +61,7 @@ export const useUIStore = create<UIState>((set, get) => ({
   isLoading: false,
   lastErrorMessage: null,
   pendingGraphResult: null,
+  pendingGraphContext: null,
   setActiveMode: (mode) => set({ activeMode: mode }),
   setTheme: (theme) => {
     persistTheme(theme);
@@ -71,4 +75,5 @@ export const useUIStore = create<UIState>((set, get) => ({
   setLoading: (isLoading) => set({ isLoading }),
   setErrorMessage: (message) => set({ lastErrorMessage: message }),
   setPendingGraphResult: (result) => set({ pendingGraphResult: result }),
+  setPendingGraphContext: (context) => set({ pendingGraphContext: context }),
 }));

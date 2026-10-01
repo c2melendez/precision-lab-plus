@@ -19,6 +19,7 @@ export const HISTORY_MAX_ENTRIES = 50;
 
 export interface HistoryEntry {
   id: string;
+  sourceModule?: string;
   operation: string;
   endpointUrl: string;
   requestPayload: Record<string, unknown>;
@@ -26,7 +27,12 @@ export interface HistoryEntry {
   label: string;
   resultLatex?: string;
   resultText?: string;
+  /** Aproximación numérica cruda del backend. Se conserva para que
+   * Historial pueda aplicar la misma política contextual de presentación
+   * que ResultPanel (por ejemplo DD/DMS para ángulos en grados). */
+  resultApprox?: string;
   resultType?: string;
+  resultData?: unknown;
   hasDetailedSteps: boolean;
   warnings: string[];
   timestamp: number;
