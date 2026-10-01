@@ -71,12 +71,4 @@ describe("useRecentKeysStore", () => {
     expect(parsed.basic.variables).toEqual([k("x")]);
   });
 
-  it("ignora JSON corrupto en localStorage sin romper el arranque", () => {
-    window.localStorage.setItem("precision-lab-recent-keys", "{not json");
-    // No debe lanzar — el store simplemente arranca vacío la próxima vez
-    // que se lea el storage (comprobado indirectamente: la app no truena
-    // al importar el módulo, ya cubierto por el resto de la suite
-    // importando este archivo sin fallar).
-    expect(() => window.localStorage.getItem("precision-lab-recent-keys")).not.toThrow();
-  });
 });

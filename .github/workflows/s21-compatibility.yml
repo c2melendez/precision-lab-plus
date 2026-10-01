@@ -39,7 +39,7 @@ jobs:
         run: npm install --no-save --package-lock=false @playwright/test@1.63.0
       - name: Use upstream Ubuntu package mirrors
         run: |
-          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+          sudo bash qa/s21/configure-apt-mirrors.sh
           printf 'Acquire::http::Timeout "20";\nAcquire::Retries "3";\n' | sudo tee /etc/apt/apt.conf.d/80-playwright-network
       - name: Install Firefox and WebKit
         working-directory: frontend
@@ -81,7 +81,7 @@ jobs:
         run: npm install --prefix lite --no-save --package-lock=false @playwright/test@1.63.0
       - name: Use upstream Ubuntu package mirrors
         run: |
-          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+          sudo bash qa/s21/configure-apt-mirrors.sh
           printf 'Acquire::http::Timeout "20";\nAcquire::Retries "3";\n' | sudo tee /etc/apt/apt.conf.d/80-playwright-network
       - name: Install Firefox and WebKit
         working-directory: lite
