@@ -352,9 +352,15 @@ async def integral_improper(payload: ImproperIntegralRequest, request: Request) 
     log_request_event(request.state.request_id, "integral_improper_request")
 
     try:
-        result = phase2_service.compute_improper_integral(
-            payload.expression, payload.variable, payload.lower_bound, payload.upper_bound
+        result = run_math_operation(
+            phase2_service.compute_improper_integral,
+            payload.expression,
+            payload.variable,
+            payload.lower_bound,
+            payload.upper_bound,
         )
+    except TimeoutError as exc:
+        return _error(request, OperationType.INTEGRAL_IMPROPER, ErrorCode.TIMEOUT, str(exc))
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.INTEGRAL_IMPROPER, ErrorCode.PARSE_ERROR, str(exc))
     except ComplexityLimitError as exc:
