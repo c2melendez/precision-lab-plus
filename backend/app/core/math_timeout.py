@@ -1,9 +1,12 @@
 """Hard wall-clock budget for expensive symbolic math operations.
 
-The outer API call is isolated in a fresh spawned process so timed-out
+The outer API call is isolated in a fresh child process so timed-out
 SymPy work can be terminated without inheriting locks from Uvicorn or
-other runtime threads. Nested guarded calls inside that child use SIGALRM
-instead of trying to create another process.
+other runtime threads. On Linux we prefer forkserver: children are forked
+from a single-threaded server rather than from Uvicorn itself, avoiding
+inherited locks while also avoiding spawn's full interpreter startup cost.
+Nested guarded calls inside that child use SIGALRM instead of creating
+another process.
 """
 
 from __future__ import annotations
@@ -17,6 +20,22 @@ from typing import Callable, TypeVar
 from app.core.config import get_settings
 
 T = TypeVar("T")
+
+_AVAILABLE_START_METHODS = multiprocessing.get_all_start_methods()
+_PROCESS_START_METHOD = (
+    "forkserver"
+    if "forkserver" in _AVAILABLE_START_METHODS
+    else "spawn"
+    if "spawn" in _AVAILABLE_START_METHODS
+    else None
+)
+
+if _PROCESS_START_METHOD == "forkserver" and hasattr(multiprocessing, "set_forkserver_preload"):
+    try:
+        multiprocessing.set_forkserver_preload(["sympy"])
+    except Exception:
+        # Preloading is only an optimization; isolation still works without it.
+        pass
 
 
 def _process_entry(sender, func, args: tuple, kwargs: dict) -> None:
@@ -32,13 +51,15 @@ def _process_entry(sender, func, args: tuple, kwargs: dict) -> None:
         sender.close()
 
 
-def _run_in_spawned_process(
+def _run_in_isolated_process(
     func: Callable[..., T],
     args: tuple,
     kwargs: dict,
     budget: float,
 ) -> T:
-    ctx = multiprocessing.get_context("spawn")
+    if _PROCESS_START_METHOD is None:
+        return _run_with_signal(func, args, kwargs, budget)
+    ctx = multiprocessing.get_context(_PROCESS_START_METHOD)
     receiver, sender = ctx.Pipe(duplex=False)
     process = ctx.Process(
         target=_process_entry,
@@ -119,13 +140,13 @@ def run_math_operation(
     if multiprocessing.current_process().name != "MainProcess":
         return _run_with_signal(func, args, kwargs, budget)
 
-    if "spawn" in multiprocessing.get_all_start_methods():
+    if _PROCESS_START_METHOD is not None:
         try:
             pickle.dumps((func, args, kwargs))
         except Exception:
             # Local closures/lambdas used by verification helpers are not
-            # spawn-serializable. They are still interruptible with SIGALRM.
+            # process-serializable. They are still interruptible with SIGALRM.
             return _run_with_signal(func, args, kwargs, budget)
-        return _run_in_spawned_process(func, args, kwargs, budget)
+        return _run_in_isolated_process(func, args, kwargs, budget)
 
     return _run_with_signal(func, args, kwargs, budget)
