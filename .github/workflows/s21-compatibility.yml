@@ -37,6 +37,10 @@ jobs:
       - name: Install Playwright test runner
         working-directory: frontend
         run: npm install --no-save --package-lock=false @playwright/test@1.63.0
+      - name: Use upstream Ubuntu package mirrors
+        run: |
+          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+          printf 'Acquire::http::Timeout "20";\nAcquire::Retries "3";\n' | sudo tee /etc/apt/apt.conf.d/80-playwright-network
       - name: Install Firefox and WebKit
         working-directory: frontend
         run: npx playwright install --with-deps firefox webkit
@@ -75,6 +79,10 @@ jobs:
         run: npm ci --prefix lite
       - name: Install Playwright test runner
         run: npm install --prefix lite --no-save --package-lock=false @playwright/test@1.63.0
+      - name: Use upstream Ubuntu package mirrors
+        run: |
+          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+          printf 'Acquire::http::Timeout "20";\nAcquire::Retries "3";\n' | sudo tee /etc/apt/apt.conf.d/80-playwright-network
       - name: Install Firefox and WebKit
         working-directory: lite
         run: npx playwright install --with-deps firefox webkit
