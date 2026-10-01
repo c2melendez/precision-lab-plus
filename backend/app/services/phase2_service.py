@@ -17,7 +17,7 @@ from typing import List
 import sympy
 
 from app.schemas.responses import EquationSolution, GraphData, InequalityInterval, Trace
-from app.services import graph_service, parsing
+from app.services import graph_service, integral_service, parsing
 
 _DIRECTION_MAP = {"both": "+-", "left": "-", "right": "+"}
 
@@ -517,7 +517,15 @@ def compute_improper_integral(
     lower_expr = parsing.parse_expression_tree(lower_bound, allow_equation=False)
     upper_expr = parsing.parse_expression_tree(upper_bound, allow_equation=False)
 
-    value = sympy.integrate(expr, (var_symbol, lower_expr, upper_expr))
+    fast_antiderivative = integral_service._fast_antiderivative(expr, var_symbol)
+    if fast_antiderivative is not None:
+        lower_value = sympy.limit(fast_antiderivative, var_symbol, lower_expr, dir="+") \
+            if lower_expr in (sympy.oo, -sympy.oo) else fast_antiderivative.subs(var_symbol, lower_expr)
+        upper_value = sympy.limit(fast_antiderivative, var_symbol, upper_expr, dir="-") \
+            if upper_expr in (sympy.oo, -sympy.oo) else fast_antiderivative.subs(var_symbol, upper_expr)
+        value = sympy.simplify(upper_value - lower_value)
+    else:
+        value = sympy.integrate(expr, (var_symbol, lower_expr, upper_expr))
 
     warnings: List[str] = []
     if value.has(sympy.Integral):
