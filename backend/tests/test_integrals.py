@@ -213,3 +213,31 @@ def test_fast_path_definite_common_identities():
         assert body["success"] is True, expression
         actual = sp.sympify(body["result_text"])
         assert sp.simplify(actual - expected) == 0, expression
+
+
+def test_asech_indefinite_is_resolved_and_its_derivative_matches_on_real_domain():
+    body = _integral("asech(x)").json()
+    assert body["success"] is True
+    assert body["result_text"].endswith("+ C")
+    assert body["result_latex"].endswith("+ C")
+    antiderivative = sp.sympify(body["antiderivative_expression"])
+    assert not antiderivative.has(sp.Integral)
+    assert not body["antiderivative_latex"].endswith("+ C")
+    x = sp.Symbol("x")
+    residual = sp.diff(antiderivative, x) - sp.asech(x)
+    for point in (sp.Rational(1, 10), sp.Rational(1, 4), sp.Rational(1, 2), sp.Rational(9, 10)):
+        assert abs(complex(residual.subs(x, point).evalf(30))) < 1e-20
+
+
+def test_asech_definite_respects_bounds_and_reversed_orientation():
+    lower, upper = sp.Rational(1, 4), sp.Rational(3, 4)
+    # Independent numerical quadrature, rather than another evaluation
+    # of the same closed form used by the implementation.
+    import mpmath
+    expected = float(mpmath.quad(lambda t: mpmath.acosh(1/t), [float(lower), float(upper)]))
+    for lo, hi, sign in (("1/4", "3/4", 1), ("3/4", "1/4", -1)):
+        body = _integral("asech(x)", lower_bound=lo, upper_bound=hi).json()
+        assert body["success"] is True
+        assert "+ C" not in body["result_text"]
+        actual = float(sp.N(sp.sympify(body["result_text"]), 20))
+        assert abs(actual - sign * expected) < 1e-10

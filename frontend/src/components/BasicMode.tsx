@@ -764,7 +764,9 @@ export function BasicMode() {
               {
                 equation: trimmed,
                 angle_unit: angleUnit,
-                domain: "real",
+                // An explicit real interval restricts solutions to R;
+                // otherwise retain complex roots supported by the solver.
+                domain: intervalRestriction ? "real" : "complex",
                 ...(intervalRestriction
                   ? {
                       domain_lower: latexToBackendSyntax(intervalRestriction.lowerLatex),
@@ -782,7 +784,9 @@ export function BasicMode() {
               {
                 expression: trimmed,
                 angle_unit: angleUnit,
-                domain: "real",
+                // Explicit imaginary units opt into complex evaluation;
+                // ordinary inverse-function domain checks remain real.
+                domain: /(?:^|[^A-Za-z_])[iI](?=$|[^A-Za-z_])/.test(trimmed) ? "complex" : "real",
                 ...(substitutionsPayload ? { substitutions: substitutionsPayload } : {}),
               },
               trimmed,

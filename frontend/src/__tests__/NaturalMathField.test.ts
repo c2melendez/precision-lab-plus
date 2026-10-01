@@ -159,3 +159,21 @@ describe("Trig matrix notation normalization", () => {
       .toBe("acot(x)");
   });
 });
+
+
+describe("B7 matrix parser regressions", () => {
+  it("keeps a function atomic after a numerical coefficient", () => {
+    expect(latexToBackendSyntax("2\\sin^{2}x-\\sin x-1=0").replace(/\s+/g, ""))
+      .toBe("2(sin(x))**(2)-sin(x)-1=0");
+  });
+
+  it("preserves the enclosing fraction after a bare function exponent", () => {
+    expect(latexToBackendSyntax("\\frac{\\cos x}{1+\\sin^{2}x}").replace(/\s+/g, ""))
+      .toBe("(cos(x))/(1+(sin(x))**(2))");
+  });
+
+  it("converts absolute value inside an inequality", () => {
+    expect(latexToBackendSyntax("\\lvert\\sin x\\rvert\\ge\\frac{\\sqrt{2}}{2}").replace(/\s+/g, ""))
+      .toBe("abs(sin(x))>=(sqrt(2))/(2)");
+  });
+});

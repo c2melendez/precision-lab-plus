@@ -135,12 +135,12 @@ function collapseKnownFunctionNames(ascii: string): string {
     // the spelled function name before the exponent so the downstream
     // inverse-normalization rules can turn it into asec/asinh/etc.
     const beforeInversePower = new RegExp(
-      `\\b${spelled}(?=\\s*(?:\\^|\\*\\*)\\s*\\(?-1\\)?)`,
+      `(?<![A-Za-z_])${spelled}(?=\\s*(?:\\^|\\*\\*)\\s*\\(?-1\\)?)`,
       "g",
     );
     result = result.replace(beforeInversePower, name);
 
-    const pattern = new RegExp(`\\b${spelled}\\s*\\(`, "g");
+    const pattern = new RegExp(`(?<![A-Za-z_])${spelled}\\s*\\(`, "g");
     result = result.replace(pattern, `${name}(`);
   }
 
@@ -335,17 +335,21 @@ function rewriteBareFunctionPowerLatex(latex: string): string {
 
 function rewriteFunctionPowers(ascii: string): string {
   const names = "sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth";
-  const prefixPower = new RegExp(`\\b(${names})\\s*(?:\\^|\\*\\*)\\s*\\(?(\\d+)\\)?\\s*\\(([^()]*)\\)`, "g");
-  let result = ascii.replace(prefixPower, (_match, fn: string, power: string, arg: string) =>
-    `(${fn}(${arg}))**(${power})`
+  // Exponent parentheses must be paired: an optional closing ')' used
+  // to consume the enclosing fraction after a bare ^2.
+  const prefixPower = new RegExp(
+    `(?<![A-Za-z_])(${names})\\s*(?:\\^|\\*\\*)\\s*(?:\\((\\d+)\\)|(\\d+))\\s*\\(([^()]*)\\)`,
+    "g",
   );
-
-  // rewriteBareFunctionPowerLatex deliberately makes MathLive see the
-  // unambiguous form sin(x)^2. The ASCII converter preserves that suffix
-  // exponent, so normalize it to the backend's explicit ** syntax too.
-  const suffixPower = new RegExp(`\\b(${names})\\s*\\(([^()]*)\\)\\s*(?:\\^|\\*\\*)\\s*\\(?(\\d+)\\)?`, "g");
-  result = result.replace(suffixPower, (_match, fn: string, arg: string, power: string) =>
-    `(${fn}(${arg}))**(${power})`
+  let result = ascii.replace(prefixPower, (_match, fn: string, grouped: string, bare: string, arg: string) =>
+    `(${fn}(${arg}))**(${grouped ?? bare})`
+  );
+  const suffixPower = new RegExp(
+    `(?<![A-Za-z_])(${names})\\s*\\(([^()]*)\\)\\s*(?:\\^|\\*\\*)\\s*(?:\\((\\d+)\\)|(\\d+))`,
+    "g",
+  );
+  result = result.replace(suffixPower, (_match, fn: string, arg: string, grouped: string, bare: string) =>
+    `(${fn}(${arg}))**(${grouped ?? bare})`
   );
   return result;
 }
@@ -454,7 +458,7 @@ export function latexToBackendSyntax(latex: string): string {
   if (asciiAggregate) return asciiAggregate;
 
   const collapsed = collapseKnownFunctionNames(ascii);
-  const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
+  const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed.replace(/∣([^∣]+)∣|\|([^|]+)\|/g, (_match, unicodeBody: string, asciiBody: string) => `abs(${unicodeBody ?? asciiBody})`)));
   const normalizedFunctions = rewriteFunctionPowers(
     rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii)),
   );

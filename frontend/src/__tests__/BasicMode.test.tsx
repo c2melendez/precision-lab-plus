@@ -106,7 +106,7 @@ describe("BasicMode", () => {
     expect(mockedCallApi).toHaveBeenCalledWith("/solve", {
       equation: "2x+3=7",
       angle_unit: "rad",
-      domain: "real",
+      domain: "complex",
     });
   });
 
@@ -312,5 +312,34 @@ describe("BasicMode", () => {
     fireEvent.click(screen.getByRole("button", { name: "Derivadas" }));
     fireEvent.click(screen.getByLabelText("derivada"));
     expect(useUIStore.getState().activeMode).toBe("basic");
+  });
+});
+
+describe("B7 complex domain routing", () => {
+  it.each(["3+4i", "3+4I", "sin(x)+i*cos(x)"])("preserves explicit imaginary unit in %s", async (expression) => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), { target: { value: expression } });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
+      expression, angle_unit: "rad", domain: "complex",
+    }));
+  });
+
+  it("requests complex roots for an equation without a real interval", async () => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), { target: { value: "x^2+1=0" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledWith("/solve", {
+      equation: "x^2+1=0", angle_unit: "rad", domain: "complex",
+    }));
+  });
+
+  it("retains real-domain validation for ordinary inverse functions", async () => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), { target: { value: "asin(2)" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
+      expression: "asin(2)", angle_unit: "rad", domain: "real",
+    }));
   });
 });

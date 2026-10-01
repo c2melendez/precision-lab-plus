@@ -179,6 +179,7 @@ def _fast_antiderivative(input_expr: sympy.Expr, x: sympy.Symbol) -> Optional[sy
     asinh = sympy.asinh
     acosh = sympy.acosh
     atanh = sympy.atanh
+    asech = sympy.asech
     acsch = sympy.acsch
     exp = sympy.exp
     sqrt = sympy.sqrt
@@ -218,6 +219,7 @@ def _fast_antiderivative(input_expr: sympy.Expr, x: sympy.Symbol) -> Optional[sy
         atanh(x): x * atanh(x) + log(1 - x**2) / 2,
         sech(x): sympy.atan(sinh(x)),
         acsch(x): x * acsch(x) + asinh(x),
+        asech(x): x * asech(x) + asin(x),
     }
 
     candidate = exact_rules.get(input_expr)
