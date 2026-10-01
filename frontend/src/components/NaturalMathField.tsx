@@ -396,6 +396,7 @@ function normalizeBackendFunctionApplications(ascii: string): string {
     "sin","cos","tan","sec","csc","cot",
     "sinh","cosh","tanh","sech","csch","coth",
     "asin","acos","atan","asec","acsc","acot",
+    "arcsin","arccos","arctan",
     "asinh","acosh","atanh","asech","acsch","acoth",
     "ln","log","sqrt",
   ].join("|");

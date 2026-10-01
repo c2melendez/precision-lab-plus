@@ -177,3 +177,11 @@ describe("B7 matrix parser regressions", () => {
       .toBe("abs(sin(x))>=(sqrt(2))/(2)");
   });
 });
+
+
+describe("Native inverse functions retain explicit application syntax", () => {
+  it("normalizes a native inverse-function equation before domain routing", () => {
+    expect(latexToBackendSyntax("\\arcsin x=\\arccos x").replace(/\s+/g, ""))
+      .toBe("arcsin(x)=arccos(x)");
+  });
+});
