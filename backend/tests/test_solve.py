@@ -165,3 +165,26 @@ def test_real_asin_equals_acos_reduces_before_generic_solver():
     solutions = [sympy.sympify(item["text"]) for item in body["result_data"]]
     assert len(solutions) == 1
     assert sympy.simplify(solutions[0] - sympy.sqrt(2) / 2) == 0
+
+def test_bounded_quadratic_in_sine_keeps_all_algebraic_and_periodic_branches():
+    body = _solve(
+        "2*sin(x)^2-sin(x)-1=0", domain="real",
+        domain_lower="0", domain_upper="2*pi", domain_upper_inclusive=False,
+    ).json()
+    assert body["success"] is True
+    values = {sympy.sympify(item["text"]) for item in body["result_data"]}
+    assert values == {sympy.pi/2, 7*sympy.pi/6, 11*sympy.pi/6}
+    x = sympy.Symbol("x")
+    residual = 2*sympy.sin(x)**2-sympy.sin(x)-1
+    assert all(sympy.simplify(residual.subs(x, value)) == 0 for value in values)
+
+
+def test_bounded_trig_polynomial_preserves_open_endpoints_and_degrees():
+    for angle_unit, expected in (("rad", {"pi/2", "pi"}), ("deg", {"90", "180"})):
+        body = _solve(
+            "sin(x)^2-sin(x)=0", domain="real", angle_unit=angle_unit,
+            domain_lower="0", domain_upper="2*pi",
+            domain_lower_inclusive=False, domain_upper_inclusive=False,
+        ).json()
+        assert body["success"] is True
+        assert {item["text"] for item in body["result_data"]} == expected

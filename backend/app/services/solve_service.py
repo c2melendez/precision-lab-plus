@@ -171,6 +171,45 @@ def _quadratic_steps(
         return None
 
 
+def _bounded_trig_polynomial_solutions(
+    expr: sympy.Expr, var: sympy.Symbol, interval: sympy.Interval
+) -> Optional[List[sympy.Expr]]:
+    """Solve each algebraic branch of a polynomial in one trig function.
+
+    The generic bounded solver may leave periodic intersections unevaluated;
+    filtering its principal solve() roots can silently lose valid branches.
+    Return None unless every branch has a finite, resolved solution set.
+    """
+    atoms = expr.atoms(sympy.sin, sympy.cos, sympy.tan)
+    if len(atoms) != 1:
+        return None
+    atom = next(iter(atoms))
+    if atom.args != (var,):
+        return None
+    u = sympy.Dummy("trig_value", real=True)
+    transformed = expr.xreplace({atom: u})
+    if transformed.free_symbols - {u}:
+        return None
+    try:
+        polynomial = sympy.Poly(transformed, u)
+    except sympy.PolynomialError:
+        return None
+    if not 2 <= polynomial.degree() <= 4:
+        return None
+    roots = sympy.solveset(polynomial.as_expr(), u, domain=sympy.S.Reals)
+    if not isinstance(roots, sympy.FiniteSet):
+        return None
+    solutions = sympy.EmptySet
+    for value in roots:
+        branch = sympy.solveset(atom - value, var, domain=interval)
+        if branch is sympy.EmptySet:
+            continue
+        if not isinstance(branch, sympy.FiniteSet):
+            return None
+        solutions = solutions.union(branch)
+    return sorted(list(solutions), key=sympy.default_sort_key)
+
+
 def solve_equation(
     equation_text: str,
     variable_name: Optional[str],
@@ -259,8 +298,11 @@ def solve_equation(
             left_open=not domain_lower_inclusive,
             right_open=not domain_upper_inclusive,
         )
-        solution_set = sympy.solveset(eq, var, domain=interval)
-        if isinstance(solution_set, sympy.FiniteSet):
+        trig_solutions = _bounded_trig_polynomial_solutions(eq.lhs - eq.rhs, var, interval)
+        solution_set = sympy.solveset(eq, var, domain=interval) if trig_solutions is None else None
+        if trig_solutions is not None:
+            solutions = trig_solutions
+        elif isinstance(solution_set, sympy.FiniteSet):
             solutions = sorted(list(solution_set), key=sympy.default_sort_key)
         else:
             raw_solutions = sympy.solve(eq, var)

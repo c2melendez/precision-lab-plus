@@ -764,9 +764,10 @@ export function BasicMode() {
               {
                 equation: trimmed,
                 angle_unit: angleUnit,
-                // An explicit real interval restricts solutions to R;
-                // otherwise retain complex roots supported by the solver.
-                domain: intervalRestriction ? "real" : "complex",
+                // Keep function equations on their real calculator branches.
+                // Unrestricted algebraic equations retain complex roots.
+                domain: intervalRestriction || /[A-Za-z_]\w*\s*\(/.test(trimmed)
+                  ? "real" : "complex",
                 ...(intervalRestriction
                   ? {
                       domain_lower: latexToBackendSyntax(intervalRestriction.lowerLatex),

@@ -343,3 +343,14 @@ describe("B7 complex domain routing", () => {
     }));
   });
 });
+
+describe("B7 function equations retain real branches", () => {
+  it.each(["asin(x)=acos(x)", "cosh(x)=1", "sinh(x)=0", "sech(x)=2"])("keeps %s real", async (equation) => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), { target: { value: equation } });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledWith("/solve", {
+      equation, angle_unit: "rad", domain: "real",
+    }));
+  });
+});
