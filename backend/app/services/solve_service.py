@@ -222,6 +222,26 @@ def solve_equation(
             lambda node: sympy.pi / 2 - sympy.atan(node.args[0]),
         )
 
+        # asin(u) + acos(u) = pi/2 on the real principal branches. SymPy
+        # 1.13 raises NotImplementedError for asin(x)=acos(x) because it
+        # treats the two inverse functions as independent generators.
+        # Reduce this exact same-argument identity before the generic
+        # solver so the usual domain/solution pipeline remains in charge.
+        if isinstance(eq, sympy.Equality):
+            lhs, rhs = eq.lhs, eq.rhs
+            if (
+                getattr(lhs, "func", None) == sympy.asin
+                and getattr(rhs, "func", None) == sympy.acos
+                and lhs.args == rhs.args
+            ):
+                eq = sympy.Eq(lhs, sympy.pi / 4)
+            elif (
+                getattr(lhs, "func", None) == sympy.acos
+                and getattr(rhs, "func", None) == sympy.asin
+                and lhs.args == rhs.args
+            ):
+                eq = sympy.Eq(rhs, sympy.pi / 4)
+
     has_direct_trig = _equation_has_direct_trig_of_variable(eq, var)
 
     bounded_real_domain = (
