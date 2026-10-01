@@ -149,6 +149,16 @@ def test_integral_improper_is_real_passthrough():
     assert body["result_text"] == "1"
 
 
+def test_integral_improper_sech_squared_uses_closed_form_fast_path():
+    response = client.post(
+        "/api/v1/integral/improper",
+        json={"expression": "sech(x)^2", "variable": "x", "lower_bound": "0", "upper_bound": "oo"},
+    )
+    body = response.json()
+    assert body["success"] is True
+    assert sympy.simplify(sympy.sympify(body["result_text"]) - 1) == 0
+
+
 def test_graph_3d_is_real_passthrough():
     response = client.post(
         "/api/v1/graph/3d", json={"expression": "x**2+y**2", "variables": ["x", "y"]}
