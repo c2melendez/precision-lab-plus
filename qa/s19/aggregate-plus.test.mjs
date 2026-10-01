@@ -17,9 +17,16 @@ test('missing, empty, unexpected and unresolved shards fail closed', () => {
   assert.throws(() => aggregate(base, [report('a.ts', ['Killed'])]), /Missing/);
   assert.throws(() => aggregate(base, [report('a.ts', []), report('b.ts', ['Killed'])]), /No mutants/);
   assert.throws(() => aggregate(base, [report('c.ts', ['Killed']), report('b.ts', ['Killed'])]), /scope/);
-  for (const status of ['Pending', 'RuntimeError', 'Ignored']) {
+  for (const status of ['Pending', 'Ignored']) {
     assert.throws(() => aggregate(base, [report('a.ts', [status]), report('b.ts', ['Killed'])]), /Unresolved/);
   }
+});
+test('resolved mutant errors use the standard Stryker denominator', () => {
+  const result = aggregate(base, [report('a.ts', ['Killed', 'RuntimeError']),
+    report('b.ts', ['Survived', 'CompileError'])]);
+  assert.equal(result.summary.score, 50);
+  assert.equal(result.summary.counts.RuntimeError, 1);
+  assert.equal(result.summary.counts.CompileError, 1);
 });
 test('global score below the original threshold fails', () => {
   assert.throws(() => aggregate(base, [report('a.ts', ['Survived']), report('b.ts', ['NoCoverage'])]), /Mutation score/);

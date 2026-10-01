@@ -17,8 +17,10 @@ export function aggregate(base, reports) {
     if (!result.mutants?.length) throw new Error(`No mutants reported for ${file}`);
     files[file] = { ...result, mutants: result.mutants.map(m => ({ ...m, id: `${index}:${m.id}` })) };
     for (const mutant of result.mutants) {
-      // Incomplete runs and infrastructure crashes cannot count as a green gate.
-      if (!['Killed', 'Timeout', 'Survived', 'NoCoverage', 'CompileError'].includes(mutant.status)) {
+      // Pending/unknown statuses cannot count as a complete run. Stryker's
+      // resolved compile/runtime errors remain in the inventory and are
+      // excluded from the valid-mutant denominator, matching its score.
+      if (!['Killed', 'Timeout', 'Survived', 'NoCoverage', 'CompileError', 'RuntimeError'].includes(mutant.status)) {
         throw new Error(`Unresolved mutant ${file}:${mutant.id} (${mutant.status})`);
       }
       counts[mutant.status] = (counts[mutant.status] ?? 0) + 1;
