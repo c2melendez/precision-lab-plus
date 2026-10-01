@@ -43,6 +43,16 @@ def test_limit_at_infinity():
     assert body["result_text"] == "0"
 
 
+def test_limit_x_cot_x_at_zero_fast_path():
+    response = client.post(
+        "/api/v1/limit",
+        json={"expression": "x*cot(x)", "variable": "x", "point": "0", "direction": "both"},
+    )
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_text"] == "1"
+
+
 def test_series_passthrough_real():
     response = client.post(
         "/api/v1/series",
