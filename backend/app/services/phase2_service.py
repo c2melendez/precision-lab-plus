@@ -368,6 +368,70 @@ def inequality_number_line_intervals(solution_set: sympy.Set) -> List[Inequality
     return intervals
 
 
+def _bounded_continuous_trig_inequality(inequality, var, domain_set):
+    """Classify a finite interval between every exact zero of sin/cos expressions."""
+    from app.services.solve_service import _bounded_trig_polynomial_solutions
+
+    expr = inequality.lhs - inequality.rhs
+    if not expr.has(sympy.sin, sympy.cos):
+        return None
+    if any(node.func not in (sympy.sin, sympy.cos, sympy.Abs)
+           for node in expr.atoms(sympy.Function)):
+        return None
+    if domain_set.start.is_finite is not True or domain_set.end.is_finite is not True:
+        return None
+    # Only continuous expressions are eligible; rational trig poles stay
+    # with the general solver rather than using a sign chart across a pole.
+    if sympy.denom(sympy.together(expr)).has(var):
+        return None
+    zero_expr = expr
+    if expr.has(sympy.Abs):
+        if inequality.lhs.func == sympy.Abs and not inequality.rhs.has(var):
+            threshold = inequality.rhs
+            if threshold.is_nonnegative is not True:
+                return None
+            zero_expr = inequality.lhs.args[0]**2 - threshold**2
+        else:
+            return None
+    roots = _bounded_trig_polynomial_solutions(zero_expr, var, domain_set)
+    if roots is None:
+        zeros = sympy.solveset(zero_expr, var, domain=domain_set)
+        if zeros is sympy.EmptySet:
+            roots = []
+        elif isinstance(zeros, sympy.FiniteSet):
+            roots = list(zeros)
+        else:
+            return None
+    points = sorted(set([domain_set.start, *roots, domain_set.end]),
+                    key=lambda point: float(sympy.N(point, 30)))
+
+    def satisfies(point):
+        value = sympy.simplify(expr.subs(var, point))
+        truth = inequality.func(value, 0)
+        if truth is sympy.true:
+            return True
+        if truth is sympy.false:
+            return False
+        return None
+
+    solution = sympy.EmptySet
+    for left, right in zip(points, points[1:]):
+        truth = satisfies((left + right)/2)
+        if truth is None:
+            return None
+        if truth:
+            solution = solution.union(sympy.Interval.open(left, right))
+    for point in points:
+        if domain_set.contains(point) is not sympy.true:
+            continue
+        truth = satisfies(point)
+        if truth is None:
+            return None
+        if truth:
+            solution = solution.union(sympy.FiniteSet(point))
+    return solution
+
+
 def compute_inequality(
     inequality: sympy.core.relational.Relational,
     variable: str,
@@ -394,6 +458,22 @@ def compute_inequality(
         lambda node: getattr(node, "func", None) == sympy.acot,
         lambda node: sympy.pi / 2 - sympy.atan(node.args[0]),
     )
+
+
+    if domain_lower is not None and domain_upper is not None:
+        lower_expr = parsing.parse_expression_tree(domain_lower, allow_equation=False)
+        upper_expr = parsing.parse_expression_tree(domain_upper, allow_equation=False)
+        if lower_expr.free_symbols or upper_expr.free_symbols:
+            raise parsing.ParseSecurityError("Los límites del dominio deben ser valores concretos.")
+        domain_set = sympy.Interval(
+            lower_expr, upper_expr,
+            left_open=not domain_lower_inclusive, right_open=not domain_upper_inclusive,
+        )
+        if isinstance(domain_set, sympy.Interval):
+            bounded = _bounded_continuous_trig_inequality(inequality, var_symbol, domain_set)
+            if bounded is not None:
+                return InequalityResult(bounded, warnings)
+
 
     try:
         solution_set = sympy.solve_univariate_inequality(inequality, var_symbol, relational=False)
