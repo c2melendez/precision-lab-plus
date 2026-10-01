@@ -180,6 +180,21 @@ describe("B7 matrix parser regressions", () => {
 
 
 describe("Native inverse functions retain explicit application syntax", () => {
+  it("keeps the complete bare fraction inside the inverse application", () => {
+    expect(latexToBackendSyntax("\\sin\\left(\\arccos\\frac{3}{5}\\right)").replace(/\s+/g, ""))
+      .toBe("sin(arccos((3)/(5)))");
+  });
+
+  it("preserves nested braces in a bare fractional function argument", () => {
+    expect(latexToBackendSyntax("\\arccos\\frac{\\sqrt{3}}{2}").replace(/\s+/g, ""))
+      .toBe("arccos((sqrt(3))/(2))");
+  });
+
+  it("preserves a fraction inside another bare fractional application", () => {
+    expect(latexToBackendSyntax("\\sin\\frac{\\arccos\\frac{3}{5}}{2}").replace(/\s+/g, ""))
+      .toBe("sin((arccos((3)/(5)))/(2))");
+  });
+
   it("normalizes a native inverse-function equation before domain routing", () => {
     expect(latexToBackendSyntax("\\arcsin x=\\arccos x").replace(/\s+/g, ""))
       .toBe("arcsin(x)=arccos(x)");

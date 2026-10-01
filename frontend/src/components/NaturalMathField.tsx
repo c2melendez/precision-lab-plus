@@ -320,6 +320,33 @@ function rewritePostfixPercent(ascii: string): string {
   return result;
 }
 
+function rewriteBareFractionFunctionLatex(latex: string): string {
+  const pattern = /\\(sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth|arcsin|arccos|arctan|ln|log)\s*\\(?:dfrac|tfrac|frac)\s*/g;
+  let result = latex;
+  // Work from the innermost/rightmost application so nested fractions
+  // keep their grouping before MathLive converts them to ASCII division.
+  for (const match of [...latex.matchAll(pattern)].reverse()) {
+    let cursor = match.index! + match[0].length;
+    const fractionStart = match.index! + match[0].indexOf("\\", 1);
+    let complete = true;
+    for (let group = 0; group < 2; group++) {
+      while (/\s/.test(result[cursor] ?? "") && cursor < result.length) cursor++;
+      if (result[cursor] !== "{") { complete = false; break; }
+      let depth = 0;
+      do {
+        if (result[cursor] === "{") depth++;
+        if (result[cursor] === "}") depth--;
+        cursor++;
+      } while (depth > 0 && cursor < result.length);
+      if (depth !== 0) { complete = false; break; }
+    }
+    if (complete) {
+      result = result.slice(0, match.index!) + `\\${match[1]}\\left(${result.slice(fractionStart, cursor)}\\right)` + result.slice(cursor);
+    }
+  }
+  return result;
+}
+
 function rewriteBareFunctionPowerLatex(latex: string): string {
   const names = "sin|cos|tan|sec|csc|cot|sinh|cosh|tanh|sech|csch|coth";
   const pattern = new RegExp(
@@ -444,7 +471,7 @@ export function latexToBackendSyntax(latex: string): string {
   // MathLive elimina un signo % literal durante la conversión ASCII.
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
-  const latexWithPercent = rewriteBareFunctionPowerLatex(rewriteOperatorNameLatex(latex))
+  const latexWithPercent = rewriteBareFunctionPowerLatex(rewriteBareFractionFunctionLatex(rewriteOperatorNameLatex(latex)))
     .replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
   // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
   // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
