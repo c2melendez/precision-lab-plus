@@ -110,6 +110,13 @@ function isEquationSolutionData(
   return resultType === "equation_solutions" && Array.isArray(data);
 }
 
+function isDirectTrigEquationAngleExpression(input: string): boolean {
+  if (!input.includes("=")) return false;
+  const value = input.replace(/\\left|\\right/g, " ");
+  return /\\\\(?:sin|cos|tan|sec|csc|cot)\b/.test(value)
+    || /(?:^|[^A-Za-z])(?:sin|cos|tan|sec|csc|cot)\s*\(/.test(value);
+}
+
 function MatrixResult({ matrix }: { matrix: string[][] }) {
   return (
     <div className="overflow-x-auto">
@@ -133,15 +140,24 @@ function MatrixResult({ matrix }: { matrix: string[][] }) {
   );
 }
 
-function SolutionListResult({ solutions }: { solutions: EquationSolution[] }) {
+function SolutionListResult({
+  solutions,
+  appendDegreeSymbol = false,
+}: {
+  solutions: EquationSolution[];
+  appendDegreeSymbol?: boolean;
+}) {
   if (solutions.length === 0) {
-    return <p className="text-sm text-muted">El sistema no tiene solución.</p>;
+    return <p className="text-sm text-muted">No hay soluciones.</p>;
   }
   return (
     <ul className="space-y-2">
       {solutions.map((solution, index) => (
         <li key={index} className="a11y-scale-result-lg text-ink">
-          <MathRenderer latex={solution.latex} fallbackText={solution.text} />
+          <MathRenderer
+            latex={appendDegreeSymbol ? `{${solution.latex}}^{\\circ}` : solution.latex}
+            fallbackText={appendDegreeSymbol ? `${solution.text}°` : solution.text}
+          />
           {solution.is_complex && <span className="ml-2 text-xs text-muted">(compleja)</span>}
         </li>
       ))}
@@ -201,6 +217,12 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
   const solutionData = isEquationSolutionData(result.result_data, result.result_type)
     ? result.result_data
     : null;
+  const equationSolutionsAreDegrees = Boolean(
+    solutionData
+    && result.operation === "solve"
+    && angleUnit === "deg"
+    && isDirectTrigEquationAngleExpression(inputLatex),
+  );
   const isRegion = result.result_type === "inequality_region";
   const approxText = result.result_approx != null ? formatResultApprox(result.result_approx) : null;
   const parsedFraction = !isRegion && isFractionLatex(result.result_latex) ? parseFracLatex(result.result_latex!) : null;
@@ -260,7 +282,7 @@ export function ResultPanel({ result, isLoading, inputLatex = "", angleUnit = "r
             <span className="rounded-md bg-paper-line/50 px-2 py-1 text-[11px] font-medium text-muted">Soluciones</span>
           </div>
           <div className="min-h-14 rounded-xl border border-paper-line bg-paper px-4 py-3">
-            <SolutionListResult solutions={solutionData} />
+            <SolutionListResult solutions={solutionData} appendDegreeSymbol={equationSolutionsAreDegrees} />
           </div>
         </section>
       )}

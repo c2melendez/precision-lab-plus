@@ -166,8 +166,57 @@ describe("ResultPanel", () => {
         isLoading={false}
       />,
     );
-    expect(screen.getByText("El sistema no tiene solución.")).toBeInTheDocument();
+    expect(screen.getByText("No hay soluciones.")).toBeInTheDocument();
   });
+
+  it("marca con grados las soluciones de una ecuación trigonométrica resuelta en DEG", () => {
+    const { container } = render(
+      <ResultPanel
+        result={{
+          ...baseResult,
+          operation: "solve",
+          result_type: "equation_solutions",
+          result_text: null,
+          result_latex: null,
+          result_approx: null,
+          result_data: [
+            { text: "30", latex: "30", is_complex: false },
+            { text: "150", latex: "150", is_complex: false },
+          ],
+        }}
+        isLoading={false}
+        inputLatex="\\sin x=\\frac{1}{2}"
+        angleUnit="deg"
+      />,
+    );
+    expect(container.textContent).toMatch(/[°∘]/);
+    expect(container.textContent).toContain("30");
+    expect(container.textContent).toContain("150");
+  });
+
+  it("no marca como grados una ecuación algebraica aunque el selector esté en DEG", () => {
+    const { container } = render(
+      <ResultPanel
+        result={{
+          ...baseResult,
+          operation: "solve",
+          result_type: "equation_solutions",
+          result_text: null,
+          result_latex: null,
+          result_approx: null,
+          result_data: [
+            { text: "2", latex: "2", is_complex: false },
+            { text: "-2", latex: "-2", is_complex: false },
+          ],
+        }}
+        isLoading={false}
+        inputLatex="x^2=4"
+        angleUnit="deg"
+      />,
+    );
+    expect(container.textContent).not.toMatch(/[°∘]/);
+  });
+
 
   it("presenta una región 2D como conjunto matemático compacto, sin cursivar el resumen", () => {
     const { container } = render(<ResultPanel result={{ ...baseResult,
