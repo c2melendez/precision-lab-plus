@@ -505,6 +505,25 @@ def compute_inequality(
         lambda node: sympy.pi / 2 - sympy.atan(node.args[0]),
     )
 
+    # On their real principal branches asin(u)+acos(u)=pi/2. Reducing
+    # comparisons with the same argument to asin(u) versus pi/4 avoids
+    # SymPy treating the two inverse functions as independent generators.
+    # Keep asin(u) so the generic solver still enforces -1 <= u <= 1.
+    lhs = getattr(inequality, "lhs", None)
+    rhs = getattr(inequality, "rhs", None)
+    if (
+        getattr(lhs, "func", None) == sympy.asin
+        and getattr(rhs, "func", None) == sympy.acos
+        and lhs.args == rhs.args
+    ):
+        inequality = inequality.func(lhs, sympy.pi / 4)
+    elif (
+        getattr(lhs, "func", None) == sympy.acos
+        and getattr(rhs, "func", None) == sympy.asin
+        and lhs.args == rhs.args
+    ):
+        inequality = inequality.func(sympy.pi / 4, rhs)
+
 
     if domain_lower is not None and domain_upper is not None:
         lower_expr = parsing.parse_expression_tree(domain_lower, allow_equation=False)
