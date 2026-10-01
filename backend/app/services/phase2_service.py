@@ -87,6 +87,11 @@ def compute_limit(expression: str, variable: str, point: str, direction: str) ->
     var_symbol = _validate_variable(variable)
     point_expr = parsing.parse_expression_tree(point, allow_equation=False)
 
+    # Fast exact identities that otherwise enter expensive heuristic
+    # limit branches in SymPy.
+    if point_expr == 0 and input_expr == var_symbol * sympy.cot(var_symbol):
+        return LimitResult(input_expr, sympy.Integer(1))
+
     # Fast, exact handling for canonical oscillatory limits that otherwise
     # keep SymPy busy until the client's 15-second timeout.
     if direction == "both":
