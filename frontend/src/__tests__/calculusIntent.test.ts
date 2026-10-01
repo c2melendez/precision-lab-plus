@@ -49,6 +49,18 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
       });
     });
 
+    it("detecta derivada evaluada en un punto y conserva el punto", () => {
+      expect(
+        detectCalculusIntent("\\left.\\frac{d}{dx}\\tan x\\right\\rvert_{x=\\pi/4}"),
+      ).toEqual({
+        kind: "derivative",
+        variable: "x",
+        order: 1,
+        innerLatex: "\\tan x",
+        evaluationPoint: "\\pi/4",
+      });
+    });
+
     it("NO matchea si la derivada es solo parte de una expresión más grande", () => {
       expect(detectCalculusIntent("2+\\frac{d}{dx}\\left(x^2\\right)")).toBeNull();
       expect(detectCalculusIntent("\\frac{d}{dx}\\left(x^2\\right)+1")).toBeNull();
@@ -75,6 +87,18 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
         lowerBound: null,
         upperBound: null,
         innerLatex: "x^2+3x",
+      });
+    });
+
+    it("ignora condición de dominio encadenada después del diferencial", () => {
+      expect(
+        detectCalculusIntent("\\int\\operatorname{arsech} x\\,dx,\\ 0<x<1"),
+      ).toEqual({
+        kind: "integral",
+        variable: "x",
+        lowerBound: null,
+        upperBound: null,
+        innerLatex: "\\operatorname{arsech} x",
       });
     });
 
