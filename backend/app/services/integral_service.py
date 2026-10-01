@@ -55,7 +55,7 @@ _TRANSPARENT_WRAPPER_RULES = (mi.ConstantTimesRule, mi.AlternativeRule, mi.Rewri
 @dataclass
 class IntegralResult:
     input_expr: sympy.Expr
-    antiderivative: sympy.Expr
+    antiderivative: Optional[sympy.Expr]
     steps: List[Step]
     has_detailed_steps: bool
     warnings: List[str]
@@ -323,6 +323,31 @@ def integrate_expression(
     ):
         lower_expr = _parse_bound(lower_bound)
         upper_expr = _parse_bound(upper_bound)
+
+        # A definite value need not have an elementary antiderivative.
+        # For I=int_0^(pi/2) log(sin(x)) dx, endpoint convergence follows
+        # from sin(x)/x -> 1. Reflection gives the same integral of log(cos),
+        # and the double-angle substitution yields 2I=I-(pi/2)*log(2).
+        # Use the exact identity only on these bounds, including reversal;
+        # leave all other intervals to the existing domain/convergence path.
+        normalized_bounds = (sympy.simplify(lower_expr), sympy.simplify(upper_expr))
+        coefficient, logarithm = input_expr.as_independent(var_symbol, as_Add=False)
+        if (
+            logarithm == sympy.log(sympy.sin(var_symbol))
+            and coefficient.is_real is True
+            and coefficient.is_finite is True
+            and normalized_bounds in ((sympy.Integer(0), sympy.pi/2), (sympy.pi/2, sympy.Integer(0)))
+        ):
+            orientation = 1 if normalized_bounds[0] == 0 else -1
+            return IntegralResult(
+                input_expr=input_expr,
+                antiderivative=None,
+                steps=[],
+                has_detailed_steps=False,
+                warnings=["Integral impropia convergente evaluada mediante simetría y ángulo doble."],
+                is_definite=True,
+                definite_value=-orientation*coefficient*sympy.pi*sympy.log(2)/2,
+            )
 
         # Detect real discontinuities before applying a definite
         # antiderivative. SymPy 1.13.3 has a known failure mode when

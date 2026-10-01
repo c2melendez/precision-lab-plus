@@ -210,6 +210,39 @@ def _bounded_trig_polynomial_solutions(
     return sorted(list(solutions), key=sympy.default_sort_key)
 
 
+def _real_affine_atan_sum(eq: sympy.Eq, var: sympy.Symbol):
+    """Reduce a two-atan sum in the principal tangent range, with a branch guard."""
+    for total, target in ((eq.lhs, eq.rhs), (eq.rhs, eq.lhs)):
+        if not isinstance(total, sympy.Add) or len(total.args) != 2:
+            continue
+        if any(getattr(term, "func", None) != sympy.atan for term in total.args):
+            continue
+        target = sympy.simplify(target)
+        if target.free_symbols or target.is_real is not True:
+            continue
+        if (target > -sympy.pi/2) is not sympy.true or (target < sympy.pi/2) is not sympy.true:
+            continue
+        u, v = (term.args[0] for term in total.args)
+        try:
+            polynomials = [sympy.Poly(argument, var) for argument in (u, v)]
+        except sympy.PolynomialError:
+            continue
+        if any(poly.degree() > 1 or any(c.is_real is not True or c.free_symbols for c in poly.all_coeffs())
+               for poly in polynomials):
+            continue
+        sine, cosine = sympy.simplify(sympy.sin(target)), sympy.simplify(sympy.cos(target))
+        if sine.is_algebraic is not True or cosine.is_algebraic is not True:
+            continue
+        denominator = 1-u*v
+        # cos(atan(u)+atan(v)) has the sign of 1-u*v. Requiring it
+        # positive fixes the sum in (-pi/2,pi/2), where tan is injective.
+        # Multiplying across the tangent identity alone would retain the
+        # root belonging to a different branch of the original equation.
+        reduced = sympy.expand(cosine*(u+v)-sine*denominator)
+        return sympy.Eq(reduced, 0, evaluate=False), denominator
+    return None
+
+
 def solve_equation(
     equation_text: str,
     variable_name: Optional[str],
@@ -251,7 +284,7 @@ def solve_equation(
         var = free_symbols[0]
         warnings.append(f"Variable inferida automáticamente: '{var}'.")
 
-    original_hyperbolic_eq = None
+    original_inverse_eq = None
     if domain == "real":
         # Calculator convention for real arccot: range (0, pi), expressed
         # as pi/2 - atan(x). SymPy's principal acot branch differs for
@@ -291,11 +324,17 @@ def solve_equation(
             # through the generic solver, as do complex-domain requests.
             functions = {getattr(lhs, "func", None), getattr(rhs, "func", None)}
             if lhs.args == rhs.args and functions == {sympy.atanh, sympy.asinh}:
-                original_hyperbolic_eq = eq
+                original_inverse_eq = eq
                 eq = sympy.Eq(lhs.args[0], 0, evaluate=False)
             elif lhs.args == rhs.args and functions == {sympy.acosh, sympy.asinh}:
-                original_hyperbolic_eq = eq
+                original_inverse_eq = eq
                 eq = sympy.Eq(1, 0, evaluate=False)
+
+    atan_denominator = None
+    atan_reduction = _real_affine_atan_sum(eq, var) if domain == "real" else None
+    if atan_reduction is not None:
+        original_inverse_eq = eq
+        eq, atan_denominator = atan_reduction
 
     has_direct_trig = _equation_has_direct_trig_of_variable(eq, var)
 
@@ -340,13 +379,25 @@ def solve_equation(
             steps = []
             has_detailed_steps = False
 
+    if atan_denominator is not None:
+        branch_solutions = []
+        for solution in solutions:
+            if solution.is_real is False:
+                continue
+            branch_value = sympy.simplify(atan_denominator.subs(var, solution))
+            if branch_value.is_positive is None:
+                raise NotImplementedError("No se pudo verificar la rama principal de la suma de arctangentes.")
+            if branch_value.is_positive:
+                branch_solutions.append(solution)
+        solutions = branch_solutions
+
     if angle_unit == "deg":
         solutions = _apply_degree_conversion(solutions, has_direct_trig)
 
-    if original_hyperbolic_eq is not None:
+    if original_inverse_eq is not None:
         # Retain the user's equation. Algebraic steps for the reduced
         # condition alone would omit the real-branch identity above.
-        eq = original_hyperbolic_eq
+        eq = original_inverse_eq
         steps = []
         has_detailed_steps = False
 

@@ -159,7 +159,9 @@ async def integral(payload: IntegralRequest, request: Request) -> MathResponse:
     if not result.is_definite and result_text != _too_large_marker:
         result_text = f"{result_text} + C"
 
-    antiderivative_latex = _safe_latex(result.antiderivative)
+    antiderivative_latex = (
+        _safe_latex(result.antiderivative) if result.antiderivative is not None else None
+    )
     if antiderivative_latex is not None and len(antiderivative_latex) > _MAX_RESULT_LATEX_LENGTH:
         antiderivative_latex = None
 
@@ -172,7 +174,9 @@ async def integral(payload: IntegralRequest, request: Request) -> MathResponse:
         input_latex=_safe_latex(result.input_expr),
         result_latex=result_latex,
         result_text=result_text,
-        antiderivative_expression=_safe_text(result.antiderivative),
+        antiderivative_expression=(
+            _safe_text(result.antiderivative) if result.antiderivative is not None else None
+        ),
         antiderivative_latex=antiderivative_latex,
         steps=result.steps,
         has_detailed_steps=result.has_detailed_steps,
