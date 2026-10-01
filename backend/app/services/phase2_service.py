@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from typing import List
 
 import sympy
+from sympy.calculus.util import continuous_domain
 
 from app.schemas.responses import EquationSolution, GraphData, InequalityInterval, Trace
 from app.services import graph_service, integral_service, parsing
@@ -120,12 +121,19 @@ def compute_limit(expression: str, variable: str, point: str, direction: str) ->
                 right_value=sympy.S.NaN,
             )
 
+    # The calculator's real arccot convention is (0, pi), while SymPy's
+    # native acot branch returns 0 at both infinities. Normalize arccot
+    # before taking real limits so, for example, lim_{x->-oo} arccot(x)=pi.
+    limit_expr = input_expr.replace(
+        lambda node: getattr(node, "func", None) == sympy.acot,
+        lambda node: sympy.pi / 2 - sympy.atan(node.args[0]),
+    )
+
     # Inverse hyperbolic functions have exact logarithmic forms. Rewriting
     # them before limit() avoids several expensive heuristic branches while
     # preserving the same real limit.
-    limit_expr = input_expr
-    if input_expr.has(sympy.asinh, sympy.acosh, sympy.atanh, sympy.acoth, sympy.asech, sympy.acsch):
-        limit_expr = input_expr.rewrite(sympy.log)
+    if limit_expr.has(sympy.asinh, sympy.acosh, sympy.atanh, sympy.acoth, sympy.asech, sympy.acsch):
+        limit_expr = limit_expr.rewrite(sympy.log)
 
     try:
         value = sympy.limit(limit_expr, var_symbol, point_expr, dir=_DIRECTION_MAP[direction])
@@ -141,16 +149,16 @@ def compute_limit(expression: str, variable: str, point: str, direction: str) ->
                 dne_reason="El límite no existe por oscilación.",
             )
         if direction == "both" and value.has(sympy.zoo):
-            left = sympy.limit(input_expr, var_symbol, point_expr, dir="-")
-            right = sympy.limit(input_expr, var_symbol, point_expr, dir="+")
+            left = sympy.limit(limit_expr, var_symbol, point_expr, dir="-")
+            right = sympy.limit(limit_expr, var_symbol, point_expr, dir="+")
             if left != right:
                 return LimitResult(input_expr, sympy.nan, dne=True, left_value=left, right_value=right)
         return LimitResult(input_expr, value)
     except ValueError as exc:
         if "does not exist" not in str(exc) or direction != "both":
             raise
-        left = sympy.limit(input_expr, var_symbol, point_expr, dir="-")
-        right = sympy.limit(input_expr, var_symbol, point_expr, dir="+")
+        left = sympy.limit(limit_expr, var_symbol, point_expr, dir="-")
+        right = sympy.limit(limit_expr, var_symbol, point_expr, dir="+")
         return LimitResult(input_expr, sympy.nan, dne=True, left_value=left, right_value=right)
 
 
@@ -495,6 +503,25 @@ def compute_inequality(
     var_symbol = _validate_variable(variable)
     warnings: List[str] = []
 
+    # SymPy's inequality solver can include endpoints at which inverse
+    # functions are not real/defined (notably acoth(x)>ln(2) yielding
+    # [1,coth(ln 2))). Compute the real function domain from the original
+    # relation and intersect it with the solved set below.
+    real_function_domain = sympy.S.Reals
+    domain_sensitive = (
+        sympy.asin, sympy.acos, sympy.asec, sympy.acsc,
+        sympy.acosh, sympy.atanh, sympy.acoth, sympy.asech, sympy.acsch,
+    )
+    if inequality.has(*domain_sensitive):
+        try:
+            real_function_domain = continuous_domain(
+                inequality.lhs - inequality.rhs, var_symbol, sympy.S.Reals
+            )
+        except (NotImplementedError, TypeError, ValueError):
+            # Keep the established solver behavior when SymPy cannot
+            # characterize a more complicated real domain.
+            real_function_domain = sympy.S.Reals
+
     # Calculator convention for real arccot uses range (0, pi):
     # arccot(x) = pi/2 - atan(x). SymPy's principal acot branch differs
     # on negative reals and can therefore add spurious intervals for
@@ -557,6 +584,10 @@ def compute_inequality(
                 "interpretación manual."
             )
             solution_set = result
+
+    if isinstance(solution_set, sympy.Set) and real_function_domain != sympy.S.Reals:
+        solution_set = sympy.Intersection(solution_set, real_function_domain)
+
     if domain_lower is not None and domain_upper is not None:
         lower_expr = parsing.parse_expression_tree(domain_lower, allow_equation=False)
         upper_expr = parsing.parse_expression_tree(domain_upper, allow_equation=False)
