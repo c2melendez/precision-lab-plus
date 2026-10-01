@@ -113,7 +113,7 @@ function isEquationSolutionData(
 function isDirectTrigEquationAngleExpression(input: string): boolean {
   if (!input.includes("=")) return false;
   const value = input.replace(/\\left|\\right/g, " ");
-  return /\\\\(?:sin|cos|tan|sec|csc|cot)\b/.test(value)
+  return /\\(?:sin|cos|tan|sec|csc|cot)\b/.test(value)
     || /(?:^|[^A-Za-z])(?:sin|cos|tan|sec|csc|cot)\s*\(/.test(value);
 }
 
