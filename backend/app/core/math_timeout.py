@@ -5,7 +5,8 @@ guarded SymPy call. If the budget expires, that process is terminated, so
 no abandoned symbolic calculation can keep consuming CPU after the HTTP
 request has timed out.
 
-On platforms without fork we retain the SIGALRM/direct fallback.
+On platforms without fork we retain the SIGALRM/direct fallback for
+compatibility.
 """
 
 from __future__ import annotations
@@ -111,14 +112,7 @@ def run_math_operation(
     if budget <= 0:
         return func(*args, **kwargs)
 
-    # The outer request gets hard process isolation. Nested guarded calls
-    # inside that child (for example step verification during a derivative)
-    # cannot spawn again when the child is daemonic, so they use SIGALRM
-    # locally and remain killable by the parent process as a final guard.
-    if (
-        "fork" in multiprocessing.get_all_start_methods()
-        and not multiprocessing.current_process().daemon
-    ):
+    if "fork" in multiprocessing.get_all_start_methods():
         return _run_in_forked_process(func, args, kwargs, budget)
 
     return _run_with_signal(func, args, kwargs, budget)
