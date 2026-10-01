@@ -88,7 +88,7 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 
 export type CalculusIntent =
-  | { kind: "derivative"; variable: string; order: 1 | 2 | 3 | 4 | 5; innerLatex: string }
+  | { kind: "derivative"; variable: string; order: 1 | 2 | 3 | 4 | 5; innerLatex: string; evaluationPoint?: string }
   | { kind: "partialDerivative"; variable: string; innerLatex: string }
   | { kind: "integral"; variable: string; lowerBound: string | null; upperBound: string | null; innerLatex: string }
   | { kind: "limit"; variable: string; point: string; innerLatex: string; direction: "both" | "left" | "right" }
@@ -257,6 +257,21 @@ function detectDerivative(latex: string): Extract<CalculusIntent, { kind: "deriv
   return { kind: "derivative", variable: bare[2], order: order as 1 | 2 | 3 | 4 | 5, innerLatex };
 }
 
+function detectEvaluatedDerivative(
+  latex: string,
+): Extract<CalculusIntent, { kind: "derivative" }> | null {
+  const trimmed = latex.trim();
+  const match = trimmed.match(
+    /^\\left\.\s*(.+?)\s*\\right\\rvert_\{\s*([a-zA-Z])\s*=\s*(.+)\}$/s,
+  );
+  if (!match) return null;
+  const base = detectDerivative(match[1].trim());
+  if (!base || base.variable !== match[2]) return null;
+  const evaluationPoint = match[3].trim();
+  if (!evaluationPoint) return null;
+  return { ...base, evaluationPoint };
+}
+
 const PARTIAL_DERIVATIVE_PREFIX = /^\\frac\{\\partial\}\{\\partial\s*([a-zA-Z])\}\\left\(/;
 
 function detectPartialDerivative(
@@ -305,8 +320,11 @@ function readBalancedLatexGroup(
 }
 
 function stripTrailingAssumption(latex: string): string {
+  // Domain assumptions used by the B7 matrix appear after the completed
+  // differential, e.g. ", x>1", ", |x|<1" or ", 0<x<1". Only strip a
+  // trailing comma-clause when it actually contains an inequality sign.
   return latex.replace(
-    /,\s*(?:\\quad\s*)?(?:\\\s*)?(?:\\lvert\s*[A-Za-z]\s*\\rvert|[A-Za-z])\s*[<>]=?\s*.+$/s,
+    /,\s*(?:\\quad\s*)?(?:\\\s*)?(?=[^,]*[<>])[^,]+$/s,
     "",
   ).trim();
 }
@@ -542,6 +560,7 @@ function detectLimit(latex: string): Extract<CalculusIntent, { kind: "limit" }> 
 export function detectCalculusIntent(latex: string): CalculusIntent | null {
   return (
     detectPartialDerivative(latex) ??
+    detectEvaluatedDerivative(latex) ??
     detectDerivative(latex) ??
     detectODE(latex) ??
     detectResidue(latex) ??
