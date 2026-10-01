@@ -7,6 +7,8 @@ resto) — para al menos un endpoint de cada tipo.
 
 import os
 
+import sympy
+
 os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
 
 from fastapi.testclient import TestClient
