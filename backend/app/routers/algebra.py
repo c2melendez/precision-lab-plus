@@ -151,6 +151,13 @@ async def solve(payload: SolveRequest, request: Request) -> MathResponse:
         return _error(request, OperationType.SOLVE, ErrorCode.COMPLEXITY_LIMIT, str(exc))
     except solve_service.AmbiguousVariableError as exc:
         return _error(request, OperationType.SOLVE, ErrorCode.AMBIGUOUS_VARIABLE, str(exc))
+    except NotImplementedError as exc:
+        return _error(
+            request,
+            OperationType.SOLVE,
+            ErrorCode.UNSUPPORTED_OPERATION,
+            str(exc),
+        )
 
     warnings = list(result.warnings)
     result_data = result.solutions if result.result_type == ResultType.EQUATION_SOLUTIONS else None
