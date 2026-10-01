@@ -156,3 +156,12 @@ def test_real_arccot_equation_uses_calculator_branch():
     solutions = [sympy.sympify(item["text"]) for item in body["result_data"]]
     assert len(solutions) == 1
     assert sympy.simplify(solutions[0] + sympy.sqrt(3) / 3) == 0
+
+
+def test_real_asin_equals_acos_reduces_before_generic_solver():
+    response = _solve("asin(x)=acos(x)", variable="x", domain="real")
+    body = response.json()
+    assert body["success"] is True
+    solutions = [sympy.sympify(item["text"]) for item in body["result_data"]]
+    assert len(solutions) == 1
+    assert sympy.simplify(solutions[0] - sympy.sqrt(2) / 2) == 0
