@@ -32,11 +32,14 @@ def test_math_timeout_propagates_service_exception():
     "spawn" not in multiprocessing.get_all_start_methods(),
     reason="Hard timeout isolation requires spawn.",
 )
-def test_math_timeout_hard_kills_spawned_cpu_bound_operation():
+def test_math_timeout_hard_kills_isolated_cpu_bound_operation():
     started = time.perf_counter()
     with pytest.raises(TimeoutError):
         run_math_operation(_spin_forever, timeout_s=0.1)
-    assert time.perf_counter() - started < 2.0
+    # The first forkserver startup may preload SymPy on a cold CI runner.
+    # The operation budget is still 0.1s; this bound only covers process
+    # bootstrap/teardown overhead and guards against a leaked child.
+    assert time.perf_counter() - started < 6.0
 
 
 def test_math_timeout_supports_unpicklable_lambda_with_signal_fallback():
