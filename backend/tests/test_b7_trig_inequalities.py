@@ -57,3 +57,32 @@ def test_multiple_periods_and_open_domain_endpoints():
         sp.Interval.Lopen(-2*sp.pi, -sp.pi),
         sp.Interval(0, sp.pi), sp.FiniteSet(2*sp.pi)
     ).intersect(sp.Interval.open(-2*sp.pi, 2*sp.pi))
+
+
+def test_tangent_does_not_connect_across_two_asymptotes():
+    actual = _solve("tan(x)>1")
+    assert actual == sp.Union(
+        sp.Interval.open(sp.pi/4, sp.pi/2),
+        sp.Interval.open(5*sp.pi/4, 3*sp.pi/2),
+    )
+    assert actual.contains(sp.pi/2) is sp.false
+    assert actual.contains(3*sp.pi/2) is sp.false
+
+
+def test_secant_in_principal_interval_excludes_poles():
+    assert _solve("sec(x)>2", domain_lower="-pi/2", domain_upper="pi/2",
+                  domain_lower_inclusive=False) == sp.Union(
+        sp.Interval.open(-sp.pi/2, -sp.pi/3),
+        sp.Interval.open(sp.pi/3, sp.pi/2),
+    )
+
+
+def test_non_strict_tangent_includes_roots_but_never_poles():
+    assert _solve("tan(x)>=1") == sp.Union(
+        sp.Interval.Ropen(sp.pi/4, sp.pi/2),
+        sp.Interval.Ropen(5*sp.pi/4, 3*sp.pi/2),
+    )
+
+
+def test_reciprocal_sine_preserves_negative_denominator_branch():
+    assert _solve("1/sin(x)<0") == sp.Interval.open(sp.pi, 2*sp.pi)

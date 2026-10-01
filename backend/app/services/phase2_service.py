@@ -369,21 +369,54 @@ def inequality_number_line_intervals(solution_set: sympy.Set) -> List[Inequality
 
 
 def _bounded_continuous_trig_inequality(inequality, var, domain_set):
-    """Classify a finite interval between every exact zero of sin/cos expressions."""
+    """Classify every component between exact zeros and original trig poles."""
     from app.services.solve_service import _bounded_trig_polynomial_solutions
 
     expr = inequality.lhs - inequality.rhs
-    if not expr.has(sympy.sin, sympy.cos):
+    trig_functions = (sympy.sin, sympy.cos, sympy.tan, sympy.sec, sympy.csc, sympy.cot)
+    if not expr.has(*trig_functions):
         return None
-    if any(node.func not in (sympy.sin, sympy.cos, sympy.Abs)
+    if any(node.func not in (*trig_functions, sympy.Abs)
            for node in expr.atoms(sympy.Function)):
         return None
     if domain_set.start.is_finite is not True or domain_set.end.is_finite is not True:
         return None
-    # Only continuous expressions are eligible; rational trig poles stay
-    # with the general solver rather than using a sign chart across a pole.
-    if sympy.denom(sympy.together(expr)).has(var):
+    # Fractional powers can introduce real-domain boundaries beyond zeros/poles.
+    if any(node.base.has(var) and node.exp.is_integer is not True
+           for node in expr.atoms(sympy.Pow)):
         return None
+
+    # Keep singularities from the original expression before together() can
+    # cancel a denominator or a reciprocal trig function.
+    pole_expressions = []
+    for node in sympy.preorder_traversal(inequality):
+        if node.func in (sympy.tan, sympy.sec):
+            pole_expressions.append(sympy.cos(node.args[0]))
+        elif node.func in (sympy.cot, sympy.csc):
+            pole_expressions.append(sympy.sin(node.args[0]))
+        elif isinstance(node, sympy.Pow) and node.exp.is_negative is True and node.base.has(var):
+            pole_expressions.append(node.base)
+
+    def finite_roots(expression):
+        if expression == 0:
+            return []
+        roots = _bounded_trig_polynomial_solutions(expression, var, domain_set)
+        if roots is not None:
+            return roots
+        zeros = sympy.solveset(expression, var, domain=domain_set)
+        if zeros is sympy.EmptySet:
+            return []
+        if isinstance(zeros, sympy.FiniteSet):
+            return list(zeros)
+        return None
+
+    poles = set()
+    for expression in pole_expressions:
+        found = finite_roots(expression)
+        if found is None:
+            return None
+        poles.update(found)
+
     zero_expr = expr
     if expr.has(sympy.Abs):
         if inequality.lhs.func == sympy.Abs and not inequality.rhs.has(var):
@@ -393,20 +426,33 @@ def _bounded_continuous_trig_inequality(inequality, var, domain_set):
             zero_expr = inequality.lhs.args[0]**2 - threshold**2
         else:
             return None
-    roots = _bounded_trig_polynomial_solutions(zero_expr, var, domain_set)
-    if roots is None:
-        zeros = sympy.solveset(zero_expr, var, domain=domain_set)
-        if zeros is sympy.EmptySet:
-            roots = []
-        elif isinstance(zeros, sympy.FiniteSet):
-            roots = list(zeros)
-        else:
+    zero_expr = zero_expr.replace(
+        lambda node: node.func in (sympy.tan, sympy.sec, sympy.csc, sympy.cot),
+        lambda node: {
+            sympy.tan: lambda x: sympy.sin(x)/sympy.cos(x),
+            sympy.sec: lambda x: 1/sympy.cos(x),
+            sympy.csc: lambda x: 1/sympy.sin(x),
+            sympy.cot: lambda x: sympy.cos(x)/sympy.sin(x),
+        }[node.func](node.args[0]),
+    )
+    numerator, denominator = sympy.fraction(sympy.together(zero_expr))
+    if denominator.has(var):
+        found = finite_roots(denominator)
+        if found is None:
             return None
-    points = sorted(set([domain_set.start, *roots, domain_set.end]),
+        poles.update(found)
+    roots = finite_roots(numerator)
+    if roots is None:
+        return None
+    points = sorted(set([domain_set.start, *roots, *poles, domain_set.end]),
                     key=lambda point: float(sympy.N(point, 30)))
 
     def satisfies(point):
+        if point in poles:
+            return False
         value = sympy.simplify(expr.subs(var, point))
+        if value.is_real is not True or value.is_finite is not True:
+            return None
         truth = inequality.func(value, 0)
         if truth is sympy.true:
             return True
@@ -422,7 +468,7 @@ def _bounded_continuous_trig_inequality(inequality, var, domain_set):
         if truth:
             solution = solution.union(sympy.Interval.open(left, right))
     for point in points:
-        if domain_set.contains(point) is not sympy.true:
+        if domain_set.contains(point) is not sympy.true or point in poles:
             continue
         truth = satisfies(point)
         if truth is None:
