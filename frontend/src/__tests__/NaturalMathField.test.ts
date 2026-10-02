@@ -120,7 +120,7 @@ describe("Trig matrix notation normalization", () => {
   });
 
   it("normalizes operatorname hyperbolic powers before MathLive ASCII spacing", () => {
-    expect(latexToBackendSyntax("\\operatorname{sech}^{2}x").replace(/\\s+/g, "")).toBe("(sech(x))**(2)");
+    expect(latexToBackendSyntax("\\operatorname{sech}^{2}x").replace(/\s+/g, "")).toBe("(sech(x))**(2)");
   });
 
   it("normalizes infinity to the backend oo token", () => {
@@ -204,17 +204,22 @@ describe("Native inverse functions retain explicit application syntax", () => {
 
 describe("B7 log-base composition regressions", () => {
   it("parses nested fractional argument in base-log notation", () => {
-    expect(latexToBackendSyntax("\\log_{3}\\left(\\frac{1}{27}\\right)").replace(/\\s+/g, ""))
+    expect(latexToBackendSyntax("\\log_{3}\\left(\\frac{1}{27}\\right)").replace(/\s+/g, ""))
       .toBe("log((1)/(27),3)");
   });
 
   it("keeps base-log atomic inside a product", () => {
-    expect(latexToBackendSyntax("\\log_{2}(3)\\cdot\\log_{3}(4)").replace(/\\s+/g, ""))
+    expect(latexToBackendSyntax("\\log_{2}(3)\\cdot\\log_{3}(4)").replace(/\s+/g, ""))
       .toBe("log(3,2)*log(4,3)");
   });
 
   it("keeps base-log atomic inside an equation", () => {
-    expect(latexToBackendSyntax("\\log_{2}x=5").replace(/\\s+/g, ""))
+    expect(latexToBackendSyntax("\\log_{2}x=5").replace(/\s+/g, ""))
       .toBe("log(x,2)=5");
+  });
+
+  it("keeps symbolic base-log atomic without parentheses", () => {
+    expect(latexToBackendSyntax("\\log_{x}8=3").replace(/\s+/g, ""))
+      .toBe("log(8,x)=3");
   });
 });
