@@ -44,11 +44,15 @@ def _finite_nonzero_conditions(base: sympy.Expr) -> Iterable[sympy.Rel]:
 
 
 def _condition_to_model(condition: sympy.Rel, kind: str) -> DomainCondition:
-    symbols = sorted(condition.free_symbols, key=lambda symbol: str(symbol))
+    # Canonicalize only the restriction itself for display. The source
+    # expression tree remains untouched; this merely turns forms such as
+    # x - 1*2 > 0 into the clearer equivalent x > 2.
+    canonical = sympy.simplify(condition)
+    symbols = sorted(canonical.free_symbols, key=lambda symbol: str(symbol))
     variable = str(symbols[0]) if len(symbols) == 1 else None
     return DomainCondition(
-        text=str(condition),
-        latex=sympy.latex(condition),
+        text=str(canonical),
+        latex=sympy.latex(canonical),
         variable=variable,
         kind=kind,
     )
