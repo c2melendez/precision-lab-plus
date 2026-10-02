@@ -200,3 +200,21 @@ describe("Native inverse functions retain explicit application syntax", () => {
       .toBe("arcsin(x)=arccos(x)");
   });
 });
+
+
+describe("B7 log-base composition regressions", () => {
+  it("parses nested fractional argument in base-log notation", () => {
+    expect(latexToBackendSyntax("\\log_{3}\\left(\\frac{1}{27}\\right)").replace(/\\s+/g, ""))
+      .toBe("log((1)/(27),3)");
+  });
+
+  it("keeps base-log atomic inside a product", () => {
+    expect(latexToBackendSyntax("\\log_{2}(3)\\cdot\\log_{3}(4)").replace(/\\s+/g, ""))
+      .toBe("log(3,2)*log(4,3)");
+  });
+
+  it("keeps base-log atomic inside an equation", () => {
+    expect(latexToBackendSyntax("\\log_{2}x=5").replace(/\\s+/g, ""))
+      .toBe("log(x,2)=5");
+  });
+});
