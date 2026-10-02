@@ -56,3 +56,16 @@ def test_module01_domain_edges_are_controlled():
                 f"success={body.get('success')}, error_code={body.get('error_code')}"
             )
     assert not failures, "\n".join(failures)
+
+
+@pytest.mark.parametrize("_repeat", range(10))
+def test_sec_pi_over_two_is_always_controlled_domain_error(_repeat):
+    """Regresión post-S18: sec(pi/2) nunca debe filtrar AttributeError/500."""
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": "sec(pi/2)", "angle_unit": "rad"},
+    )
+    body = response.json()
+    assert response.status_code == 200, body
+    assert body["success"] is False, body
+    assert body["error_code"] == "DOMAIN_ERROR", body
