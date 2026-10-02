@@ -16,7 +16,7 @@ describe("latexToBackendSyntax", () => {
   });
 
   it("reescribe la raíz n-ésima a potencia fraccionaria (el backend no tiene root())", () => {
-    expect(latexToBackendSyntax("\\sqrt[3]{8}")).toBe("(8)**(1/(3))");
+    expect(latexToBackendSyntax("\\sqrt[3]{8}")).toBe("realroot(8,3)");
   });
 
   it("reescribe una raíz n-ésima anidada dentro de otra expresión", () => {
@@ -221,5 +221,15 @@ describe("B7 log-base composition regressions", () => {
   it("keeps symbolic base-log atomic without parentheses", () => {
     expect(latexToBackendSyntax("\\log_{x}8=3").replace(/\s+/g, ""))
       .toBe("log(8,x)=3");
+  });
+});
+
+
+describe("B7 N1 real nth roots", () => {
+  it("conserva semántica real en raíces impares negativas", () => {
+    expect(latexToBackendSyntax("\\sqrt[3]{-8}").replace(/\s+/g, ""))
+      .toBe("realroot(-8,3)");
+    expect(latexToBackendSyntax("\\sqrt[5]{-32}").replace(/\s+/g, ""))
+      .toBe("realroot(-32,5)");
   });
 });
