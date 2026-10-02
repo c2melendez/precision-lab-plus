@@ -1326,6 +1326,16 @@ export interface components {
             y: (number | null)[];
             /** Z */
             z?: number[][] | null;
+            /**
+             * Hole X
+             * @default []
+             */
+            hole_x?: number[];
+            /**
+             * Hole Y
+             * @default []
+             */
+            hole_y?: number[];
         };
         /** UniformRequest */
         UniformRequest: {
