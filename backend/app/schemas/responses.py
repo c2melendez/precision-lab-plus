@@ -196,6 +196,21 @@ class EquationSolution(BaseModel):
     is_complex: bool = False
 
 
+class DomainCondition(BaseModel):
+    """Restricción matemática que pertenece al dominio de la expresión
+    ORIGINAL, antes de simplificar/factorizar/expandir.
+
+    Es un contrato aditivo: permite que la UI y futuras rutas de
+    graficación conserven huecos y exclusiones aunque la forma resultante
+    ya no los haga visibles (ej. (x**2-1)/(x-1) -> x+1, con x != 1).
+    """
+
+    text: str
+    latex: str
+    variable: Optional[str] = None
+    kind: str = "domain"
+
+
 class Trace(BaseModel):
     type: str
     name: str
@@ -252,6 +267,9 @@ class MathResponse(BaseModel):
     has_detailed_steps: bool
     graph_data: Optional[GraphData] = None
     warnings: List[str] = []
+    # Contrato S26 de resultados contextuales: restricciones heredadas de
+    # la estructura de entrada, no de la forma ya simplificada.
+    domain_conditions: List[DomainCondition] = []
     error_code: Optional[ErrorCode] = None
     error_message: Optional[str] = None
     duration_ms: float
