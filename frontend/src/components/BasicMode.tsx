@@ -74,6 +74,36 @@ interface SubstitutionRow {
 // comporte igual sin importar desde qué pantalla se escribió.
 const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
 
+
+function stripTrailingDomainAssumption(source: string): string {
+  const trimmed = source.trim();
+  const match = trimmed.match(/^(.*?),\s*(?:\\quad\s*)?(?:\\\s*)?([^,]*[<>][^,]*)$/s);
+  if (!match) return trimmed;
+  const main = match[1].trim();
+  return main || trimmed;
+}
+
+function extractFunctionEvaluation(source: string): {
+  bodyLatex: string;
+  variable: string;
+  argumentLatex: string;
+} | null {
+  const normalized = source
+    .replace(/\\left\(/g, "(")
+    .replace(/\\right\)/g, ")")
+    .replace(/\\\s/g, " ")
+    .trim();
+  const match = normalized.match(
+    /^([A-Za-z])\(([A-Za-z])\)\s*=\s*(.+?)\s*;\s*\1\((.+)\)\s*$/s,
+  );
+  if (!match) return null;
+  return {
+    variable: match[2],
+    bodyLatex: match[3].trim(),
+    argumentLatex: match[4].trim(),
+  };
+}
+
 function extractIntervalRestriction(source: string): {
   expressionLatex: string;
   lowerLatex: string;
@@ -717,8 +747,40 @@ export function BasicMode() {
       return;
     }
 
+    const functionEvaluation = extractFunctionEvaluation(currentLatex);
+    if (functionEvaluation) {
+      const expression = latexToBackendSyntax(functionEvaluation.bodyLatex);
+      const point = latexToBackendSyntax(functionEvaluation.argumentLatex);
+      if (!expression || !point) {
+        setValidationError("La evaluación de la función está incompleta.");
+        return;
+      }
+      setValidationError(null);
+      setLoading(true);
+      setErrorMessage(null);
+      try {
+        const result = await submitScientific(
+          "/evaluate",
+          {
+            expression,
+            angle_unit: angleUnit,
+            domain: "real",
+            substitutions: { [functionEvaluation.variable]: point },
+          },
+          `Evaluar función en ${functionEvaluation.variable}=${point}`,
+          currentLatex,
+        );
+        setLastResult(result);
+        if (!result.success) setErrorMessage(result.error_message ?? "Ocurrió un error.");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     const intervalRestriction = extractIntervalRestriction(currentLatex);
-    const sourceForBackend = intervalRestriction?.expressionLatex ?? currentLatex;
+    const sourceForBackend =
+      intervalRestriction?.expressionLatex ?? stripTrailingDomainAssumption(currentLatex);
     const trimmed = latexToBackendSyntax(sourceForBackend);
     if (!trimmed) {
       setValidationError("La expresión no puede estar vacía.");
