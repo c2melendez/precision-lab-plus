@@ -141,10 +141,16 @@ describe("E2E mínimo — Derivada (sección 15)", () => {
       order: 1,
     });
 
-    // El resultado reusado también se renderiza (segunda ocurrencia del
-    // mismo paso, esta vez dentro del panel de historial — result_latex se
-    // renderiza vía KaTeX como spans, no como el texto plano "2*x", así
-    // que se verifica sobre el título del step, que sí es texto plano).
+    // Contrato S26: al llegar un resultado nuevo por "Reusar", el
+    // procedimiento vuelve a iniciar colapsado. El historial conserva el
+    // resultado previo, pero el panel activo no debe desplegar pasos sin
+    // una nueva acción explícita del usuario.
+    await waitFor(() => {
+      expect(screen.getAllByText("Regla de la potencia").length).toBe(1);
+    });
+    const reusedStepsToggle = screen.getByRole("button", { name: "Mostrar pasos detallados" });
+    expect(reusedStepsToggle).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(reusedStepsToggle);
     await waitFor(() => {
       expect(screen.getAllByText("Regla de la potencia").length).toBe(2);
     });
