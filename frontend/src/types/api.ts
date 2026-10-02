@@ -1114,7 +1114,7 @@ export interface components {
              * Domain Conditions
              * @default []
              */
-            domain_conditions: components["schemas"]["DomainCondition"][];
+            domain_conditions?: components["schemas"]["DomainCondition"][];
             error_code?: components["schemas"]["ErrorCode"] | null;
             /** Error Message */
             error_message?: string | null;
