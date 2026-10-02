@@ -5,6 +5,7 @@ app/services/graph_service.py — `/graph/2d` (spec, sección 10, `Graph2DReques
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeoutError
 from dataclasses import dataclass, field
+import math
 import time
 from typing import List, Optional, Tuple
 
@@ -170,12 +171,22 @@ def _find_removable_holes(
         if not (x_min <= x_value <= x_max):
             continue
 
-        limit_value = _run_with_timeout(
-            lambda p=point: sympy.limit(expr, var_symbol, p, dir="+-"),
+        left_limit = _run_with_timeout(
+            lambda p=point: sympy.limit(expr, var_symbol, p, dir="-"),
             timeout_s=_ANALYSIS_TIMEOUT_S,
         )
-        if limit_value is None:
+        right_limit = _run_with_timeout(
+            lambda p=point: sympy.limit(expr, var_symbol, p, dir="+"),
+            timeout_s=_ANALYSIS_TIMEOUT_S,
+        )
+        if left_limit is None or right_limit is None:
             continue
+        try:
+            if sympy.simplify(left_limit - right_limit) != 0:
+                continue
+        except Exception:
+            continue
+        limit_value = left_limit
         if getattr(limit_value, "is_real", None) is False:
             continue
         if getattr(limit_value, "is_finite", None) is not True:
