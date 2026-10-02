@@ -111,7 +111,11 @@ describe("E2E mínimo — Derivada (sección 15)", () => {
       order: 1,
     });
 
-    // 4. result_latex y steps renderizados.
+    // 4. result_latex y pasos disponibles. Contrato S26: el procedimiento
+    // detallado está colapsado por defecto y solo se renderiza al pedirlo.
+    const stepsToggle = await screen.findByRole("button", { name: "Mostrar pasos detallados" });
+    expect(screen.queryByLabelText("Procedimiento paso a paso")).not.toBeInTheDocument();
+    fireEvent.click(stepsToggle);
     await screen.findByText("Regla de la potencia");
     expect(screen.getByLabelText("Procedimiento paso a paso")).toBeInTheDocument();
 
