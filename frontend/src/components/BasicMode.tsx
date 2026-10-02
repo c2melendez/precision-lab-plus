@@ -77,7 +77,7 @@ const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
 
 function stripTrailingDomainAssumption(source: string): string {
   const trimmed = source.trim();
-  const match = trimmed.match(/^(.*?),\s*(?:\\quad\s*)?(?:\\\s*)?([^,]*[<>][^,]*)$/s);
+  const match = trimmed.match(/^(.*?)(?<!\\),\s*(?:\\quad\s*)?(?:\\\s*)?([^,]*[<>][^,]*)$/s);
   if (!match) return trimmed;
   const main = match[1].trim();
   return main || trimmed;
