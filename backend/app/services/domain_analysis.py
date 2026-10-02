@@ -128,6 +128,13 @@ def extract_domain_conditions(expr: sympy.Expr) -> List[DomainCondition]:
     seen: set[str] = set()
     result: List[DomainCondition] = []
     for condition, kind in collected:
+        # Las restricciones persistentes describen el dominio simbólico.
+        # Una condición constante verdadera como 2 != 0, log(100)>0 o
+        # 9>=0 no aporta información y, peor, puede desplazar visualmente
+        # el resultado. Las constantes inválidas ya son responsabilidad
+        # del evaluador/operación normal (DOMAIN_ERROR).
+        if not condition.free_symbols:
+            continue
         key = sympy.srepr(condition)
         if key in seen:
             continue
