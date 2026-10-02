@@ -84,6 +84,7 @@ def _build_response(
         steps=result.steps,
         has_detailed_steps=result.has_detailed_steps,
         warnings=warnings,
+        domain_conditions=result.domain_conditions,
         duration_ms=_duration_ms(request),
     )
 
