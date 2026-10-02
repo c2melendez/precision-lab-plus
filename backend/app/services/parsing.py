@@ -106,6 +106,19 @@ def _plus_minus(value, **_):
     return sympy.FiniteSet(value, -value)
 
 
+def _real_nth_root(value, index, **_):
+    """Real calculator convention for n-th roots.
+
+    For odd positive integer indices, negative real radicands use the real
+    branch (e.g. realroot(-8,3) == -2). Even roots retain SymPy's principal
+    semantics and are rejected later when the request domain is real.
+    """
+    n = sympy.sympify(index)
+    if n.is_integer is True and n.is_positive is True:
+        return sympy.real_root(value, n)
+    return sympy.root(value, n)
+
+
 
 ALLOWED_FUNCTIONS = {
     "sin": sin,
@@ -235,6 +248,7 @@ ALLOWED_FUNCTIONS = {
     # necesarios. zoo (log(0)) ya lo maneja evaluate_service.py existente
     # (detectado, no un caso nuevo).
     "root": root,
+    "realroot": _real_nth_root,
 }
 ALLOWED_CONSTANTS = {"pi": pi, "e": E, "E": E, "i": I, "I": I, "oo": oo}
 

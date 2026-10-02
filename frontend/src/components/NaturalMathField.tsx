@@ -45,7 +45,7 @@ function rewriteNthRoot(ascii: string): string {
   // Se repite porque una raíz puede anidar otra en el índice o el radicando.
   for (let i = 0; i < 5 && pattern.test(result); i++) {
     pattern.lastIndex = 0;
-    result = result.replace(pattern, (_match, n: string, x: string) => `(${x})**(1/(${n}))`);
+    result = result.replace(pattern, (_match, n: string, x: string) => `realroot(${x},${n})`);
   }
   return result;
 }
@@ -293,20 +293,63 @@ function rewriteHyperbolicInverses(ascii: string): string {
 
 
 
+function rewriteBareLogSubscriptLatex(latex: string): string {
+  // Preserve the base/argument boundary before MathLive flattens
+  // \\log_{2}x into the ambiguous ASCII form "log _2x".
+  // Parenthesized arguments are already handled downstream.
+  return latex.replace(
+    /\\log_\{([^{}]+)\}\s*([A-Za-z]|\d+(?:\.\d+)?)(?=[^A-Za-z0-9.]|$)/g,
+    (_match, base: string, arg: string) => `\\log_{${base}}\\left(${arg}\\right)`,
+  );
+}
+
 function rewriteLogSubscriptBase(ascii: string): string {
-  let result = ascii;
-  // MathLive/Compute Engine puede serializar \\log_{2}(8) como
-  // "log _2(8)" o "log _(2)(8)". Normalizamos ambas formas al
-  // contrato explícito del backend: log(argumento,base).
-  result = result.replace(
-    /\blog\s*_\s*\(\s*([^()]+?)\s*\)\s*\(\s*([^()]+?)\s*\)/g,
-    "log($2,$1)",
-  );
-  result = result.replace(
-    /\blog\s*_\s*([A-Za-z0-9.+\-*/^]+)\s*\(\s*([^()]+?)\s*\)/g,
-    "log($2,$1)",
-  );
-  return result;
+  let out = "";
+  let i = 0;
+
+  const readBalanced = (start: number): [string, number] | null => {
+    if (ascii[start] !== "(") return null;
+    let depth = 1;
+    let j = start + 1;
+    while (j < ascii.length && depth > 0) {
+      if (ascii[j] === "(") depth++;
+      else if (ascii[j] === ")") depth--;
+      j++;
+    }
+    if (depth !== 0) return null;
+    return [ascii.slice(start + 1, j - 1), j];
+  };
+
+  while (i < ascii.length) {
+    const m = ascii.slice(i).match(/^log\s*_\s*/);
+    if (!m) {
+      out += ascii[i++];
+      continue;
+    }
+
+    let cursor = i + m[0].length;
+    let base = "";
+    if (ascii[cursor] === "(") {
+      const parsedBase = readBalanced(cursor);
+      if (!parsedBase) { out += ascii[i++]; continue; }
+      [base, cursor] = parsedBase;
+    } else {
+      const baseMatch = ascii.slice(cursor).match(/^([A-Za-z0-9.+\-*/^]+)/);
+      if (!baseMatch) { out += ascii[i++]; continue; }
+      base = baseMatch[1];
+      cursor += baseMatch[1].length;
+    }
+
+    while (/\s/.test(ascii[cursor] ?? "")) cursor++;
+    const parsedArg = readBalanced(cursor);
+    if (!parsedArg) { out += ascii[i++]; continue; }
+    const [arg, next] = parsedArg;
+
+    out += `log(${arg},${base})`;
+    i = next;
+  }
+
+  return out;
 }
 
 function rewritePostfixPercent(ascii: string): string {
@@ -471,8 +514,11 @@ export function latexToBackendSyntax(latex: string): string {
   // MathLive elimina un signo % literal durante la conversión ASCII.
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
-  const latexWithPercent = rewriteBareFunctionPowerLatex(rewriteBareFractionFunctionLatex(rewriteOperatorNameLatex(latex)))
-    .replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
+  const latexWithPercent = rewriteBareFunctionPowerLatex(
+    rewriteBareFractionFunctionLatex(
+      rewriteOperatorNameLatex(rewriteBareLogSubscriptLatex(latex)),
+    ),
+  ).replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
   // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
   // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
   // conocido antes de delegar al conversor, y luego collapseKnownFunctionNames

@@ -124,6 +124,16 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
       });
     });
 
+    it("B7 N1: ignora una hipótesis paramétrica después del límite", () => {
+      expect(detectCalculusIntent("\\lim_{x\\to 0}\\frac{a^{x}-1}{x},\\ a>0")).toEqual({
+        kind: "limit",
+        variable: "x",
+        point: "0",
+        innerLatex: "\\frac{a^{x}-1}{x}",
+        direction: "both",
+      });
+    });
+
     it("detecta un límite al +infinito (PositiveInfinity -> \"oo\")", () => {
       expect(detectCalculusIntent("\\lim_{x\\to \\infty} \\frac{1}{x}")).toEqual({
         kind: "limit",

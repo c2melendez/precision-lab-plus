@@ -1,11 +1,8 @@
-name: Trig Matrix Diagnostic
+name: Log Exp Radical Matrix Diagnostic
 
 concurrency:
-  group: trig-matrix-${{ github.ref }}
+  group: log-exp-radical-matrix-${{ github.ref }}
   cancel-in-progress: true
-# Post-parser trig matrix recertification 2026-10-01.
-# pull_request is intentionally limited to the QA recertification branch so
-# connector-visible PR runs can be inspected without changing product code.
 
 on:
   push:
@@ -13,23 +10,23 @@ on:
     paths:
       - "frontend/src/**"
       - "backend/app/**"
-      - "frontend/e2e/trig-matrix-diagnostic.spec.ts"
-      - ".github/workflows/trig-matrix-diagnostic.yml"
+      - "frontend/e2e/log-exp-radical-matrix-diagnostic.spec.ts"
+      - ".github/workflows/log-exp-radical-matrix-diagnostic.yml"
   pull_request:
     branches: [qa/s26-execution]
     paths:
-      - "frontend/e2e/trig-matrix-diagnostic.spec.ts"
-      - ".github/workflows/trig-matrix-diagnostic.yml"
+      - "frontend/e2e/log-exp-radical-matrix-diagnostic.spec.ts"
+      - ".github/workflows/log-exp-radical-matrix-diagnostic.yml"
   workflow_dispatch:
 
 jobs:
-  trig-matrix:
+  log-exp-radical-matrix:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]
+        shard: [0, 1, 2, 3, 4, 5]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -52,8 +49,8 @@ jobs:
       - name: Install Chromium
         working-directory: frontend
         run: npx playwright install --with-deps chromium
-      - name: Run trig matrix shard
+      - name: Run log exp radical matrix shard
         working-directory: frontend
         env:
-          TRIG_MATRIX_SHARD: ${{ matrix.shard }}
-        run: npx playwright test e2e/trig-matrix-diagnostic.spec.ts --project=desktop-chromium --workers=1
+          LER_MATRIX_SHARD: ${{ matrix.shard }}
+        run: npx playwright test e2e/log-exp-radical-matrix-diagnostic.spec.ts --project=desktop-chromium --workers=1

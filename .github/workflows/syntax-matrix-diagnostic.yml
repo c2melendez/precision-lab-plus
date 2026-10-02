@@ -1,33 +1,23 @@
-name: Trig Matrix Diagnostic
+name: Syntax Matrix Diagnostic
 
 concurrency:
-  group: trig-matrix-${{ github.ref }}
+  group: syntax-matrix-${{ github.ref }}
   cancel-in-progress: true
-# Post-parser trig matrix recertification 2026-10-01.
-# pull_request is intentionally limited to the QA recertification branch so
-# connector-visible PR runs can be inspected without changing product code.
 
 on:
-  push:
-    branches: [qa/s26-execution]
-    paths:
-      - "frontend/src/**"
-      - "backend/app/**"
-      - "frontend/e2e/trig-matrix-diagnostic.spec.ts"
-      - ".github/workflows/trig-matrix-diagnostic.yml"
   pull_request:
     branches: [qa/s26-execution]
     paths:
-      - "frontend/e2e/trig-matrix-diagnostic.spec.ts"
-      - ".github/workflows/trig-matrix-diagnostic.yml"
+      - "frontend/e2e/syntax-matrix-diagnostic.spec.ts"
+      - ".github/workflows/syntax-matrix-diagnostic.yml"
   workflow_dispatch:
 
 jobs:
-  trig-matrix:
+  syntax-matrix:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]
+        shard: [0,1,2,3,4,5,6,7]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -42,7 +32,8 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - run: pip install -r backend/requirements.txt
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
@@ -52,8 +43,8 @@ jobs:
       - name: Install Chromium
         working-directory: frontend
         run: npx playwright install --with-deps chromium
-      - name: Run trig matrix shard
+      - name: Run syntax matrix shard
         working-directory: frontend
         env:
-          TRIG_MATRIX_SHARD: ${{ matrix.shard }}
-        run: npx playwright test e2e/trig-matrix-diagnostic.spec.ts --project=desktop-chromium --workers=1
+          SYNTAX_MATRIX_SHARD: ${{ matrix.shard }}
+        run: npx playwright test e2e/syntax-matrix-diagnostic.spec.ts --project=desktop-chromium --workers=1

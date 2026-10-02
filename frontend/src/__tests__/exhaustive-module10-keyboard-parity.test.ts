@@ -84,8 +84,7 @@ describe("Suite exhaustiva original — Módulo 10: teclado ↔ motor (Plus fron
 
   it("raíz n-ésima algebraica usa una potencia equivalente", () => {
     const normalized = latexToBackendSyntax("\\sqrt[3]{27}");
-    expect(normalized).toMatch(/27/);
-    expect(normalized).toMatch(/1\/\(3\)/);
+    expect(normalized).toBe("realroot(27,3)");
   });
 
   it.each([

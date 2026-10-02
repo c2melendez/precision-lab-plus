@@ -356,3 +356,19 @@ def test_real_domain_allows_nested_inverse_trig_composition():
     body = response.json()
     assert body["success"] is True
     assert body["result_approx"] == pytest.approx(4/5)
+
+
+
+def test_real_odd_nth_roots_of_negative_values():
+    for expression, expected in (("realroot(-8,3)", -2.0), ("realroot(-32,5)", -2.0)):
+        response = _evaluate(expression=expression, domain="real")
+        body = response.json()
+        assert body["success"] is True, body
+        assert body["result_approx"] == pytest.approx(expected)
+
+
+def test_even_realroot_of_negative_value_remains_outside_real_domain():
+    response = _evaluate(expression="realroot(-4,2)", domain="real")
+    body = response.json()
+    assert body["success"] is False
+    assert body["error_code"] == "DOMAIN_ERROR"

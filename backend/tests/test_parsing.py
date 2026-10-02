@@ -168,3 +168,14 @@ def test_complexity_limit_large_exponent():
 def test_reasonable_expression_within_complexity_limits():
     expr = parsing.parse_expression_tree("x**2 + 2*x + 1")
     assert expr is not None
+
+
+
+def test_realroot_internal_piecewise_is_safe_but_piecewise_input_is_blocked():
+    x = sympy.Symbol("x")
+    parsed = parsing.parse_expression_tree("realroot(x,3)")
+    assert parsed.has(sympy.Piecewise)
+    assert parsed.subs(x, -8) == -2
+
+    with pytest.raises(parsing.ParseSecurityError):
+        parsing.parse_expression_tree("Piecewise((1,x>0),(0,True))")

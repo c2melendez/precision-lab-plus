@@ -16,11 +16,11 @@ describe("latexToBackendSyntax", () => {
   });
 
   it("reescribe la raíz n-ésima a potencia fraccionaria (el backend no tiene root())", () => {
-    expect(latexToBackendSyntax("\\sqrt[3]{8}")).toBe("(8)**(1/(3))");
+    expect(latexToBackendSyntax("\\sqrt[3]{8}")).toBe("realroot(8,3)");
   });
 
   it("reescribe una raíz n-ésima anidada dentro de otra expresión", () => {
-    expect(latexToBackendSyntax("1+\\sqrt[3]{8}")).toBe("1+(8)**(1/(3))");
+    expect(latexToBackendSyntax("1+\\sqrt[3]{8}")).toBe("1+realroot(8,3)");
   });
 
   it("convierte funciones trigonométricas e implícitas", () => {
@@ -120,7 +120,7 @@ describe("Trig matrix notation normalization", () => {
   });
 
   it("normalizes operatorname hyperbolic powers before MathLive ASCII spacing", () => {
-    expect(latexToBackendSyntax("\\operatorname{sech}^{2}x").replace(/\\s+/g, "")).toBe("(sech(x))**(2)");
+    expect(latexToBackendSyntax("\\operatorname{sech}^{2}x").replace(/\s+/g, "")).toBe("(sech(x))**(2)");
   });
 
   it("normalizes infinity to the backend oo token", () => {
@@ -198,5 +198,38 @@ describe("Native inverse functions retain explicit application syntax", () => {
   it("normalizes a native inverse-function equation before domain routing", () => {
     expect(latexToBackendSyntax("\\arcsin x=\\arccos x").replace(/\s+/g, ""))
       .toBe("arcsin(x)=arccos(x)");
+  });
+});
+
+
+describe("B7 log-base composition regressions", () => {
+  it("parses nested fractional argument in base-log notation", () => {
+    expect(latexToBackendSyntax("\\log_{3}\\left(\\frac{1}{27}\\right)").replace(/\s+/g, ""))
+      .toBe("log((1)/(27),3)");
+  });
+
+  it("keeps base-log atomic inside a product", () => {
+    expect(latexToBackendSyntax("\\log_{2}(3)\\cdot\\log_{3}(4)").replace(/\s+/g, ""))
+      .toBe("log(3,2)*log(4,3)");
+  });
+
+  it("keeps base-log atomic inside an equation", () => {
+    expect(latexToBackendSyntax("\\log_{2}x=5").replace(/\s+/g, ""))
+      .toBe("log(x,2)=5");
+  });
+
+  it("keeps symbolic base-log atomic without parentheses", () => {
+    expect(latexToBackendSyntax("\\log_{x}8=3").replace(/\s+/g, ""))
+      .toBe("log(8,x)=3");
+  });
+});
+
+
+describe("B7 N1 real nth roots", () => {
+  it("conserva semántica real en raíces impares negativas", () => {
+    expect(latexToBackendSyntax("\\sqrt[3]{-8}").replace(/\s+/g, ""))
+      .toBe("realroot(-8,3)");
+    expect(latexToBackendSyntax("\\sqrt[5]{-32}").replace(/\s+/g, ""))
+      .toBe("realroot(-32,5)");
   });
 });
