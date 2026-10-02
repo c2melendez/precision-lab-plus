@@ -114,3 +114,51 @@ def test_parse_error_propagates(path):
     assert body["success"] is False
     assert body["error_code"] == "PARSE_ERROR"
     assert body["operation"] == path
+
+
+# ---------------------------------------------------------------------------
+# Contrato S26: las restricciones del dominio pertenecen a la expresión
+# ORIGINAL y sobreviven a transformaciones que las oculten visualmente.
+# ---------------------------------------------------------------------------
+
+
+def test_simplify_preserves_hole_from_original_rational_expression():
+    response = _post("simplify", "(x**2-1)/(x-1)")
+    body = response.json()
+
+    assert body["success"] is True
+    assert body["result_text"] == "x + 1"
+    conditions = body["domain_conditions"]
+    assert any(
+        condition["variable"] == "x"
+        and condition["kind"] == "denominator"
+        and condition["text"] in ("Ne(x, 1)", "x != 1")
+        for condition in conditions
+    )
+
+
+def test_simplify_preserves_real_log_domain_condition():
+    response = _post("simplify", "ln(x-2)")
+    body = response.json()
+
+    assert body["success"] is True
+    assert any(
+        condition["kind"] == "log"
+        and condition["variable"] == "x"
+        and "x - 2" in condition["text"]
+        and "> 0" in condition["text"]
+        for condition in body["domain_conditions"]
+    )
+
+
+def test_factor_and_expand_also_carry_source_domain_conditions():
+    for operation in ("factor", "expand"):
+        response = _post(operation, "1/(x-3)")
+        body = response.json()
+        assert body["success"] is True
+        assert any(
+            condition["kind"] == "denominator"
+            and condition["variable"] == "x"
+            and condition["text"] in ("Ne(x, 3)", "x != 3")
+            for condition in body["domain_conditions"]
+        )
