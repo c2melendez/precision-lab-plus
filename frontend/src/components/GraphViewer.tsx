@@ -39,9 +39,9 @@ interface PlotlyModule {
 // color de cada curva sigue llegando por el prop `colors` de
 // `<GraphViewer>`, sin cambios en ese contrato.
 
-function traceToPlotly(trace: GraphData["traces"][number], color?: string) {
+function traceToPlotly(trace: GraphData["traces"][number], color?: string): unknown[] {
   if (trace.type === "surface") {
-    return {
+    return [{
       x: trace.x,
       y: trace.y,
       z: trace.z,
@@ -49,7 +49,7 @@ function traceToPlotly(trace: GraphData["traces"][number], color?: string) {
       name: trace.name,
       colorscale: "Viridis" as const,
       showscale: false,
-    };
+    }];
   }
   // Fase F (spec_edo_complejos_tooltips.md §3.4, Módulo F3): "point"
   // (Argand) -- mismo type "scatter" que una curva, pero mode:"markers"
@@ -57,16 +57,16 @@ function traceToPlotly(trace: GraphData["traces"][number], color?: string) {
   // nueva, tal como preveía el spec). NO reutiliza mode:"lines" con un
   // solo punto -- eso conecta con nada y Plotly lo dibuja invisible.
   if (trace.type === "point") {
-    return {
+    return [{
       x: trace.x,
       y: trace.y,
       type: "scatter" as const,
       mode: "markers" as const,
       name: trace.name,
       marker: color ? { color, size: 10 } : { size: 10 },
-    };
+    }];
   }
-  return {
+  const lineTrace = {
     x: trace.x,
     y: trace.y,
     type: "scatter" as const,
@@ -75,6 +75,32 @@ function traceToPlotly(trace: GraphData["traces"][number], color?: string) {
     line: color ? { color } : undefined,
     connectgaps: false, // los `null` (discontinuidades, sección 10) cortan la línea
   };
+
+  const holeX = trace.hole_x ?? [];
+  const holeY = trace.hole_y ?? [];
+  if (holeX.length === 0 || holeX.length !== holeY.length) {
+    return [lineTrace];
+  }
+
+  // Las discontinuidades removibles se dibujan como círculos ABIERTOS.
+  // Se mantienen como una traza separada para que sean visibles aunque la
+  // malla numérica no contenga exactamente el punto excluido.
+  const holeTrace = {
+    x: holeX,
+    y: holeY,
+    type: "scatter" as const,
+    mode: "markers" as const,
+    name: `${trace.name} (hueco)`,
+    showlegend: false,
+    hovertemplate: "Hueco: (%{x}, %{y})<extra></extra>",
+    marker: {
+      symbol: "circle-open" as const,
+      size: 11,
+      line: color ? { color, width: 2 } : { width: 2 },
+      color: color ?? "currentColor",
+    },
+  };
+  return [lineTrace, holeTrace];
 }
 
 function isSurface(data: GraphData): boolean {
@@ -113,7 +139,7 @@ export default function GraphViewer({ data, colors }: GraphViewerProps) {
 
         await Plotly.newPlot(
           safeContainer,
-          data.traces.map((trace, i) => traceToPlotly(trace, colors?.[i])),
+          data.traces.flatMap((trace, i) => traceToPlotly(trace, colors?.[i])),
           isSurface(data)
             ? {
                 scene: {
