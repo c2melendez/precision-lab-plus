@@ -28,6 +28,7 @@ export async function submitAndRecord(
     resultType: result.success ? (result.result_type ?? undefined) : undefined,
     hasDetailedSteps: result.has_detailed_steps,
     warnings: result.warnings,
+    domainConditions: result.success ? (result.domain_conditions ?? []) : [],
   });
 
   return result;
