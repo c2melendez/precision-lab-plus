@@ -202,3 +202,40 @@ def test_graph_3d_paraboloid_minimum_near_origin():
     z_grid = body["graph_data"]["traces"][0]["z"]
     min_z = min(min(row) for row in z_grid)
     assert 0 <= min_z < 0.1
+
+
+
+# ---------------------------------------------------------------------------
+# Contrato S26: discontinuidades removibles explícitas.
+# ---------------------------------------------------------------------------
+
+
+def test_removable_discontinuity_is_reported_as_open_hole_metadata():
+    # 50 muestras entre -2 y 4 NO garantizan caer exactamente en x=1.
+    # El hueco debe detectarse simbólicamente desde la expresión original,
+    # no por accidente de la malla numérica.
+    response = _graph(["(x**2-1)/(x-1)"], x_min=-2, x_max=4, samples=50)
+    body = response.json()
+
+    assert body["success"] is True
+    trace = body["graph_data"]["traces"][0]
+    assert len(trace["hole_x"]) == 1
+    assert len(trace["hole_y"]) == 1
+    assert abs(trace["hole_x"][0] - 1.0) < 1e-9
+    assert abs(trace["hole_y"][0] - 2.0) < 1e-9
+
+    # El dominio también se calcula desde la forma original, por lo que no
+    # puede degradarse a todos los reales tras cancelar (x-1).
+    domain = body["graph_data"]["analysis"][0]["domain_text"]
+    assert domain is not None
+    assert "1" in domain
+
+
+def test_vertical_asymptote_is_not_misclassified_as_removable_hole():
+    response = _graph(["1/(x-1)"], x_min=-2, x_max=4, samples=50)
+    body = response.json()
+
+    assert body["success"] is True
+    trace = body["graph_data"]["traces"][0]
+    assert trace["hole_x"] == []
+    assert trace["hole_y"] == []
