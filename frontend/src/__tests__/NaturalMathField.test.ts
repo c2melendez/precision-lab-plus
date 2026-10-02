@@ -20,7 +20,7 @@ describe("latexToBackendSyntax", () => {
   });
 
   it("reescribe una raíz n-ésima anidada dentro de otra expresión", () => {
-    expect(latexToBackendSyntax("1+\\sqrt[3]{8}")).toBe("1+(8)**(1/(3))");
+    expect(latexToBackendSyntax("1+\\sqrt[3]{8}")).toBe("1+realroot(8,3)");
   });
 
   it("convierte funciones trigonométricas e implícitas", () => {
