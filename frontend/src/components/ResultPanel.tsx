@@ -167,6 +167,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
   const copyText = result.result_text ?? approxText;
   const parsedFraction = isFractionLatex(result.result_latex) ? parseFracLatex(result.result_latex!) : null;
   const mixedLatex = parsedFraction ? toMixedFracLatex(parsedFraction.n, parsedFraction.d) : null;
+  const domainConditions = result.domain_conditions ?? [];
 
   return (
     <div aria-live="polite" className="space-y-4 fade-in">
@@ -248,6 +249,19 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {domainConditions.length > 0 && (
+        <div className="rounded border border-paper-line bg-paper/60 px-3 py-2">
+          <p className="mb-1 text-xs font-semibold text-ink">Restricciones del dominio</p>
+          <ul className="space-y-1">
+            {domainConditions.map((condition, index) => (
+              <li key={index} className="text-sm text-muted">
+                <MathRenderer latex={condition.latex} fallbackText={condition.text} />
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
