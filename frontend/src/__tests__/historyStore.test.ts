@@ -66,6 +66,31 @@ describe("useHistoryStore", () => {
     expect(reused?.endpointUrl).toBe("/derivative");
   });
 
+  it("reuseEntry conserva las restricciones de dominio del contrato S26", () => {
+    useHistoryStore.getState().addEntry(
+      baseEntry({
+        endpointUrl: "/simplify",
+        label: "(x^2-1)/(x-1)",
+        domainConditions: [
+          {
+            text: "Ne(x, 1)",
+            latex: "x \\neq 1",
+            variable: "x",
+            kind: "denominator",
+          },
+        ],
+      }),
+    );
+    const [entry] = useHistoryStore.getState().entries;
+    const reused = useHistoryStore.getState().reuseEntry(entry.id);
+    expect(reused?.domainConditions).toEqual([
+      expect.objectContaining({
+        variable: "x",
+        kind: "denominator",
+      }),
+    ]);
+  });
+
   it("reuseEntry devuelve null si el endpointUrl NO está en la whitelist", () => {
     useHistoryStore.getState().addEntry(baseEntry({ endpointUrl: "/no-existe" }));
     const [entry] = useHistoryStore.getState().entries;
