@@ -217,6 +217,12 @@ class Trace(BaseModel):
     x: List[float]
     y: List[Optional[float]]
     z: Optional[List[List[float]]] = None
+    # Contrato S26: discontinuidades removibles detectadas desde la
+    # expresión ORIGINAL. Se representan separadas de los samples para
+    # que el hueco sea visible aunque la malla no contenga exactamente
+    # ese valor de x.
+    hole_x: List[float] = []
+    hole_y: List[float] = []
 
 
 class GraphAnalysis(BaseModel):
