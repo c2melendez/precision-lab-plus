@@ -774,6 +774,20 @@ export interface components {
              */
             is_complex: boolean;
         };
+        /** DomainCondition */
+        DomainCondition: {
+            /** Text */
+            text: string;
+            /** Latex */
+            latex: string;
+            /** Variable */
+            variable?: string | null;
+            /**
+             * Kind
+             * @default domain
+             */
+            kind: string;
+        };
         /**
          * ErrorCode
          * @description Enum central — el backend NUNCA usa un string de error fuera de esta lista.
@@ -1096,6 +1110,11 @@ export interface components {
              * @default []
              */
             warnings: string[];
+            /**
+             * Domain Conditions
+             * @default []
+             */
+            domain_conditions: components["schemas"]["DomainCondition"][];
             error_code?: components["schemas"]["ErrorCode"] | null;
             /** Error Message */
             error_message?: string | null;
