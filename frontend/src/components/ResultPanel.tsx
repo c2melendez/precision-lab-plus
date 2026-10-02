@@ -129,6 +129,10 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
   // que el toggle equivalente en Lite: default mixta cuando corresponde,
   // el usuario puede pedir la impropia.
   const [showMixed, setShowMixed] = useState(true);
+  // Contrato de resultados S26: el procedimiento detallado en Plus es
+  // opcional y permanece colapsado por defecto para no sobrecargar la
+  // pantalla. Solo se despliega cuando el usuario lo solicita.
+  const [showDetailedSteps, setShowDetailedSteps] = useState(false);
 
   if (isLoading) {
     return (
@@ -266,7 +270,19 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
         </div>
       )}
 
-      {result.has_detailed_steps && <StepList steps={result.steps} />}
+      {result.has_detailed_steps && (
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => setShowDetailedSteps((visible) => !visible)}
+            aria-expanded={showDetailedSteps}
+            className="text-xs font-medium text-marker underline decoration-dotted hover:text-marker-text"
+          >
+            {showDetailedSteps ? "Ocultar pasos detallados" : "Mostrar pasos detallados"}
+          </button>
+          {showDetailedSteps && <StepList steps={result.steps} />}
+        </div>
+      )}
     </div>
   );
 }
