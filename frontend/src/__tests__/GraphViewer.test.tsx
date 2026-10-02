@@ -68,6 +68,45 @@ describe("GraphViewer", () => {
     );
   });
 
+  it("renderiza discontinuidades removibles como marcadores de círculo abierto", async () => {
+    const dataWithHole: GraphData = {
+      traces: [
+        {
+          type: "line",
+          name: "(x^2-1)/(x-1)",
+          x: [-1, 0, 2, 3],
+          y: [0, 1, 3, 4],
+          hole_x: [1],
+          hole_y: [2],
+        },
+      ],
+      x_range: [-1, 3],
+      y_range: [0, 4],
+      points_truncated: false,
+    };
+
+    render(<GraphViewer data={dataWithHole} colors={["#123456"]} />);
+    await waitFor(() => expect(newPlot).toHaveBeenCalledTimes(1));
+
+    const [, plotlyTraces] = newPlot.mock.calls[0];
+    expect(plotlyTraces).toHaveLength(2);
+    expect(plotlyTraces[0]).toEqual(
+      expect.objectContaining({ mode: "lines", name: "(x^2-1)/(x-1)" }),
+    );
+    expect(plotlyTraces[1]).toEqual(
+      expect.objectContaining({
+        x: [1],
+        y: [2],
+        mode: "markers",
+        showlegend: false,
+        marker: expect.objectContaining({
+          symbol: "circle-open",
+          size: 11,
+        }),
+      }),
+    );
+  });
+
   it("muestra la advertencia de muestreo reducido cuando points_truncated es true", async () => {
     render(<GraphViewer data={{ ...sampleData, points_truncated: true }} />);
     await waitFor(() => expect(newPlot).toHaveBeenCalledTimes(1));
