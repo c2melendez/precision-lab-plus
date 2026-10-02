@@ -294,19 +294,52 @@ function rewriteHyperbolicInverses(ascii: string): string {
 
 
 function rewriteLogSubscriptBase(ascii: string): string {
-  let result = ascii;
-  // MathLive/Compute Engine puede serializar \\log_{2}(8) como
-  // "log _2(8)" o "log _(2)(8)". Normalizamos ambas formas al
-  // contrato explícito del backend: log(argumento,base).
-  result = result.replace(
-    /\blog\s*_\s*\(\s*([^()]+?)\s*\)\s*\(\s*([^()]+?)\s*\)/g,
-    "log($2,$1)",
-  );
-  result = result.replace(
-    /\blog\s*_\s*([A-Za-z0-9.+\-*/^]+)\s*\(\s*([^()]+?)\s*\)/g,
-    "log($2,$1)",
-  );
-  return result;
+  let out = "";
+  let i = 0;
+
+  const readBalanced = (start: number): [string, number] | null => {
+    if (ascii[start] !== "(") return null;
+    let depth = 1;
+    let j = start + 1;
+    while (j < ascii.length && depth > 0) {
+      if (ascii[j] === "(") depth++;
+      else if (ascii[j] === ")") depth--;
+      j++;
+    }
+    if (depth !== 0) return null;
+    return [ascii.slice(start + 1, j - 1), j];
+  };
+
+  while (i < ascii.length) {
+    const m = ascii.slice(i).match(/^log\s*_\s*/);
+    if (!m) {
+      out += ascii[i++];
+      continue;
+    }
+
+    let cursor = i + m[0].length;
+    let base = "";
+    if (ascii[cursor] === "(") {
+      const parsedBase = readBalanced(cursor);
+      if (!parsedBase) { out += ascii[i++]; continue; }
+      [base, cursor] = parsedBase;
+    } else {
+      const baseMatch = ascii.slice(cursor).match(/^([A-Za-z0-9.+\-*/^]+)/);
+      if (!baseMatch) { out += ascii[i++]; continue; }
+      base = baseMatch[1];
+      cursor += baseMatch[1].length;
+    }
+
+    while (/\s/.test(ascii[cursor] ?? "")) cursor++;
+    const parsedArg = readBalanced(cursor);
+    if (!parsedArg) { out += ascii[i++]; continue; }
+    const [arg, next] = parsedArg;
+
+    out += `log(${arg},${base})`;
+    i = next;
+  }
+
+  return out;
 }
 
 function rewritePostfixPercent(ascii: string): string {
