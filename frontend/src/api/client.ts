@@ -16,6 +16,7 @@ export type MathResponse = components["schemas"]["MathResponse"];
 export type OperationType = components["schemas"]["OperationType"];
 export type ResultType = components["schemas"]["ResultType"];
 export type EquationSolution = components["schemas"]["EquationSolution"];
+export type DomainCondition = components["schemas"]["DomainCondition"];
 
 const REQUEST_TIMEOUT_MS = 15_000;
 
