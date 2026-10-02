@@ -75,6 +75,12 @@ def validate_ast_safety(tree: sympy.Basic) -> None:
 
     allowed_function_classes = tuple(
         cls for cls in ALLOWED_FUNCTIONS.values() if isinstance(cls, type)
+    ) + (
+        # Trusted helpers may lower calculator semantics to Piecewise
+        # during parsing (currently realroot for real odd roots). Piecewise
+        # itself is NOT exposed in ALLOWED_FUNCTIONS, so users cannot call
+        # it directly; this only permits the internally generated node.
+        sympy.Piecewise,
     )
 
     for node in sympy.preorder_traversal(tree):
