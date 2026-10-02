@@ -12,6 +12,7 @@
 import { create } from "zustand";
 
 import { isKnownEndpoint } from "../api/endpoints";
+import type { DomainCondition } from "../api/client";
 
 export const HISTORY_SCHEMA_VERSION = 1;
 export const HISTORY_STORAGE_KEY = "calculadora-cientifica-history";
@@ -29,6 +30,7 @@ export interface HistoryEntry {
   resultType?: string;
   hasDetailedSteps: boolean;
   warnings: string[];
+  domainConditions?: DomainCondition[];
   timestamp: number;
 }
 
