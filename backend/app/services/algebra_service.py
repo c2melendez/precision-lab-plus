@@ -22,8 +22,8 @@ from typing import List, Optional
 
 import sympy
 
-from app.schemas.responses import Step
-from app.services import parsing
+from app.schemas.responses import DomainCondition, Step
+from app.services import domain_analysis, parsing
 from app.services.ast_validator import check_complexity_limits
 from app.services.step_verification import verify_step_equivalence
 
@@ -34,6 +34,7 @@ class AlgebraResult:
     result_expr: sympy.Expr
     steps: List[Step]
     has_detailed_steps: bool
+    domain_conditions: List[DomainCondition]
     pattern_name: Optional[str] = None
 
 
@@ -51,7 +52,13 @@ def simplify_expression(expression: str) -> AlgebraResult:
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     result_expr = sympy.simplify(input_expr)
     step = _summary_step(input_expr, result_expr, "Simplificación")
-    return AlgebraResult(input_expr, result_expr, [step], has_detailed_steps=False)
+    return AlgebraResult(
+        input_expr,
+        result_expr,
+        [step],
+        has_detailed_steps=False,
+        domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
+    )
 
 
 def expand_expression(expression: str) -> AlgebraResult:
@@ -68,7 +75,13 @@ def expand_expression(expression: str) -> AlgebraResult:
     check_complexity_limits(result_expr)
 
     step = _summary_step(input_expr, result_expr, "Expansión")
-    return AlgebraResult(input_expr, result_expr, [step], has_detailed_steps=False)
+    return AlgebraResult(
+        input_expr,
+        result_expr,
+        [step],
+        has_detailed_steps=False,
+        domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
+    )
 
 
 def _is_conjugate_binomial_pair(factor_a: sympy.Expr, factor_b: sympy.Expr) -> bool:
@@ -139,5 +152,6 @@ def factor_expression(expression: str) -> AlgebraResult:
         factored,
         [step],
         has_detailed_steps=has_detailed_steps,
+        domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
         pattern_name=pattern_name,
     )
