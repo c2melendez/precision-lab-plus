@@ -485,7 +485,7 @@ function detectLateralLimit(latex: string): Extract<CalculusIntent, { kind: "lim
 }
 
 function detectLimit(latex: string): Extract<CalculusIntent, { kind: "limit" }> | null {
-  const trimmed = latex.trim();
+  const trimmed = stripTrailingAssumption(latex.trim());
   if (!trimmed.startsWith("\\lim")) return null;
 
   const lateral = detectLateralLimit(trimmed);
