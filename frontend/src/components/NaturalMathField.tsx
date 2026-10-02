@@ -293,6 +293,16 @@ function rewriteHyperbolicInverses(ascii: string): string {
 
 
 
+function rewriteBareLogSubscriptLatex(latex: string): string {
+  // Preserve the base/argument boundary before MathLive flattens
+  // \\log_{2}x into the ambiguous ASCII form "log _2x".
+  // Parenthesized arguments are already handled downstream.
+  return latex.replace(
+    /\\log_\{([^{}]+)\}\s*([A-Za-z]|\d+(?:\.\d+)?)(?=[^A-Za-z0-9.]|$)/g,
+    (_match, base: string, arg: string) => `\\log_{${base}}\\left(${arg}\\right)`,
+  );
+}
+
 function rewriteLogSubscriptBase(ascii: string): string {
   let out = "";
   let i = 0;
@@ -504,8 +514,11 @@ export function latexToBackendSyntax(latex: string): string {
   // MathLive elimina un signo % literal durante la conversión ASCII.
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
-  const latexWithPercent = rewriteBareFunctionPowerLatex(rewriteBareFractionFunctionLatex(rewriteOperatorNameLatex(latex)))
-    .replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
+  const latexWithPercent = rewriteBareFunctionPowerLatex(
+    rewriteBareFractionFunctionLatex(
+      rewriteOperatorNameLatex(rewriteBareLogSubscriptLatex(latex)),
+    ),
+  ).replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
   // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
   // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
   // conocido antes de delegar al conversor, y luego collapseKnownFunctionNames
