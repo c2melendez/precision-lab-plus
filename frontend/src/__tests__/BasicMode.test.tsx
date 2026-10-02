@@ -139,6 +139,18 @@ describe("BasicMode", () => {
     });
   });
 
+  it("B7 N1: no confunde \\, de espaciado LaTeX con una hipótesis final", async () => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), {
+      target: { value: "\\sqrt{x}\\,\\ln x<0" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledWith("/inequality", {
+      inequality: "\\sqrt{x}\\,\\ln x<0",
+    }));
+  });
+
   it("enruta a /inequality cuando el campo tiene < o >", async () => {
     render(<BasicMode />);
     fireEvent.change(screen.getByLabelText("Expresión"), { target: { value: "x+3>0" } });
