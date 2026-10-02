@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeoutError
 from dataclasses import dataclass, field
 import time
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import sympy
 from sympy import S, cos, cot, csc, pi, sec, sin, tan
@@ -138,6 +138,60 @@ def _inflection_points(
     return points
 
 
+def _find_removable_holes(
+    expr: sympy.Expr,
+    var_symbol: sympy.Symbol,
+    x_min: float,
+    x_max: float,
+) -> Tuple[List[float], List[float]]:
+    """Return finite removable discontinuities as explicit (x, y) points.
+
+    Detection is based on the ORIGINAL expression tree. A singular point is
+    considered a removable hole only when the two-sided symbolic limit exists
+    and is finite and real. Poles/asymptotes therefore remain line breaks and
+    are never rendered as open circles.
+    """
+    singular = _run_with_timeout(
+        lambda: sympy.singularities(expr, var_symbol),
+        timeout_s=_ANALYSIS_TIMEOUT_S,
+    )
+    if singular is None or not isinstance(singular, sympy.FiniteSet):
+        return [], []
+
+    hole_x: List[float] = []
+    hole_y: List[float] = []
+    for point in singular:
+        if point.is_real is False:
+            continue
+        try:
+            x_value = float(point.evalf())
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if not (x_min <= x_value <= x_max):
+            continue
+
+        limit_value = _run_with_timeout(
+            lambda p=point: sympy.limit(expr, var_symbol, p, dir="+-"),
+            timeout_s=_ANALYSIS_TIMEOUT_S,
+        )
+        if limit_value is None:
+            continue
+        if getattr(limit_value, "is_real", None) is False:
+            continue
+        if getattr(limit_value, "is_finite", None) is not True:
+            continue
+        try:
+            y_value = float(limit_value.evalf())
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if not math.isfinite(y_value):
+            continue
+        hole_x.append(x_value)
+        hole_y.append(y_value)
+
+    return hole_x, hole_y
+
+
 def compute_analysis(
     expr: sympy.Expr, var_symbol: sympy.Symbol, x_min: float, x_max: float
 ) -> GraphAnalysis:
@@ -166,7 +220,12 @@ def compute_analysis(
     es un error) en vez de seguir gastando tiempo en análisis que ya no
     alcanza a completarse dentro de un tiempo de respuesta razonable.
     """
-    expr = sympy.expand(expr)
+    # Preserve the original evaluate=False tree for domain analysis.
+    # Transforming first can erase exclusions such as x != 1 in
+    # (x**2-1)/(x-1). Other descriptive analyses may use the expanded
+    # equivalent for cleaner output, but the domain never does.
+    source_expr = expr
+    analysis_expr = sympy.expand(expr)
     analysis = GraphAnalysis()
     deadline = time.monotonic() + _TOTAL_ANALYSIS_BUDGET_S
 
@@ -175,7 +234,10 @@ def compute_analysis(
 
     domain = None
     if time.monotonic() < deadline:
-        domain = _run_with_timeout(lambda: continuous_domain(expr, var_symbol, S.Reals), timeout_s=remaining())
+        domain = _run_with_timeout(
+            lambda: continuous_domain(source_expr, var_symbol, S.Reals),
+            timeout_s=remaining(),
+        )
     if domain is not None:
         analysis.domain_text = str(domain)
         analysis.domain_latex = sympy.latex(domain)
@@ -183,7 +245,11 @@ def compute_analysis(
     range_result = None
     if time.monotonic() < deadline:
         range_result = _run_with_timeout(
-            lambda: function_range(expr, var_symbol, domain if domain is not None else S.Reals),
+            lambda: function_range(
+                analysis_expr,
+                var_symbol,
+                domain if domain is not None else S.Reals,
+            ),
             timeout_s=remaining(),
         )
     if range_result is not None:
@@ -192,7 +258,7 @@ def compute_analysis(
 
     y_intercept = None
     if time.monotonic() < deadline:
-        y_intercept = _run_with_timeout(lambda: expr.subs(var_symbol, 0), timeout_s=remaining())
+        y_intercept = _run_with_timeout(lambda: analysis_expr.subs(var_symbol, 0), timeout_s=remaining())
     if y_intercept is not None:
         evaluated = y_intercept.evalf()
         if evaluated.is_real and evaluated.is_finite:
@@ -200,14 +266,14 @@ def compute_analysis(
 
     x_intercepts = None
     if time.monotonic() < deadline:
-        x_intercepts = _run_with_timeout(lambda: _format_real_roots(expr, var_symbol), timeout_s=remaining())
+        x_intercepts = _run_with_timeout(lambda: _format_real_roots(analysis_expr, var_symbol), timeout_s=remaining())
     if x_intercepts is not None:
         analysis.x_intercepts = [str(root) for root in x_intercepts]
 
     critical = None
     if time.monotonic() < deadline:
         critical = _run_with_timeout(
-            lambda: _classify_critical_points(expr, var_symbol, x_min, x_max), timeout_s=remaining()
+            lambda: _classify_critical_points(analysis_expr, var_symbol, x_min, x_max), timeout_s=remaining()
         )
     if critical is not None:
         maxima, minima = critical
@@ -216,7 +282,7 @@ def compute_analysis(
 
     inflection = None
     if time.monotonic() < deadline:
-        inflection = _run_with_timeout(lambda: _inflection_points(expr, var_symbol, x_min, x_max), timeout_s=remaining())
+        inflection = _run_with_timeout(lambda: _inflection_points(analysis_expr, var_symbol, x_min, x_max), timeout_s=remaining())
     if inflection is not None:
         analysis.inflection_points = [str(p) for p in inflection]
 
@@ -591,7 +657,19 @@ def compute_graph(
                 "(discontinuidades, división por cero, o fuera de dominio)."
             )
 
-        traces.append(Trace(type="line", name=expression_text, x=x_values, y=y_values))
+        hole_x, hole_y = _find_removable_holes(
+            working_expr, var_symbol, x_min, x_max
+        )
+        traces.append(
+            Trace(
+                type="line",
+                name=expression_text,
+                x=x_values,
+                y=y_values,
+                hole_x=hole_x,
+                hole_y=hole_y,
+            )
+        )
         analyses.append(compute_analysis(working_expr, var_symbol, x_min, x_max))
 
     all_y_values = [y for trace in traces for y in trace.y]
