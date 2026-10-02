@@ -162,3 +162,11 @@ def test_factor_and_expand_also_carry_source_domain_conditions():
             and condition["text"] in ("Ne(x, 3)", "x != 3")
             for condition in body["domain_conditions"]
         )
+
+
+def test_algebra_domain_metadata_omits_numeric_domain_tautologies():
+    for expression in ("8/2", "log(100)", "sqrt(9)"):
+        response = _post("simplify", expression)
+        body = response.json()
+        assert body["success"] is True
+        assert body["domain_conditions"] == []
