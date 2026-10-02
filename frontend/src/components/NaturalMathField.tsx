@@ -45,7 +45,7 @@ function rewriteNthRoot(ascii: string): string {
   // Se repite porque una raíz puede anidar otra en el índice o el radicando.
   for (let i = 0; i < 5 && pattern.test(result); i++) {
     pattern.lastIndex = 0;
-    result = result.replace(pattern, (_match, n: string, x: string) => `(${x})**(1/(${n}))`);
+    result = result.replace(pattern, (_match, n: string, x: string) => `realroot(${x},${n})`);
   }
   return result;
 }
