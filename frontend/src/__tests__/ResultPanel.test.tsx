@@ -96,8 +96,19 @@ describe("ResultPanel", () => {
         isLoading={false}
       />,
     );
+    // Contrato S26: los pasos detallados existen, pero permanecen
+    // colapsados hasta que el usuario los solicite.
+    expect(screen.queryByLabelText("Procedimiento paso a paso")).not.toBeInTheDocument();
+    const toggle = screen.getByRole("button", { name: "Mostrar pasos detallados" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(toggle);
     expect(screen.getByLabelText("Procedimiento paso a paso")).toBeInTheDocument();
     expect(screen.getByText("Regla de la potencia")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Ocultar pasos detallados" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     expect(screen.getByRole("button", { name: "Copiar como LaTeX" })).toBeEnabled();
   });
 
