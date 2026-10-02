@@ -84,6 +84,35 @@ describe("BasicMode", () => {
     expect(screen.queryByLabelText(/Valor de la variable/)).not.toBeInTheDocument();
   });
 
+  it("B7 N1: evalúa f(x)=...; f(a) mediante substitutions, no como ecuación", async () => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), {
+      target: { value: "f(x)=x^x; f(2)" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
+      expression: "x^x",
+      angle_unit: "rad",
+      domain: "real",
+      substitutions: { x: "2" },
+    }));
+  });
+
+  it("B7 N1: una hipótesis final x>0 no convierte la expresión principal en inecuación", async () => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), {
+      target: { value: "e^(ln(x)), x>0" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
+      expression: "e^(ln(x))",
+      angle_unit: "rad",
+      domain: "real",
+    }));
+  });
+
   it("no llama a la API con una expresión vacía (payload inválido)", () => {
     render(<BasicMode />);
     fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
