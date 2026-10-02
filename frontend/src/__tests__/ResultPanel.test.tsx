@@ -44,6 +44,35 @@ describe("ResultPanel", () => {
     expect(screen.queryByLabelText("Procedimiento paso a paso")).not.toBeInTheDocument();
   });
 
+
+
+  it("muestra restricciones de dominio preservadas desde la expresión original", () => {
+    render(
+      <ResultPanel
+        result={{
+          ...baseResult,
+          operation: "simplify",
+          result_text: "x + 1",
+          result_latex: "x + 1",
+          domain_conditions: [
+            {
+              text: "Ne(x, 1)",
+              latex: "x \\neq 1",
+              variable: "x",
+              kind: "denominator",
+            },
+          ],
+        }}
+        isLoading={false}
+      />,
+    );
+
+    expect(screen.getByText("Restricciones del dominio")).toBeInTheDocument();
+    const text = screen.getByText("Restricciones del dominio").parentElement?.textContent ?? "";
+    expect(text.replace(/\s+/g, "")).toContain("x");
+    expect(text).toContain("1");
+  });
+
   it("muestra los warnings cuando existen", () => {
     render(
       <ResultPanel
