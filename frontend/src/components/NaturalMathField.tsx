@@ -273,6 +273,7 @@ export function latexToBackendSyntax(latex: string): string {
   const absoluteTrimmed = latex.trim();
   const absoluteMatch =
     absoluteTrimmed.match(/^\\left\|(.*)\\right\|$/s) ??
+    absoluteTrimmed.match(/^\\lvert\s*(.*)\s*\\rvert$/s) ??
     absoluteTrimmed.match(/^\|(.*)\|$/s);
   if (absoluteMatch) return `abs(${latexToBackendSyntax(absoluteMatch[1])})`;
 
@@ -301,6 +302,7 @@ export function latexToBackendSyntax(latex: string): string {
   if (asciiAggregate) return asciiAggregate;
 
   const collapsed = collapseKnownFunctionNames(ascii)
+    .replace(/\bchoose\s*\(/g, "nCr(")
     .replace(/[∗×]/g, "*")
     .replace(/[÷]/g, "/");
   const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
