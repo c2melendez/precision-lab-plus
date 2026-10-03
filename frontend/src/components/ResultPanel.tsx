@@ -134,6 +134,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
   // pantalla. Solo se despliega cuando el usuario lo solicita.
   const [showDetailedSteps, setShowDetailedSteps] = useState(false);
   const [symbolicViewKey, setSymbolicViewKey] = useState("result");
+  const [displayMode, setDisplayMode] = useState<"view" | "format">("view");
 
   if (isLoading) {
     return (
@@ -172,8 +173,11 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
   const contextualViews = result.result_views ?? [];
   const hasContextualViews =
     contextualViews.length > 0 &&
-    result.result_kind !== "numeric" &&
     matrixData === null;
+  const hasNumericFormats =
+    result.result_approx != null ||
+    isFractionLatex(result.result_latex) ||
+    (result.result_text != null && Number.isFinite(Number(result.result_text)));
   const activeContextualView =
     contextualViews.find((view) => view.key === symbolicViewKey) ??
     contextualViews.find((view) => view.key !== "original") ??
@@ -191,7 +195,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
     <div aria-live="polite" className="space-y-4 fade-in">
       {matrixData && <MatrixResult matrix={matrixData} />}
       {solutionData && (
-        activeContextualView?.key === "original" ? (
+        displayMode === "view" && activeContextualView?.key === "original" ? (
           <MathRenderer
             latex={activeContextualView.latex}
             fallbackText={result.input_text ?? undefined}
@@ -220,7 +224,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
       {!matrixData && !solutionData && (result.result_latex || result.result_text) && (
         <div className="space-y-1">
           {(() => {
-            if (hasContextualViews && activeContextualView) {
+            if (displayMode === "view" && hasContextualViews && activeContextualView) {
               return (
                 <MathRenderer
                   latex={activeContextualView.latex}
@@ -276,10 +280,10 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
               nunca uno oculta al otro (sección 9: fracciones + su
               equivalente decimal) — solo en el formato "exact", que es el
               que ya traía este comportamiento antes de Fase 2.5. */}
-          {!hasContextualViews && format === "exact" && approxText && approxText !== result.result_text && (
+          {displayMode === "format" && format === "exact" && approxText && approxText !== result.result_text && (
             <p className="text-sm text-muted">≈ {approxText}</p>
           )}
-          {format === "frac" && mixedLatex && (
+          {displayMode === "format" && format === "frac" && mixedLatex && (
             <button
               type="button"
               onClick={() => setShowMixed((v) => !v)}
@@ -289,29 +293,35 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
             </button>
           )}
           <div className="flex flex-wrap gap-3 pt-1 text-xs text-muted">
-            {hasContextualViews
-              ? contextualViews.map((view) => (
-                  <button
-                    key={view.key}
-                    type="button"
-                    onClick={() => setSymbolicViewKey(view.key)}
-                    aria-pressed={activeContextualView?.key === view.key}
-                    className={activeContextualView?.key === view.key ? "font-semibold text-marker" : "hover:text-ink"}
-                  >
-                    {view.label}
-                  </button>
-                ))
-              : (["exact", "dec", "frac", "scn"] as AnswerFormat[]).map((f) => (
-                  <button
-                    key={f}
-                    type="button"
-                    onClick={() => setFormat(f)}
-                    aria-pressed={format === f}
-                    className={format === f ? "font-semibold text-marker" : "hover:text-ink"}
-                  >
-                    {f === "exact" ? "exacto" : f}
-                  </button>
-                ))}
+            {contextualViews.map((view) => (
+              <button
+                key={`view-${view.key}`}
+                type="button"
+                onClick={() => {
+                  setSymbolicViewKey(view.key);
+                  setDisplayMode("view");
+                }}
+                aria-pressed={displayMode === "view" && activeContextualView?.key === view.key}
+                className={displayMode === "view" && activeContextualView?.key === view.key ? "font-semibold text-marker" : "hover:text-ink"}
+              >
+                {view.label}
+              </button>
+            ))}
+            {hasNumericFormats &&
+              (["exact", "dec", "frac", "scn"] as AnswerFormat[]).map((f) => (
+                <button
+                  key={`format-${f}`}
+                  type="button"
+                  onClick={() => {
+                    setFormat(f);
+                    setDisplayMode("format");
+                  }}
+                  aria-pressed={displayMode === "format" && format === f}
+                  className={displayMode === "format" && format === f ? "font-semibold text-marker" : "hover:text-ink"}
+                >
+                  {f === "exact" ? "exacto" : f}
+                </button>
+              ))}
           </div>
         </div>
       )}
