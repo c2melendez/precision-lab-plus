@@ -276,7 +276,13 @@ function rewriteS26SyntaxAliases(latex: string): string {
     .replace(/\\left\\\|\s*(.*?)\s*\\right\\\|/g, "\\left|$1\\right|")
     .replace(/\\\\\|\s*(.*?)\s*\\\\\|/g, "\\left|$1\\right|")
     .replace(/\\times/g, "\\cdot")
+    .replace(/\\ast/g, "\\cdot")
     .replace(/\\div/g, "/")
+    .replace(/\\(?:leq|le)/g, "\\le")
+    .replace(/\\(?:geq|ge)/g, "\\ge")
+    .replace(/\\(?:neq|ne)/g, "\\ne")
+    .replace(/\\lt/g, "<")
+    .replace(/\\gt/g, ">")
     .replace(/\\sqrt\[3\]\{([^{}]+)\}/g, "\\mathrm{cbrt}($1)")
     .replace(/\\sqrt\[3\]([A-Za-z0-9.+-]+)/g, "\\mathrm{cbrt}($1)");
 
@@ -350,6 +356,9 @@ export function latexToBackendSyntax(latex: string): string {
     (trimmed.startsWith("[") && trimmed.endsWith(")") && trimmed.includes(","))
   ) {
     return "unsupported_interval()";
+  }
+  if (/\\\\vec\{[^{}]+\}\\\\times\\\\vec\{[^{}]+\}/.test(trimmed)) {
+    return "unsupported_cross_product()";
   }
   if (trimmed.includes("\\lVert") && trimmed.includes("pmatrix")) {
     return "unsupported_vector_norm()";
