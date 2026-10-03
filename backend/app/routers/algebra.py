@@ -79,7 +79,12 @@ def _build_response(
     }[operation]
     result_kind = result_contract.classify_expression(result.input_expr)
     result_views = result_contract.algebra_views(
-        result.input_expr, result.result_expr, result_kind, operation_name
+        result.input_expr,
+        result.result_expr,
+        result_kind,
+        operation_name,
+        steps=result.steps,
+        has_detailed_steps=result.has_detailed_steps,
     )
 
     return MathResponse(
