@@ -196,6 +196,14 @@ function rewriteLogSubscriptBase(ascii: string): string {
 
 function rewriteS26SyntaxAliases(latex: string): string {
   let result = latex
+    .replace(
+      /\\operatorname\{choose\}\s*\\left\(([^,()]+),([^()]+)\\right\)/g,
+      (_match, n: string, r: string) => `\\mathrm{nCr}(${n},${r})`,
+    )
+    .replace(
+      /\\operatorname\{choose\}\s*\(([^,()]+),([^()]+)\)/g,
+      (_match, n: string, r: string) => `\\mathrm{nCr}(${n},${r})`,
+    )
     .replace(/\\(?:dfrac|tfrac)/g, "\\frac")
     .replace(/\\times/g, "\\cdot")
     .replace(/\\div/g, "/")
