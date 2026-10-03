@@ -86,6 +86,66 @@ def basic_views(
     return dedupe_views(views)
 
 
+
+def _safe_transform(transform, expr: sympy.Expr) -> sympy.Expr | None:
+    """Transformación opcional de vista.
+
+    Una vista auxiliar nunca debe convertir un cálculo válido en error:
+    si SymPy no puede producirla de forma segura, simplemente se omite.
+    """
+    try:
+        transformed = transform(expr)
+    except Exception:
+        return None
+    return transformed if isinstance(transformed, sympy.Expr) else None
+
+
+def expression_views(
+    input_expr: sympy.Expr,
+    result_expr: sympy.Expr,
+    kind: ResultKind,
+) -> List[ResultView]:
+    """Contrato completo de vistas para evaluación simbólica general."""
+    views: List[ResultView] = [_view("original", "Original", input_expr, kind)]
+
+    simplified = _safe_transform(sympy.simplify, input_expr)
+    if simplified is not None:
+        views.append(_view("simplified", "Simplificada", simplified, kind))
+
+    # Las formas algebraicas siguen siendo útiles como representaciones
+    # equivalentes en racionales/radicales/log-exp/trig siempre que cambien.
+    factored = _safe_transform(sympy.factor, input_expr)
+    if factored is not None:
+        views.append(_view("factored", "Factorizada", factored, kind))
+
+    expanded = _safe_transform(sympy.expand, input_expr)
+    if expanded is not None:
+        views.append(_view("expanded", "Expandida", expanded, kind))
+
+    if kind == ResultKind.RATIONAL:
+        rational_equiv = _safe_transform(sympy.cancel, input_expr)
+        if rational_equiv is not None:
+            views.append(_view("identity", "Forma equivalente", rational_equiv, kind))
+    elif kind == ResultKind.RADICAL:
+        radical_equiv = _safe_transform(sympy.radsimp, input_expr)
+        if radical_equiv is not None:
+            views.append(_view("identity", "Forma equivalente", radical_equiv, kind))
+    elif kind == ResultKind.LOGARITHMIC:
+        log_equiv = _safe_transform(lambda e: sympy.expand_log(e, force=False), input_expr)
+        if log_equiv is not None:
+            views.append(_view("identity", "Forma equivalente", log_equiv, kind))
+    elif kind == ResultKind.EXPONENTIAL:
+        exp_equiv = _safe_transform(sympy.powsimp, input_expr)
+        if exp_equiv is not None:
+            views.append(_view("identity", "Forma equivalente", exp_equiv, kind))
+    elif kind == ResultKind.TRIGONOMETRIC:
+        trig_equiv = _safe_transform(sympy.trigsimp, input_expr)
+        if trig_equiv is not None:
+            views.append(_view("identity", "Identidad", trig_equiv, kind))
+
+    views.append(_view("result", "Resultado", result_expr, kind))
+    return dedupe_views(views)
+
 def algebra_views(
     input_expr: sympy.Expr,
     result_expr: sympy.Expr,
