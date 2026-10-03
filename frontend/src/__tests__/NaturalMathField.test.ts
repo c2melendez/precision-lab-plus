@@ -15,12 +15,12 @@ describe("latexToBackendSyntax", () => {
     expect(latexToBackendSyntax("\\sqrt{9}")).toBe("sqrt(9)");
   });
 
-  it("reescribe la raíz n-ésima a potencia fraccionaria (el backend no tiene root())", () => {
-    expect(latexToBackendSyntax("\\sqrt[3]{8}")).toBe("(8)**(1/(3))");
+  it("reescribe la raíz cúbica a cbrt para conservar la raíz real", () => {
+    expect(latexToBackendSyntax("\\sqrt[3]{8}")).toBe("cbrt(8)");
   });
 
-  it("reescribe una raíz n-ésima anidada dentro de otra expresión", () => {
-    expect(latexToBackendSyntax("1+\\sqrt[3]{8}")).toBe("1+(8)**(1/(3))");
+  it("reescribe una raíz cúbica anidada sin perder su semántica real", () => {
+    expect(latexToBackendSyntax("1+\\sqrt[3]{8}")).toBe("1+cbrt(8)");
   });
 
   it("convierte funciones trigonométricas e implícitas", () => {
