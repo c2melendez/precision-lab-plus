@@ -66,7 +66,7 @@ async function originalLatex(page: Page, caseId?: string): Promise<string> {
     const field = page.locator("math-field").first();
     assertionContext = JSON.stringify({
       caseId,
-      canonical: await field.inputValue(),
+      canonical: await field.evaluate((node) => (node as HTMLElement & { value: string }).value),
       requestBody: response.request().postDataJSON?.() ?? null,
       body,
     });
