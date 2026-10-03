@@ -92,6 +92,7 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "variancepop",
   "sign",
   "root",
+  "cbrt",
   "ceil",
   "doublefactorial",
   "log",
@@ -197,7 +198,9 @@ function rewriteS26SyntaxAliases(latex: string): string {
   let result = latex
     .replace(/\\(?:dfrac|tfrac)/g, "\\frac")
     .replace(/\\times/g, "\\cdot")
-    .replace(/\\div/g, "/");
+    .replace(/\\div/g, "/")
+    .replace(/\\sqrt\[3\]\{([^{}]+)\}/g, "\\mathrm{cbrt}($1)")
+    .replace(/\\sqrt\[3\]([A-Za-z0-9.+-]+)/g, "\\mathrm{cbrt}($1)");
 
   result = result.replace(
     /\\binom\{([^{}]+)\}\{([^{}]+)\}/g,
