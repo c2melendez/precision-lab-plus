@@ -380,6 +380,10 @@ export function latexToBackendSyntax(latex: string): string {
   // MathLive may serialize ± as either \\pm or +-. Preserve its calculator
   // semantics as two branches instead of letting the parser reduce it to -x.
   const pmTrimmed = latex.trim();
+  const binaryPmMatch = pmTrimmed.match(/^(.*?)\\pm\s*(.*?)$/s);
+  if (binaryPmMatch && binaryPmMatch[1].trim() && binaryPmMatch[2].trim()) {
+    return `pm_pair(${latexToBackendSyntax(binaryPmMatch[1])},${latexToBackendSyntax(binaryPmMatch[2])})`;
+  }
   const pmMatch = pmTrimmed.match(/^\\pm\\left\((.*)\\right\)$/s) ?? pmTrimmed.match(/^\\pm\((.*)\)$/s);
   if (pmMatch) return `pm(${latexToBackendSyntax(pmMatch[1])})`;
   // MathLive elimina un signo % literal durante la conversión ASCII.
