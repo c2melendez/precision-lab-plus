@@ -12,7 +12,7 @@ from fastapi import APIRouter, Request
 from app.core.logging import log_request_event
 from app.schemas.requests import ExpressionRequest, SolveRequest
 from app.schemas.responses import ErrorCode, MathResponse, OperationType, ResultType
-from app.services import algebra_service, parsing, solve_service, result_contract
+from app.services import algebra_service, domain_analysis, parsing, solve_service, result_contract
 from app.services.ast_validator import ComplexityLimitError
 
 router = APIRouter(tags=["algebra"])
@@ -171,5 +171,6 @@ async def solve(payload: SolveRequest, request: Request) -> MathResponse:
         steps=result.steps,
         has_detailed_steps=result.has_detailed_steps,
         warnings=warnings,
+        domain_conditions=domain_analysis.extract_domain_conditions(result.input_eq),
         duration_ms=_duration_ms(request),
     )
