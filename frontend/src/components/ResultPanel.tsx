@@ -173,8 +173,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
   const hasContextualViews =
     contextualViews.length > 0 &&
     result.result_kind !== "numeric" &&
-    matrixData === null &&
-    solutionData === null;
+    matrixData === null;
   const activeContextualView =
     contextualViews.find((view) => view.key === symbolicViewKey) ??
     contextualViews.find((view) => view.key !== "original") ??
@@ -183,7 +182,32 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
   return (
     <div aria-live="polite" className="space-y-4 fade-in">
       {matrixData && <MatrixResult matrix={matrixData} />}
-      {solutionData && <SolutionListResult solutions={solutionData} />}
+      {solutionData && (
+        activeContextualView?.key === "original" ? (
+          <MathRenderer
+            latex={activeContextualView.latex}
+            fallbackText={result.input_text ?? undefined}
+            className="a11y-scale-result-lg"
+          />
+        ) : (
+          <SolutionListResult solutions={solutionData} />
+        )
+      )}
+      {solutionData && hasContextualViews && (
+        <div className="flex flex-wrap gap-3 pt-1 text-xs text-muted">
+          {contextualViews.map((view) => (
+            <button
+              key={view.key}
+              type="button"
+              onClick={() => setSymbolicViewKey(view.key)}
+              aria-pressed={activeContextualView?.key === view.key}
+              className={activeContextualView?.key === view.key ? "font-semibold text-marker" : "hover:text-ink"}
+            >
+              {view.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {!matrixData && !solutionData && (result.result_latex || result.result_text) && (
         <div className="space-y-1">
