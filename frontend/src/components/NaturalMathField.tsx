@@ -194,8 +194,31 @@ function rewriteLogSubscriptBase(ascii: string): string {
   return result;
 }
 
+
+function normalizeS26A2Delimiters(input: string): string {
+  let out = input.split("\\mleft").join("\\left").split("\\mright").join("\\right");
+
+  while (out.includes("\\left[") && out.includes("\\right]")) {
+    const start = out.indexOf("\\left[");
+    const end = out.indexOf("\\right]", start + 6);
+    if (end === -1) break;
+    const inner = out.slice(start + 6, end);
+    out = out.slice(0, start) + "\\left(" + inner + "\\right)" + out.slice(end + 7);
+  }
+
+  while (out.includes("\\lfloor") && out.includes("\\rfloor")) {
+    const start = out.indexOf("\\lfloor");
+    const end = out.indexOf("\\rfloor", start + 7);
+    if (end === -1) break;
+    const inner = out.slice(start + 7, end).trim();
+    out = out.slice(0, start) + "\\mathrm{floor}(" + inner + ")" + out.slice(end + 7);
+  }
+
+  return out;
+}
+
 function rewriteS26SyntaxAliases(latex: string): string {
-  let result = latex
+  let result = normalizeS26A2Delimiters(latex)
     .replace(
       /\\operatorname\{choose\}\s*\\left\(([^,()]+?),([^\\(),]+?)\\right\)/g,
       (_match, n: string, r: string) => `\\mathrm{nCr}\\left(${n},${r}\\right)`,
