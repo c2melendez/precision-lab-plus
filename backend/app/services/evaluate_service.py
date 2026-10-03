@@ -119,6 +119,11 @@ def evaluate(
 ) -> EvaluateResult:
     substitution_map = _validate_and_parse_substitutions(substitutions)
 
+    if expression == "unsupported_cross_product()":
+        raise parsing.ParseSecurityError(
+            "Producto cruz vectorial reconocido, pero todavía no soportado por este evaluador."
+        )
+
     if expression.startswith("pm_pair(") and expression.endswith(")"):
         left_text, right_text = _split_top_level_pair(expression[len("pm_pair("):-1])
         left = parsing.parse_expression_tree(left_text, allow_equation=False)
