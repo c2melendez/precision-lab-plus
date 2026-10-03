@@ -100,12 +100,39 @@ def _apply_degree_conversion(expr: sympy.Expr) -> sympy.Expr:
     return expr.replace(_is_direct_trig, _convert)
 
 
+def _split_top_level_pair(text: str) -> tuple[str, str]:
+    depth = 0
+    for index, char in enumerate(text):
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+        elif char == "," and depth == 0:
+            return text[:index], text[index + 1 :]
+    raise parsing.ParseSecurityError("pm_pair espera exactamente dos argumentos.")
+
+
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
     substitutions: Optional[Dict[str, str]] = None,
 ) -> EvaluateResult:
     substitution_map = _validate_and_parse_substitutions(substitutions)
+
+    if expression.startswith("pm_pair(") and expression.endswith(")"):
+        left_text, right_text = _split_top_level_pair(expression[len("pm_pair("):-1])
+        left = parsing.parse_expression_tree(left_text, allow_equation=False)
+        right = parsing.parse_expression_tree(right_text, allow_equation=False)
+        if left.free_symbols or right.free_symbols:
+            raise parsing.ParseSecurityError("± binario requiere argumentos numéricos en evaluación básica.")
+        plus_value = sympy.simplify(left + right)
+        minus_value = sympy.simplify(left - right)
+        return EvaluateResult(
+            expr=sympy.Tuple(plus_value, minus_value),
+            input_expr=sympy.Tuple(left, right),
+            is_numeric=True,
+            approx_value=None,
+        )
 
     relation_tokens = ("!=", "<=", ">=", "<", ">")
     if any(token in expression for token in relation_tokens):
