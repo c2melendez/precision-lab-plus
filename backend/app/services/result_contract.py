@@ -22,18 +22,18 @@ _TRIG_FUNCS = (
 
 
 def classify_expression(expr: sympy.Expr, *, is_numeric: bool = False) -> ResultKind:
-    # Complejo tiene prioridad sobre "numérico": 2+3*I es numérico,
-    # pero necesita las cuatro representaciones complejas.
+    # La familia semántica de la entrada tiene prioridad sobre el hecho de
+    # que el resultado final sea numérico. sin(pi/6) sigue siendo trig.
     if expr.has(sympy.I):
         return ResultKind.COMPLEX
-    if is_numeric:
-        return ResultKind.NUMERIC
     if any(expr.has(fn) for fn in _TRIG_FUNCS):
         return ResultKind.TRIGONOMETRIC
     if expr.has(sympy.log):
         return ResultKind.LOGARITHMIC
     if expr.has(sympy.exp):
         return ResultKind.EXPONENTIAL
+    if is_numeric:
+        return ResultKind.NUMERIC
     if any(
         isinstance(node, sympy.Pow) and getattr(node.exp, "q", 1) != 1
         for node in sympy.preorder_traversal(expr)
