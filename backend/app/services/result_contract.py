@@ -22,10 +22,12 @@ _TRIG_FUNCS = (
 
 
 def classify_expression(expr: sympy.Expr, *, is_numeric: bool = False) -> ResultKind:
-    if is_numeric:
-        return ResultKind.NUMERIC
+    # Complejo tiene prioridad sobre "numérico": 2+3*I es numérico,
+    # pero necesita las cuatro representaciones complejas.
     if expr.has(sympy.I):
         return ResultKind.COMPLEX
+    if is_numeric:
+        return ResultKind.NUMERIC
     if any(expr.has(fn) for fn in _TRIG_FUNCS):
         return ResultKind.TRIGONOMETRIC
     if expr.has(sympy.log):
@@ -98,3 +100,78 @@ def algebra_views(
             _view(key, label, result_expr, kind),
         ]
     )
+
+
+def complex_views(input_expr: sympy.Expr, value: sympy.Expr) -> List[ResultView]:
+    """Cuatro representaciones para un único número complejo evaluado."""
+    re_part, im_part = [sympy.simplify(part) for part in value.as_real_imag()]
+    magnitude = sympy.simplify(sympy.Abs(value))
+    angle = sympy.simplify(sympy.arg(value))
+    binomial = sympy.simplify(re_part + sympy.I * im_part)
+
+    return dedupe_views(
+        [
+            _view("original", "Original", input_expr, ResultKind.COMPLEX),
+            _view("complex_binomial", "Binómica", binomial, ResultKind.COMPLEX),
+            ResultView(
+                key="complex_polar",
+                label="Polar",
+                latex=f"{sympy.latex(magnitude)}\\angle {sympy.latex(angle)}",
+                kind=ResultKind.COMPLEX,
+            ),
+            ResultView(
+                key="complex_trigonometric",
+                label="Trigonométrica",
+                latex=(
+                    f"{sympy.latex(magnitude)}"
+                    f"\\left(\\cos\\left({sympy.latex(angle)}\\right)"
+                    f"+i\\sin\\left({sympy.latex(angle)}\\right)\\right)"
+                ),
+                kind=ResultKind.COMPLEX,
+            ),
+            ResultView(
+                key="complex_exponential",
+                label="Exponencial",
+                latex=f"{sympy.latex(magnitude)}e^{{i({sympy.latex(angle)})}}",
+                kind=ResultKind.COMPLEX,
+            ),
+        ]
+    )
+
+
+def equation_views(
+    input_eq: sympy.Expr,
+    variable: sympy.Symbol | None,
+    solutions: list,
+    result_type,
+) -> List[ResultView]:
+    """Original + Solución únicamente; raíces complejas no generan 4 vistas."""
+    views = [
+        ResultView(
+            key="original",
+            label="Original",
+            latex=sympy.latex(input_eq),
+            kind=ResultKind.EQUATION,
+        )
+    ]
+    result_type_value = str(getattr(result_type, "value", result_type))
+    if result_type_value == "identity":
+        solution_latex = r"\text{Identidad: se cumple para todo valor admisible}"
+    elif result_type_value == "contradiction":
+        solution_latex = r"\varnothing"
+    else:
+        var_latex = sympy.latex(variable) if variable is not None else "x"
+        pieces = [
+            f"{var_latex}_{{{idx + 1}}}={solution.latex}"
+            for idx, solution in enumerate(solutions)
+        ]
+        solution_latex = r",\ ".join(pieces) if pieces else r"\varnothing"
+    views.append(
+        ResultView(
+            key="solution",
+            label="Solución",
+            latex=solution_latex,
+            kind=ResultKind.EQUATION,
+        )
+    )
+    return views
