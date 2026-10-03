@@ -94,6 +94,7 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "root",
   "cbrt",
   "ceil",
+  "floor",
   "doublefactorial",
   "log",
   "Log",
