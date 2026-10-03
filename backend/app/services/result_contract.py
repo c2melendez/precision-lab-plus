@@ -11,7 +11,7 @@ from typing import Iterable, List
 
 import sympy
 
-from app.schemas.responses import ResultKind, ResultView
+from app.schemas.responses import ResultKind, ResultView, Step
 
 
 _TRIG_FUNCS = (
@@ -49,6 +49,32 @@ def classify_expression(expr: sympy.Expr, *, is_numeric: bool = False) -> Result
 
 def _view(key: str, label: str, expr: sympy.Expr, kind: ResultKind) -> ResultView:
     return ResultView(key=key, label=label, latex=sympy.latex(expr), kind=kind)
+
+
+def _transformed_view(
+    key: str,
+    label: str,
+    before: sympy.Expr,
+    after: sympy.Expr,
+    kind: ResultKind,
+    rule: str,
+) -> ResultView:
+    step = Step(
+        index=0,
+        title=label,
+        description=f"Se obtiene la forma {label.lower()} equivalente.",
+        rule=rule,
+        latex_before=sympy.latex(before),
+        latex_after=sympy.latex(after),
+    )
+    return ResultView(
+        key=key,
+        label=label,
+        latex=sympy.latex(after),
+        kind=kind,
+        steps=[step],
+        has_detailed_steps=False,
+    )
 
 
 def dedupe_views(views: Iterable[ResultView]) -> List[ResultView]:
@@ -110,38 +136,54 @@ def expression_views(
 
     simplified = _safe_transform(sympy.simplify, input_expr)
     if simplified is not None:
-        views.append(_view("simplified", "Simplificada", simplified, kind))
+        views.append(_transformed_view(
+            "simplified", "Simplificada", input_expr, simplified, kind, "Simplify"
+        ))
 
     # Las formas algebraicas siguen siendo útiles como representaciones
     # equivalentes en racionales/radicales/log-exp/trig siempre que cambien.
     factored = _safe_transform(sympy.factor, input_expr)
     if factored is not None:
-        views.append(_view("factored", "Factorizada", factored, kind))
+        views.append(_transformed_view(
+            "factored", "Factorizada", input_expr, factored, kind, "Factor"
+        ))
 
     expanded = _safe_transform(sympy.expand, input_expr)
     if expanded is not None:
-        views.append(_view("expanded", "Expandida", expanded, kind))
+        views.append(_transformed_view(
+            "expanded", "Expandida", input_expr, expanded, kind, "Expand"
+        ))
 
     if kind == ResultKind.RATIONAL:
         rational_equiv = _safe_transform(sympy.cancel, input_expr)
         if rational_equiv is not None:
-            views.append(_view("identity", "Forma equivalente", rational_equiv, kind))
+            views.append(_transformed_view(
+                "identity", "Forma equivalente", input_expr, rational_equiv, kind, "Cancel"
+            ))
     elif kind == ResultKind.RADICAL:
         radical_equiv = _safe_transform(sympy.radsimp, input_expr)
         if radical_equiv is not None:
-            views.append(_view("identity", "Forma equivalente", radical_equiv, kind))
+            views.append(_transformed_view(
+                "identity", "Forma equivalente", input_expr, radical_equiv, kind, "RadicalSimplify"
+            ))
     elif kind == ResultKind.LOGARITHMIC:
         log_equiv = _safe_transform(lambda e: sympy.expand_log(e, force=False), input_expr)
         if log_equiv is not None:
-            views.append(_view("identity", "Forma equivalente", log_equiv, kind))
+            views.append(_transformed_view(
+                "identity", "Forma equivalente", input_expr, log_equiv, kind, "LogExpand"
+            ))
     elif kind == ResultKind.EXPONENTIAL:
         exp_equiv = _safe_transform(sympy.powsimp, input_expr)
         if exp_equiv is not None:
-            views.append(_view("identity", "Forma equivalente", exp_equiv, kind))
+            views.append(_transformed_view(
+                "identity", "Forma equivalente", input_expr, exp_equiv, kind, "PowerSimplify"
+            ))
     elif kind == ResultKind.TRIGONOMETRIC:
         trig_equiv = _safe_transform(sympy.trigsimp, input_expr)
         if trig_equiv is not None:
-            views.append(_view("identity", "Identidad", trig_equiv, kind))
+            views.append(_transformed_view(
+                "identity", "Identidad", input_expr, trig_equiv, kind, "TrigSimplify"
+            ))
 
     views.append(_view("result", "Resultado", result_expr, kind))
     return dedupe_views(views)
@@ -151,6 +193,8 @@ def algebra_views(
     result_expr: sympy.Expr,
     kind: ResultKind,
     operation: str,
+    steps: List[Step] | None = None,
+    has_detailed_steps: bool = False,
 ) -> List[ResultView]:
     key_label = {
         "simplify": ("simplified", "Simplificada"),
@@ -158,10 +202,18 @@ def algebra_views(
         "expand": ("expanded", "Expandida"),
     }
     key, label = key_label[operation]
+    transformed = ResultView(
+        key=key,
+        label=label,
+        latex=sympy.latex(result_expr),
+        kind=kind,
+        steps=steps or [],
+        has_detailed_steps=has_detailed_steps,
+    )
     return dedupe_views(
         [
             _view("original", "Original", input_expr, kind),
-            _view(key, label, result_expr, kind),
+            transformed,
         ]
     )
 
