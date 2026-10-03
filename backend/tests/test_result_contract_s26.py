@@ -38,3 +38,31 @@ def test_algebra_views_use_operation_specific_label():
     )
     assert [view.key for view in views] == ["original", "factored"]
     assert views[1].label == "Factorizada"
+
+
+def test_complex_views_have_four_representations():
+    value = 2 + 3 * sp.I
+    views = result_contract.complex_views(value, value)
+    assert [view.key for view in views] == [
+        "original",
+        "complex_binomial",
+        "complex_polar",
+        "complex_trigonometric",
+        "complex_exponential",
+    ]
+
+
+def test_equation_views_do_not_expand_complex_roots():
+    x = sp.Symbol("x")
+    equation = sp.Eq(x**2 + 1, 0)
+    solutions = [
+        type("S", (), {"latex": "i"})(),
+        type("S", (), {"latex": "-i"})(),
+    ]
+    views = result_contract.equation_views(
+        equation, x, solutions, "equation_solutions"
+    )
+    assert [view.key for view in views] == ["original", "solution"]
+    assert "complex_polar" not in [view.key for view in views]
+    assert "x_{1}=i" in views[1].latex
+    assert "x_{2}=-i" in views[1].latex
