@@ -53,7 +53,7 @@ type EvaluateBody = {
   error_message?: string | null;
 };
 
-async function originalLatex(page: Page, caseId?: string): Promise<string> {
+async function originalLatex(page: Page): Promise<string> {
   const calculate = page.getByRole("button", { name: /calcular|evaluar/i }).first();
   const responsePromise = page.waitForResponse(
     (r) => r.url().includes("/api/v1/evaluate") && r.request().method() === "POST",
@@ -61,17 +61,7 @@ async function originalLatex(page: Page, caseId?: string): Promise<string> {
   await calculate.click();
   const response = await responsePromise;
   const body = (await response.json()) as EvaluateBody;
-  let assertionContext = JSON.stringify(body);
-  if (caseId && ["EN-DL-11", "EN-DL-12", "EN-DL-13"].includes(caseId)) {
-    const field = page.locator("math-field").first();
-    assertionContext = JSON.stringify({
-      caseId,
-      canonical: await field.evaluate((node) => (node as HTMLElement & { value: string }).value),
-      requestBody: response.request().postDataJSON?.() ?? null,
-      body,
-    });
-  }
-  expect(body.success, assertionContext).toBe(true);
+  expect(body.success, JSON.stringify(body)).toBe(true);
 
   const originalView = body.result_views?.find((view) => view.key === "original");
   expect(originalView, JSON.stringify(body)).toBeDefined();
@@ -91,7 +81,7 @@ test.describe("S26 Sintaxis 625 — Bloque A eco estructural", () => {
     test(tc.id, async ({ page }) => {
       await page.goto("./");
       await setExpression(page, tc.input);
-      const echo = await originalLatex(page, tc.id);
+      const echo = await originalLatex(page);
       const plain = echo
         .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, "$1/$2")
         .replace(/\\sqrt\{([^{}]+)\}/g, "sqrt($1)")
