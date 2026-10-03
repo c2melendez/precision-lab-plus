@@ -10,7 +10,7 @@ from fastapi import APIRouter, Request
 from app.core.logging import log_request_event
 from app.schemas.requests import EvaluateRequest
 from app.schemas.responses import ErrorCode, MathResponse, OperationType, ResultType
-from app.services import evaluate_service, parsing, result_contract
+from app.services import domain_analysis, evaluate_service, parsing, result_contract
 from app.services.ast_validator import ComplexityLimitError
 
 router = APIRouter(tags=["evaluate"])
@@ -115,5 +115,6 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         steps=[],
         has_detailed_steps=False,
         warnings=warnings,
+        domain_conditions=domain_analysis.extract_domain_conditions(result.input_expr),
         duration_ms=_duration_ms(request),
     )
