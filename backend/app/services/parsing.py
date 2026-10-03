@@ -200,6 +200,7 @@ ALLOWED_FUNCTIONS = {
     "gcd": gcd,
     "lcm": lcm,
     "nCr": binomial,
+    "choose": binomial,
     "nPr": FallingFactorial,
     # P4 (spec v2 §5.2, Complejos): re/im/arg/conjugate son nativos de
     # SymPy — solo hacía falta registrarlos, mismo patrón que arriba.
