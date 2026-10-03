@@ -311,6 +311,9 @@ export function latexToBackendSyntax(latex: string): string {
 
   const collapsed = collapseKnownFunctionNames(ascii)
     .replace(/\bchoose\s*\(/g, "nCr(")
+    // MathLive serializa \\binom{n}{r} como "((n) nCr(r))".
+    // Recuperamos la llamada binomial sin introducir reglas por caso.
+    .replace(/\(\s*\(?\s*([^()]+?)\s*\)?\s+nCr\s*\(\s*([^()]+?)\s*\)\s*\)/g, "nCr($1,$2)")
     .replace(/[∗×]/g, "*")
     .replace(/[÷]/g, "/");
   const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
