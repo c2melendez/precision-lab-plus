@@ -12,7 +12,7 @@ from fastapi import APIRouter, Request
 from app.core.logging import log_request_event
 from app.schemas.requests import ExpressionRequest, SolveRequest
 from app.schemas.responses import ErrorCode, MathResponse, OperationType, ResultType
-from app.services import algebra_service, parsing, solve_service
+from app.services import algebra_service, parsing, solve_service, result_contract
 from app.services.ast_validator import ComplexityLimitError
 
 router = APIRouter(tags=["algebra"])
@@ -72,10 +72,22 @@ def _build_response(
 
     input_latex = _safe_latex(result.input_expr)
 
+    operation_name = {
+        OperationType.SIMPLIFY: "simplify",
+        OperationType.FACTOR: "factor",
+        OperationType.EXPAND: "expand",
+    }[operation]
+    result_kind = result_contract.classify_expression(result.input_expr)
+    result_views = result_contract.algebra_views(
+        result.input_expr, result.result_expr, result_kind, operation_name
+    )
+
     return MathResponse(
         success=True,
         operation=operation,
         request_id=request.state.request_id,
+        result_kind=result_kind,
+        result_views=result_views,
         result_type=ResultType.SCALAR,
         input_text=payload.expression,
         input_latex=input_latex,
