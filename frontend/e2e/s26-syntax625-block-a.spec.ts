@@ -67,6 +67,9 @@ test.describe("S26 Sintaxis 625 — Bloque A determinista", () => {
     test(tc.id, async ({ page }) => {
       await page.goto("./");
       await setExpression(page, tc.input);
+      const canonical = String(await page.locator("math-field").first().evaluate((el) =>
+        (el as HTMLElement & { value?: string }).value ?? "",
+      ));
       const calculate = page.getByRole("button", { name: /calcular|evaluar/i }).first();
       await expect(calculate).toBeEnabled();
       const responsePromise = page.waitForResponse(
@@ -75,7 +78,11 @@ test.describe("S26 Sintaxis 625 — Bloque A determinista", () => {
       await calculate.click();
       const response = await responsePromise;
       const body = (await response.json()) as EvaluateBody;
-      expect(body.success, `${tc.id}: ${tc.input} -> ${JSON.stringify(body)}`).toBe(true);
+      const requestBody = response.request().postData() ?? "";
+      expect(
+        body.success,
+        `${tc.id}: input=${tc.input} canonical=${canonical} request=${requestBody} response=${JSON.stringify(body)}`,
+      ).toBe(true);
       const numeric = Number(body.result_approx ?? body.result_text);
       expect(Number.isFinite(numeric), `${tc.id}: ${tc.input} -> ${JSON.stringify(body)}`).toBe(true);
       expect(numeric, `${tc.id}: ${tc.input} -> ${numeric}`).toBeCloseTo(tc.expected, 5);
