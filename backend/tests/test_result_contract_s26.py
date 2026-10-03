@@ -66,3 +66,10 @@ def test_equation_views_do_not_expand_complex_roots():
     assert "complex_polar" not in [view.key for view in views]
     assert "x_{1}=i" in views[1].latex
     assert "x_{2}=-i" in views[1].latex
+
+
+def test_trig_identity_view_is_exposed():
+    x = sp.Symbol("x")
+    expr = sp.sin(x)**2 + sp.cos(x)**2
+    views = result_contract.basic_views(expr, sp.Integer(1), ResultKind.TRIGONOMETRIC)
+    assert "identity" in [view.key for view in views]
