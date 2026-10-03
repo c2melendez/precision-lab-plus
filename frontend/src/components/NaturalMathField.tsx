@@ -92,6 +92,8 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "variancepop",
   "sign",
   "root",
+  "ceil",
+  "doublefactorial",
   "log",
   "Log",
   "acsch",
@@ -191,6 +193,25 @@ function rewriteLogSubscriptBase(ascii: string): string {
   return result;
 }
 
+function rewriteS26SyntaxAliases(latex: string): string {
+  let result = latex
+    .replace(/\\(?:dfrac|tfrac)/g, "\\frac")
+    .replace(/\\times/g, "\\cdot")
+    .replace(/\\div/g, "/");
+
+  result = result.replace(
+    /\\binom\{([^{}]+)\}\{([^{}]+)\}/g,
+    (_match, n: string, r: string) => `\\mathrm{nCr}(${n},${r})`,
+  );
+
+  result = result
+    .replace(/(-?\d+(?:\.\d+)?)\\bmod(-?\d+(?:\.\d+)?)/g, "\\mathrm{mod}($1,$2)")
+    .replace(/\\lceil\s*([^{}]+?)\s*\\rceil/g, "\\mathrm{ceil}($1)");
+
+  result = result.replace(/(\d+)!!/g, "\\mathrm{doublefactorial}($1)");
+  return result;
+}
+
 function rewritePostfixPercent(ascii: string): string {
   let result = ascii;
   const pattern = /(\([^()]+\)|(?:\d+(?:\.\d+)?)|(?:[A-Za-z][A-Za-z0-9_]*))%/g;
@@ -262,7 +283,8 @@ export function latexToBackendSyntax(latex: string): string {
   // MathLive elimina un signo % literal durante la conversión ASCII.
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
-  const latexWithPercent = latex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
+  const syntaxNormalizedLatex = rewriteS26SyntaxAliases(latex);
+  const latexWithPercent = syntaxNormalizedLatex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
   // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
   // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
   // conocido antes de delegar al conversor, y luego collapseKnownFunctionNames
@@ -275,7 +297,9 @@ export function latexToBackendSyntax(latex: string): string {
   const asciiAggregate = rewriteFiniteAggregateAscii(ascii);
   if (asciiAggregate) return asciiAggregate;
 
-  const collapsed = collapseKnownFunctionNames(ascii);
+  const collapsed = collapseKnownFunctionNames(ascii)
+    .replace(/[∗×]/g, "*")
+    .replace(/[÷]/g, "/");
   const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
   return rewritePostfixPercent(applyDegreeNotation(
     rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii)),
