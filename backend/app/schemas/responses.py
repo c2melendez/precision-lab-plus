@@ -125,6 +125,15 @@ class ResultType(str, Enum):
     COMPLEX_SINGULARITIES = "complex_singularities"
 
 
+class Step(BaseModel):
+    index: int
+    title: str
+    description: str
+    rule: Optional[str] = None
+    latex_before: str
+    latex_after: str
+
+
 class ResultKind(str, Enum):
     NUMERIC = "numeric"
     ALGEBRAIC = "algebraic"
@@ -148,9 +157,8 @@ class ResultView(BaseModel):
     latex: str
     kind: ResultKind
     # Plus puede asociar el procedimiento a la representación concreta,
-    # no solo a la respuesta global. Forward reference porque Step se
-    # declara unas líneas más abajo en este contrato.
-    steps: List["Step"] = []
+    # no solo a la respuesta global.
+    steps: List[Step] = []
     has_detailed_steps: bool = False
 
 
@@ -208,15 +216,6 @@ ERROR_CODE_HTTP_STATUS: Dict[ErrorCode, int] = {
     ErrorCode.UNSUPPORTED_OPERATION: 200,
     ErrorCode.INTERNAL_ERROR: 500,
 }
-
-
-class Step(BaseModel):
-    index: int
-    title: str
-    description: str
-    rule: Optional[str] = None
-    latex_before: str
-    latex_after: str
 
 
 class EquationSolution(BaseModel):
