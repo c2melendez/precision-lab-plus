@@ -31,16 +31,32 @@ async function setExpression(page: Page, value: string) {
   }, value);
 }
 
+type EvaluateBody = {
+  success: boolean;
+  result_views?: Array<{ key: string; label: string; latex: string }>;
+  error_code?: string | null;
+  error_message?: string | null;
+};
+
 async function originalLatex(page: Page): Promise<string> {
   const calculate = page.getByRole("button", { name: /calcular|evaluar/i }).first();
+  const responsePromise = page.waitForResponse(
+    (r) => r.url().includes("/api/v1/evaluate") && r.request().method() === "POST",
+  );
   await calculate.click();
+  const response = await responsePromise;
+  const body = (await response.json()) as EvaluateBody;
+  expect(body.success, JSON.stringify(body)).toBe(true);
+
+  const originalView = body.result_views?.find((view) => view.key === "original");
+  expect(originalView, JSON.stringify(body)).toBeDefined();
+
   const original = page.getByRole("button", { name: "Original", exact: true }).first();
   await expect(original).toBeVisible({ timeout: 12000 });
   await original.click();
-  const resultRegion = page.locator('section[aria-label="Resultado"]').first();
-  const field = resultRegion.locator('math-field[read-only]').first();
-  await expect(field).toBeVisible();
-  return String(await field.evaluate((el) => (el as HTMLElement & { value?: string }).value ?? ""))
+  await expect(original).toHaveAttribute("aria-pressed", "true");
+
+  return String(originalView?.latex ?? "")
     .replace(/\\left|\\right/g, "")
     .replace(/\s+/g, "");
 }
