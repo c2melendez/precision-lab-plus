@@ -105,6 +105,6 @@ describe("latexToBackendSyntax — S26 Sintaxis 625", () => {
 describe("latexToBackendSyntax — S26 delimitadores y alias MathLive", () => {
   it("normaliza lvert y choose", () => {
     expect(latexToBackendSyntax("\\lvert x-1\\rvert")).toBe("abs(x-1)");
-    expect(latexToBackendSyntax("\\operatorname{choose}\left(5,2\right)")).toBe("nCr(5,2)");
+    expect(latexToBackendSyntax("\\operatorname{choose}\\left(5,2\\right)")).toBe("nCr(5,2)");
   });
 });
