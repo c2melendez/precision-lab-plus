@@ -125,6 +125,30 @@ class ResultType(str, Enum):
     COMPLEX_SINGULARITIES = "complex_singularities"
 
 
+class ResultKind(str, Enum):
+    NUMERIC = "numeric"
+    ALGEBRAIC = "algebraic"
+    RATIONAL = "rational"
+    RADICAL = "radical"
+    LOGARITHMIC = "logarithmic"
+    EXPONENTIAL = "exponential"
+    TRIGONOMETRIC = "trigonometric"
+    COMPLEX = "complex"
+    EQUATION = "equation"
+    INEQUALITY = "inequality"
+    CALCULUS = "calculus"
+    MATRIX = "matrix"
+    GRAPH = "graph"
+    OTHER = "other"
+
+
+class ResultView(BaseModel):
+    key: str
+    label: str
+    latex: str
+    kind: ResultKind
+
+
 class ErrorCode(str, Enum):
     """Enum central — el backend NUNCA usa un string de error fuera de esta lista.
 
@@ -262,6 +286,10 @@ class MathResponse(BaseModel):
     success: bool
     operation: OperationType
     request_id: str
+    # Contrato S26: clasificación y vistas contextuales declaradas por el
+    # motor. Son aditivas y retrocompatibles mientras migra la UI.
+    result_kind: Optional[ResultKind] = None
+    result_views: List[ResultView] = []
     result_type: Optional[ResultType] = None
     input_text: Optional[str] = None
     input_latex: Optional[str] = None
