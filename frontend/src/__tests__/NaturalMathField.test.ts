@@ -86,3 +86,17 @@ describe("latexToBackendSyntax — Fase 10 (funciones de estadística)", () => {
     expect(latexToBackendSyntax("xyz")).toBe("x y z");
   });
 });
+
+
+describe("latexToBackendSyntax — S26 Sintaxis 625", () => {
+  it("cubre aliases S26 de sintaxis", () => {
+    expect(latexToBackendSyntax("\\dfrac{1}{2}")).toBe("(1)/(2)");
+    expect(latexToBackendSyntax("\\tfrac{1}{2}")).toBe("(1)/(2)");
+    expect(latexToBackendSyntax("\\binom{5}{2}")).toBe("nCr(5,2)");
+    expect(latexToBackendSyntax("17\\bmod5")).toBe("mod(17,5)");
+    expect(latexToBackendSyntax("\\lceil 2.1\\rceil")).toBe("ceil(2.1)");
+    expect(latexToBackendSyntax("5!!")).toBe("doublefactorial(5)");
+    expect(latexToBackendSyntax("\\sqrt[3]{-8}")).toBe("cbrt(-8)");
+    expect(latexToBackendSyntax("\\sqrt[3]4")).toBe("cbrt(4)");
+  });
+});
