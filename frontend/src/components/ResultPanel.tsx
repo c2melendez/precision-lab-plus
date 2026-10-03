@@ -182,14 +182,12 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
     contextualViews.find((view) => view.key === symbolicViewKey) ??
     contextualViews.find((view) => view.key !== "original") ??
     contextualViews[0];
-  const activeSteps =
-    activeContextualView?.steps && activeContextualView.steps.length > 0
-      ? activeContextualView.steps
-      : result.steps;
-  const activeHasDetailedSteps =
-    activeContextualView?.steps && activeContextualView.steps.length > 0
-      ? Boolean(activeContextualView.has_detailed_steps)
-      : result.has_detailed_steps;
+  const activeSteps = activeContextualView
+    ? (activeContextualView.steps ?? [])
+    : result.steps;
+  const activeHasDetailedSteps = activeContextualView
+    ? Boolean(activeContextualView.has_detailed_steps)
+    : result.has_detailed_steps;
 
   return (
     <div aria-live="polite" className="space-y-4 fade-in">
@@ -339,7 +337,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
         </div>
       )}
 
-      {!activeHasDetailedSteps && activeSteps.length > 0 && (
+      {!activeHasDetailedSteps && (!hasContextualViews || activeSteps.length > 0) && (
         <p className="text-xs text-amber-600">Procedimiento resumido (sin desglose paso a paso).</p>
       )}
 
