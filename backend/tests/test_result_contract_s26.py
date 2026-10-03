@@ -73,3 +73,39 @@ def test_trig_identity_view_is_exposed():
     expr = sp.sin(x)**2 + sp.cos(x)**2
     views = result_contract.basic_views(expr, sp.Integer(1), ResultKind.TRIGONOMETRIC)
     assert "identity" in [view.key for view in views]
+
+
+def test_expression_views_cover_symbolic_families():
+    x = sp.Symbol("x")
+
+    algebra_views = result_contract.expression_views(
+        (x + 1)**2,
+        sp.expand((x + 1)**2),
+        ResultKind.ALGEBRAIC,
+    )
+    assert "original" in [view.key for view in algebra_views]
+    assert any(view.key in {"simplified", "factored", "expanded"} for view in algebra_views)
+
+    rational_expr = (x**2 - 1)/(x - 1)
+    rational_views = result_contract.expression_views(
+        rational_expr,
+        sp.simplify(rational_expr),
+        ResultKind.RATIONAL,
+    )
+    assert any(view.label == "Forma equivalente" for view in rational_views)
+
+    log_expr = sp.log(x**2)
+    log_views = result_contract.expression_views(
+        log_expr,
+        log_expr,
+        ResultKind.LOGARITHMIC,
+    )
+    assert "original" in [view.key for view in log_views]
+
+    trig_expr = sp.sin(x)**2 + sp.cos(x)**2
+    trig_views = result_contract.expression_views(
+        trig_expr,
+        sp.Integer(1),
+        ResultKind.TRIGONOMETRIC,
+    )
+    assert "identity" in [view.key for view in trig_views]
