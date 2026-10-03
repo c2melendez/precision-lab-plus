@@ -71,15 +71,16 @@ def basic_views(
 ) -> List[ResultView]:
     """Vista base segura: interpretación original + resultado.
 
-    Las transformaciones adicionales se añaden desde las rutas de álgebra
-    donde ya existen presupuestos de complejidad y pasos verificados.
+    Para expresiones trigonométricas, una reducción real por identidad se
+    expone como vista Identidad y se deduplica si coincide con Resultado.
     """
-    return dedupe_views(
-        [
-            _view("original", "Original", input_expr, kind),
-            _view("result", result_label, result_expr, kind),
-        ]
-    )
+    views = [_view("original", "Original", input_expr, kind)]
+    if kind == ResultKind.TRIGONOMETRIC:
+        identity_expr = sympy.trigsimp(input_expr)
+        if sympy.simplify(identity_expr - input_expr) != 0:
+            views.append(_view("identity", "Identidad", identity_expr, kind))
+    views.append(_view("result", result_label, result_expr, kind))
+    return dedupe_views(views)
 
 
 def algebra_views(
