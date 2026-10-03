@@ -77,7 +77,10 @@ def basic_views(
     views = [_view("original", "Original", input_expr, kind)]
     if kind == ResultKind.TRIGONOMETRIC:
         identity_expr = sympy.trigsimp(input_expr)
-        if sympy.simplify(identity_expr - input_expr) != 0:
+        # La identidad debe aparecer cuando CAMBIA la representación
+        # estructural, aunque ambas expresiones sean matemáticamente
+        # equivalentes (que es justamente la definición de identidad).
+        if sympy.srepr(identity_expr) != sympy.srepr(input_expr):
             views.append(_view("identity", "Identidad", identity_expr, kind))
     views.append(_view("result", result_label, result_expr, kind))
     return dedupe_views(views)
@@ -110,34 +113,35 @@ def complex_views(input_expr: sympy.Expr, value: sympy.Expr) -> List[ResultView]
     angle = sympy.simplify(sympy.arg(value))
     binomial = sympy.simplify(re_part + sympy.I * im_part)
 
-    return dedupe_views(
-        [
-            _view("original", "Original", input_expr, ResultKind.COMPLEX),
-            _view("complex_binomial", "Binómica", binomial, ResultKind.COMPLEX),
-            ResultView(
-                key="complex_polar",
-                label="Polar",
-                latex=f"{sympy.latex(magnitude)}\\angle {sympy.latex(angle)}",
-                kind=ResultKind.COMPLEX,
+    # En complejos NO se deduplica Original contra Binómica: ambas vistas
+    # tienen semántica distinta dentro del contrato aunque una entrada ya
+    # venga escrita en forma binómica.
+    return [
+        _view("original", "Original", input_expr, ResultKind.COMPLEX),
+        _view("complex_binomial", "Binómica", binomial, ResultKind.COMPLEX),
+        ResultView(
+            key="complex_polar",
+            label="Polar",
+            latex=f"{sympy.latex(magnitude)}\\angle {sympy.latex(angle)}",
+            kind=ResultKind.COMPLEX,
+        ),
+        ResultView(
+            key="complex_trigonometric",
+            label="Trigonométrica",
+            latex=(
+                f"{sympy.latex(magnitude)}"
+                f"\\left(\\cos\\left({sympy.latex(angle)}\\right)"
+                f"+i\\sin\\left({sympy.latex(angle)}\\right)\\right)"
             ),
-            ResultView(
-                key="complex_trigonometric",
-                label="Trigonométrica",
-                latex=(
-                    f"{sympy.latex(magnitude)}"
-                    f"\\left(\\cos\\left({sympy.latex(angle)}\\right)"
-                    f"+i\\sin\\left({sympy.latex(angle)}\\right)\\right)"
-                ),
-                kind=ResultKind.COMPLEX,
-            ),
-            ResultView(
-                key="complex_exponential",
-                label="Exponencial",
-                latex=f"{sympy.latex(magnitude)}e^{{i({sympy.latex(angle)})}}",
-                kind=ResultKind.COMPLEX,
-            ),
-        ]
-    )
+            kind=ResultKind.COMPLEX,
+        ),
+        ResultView(
+            key="complex_exponential",
+            label="Exponencial",
+            latex=f"{sympy.latex(magnitude)}e^{{i({sympy.latex(angle)})}}",
+            kind=ResultKind.COMPLEX,
+        ),
+    ]
 
 
 def equation_views(
