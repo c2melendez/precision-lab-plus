@@ -177,3 +177,7 @@ def test_s26_existing_combinatorics_and_mod_contract():
 
 def test_s26_real_cube_root_contract():
     assert sympy.simplify(parsing.parse_expression_tree("cbrt(-8)") + 2) == 0
+
+
+def test_s26_choose_alias():
+    assert parsing.parse_expression_tree("choose(5,2)") == 10
