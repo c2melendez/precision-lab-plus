@@ -178,6 +178,14 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
     contextualViews.find((view) => view.key === symbolicViewKey) ??
     contextualViews.find((view) => view.key !== "original") ??
     contextualViews[0];
+  const activeSteps =
+    activeContextualView?.steps && activeContextualView.steps.length > 0
+      ? activeContextualView.steps
+      : result.steps;
+  const activeHasDetailedSteps =
+    activeContextualView?.steps && activeContextualView.steps.length > 0
+      ? Boolean(activeContextualView.has_detailed_steps)
+      : result.has_detailed_steps;
 
   return (
     <div aria-live="polite" className="space-y-4 fade-in">
@@ -321,7 +329,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
         </div>
       )}
 
-      {!result.has_detailed_steps && (
+      {!activeHasDetailedSteps && activeSteps.length > 0 && (
         <p className="text-xs text-amber-600">Procedimiento resumido (sin desglose paso a paso).</p>
       )}
 
@@ -340,7 +348,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
         </div>
       )}
 
-      {result.has_detailed_steps && (
+      {activeSteps.length > 0 && (
         <div className="space-y-2">
           <button
             type="button"
@@ -348,9 +356,9 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
             aria-expanded={showDetailedSteps}
             className="text-xs font-medium text-marker underline decoration-dotted hover:text-marker-text"
           >
-            {showDetailedSteps ? "Ocultar pasos detallados" : "Mostrar pasos detallados"}
+            {showDetailedSteps ? "Ocultar procedimiento" : activeHasDetailedSteps ? "Mostrar pasos detallados" : "Mostrar procedimiento resumido"}
           </button>
-          {showDetailedSteps && <StepList steps={result.steps} />}
+          {showDetailedSteps && <StepList steps={activeSteps} />}
         </div>
       )}
     </div>
