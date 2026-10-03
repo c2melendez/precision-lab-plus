@@ -133,6 +133,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
   // opcional y permanece colapsado por defecto para no sobrecargar la
   // pantalla. Solo se despliega cuando el usuario lo solicita.
   const [showDetailedSteps, setShowDetailedSteps] = useState(false);
+  const [symbolicViewKey, setSymbolicViewKey] = useState("result");
 
   if (isLoading) {
     return (
@@ -168,6 +169,16 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
   const parsedFraction = isFractionLatex(result.result_latex) ? parseFracLatex(result.result_latex!) : null;
   const mixedLatex = parsedFraction ? toMixedFracLatex(parsedFraction.n, parsedFraction.d) : null;
   const domainConditions = result.domain_conditions ?? [];
+  const contextualViews = result.result_views ?? [];
+  const hasContextualViews =
+    contextualViews.length > 0 &&
+    result.result_kind !== "numeric" &&
+    matrixData === null &&
+    solutionData === null;
+  const activeContextualView =
+    contextualViews.find((view) => view.key === symbolicViewKey) ??
+    contextualViews.find((view) => view.key !== "original") ??
+    contextualViews[0];
 
   return (
     <div aria-live="polite" className="space-y-4 fade-in">
@@ -177,6 +188,15 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
       {!matrixData && !solutionData && (result.result_latex || result.result_text) && (
         <div className="space-y-1">
           {(() => {
+            if (hasContextualViews && activeContextualView) {
+              return (
+                <MathRenderer
+                  latex={activeContextualView.latex}
+                  fallbackText={result.result_text ?? undefined}
+                  className="a11y-scale-result-lg"
+                />
+              );
+            }
             if (format === "dec") {
               return approxText ? (
                 <p className="a11y-scale-result-lg text-ink">{approxText}</p>
@@ -224,7 +244,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
               nunca uno oculta al otro (sección 9: fracciones + su
               equivalente decimal) — solo en el formato "exact", que es el
               que ya traía este comportamiento antes de Fase 2.5. */}
-          {format === "exact" && approxText && approxText !== result.result_text && (
+          {!hasContextualViews && format === "exact" && approxText && approxText !== result.result_text && (
             <p className="text-sm text-muted">≈ {approxText}</p>
           )}
           {format === "frac" && mixedLatex && (
@@ -236,18 +256,30 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
               {showMixed ? "ver como impropia" : "ver como mixta"}
             </button>
           )}
-          <div className="flex gap-3 pt-1 text-xs text-muted">
-            {(["exact", "dec", "frac", "scn"] as AnswerFormat[]).map((f) => (
-              <button
-                key={f}
-                type="button"
-                onClick={() => setFormat(f)}
-                aria-pressed={format === f}
-                className={format === f ? "font-semibold text-marker" : "hover:text-ink"}
-              >
-                {f === "exact" ? "exacto" : f}
-              </button>
-            ))}
+          <div className="flex flex-wrap gap-3 pt-1 text-xs text-muted">
+            {hasContextualViews
+              ? contextualViews.map((view) => (
+                  <button
+                    key={view.key}
+                    type="button"
+                    onClick={() => setSymbolicViewKey(view.key)}
+                    aria-pressed={activeContextualView?.key === view.key}
+                    className={activeContextualView?.key === view.key ? "font-semibold text-marker" : "hover:text-ink"}
+                  >
+                    {view.label}
+                  </button>
+                ))
+              : (["exact", "dec", "frac", "scn"] as AnswerFormat[]).map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => setFormat(f)}
+                    aria-pressed={format === f}
+                    className={format === f ? "font-semibold text-marker" : "hover:text-ink"}
+                  >
+                    {f === "exact" ? "exacto" : f}
+                  </button>
+                ))}
           </div>
         </div>
       )}
