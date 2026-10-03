@@ -154,10 +154,16 @@ async def solve(payload: SolveRequest, request: Request) -> MathResponse:
     warnings = list(result.warnings)
     result_data = result.solutions if result.result_type == ResultType.EQUATION_SOLUTIONS else None
 
+    solve_views = result_contract.equation_views(
+        result.input_eq, result.variable, result.solutions, result.result_type
+    )
+
     return MathResponse(
         success=True,
         operation=OperationType.SOLVE,
         request_id=request.state.request_id,
+        result_kind=result_contract.ResultKind.EQUATION,
+        result_views=solve_views,
         result_type=result.result_type,
         input_text=payload.equation,
         input_latex=_safe_latex(result.input_eq),
