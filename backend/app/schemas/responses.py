@@ -147,6 +147,11 @@ class ResultView(BaseModel):
     label: str
     latex: str
     kind: ResultKind
+    # Plus puede asociar el procedimiento a la representación concreta,
+    # no solo a la respuesta global. Forward reference porque Step se
+    # declara unas líneas más abajo en este contrato.
+    steps: List["Step"] = []
+    has_detailed_steps: bool = False
 
 
 class ErrorCode(str, Enum):
