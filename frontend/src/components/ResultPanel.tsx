@@ -134,7 +134,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
   // pantalla. Solo se despliega cuando el usuario lo solicita.
   const [showDetailedSteps, setShowDetailedSteps] = useState(false);
   const [symbolicViewKey, setSymbolicViewKey] = useState("result");
-  const [displayMode, setDisplayMode] = useState<"view" | "format">("view");
+  const [displayMode, setDisplayMode] = useState<"view" | "format">("format");
 
   if (isLoading) {
     return (
@@ -278,7 +278,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
               nunca uno oculta al otro (sección 9: fracciones + su
               equivalente decimal) — solo en el formato "exact", que es el
               que ya traía este comportamiento antes de Fase 2.5. */}
-          {displayMode === "format" && format === "exact" && approxText && approxText !== result.result_text && (
+          {(!hasContextualViews || displayMode === "format") && format === "exact" && approxText && approxText !== result.result_text && (
             <p className="text-sm text-muted">≈ {approxText}</p>
           )}
           {displayMode === "format" && format === "frac" && mixedLatex && (
@@ -364,7 +364,7 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
             aria-expanded={showDetailedSteps}
             className="text-xs font-medium text-marker underline decoration-dotted hover:text-marker-text"
           >
-            {showDetailedSteps ? "Ocultar procedimiento" : activeHasDetailedSteps ? "Mostrar pasos detallados" : "Mostrar procedimiento resumido"}
+            {showDetailedSteps ? (activeHasDetailedSteps ? "Ocultar pasos detallados" : "Ocultar procedimiento") : activeHasDetailedSteps ? "Mostrar pasos detallados" : "Mostrar procedimiento resumido"}
           </button>
           {showDetailedSteps && <StepList steps={activeSteps} />}
         </div>
