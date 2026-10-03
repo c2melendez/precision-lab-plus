@@ -5,11 +5,12 @@ type StructuralCase = {
   input: string;
   mustContain: string[];
   mustNotContain?: string[];
+  mustNotMatchEcho?: RegExp[];
 };
 
 const CASES: StructuralCase[] = [
   { id: "EN-FR-07", input: "\\frac{x+1}{x-1}", mustContain: ["x+1", "x-1"] },
-  { id: "EN-FR-17", input: "\\frac{1}{2}x", mustContain: ["x"], mustNotContain: ["2x"] },
+  { id: "EN-FR-17", input: "\\frac{1}{2}x", mustContain: ["1/2", "x"], mustNotMatchEcho: [/\\frac\{1\}\{2\s*x\}/] },
   { id: "EN-FR-18", input: "\\frac{1}{2x}", mustContain: ["2x"] },
   { id: "EN-FR-20", input: "x+1/x-1", mustContain: ["x", "1/x"] },
   { id: "EN-DL-01", input: "\\left(x+1\\right)^{2}", mustContain: ["(x+1)", "^2"] },
@@ -73,6 +74,7 @@ test.describe("S26 Sintaxis 625 — Bloque A eco estructural", () => {
         .replace(/[{}]/g, "");
       for (const fragment of tc.mustContain) expect(plain, `${tc.id}: ${echo}`).toContain(fragment);
       for (const fragment of tc.mustNotContain ?? []) expect(plain, `${tc.id}: ${echo}`).not.toContain(fragment);
+      for (const pattern of tc.mustNotMatchEcho ?? []) expect(echo, `${tc.id}: ${echo}`).not.toMatch(pattern);
     });
   }
 });
