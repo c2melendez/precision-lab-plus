@@ -19,6 +19,10 @@ from sympy import (
     Add,
     E,
     factorial,
+    factorial2,
+    ceiling,
+    floor,
+    floor,
     Float,
     I,
     Integer,
@@ -164,6 +168,10 @@ ALLOWED_FUNCTIONS = {
     "exp": exp,
     "abs": Abs,
     "sign": sign,
+    "ceil": ceiling,
+    "floor": floor,
+    "floor": floor,
+    "doublefactorial": factorial2,
     "pm": _plus_minus,
     # Fase 10 (auditoría Fase 0 v2, port de precision-lab-lite): estas 15
     # claves NUNCA estaban aquí — de las 10 teclas del menú "Stat" del
@@ -196,6 +204,7 @@ ALLOWED_FUNCTIONS = {
     "gcd": gcd,
     "lcm": lcm,
     "nCr": binomial,
+    "choose": binomial,
     "nPr": FallingFactorial,
     # P4 (spec v2 §5.2, Complejos): re/im/arg/conjugate son nativos de
     # SymPy — solo hacía falta registrarlos, mismo patrón que arriba.
@@ -530,6 +539,8 @@ def build_minimal_global_dict() -> Dict[str, object]:
         "Mul": Mul,
         "Pow": Pow,
         "factorial": factorial,
+        "factorial2": factorial2,
+        "ceiling": ceiling,
         "__builtins__": {},
     }
 
