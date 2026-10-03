@@ -669,13 +669,13 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
     return sympy.Eq(lhs_expr, rhs_expr)
 
 
-_INEQUALITY_OPERATORS = ["<=", ">=", "<", ">"]  # orden importa: <= antes que <
+_INEQUALITY_OPERATORS = ["!=", "<=", ">=", "<", ">"]  # orden importa: operadores de 2 chars primero
 
 
 def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     """`/inequality` (spec, `InequalityRequest`). Reutiliza toda la
     infraestructura de seguridad de `parse_expression_tree` (etapas 1-9):
-    solo cambia qué operador separa los dos lados (`<,>,<=,>=` en vez de
+    solo cambia qué operador separa los dos lados (`<,>,<=,>=,!=` en vez de
     `=`) y qué tipo de `Relational` de SymPy se construye al final."""
     validate_length(text)
     normalized = normalize_unicode(text)
@@ -687,7 +687,7 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
             break
     if found_operator is None:
         raise ParseSecurityError(
-            "Se esperaba un operador de desigualdad (<, >, <=, >=) en la expresión."
+            "Se esperaba un operador relacional (<, >, <=, >=, !=) en la expresión."
         )
     if normalized.count(found_operator) > 1:
         raise ParseSecurityError(
@@ -721,5 +721,6 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
         ">": sympy.Gt,
         "<=": sympy.Le,
         ">=": sympy.Ge,
+        "!=": sympy.Ne,
     }
     return relational_by_operator[found_operator](lhs_expr, rhs_expr)
