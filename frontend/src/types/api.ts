@@ -1239,6 +1239,16 @@ export interface components {
             /** Latex */
             latex: string;
             kind: components["schemas"]["ResultKind"];
+            /**
+             * Steps
+             * @default []
+             */
+            steps?: components["schemas"]["Step"][];
+            /**
+             * Has Detailed Steps
+             * @default false
+             */
+            has_detailed_steps?: boolean;
         };
         /**
          * ResultType
