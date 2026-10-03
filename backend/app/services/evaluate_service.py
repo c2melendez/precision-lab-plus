@@ -107,7 +107,11 @@ def evaluate(
 ) -> EvaluateResult:
     substitution_map = _validate_and_parse_substitutions(substitutions)
 
-    input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
+    relation_tokens = ("!=", "<=", ">=", "<", ">")
+    if any(token in expression for token in relation_tokens):
+        input_expr = parsing.parse_inequality_tree(expression)
+    else:
+        input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     expr = input_expr
 
     if angle_unit == "deg":
