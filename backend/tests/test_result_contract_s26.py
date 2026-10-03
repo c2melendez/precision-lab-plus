@@ -109,3 +109,15 @@ def test_expression_views_cover_symbolic_families():
         ResultKind.TRIGONOMETRIC,
     )
     assert "identity" in [view.key for view in trig_views]
+
+
+def test_semantic_family_precedes_numeric_result():
+    assert result_contract.classify_expression(
+        sp.sin(sp.pi/6), is_numeric=True
+    ) == ResultKind.TRIGONOMETRIC
+    assert result_contract.classify_expression(
+        sp.log(2), is_numeric=True
+    ) == ResultKind.LOGARITHMIC
+    assert result_contract.classify_expression(
+        sp.sqrt(2), is_numeric=True
+    ) == ResultKind.RADICAL
