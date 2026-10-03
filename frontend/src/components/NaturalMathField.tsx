@@ -198,7 +198,7 @@ function rewriteS26SyntaxAliases(latex: string): string {
   let result = latex
     .replace(
       /\\operatorname\{choose\}\s*\\left\(([^,()]+?),([^\\(),]+?)\\right\)/g,
-      (_match, n: string, r: string) => `\\mathrm{nCr}(${n},${r})`,
+      (_match, n: string, r: string) => `\\mathrm{nCr}\\left(${n},${r}\\right)`,
     )
     .replace(
       /\\operatorname\{choose\}\s*\(([^,()]+),([^()]+)\)/g,
