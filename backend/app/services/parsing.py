@@ -21,6 +21,7 @@ from sympy import (
     factorial,
     factorial2,
     ceiling,
+    floor,
     Float,
     I,
     Integer,
@@ -167,6 +168,7 @@ ALLOWED_FUNCTIONS = {
     "abs": Abs,
     "sign": sign,
     "ceil": ceiling,
+    "floor": floor,
     "doublefactorial": factorial2,
     "pm": _plus_minus,
     # Fase 10 (auditoría Fase 0 v2, port de precision-lab-lite): estas 15
