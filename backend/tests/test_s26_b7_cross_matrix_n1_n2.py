@@ -10,7 +10,7 @@ import sympy as sp
 from app.services import derivative_service, integral_service, evaluate_service
 
 
-x = sp.Symbol("x", real=True)
+x = sp.Symbol("x")
 
 
 def _equivalent(actual: sp.Expr, expected: sp.Expr) -> bool:
@@ -20,9 +20,9 @@ def _equivalent(actual: sp.Expr, expected: sp.Expr) -> bool:
 def test_n1_hyperbolic_log_known_values():
     # EV-H-04 / EV-H-05 / EV-H-06
     cases = [
-        ("sinh(log(2))", sp.Rational(3, 4)),
-        ("cosh(log(2))", sp.Rational(5, 4)),
-        ("tanh(log(2))", sp.Rational(3, 5)),
+        ("sinh(ln(2))", sp.Rational(3, 4)),
+        ("cosh(ln(2))", sp.Rational(5, 4)),
+        ("tanh(ln(2))", sp.Rational(3, 5)),
     ]
     for expression, expected in cases:
         result = evaluate_service.evaluate(expression)
@@ -38,7 +38,7 @@ def test_n1_hyperbolic_identity_is_preserved():
 
 def test_n2_derivative_log_sine_matches_cotangent():
     # DV-T-01
-    result = derivative_service.compute_derivative("log(sin(x))", "x", 1)
+    result = derivative_service.compute_derivative("ln(sin(x))", "x", 1)
     assert _equivalent(result.result_expr, sp.cot(x))
 
 
@@ -51,7 +51,7 @@ def test_n2_derivative_exp_sine_chain_rule():
 
 def test_n2_derivative_log_cosh_matches_tanh():
     # DV-T-14
-    result = derivative_service.compute_derivative("log(cosh(x))", "x", 1)
+    result = derivative_service.compute_derivative("ln(cosh(x))", "x", 1)
     assert _equivalent(result.result_expr, sp.tanh(x))
 
 
@@ -79,5 +79,5 @@ def test_n2_definite_exp_sine():
 def test_n2_radical_log_integral_differentiates_back():
     # IT-M-01
     integrand = sp.sqrt(x) * sp.log(x)
-    result = integral_service.integrate_expression("sqrt(x)*log(x)", "x")
+    result = integral_service.integrate_expression("sqrt(x)*ln(x)", "x")
     assert _equivalent(sp.diff(result.antiderivative, x), integrand)
