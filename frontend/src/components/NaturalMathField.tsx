@@ -197,22 +197,41 @@ function rewriteLogSubscriptBase(ascii: string): string {
 
 
 function normalizeS26A2Delimiters(input: string): string {
-  let out = input.split("\\mleft").join("\\left").split("\\mright").join("\\right");
+  const bs = String.fromCharCode(92);
+  let out = input.split(bs + "mleft").join(bs + "left").split(bs + "mright").join(bs + "right");
 
-  while (out.includes("\\left[") && out.includes("\\right]")) {
-    const start = out.indexOf("\\left[");
-    const end = out.indexOf("\\right]", start + 6);
-    if (end === -1) break;
-    const inner = out.slice(start + 6, end);
-    out = out.slice(0, start) + "\\left(" + inner + "\\right)" + out.slice(end + 7);
+  while (out.includes(bs + "left[") && out.includes(bs + "right]")) {
+    const start = out.indexOf(bs + "left[");
+    const finish = out.indexOf(bs + "right]", start + 6);
+    if (finish === -1) break;
+    const inner = out.slice(start + 6, finish);
+    out = out.slice(0, start) + bs + "left(" + inner + bs + "right)" + out.slice(finish + 7);
   }
 
-  while (out.includes("\\lfloor") && out.includes("\\rfloor")) {
-    const start = out.indexOf("\\lfloor");
-    const end = out.indexOf("\\rfloor", start + 7);
-    if (end === -1) break;
-    const inner = out.slice(start + 7, end).trim();
-    out = out.slice(0, start) + "\\mathrm{floor}(" + inner + ")" + out.slice(end + 7);
+  while (out.includes(bs + "lfloor") && out.includes(bs + "rfloor")) {
+    const start = out.indexOf(bs + "lfloor");
+    const finish = out.indexOf(bs + "rfloor", start + 7);
+    if (finish === -1) break;
+    const inner = out.slice(start + 7, finish).trim();
+    out = out.slice(0, start) + bs + "mathrm{floor}(" + inner + ")" + out.slice(finish + 7);
+  }
+
+  const bar = bs + "|";
+  for (let guard = 0; guard < 8; guard++) {
+    const positions: number[] = [];
+    let from = 0;
+    while (true) {
+      const p = out.indexOf(bar, from);
+      if (p === -1) break;
+      positions.push(p);
+      from = p + bar.length;
+    }
+    if (positions.length < 2 || positions.length % 2 !== 0) break;
+    const leftIndex = positions.length / 2 - 1;
+    const start = positions[leftIndex];
+    const finish = positions[leftIndex + 1];
+    const inner = out.slice(start + bar.length, finish);
+    out = out.slice(0, start) + bs + "left|" + inner + bs + "right|" + out.slice(finish + bar.length);
   }
 
   return out;
