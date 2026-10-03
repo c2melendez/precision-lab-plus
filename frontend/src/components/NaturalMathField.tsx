@@ -333,6 +333,17 @@ function rewriteFiniteAggregateAscii(ascii: string): string | null {
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
 
+  const trimmed = latex.trim();
+  if (
+    (trimmed.includes("\\left(") && trimmed.includes("\\right]")) ||
+    (trimmed.startsWith("[") && trimmed.endsWith(")") && trimmed.includes(","))
+  ) {
+    return "unsupported_interval()";
+  }
+  if (trimmed.includes("\\lVert") && trimmed.includes("pmatrix")) {
+    return "unsupported_vector_norm()";
+  }
+
   // S16 REG-009: la tecla |a| inserta \\left|#0\\right|. MathLive no
   // garantiza una forma ASCII que el parser Python interprete como valor
   // absoluto, mientras que el backend sí expone abs(...). Normalizamos
