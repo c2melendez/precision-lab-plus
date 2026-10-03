@@ -97,7 +97,11 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
     result_views = (
         result_contract.complex_views(result.input_expr, result.expr)
         if result_kind == result_contract.ResultKind.COMPLEX
-        else result_contract.basic_views(result.input_expr, result.expr, result_kind)
+        else (
+            result_contract.basic_views(result.input_expr, result.expr, result_kind)
+            if result_kind in (result_contract.ResultKind.NUMERIC, result_contract.ResultKind.OTHER)
+            else result_contract.expression_views(result.input_expr, result.expr, result_kind)
+        )
     )
 
     return MathResponse(
