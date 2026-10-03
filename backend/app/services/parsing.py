@@ -19,6 +19,8 @@ from sympy import (
     Add,
     E,
     factorial,
+    factorial2,
+    ceiling,
     Float,
     I,
     Integer,
@@ -164,6 +166,8 @@ ALLOWED_FUNCTIONS = {
     "exp": exp,
     "abs": Abs,
     "sign": sign,
+    "ceil": ceiling,
+    "doublefactorial": factorial2,
     "pm": _plus_minus,
     # Fase 10 (auditoría Fase 0 v2, port de precision-lab-lite): estas 15
     # claves NUNCA estaban aquí — de las 10 teclas del menú "Stat" del
@@ -530,6 +534,8 @@ def build_minimal_global_dict() -> Dict[str, object]:
         "Mul": Mul,
         "Pow": Pow,
         "factorial": factorial,
+        "factorial2": factorial2,
+        "ceiling": ceiling,
         "__builtins__": {},
     }
 
