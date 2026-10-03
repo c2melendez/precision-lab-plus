@@ -205,6 +205,12 @@ function rewriteS26SyntaxAliases(latex: string): string {
       (_match, n: string, r: string) => `\\mathrm{nCr}(${n},${r})`,
     )
     .replace(/\\(?:dfrac|tfrac)/g, "\\frac")
+    .replace(/\\mleft/g, "\\left")
+    .replace(/\\mright/g, "\\right")
+    .replace(/\\left\[([^\[\]]*?)\\right\]/g, "\\left($1\\right)")
+    .replace(/\\lfloor\s*([^{}]+?)\s*\\rfloor/g, "\\mathrm{floor}($1)")
+    .replace(/\\left\\\|\s*(.*?)\s*\\right\\\|/g, "\\left|$1\\right|")
+    .replace(/\\\\\|\s*(.*?)\s*\\\\\|/g, "\\left|$1\\right|")
     .replace(/\\times/g, "\\cdot")
     .replace(/\\div/g, "/")
     .replace(/\\sqrt\[3\]\{([^{}]+)\}/g, "\\mathrm{cbrt}($1)")
