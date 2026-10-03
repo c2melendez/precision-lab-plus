@@ -60,11 +60,7 @@ async function originalLatex(page: Page): Promise<string> {
   );
   await calculate.click();
   const response = await responsePromise;
-  const requestBody = response.request().postDataJSON?.() ?? null;
   const body = (await response.json()) as EvaluateBody;
-  if (["EN-DL-11", "EN-DL-12", "EN-DL-13"].includes(caseId)) {
-    console.log("S26A2_DEBUG", JSON.stringify({ caseId, canonical: await field.inputValue(), requestBody, body }));
-  }
   expect(body.success, JSON.stringify(body)).toBe(true);
 
   const originalView = body.result_views?.find((view) => view.key === "original");
