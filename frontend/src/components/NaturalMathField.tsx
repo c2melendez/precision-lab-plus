@@ -39,6 +39,17 @@ declare global {
  * `matrix_service`/`parsing.py`) — se reescribe como `(x)**(1/(n))`, que
  * SÍ entiende (`convert_xor`/`**` ambos soportados).
  */
+function rewriteAbsoluteBars(ascii: string): string {
+  let result = ascii;
+  const innermost = /\|([^|]+)\|/g;
+  for (let i = 0; i < 12; i++) {
+    const next = result.replace(innermost, "abs($1)");
+    if (next === result) break;
+    result = next;
+  }
+  return result;
+}
+
 function rewriteNthRoot(ascii: string): string {
   const pattern = /root\s*\(\s*([^()]+?)\s*\)\s*\(\s*([^()]+?)\s*\)/g;
   let result = ascii;
@@ -386,7 +397,7 @@ export function latexToBackendSyntax(latex: string): string {
     .replace(/\(\s*\(?\s*([^()]+?)\s*\)?\s+nCr\s*\(\s*([^()]+?)\s*\)\s*\)/g, "nCr($1,$2)")
     .replace(/[∗×]/g, "*")
     .replace(/[÷]/g, "/");
-  const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
+  const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(rewriteAbsoluteBars(collapsed)));
   return rewritePostfixPercent(applyDegreeNotation(
     rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii)),
   )).trim();
