@@ -61,19 +61,17 @@ async function originalLatex(page: Page, caseId?: string): Promise<string> {
   await calculate.click();
   const response = await responsePromise;
   const body = (await response.json()) as EvaluateBody;
+  let assertionContext = JSON.stringify(body);
   if (caseId && ["EN-DL-11", "EN-DL-12", "EN-DL-13"].includes(caseId)) {
     const field = page.locator("math-field").first();
-    console.log(
-      "S26A2_DEBUG",
-      JSON.stringify({
-        caseId,
-        canonical: await field.inputValue(),
-        requestBody: response.request().postDataJSON?.() ?? null,
-        body,
-      }),
-    );
+    assertionContext = JSON.stringify({
+      caseId,
+      canonical: await field.inputValue(),
+      requestBody: response.request().postDataJSON?.() ?? null,
+      body,
+    });
   }
-  expect(body.success, JSON.stringify(body)).toBe(true);
+  expect(body.success, assertionContext).toBe(true);
 
   const originalView = body.result_views?.find((view) => view.key === "original");
   expect(originalView, JSON.stringify(body)).toBeDefined();
