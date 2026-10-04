@@ -274,8 +274,6 @@ function normalizeAbsoluteDelimiterLatex(input: string): string {
 
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
-  latex = normalizeAbsoluteDelimiterLatex(latex);
-
   // S16 REG-009: la tecla |a| inserta \\left|#0\\right|. MathLive no
   // garantiza una forma ASCII que el parser Python interprete como valor
   // absoluto, mientras que el backend sí expone abs(...). Normalizamos
@@ -311,9 +309,12 @@ export function latexToBackendSyntax(latex: string): string {
 
   const collapsed = collapseKnownFunctionNames(ascii);
   const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
-  return rewritePostfixPercent(applyDegreeNotation(
+  const backendSyntax = rewritePostfixPercent(applyDegreeNotation(
     rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii)),
   )).trim();
+  // IN625 A2: convertir barras a abs() después de toda la conversión
+  // LaTeX→ASCII para evitar que el conversor fragmente "abs" como a b s.
+  return normalizeAbsoluteDelimiterLatex(backendSyntax);
 }
 
 interface NaturalMathFieldProps {
