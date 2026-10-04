@@ -18,8 +18,12 @@ describe("IN625 Parte B / B3 Multiplicación implícita — UI → backend",()=>
   ];
   for(const [id,input] of cases) it(`${id}: conversión válida sin TeX residual`,()=>{noTex(input);});
 
-  it("MI-01/06/08 preservan producto y precedencia de potencia",()=>{
-    for(const input of ["2x","2x^2","3x^2y"]){
+  it("MI-01 preserva producto implícito",()=>{
+    const out=noTex("2x");
+    expect(out).toMatch(/\*|[0-9)][A-Za-z]|[A-Za-z][A-Za-z]/);
+  });
+  it("MI-06/08 preservan producto y precedencia de potencia",()=>{
+    for(const input of ["2x^2","3x^2y"]){
       const out=noTex(input);
       expect(out).toMatch(/\*|[0-9)][A-Za-z]|[A-Za-z][A-Za-z]/);
       expect(out).toMatch(/\^|\*\*/);
