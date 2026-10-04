@@ -281,7 +281,7 @@ def validate_length(text: str) -> None:
 
 def normalize_unicode(text: str) -> str:
     """Normaliza símbolos seguros antes del parser de SymPy."""
-    text = text.replace("π", "pi").replace("∞", "oo")
+    text = text.replace("π", "pi").replace("∞", "oo").replace("≤", "<=").replace("≥", ">=").replace("≠", "!=")
     text = _expand_sqrt_tokens(text)
     # Porcentaje postfix de calculadora: 50% -> (50)/100. Se limita a
     # átomos simples o un único grupo parentizado para no inventar una
