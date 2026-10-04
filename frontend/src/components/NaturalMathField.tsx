@@ -94,6 +94,7 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "root",
   "log",
   "Log",
+  "csch",
   "acsch",
   "asech",
   "acoth",
@@ -303,7 +304,9 @@ const LOCALIZED_LATEX_ALIAS_MAP: Record<string, string> = {
   tgh: "\\tanh",
   ctgh: "\\coth",
   cotgh: "\\coth",
-  cosech: "\\csch",
+  // MathLive puede descartar el macro no estándar \\csch. Emitirlo como texto de función
+  // preserva el nombre hasta collapseKnownFunctionNames, igual que acsch/asech/acoth.
+  cosech: "\\mathrm{csch}",
   argsenh: "\\operatorname{asinh}",
   arcsenh: "\\operatorname{asinh}",
   argcosh: "\\operatorname{acosh}",
