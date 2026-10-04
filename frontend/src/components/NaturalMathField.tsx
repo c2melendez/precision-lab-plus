@@ -364,7 +364,7 @@ export function latexToBackendSyntax(latex: string): string {
   // IN625 C4 — conjugado complejo escrito con sobrelínea.
   // El conversor LaTeX→ASCII descarta \\overline en este caso, por lo que
   // preservamos explícitamente la semántica antes de delegar.
-  const overlineMatch = latex.trim().match(/^\\\\overline\\{(.+)\\}$/s);
+  const overlineMatch = latex.trim().match(/^\\overline\{(.+)\}$/s);
   if (overlineMatch) return `conjugate(${latexToBackendSyntax(overlineMatch[1])})`;
   // MathLive may serialize ± as either \\pm or +-. Preserve its calculator
   // semantics as two branches instead of letting the parser reduce it to -x.
