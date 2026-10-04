@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { detectCalculusIntent } from "../components/calculusIntent";
 
 describe("IN625 E1b — reconocimiento de límites",()=>{
-  const core={kind:"limit" as const,variable:"x",innerLatex:"\\frac{\\sin x}{x}",direction:"both" as const};
+  const core={kind:"limit" as const,variable:"x",innerLatex:"\\frac{\\sin(x)}{x}",direction:"both" as const};
   it("EN-CA-20 x->0",()=>expect(detectCalculusIntent("\\lim_{x\\to0}\\frac{\\sin x}{x}")).toEqual({...core,point:"0"}));
   it("EN-CA-21 acepta \\rightarrow",()=>expect(detectCalculusIntent("\\lim_{x\\rightarrow0}\\frac{\\sin x}{x}")).toEqual({...core,point:"0"}));
   it("EN-CA-22 lateral derecho",()=>expect(detectCalculusIntent("\\lim_{x\\to0^{+}}\\frac{1}{x}")).toEqual({
