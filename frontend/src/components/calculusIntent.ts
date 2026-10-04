@@ -343,13 +343,14 @@ function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integra
  * lateral a mano sigue cayendo a "no reconocido" y el usuario puede usar
  * LimitMode.tsx, que siempre soportó dirección vía su propio selector.
  */
-const LATERAL_LIMIT = /^\\lim_\{\s*([a-zA-Z])\s*\\to\s*(.+?)\s*\^\{\s*([+-])\s*\}\s*\}(.+)$/s;
+const LATERAL_LIMIT = /^\\lim_\{\s*([a-zA-Z])\s*\\to\s*(.+?)\s*\^(?:\{\s*([+-])\s*\}|([+-]))\s*\}(.+)$/s;
 
 function detectLateralLimit(latex: string): Extract<CalculusIntent, { kind: "limit" }> | null {
   const trimmed = latex.trim();
   const m = LATERAL_LIMIT.exec(trimmed);
   if (!m) return null;
-  const [, variable, pointLatex, sign, innerLatex] = m;
+  const [, variable, pointLatex, signBraced, signBare, innerLatex] = m;
+  const sign = signBraced ?? signBare;
   if (innerLatex.trim().length === 0) return null;
 
   // El punto puede venir como número, o como \infty (mismo criterio que
@@ -418,6 +419,8 @@ function detectLimit(latex: string): Extract<CalculusIntent, { kind: "limit" }> 
  * (más barato, solo regex); integral y límite comparten el mismo motor
  * de reconocimiento (Compute Engine). */
 export function detectCalculusIntent(latex: string): CalculusIntent | null {
+  // IN625 E1b: variantes tipográficas equivalentes del contrato.
+  latex = latex.replace(/\\displaystyle/g, "").replace(/\\rightarrow/g, "\\to");
   return (
     detectPartialDerivative(latex) ??
     detectDerivative(latex) ??
