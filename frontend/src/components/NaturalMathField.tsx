@@ -302,11 +302,15 @@ export function latexToBackendSyntax(latex: string): string {
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
   const latexWithPercent = latex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
+  // IN625 B3: MathLive/Compute Engine can serialize \\div as the ASCII
+  // artifact "-:". Normalize the operator before conversion so it reaches
+  // the backend as ordinary division.
+  const latexWithDivision = latexWithPercent.replace(/\\\\div/g, "/");
   // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
   // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
   // conocido antes de delegar al conversor, y luego collapseKnownFunctionNames
   // recompone el identificador multi-letra.
-  const latexWithReciprocalHyperbolicInverses = latexWithPercent
+  const latexWithReciprocalHyperbolicInverses = latexWithDivision
     .replace(/\\csch\^\{-1\}/g, "\\mathrm{acsch}")
     .replace(/\\sech\^\{-1\}/g, "\\mathrm{asech}")
     .replace(/\\coth\^\{-1\}/g, "\\mathrm{acoth}");
