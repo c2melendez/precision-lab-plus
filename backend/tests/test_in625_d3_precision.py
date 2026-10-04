@@ -59,9 +59,14 @@ def test_en_pn_19_tiny_power_is_exact_nonzero():
 
 def test_en_pn_20_huge_integer_does_not_overflow_evaluate():
     result=evaluate("2^1024")
-    assert result.expr == sympy.Integer(2)**1024
-    assert len(str(result.expr)) == 309
-    assert str(result.expr).startswith("17976931348623159")
+    expected = sympy.Integer(2) ** 1024
+    # El servicio preserva la forma exacta no evaluada (evaluate=False)
+    # y evita forzar una aproximación IEEE-754 infinita.
+    assert sympy.simplify(result.expr - expected) == 0
+    assert result.approx_value is None
+    materialized = str(expected)
+    assert len(materialized) == 309
+    assert materialized.startswith("17976931348623159")
 
 # EN-PN-15..17 are intentionally left for explicit repeating-decimal syntax
 # support/error-contract verification; they are requires_human/non-blocking.
