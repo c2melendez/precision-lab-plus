@@ -139,11 +139,12 @@ def evaluate(
             approx_value=None,
         )
 
+    normalized_expression = parsing.normalize_unicode(expression)
     relation_tokens = ("!=", "<=", ">=", "<", ">")
-    if any(token in expression for token in relation_tokens):
-        input_expr = parsing.parse_inequality_tree(expression)
+    if any(token in normalized_expression for token in relation_tokens):
+        input_expr = parsing.parse_inequality_tree(normalized_expression)
     else:
-        input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
+        input_expr = parsing.parse_expression_tree(normalized_expression, allow_equation=False)
     expr = input_expr
 
     if angle_unit == "deg":
