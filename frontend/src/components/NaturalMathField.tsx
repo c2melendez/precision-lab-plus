@@ -241,8 +241,8 @@ function rewriteFiniteAggregateAscii(ascii: string): string | null {
 
 function normalizeRelationOperators(input: string): string {
   return input
-    .replace(/≤/g, "<=")
-    .replace(/≥/g, ">=")
+    .replace(/[≤⩽]/g, "<=")
+    .replace(/[≥⩾]/g, ">=")
     .replace(/≠/g, "!=");
 }
 
