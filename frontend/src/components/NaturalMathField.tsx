@@ -287,6 +287,8 @@ function normalizeAbsoluteDelimiterLatex(input: string): string {
 
 
 const LOCALIZED_LATEX_ALIAS_MAP: Record<string, string> = {
+  sin: "\\sin", cos: "\\cos", tan: "\\tan", csc: "\\csc", sec: "\\sec", cot: "\\cot",
+  ln: "\\ln", log: "\\log", exp: "\\exp", sinh: "\\sinh", cosh: "\\cosh", tanh: "\\tanh",
   sen: "\\sin",
   tg: "\\tan",
   ctg: "\\cot",
@@ -321,7 +323,10 @@ function normalizeLocalizedLatexAliases(input: string): string {
 
   out = out.replace(
     /\\(?:operatorname|mathrm|text)\{([^{}]+)\}/g,
-    (_m, rawName) => LOCALIZED_LATEX_ALIAS_MAP[String(rawName).toLowerCase()] ?? "\\operatorname{" + String(rawName) + "}",
+    (_m, rawName) => {
+      const mapped = LOCALIZED_LATEX_ALIAS_MAP[String(rawName).toLowerCase()] ?? "\\operatorname{" + String(rawName) + "}";
+      return mapped.startsWith("\\") ? mapped + " " : mapped;
+    },
   );
 
   out = out.replace(
