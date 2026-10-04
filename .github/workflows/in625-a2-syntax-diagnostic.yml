@@ -1,4 +1,4 @@
-name: IN625 A1+A2+A3+A4+B1+B2+B3+B4+C1+C2+C3+C4+D1+D2+D3+E1a Syntax Diagnostic
+name: IN625 A1+A2+A3+A4+B1+B2+B3+B4+C1+C2+C3+C4+D1+D2+D3+E1a+E1b Syntax Diagnostic
 on:
   pull_request:
   workflow_dispatch:
@@ -24,7 +24,7 @@ jobs:
           python-version: "3.12"
       - name: Install Plus backend dependencies for D3
         run: python -m pip install -r ../backend/requirements.txt
-      - name: Run A1+A2+A3+A4+B1+B2+B3+B4+C1+C2+C3+C4+D1+D2+D3+E1a syntax diagnostics
-        run: npx vitest run src/__tests__/in625A1Fractions.audit.test.ts src/__tests__/in625A2Delimiters.audit.test.ts src/__tests__/in625A3Operators.audit.test.ts src/__tests__/in625A4Roots.audit.test.ts src/__tests__/in625B1Exponents.audit.test.ts src/__tests__/in625B2SubscriptsLogs.audit.test.ts src/__tests__/in625B3ImplicitMultiplication.audit.test.ts src/__tests__/in625B4Precedence.audit.test.ts src/__tests__/in625C1FunctionPowers.audit.test.ts src/__tests__/in625C2FunctionArguments.audit.test.ts src/__tests__/in625C3SpanishAliases.audit.test.ts src/__tests__/in625C4ConstantsFunctions.audit.test.ts src/__tests__/in625D1Decimals.audit.test.ts src/__tests__/in625D2ScientificPercent.audit.test.ts src/__tests__/in625D3Precision.audit.test.ts src/__tests__/in625E1aDerivatives.audit.test.ts
+      - name: Run A1+A2+A3+A4+B1+B2+B3+B4+C1+C2+C3+C4+D1+D2+D3+E1a+E1b syntax diagnostics
+        run: npx vitest run src/__tests__/in625A1Fractions.audit.test.ts src/__tests__/in625A2Delimiters.audit.test.ts src/__tests__/in625A3Operators.audit.test.ts src/__tests__/in625A4Roots.audit.test.ts src/__tests__/in625B1Exponents.audit.test.ts src/__tests__/in625B2SubscriptsLogs.audit.test.ts src/__tests__/in625B3ImplicitMultiplication.audit.test.ts src/__tests__/in625B4Precedence.audit.test.ts src/__tests__/in625C1FunctionPowers.audit.test.ts src/__tests__/in625C2FunctionArguments.audit.test.ts src/__tests__/in625C3SpanishAliases.audit.test.ts src/__tests__/in625C4ConstantsFunctions.audit.test.ts src/__tests__/in625D1Decimals.audit.test.ts src/__tests__/in625D2ScientificPercent.audit.test.ts src/__tests__/in625D3Precision.audit.test.ts src/__tests__/in625E1a+E1bDerivatives.audit.test.ts
       - name: Run D3 exact backend precision diagnostics
-        run: PYTHONPATH=../backend pytest -q ../backend/tests/test_in625_d3_precision.py ../backend/tests/test_in625_e1a_derivatives.py
+        run: PYTHONPATH=../backend pytest -q ../backend/tests/test_in625_d3_precision.py ../backend/tests/test_in625_e1a_derivatives.py ../backend/tests/test_in625_e1b_limits.py
