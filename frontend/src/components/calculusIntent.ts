@@ -288,8 +288,34 @@ function getComputeEngine(): ComputeEngine {
 }
 
 function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integral" }> | null {
-  const trimmed = latex.trim();
+  const trimmed = latex
+    .trim()
+    .replace(/\\displaystyle/g, "")
+    .replace(/\\differentialD\s*([A-Za-z])/g, "\\,d$1")
+    .replace(/\\mathrm\{d\}\s*([A-Za-z])/g, "\\,d$1");
   if (trimmed.length === 0) return null;
+
+  // IN625 E1c: escáner propio para las formas canónicas de integral.
+  // Permite variable arbitraria y límites finitos simbólicos (ej. pi),
+  // que el MathJSON de Compute Engine no siempre conserva como números.
+  const canonical = trimmed.match(
+    /^\\int(?:_(?:\{([^{}]+)\}|([^\\s^]+))\^(?:\{([^{}]+)\}|([^\\s]+)))?\s*(.*?)\s*(?:\\,)?d([A-Za-z])$/s,
+  );
+  if (canonical) {
+    const lower = canonical[1] ?? canonical[2] ?? null;
+    const upper = canonical[3] ?? canonical[4] ?? null;
+    const innerLatex = canonical[5].trim();
+    const variable = canonical[6];
+    if (!innerLatex) return null;
+    if ((lower === null) !== (upper === null)) return null;
+    return {
+      kind: "integral",
+      variable,
+      lowerBound: lower,
+      upperBound: upper,
+      innerLatex,
+    };
+  }
 
   let expr;
   try {
