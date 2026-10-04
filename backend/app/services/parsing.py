@@ -70,6 +70,7 @@ from sympy.parsing.sympy_parser import (
     convert_xor,
     implicit_multiplication_application,
     parse_expr,
+    rationalize,
     standard_transformations,
 )
 
@@ -537,6 +538,9 @@ def build_minimal_global_dict() -> Dict[str, object]:
 _TRANSFORMATIONS = standard_transformations + (
     implicit_multiplication_application,
     convert_xor,
+    # IN625 D3: todo decimal literal debe entrar como Rational exacto,
+    # nunca como Float binario/decimal de precisión finita.
+    rationalize,
 )
 
 
