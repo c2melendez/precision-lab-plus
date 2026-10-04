@@ -241,10 +241,10 @@ function rewriteFiniteAggregateAscii(ascii: string): string | null {
 
 function normalizeAbsoluteDelimiterLatex(input: string): string {
   const expr = input
-    .replace(/\\\\left\|/g, "|")
-    .replace(/\\\\right\|/g, "|")
-    .replace(/\\\\lvert/g, "|")
-    .replace(/\\\\rvert/g, "|")
+    .replace(/\\left\|/g, "|")
+    .replace(/\\right\|/g, "|")
+    .replace(/\\lvert/g, "|")
+    .replace(/\\rvert/g, "|")
     .replace(/∣/g, "|");
 
   let out = "";
@@ -273,7 +273,8 @@ function normalizeAbsoluteDelimiterLatex(input: string): string {
 }
 
 export function latexToBackendSyntax(latex: string): string {
-  if (latex.trim() === "") return "";\n  latex = normalizeAbsoluteDelimiterLatex(latex);
+  if (latex.trim() === "") return "";
+  latex = normalizeAbsoluteDelimiterLatex(latex);
 
   // S16 REG-009: la tecla |a| inserta \\left|#0\\right|. MathLive no
   // garantiza una forma ASCII que el parser Python interprete como valor
