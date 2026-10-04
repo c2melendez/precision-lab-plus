@@ -239,8 +239,41 @@ function rewriteFiniteAggregateAscii(ascii: string): string | null {
   return `${op === "sum" ? "sum" : "product"}(${body.trim()},${variable},${lower.trim()},${upper.trim()})`;
 }
 
+function normalizeAbsoluteDelimiterLatex(input: string): string {
+  const expr = input
+    .replace(/\\\\left\|/g, "|")
+    .replace(/\\\\right\|/g, "|")
+    .replace(/\\\\lvert/g, "|")
+    .replace(/\\\\rvert/g, "|")
+    .replace(/∣/g, "|");
+
+  let out = "";
+  let depth = 0;
+  for (let i = 0; i < expr.length; i++) {
+    const ch = expr[i];
+    if (ch !== "|") {
+      out += ch;
+      continue;
+    }
+
+    let j = out.length - 1;
+    while (j >= 0 && /\\s/.test(out[j])) j--;
+    const prev = j >= 0 ? out[j] : "";
+    const beginsOperand = depth === 0 || prev === "" || /[\\(,+\\-*\\/^=<>]/.test(prev);
+
+    if (beginsOperand) {
+      out += "abs(";
+      depth++;
+    } else {
+      out += ")";
+      depth = Math.max(0, depth - 1);
+    }
+  }
+  return out;
+}
+
 export function latexToBackendSyntax(latex: string): string {
-  if (latex.trim() === "") return "";
+  if (latex.trim() === "") return "";\n  latex = normalizeAbsoluteDelimiterLatex(latex);
 
   // S16 REG-009: la tecla |a| inserta \\left|#0\\right|. MathLive no
   // garantiza una forma ASCII que el parser Python interprete como valor
