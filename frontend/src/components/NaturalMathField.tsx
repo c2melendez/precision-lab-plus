@@ -246,6 +246,12 @@ function normalizeRelationOperators(input: string): string {
     .replace(/≠/g, "!=");
 }
 
+function normalizeArithmeticOperatorSymbols(input: string): string {
+  return input
+    .replace(/[∗×·]/g, "*")
+    .replace(/÷/g, "/");
+}
+
 function normalizeAbsoluteDelimiterLatex(input: string): string {
   const expr = input
     .replace(/\\left\|/g, "|")
@@ -325,7 +331,9 @@ export function latexToBackendSyntax(latex: string): string {
   )).trim();
   // IN625 A2: convertir barras a abs() después de toda la conversión
   // LaTeX→ASCII para evitar que el conversor fragmente "abs" como a b s.
-  return normalizeRelationOperators(normalizeAbsoluteDelimiterLatex(backendSyntax));
+  return normalizeArithmeticOperatorSymbols(
+    normalizeRelationOperators(normalizeAbsoluteDelimiterLatex(backendSyntax)),
+  );
 }
 
 interface NaturalMathFieldProps {
