@@ -13,6 +13,7 @@ a valores PURAMENTE numéricos (sin variables libres) — si no, `VALIDATION_ERR
 """
 
 from dataclasses import dataclass
+import math
 from typing import Dict, Optional
 
 import sympy
@@ -170,6 +171,14 @@ def evaluate(
     if numeric_value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
         raise DomainErrorResult("El resultado no está definido en este dominio.")
 
-    approx = float(numeric_value) if numeric_value.is_real else None
+    approx = None
+    if numeric_value.is_real:
+        try:
+            candidate = float(numeric_value)
+            approx = candidate if math.isfinite(candidate) else None
+        except (OverflowError, TypeError, ValueError):
+            # IN625 D3: la aproximación IEEE-754 es opcional; nunca debe
+            # destruir ni impedir devolver el resultado simbólico exacto.
+            approx = None
 
     return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=True, approx_value=approx)
