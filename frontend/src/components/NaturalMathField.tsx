@@ -285,8 +285,61 @@ function normalizeAbsoluteDelimiterLatex(input: string): string {
   return out;
 }
 
+
+const LOCALIZED_LATEX_ALIAS_MAP: Record<string, string> = {
+  sen: "\\sin",
+  tg: "\\tan",
+  ctg: "\\cot",
+  cotg: "\\cot",
+  cosec: "\\csc",
+  arcsen: "\\arcsin",
+  arctg: "\\arctan",
+  arcctg: "\\operatorname{arccot}",
+  arccotg: "\\operatorname{arccot}",
+  arccosec: "\\operatorname{arccsc}",
+  senh: "\\sinh",
+  tgh: "\\tanh",
+  ctgh: "\\coth",
+  cotgh: "\\coth",
+  cosech: "\\csch",
+  argsenh: "\\operatorname{asinh}",
+  arcsenh: "\\operatorname{asinh}",
+  argcosh: "\\operatorname{acosh}",
+  argtgh: "\\operatorname{atanh}",
+  arctgh: "\\operatorname{atanh}",
+  lg: "\\log",
+  raiz: "\\sqrt",
+  "raíz": "\\sqrt",
+  mcd: "\\operatorname{gcd}",
+  mcm: "\\operatorname{lcm}",
+  "máx": "\\max",
+  "mín": "\\min",
+};
+
+function normalizeLocalizedLatexAliases(input: string): string {
+  let out = input;
+
+  out = out.replace(
+    /\\(?:operatorname|mathrm|text)\{([^{}]+)\}/g,
+    (_m, rawName) => LOCALIZED_LATEX_ALIAS_MAP[String(rawName).toLowerCase()] ?? "\\operatorname{" + String(rawName) + "}",
+  );
+
+  out = out.replace(
+    /\\(sen|tg|ctg|cotg|cosec|arcsen|arctg|arcctg|arccotg|arccosec|senh|tgh|ctgh|cotgh|cosech|argsenh|arcsenh|argcosh|argtgh|arctgh|raiz)(?![A-Za-z])/gi,
+    (_m, rawName) => LOCALIZED_LATEX_ALIAS_MAP[String(rawName).toLowerCase()] ?? String(rawName),
+  );
+
+  out = out.replace(
+    /(?<![A-Za-zÁÉÍÓÚáéíóúÑñ])(arccosec|arccotg|arcctg|arcsenh|argsenh|argcosh|argtgh|arctgh|arcsen|arctg|cosech|cotgh|ctgh|senh|tgh|cotg|cosec|ctg|sen|tg|lg|raíz|raiz|mcd|mcm|máx|mín)(?![A-Za-zÁÉÍÓÚáéíóúÑñ])/gi,
+    (rawName) => LOCALIZED_LATEX_ALIAS_MAP[String(rawName).toLowerCase()] ?? String(rawName),
+  );
+
+  return out;
+}
+
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
+  latex = normalizeLocalizedLatexAliases(latex);
   // S16 REG-009: la tecla |a| inserta \\left|#0\\right|. MathLive no
   // garantiza una forma ASCII que el parser Python interprete como valor
   // absoluto, mientras que el backend sí expone abs(...). Normalizamos
