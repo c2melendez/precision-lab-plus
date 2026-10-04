@@ -233,6 +233,29 @@ function detectDerivative(latex: string): Extract<CalculusIntent, { kind: "deriv
   return { kind: "derivative", variable, order: order as 1 | 2 | 3 | 4 | 5, innerLatex };
 }
 
+// IN625 E1a: también se acepta la notación operatoria sin paréntesis
+// explícitos, por ejemplo \\frac{d}{dx}x^{2} o \\frac{d}{dx}\\sin x.
+// Se restringe a una expresión completa que empiece por d/d<variable>.
+const BARE_DERIVATIVE_PREFIX = /^\\frac\{d(?:\^\{?(\d)\}?)?\}\{d([a-zA-Z])(?:\^\{?\d\}?)?\}(.+)$/s;
+
+function detectBareDerivative(
+  latex: string,
+): Extract<CalculusIntent, { kind: "derivative" }> | null {
+  const trimmed = latex.trim();
+  const m = BARE_DERIVATIVE_PREFIX.exec(trimmed);
+  if (!m) return null;
+  const order = m[1] ? Number(m[1]) : 1;
+  if (order < 1 || order > 5) return null;
+  const innerLatex = m[3].trim();
+  if (!innerLatex || innerLatex.startsWith("\\left(")) return null;
+  return {
+    kind: "derivative",
+    variable: m[2],
+    order: order as 1 | 2 | 3 | 4 | 5,
+    innerLatex,
+  };
+}
+
 const PARTIAL_DERIVATIVE_PREFIX = /^\\frac\{\\partial\}\{\\partial\s*([a-zA-Z])\}\\left\(/;
 
 function detectPartialDerivative(
@@ -398,6 +421,7 @@ export function detectCalculusIntent(latex: string): CalculusIntent | null {
   return (
     detectPartialDerivative(latex) ??
     detectDerivative(latex) ??
+    detectBareDerivative(latex) ??
     detectODE(latex) ??
     detectResidue(latex) ??
     detectSingularities(latex) ??
