@@ -305,7 +305,7 @@ export function latexToBackendSyntax(latex: string): string {
   // IN625 B3: MathLive/Compute Engine can serialize \\div as the ASCII
   // artifact "-:". Normalize the operator before conversion so it reaches
   // the backend as ordinary division.
-  const latexWithDivision = latexWithPercent.replace(/\\\\div/g, "/");
+  const latexWithDivision = latexWithPercent.replace(/\\div/g, "/");
   // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
   // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
   // conocido antes de delegar al conversor, y luego collapseKnownFunctionNames
