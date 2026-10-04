@@ -207,6 +207,12 @@ def evaluate(
     if numeric_value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
         raise DomainErrorResult("El resultado no está definido en este dominio.")
 
+    if numeric_value.is_real is False:
+        try:
+            expr = sympy.simplify(expr)
+        except (AttributeError, ValueError, TypeError):
+            pass
+
     approx = float(numeric_value) if numeric_value.is_real else None
 
     return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=True, approx_value=approx)
