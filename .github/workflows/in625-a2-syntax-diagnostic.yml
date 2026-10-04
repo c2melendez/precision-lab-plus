@@ -20,4 +20,4 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - name: Run A1+A2 syntax diagnostics
-        run: npx vitest run src/__tests__/in625A1Fractions.audit.test.ts src/__tests__/in625A2Delimiters.audit.test.ts
+        run: npx vitest run src/__tests__/in625A1Fractions.audit.test.ts src/__tests__/in625A2Delimiters.audit.test.ts src/__tests__/in625A3Operators.audit.test.ts
