@@ -42,7 +42,15 @@ def main() -> int:
         operation = case["operation"]
         row = {"id": case["id"], "operation": operation, "expected": adapter["expected"]}
         try:
-            response = client.post(f"/api/v1/{operation}", json={"expression": adapter["expression"]})
+            if operation == "derivative":
+                payload = {
+                    "expression": adapter["expression"],
+                    "variable": adapter.get("variable", "x"),
+                    "order": adapter.get("order", 1),
+                }
+            else:
+                payload = {"expression": adapter["expression"]}
+            response = client.post(f"/api/v1/{operation}", json=payload)
             body = response.json()
             if response.status_code != 200 or not body.get("success"):
                 row.update(status="ERROR", error=f"HTTP {response.status_code}: {body}")
