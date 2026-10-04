@@ -348,6 +348,22 @@ function normalizeLocalizedLatexAliases(input: string): string {
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
   latex = normalizeLocalizedLatexAliases(latex);
+
+  // IN625 D1 — normalización numérica que debe ocurrir antes de que
+  // MathLive/Compute Engine pueda borrar información de separación.
+  // {,} es la forma explícita e inequívoca de coma decimal emitida por
+  // MathLive; se canoniza a punto independientemente del modo regional.
+  latex = latex.replace(/\{,\}/g, ".");
+
+  // Los espacios entre dígitos solo se aceptan como agrupación de miles
+  // cuando preceden exactamente a un grupo de tres dígitos. Cualquier
+  // otro espacio numérico es ambiguo y no debe degradarse a concatenación.
+  let previousGrouping = "";
+  while (latex !== previousGrouping) {
+    previousGrouping = latex;
+    latex = latex.replace(/(?<=\d)\s+(?=\d{3}(?:\D|$))/g, "");
+  }
+  if (/\d\s+\d/.test(latex)) return "__INVALID_NUMERIC_SPACING__";
   // S16 REG-009: la tecla |a| inserta \\left|#0\\right|. MathLive no
   // garantiza una forma ASCII que el parser Python interprete como valor
   // absoluto, mientras que el backend sí expone abs(...). Normalizamos
