@@ -357,7 +357,7 @@ export function latexToBackendSyntax(latex: string): string {
   ) {
     return "unsupported_interval()";
   }
-  if (/\\\\vec\{[^{}]+\}\\\\times\\\\vec\{[^{}]+\}/.test(trimmed)) {
+  if (trimmed.includes("\\vec") && trimmed.includes("\\times")) {
     return "unsupported_cross_product()";
   }
   if (trimmed.includes("\\lVert") && trimmed.includes("pmatrix")) {
