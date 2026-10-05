@@ -346,7 +346,7 @@ export function BasicMode() {
         success: true,
         operation: "evaluate",
         request_id: crypto.randomUUID(),
-        result_type: "expression",
+        result_type: "scalar",
         input_text: latex,
         input_latex: latex,
         result_text: latex,
