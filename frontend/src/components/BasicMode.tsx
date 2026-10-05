@@ -51,7 +51,7 @@ import { detectCalculusIntent, type CalculusIntent } from "./calculusIntent";
 import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
-import { splitSystemLatex } from "./systemSplit";
+import { splitSystemLatex, splitFreeSystemLatex } from "./systemSplit";
 import { detectPiecewiseIntent } from "./piecewiseIntent";
 
 interface SubstitutionRow {
@@ -88,7 +88,7 @@ export function BasicMode() {
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
 
   const piecewiseIntent = detectPiecewiseIntent(latex);
-  const systemRows = piecewiseIntent ? null : splitSystemLatex(latex);
+  const systemRows = piecewiseIntent ? null : (splitSystemLatex(latex) ?? splitFreeSystemLatex(latex));
 
   function addSubstitutionRow(): void {
     setSubstitutions((rows) => [...rows, { name: "", value: "" }]);
