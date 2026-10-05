@@ -172,7 +172,8 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
     log_request_event(request.state.request_id, "inequality_request")
 
     try:
-        parsed = parsing.parse_inequality_tree(payload.inequality)
+        chained = parsing.parse_chained_inequalities(payload.inequality)
+        parsed = None if chained else parsing.parse_inequality_tree(payload.inequality)
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.INEQUALITY, ErrorCode.PARSE_ERROR, str(exc))
     except ComplexityLimitError as exc:
@@ -180,7 +181,11 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
 
     variable = payload.variable
     if variable is None:
-        free_symbols = parsed.free_symbols
+        free_symbols = (
+            set().union(*(rel.free_symbols for rel in chained))
+            if chained
+            else parsed.free_symbols
+        )
         if len(free_symbols) != 1:
             return _error(
                 request,
@@ -192,7 +197,11 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
         variable = str(next(iter(free_symbols)))
 
     try:
-        result = phase2_service.compute_inequality(parsed, variable)
+        result = (
+            phase2_service.compute_chained_inequality(chained, variable)
+            if chained
+            else phase2_service.compute_inequality(parsed, variable)
+        )
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.INEQUALITY, ErrorCode.PARSE_ERROR, str(exc))
 
