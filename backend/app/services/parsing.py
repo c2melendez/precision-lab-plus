@@ -667,6 +667,26 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
 _INEQUALITY_OPERATORS = ["<=", ">=", "<", ">"]  # orden importa: <= antes que <
 
 
+
+def parse_chained_inequalities(
+    text: str,
+) -> Optional[List[sympy.core.relational.Relational]]:
+    """Parsea exactamente dos comparaciones encadenadas, p. ej. 3<x<7.
+    Devuelve None para una desigualdad simple, preservando el contrato
+    existente de parse_inequality_tree()."""
+    validate_length(text)
+    normalized = normalize_unicode(text).replace(" ", "")
+    match = re.fullmatch(r"(.+?)(<=|>=|<|>)([A-Za-z])((?:<=|>=|<|>))(.+)", normalized)
+    if not match:
+        return None
+    left, op1, middle, op2, right = match.groups()
+    if not left or not right:
+        return None
+    return [
+        parse_inequality_tree(f"{left}{op1}{middle}"),
+        parse_inequality_tree(f"{middle}{op2}{right}"),
+    ]
+
 def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     """`/inequality` (spec, `InequalityRequest`). Reutiliza toda la
     infraestructura de seguridad de `parse_expression_tree` (etapas 1-9):
