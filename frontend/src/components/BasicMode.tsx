@@ -54,6 +54,7 @@ import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex, splitFreeSystemLatex } from "./systemSplit";
 import { detectPiecewiseIntent } from "./piecewiseIntent";
 import { detectRelationIntent } from "./relationIntent";
+import { detectConstrainedEquationIntent, satisfiesConstraint } from "./constrainedEquationIntent";
 
 interface SubstitutionRow {
   name: string;
@@ -89,8 +90,11 @@ export function BasicMode() {
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
 
   const piecewiseIntent = detectPiecewiseIntent(latex);
-  const relationIntent = piecewiseIntent ? null : detectRelationIntent(latex);
-  const systemRows = piecewiseIntent || relationIntent ? null : (splitSystemLatex(latex) ?? splitFreeSystemLatex(latex));
+  const constrainedIntent = piecewiseIntent ? null : detectConstrainedEquationIntent(latex);
+  const relationIntent = piecewiseIntent || constrainedIntent ? null : detectRelationIntent(latex);
+  const systemRows = piecewiseIntent || relationIntent || constrainedIntent
+    ? null
+    : (splitSystemLatex(latex) ?? splitFreeSystemLatex(latex));
 
   function addSubstitutionRow(): void {
     setSubstitutions((rows) => [...rows, { name: "", value: "" }]);
@@ -332,6 +336,39 @@ export function BasicMode() {
     const calculusIntent = detectCalculusIntent(latex);
     if (calculusIntent) {
       await submitCalculus(calculusIntent);
+      return;
+    }
+
+    if (constrainedIntent) {
+      const equationBackend = latexToBackendSyntax(constrainedIntent.equationLatex);
+      setValidationError(null);
+      setLoading(true);
+      setErrorMessage(null);
+      try {
+        const result = await submitAndRecord(
+          "/solve",
+          { equation: equationBackend, variable: constrainedIntent.variable, angle_unit: angleUnit },
+          latex,
+        );
+        if (result.success) {
+          const solutions = Array.isArray(result.result_data) ? result.result_data : [];
+          const filtered = solutions.filter((solution) => {
+            if (typeof solution !== "object" || solution === null || !("text" in solution)) return false;
+            const numeric = Number((solution as { text: string }).text);
+            return Number.isFinite(numeric) && satisfiesConstraint(numeric, constrainedIntent);
+          });
+          result.result_data = filtered;
+          result.result_text = filtered.length
+            ? filtered.map((solution) => `${constrainedIntent.variable}=${(solution as { text: string }).text}`).join(", ")
+            : "Sin solución bajo la restricción";
+        }
+        setLastResult(result);
+        if (!result.success) {
+          setErrorMessage(result.error_message ?? "Ocurrió un error.");
+        }
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
