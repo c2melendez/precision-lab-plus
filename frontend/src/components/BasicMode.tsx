@@ -53,6 +53,7 @@ import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex, splitFreeSystemLatex } from "./systemSplit";
 import { detectPiecewiseIntent } from "./piecewiseIntent";
+import { detectRelationIntent } from "./relationIntent";
 
 interface SubstitutionRow {
   name: string;
@@ -88,7 +89,8 @@ export function BasicMode() {
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
 
   const piecewiseIntent = detectPiecewiseIntent(latex);
-  const systemRows = piecewiseIntent ? null : (splitSystemLatex(latex) ?? splitFreeSystemLatex(latex));
+  const relationIntent = piecewiseIntent ? null : detectRelationIntent(latex);
+  const systemRows = piecewiseIntent || relationIntent ? null : (splitSystemLatex(latex) ?? splitFreeSystemLatex(latex));
 
   function addSubstitutionRow(): void {
     setSubstitutions((rows) => [...rows, { name: "", value: "" }]);
@@ -330,6 +332,33 @@ export function BasicMode() {
     const calculusIntent = detectCalculusIntent(latex);
     if (calculusIntent) {
       await submitCalculus(calculusIntent);
+      return;
+    }
+
+    if (relationIntent) {
+      const label =
+        relationIntent.kind === "functionDefinition"
+          ? "Definición de función"
+          : relationIntent.kind === "explicitRelation"
+            ? "Relación explícita"
+            : "Relación implícita";
+      const localResult: MathResponse = {
+        success: true,
+        operation: "evaluate",
+        request_id: crypto.randomUUID(),
+        result_type: "expression",
+        input_text: latex,
+        input_latex: latex,
+        result_text: latex,
+        result_latex: latex,
+        result_data: null,
+        steps: [],
+        has_detailed_steps: false,
+        warnings: [label],
+        duration_ms: 0,
+      };
+      setValidationError(null);
+      setLastResult(localResult);
       return;
     }
 
