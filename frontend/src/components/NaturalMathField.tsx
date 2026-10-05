@@ -21,6 +21,44 @@ import { useCallback, useEffect, useId, useRef } from "react";
 import type { MathfieldElement, MathfieldElementAttributes } from "mathlive";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 
+function normalizePastedLatex(input: string): string {
+  let out = input.trim();
+
+  // Delimitadores de modo matemático pegados desde Markdown/TeX.
+  if (out.startsWith("$$") && out.endsWith("$$") && out.length >= 4) {
+    out = out.slice(2, -2).trim();
+  } else if (out.startsWith("$") && out.endsWith("$") && out.length >= 2) {
+    out = out.slice(1, -1).trim();
+  }
+  if (out.startsWith("\\(") && out.endsWith("\\)")) out = out.slice(2, -2).trim();
+  if (out.startsWith("\\[") && out.endsWith("\\]")) out = out.slice(2, -2).trim();
+
+  // Entornos de ecuación/alineación copiados completos.
+  out = out.replace(/^\\begin\{(?:equation\*?|align\*?)\}/, "");
+  out = out.replace(/\\end\{(?:equation\*?|align\*?)\}$/, "");
+
+  // Estilos visuales no semánticos.
+  out = out
+    .replace(/\\(?:displaystyle|textstyle|scriptstyle)\b/g, "")
+    .replace(/\\(?:,|;|:|!)(?=\s|$|[^A-Za-z])/g, "")
+    .replace(/\\(?:quad|qquad)\b/g, "")
+    .replace(/~/g, " ");
+
+  // Wrapper típico de Wikipedia: {\displaystyle ...}
+  const displayGroup = out.match(/^\{\s*\\displaystyle\s+([\s\S]*)\}$/);
+  if (displayGroup) out = displayGroup[1];
+
+  // Numeración/labels editoriales no cambian la expresión.
+  out = out
+    .replace(/\\tag\{[^{}]*\}/g, "")
+    .replace(/\\label\{[^{}]*\}/g, "");
+
+  // Separador de línea sobrante al final.
+  out = out.replace(/\\\\\s*$/, "");
+
+  return out.trim();
+}
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
@@ -347,6 +385,7 @@ function normalizeLocalizedLatexAliases(input: string): string {
 
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
+  latex = normalizePastedLatex(latex);
   latex = normalizeLocalizedLatexAliases(latex);
 
   // IN625 D1 — normalización numérica que debe ocurrir antes de que
