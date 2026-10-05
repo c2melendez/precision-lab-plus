@@ -299,7 +299,7 @@ function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integra
   // Permite variable arbitraria y límites finitos simbólicos (ej. pi),
   // que el MathJSON de Compute Engine no siempre conserva como números.
   const canonical = trimmed.match(
-    /^\\int(?:_(?:\{([^{}]+)\}|([^\\s^]+))\^(?:\{([^{}]+)\}|([^\\s]+)))?\s*(.*?)\s*(?:\\,)?d([A-Za-z])$/s,
+    /^\\int(?:_(?:\{([^{}]+)\}|([^\s^]+))\^(?:\{([^{}]+)\}|([^\s]+)))?\s*(.*?)\s*(?:\\,)?d([A-Za-z])$/s,
   );
   if (canonical) {
     const lower = canonical[1] ?? canonical[2] ?? null;
