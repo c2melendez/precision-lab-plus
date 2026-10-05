@@ -52,6 +52,7 @@ import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
+import { detectPiecewiseIntent } from "./piecewiseIntent";
 
 interface SubstitutionRow {
   name: string;
@@ -86,7 +87,8 @@ export function BasicMode() {
   const setActiveMode = useUIStore((state) => state.setActiveMode);
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
 
-  const systemRows = splitSystemLatex(latex);
+  const piecewiseIntent = detectPiecewiseIntent(latex);
+  const systemRows = piecewiseIntent ? null : splitSystemLatex(latex);
 
   function addSubstitutionRow(): void {
     setSubstitutions((rows) => [...rows, { name: "", value: "" }]);
@@ -301,6 +303,24 @@ export function BasicMode() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+
+    if (piecewiseIntent) {
+      setValidationError(null);
+      setErrorMessage(null);
+      setLastResult({
+        success: true,
+        operation: "evaluate",
+        request_id: `local-piecewise-${Date.now()}`,
+        result_type: "scalar",
+        result_text: "Función a trozos",
+        result_latex: latex,
+        steps: [],
+        has_detailed_steps: false,
+        warnings: [],
+        duration_ms: 0,
+      });
+      return;
+    }
 
     if (systemRows) {
       await submitSystem(systemRows);
