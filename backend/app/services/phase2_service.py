@@ -124,6 +124,19 @@ class InequalityResult:
     warnings: List[str]
 
 
+
+def compute_chained_inequality(
+    inequalities: List[sympy.core.relational.Relational], variable: str
+) -> InequalityResult:
+    """Intersección de dos comparaciones encadenadas, p. ej. 3<x<7."""
+    var_symbol = _validate_variable(variable)
+    reduced = sympy.reduce_inequalities(inequalities, var_symbol)
+    if isinstance(reduced, sympy.logic.boolalg.BooleanFalse):
+        return InequalityResult(sympy.S.EmptySet, [])
+    if isinstance(reduced, sympy.logic.boolalg.BooleanTrue):
+        return InequalityResult(sympy.S.Reals, [])
+    return InequalityResult(reduced.as_set(), [])
+
 def compute_inequality(inequality: sympy.core.relational.Relational, variable: str) -> InequalityResult:
     """`/inequality` (spec, `InequalityRequest`). Usa
     `sympy.solve_univariate_inequality` (una sola variable, el caso común
