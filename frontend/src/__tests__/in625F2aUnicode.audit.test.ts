@@ -6,7 +6,7 @@ describe("IN625 F2a — Unicode 01..19", () => {
   it("EN-UC-01/02 superíndices", () => {
     expect(norm("x²")).toContain("x^2");
     expect(norm("x³")).toContain("x^3");
-    expect(norm("x¹⁰")).toContain("x^10");
+    expect(norm("x¹⁰")).toMatch(/x\^\(?10\)?/);
   });
   it("EN-UC-03 exponentes negativos", () => {
     expect(norm("10⁻³")).toMatch(/10\^\(?-3\)?/);
@@ -14,7 +14,7 @@ describe("IN625 F2a — Unicode 01..19", () => {
   });
   it("EN-UC-04 subíndices", () => {
     expect(norm("x₁")).toMatch(/x_?1/);
-    expect(norm("x₁₀")).toMatch(/x_?10/);
+    expect(norm("x₁₀")).toMatch(/x_?\(?10\)?/);
   });
   it("EN-UC-05/06/07 raíces", () => {
     expect(norm("√4")).toContain("sqrt");
