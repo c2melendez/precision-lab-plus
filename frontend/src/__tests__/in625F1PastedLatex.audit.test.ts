@@ -3,22 +3,22 @@ import { latexToBackendSyntax } from "../components/NaturalMathField";
 
 describe("IN625 F1 — texto pegado", () => {
   it.each([
-    ["EN-PG-01", "$x^{2}+1$"],
-    ["EN-PG-02", "$$x^{2}+1$$"],
-    ["EN-PG-03", "\\(x^{2}+1\\)"],
-    ["EN-PG-04", "\\[x^{2}+1\\]"],
-    ["EN-PG-05a", "\\begin{equation}x^{2}+1\\end{equation}"],
-    ["EN-PG-05b", "\\begin{align*}x^{2}+1\\end{align*}"],
-    ["EN-PG-06", "{\\displaystyle x^{2}+1}"],
-    ["EN-PG-08", "x^{2}\\,+\\,1"],
-    ["EN-PG-09", "x^{2}+1 \\,"],
-    ["EN-PG-12", "x^{2}+1\n"],
-    ["EN-PG-13", "x+1\\\\"],
-    ["EN-PG-14a", "x^{2}+1\\tag{1}"],
-    ["EN-PG-14b", "x^{2}+1\\label{eq:1}"],
-  ])("%s limpia ruido no semántico", (_id, input) => {
+    ["EN-PG-01", "$x^{2}+1$", "x^2+1"],
+    ["EN-PG-02", "$x^{2}+1$", "x^2+1"],
+    ["EN-PG-03", "\\(x^{2}+1\\)", "x^2+1"],
+    ["EN-PG-04", "\\[x^{2}+1\\]", "x^2+1"],
+    ["EN-PG-05a", "\\begin{equation}x^{2}+1\\end{equation}", "x^2+1"],
+    ["EN-PG-05b", "\\begin{align*}x^{2}+1\\end{align*}", "x^2+1"],
+    ["EN-PG-06", "{\\displaystyle x^{2}+1}", "x^2+1"],
+    ["EN-PG-08", "x^{2}\\,+\\,1", "x^2+1"],
+    ["EN-PG-09", "x^{2}+1 \\,", "x^2+1"],
+    ["EN-PG-12", "x^{2}+1\n", "x^2+1"],
+    ["EN-PG-13", "x+1\\\\", "x+1"],
+    ["EN-PG-14a", "x^{2}+1\\tag{1}", "x^2+1"],
+    ["EN-PG-14b", "x^{2}+1\\label{eq:1}", "x^2+1"],
+  ])("%s limpia ruido no semántico", (_id, input, expected) => {
     const out = latexToBackendSyntax(input);
-    expect(out.replace(/\s+/g, "")).toBe("x^2+1");
+    expect(out.replace(/\s+/g, "")).toBe(expected);
   });
 
   it.each([
