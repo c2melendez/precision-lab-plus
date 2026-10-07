@@ -298,7 +298,7 @@ def validate_g3_structure(text: str) -> None:
     if re.search(r"\(\s*\)", raw):
         raise ParseSecurityError("Paréntesis vacíos: falta una expresión.")
 
-    if re.search(r"\\left\([^]*\\right\]", raw):
+    if re.search(r"\\left\([\\s\\S]*\\right\]", raw):
         raise ParseSecurityError("Delimitadores incompatibles: paréntesis y corchete no coinciden.")
     if "\\left" in raw and "\\right" not in raw:
         raise ParseSecurityError("Delimitador incompleto: falta \\right.")
