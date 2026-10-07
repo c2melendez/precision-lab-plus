@@ -258,6 +258,84 @@ _SCIENTIFIC_NOTATION_PATTERN = re.compile(r"[eE][+-]?\d+")
 _CALL_ARITY_PATTERN = re.compile(r"\b(log|ln)\s*\(")
 
 
+
+
+def validate_g3_structure(text: str) -> None:
+    """IN625 G3: errores de edición/estructura con mensajes deterministas.
+
+    Esta capa no evalúa matemáticas. Evita que parse_expr/SymPy conviertan
+    entradas claramente incompletas en errores internos o mensajes genéricos.
+    """
+    raw = text.strip()
+
+    if not raw:
+        raise ParseSecurityError("Escriba una expresión antes de calcular.")
+
+    if re.search(r"\\placeholder(?:\{\})?", raw, re.I):
+        raise ParseSecurityError("Entrada incompleta: complete el marcador pendiente.")
+
+    if re.fullmatch(r"\\text\{[\s\S]*\}", raw):
+        raise ParseSecurityError("Texto no matemático: escriba una expresión matemática.")
+
+    if raw.startswith("=") or raw.endswith("="):
+        raise ParseSecurityError('Ecuación incompleta: debe haber una expresión a ambos lados de "=".')
+
+    if re.match(r"^\s*\^", raw):
+        raise ParseSecurityError("Exponente sin base.")
+    if re.search(r"\^\s*(?:\{\s*\})?\s*$", raw):
+        raise ParseSecurityError("Exponente vacío.")
+
+    if re.search(r"\\frac\s*\{\s*\}\s*\{", raw):
+        raise ParseSecurityError("Fracción incompleta: el numerador está vacío.")
+    if re.search(r"\\frac\s*\{[^{}]*\}\s*(?:\{\s*\})?\s*$", raw):
+        raise ParseSecurityError("Fracción incompleta: falta el denominador.")
+    if re.search(r"\\sqrt\s*\{\s*\}", raw):
+        raise ParseSecurityError("Raíz incompleta: el radicando está vacío.")
+
+    if re.search(r"\\(?:sin|cos|tan|csc|sec|cot|ln|log|exp)\s*(?:\(\s*\))?\s*$", raw):
+        raise ParseSecurityError("Falta el argumento de la función.")
+
+    if re.search(r"\(\s*\)", raw):
+        raise ParseSecurityError("Paréntesis vacíos: falta una expresión.")
+
+    if re.search(r"\\left\([^]*\\right\]", raw):
+        raise ParseSecurityError("Delimitadores incompatibles: paréntesis y corchete no coinciden.")
+    if "\\left" in raw and "\\right" not in raw:
+        raise ParseSecurityError("Delimitador incompleto: falta \\right.")
+    if "\\right" in raw and "\\left" not in raw:
+        raise ParseSecurityError("Delimitador inválido: aparece \\right sin \\left.")
+
+    paren = 0
+    simplified = raw.replace("\\left", "").replace("\\right", "")
+    for ch in simplified:
+        if ch == "(":
+            paren += 1
+        elif ch == ")":
+            paren -= 1
+            if paren < 0:
+                raise ParseSecurityError("Paréntesis de cierre sobrante.")
+    if paren > 0:
+        raise ParseSecurityError("Paréntesis sin cerrar.")
+
+    brace = 0
+    for ch in raw:
+        if ch == "{":
+            brace += 1
+        elif ch == "}":
+            brace -= 1
+            if brace < 0:
+                raise ParseSecurityError("Llave de cierre sobrante.")
+    if brace > 0:
+        raise ParseSecurityError("Llave sin cerrar.")
+
+    if re.match(r"^[*/]", raw):
+        raise ParseSecurityError("Operador sin primer operando.")
+    if re.search(r"[+*/]\s*$", raw):
+        raise ParseSecurityError("Operador sin segundo operando.")
+    if re.search(r"(?:\*/|/\*|\+\+)", raw):
+        raise ParseSecurityError("Secuencia de operadores inválida.")
+
+
 def validate_length(text: str) -> None:
     """Etapa 1 (sección 7): longitud entre 1 y 500 caracteres.
 
