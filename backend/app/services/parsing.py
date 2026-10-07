@@ -292,7 +292,7 @@ def validate_g3_structure(text: str) -> None:
     if re.search(r"\\sqrt\s*\{\s*\}", raw):
         raise ParseSecurityError("Raíz incompleta: el radicando está vacío.")
 
-    if re.search(r"\\(?:sin|cos|tan|csc|sec|cot|ln|log|exp)\s*(?:\(\s*\))?\s*$", raw):
+    if re.search(r"(?:\\)?(?:sin|cos|tan|csc|sec|cot|ln|log|exp)\s*(?:\(\s*\))?\s*$", raw):
         raise ParseSecurityError("Falta el argumento de la función.")
 
     if re.search(r"\(\s*\)", raw):
