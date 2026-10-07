@@ -274,6 +274,18 @@ def validate_g3_structure(text: str) -> None:
     if re.search(r"\\placeholder(?:\{\})?", raw, re.I):
         raise ParseSecurityError("Entrada incompleta: complete el marcador pendiente.")
 
+    unknown_command = re.search(r"\\([A-Za-z]+)(?:\{|\()", raw)
+    if unknown_command:
+        known = {
+            "frac","sqrt","sin","cos","tan","csc","sec","cot","ln","log","exp",
+            "left","right","pi","infty","theta","alpha","beta","gamma","lambda",
+            "zeta","Delta","Lambda","Phi","gcd","min","max","pm","le","ge","leq",
+            "geq","neq","ne","lt","gt","operatorname","mathrm","text","placeholder",
+            "lim","int","partial","displaystyle","dfrac","tfrac","cfrac",
+        }
+        if unknown_command.group(1) not in known:
+            raise ParseSecurityError(f"Comando desconocido: \\{unknown_command.group(1)}.")
+
     if re.fullmatch(r"\\text\{[\s\S]*\}", raw):
         raise ParseSecurityError("Texto no matemático: escriba una expresión matemática.")
 
