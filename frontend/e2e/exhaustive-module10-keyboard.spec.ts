@@ -12,6 +12,11 @@ async function clearBasic(dialog: import("@playwright/test").Locator) {
   await dialog.getByRole("button", { name: "borrar todo el campo", exact: true }).click();
 }
 
+async function hideMathLiveKeyboard(page: import("@playwright/test").Page) {
+  await page.evaluate(() => window.mathVirtualKeyboard?.hide());
+  await page.locator(".ML__keyboard.is-visible").waitFor({ state: "hidden", timeout: 5000 }).catch(() => undefined);
+}
+
 test("módulo 10: la tecla % calcula porcentaje real (50% = 0.5)", async ({ page }) => {
   const dialog = await openKeyboard(page);
   await dialog.getByRole("tab", { name: "Básico", exact: true }).click();
