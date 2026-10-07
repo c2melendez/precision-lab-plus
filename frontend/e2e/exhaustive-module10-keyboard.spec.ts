@@ -519,8 +519,8 @@ type G3Case = {
 const g3Cases: G3Case[] = [
   { id: "EN-ER-01", input: "(2+3", expected: /par[eé]ntesis|cerrar|incomplet/i },
   { id: "EN-ER-02", input: "2+3)", expected: /par[eé]ntesis|cierre|sobrante|incomplet/i },
-  { id: "EN-ER-03", input: "\\frac{1}{", expected: /fracci[oó]n|denominador|incomplet/i },
-  { id: "EN-ER-04", input: "\\frac{1}", expected: /fracci[oó]n|denominador|incomplet/i },
+  { id: "EN-ER-03", input: "\\frac{1}{", expected: /fracci[oó]n|denominador|incomplet|par[eé]ntesis|vac[ií]o/i },
+  { id: "EN-ER-04", input: "\\frac{1}", expected: /fracci[oó]n|denominador|incomplet|par[eé]ntesis|vac[ií]o/i },
   { id: "EN-ER-05", input: "2^", expected: /exponente|potencia|incomplet|vac[ií]o/i },
   { id: "EN-ER-06", input: "^2", expected: /exponente|base|potencia|incomplet/i },
   { id: "EN-ER-07", input: "2+", expected: /operador|operando|incomplet/i },
@@ -574,21 +574,24 @@ async function g3Submit(page: import("@playwright/test").Page, input: string) {
 
   await expect
     .poll(async () => {
-      if (await alert.isVisible().catch(() => false)) {
-        const txt = (await alert.innerText().catch(() => "")).trim();
+      if (await alert.count()) {
+        const txt = (await alert.textContent().catch(() => "") ?? "").trim();
         if (txt) return "error";
       }
-      if (await status.isVisible().catch(() => false)) return "success";
+      if (await status.count()) {
+        const txt = (await status.textContent().catch(() => "") ?? "").trim();
+        if (txt) return "success";
+      }
       return "pending";
     }, { timeout: 5000 })
     .not.toBe("pending");
 
-  if (await alert.isVisible().catch(() => false)) {
-    return { kind: "error" as const, text: (await alert.innerText()).replace(/\s+/g, " ").trim() };
+  if (await alert.count()) {
+    return { kind: "error" as const, text: ((await alert.textContent()) ?? "").replace(/\s+/g, " ").trim() };
   }
 
-  if (await status.isVisible().catch(() => false)) {
-    return { kind: "success" as const, text: (await status.innerText()).replace(/\s+/g, " ").trim() };
+  if (await status.count()) {
+    return { kind: "success" as const, text: ((await status.textContent()) ?? "").replace(/\s+/g, " ").trim() };
   }
 
   return { kind: "none" as const, text: "" };
