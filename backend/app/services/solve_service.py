@@ -189,6 +189,14 @@ def solve_equation(
             result_type = ResultType.IDENTITY if is_identity else ResultType.CONTRADICTION
         return SolveResult(eq, None, result_type, [], [], False, [])
 
+    # IN625 E3d2: una ecuación puede ser una identidad aunque tenga
+    # símbolos libres (p. ej. sin(x)^2+cos(x)^2=1 o una identidad
+    # binomial). Clasificar esto ANTES de resolver evita devolver una
+    # lista de raíces arbitrarias para una proposición verdadera para
+    # todo valor del dominio.
+    if sympy.simplify(eq.lhs - eq.rhs) == 0:
+        return SolveResult(eq, None, ResultType.IDENTITY, [], [], False, [])
+
     warnings: List[str] = []
     if variable_name:
         candidates = parsing.extract_candidate_identifiers(variable_name)

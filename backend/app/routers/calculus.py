@@ -39,7 +39,10 @@ def _error(
 
 def _safe_latex(expr: sympy.Expr) -> Optional[str]:
     try:
-        return sympy.latex(expr)
+        latex = sympy.latex(expr)
+        # Precision Lab reserva \\log para base 10 y usa \\ln para el
+        # logaritmo natural. SymPy serializa log natural como \\log.
+        return latex.replace(r"\log", r"\ln")
     except ValueError:
         return None
 

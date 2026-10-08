@@ -27,6 +27,7 @@ from sympy import (
     Mod,
     Mul,
     Pow,
+    Rational,
     Symbol,
     acos,
     acosh,
@@ -70,6 +71,7 @@ from sympy.parsing.sympy_parser import (
     convert_xor,
     implicit_multiplication_application,
     parse_expr,
+    rationalize,
     standard_transformations,
 )
 
@@ -254,6 +256,96 @@ BLOCKED_IDENTIFIERS = (
 _IDENTIFIER_PATTERN = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 _SCIENTIFIC_NOTATION_PATTERN = re.compile(r"[eE][+-]?\d+")
 _CALL_ARITY_PATTERN = re.compile(r"\b(log|ln)\s*\(")
+
+
+
+
+def validate_g3_structure(text: str) -> None:
+    """IN625 G3: errores de edición/estructura con mensajes deterministas.
+
+    Esta capa no evalúa matemáticas. Evita que parse_expr/SymPy conviertan
+    entradas claramente incompletas en errores internos o mensajes genéricos.
+    """
+    raw = text.strip()
+
+    if not raw:
+        raise ParseSecurityError("Escriba una expresión antes de calcular.")
+
+    if re.search(r"\\placeholder(?:\{\})?", raw, re.I):
+        raise ParseSecurityError("Entrada incompleta: complete el marcador pendiente.")
+
+    unknown_command = re.search(r"\\([A-Za-z]+)(?:\{|\()", raw)
+    if unknown_command:
+        known = {
+            "frac","sqrt","sin","cos","tan","csc","sec","cot","ln","log","exp",
+            "left","right","pi","infty","theta","alpha","beta","gamma","lambda",
+            "zeta","Delta","Lambda","Phi","gcd","min","max","pm","le","ge","leq",
+            "geq","neq","ne","lt","gt","operatorname","mathrm","text","placeholder",
+            "lim","int","partial","displaystyle","dfrac","tfrac","cfrac",
+        }
+        if unknown_command.group(1) not in known:
+            raise ParseSecurityError(f"Comando desconocido: \\{unknown_command.group(1)}.")
+
+    if re.fullmatch(r"\\text\{[\s\S]*\}", raw):
+        raise ParseSecurityError("Texto no matemático: escriba una expresión matemática.")
+
+    if raw.startswith("=") or raw.endswith("="):
+        raise ParseSecurityError('Ecuación incompleta: debe haber una expresión a ambos lados de "=".')
+
+    if re.match(r"^\s*\^", raw):
+        raise ParseSecurityError("Exponente sin base.")
+    if re.search(r"\^\s*(?:\{\s*\})?\s*$", raw):
+        raise ParseSecurityError("Exponente vacío.")
+
+    if re.search(r"\\frac\s*\{\s*\}\s*\{", raw):
+        raise ParseSecurityError("Fracción incompleta: el numerador está vacío.")
+    if re.search(r"\\frac\s*\{[^{}]*\}\s*(?:\{\s*\})?\s*$", raw):
+        raise ParseSecurityError("Fracción incompleta: falta el denominador.")
+    if re.search(r"\\sqrt\s*\{\s*\}", raw):
+        raise ParseSecurityError("Raíz incompleta: el radicando está vacío.")
+
+    if re.search(r"(?:\\)?(?:sin|cos|tan|csc|sec|cot|ln|log|exp)\s*(?:\(\s*\))?\s*$", raw):
+        raise ParseSecurityError("Falta el argumento de la función.")
+
+    if re.search(r"\(\s*\)", raw):
+        raise ParseSecurityError("Paréntesis vacíos: falta una expresión.")
+
+    if re.search(r"\\left\([\\s\\S]*\\right\]", raw):
+        raise ParseSecurityError("Delimitadores incompatibles: paréntesis y corchete no coinciden.")
+    if "\\left" in raw and "\\right" not in raw:
+        raise ParseSecurityError("Delimitador incompleto: falta \\right.")
+    if "\\right" in raw and "\\left" not in raw:
+        raise ParseSecurityError("Delimitador inválido: aparece \\right sin \\left.")
+
+    paren = 0
+    simplified = raw.replace("\\left", "").replace("\\right", "")
+    for ch in simplified:
+        if ch == "(":
+            paren += 1
+        elif ch == ")":
+            paren -= 1
+            if paren < 0:
+                raise ParseSecurityError("Paréntesis de cierre sobrante.")
+    if paren > 0:
+        raise ParseSecurityError("Paréntesis sin cerrar.")
+
+    brace = 0
+    for ch in raw:
+        if ch == "{":
+            brace += 1
+        elif ch == "}":
+            brace -= 1
+            if brace < 0:
+                raise ParseSecurityError("Llave de cierre sobrante.")
+    if brace > 0:
+        raise ParseSecurityError("Llave sin cerrar.")
+
+    if re.match(r"^[*/]", raw):
+        raise ParseSecurityError("Operador sin primer operando.")
+    if re.search(r"[+*/]\s*$", raw):
+        raise ParseSecurityError("Operador sin segundo operando.")
+    if re.search(r"(?:\*/|/\*|\+\+)", raw):
+        raise ParseSecurityError("Secuencia de operadores inválida.")
 
 
 def validate_length(text: str) -> None:
@@ -526,6 +618,7 @@ def build_minimal_global_dict() -> Dict[str, object]:
         "Symbol": Symbol,
         "Integer": Integer,
         "Float": Float,
+        "Rational": Rational,
         "Add": Add,
         "Mul": Mul,
         "Pow": Pow,
@@ -537,6 +630,9 @@ def build_minimal_global_dict() -> Dict[str, object]:
 _TRANSFORMATIONS = standard_transformations + (
     implicit_multiplication_application,
     convert_xor,
+    # IN625 D3: todo decimal literal debe entrar como Rational exacto,
+    # nunca como Float binario/decimal de precisión finita.
+    rationalize,
 )
 
 
@@ -610,6 +706,7 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
     `allow_equation=True` (lado derecho implícito `0` si no había `=`,
     sección 3: "sin `=` -> se asume `= 0`").
     """
+    validate_g3_structure(text)
     validate_length(text)
     normalized = normalize_unicode(text)
 
@@ -660,6 +757,26 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
 
 _INEQUALITY_OPERATORS = ["<=", ">=", "<", ">"]  # orden importa: <= antes que <
 
+
+
+def parse_chained_inequalities(
+    text: str,
+) -> Optional[List[sympy.core.relational.Relational]]:
+    """Parsea exactamente dos comparaciones encadenadas, p. ej. 3<x<7.
+    Devuelve None para una desigualdad simple, preservando el contrato
+    existente de parse_inequality_tree()."""
+    validate_length(text)
+    normalized = normalize_unicode(text).replace(" ", "")
+    match = re.fullmatch(r"(.+?)(<=|>=|<|>)([A-Za-z])((?:<=|>=|<|>))(.+)", normalized)
+    if not match:
+        return None
+    left, op1, middle, op2, right = match.groups()
+    if not left or not right:
+        return None
+    return [
+        parse_inequality_tree(f"{left}{op1}{middle}"),
+        parse_inequality_tree(f"{middle}{op2}{right}"),
+    ]
 
 def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     """`/inequality` (spec, `InequalityRequest`). Reutiliza toda la

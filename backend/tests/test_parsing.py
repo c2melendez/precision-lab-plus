@@ -163,3 +163,24 @@ def test_complexity_limit_large_exponent():
 def test_reasonable_expression_within_complexity_limits():
     expr = parsing.parse_expression_tree("x**2 + 2*x + 1")
     assert expr is not None
+
+
+# ---------------------------------------------------------------------------
+# IN625 G3 — raw inputs canonicalizados por MathLive
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "case_id,text",
+    [
+        ("EN-ER-05", "2^"),
+        ("EN-ER-15", r"\foo{x}"),
+        ("EN-ER-19", "{x+1"),
+        ("EN-ER-20", "x+1}"),
+        ("EN-ER-26", "=3"),
+        ("EN-ER-27", "x^{}"),
+        ("EN-ER-31", r"\text{hola}"),
+    ],
+)
+def test_in625_g3_raw_inputs_rejected_before_sympy(case_id, text):
+    with pytest.raises(parsing.ParseSecurityError):
+        parsing.parse_expression_tree(text)

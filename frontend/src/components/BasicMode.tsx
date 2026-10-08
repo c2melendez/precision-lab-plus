@@ -51,7 +51,11 @@ import { detectCalculusIntent, type CalculusIntent } from "./calculusIntent";
 import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
-import { splitSystemLatex } from "./systemSplit";
+import { splitSystemLatex, splitFreeSystemLatex } from "./systemSplit";
+import { detectPiecewiseIntent } from "./piecewiseIntent";
+import { detectRelationIntent } from "./relationIntent";
+import { detectConstrainedEquationIntent, satisfiesConstraint } from "./constrainedEquationIntent";
+import { detectMatrixIntent } from "./matrixIntent";
 
 interface SubstitutionRow {
   name: string;
@@ -70,6 +74,19 @@ const EXAMPLES: { display: string; latex: string }[] = [
 // comporte igual sin importar desde qué pantalla se escribió.
 const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
 
+function isIntervalUnionLatex(input: string): boolean {
+  const compact = input.replace(/\s+/g, "");
+  const interval = String.raw`\\left\((?:-?\\infty|-?\d+(?:\.\d+)?),(?:-?\\infty|-?\d+(?:\.\d+)?)\\right\)`;
+  const union = new RegExp("^" + interval + "(?:\\\\cup" + interval + ")+$");
+  return union.test(compact);
+}
+
+function matrixDataToLatex(data: unknown): string | null {
+  if (!Array.isArray(data) || !data.every((row) => Array.isArray(row))) return null;
+  const rows = (data as unknown[][]).map((row) => row.map((cell) => String(cell)).join("&"));
+  return `\\begin{pmatrix}${rows.join("\\\\")}\\end{pmatrix}`;
+}
+
 export function BasicMode() {
   const formRef = useRef<HTMLFormElement>(null);
   const [mathField, setMathField] = useState<MathfieldElement | null>(null);
@@ -86,7 +103,12 @@ export function BasicMode() {
   const setActiveMode = useUIStore((state) => state.setActiveMode);
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
 
-  const systemRows = splitSystemLatex(latex);
+  const piecewiseIntent = detectPiecewiseIntent(latex);
+  const constrainedIntent = piecewiseIntent ? null : detectConstrainedEquationIntent(latex);
+  const relationIntent = piecewiseIntent || constrainedIntent ? null : detectRelationIntent(latex);
+  const systemRows = piecewiseIntent || relationIntent || constrainedIntent
+    ? null
+    : (splitSystemLatex(latex) ?? splitFreeSystemLatex(latex));
 
   function addSubstitutionRow(): void {
     setSubstitutions((rows) => [...rows, { name: "", value: "" }]);
@@ -302,14 +324,177 @@ export function BasicMode() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
 
+    // H1 EN-RE-12: una unión de intervalos producida por el propio solver
+    // es una salida matemática válida, aunque no sea una expresión
+    // algebraica para /evaluate. Se acepta localmente para preservar
+    // round-trip sin reinterpretarla como una operación distinta.
+    if (isIntervalUnionLatex(latex)) {
+      setValidationError(null);
+      setErrorMessage(null);
+      setLastResult({
+        success: true,
+        operation: "evaluate",
+        request_id: crypto.randomUUID(),
+        result_type: "scalar",
+        input_text: latex,
+        input_latex: latex,
+        result_text: latex,
+        result_latex: latex,
+        result_data: null,
+        steps: [],
+        has_detailed_steps: false,
+        warnings: ["Intervalo preservado como conjunto solución."],
+        duration_ms: 0,
+      });
+      return;
+    }
+
+    if (piecewiseIntent) {
+      setValidationError(null);
+      setErrorMessage(null);
+      setLastResult({
+        success: true,
+        operation: "evaluate",
+        request_id: `local-piecewise-${Date.now()}`,
+        result_type: "scalar",
+        result_text: "Función a trozos",
+        result_latex: latex,
+        steps: [],
+        has_detailed_steps: false,
+        warnings: [],
+        duration_ms: 0,
+      });
+      return;
+    }
+
     if (systemRows) {
       await submitSystem(systemRows);
+      return;
+    }
+
+    const matrixIntent = detectMatrixIntent(latex);
+    if (matrixIntent) {
+      setValidationError(null);
+      setLoading(true);
+      setErrorMessage(null);
+      try {
+        if (matrixIntent.kind === "literal") {
+          const resultLatex = latex.trim();
+          setLastResult({
+            success: true,
+            operation: "matrix_operation",
+            request_id: crypto.randomUUID(),
+            result_type: "matrix",
+            result_data: matrixIntent.matrix,
+            result_latex: resultLatex,
+            result_text: resultLatex,
+            steps: [],
+            has_detailed_steps: false,
+            warnings: [],
+            duration_ms: 0,
+          });
+          return;
+        }
+
+        const matrixA = matrixIntent.matrix.map((row) => row.map((cell) => latexToBackendSyntax(cell)));
+        let result: MathResponse;
+
+        if (matrixIntent.kind === "inverse") {
+          result = await submitAndRecord("/matrix/inverse", { matrix: matrixA }, latex);
+        } else if (matrixIntent.kind === "transpose") {
+          result = await submitAndRecord("/matrix/transpose", { matrix: matrixA }, latex);
+        } else if (matrixIntent.kind === "determinant") {
+          result = await submitAndRecord("/matrix/determinant", { matrix: matrixA }, latex);
+        } else if (matrixIntent.kind === "power") {
+          result = await submitAndRecord("/matrix/power", { matrix: matrixA, exponent: matrixIntent.exponent }, latex);
+        } else {
+          const matrixB = matrixIntent.right.map((row) => row.map((cell) => latexToBackendSyntax(cell)));
+          result = await submitAndRecord(
+            "/matrix/operations",
+            { operation: "multiply", matrix_a: matrixA, matrix_b: matrixB },
+            latex,
+          );
+        }
+
+        if (result.success && result.result_type === "matrix") {
+          const matrixLatex = matrixDataToLatex(result.result_data);
+          if (matrixLatex) {
+            result.result_latex = matrixLatex;
+            result.result_text = matrixLatex;
+          }
+        }
+
+        setLastResult(result);
+        if (!result.success) setErrorMessage(result.error_message ?? "Ocurrió un error.");
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
     const calculusIntent = detectCalculusIntent(latex);
     if (calculusIntent) {
       await submitCalculus(calculusIntent);
+      return;
+    }
+
+    if (constrainedIntent) {
+      const equationBackend = latexToBackendSyntax(constrainedIntent.equationLatex);
+      setValidationError(null);
+      setLoading(true);
+      setErrorMessage(null);
+      try {
+        const result = await submitAndRecord(
+          "/solve",
+          { equation: equationBackend, variable: constrainedIntent.variable, angle_unit: angleUnit },
+          latex,
+        );
+        if (result.success) {
+          const solutions = Array.isArray(result.result_data) ? result.result_data : [];
+          const filtered = solutions.filter((solution) => {
+            if (typeof solution !== "object" || solution === null || !("text" in solution)) return false;
+            const numeric = Number((solution as { text: string }).text);
+            return Number.isFinite(numeric) && satisfiesConstraint(numeric, constrainedIntent);
+          });
+          result.result_data = filtered;
+          result.result_text = filtered.length
+            ? filtered.map((solution) => `${constrainedIntent.variable}=${(solution as { text: string }).text}`).join(", ")
+            : "Sin solución bajo la restricción";
+        }
+        setLastResult(result);
+        if (!result.success) {
+          setErrorMessage(result.error_message ?? "Ocurrió un error.");
+        }
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    if (relationIntent) {
+      const label =
+        relationIntent.kind === "functionDefinition"
+          ? "Definición de función"
+          : relationIntent.kind === "explicitRelation"
+            ? "Relación explícita"
+            : "Relación implícita";
+      const localResult: MathResponse = {
+        success: true,
+        operation: "evaluate",
+        request_id: crypto.randomUUID(),
+        result_type: "scalar",
+        input_text: latex,
+        input_latex: latex,
+        result_text: latex,
+        result_latex: latex,
+        result_data: null,
+        steps: [],
+        has_detailed_steps: false,
+        warnings: [label],
+        duration_ms: 0,
+      };
+      setValidationError(null);
+      setLastResult(localResult);
       return;
     }
 

@@ -33,3 +33,7 @@ Playwright levanta automáticamente FastAPI en `127.0.0.1:8000` y Vite en `127.0
 ## Quality gate recomendado
 
 No publicar si falla pytest, typecheck, Vitest/paridad del teclado, build de producción o Playwright E2E.
+
+## Certification continuity
+
+For the active certification state and execution rules, start at `qa/certification/README.md`. Do not reconstruct the certification plan from chat history when repository state is available.
