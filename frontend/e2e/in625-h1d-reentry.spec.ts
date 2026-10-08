@@ -45,8 +45,16 @@ function canonical(v:string){
 }
 async function evaluateOnce(page:Page,input:string){
   await setInput(page,input);
+  const field=page.locator("math-field").first();
+  const actualLatex=String(await field.evaluate(el=>(el as HTMLElement&{value?:string}).value??""));
+  const reqPromise=page.waitForRequest(req =>
+    req.method()==="POST" && req.url().includes("/api/v1/")
+  ).catch(()=>null);
   const out=await submit(page);
-  expect(out.kind,input+" -> "+out.value).toBe("result");
+  const req=await reqPromise;
+  let payload="";
+  try { payload=req?.postData() ?? ""; } catch {}
+  expect(out.kind,input+" ACTUAL="+actualLatex+" PAYLOAD="+payload+" -> "+out.value).toBe("result");
   expect(out.value.trim()).not.toBe("");
   return out.value;
 }
