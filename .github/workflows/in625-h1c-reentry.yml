@@ -1,4 +1,5 @@
 name: IN625 H1c Reentry Diagnostic
+# trigger: h1c-plus
 
 on:
   pull_request:
