@@ -56,8 +56,13 @@ test.describe("IN625 H1a reentrada básica Plus", () => {
       const s1 = await calculate(page);
 
       await setInput(page, s1);
-      const s2 = await calculate(page);
-      expect(canonical(s2), id + " S1=" + s1 + " S2=" + s2).toBe(canonical(s1));
+      const reinjected = await page.locator("math-field").first().evaluate((el) =>
+        String((el as HTMLElement & { value?: string }).value ?? "")
+      );
+      const s2 = await calculate(page).catch((err) => {
+        throw new Error(id + " S1=" + s1 + " REINJECTED=" + reinjected + " ERROR=" + String(err));
+      });
+      expect(canonical(s2), id + " S1=" + s1 + " REINJECTED=" + reinjected + " S2=" + s2).toBe(canonical(s1));
     });
   }
 });
