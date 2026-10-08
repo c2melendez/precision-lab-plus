@@ -73,6 +73,11 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
 
     try:
         result_latex = sympy.latex(display_expr)
+        # H1 round-trip: SymPy representa el logaritmo natural con \\log,
+        # pero Precision Lab reserva \\log para base 10 y usa \\ln para
+        # el natural. Normalizar la salida evita cambiar el significado al
+        # reingresar el propio resultado.
+        result_latex = result_latex.replace(r"\log", r"\ln")
     except ValueError:
         # Un entero cuya magnitud excede el límite de conversión int->str de
         # Python (`sys.set_int_max_str_digits`) puede surgir incluso dentro
