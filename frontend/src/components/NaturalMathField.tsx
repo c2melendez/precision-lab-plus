@@ -561,6 +561,28 @@ function normalizeLocalizedLatexAliases(input: string): string {
 
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
+
+  // H1 EN-RE-26/27: interceptar aliases SymPy antes de cualquier
+  // transformación de MathLive. Algunas serializaciones llegan como
+  // \\operatorname{asin}\\left(...\\right) y otras envuelven el
+  // argumento en llaves. Solo se aceptan los tres aliases conocidos.
+  const operatornameInverse = latex.trim().match(
+    /^\\operatorname\{(asin|acos|atan)\}\s*\{?\\left\(([\s\S]*)\\right\)\}?$/,
+  );
+  if (operatornameInverse) {
+    const [, fn, argLatex] = operatornameInverse;
+    const mapped = fn === "asin" ? "asin" : fn === "acos" ? "acos" : "atan";
+    return `${mapped}(${latexToBackendSyntax(argLatex)})`;
+  }
+
+  const operatornameSimple = latex.trim().match(
+    /^\\operatorname\{(asin|acos|atan)\}\s*\{([^{}]+)\}$/,
+  );
+  if (operatornameSimple) {
+    const [, fn, argLatex] = operatornameSimple;
+    const mapped = fn === "asin" ? "asin" : fn === "acos" ? "acos" : "atan";
+    return `${mapped}(${latexToBackendSyntax(argLatex)})`;
+  }
   latex = normalizeExternalSyntaxF3c(normalizeExternalSyntax(normalizeUnicodePaste(normalizePastedLatex(latex))));
   latex = normalizeLocalizedLatexAliases(latex);
 
