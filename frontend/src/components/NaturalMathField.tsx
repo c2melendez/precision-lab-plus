@@ -370,6 +370,22 @@ function rewritePostfixPercent(ascii: string): string {
   return result;
 }
 
+function rewritePositiveFunctionPowers(ascii: string): string {
+  // H1 EN-RE-04: MathLive serializa sin^2(x) / sin^2x como "sin ^2x".
+  // El backend seguro no interpreta una potencia aplicada al nombre de
+  // función; se explicita como (sin(x))^2. Se limita a exponentes enteros
+  // positivos para no interferir con sin^-1, que rewriteCommonInverses
+  // maneja como función inversa.
+  return ascii.replace(
+    /\\b(sin|cos|tan|sec|csc|cot|sinh|cosh|tanh)\\s*\\^\\s*(\\d+)\\s*(\\([^()]+\\)|[A-Za-z][A-Za-z0-9_]*)/g,
+    (_m, fn, exponent, arg) => {
+      const body = String(arg).startsWith("(") ? String(arg).slice(1, -1) : String(arg);
+      return `(${fn}(${body}))^${exponent}`;
+    },
+  );
+}
+
+
 function rewriteCommonInverses(ascii: string): string {
   const names: Record<string, string> = {
     sin: "asin", cos: "acos", tan: "atan", csc: "acsc", sec: "asec", cot: "acot",
@@ -576,7 +592,9 @@ export function latexToBackendSyntax(latex: string): string {
   if (asciiAggregate) return asciiAggregate;
 
   const collapsed = collapseKnownFunctionNames(ascii);
-  const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
+  const normalizedAscii = rewritePositiveFunctionPowers(
+    rewriteLogSubscriptBase(rewriteNthRoot(collapsed)),
+  );
   const backendSyntax = rewritePostfixPercent(applyDegreeNotation(
     rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii)),
   )).trim();
