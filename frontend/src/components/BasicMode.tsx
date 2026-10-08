@@ -55,6 +55,7 @@ import { splitSystemLatex, splitFreeSystemLatex } from "./systemSplit";
 import { detectPiecewiseIntent } from "./piecewiseIntent";
 import { detectRelationIntent } from "./relationIntent";
 import { detectConstrainedEquationIntent, satisfiesConstraint } from "./constrainedEquationIntent";
+import { detectMatrixIntent } from "./matrixIntent";
 
 interface SubstitutionRow {
   name: string;
@@ -72,6 +73,12 @@ const EXAMPLES: { display: string; latex: string }[] = [
 // tal cual para que "escribo < o >, se resuelve como desigualdad" se
 // comporte igual sin importar desde qué pantalla se escribió.
 const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
+
+function matrixDataToLatex(data: unknown): string | null {
+  if (!Array.isArray(data) || !data.every((row) => Array.isArray(row))) return null;
+  const rows = (data as unknown[][]).map((row) => row.map((cell) => String(cell)).join("&"));
+  return `\\begin{pmatrix}${rows.join("\\\\")}\\end{pmatrix}`;
+}
 
 export function BasicMode() {
   const formRef = useRef<HTMLFormElement>(null);
@@ -330,6 +337,66 @@ export function BasicMode() {
 
     if (systemRows) {
       await submitSystem(systemRows);
+      return;
+    }
+
+    const matrixIntent = detectMatrixIntent(latex);
+    if (matrixIntent) {
+      setValidationError(null);
+      setLoading(true);
+      setErrorMessage(null);
+      try {
+        if (matrixIntent.kind === "literal") {
+          const resultLatex = latex.trim();
+          setLastResult({
+            success: true,
+            operation: "matrix_operation",
+            request_id: crypto.randomUUID(),
+            result_type: "matrix",
+            result_data: matrixIntent.matrix,
+            result_latex: resultLatex,
+            result_text: resultLatex,
+            steps: [],
+            has_detailed_steps: false,
+            warnings: [],
+            duration_ms: 0,
+          });
+          return;
+        }
+
+        const matrixA = matrixIntent.matrix.map((row) => row.map((cell) => latexToBackendSyntax(cell)));
+        let result: MathResponse;
+
+        if (matrixIntent.kind === "inverse") {
+          result = await submitAndRecord("/matrix/inverse", { matrix: matrixA }, latex);
+        } else if (matrixIntent.kind === "transpose") {
+          result = await submitAndRecord("/matrix/transpose", { matrix: matrixA }, latex);
+        } else if (matrixIntent.kind === "determinant") {
+          result = await submitAndRecord("/matrix/determinant", { matrix: matrixA }, latex);
+        } else if (matrixIntent.kind === "power") {
+          result = await submitAndRecord("/matrix/power", { matrix: matrixA, exponent: matrixIntent.exponent }, latex);
+        } else {
+          const matrixB = matrixIntent.right.map((row) => row.map((cell) => latexToBackendSyntax(cell)));
+          result = await submitAndRecord(
+            "/matrix/operations",
+            { operation: "multiply", matrix_a: matrixA, matrix_b: matrixB },
+            latex,
+          );
+        }
+
+        if (result.success && result.result_type === "matrix") {
+          const matrixLatex = matrixDataToLatex(result.result_data);
+          if (matrixLatex) {
+            result.result_latex = matrixLatex;
+            result.result_text = matrixLatex;
+          }
+        }
+
+        setLastResult(result);
+        if (!result.success) setErrorMessage(result.error_message ?? "Ocurrió un error.");
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
