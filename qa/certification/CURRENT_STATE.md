@@ -45,12 +45,20 @@ Evidencia:
 
 Siguiente bloque activo: H1 — 30 casos de reentrada / output-as-input.
 
-## Siguiente paso exacto
-1. Localizar/confirmar los 34 casos G3 en la matriz/spec vigente.
-2. Implementar o completar la cobertura G3 en Lite y Plus manteniendo paridad.
-3. Ejecutar Playwright en ambos motores.
-4. Clasificar cualquier rojo como producto / harness / oráculo / capability antes de modificar producto.
-5. Registrar commits, runs, decisiones y siguiente paso en CURRENT_STATE y EXECUTION_LOG de ambos repositorios.
+## Siguiente paso exacto — IN625 H1d (EN-RE-24..30)
+1. Localizar los siete casos EN-RE-24..30 en la matriz/spec vigente y localizar el harness E2E correspondiente en cada repositorio.
+2. Verificar HEAD y el historial completo de Actions pertinente en ambos repositorios. No inferir ausencia de runs de la consulta por SHA del conector, que solo cubre una parte de los eventos.
+3. Reconciliar EN-RE-29 y EN-RE-30 contra MANUAL_CAPABILITY_GAPS.md y confirmar si permanecen no implementados. No contabilizarlos como PASS ni como rojo de producto sin reproducir el contrato.
+4. Ejecutar los casos automatizables de H1d en Lite y Plus, con el gate acumulativo relevante. Clasificar cada rojo como producto / harness / oráculo / capability antes de modificar producto.
+5. Registrar evidencias verificadas, IDs de runs, SHA, resultados, decisiones y próximo bloque en CURRENT_STATE.md y EXECUTION_LOG.md de ambos repositorios. Solo avanzar a H2 cuando H1d tenga cierre bilateral verificable.
+
+### Última reconciliación de continuidad — 2026-10-08
+- H1a/H1b/H1c permanecen cerrados según evidencia documental de Actions; H1d sigue PENDIENTE DE VERIFICACIÓN, sin resultado nuevo acreditado por esta reconciliación.
+- HEAD canónicos observados antes de este ajuste documental: Lite `a9627f4d67f141c0346a19c467656d626e3affcc`; Plus `802eea7d7a9abf2ec28f2fa46d97a40c67e5296f`.
+- Runs H1c referenciados por el registro: Lite `37794754460`, Plus `37794867403` (jobs `h1c` completados en SUCCESS).
+- La consulta limitada de runs por SHA devolvió listas vacías; esto NO acredita ausencia de corridas más recientes de otros eventos.
+- EN-RE-22 sigue como capability gap de H1c; EN-RE-29 y EN-RE-30 constan como gaps de H1d y necesitan reconciliación antes del cierre.
+- Se corrigió el siguiente paso obsoleto que remitía a G3 ya cerrado. No se han ejecutado pruebas nuevas ni alterado el producto en esta reconciliación.
 
 ## Continuidad repo-native
 El bootstrap oficial es `qa/certification/CONTINUATION_PROMPT.md`. No se necesita ZIP de handoff mientras GitHub y estos archivos estén accesibles.
