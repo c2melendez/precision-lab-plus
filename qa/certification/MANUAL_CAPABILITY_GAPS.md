@@ -26,3 +26,10 @@ Estos puntos NO deben marcarse automáticamente como fallo del producto mientras
 - Estado: manual / config-dependent.
 - Requiere entorno regional donde la coma decimal sea interpretada según configuración del SO/navegador/MathLive.
 - No se debe marcar como automatizado únicamente con locale fijo del runner CI.
+
+
+## EN-RE-22 — historial restaura entrada idéntica
+- Estado: CAPABILITY GAP confirmado durante IN625 H1c.
+- Contrato: al seleccionar/reusar una entrada del historial, el campo principal debe recuperar el LaTeX original exactamente, sin wrappers ni espacios añadidos.
+- Estado actual: la acción Reusar reejecuta el endpoint y muestra el resultado; no restaura el input original al campo principal.
+- No se contabiliza como PASS automático hasta implementar el flujo de restauración o validarlo manualmente tras su implementación.
