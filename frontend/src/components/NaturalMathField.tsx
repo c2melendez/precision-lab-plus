@@ -402,6 +402,21 @@ function rewritePositiveFunctionPowers(ascii: string): string {
 }
 
 
+function rewriteOperatornameInverseTrigAscii(ascii: string): string {
+  let result = ascii;
+  // MathLive/Compute Engine puede conservar \\operatorname como una
+  // función ASCII llamada operatorname(...) aun después del rewrite LaTeX.
+  // Aceptamos únicamente los tres aliases SymPy permitidos por contrato.
+  result = result
+    .replace(/operatorname\s*\(\s*asin\s*\)\s*\(?([^()]+)\)?/g, "asin($1)")
+    .replace(/operatorname\s*\(\s*acos\s*\)\s*\(?([^()]+)\)?/g, "acos($1)")
+    .replace(/operatorname\s*\(\s*atan\s*\)\s*\(?([^()]+)\)?/g, "atan($1)")
+    .replace(/operatorname\s+asin\s*\(?([^()]+)\)?/g, "asin($1)")
+    .replace(/operatorname\s+acos\s*\(?([^()]+)\)?/g, "acos($1)")
+    .replace(/operatorname\s+atan\s*\(?([^()]+)\)?/g, "atan($1)");
+  return result;
+}
+
 function rewriteCommonInverses(ascii: string): string {
   const names: Record<string, string> = {
     sin: "asin", cos: "acos", tan: "atan", csc: "acsc", sec: "asec", cot: "acot",
@@ -607,7 +622,7 @@ export function latexToBackendSyntax(latex: string): string {
   const asciiAggregate = rewriteFiniteAggregateAscii(ascii);
   if (asciiAggregate) return asciiAggregate;
 
-  const collapsed = collapseKnownFunctionNames(ascii);
+  const collapsed = rewriteOperatornameInverseTrigAscii(collapseKnownFunctionNames(ascii));
   const normalizedAscii = rewritePositiveFunctionPowers(
     rewriteLogSubscriptBase(rewriteNthRoot(collapsed)),
   );
