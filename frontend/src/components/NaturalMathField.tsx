@@ -377,7 +377,7 @@ function rewritePositiveFunctionPowers(ascii: string): string {
   // positivos para no interferir con sin^-1, que rewriteCommonInverses
   // maneja como función inversa.
   return ascii.replace(
-    /\\b(sin|cos|tan|sec|csc|cot|sinh|cosh|tanh)\\s*\\^\\s*(\\d+)\\s*(\\([^()]+\\)|[A-Za-z][A-Za-z0-9_]*)/g,
+    /\b(sin|cos|tan|sec|csc|cot|sinh|cosh|tanh)\s*\^\s*(\d+)\s*(\([^()]+\)|[A-Za-z][A-Za-z0-9_]*)/g,
     (_m, fn, exponent, arg) => {
       const body = String(arg).startsWith("(") ? String(arg).slice(1, -1) : String(arg);
       return `(${fn}(${body}))^${exponent}`;
