@@ -28,13 +28,20 @@ async function setInput(page: Page, value: string) {
 async function calculate(page: Page): Promise<string> {
   await page.evaluate(() => window.mathVirtualKeyboard?.hide());
   const responsePromise = page.waitForResponse(
-    (r) => r.url().includes("/api/v1/evaluate") && r.request().method() === "POST",
+    (r) => r.url().includes("/api/v1/") && r.request().method() === "POST",
     { timeout: 15000 },
   );
   await page.getByRole("button", { name: "Evaluar", exact: true }).click();
   const response = await responsePromise;
   const body = await response.json();
-  expect(body.success, JSON.stringify(body)).toBe(true);
+  expect(
+    body.success,
+    JSON.stringify({
+      url: response.url(),
+      request: response.request().postDataJSON(),
+      body,
+    }),
+  ).toBe(true);
   const output = String(body.result_latex ?? body.result_text ?? body.result_approx ?? "");
   expect(output.trim()).not.toBe("");
   return output;
