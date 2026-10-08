@@ -688,8 +688,15 @@ export function NaturalMathField({
     if (!el) return;
 
     function handleInput(): void {
-      if (el && el.getValue("latex-unstyled") !== latex) {
-        onLatexChange(el.getValue("latex-unstyled"));
+      if (!el) return;
+      // H1 EN-RE-26/27: getValue("latex-unstyled") pierde el nombre
+      // dentro de \\operatorname{asin/acos/atan}, aunque el valor real
+      // del math-field lo conserva. El estado debe reflejar el LaTeX que
+      // realmente ve el usuario para evitar degradación semántica antes
+      // de latexToBackendSyntax().
+      const currentLatex = el.value;
+      if (currentLatex !== latex) {
+        onLatexChange(currentLatex);
       }
     }
 
@@ -727,7 +734,7 @@ export function NaturalMathField({
 
   useEffect(() => {
     const el = elRef.current;
-    if (el && el.getValue("latex-unstyled") !== latex) {
+    if (el && el.value !== latex) {
       el.setValue(latex);
     }
   }, [latex]);
