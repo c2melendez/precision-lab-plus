@@ -14,18 +14,17 @@ async function setInput(page: Page, value: string) {
 }
 
 async function readOutcome(page: Page): Promise<{ kind: "result" | "error"; value: string }> {
-  const region = page.locator('section[aria-label="Resultado"]').first();
-  const alert = region.locator('[role="alert"]').first();
-  const status = region.locator('[role="status"]').first();
+  const alert = page.locator('[role="alert"]').last();
+  const live = page.locator('[aria-live="polite"]').last();
 
   await expect.poll(async () => {
     if (await alert.count()) {
       const txt = ((await alert.textContent().catch(() => "")) ?? "").trim();
       if (txt) return "error";
     }
-    if (await status.count()) {
-      const txt = ((await status.textContent().catch(() => "")) ?? "").trim();
-      if (txt && !/calculando/i.test(txt)) return "result";
+    if (await live.count()) {
+      const txt = ((await live.textContent().catch(() => "")) ?? "").trim();
+      if (txt && !/calculando/i.test(txt) && !/introduce una expresión/i.test(txt)) return "result";
     }
     return "pending";
   }, { timeout: 15000 }).not.toBe("pending");
@@ -35,14 +34,13 @@ async function readOutcome(page: Page): Promise<{ kind: "result" | "error"; valu
     if (txt) return { kind: "error", value: txt };
   }
 
-  const staticField = status.locator("math-field[read-only]").first();
-  if (await staticField.count()) {
-    const value = String(await staticField.evaluate((el) => (el as HTMLElement & { value?: string }).value ?? ""));
+  const math = live.locator("math-field[read-only], math-field").first();
+  if (await math.count()) {
+    const value = String(await math.evaluate((el) => (el as HTMLElement & { value?: string }).value ?? ""));
     if (value.trim()) return { kind: "result", value };
   }
 
-  const text = ((await status.textContent()) ?? "").trim();
-  return { kind: "result", value: text };
+  return { kind: "result", value: ((await live.textContent()) ?? "").trim() };
 }
 
 async function submit(page: Page) {
