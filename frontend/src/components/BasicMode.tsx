@@ -76,7 +76,7 @@ const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
 
 function isIntervalUnionLatex(input: string): boolean {
   const compact = input.replace(/\s+/g, "");
-  const interval = String.raw`\\left\((?:-?\\infty|-?\\d+(?:\\.\\d+)?),(?:-?\\infty|-?\\d+(?:\\.\\d+)?)\\right\)`;
+  const interval = String.raw`\\left\((?:-?\\infty|-?\d+(?:\.\d+)?),(?:-?\\infty|-?\d+(?:\.\d+)?)\\right\)`;
   const union = new RegExp("^" + interval + "(?:\\\\cup" + interval + ")+$");
   return union.test(compact);
 }
