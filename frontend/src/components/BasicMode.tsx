@@ -74,6 +74,13 @@ const EXAMPLES: { display: string; latex: string }[] = [
 // comporte igual sin importar desde qué pantalla se escribió.
 const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
 
+function isIntervalUnionLatex(input: string): boolean {
+  const compact = input.replace(/\s+/g, "");
+  const interval = String.raw`\\left\((?:-?\\infty|-?\\d+(?:\\.\\d+)?),(?:-?\\infty|-?\\d+(?:\\.\\d+)?)\\right\)`;
+  const union = new RegExp("^" + interval + "(?:\\\\cup" + interval + ")+$");
+  return union.test(compact);
+}
+
 function matrixDataToLatex(data: unknown): string | null {
   if (!Array.isArray(data) || !data.every((row) => Array.isArray(row))) return null;
   const rows = (data as unknown[][]).map((row) => row.map((cell) => String(cell)).join("&"));
@@ -316,6 +323,31 @@ export function BasicMode() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+
+    // H1 EN-RE-12: una unión de intervalos producida por el propio solver
+    // es una salida matemática válida, aunque no sea una expresión
+    // algebraica para /evaluate. Se acepta localmente para preservar
+    // round-trip sin reinterpretarla como una operación distinta.
+    if (isIntervalUnionLatex(latex)) {
+      setValidationError(null);
+      setErrorMessage(null);
+      setLastResult({
+        success: true,
+        operation: "evaluate",
+        request_id: crypto.randomUUID(),
+        result_type: "scalar",
+        input_text: latex,
+        input_latex: latex,
+        result_text: latex,
+        result_latex: latex,
+        result_data: null,
+        steps: [],
+        has_detailed_steps: false,
+        warnings: ["Intervalo preservado como conjunto solución."],
+        duration_ms: 0,
+      });
+      return;
+    }
 
     if (piecewiseIntent) {
       setValidationError(null);
