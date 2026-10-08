@@ -61,8 +61,18 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         )
 
     warnings = []
+    # H1 round-trip: el parser seguro construye el AST con evaluate=False
+    # para no ejecutar/simplificar durante el parseo. Esa forma puede
+    # conservar artefactos como 1*(1/3) o asin(1/2) sin reducir. La salida
+    # pública, en cambio, debe ser canónica y reingresable sin acumular
+    # factores ni cambiar de significado.
     try:
-        result_latex = sympy.latex(result.expr)
+        display_expr = sympy.simplify(result.expr)
+    except Exception:
+        display_expr = result.expr
+
+    try:
+        result_latex = sympy.latex(display_expr)
     except ValueError:
         # Un entero cuya magnitud excede el límite de conversión int->str de
         # Python (`sys.set_int_max_str_digits`) puede surgir incluso dentro
@@ -82,7 +92,7 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
             result_latex = None
             warnings.append("Resultado LaTeX omitido: excede los 10,000 caracteres (sección 4).")
         try:
-            result_text = str(result.expr)
+            result_text = str(display_expr)
         except ValueError:
             result_text = "(resultado numérico demasiado grande para mostrarse)"
 
