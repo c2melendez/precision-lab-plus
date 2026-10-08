@@ -34,10 +34,30 @@ async function readOutcome(page: Page): Promise<{ kind: "result" | "error"; valu
     if (txt) return { kind: "error", value: txt };
   }
 
-  const math = live.locator("math-field[read-only], math-field").first();
-  if (await math.count()) {
-    const value = String(await math.evaluate((el) => (el as HTMLElement & { value?: string }).value ?? ""));
-    if (value.trim()) return { kind: "result", value };
+  const annotation = live.locator('annotation[encoding="application/x-tex"]').first();
+  if (await annotation.count()) {
+    const latex = ((await annotation.textContent()) ?? "").trim();
+    if (latex) return { kind: "result", value: latex };
+  }
+
+  const rows = live.locator("table tbody tr");
+  if (await rows.count()) {
+    const matrixRows: string[] = [];
+    for (let i = 0; i < await rows.count(); i++) {
+      const cells = rows.nth(i).locator("td");
+      const values: string[] = [];
+      for (let j = 0; j < await cells.count(); j++) {
+        values.push(((await cells.nth(j).textContent()) ?? "").trim());
+      }
+      matrixRows.push(values.join("&"));
+    }
+    return { kind: "result", value: "\\begin{pmatrix}" + matrixRows.join("\\\\") + "\\end{pmatrix}" };
+  }
+
+  const primary = live.locator(".a11y-scale-result-lg").first();
+  if (await primary.count()) {
+    const text = ((await primary.textContent()) ?? "").trim();
+    if (text) return { kind: "result", value: text };
   }
 
   return { kind: "result", value: ((await live.textContent()) ?? "").trim() };
