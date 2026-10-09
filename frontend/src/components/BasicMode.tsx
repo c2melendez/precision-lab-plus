@@ -396,7 +396,8 @@ export function BasicMode() {
           return;
         }
 
-        const matrixA = matrixIntent.matrix.map((row) => row.map((cell) => latexToBackendSyntax(cell)));
+        const matrixA = (matrixIntent.kind === "multiply" ? matrixIntent.left : matrixIntent.matrix)
+          .map((row) => row.map((cell) => latexToBackendSyntax(cell)));
         let result: MathResponse;
 
         if (matrixIntent.kind === "inverse") {
@@ -450,7 +451,10 @@ export function BasicMode() {
           latex,
         );
         if (result.success) {
-          const solutions = Array.isArray(result.result_data) ? result.result_data : [];
+          const solutions = Array.isArray(result.result_data)
+            ? result.result_data.filter((item): item is { text: string; latex: string; is_complex: boolean } =>
+                !Array.isArray(item) && typeof item === "object" && item !== null && "text" in item)
+            : [];
           const filtered = solutions.filter((solution) => {
             if (typeof solution !== "object" || solution === null || !("text" in solution)) return false;
             const numeric = Number((solution as { text: string }).text);
