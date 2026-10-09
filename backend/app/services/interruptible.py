@@ -7,11 +7,16 @@ evaluation before any production integration.
 from __future__ import annotations
 
 import multiprocessing as mp
+import time
 from typing import Any, Callable
 
 
 class ComputationTimedOut(TimeoutError):
     """The isolated computation exceeded its wall-clock allowance."""
+
+
+class ComputationCancelled(RuntimeError):
+    """The caller requested interruption of the isolated child."""
 
 
 class ComputationFailed(RuntimeError):
@@ -27,7 +32,10 @@ def _child_main(send: Any, operation: Callable[..., Any], args: tuple[Any, ...])
         send.close()
 
 
-def run_bounded(operation: Callable[..., Any], *args: Any, timeout_seconds: float = 2.0) -> Any:
+def run_bounded(
+    operation: Callable[..., Any], *args: Any, timeout_seconds: float = 2.0,
+    cancel_event: Any = None,
+) -> Any:
     """Run a picklable operation in a distinct process and stop it on timeout.
 
     Prototype limitations: only small, picklable inputs/outputs; no routing,
@@ -41,13 +49,17 @@ def run_bounded(operation: Callable[..., Any], *args: Any, timeout_seconds: floa
     try:
         process.start()
         send.close()
-        if not receive.poll(timeout_seconds):
-            process.terminate()
-            process.join(timeout=1)
-            if process.is_alive():
-                process.kill()
-                process.join(timeout=1)
-            raise ComputationTimedOut("Computation exceeded isolated time limit")
+        deadline = time.monotonic() + timeout_seconds
+        while True:
+            if cancel_event is not None and cancel_event.is_set():
+                raise ComputationCancelled("Caller cancelled isolated computation")
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise ComputationTimedOut("Computation exceeded isolated time limit")
+            if receive.poll(min(remaining, 0.05)):
+                break
+        if cancel_event is not None and cancel_event.is_set():
+            raise ComputationCancelled("Caller cancelled isolated computation")
         try:
             status, payload = receive.recv()
         except EOFError as exc:
