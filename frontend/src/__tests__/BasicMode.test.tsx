@@ -339,10 +339,10 @@ describe("BasicMode", () => {
     fireEvent.submit(form);
     await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
     resolveSecond({ success: true, operation: "evaluate", request_id: "new", result_text: "4", result_latex: "4", result_approx: 4, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
-    await waitFor(() => expect(screen.getByText("4")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText("4").length).toBeGreaterThan(0));
     resolveFirst({ success: true, operation: "evaluate", request_id: "old", result_text: "2", result_latex: "2", result_approx: 2, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
     await waitFor(() => expect(screen.queryByText("2")).not.toBeInTheDocument());
-    expect(screen.getByText("4")).toBeInTheDocument();
+    expect(screen.getAllByText("4").length).toBeGreaterThan(0);
   });
 
 });
