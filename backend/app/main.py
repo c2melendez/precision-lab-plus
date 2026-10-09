@@ -78,6 +78,21 @@ async def request_context_middleware(request: Request, call_next):
                          "error_message": "El cuerpo de la solicitud supera el límite de 1 MiB."},
                 headers={"X-Request-ID": request.state.request_id},
             )
+    # Also bound bodies with no declared Content-Length (e.g. chunked requests).
+    # Read at most one byte beyond the limit and only then replay a small body.
+    if request.method in {"POST", "PUT", "PATCH"} and declared_size is None:
+        body = bytearray()
+        async for chunk in request.stream():
+            body.extend(chunk)
+            if len(body) > 1024 * 1024:
+                return JSONResponse(
+                    status_code=413,
+                    content={"success": False, "request_id": request.state.request_id,
+                             "error_code": "PAYLOAD_TOO_LARGE",
+                             "error_message": "El cuerpo de la solicitud supera el límite de 1 MiB."},
+                    headers={"X-Request-ID": request.state.request_id},
+                )
+        request._body = bytes(body)
     response = await call_next(request)
     response.headers["X-Request-ID"] = request.state.request_id
     response.headers["X-Content-Type-Options"] = "nosniff"
