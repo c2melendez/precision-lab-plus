@@ -310,3 +310,28 @@ def test_in625_h2_sg31_declared_oversize_does_not_affect_next_request():
     )
     assert followup.status_code == 200
     assert followup.json().get("result_approx") == pytest.approx(42.0)
+
+@pytest.mark.parametrize("expression", [
+    'x"y',
+    "x'y",
+    "x\\\\y",
+    "x\u0000y",
+    "x\r\ny",
+])
+def test_in625_h2_sg30_json_special_characters_have_structured_safe_response(expression):
+    """EN-SG-30: JSON transport survives quotes, slashes and control bytes.
+
+    Malformed mathematical expressions are acceptable, but responses must
+    stay valid JSON with request correlation and no internal stack trace.
+    """
+    response = client.post("/api/v1/evaluate", json={
+        "expression": expression, "angle_unit": "rad",
+    })
+    assert response.status_code in (200, 422), (response.status_code, response.text[:200])
+    body = response.json()
+    assert isinstance(body, dict), body
+    assert isinstance(body.get("success"), bool), body
+    assert body.get("request_id"), body
+    assert response.headers.get("x-request-id") == body["request_id"], body
+    assert "traceback" not in response.text.lower()
+    assert "internal server error" not in response.text.lower()
