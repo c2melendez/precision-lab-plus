@@ -426,8 +426,8 @@ describe("BasicMode", () => {
     fireEvent.change(input, { target: { value: "\\frac{d}{dx}(x^3)" } });
     fireEvent.submit(form);
     await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
-    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/derivative", { expression: "x^2", variable: "x", order: 1 });
-    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/derivative", { expression: "x^3", variable: "x", order: 1 });
+    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/derivative", { expression: "(x^2)", variable: "x", order: 1 });
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/derivative", { expression: "(x^3)", variable: "x", order: 1 });
     resolveSecond({ success: true, operation: "derivative", request_id: "new", result_text: "SG29_DERIV_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
     await waitFor(() => expect(screen.getAllByText("SG29_DERIV_NEW").length).toBeGreaterThan(0));
     resolveFirst({ success: true, operation: "derivative", request_id: "old", result_text: "SG29_DERIV_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
