@@ -136,6 +136,7 @@ export function BasicMode() {
   // ecuación -> /solve/system (sin cambios); todas inecuación ->
   // /inequality/system (nuevo); mezcla -> error explícito.
   async function submitSystem(rows: string[]): Promise<void> {
+    const submissionId = ++latestSubmissionRef.current;
     const rowsBackend = rows.map((row) => latexToBackendSyntax(row));
     if (rowsBackend.some((r) => r === "")) {
       setValidationError("Todas las filas del sistema deben tener contenido.");
@@ -178,12 +179,13 @@ export function BasicMode() {
         { equations, variables: variableList },
         `Sistema: ${equations.join(" ; ")}`,
       );
+      if (submissionId !== latestSubmissionRef.current) return;
       setLastResult(result);
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
     } finally {
-      setLoading(false);
+      if (submissionId === latestSubmissionRef.current) setLoading(false);
     }
   }
 
@@ -192,6 +194,7 @@ export function BasicMode() {
   // importar cuántas inecuaciones haya en el sistema — a diferencia de
   // submitSystem (ecuaciones) no se exige #variables === #filas.
   async function submitInequalitySystem(inequalitiesBackend: string[]): Promise<void> {
+    const submissionId = ++latestSubmissionRef.current;
     const variableList = systemVariables
       .split(",")
       .map((v) => v.trim())
@@ -229,12 +232,13 @@ export function BasicMode() {
               ? `Región no acotada. Vértices finitos: ${verticesText}`
               : `Vértices del polígono factible: ${verticesText}`;
       }
+      if (submissionId !== latestSubmissionRef.current) return;
       setLastResult(result);
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
     } finally {
-      setLoading(false);
+      if (submissionId === latestSubmissionRef.current) setLoading(false);
     }
   }
 
@@ -243,6 +247,7 @@ export function BasicMode() {
   // completo. Mismos endpoints y misma forma de payload que
   // DerivativeMode.tsx/IntegralMode.tsx.
   async function submitCalculus(intent: CalculusIntent): Promise<void> {
+    const submissionId = ++latestSubmissionRef.current;
     // Fase E: "ode" no tiene innerLatex (no hay envoltura que
     // desenvolver, ver calculusIntent.ts) -- usa cleanedExpression.
     // NIVEL DE EVIDENCIA 2 para la conversión de la prima (') a través de
@@ -316,12 +321,13 @@ export function BasicMode() {
                       { expression: trimmedInner },
                       `Sing(${trimmedInner})`,
                     );
+      if (submissionId !== latestSubmissionRef.current) return;
       setLastResult(result);
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
     } finally {
-      setLoading(false);
+      if (submissionId === latestSubmissionRef.current) setLoading(false);
     }
   }
 
