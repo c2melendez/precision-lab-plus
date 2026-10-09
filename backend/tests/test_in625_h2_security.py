@@ -199,11 +199,17 @@ def test_in625_h2_sg18_reserved_token_does_not_change_subsequent_fraction(expres
 def test_in625_h2_sg19_sg20_parentheses_depth_controlled(case_id, expression):
     """Bounded in-process nested input; no expensive symbolic expansion."""
     response = client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "rad"})
-    assert response.status_code == 200, (case_id, response.status_code)
     result = response.json()
     if case_id == "EN-SG-19":
+        assert response.status_code == 200, (case_id, response.status_code)
         assert result.get("success") is True, (case_id, result)
         assert result.get("result_approx") == pytest.approx(1.0), (case_id, result)
     else:
+        # EvaluateRequest has max_length=500. The 2,001-character SG20 input
+        # is rejected at the request-validation boundary, before parser depth.
+        # This certifies safe rejection, NOT an internal recursion-depth guard.
+        assert response.status_code == 422, (case_id, response.status_code, result)
         assert result.get("success") is False, (case_id, result)
-        assert result.get("error_code"), (case_id, result)
+        assert result.get("error_code") == "VALIDATION_ERROR", (case_id, result)
+        assert result.get("error_message"), (case_id, result)
+        assert "traceback" not in str(result).lower(), (case_id, result)
