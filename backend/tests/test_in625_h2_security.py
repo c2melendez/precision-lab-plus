@@ -49,3 +49,20 @@ def test_in625_h2_rejects_additional_python_variants(case_id, expression):
     assert result.get("success") is False, (case_id, result)
     assert result.get("error_code") == "PARSE_ERROR", (case_id, result)
     assert "traceback" not in str(result.get("error_message", "")).lower()
+
+def test_in625_h2_sg17_assignment_does_not_leak_between_evaluations():
+    """EN-SG-17: a=7 must not persist as mutable shared CAS state."""
+    client.post("/api/v1/evaluate", json={"expression": "a=7", "angle_unit": "rad"})
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": "a+1", "angle_unit": "rad"},
+    )
+    assert response.status_code == 200, response.text[:200]
+    result = response.json()
+    # Either an explicit unsupported symbolic evaluation, or an algebraic
+    # result containing the free variable; never a leaked numeric 8.
+    if result.get("success"):
+        rendered = str(result.get("result", result.get("output", result)))
+        assert rendered.strip() != "8", result
+    else:
+        assert result.get("error_code"), result
