@@ -562,6 +562,27 @@ function normalizeLocalizedLatexAliases(input: string): string {
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
 
+  // Exact keyboard DMS notation: convert degrees/minutes/seconds before
+  // MathLive can reinterpret prime marks as derivatives.
+  const dms = latex.trim().match(/^([+-]?\d+(?:\.\d+)?)°(\d+(?:\.\d+)?)′(?:(\d+(?:\.\d+)?)″)?$/);
+  if (dms) {
+    const [, deg, minutes, seconds] = dms;
+    const magnitude = "(" + deg + "+" + minutes + "/60" +
+      (seconds === undefined ? "" : "+" + seconds + "/3600") + ")";
+    return "(" + magnitude + "*pi/180)";
+  }
+  // MathLive may split operator names defined with mathrm into individual
+  // variables; these explicit function commands retain their semantics.
+  const knownOperator = latex.trim().match(/^\\mathrm\{(sign|root|log|acsch|asech|acoth)\}\\left\(([\s\S]*)\\right\)$/);
+  if (knownOperator) {
+    const [, functionName, args] = knownOperator;
+    return functionName + "(" + latexToBackendSyntax(args) + ")";
+  }
+  const inverseHyperbolic = latex.trim().match(/^\\(csch|sech|coth)\^\{-1\}\\left\(([\s\S]*)\\right\)$/);
+  if (inverseHyperbolic) {
+    return "a" + inverseHyperbolic[1] + "(" + latexToBackendSyntax(inverseHyperbolic[2]) + ")";
+  }
+
   // H1 EN-RE-26/27: interceptar aliases SymPy antes de cualquier
   // transformación de MathLive. Algunas serializaciones llegan como
   // \\operatorname{asin}\\left(...\\right) y otras envuelven el
