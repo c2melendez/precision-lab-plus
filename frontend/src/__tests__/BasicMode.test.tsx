@@ -556,4 +556,28 @@ describe("BasicMode", () => {
     expect(screen.getAllByText("SG29_MATRIX_NEW").length).toBeGreaterThan(0);
   });
 
+
+  it("SG29: una respuesta matricial antigua no apaga la carga de una evaluación pendiente", async () => {
+    let resolveMatrix!: (value: any) => void;
+    let resolveEvaluation!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveMatrix = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveEvaluation = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "\\det\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "2+2" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(useUIStore.getState().isLoading).toBe(true);
+    resolveMatrix({ success: false, operation: "matrix_operation", request_id: "old", error_message: "SG29_MATRIX_STALE_ERROR", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(useUIStore.getState().isLoading).toBe(true));
+    expect(screen.queryByText("SG29_MATRIX_STALE_ERROR")).not.toBeInTheDocument();
+    resolveEvaluation({ success: true, operation: "evaluate", request_id: "new", result_text: "SG29_MATRIX_RECENT", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(useUIStore.getState().isLoading).toBe(false));
+    expect(screen.getAllByText("SG29_MATRIX_RECENT").length).toBeGreaterThan(0);
+  });
+
 });
