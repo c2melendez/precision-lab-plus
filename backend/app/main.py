@@ -13,6 +13,7 @@ import uuid
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import API_V1_PREFIX, get_settings
 from app.core.exception_handlers import (
@@ -61,6 +62,22 @@ async def request_context_middleware(request: Request, call_next):
     """Genera request_id/start_time ANTES de cualquier validación posterior."""
     request.state.request_id = str(uuid.uuid4())
     request.state.start_time = time.perf_counter()
+    # IN625 H2 EN-SG-31: reject oversized declared JSON bodies before routing.
+    # Headerless/chunked transports require a separate streaming-size audit.
+    declared_size = request.headers.get("content-length")
+    if request.method in {"POST", "PUT", "PATCH"} and declared_size is not None:
+        try:
+            oversized = int(declared_size) > 1024 * 1024
+        except ValueError:
+            oversized = False
+        if oversized:
+            return JSONResponse(
+                status_code=413,
+                content={"success": False, "request_id": request.state.request_id,
+                         "error_code": "PAYLOAD_TOO_LARGE",
+                         "error_message": "El cuerpo de la solicitud supera el límite de 1 MiB."},
+                headers={"X-Request-ID": request.state.request_id},
+            )
     response = await call_next(request)
     response.headers["X-Request-ID"] = request.state.request_id
     response.headers["X-Content-Type-Options"] = "nosniff"
