@@ -233,10 +233,11 @@ def test_substitution_with_free_variable_is_validation_error():
 
 
 def test_result_latex_truncated_when_too_long(monkeypatch):
-    # Expresión con muchos términos simbólicos (no un entero gigante, para no
-    # chocar con el límite de conversión int->str de Python) cuyo LaTeX
-    # supera los 10,000 caracteres.
-    huge_expr = sympy.Add(*(sympy.Symbol(f"x{i}") for i in range(3000)))
+    # Un símbolo de nombre largo produce más de 10.000 caracteres de LaTeX
+    # sin construir ni ordenar una suma de 3.000 símbolos (operación
+    # cuadrática/costosa en SymPy que bloqueaba el gate acumulativo).
+    # El mock prueba exclusivamente el truncado de salida del router.
+    huge_expr = sympy.Symbol("x" + "a" * 10_100)
 
     def _fake_evaluate(expression, angle_unit="rad", substitutions=None):
         return evaluate_service.EvaluateResult(
