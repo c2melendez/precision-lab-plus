@@ -169,3 +169,15 @@ def test_in625_h2_sg18_reserved_word_cannot_corrupt_independent_numeric_result(e
     result = response.json()
     assert result.get("success") is True, (expression, result)
     assert result.get("result_approx") == pytest.approx(42.0), (expression, result)
+
+@pytest.mark.parametrize("expression", ["clearall", "draw", "run", "last", "lambda", "S", "N"])
+def test_in625_h2_sg18_repeated_reserved_request_preserves_calculation(expression):
+    """Check three sequential inert probes before a separate numerical query."""
+    for _ in range(3):
+        probe = client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "rad"})
+        assert probe.status_code == 200, (expression, probe.status_code)
+    response = client.post("/api/v1/evaluate", json={"expression": "3^2+1", "angle_unit": "rad"})
+    assert response.status_code == 200, (expression, response.status_code)
+    result = response.json()
+    assert result.get("success") is True, (expression, result)
+    assert result.get("result_approx") == pytest.approx(10.0), (expression, result)
