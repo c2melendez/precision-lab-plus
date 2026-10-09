@@ -267,3 +267,17 @@ def test_in625_h2_sg31_body_without_content_length_is_rejected():
 def body_stream_sync(payload):
     for offset in range(0, len(payload), 8192):
         yield payload[offset:offset + 8192]
+
+def test_in625_h2_sg31_streamed_small_body_still_evaluates():
+    """Regression: buffering absent-length requests must not swallow valid JSON."""
+    import json
+    payload = json.dumps({"expression": "2+3", "angle_unit": "rad"}).encode()
+    response = client.post(
+        "/api/v1/evaluate",
+        content=body_stream_sync(payload),
+        headers={"Content-Type": "application/json"},
+    )
+    assert response.status_code == 200, response.status_code
+    result = response.json()
+    assert result.get("success") is True, result
+    assert result.get("result_approx") == pytest.approx(5.0), result
