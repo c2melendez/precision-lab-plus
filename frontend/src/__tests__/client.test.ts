@@ -210,6 +210,22 @@ describe("callApi", () => {
     }
   });
 
+  it("SG28: un fallo de red libera el timeout sin aborto tardío", async () => {
+    vi.useFakeTimers();
+    try {
+      globalThis.fetch = vi.fn().mockRejectedValue(new TypeError("Offline"));
+      const response = await callApi("/evaluate", { expression: "1+1" });
+      expect(response.success).toBe(false);
+      expect(response.error_message).toMatch(/servidor/);
+      const signal = (vi.mocked(globalThis.fetch).mock.calls[0][1] as RequestInit).signal as AbortSignal;
+      expect(signal.aborted).toBe(false);
+      await vi.advanceTimersByTimeAsync(30_000);
+      expect(signal.aborted).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("sintetiza un MathResponse de error ante una respuesta no-JSON", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       status: 502,
