@@ -382,9 +382,9 @@ describe("BasicMode", () => {
     await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
     expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/solve", { equation: "x=2", angle_unit: "rad" });
     expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/solve", { equation: "x=4", angle_unit: "rad" });
-    resolveSecond({ success: true, operation: "solve", request_id: "new", result_text: "SG29_SOLVE_NEW", result_latex: "4", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    resolveSecond({ success: true, operation: "solve", request_id: "new", result_text: "SG29_SOLVE_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
     await waitFor(() => expect(screen.getByText("SG29_SOLVE_NEW")).toBeInTheDocument());
-    resolveFirst({ success: true, operation: "solve", request_id: "old", result_text: "SG29_SOLVE_OLD", result_latex: "2", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    resolveFirst({ success: true, operation: "solve", request_id: "old", result_text: "SG29_SOLVE_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
     expect(screen.queryByText("SG29_SOLVE_OLD")).not.toBeInTheDocument();
     expect(screen.getByText("SG29_SOLVE_NEW")).toBeInTheDocument();
   });
