@@ -435,4 +435,28 @@ describe("BasicMode", () => {
     expect(screen.getAllByText("SG29_DERIV_NEW").length).toBeGreaterThan(0);
   });
 
+
+  it("SG29: dos integrales fuera de orden mantienen el resultado más reciente", async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecond = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "\\int_{0}^{1} x^2\\,dx" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "\\int_{0}^{2} x^2\\,dx" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(mockedCallApi.mock.calls[0][0]).toBe("/integral");
+    expect(mockedCallApi.mock.calls[1][0]).toBe("/integral");
+    resolveSecond({ success: true, operation: "integral", request_id: "new", result_text: "SG29_INTEGRAL_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("SG29_INTEGRAL_NEW").length).toBeGreaterThan(0));
+    resolveFirst({ success: true, operation: "integral", request_id: "old", result_text: "SG29_INTEGRAL_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_INTEGRAL_OLD")).not.toBeInTheDocument();
+    expect(screen.getAllByText("SG29_INTEGRAL_NEW").length).toBeGreaterThan(0);
+  });
+
 });
