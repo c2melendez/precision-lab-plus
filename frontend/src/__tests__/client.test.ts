@@ -226,6 +226,24 @@ describe("callApi", () => {
     }
   });
 
+  it("SG28: la respuesta no-JSON deja el temporizador cancelado", async () => {
+    vi.useFakeTimers();
+    try {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        status: 502,
+        json: () => Promise.reject(new SyntaxError("Invalid JSON")),
+      } as unknown as Response);
+      const failed = await callApi("/evaluate", { expression: "2+2" });
+      expect(failed.success).toBe(false);
+      expect(failed.error_message).toMatch(/no-JSON/);
+      const signal = (vi.mocked(globalThis.fetch).mock.calls[0][1] as RequestInit).signal as AbortSignal;
+      await vi.advanceTimersByTimeAsync(30_000);
+      expect(signal.aborted).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("sintetiza un MathResponse de error ante una respuesta no-JSON", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       status: 502,
