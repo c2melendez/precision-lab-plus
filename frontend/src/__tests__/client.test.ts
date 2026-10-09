@@ -181,6 +181,35 @@ describe("callApi", () => {
     expect(first).not.toBe(second);
   });
 
+  it("SG28: timeout de una solicitud no cancela otra iniciada más tarde", async () => {
+    vi.useFakeTimers();
+    try {
+      let resolveRecent!: (value: Response) => void;
+      const firstFetch = vi.fn((_url: string, options: RequestInit) => new Promise<Response>((_resolve, reject) => {
+        (options.signal as AbortSignal).addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true });
+      }));
+      const secondFetch = vi.fn((_url: string, _options: RequestInit) => new Promise<Response>((resolve) => { resolveRecent = resolve; }));
+      globalThis.fetch = vi.fn().mockImplementationOnce(firstFetch).mockImplementationOnce(secondFetch);
+      const oldRequest = callApi("/evaluate", { expression: "1+1" });
+      await vi.advanceTimersByTimeAsync(5_000);
+      const newRequest = callApi("/evaluate", { expression: "2+2" });
+      await vi.advanceTimersByTimeAsync(10_000);
+      const oldResponse = await oldRequest;
+      expect(oldResponse.success).toBe(false);
+      const newerSignal = (vi.mocked(globalThis.fetch).mock.calls[1][1] as RequestInit).signal as AbortSignal;
+      expect(newerSignal.aborted).toBe(false);
+      resolveRecent({ status: 200, json: () => Promise.resolve({
+        success: true, operation: "evaluate", request_id: "sg28-overlap",
+        result_text: "4", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1,
+      }) } as Response);
+      expect((await newRequest).success).toBe(true);
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(newerSignal.aborted).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("sintetiza un MathResponse de error ante una respuesta no-JSON", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       status: 502,
