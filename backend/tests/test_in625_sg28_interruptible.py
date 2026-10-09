@@ -69,3 +69,29 @@ def test_running_sympy_worker_is_terminated_before_evaluation_and_recovers() -> 
         run_bounded(_sympy_after_gate, ready, release, timeout_seconds=1.0)
     assert ready.is_set(), "The isolated SymPy child never reached its active gate"
     assert run_bounded(_real_sympy_evaluation, timeout_seconds=5) == "3*x**2 + 2"
+
+
+def _sympy_mid_computation(ready) -> None:
+    """Enter a genuine, bounded-repeat SymPy differentiation loop."""
+    import sympy
+
+    x = sympy.Symbol("x")
+    expr = x**3 + 2*x
+    ready.set()
+    while True:
+        # Actual SymPy computation, not a sleep or synchronization wait.
+        expr = sympy.diff(expr, x) + x**3
+        if expr == 0:
+            expr = x**3
+
+
+def test_terminate_during_real_sympy_computation_and_recover() -> None:
+    """A live SymPy loop is stopped at its wall-clock limit, then recovers."""
+    import multiprocessing as mp
+
+    ctx = mp.get_context("spawn")
+    ready = ctx.Event()
+    with pytest.raises(ComputationTimedOut):
+        run_bounded(_sympy_mid_computation, ready, timeout_seconds=1.0)
+    assert ready.is_set(), "SymPy computation never reached its active loop"
+    assert run_bounded(_real_sympy_evaluation, timeout_seconds=5) == "3*x**2 + 2"
