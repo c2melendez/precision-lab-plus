@@ -118,3 +118,20 @@ def test_in625_h2_sg18_remaining_reserved_symbols_are_inert(case_id, expression)
         assert result.get("error_code"), (case_id, result)
     else:
         assert "traceback" not in str(result).lower(), (case_id, result)
+
+@pytest.mark.parametrize("expression", ["clearall", "draw", "run", "last", "lambda", "S", "N"])
+def test_in625_h2_sg18_reserved_word_request_preserves_following_calculation(expression):
+    """A reserved-token request must not disrupt subsequent independent calls."""
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": expression, "angle_unit": "rad"},
+    )
+    assert response.status_code == 200, (expression, response.status_code)
+    probe = client.post(
+        "/api/v1/evaluate",
+        json={"expression": "2+3", "angle_unit": "rad"},
+    )
+    assert probe.status_code == 200, (expression, probe.status_code)
+    result = probe.json()
+    assert result.get("success") is True, (expression, result)
+    assert str(result.get("result", "")).strip() == "5", (expression, result)
