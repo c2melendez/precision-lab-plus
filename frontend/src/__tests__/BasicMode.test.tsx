@@ -450,8 +450,12 @@ describe("BasicMode", () => {
     fireEvent.change(input, { target: { value: "\\int_{0}^{2} x^2\\,dx" } });
     fireEvent.submit(form);
     await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
-    expect(mockedCallApi.mock.calls[0][0]).toBe("/integral");
-    expect(mockedCallApi.mock.calls[1][0]).toBe("/integral");
+    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/integral", {
+      expression: "x^2", variable: "x", lower_bound: "0", upper_bound: "1",
+    });
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/integral", {
+      expression: "x^2", variable: "x", lower_bound: "0", upper_bound: "2",
+    });
     resolveSecond({ success: true, operation: "integral", request_id: "new", result_text: "SG29_INTEGRAL_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
     await waitFor(() => expect(screen.getAllByText("SG29_INTEGRAL_NEW").length).toBeGreaterThan(0));
     resolveFirst({ success: true, operation: "integral", request_id: "old", result_text: "SG29_INTEGRAL_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
