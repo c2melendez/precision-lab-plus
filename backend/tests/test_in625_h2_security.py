@@ -191,3 +191,19 @@ def test_in625_h2_sg18_reserved_token_does_not_change_subsequent_fraction(expres
     body = response.json()
     assert body.get("success") is True, (expression, body)
     assert body.get("result_approx") == pytest.approx(0.75), (expression, body)
+
+@pytest.mark.parametrize("case_id, expression", [
+    ("EN-SG-19", "(" * 50 + "1" + ")" * 50),
+    ("EN-SG-20", "(" * 1000 + "1" + ")" * 1000),
+])
+def test_in625_h2_sg19_sg20_parentheses_depth_controlled(case_id, expression):
+    """Bounded in-process nested input; no expensive symbolic expansion."""
+    response = client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "rad"})
+    assert response.status_code == 200, (case_id, response.status_code)
+    result = response.json()
+    if case_id == "EN-SG-19":
+        assert result.get("success") is True, (case_id, result)
+        assert result.get("result_approx") == pytest.approx(1.0), (case_id, result)
+    else:
+        assert result.get("success") is False, (case_id, result)
+        assert result.get("error_code"), (case_id, result)
