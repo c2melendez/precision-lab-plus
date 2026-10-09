@@ -242,3 +242,28 @@ def test_in625_h2_sg31_five_mib_json_body_returns_413():
     assert body.get("success") is False, body
     assert body.get("error_code") == "PAYLOAD_TOO_LARGE", body
     assert body.get("error_message"), body
+
+def test_in625_h2_sg31_body_without_content_length_is_rejected():
+    """ASGI request without length header: 5 MiB body gets HTTP 413."""
+    import json
+    import httpx
+
+    payload = json.dumps({"expression": "1" * (5 * 1024 * 1024), "angle_unit": "rad"}).encode()
+    async def body_stream():
+        for offset in range(0, len(payload), 8192):
+            yield payload[offset:offset + 8192]
+
+    # TestClient's streaming body generally sets transfer-encoding: chunked,
+    # with no Content-Length, while staying within the local ASGI app.
+    response = client.post(
+        "/api/v1/evaluate",
+        content=body_stream_sync(payload),
+        headers={"Content-Type": "application/json"},
+    )
+    assert response.status_code == 413, response.status_code
+    assert response.json().get("error_code") == "PAYLOAD_TOO_LARGE"
+
+
+def body_stream_sync(payload):
+    for offset in range(0, len(payload), 8192):
+        yield payload[offset:offset + 8192]
