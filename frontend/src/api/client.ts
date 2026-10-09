@@ -158,7 +158,11 @@ export async function callApi(
 
   const startTime = performance.now();
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
 
   try {
     const response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
@@ -172,7 +176,7 @@ export async function callApi(
     try {
       body = await response.json();
     } catch (error) {
-      if (controller.signal.aborted) {
+      if (timedOut) {
         return synthesizeErrorResponse(
           endpoint,
           `La solicitud excedió el tiempo máximo de ${REQUEST_TIMEOUT_MS / 1000}s.`,
@@ -187,7 +191,7 @@ export async function callApi(
     }
 
     // Rechaza respuestas tardías incluso si un adaptador de fetch ignora abort.
-    if (controller.signal.aborted) {
+    if (timedOut) {
       return synthesizeErrorResponse(
         endpoint,
         `La solicitud excedió el tiempo máximo de ${REQUEST_TIMEOUT_MS / 1000}s.`,
@@ -205,7 +209,7 @@ export async function callApi(
 
     return body;
   } catch (error) {
-    if (controller.signal.aborted) {
+    if (timedOut) {
       return synthesizeErrorResponse(
         endpoint,
         `La solicitud excedió el tiempo máximo de ${REQUEST_TIMEOUT_MS / 1000}s.`,
