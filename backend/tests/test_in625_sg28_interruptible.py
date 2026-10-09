@@ -122,3 +122,24 @@ def test_explicit_cancellation_of_active_sympy_child_and_recovery() -> None:
         cancelled.set()
         watcher.join(timeout=1)
     assert run_bounded(_real_sympy_evaluation, timeout_seconds=5) == "3*x**2 + 2"
+
+
+def _repeated_real_sympy_work() -> str:
+    """Exercise actual SymPy repeatedly; the parent must stop this worker."""
+    import sympy
+
+    x = sympy.Symbol("x")
+    deadline = time.monotonic() + 4.0
+    while time.monotonic() < deadline:
+        expr = (x + 1) ** 12
+        _ = sympy.diff(expr, x)
+    return "unexpected-completion-before-timeout"
+
+
+def test_running_sympy_process_is_terminated_then_recovers() -> None:
+    """Timeout kills a child running SymPy work; a fresh process still works."""
+    started = time.monotonic()
+    with pytest.raises(ComputationTimedOut):
+        run_bounded(_repeated_real_sympy_work, timeout_seconds=1.5)
+    assert time.monotonic() - started < 4.0
+    assert run_bounded(_real_sympy_evaluation, timeout_seconds=5) == "3*x**2 + 2"
