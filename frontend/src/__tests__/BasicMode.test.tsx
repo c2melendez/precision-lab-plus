@@ -389,4 +389,27 @@ describe("BasicMode", () => {
     expect(screen.getAllByText("SG29_SOLVE_NEW")[0]).toBeInTheDocument();
   });
 
+  it("SG29: respuestas /inequality fuera de orden preservan el resultado reciente", async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecond = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "x>1" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "x>3" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/inequality", { inequality: "x>1" });
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/inequality", { inequality: "x>3" });
+    resolveSecond({ success: true, operation: "solve", request_id: "new", result_text: "SG29_INEQ_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("SG29_INEQ_NEW").length).toBeGreaterThan(0));
+    resolveFirst({ success: true, operation: "solve", request_id: "old", result_text: "SG29_INEQ_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_INEQ_OLD")).not.toBeInTheDocument();
+    expect(screen.getAllByText("SG29_INEQ_NEW").length).toBeGreaterThan(0);
+  });
+
 });
