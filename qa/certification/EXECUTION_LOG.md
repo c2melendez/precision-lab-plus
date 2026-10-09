@@ -330,3 +330,8 @@ Registro acumulativo; `CURRENT_STATE.md` conserva la fotografía autoritativa ac
 - Plus gate 37928413904 SUCCESS SHA b57755bb: frontend 69/69 archivos; 725 PASS, 0 FAIL, 28 TODO (753), con backend gate SUCCESS. H1d 37928415752 SUCCESS.
 - Cobertura nueva H2: Lite 10 casos de rechazo parser (EN-SG-01/02/04/05/06/07/08, variantes); Plus 9 casos de rechazo backend TestClient (muestras EN-SG-09..16). Estas cifras son aserciones, NO 19 de 32 filas H2 certificadas: faltan verificaciones DOM/código nunca ejecutado, cobertura completa por fila, estrés/cancelación y API.
 - Siguiente paso: reforzar cobertura de H2 sin lanzar cargas peligrosas en producción, evaluar categorías por fila y ejecutar nueva tanda aislada con evidencia.
+
+## 2026-10-09 — IN625 H2 segunda tanda
+- Lite commit de pruebas 181f58a8, gate 37929006342, H1d 37929006262. Plus commit de pruebas bd7f4f09, gate 37928951948 y H1d 37928952061.
+- Se incorporaron variantes adicionales de rechazo de macros LaTeX en Lite y variantes negativas de atributos y constructores en Plus.
+- CI en curso durante el registro. No acreditar PASS antes de verificar resultados. Pendientes UI, estado, recursos y API.
