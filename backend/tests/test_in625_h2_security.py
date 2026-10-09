@@ -102,3 +102,19 @@ def test_in625_h2_sg18_reserved_words_cannot_execute_commands(case_id, expressio
     else:
         serialized = str(result).lower()
         assert "traceback" not in serialized, (case_id, result)
+
+@pytest.mark.parametrize("case_id, expression", [
+    ("EN-SG-18 symbol S", "S"),
+    ("EN-SG-18 symbol N", "N"),
+])
+def test_in625_h2_sg18_remaining_reserved_symbols_are_inert(case_id, expression):
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": expression, "angle_unit": "rad"},
+    )
+    assert response.status_code == 200, (case_id, response.status_code)
+    result = response.json()
+    if not result.get("success"):
+        assert result.get("error_code"), (case_id, result)
+    else:
+        assert "traceback" not in str(result).lower(), (case_id, result)
