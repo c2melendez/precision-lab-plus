@@ -366,4 +366,27 @@ describe("BasicMode", () => {
     expect(screen.getAllByText("4").length).toBeGreaterThan(0);
   });
 
+  it("SG29: dos solicitudes /solve fuera de orden preservan la ecuación más reciente", async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecond = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "x=2" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "x=4" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/solve", { equation: "x=2", angle_unit: "rad" });
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/solve", { equation: "x=4", angle_unit: "rad" });
+    resolveSecond({ success: true, operation: "solve", request_id: "new", result_text: "SG29_SOLVE_NEW", result_latex: "4", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getByText("SG29_SOLVE_NEW")).toBeInTheDocument());
+    resolveFirst({ success: true, operation: "solve", request_id: "old", result_text: "SG29_SOLVE_OLD", result_latex: "2", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_SOLVE_OLD")).not.toBeInTheDocument();
+    expect(screen.getByText("SG29_SOLVE_NEW")).toBeInTheDocument();
+  });
+
 });
