@@ -96,6 +96,8 @@ export function BasicMode() {
   const [systemVariables, setSystemVariables] = useState("x, y");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<MathResponse | null>(null);
+  // SG29: prevent late responses from replacing the most recent basic request.
+  const latestSubmissionRef = useRef(0);
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
@@ -325,6 +327,7 @@ export function BasicMode() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    const submissionId = ++latestSubmissionRef.current;
 
     // H1 EN-RE-12: una unión de intervalos producida por el propio solver
     // es una salida matemática válida, aunque no sea una expresión
@@ -539,12 +542,13 @@ export function BasicMode() {
               },
               trimmed,
             );
+      if (submissionId !== latestSubmissionRef.current) return;
       setLastResult(result);
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
     } finally {
-      setLoading(false);
+      if (submissionId === latestSubmissionRef.current) setLoading(false);
     }
   }
 
