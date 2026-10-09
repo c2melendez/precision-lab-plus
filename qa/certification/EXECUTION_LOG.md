@@ -335,3 +335,8 @@ Registro acumulativo; `CURRENT_STATE.md` conserva la fotografía autoritativa ac
 - Lite commit de pruebas 181f58a8, gate 37929006342, H1d 37929006262. Plus commit de pruebas bd7f4f09, gate 37928951948 y H1d 37928952061.
 - Se incorporaron variantes adicionales de rechazo de macros LaTeX en Lite y variantes negativas de atributos y constructores en Plus.
 - CI en curso durante el registro. No acreditar PASS antes de verificar resultados. Pendientes UI, estado, recursos y API.
+
+## 2026-10-09 — H2 segunda tanda: gates bilaterales verdes
+- Lite SHA 181f58a8 gate #37929006342 SUCCESS: 84/84 archivos, 1029 PASS, 0 FAIL, 30 TODO. H1d #37929006262 SUCCESS, build #37929006242 SUCCESS. El gate de SHA intermedia 571226fb falló y fue corregido antes de SHA validada.
+- Plus SHA bd7f4f09 gate #37928951948 SUCCESS y H1d #37928952061 SUCCESS; log backend 498 PASS. Se preservó la primera tanda H2.
+- H2 todavía NO cerrado: la verificación de rechazo sintáctico no sustituye escape/render DOM ni controles de recursos y concurrencia; próximos casos SG17..32 aislados.
