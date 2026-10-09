@@ -181,3 +181,13 @@ def test_in625_h2_sg18_repeated_reserved_request_preserves_calculation(expressio
     result = response.json()
     assert result.get("success") is True, (expression, result)
     assert result.get("result_approx") == pytest.approx(10.0), (expression, result)
+
+@pytest.mark.parametrize("expression", ["clearall", "draw", "run", "last", "lambda", "S", "N"])
+def test_in625_h2_sg18_reserved_token_does_not_change_subsequent_fraction(expression):
+    """SG18: preserve independent exact rational evaluation after inert tokens."""
+    client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "rad"})
+    response = client.post("/api/v1/evaluate", json={"expression": "1/2+1/4", "angle_unit": "rad"})
+    assert response.status_code == 200, (expression, response.status_code)
+    body = response.json()
+    assert body.get("success") is True, (expression, body)
+    assert body.get("result_approx") == pytest.approx(0.75), (expression, body)
