@@ -105,10 +105,12 @@ export function BasicMode() {
 
   const piecewiseIntent = detectPiecewiseIntent(latex);
   const constrainedIntent = piecewiseIntent ? null : detectConstrainedEquationIntent(latex);
-  const relationIntent = piecewiseIntent || constrainedIntent ? null : detectRelationIntent(latex);
-  const systemRows = piecewiseIntent || relationIntent || constrainedIntent
-    ? null
-    : (splitSystemLatex(latex) ?? splitFreeSystemLatex(latex));
+  // Un sistema de varias filas tiene prioridad sobre la clasificación
+  // de una relación aislada: "cases" con varias incógnitas no es una gráfica.
+  const candidateSystemRows = piecewiseIntent ? null : (splitSystemLatex(latex) ?? splitFreeSystemLatex(latex));
+  const relationIntent = piecewiseIntent || constrainedIntent || candidateSystemRows
+    ? null : detectRelationIntent(latex);
+  const systemRows = piecewiseIntent || relationIntent || constrainedIntent ? null : candidateSystemRows;
 
   function addSubstitutionRow(): void {
     setSubstitutions((rows) => [...rows, { name: "", value: "" }]);
