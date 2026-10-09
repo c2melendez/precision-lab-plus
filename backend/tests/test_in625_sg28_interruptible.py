@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from app.services.interruptible import ComputationTimedOut, run_bounded
+from app.services.interruptible import ComputationCancelled, ComputationTimedOut, run_bounded
 
 
 def _add(a: int, b: int) -> int:
@@ -94,4 +94,31 @@ def test_terminate_during_real_sympy_computation_and_recover() -> None:
     with pytest.raises(ComputationTimedOut):
         run_bounded(_sympy_mid_computation, ready, timeout_seconds=1.0)
     assert ready.is_set(), "SymPy computation never reached its active loop"
+    assert run_bounded(_real_sympy_evaluation, timeout_seconds=5) == "3*x**2 + 2"
+
+
+def test_explicit_cancellation_of_active_sympy_child_and_recovery() -> None:
+    """Caller-triggered cancellation (not just timeout) kills active SymPy work."""
+    import multiprocessing as mp
+    import threading
+
+    ready = mp.get_context("spawn").Event()
+    cancelled = threading.Event()
+
+    def cancel_after_worker_started() -> None:
+        if ready.wait(timeout=3):
+            cancelled.set()
+
+    watcher = threading.Thread(target=cancel_after_worker_started, daemon=True)
+    watcher.start()
+    try:
+        with pytest.raises(ComputationCancelled):
+            run_bounded(
+                _sympy_mid_computation, ready, timeout_seconds=5,
+                cancel_event=cancelled,
+            )
+        assert ready.is_set()
+    finally:
+        cancelled.set()
+        watcher.join(timeout=1)
     assert run_bounded(_real_sympy_evaluation, timeout_seconds=5) == "3*x**2 + 2"
