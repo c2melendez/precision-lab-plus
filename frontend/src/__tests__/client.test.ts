@@ -292,6 +292,30 @@ describe("callApi", () => {
     }
   });
 
+  it("SG28: JSON tardío no se acepta tras un timeout ya vencido", async () => {
+    vi.useFakeTimers();
+    try {
+      let finishBody!: (body: unknown) => void;
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        status: 200,
+        // Adaptador no cooperativo: el Promise no escucha AbortSignal.
+        json: () => new Promise((resolve) => { finishBody = resolve; }),
+      } as unknown as Response);
+      const pending = callApi("/evaluate", { expression: "2+2" });
+      await vi.advanceTimersByTimeAsync(15_000);
+      finishBody({
+        success: true, operation: "evaluate", request_id: "sg28-late-json",
+        result_text: "4", steps: [], has_detailed_steps: false,
+        warnings: [], duration_ms: 1,
+      });
+      const result = await pending;
+      expect(result.success).toBe(false);
+      expect(result.error_message).toMatch(/tiempo máximo/);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("sintetiza un MathResponse de error ante una respuesta no-JSON", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       status: 502,
