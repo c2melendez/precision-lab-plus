@@ -213,3 +213,22 @@ def test_in625_h2_sg19_sg20_parentheses_depth_controlled(case_id, expression):
         assert result.get("error_code") == "VALIDATION_ERROR", (case_id, result)
         assert result.get("error_message"), (case_id, result)
         assert "traceback" not in str(result).lower(), (case_id, result)
+
+@pytest.mark.parametrize("case_id, expression", [
+    ("EN-SG-22", "1" * 100_000),
+    ("EN-SG-31", "1" * (5 * 1024 * 1024)),
+])
+def test_in625_h2_oversized_expression_rejected_at_request_boundary(case_id, expression):
+    """In-process only; input schema must reject, not evaluate, oversized text.
+
+    EN-SG-31 is a *partial* check: this does not assert HTTP 413 or raw-body
+    size middleware; it demonstrates bounded expression validation.
+    """
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": expression, "angle_unit": "rad"},
+    )
+    assert response.status_code == 422, (case_id, response.status_code)
+    body = response.json()
+    assert body.get("success") is False, (case_id, body)
+    assert body.get("error_code") == "VALIDATION_ERROR", (case_id, body)
