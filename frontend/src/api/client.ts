@@ -160,17 +160,43 @@ export async function callApi(
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
+
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch (error) {
+      if (controller.signal.aborted) {
+        return synthesizeErrorResponse(
+          endpoint,
+          `La solicitud excedió el tiempo máximo de ${REQUEST_TIMEOUT_MS / 1000}s.`,
+          startTime,
+        );
+      }
+      return synthesizeErrorResponse(
+        endpoint,
+        `El servidor respondió con contenido no-JSON (HTTP ${response.status}).`,
+        startTime,
+      );
+    }
+
+    if (!isValidMathResponseShape(body)) {
+      return synthesizeErrorResponse(
+        endpoint,
+        "La respuesta del servidor no cumple el contrato MathResponse esperado.",
+        startTime,
+      );
+    }
+
+    return body;
   } catch (error) {
-    clearTimeout(timeoutId);
-    if (error instanceof DOMException && error.name === "AbortError") {
+    if (controller.signal.aborted) {
       return synthesizeErrorResponse(
         endpoint,
         `La solicitud excedió el tiempo máximo de ${REQUEST_TIMEOUT_MS / 1000}s.`,
@@ -185,25 +211,4 @@ export async function callApi(
   } finally {
     clearTimeout(timeoutId);
   }
-
-  let body: unknown;
-  try {
-    body = await response.json();
-  } catch {
-    return synthesizeErrorResponse(
-      endpoint,
-      `El servidor respondió con contenido no-JSON (HTTP ${response.status}).`,
-      startTime,
-    );
-  }
-
-  if (!isValidMathResponseShape(body)) {
-    return synthesizeErrorResponse(
-      endpoint,
-      "La respuesta del servidor no cumple el contrato MathResponse esperado.",
-      startTime,
-    );
-  }
-
-  return body;
 }
