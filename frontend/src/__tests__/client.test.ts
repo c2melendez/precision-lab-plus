@@ -169,6 +169,18 @@ describe("callApi", () => {
     }
   });
 
+  it("SG28: solicitudes paralelas usan AbortSignal independientes", async () => {
+    const response = { success: true, operation: "evaluate", request_id: "sg28-parallel", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 };
+    globalThis.fetch = vi.fn().mockResolvedValue({ status: 200, json: () => Promise.resolve(response) } as Response);
+    await Promise.all([callApi("/evaluate", { expression: "1+1" }), callApi("/evaluate", { expression: "2+2" })]);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    const first = (vi.mocked(globalThis.fetch).mock.calls[0][1] as RequestInit).signal;
+    const second = (vi.mocked(globalThis.fetch).mock.calls[1][1] as RequestInit).signal;
+    expect(first).toBeInstanceOf(AbortSignal);
+    expect(second).toBeInstanceOf(AbortSignal);
+    expect(first).not.toBe(second);
+  });
+
   it("sintetiza un MathResponse de error ante una respuesta no-JSON", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       status: 502,
