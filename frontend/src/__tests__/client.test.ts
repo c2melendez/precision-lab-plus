@@ -71,6 +71,46 @@ describe("callApi", () => {
     expect(secondSignal).not.toBe(firstSignal);
   });
 
+  it("SG28: el timeout de 15 segundos aborta fetch y permite recuperación", async () => {
+    vi.useFakeTimers();
+    try {
+      let aborted = false;
+      const successResponse = {
+        success: true,
+        operation: "evaluate",
+        request_id: "sg28-timeout-recovered",
+        result_text: "42",
+        steps: [],
+        has_detailed_steps: false,
+        warnings: [],
+        duration_ms: 1,
+      };
+      globalThis.fetch = vi.fn()
+        .mockImplementationOnce((_url: string, options: RequestInit) => new Promise((_resolve, reject) => {
+          const signal = options.signal as AbortSignal;
+          signal.addEventListener("abort", () => {
+            aborted = true;
+            reject(new DOMException("Aborted", "AbortError"));
+          }, { once: true });
+        }))
+        .mockResolvedValueOnce({
+          status: 200,
+          json: () => Promise.resolve(successResponse),
+        } as unknown as Response);
+
+      const pending = callApi("/evaluate", { expression: "1+1" });
+      await vi.advanceTimersByTimeAsync(15_000);
+      const timedOut = await pending;
+      expect(aborted).toBe(true);
+      expect(timedOut.success).toBe(false);
+      expect(timedOut.error_message).toMatch(/tiempo máximo/);
+      const recovered = await callApi("/evaluate", { expression: "6*7" });
+      expect(recovered).toEqual(successResponse);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("sintetiza un MathResponse de error ante una respuesta no-JSON", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       status: 502,
