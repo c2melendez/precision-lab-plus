@@ -532,4 +532,28 @@ describe("BasicMode", () => {
     expect(screen.getAllByText("4").length).toBeGreaterThan(0);
   });
 
+
+  it("SG29: respuesta matricial obsoleta no sustituye el cálculo más reciente", async () => {
+    let resolveMatrix!: (value: any) => void;
+    let resolveRecent!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveMatrix = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveRecent = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "\\det\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "2+2" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/matrix/determinant", { matrix: [["1", "2"], ["3", "4"]] });
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/evaluate", { expression: "2+2", angle_unit: "rad" });
+    resolveRecent({ success: true, operation: "evaluate", request_id: "new", result_text: "SG29_MATRIX_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("SG29_MATRIX_NEW").length).toBeGreaterThan(0));
+    resolveMatrix({ success: true, operation: "matrix_operation", request_id: "old", result_type: "scalar", result_text: "SG29_MATRIX_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_MATRIX_OLD")).not.toBeInTheDocument();
+    expect(screen.getAllByText("SG29_MATRIX_NEW").length).toBeGreaterThan(0);
+  });
+
 });
