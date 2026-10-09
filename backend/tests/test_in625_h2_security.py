@@ -216,13 +216,11 @@ def test_in625_h2_sg19_sg20_parentheses_depth_controlled(case_id, expression):
 
 @pytest.mark.parametrize("case_id, expression", [
     ("EN-SG-22", "1" * 100_000),
-    ("EN-SG-31", "1" * (5 * 1024 * 1024)),
 ])
 def test_in625_h2_oversized_expression_rejected_at_request_boundary(case_id, expression):
-    """In-process only; input schema must reject, not evaluate, oversized text.
+    """EN-SG-22: request schema safely rejects a 100k-character expression.
 
-    EN-SG-31 is a *partial* check: this does not assert HTTP 413 or raw-body
-    size middleware; it demonstrates bounded expression validation.
+    EN-SG-31 5 MiB body is covered separately by its dedicated HTTP 413 test.
     """
     response = client.post(
         "/api/v1/evaluate",
