@@ -412,4 +412,27 @@ describe("BasicMode", () => {
     expect(screen.getAllByText("SG29_INEQ_NEW").length).toBeGreaterThan(0);
   });
 
+  it("SG29: dos derivadas fuera de orden mantienen el resultado más reciente", async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecond = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "\\frac{d}{dx}(x^2)" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "\\frac{d}{dx}(x^3)" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(mockedCallApi.mock.calls[0][0]).toBe("/derivative");
+    expect(mockedCallApi.mock.calls[1][0]).toBe("/derivative");
+    resolveSecond({ success: true, operation: "derivative", request_id: "new", result_text: "SG29_DERIV_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("SG29_DERIV_NEW").length).toBeGreaterThan(0));
+    resolveFirst({ success: true, operation: "derivative", request_id: "old", result_text: "SG29_DERIV_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_DERIV_OLD")).not.toBeInTheDocument();
+    expect(screen.getAllByText("SG29_DERIV_NEW").length).toBeGreaterThan(0);
+  });
+
 });
