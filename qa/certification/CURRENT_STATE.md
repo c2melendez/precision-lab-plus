@@ -141,3 +141,9 @@ Siguiente bloque: H1b — EN-RE-09..16: CERRADO 8/8 en Lite y Plus.
 - H1d Plus: run `37909986581` SUCCESS y gate acumulativo `37909986582` SUCCESS en SHA `2d4e97c38`. Son SHAs de código probado; commits puramente documentales posteriores no equivalen a nuevas corridas técnicas.
 - **H1d CERRADO exclusivamente al nivel de clasificación contractual de los siete casos.** EN-RE-29 (share-link) y EN-RE-30 (persistencia de entrada) siguen CAPABILITY GAPS explícitos, no implementados ni certificados. EN-RE-22 permanece GAP de H1c. La semántica universal de EN-RE-25/26/27/28 continúa como deuda de fortalecimiento del oráculo; no implica certificación funcional global.
 - **Siguiente bloque activo: IN625 H2.** Primer paso: localizar la matriz canónica H2 y su enumeración/cobertura real en los repositorios antes de crear o disparar nuevas pruebas; no inventar casos ni declarar H2 ejecutado.
+
+## 2026-10-09 — H2: discovery de matriz canónica
+- H1d cerrado por clasificación: cinco PASS automatizados EN-RE-24..28 en cada motor, dos GAP EN-RE-29/30; H1c EN-RE-22 también GAP. Gates Lite #37926844320 y Plus #37909986582 SUCCESS.
+- **H2 no ejecutado**: no se localizó su matriz canónica en `qa/certification/`; la búsqueda limitada de GitHub tampoco identificó su fuente original `matriz_entrada_sintaxis_calculadora` Parte H.2. No hay IDs/casos H2 acreditados.
+- Se creó `qa/certification/IN625_H2_DISCOVERY.md` bilateral, con inventario de fuentes consultadas y condiciones de procedencia antes de testear. Lite commit 724436bf; Plus commit 4d71ab65.
+- **Siguiente paso exacto**: recuperar de los artefactos originales/otra ubicación del repo la Parte H.2 con IDs, entradas, expected y clasificación; incorporarla fielmente, preparar harness Lite y Plus y correr las suites. No marcar H2 PASS sin evidencias.
