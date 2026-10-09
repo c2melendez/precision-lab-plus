@@ -268,6 +268,30 @@ describe("callApi", () => {
     }
   });
 
+  it("SG28: lectura JSON completada antes del timeout conserva el resultado", async () => {
+    vi.useFakeTimers();
+    try {
+      let resolveBody!: (value: unknown) => void;
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        status: 200,
+        json: () => new Promise((resolve) => { resolveBody = resolve; }),
+      } as unknown as Response);
+      const pending = callApi("/evaluate", { expression: "2+2" });
+      const signal = (vi.mocked(globalThis.fetch).mock.calls[0][1] as RequestInit).signal as AbortSignal;
+      await vi.advanceTimersByTimeAsync(14_999);
+      expect(signal.aborted).toBe(false);
+      resolveBody({
+        success: true, operation: "evaluate", request_id: "sg28-body-before-limit",
+        result_text: "4", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1,
+      });
+      expect((await pending).success).toBe(true);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(signal.aborted).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("sintetiza un MathResponse de error ante una respuesta no-JSON", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       status: 502,
