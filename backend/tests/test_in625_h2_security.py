@@ -81,3 +81,24 @@ def test_in625_h2_sg30_special_characters_are_valid_json_requests(case_id, expre
         json={"expression": expression, "angle_unit": "rad"},
     )
     assert response.status_code not in (400, 500), (case_id, response.text[:200])
+
+@pytest.mark.parametrize("case_id, expression", [
+    ("EN-SG-18 clearall", "clearall"),
+    ("EN-SG-18 draw", "draw"),
+    ("EN-SG-18 run", "run"),
+    ("EN-SG-18 last", "last"),
+    ("EN-SG-18 lambda", "lambda"),
+])
+def test_in625_h2_sg18_reserved_words_cannot_execute_commands(case_id, expression):
+    """Reserved words must remain inert: symbolic result or controlled rejection."""
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": expression, "angle_unit": "rad"},
+    )
+    assert response.status_code == 200, (case_id, response.status_code)
+    result = response.json()
+    if result.get("success") is False:
+        assert result.get("error_code"), (case_id, result)
+    else:
+        serialized = str(result).lower()
+        assert "traceback" not in serialized, (case_id, result)
