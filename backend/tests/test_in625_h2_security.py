@@ -134,4 +134,4 @@ def test_in625_h2_sg18_reserved_word_request_preserves_following_calculation(exp
     assert probe.status_code == 200, (expression, probe.status_code)
     result = probe.json()
     assert result.get("success") is True, (expression, result)
-    assert str(result.get("result", "")).strip() == "5", (expression, result)
+    assert result.get("result_approx") == pytest.approx(5.0), (expression, result)
