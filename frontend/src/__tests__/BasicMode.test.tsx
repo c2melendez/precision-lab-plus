@@ -345,4 +345,25 @@ describe("BasicMode", () => {
     expect(screen.getAllByText("4").length).toBeGreaterThan(0);
   });
 
+  it("SG29: también descarta un error antiguo después de una respuesta reciente", async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecond = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "1+1" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "2+2" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    resolveSecond({ success: true, operation: "evaluate", request_id: "new", result_text: "4", result_latex: "4", result_approx: 4, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("4").length).toBeGreaterThan(0));
+    resolveFirst({ success: false, operation: "evaluate", request_id: "old", error_code: "PARSE_ERROR", error_message: "Error anterior SG29", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.queryByText("Error anterior SG29")).not.toBeInTheDocument());
+    expect(screen.getAllByText("4").length).toBeGreaterThan(0);
+  });
+
 });
