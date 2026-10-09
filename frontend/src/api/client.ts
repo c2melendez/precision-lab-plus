@@ -186,6 +186,15 @@ export async function callApi(
       );
     }
 
+    // Rechaza respuestas tardías incluso si un adaptador de fetch ignora abort.
+    if (controller.signal.aborted) {
+      return synthesizeErrorResponse(
+        endpoint,
+        `La solicitud excedió el tiempo máximo de ${REQUEST_TIMEOUT_MS / 1000}s.`,
+        startTime,
+      );
+    }
+
     if (!isValidMathResponseShape(body)) {
       return synthesizeErrorResponse(
         endpoint,
