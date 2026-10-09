@@ -316,6 +316,30 @@ describe("callApi", () => {
     }
   });
 
+  it("SG28: fetch tardío no convierte un timeout en éxito", async () => {
+    vi.useFakeTimers();
+    try {
+      let resolveFetch!: (value: Response) => void;
+      globalThis.fetch = vi.fn().mockImplementation(() => new Promise<Response>((resolve) => {
+        resolveFetch = resolve;
+      }));
+      const pending = callApi("/evaluate", { expression: "2+2" });
+      const signal = (vi.mocked(globalThis.fetch).mock.calls[0][1] as RequestInit).signal as AbortSignal;
+      await vi.advanceTimersByTimeAsync(15_000);
+      expect(signal.aborted).toBe(true);
+      resolveFetch({ status: 200, json: () => Promise.resolve({
+        success: true, operation: "evaluate", request_id: "sg28-late-fetch",
+        result_text: "4", steps: [], has_detailed_steps: false,
+        warnings: [], duration_ms: 1,
+      }) } as Response);
+      const result = await pending;
+      expect(result.success).toBe(false);
+      expect(result.error_message).toMatch(/tiempo máximo/);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("sintetiza un MathResponse de error ante una respuesta no-JSON", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       status: 502,
