@@ -111,6 +111,35 @@ describe("callApi", () => {
     }
   });
 
+  it("SG28: una petición completada limpia su temporizador y no se aborta después", async () => {
+    vi.useFakeTimers();
+    try {
+      const response = {
+        success: true,
+        operation: "evaluate",
+        request_id: "sg28-no-late-abort",
+        result_text: "4",
+        steps: [],
+        has_detailed_steps: false,
+        warnings: [],
+        duration_ms: 1,
+      };
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        status: 200,
+        json: () => Promise.resolve(response),
+      } as unknown as Response);
+
+      const result = await callApi("/evaluate", { expression: "2+2" });
+      expect(result).toEqual(response);
+      const signal = (vi.mocked(globalThis.fetch).mock.calls[0][1] as RequestInit).signal as AbortSignal;
+      expect(signal.aborted).toBe(false);
+      await vi.advanceTimersByTimeAsync(30_000);
+      expect(signal.aborted).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("sintetiza un MathResponse de error ante una respuesta no-JSON", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       status: 502,
