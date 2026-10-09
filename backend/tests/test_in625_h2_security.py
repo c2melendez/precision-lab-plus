@@ -281,3 +281,32 @@ def test_in625_h2_sg31_streamed_small_body_still_evaluates():
     result = response.json()
     assert result.get("success") is True, result
     assert result.get("result_approx") == pytest.approx(5.0), result
+
+def test_in625_h2_sg31_streamed_exact_limit_preserves_valid_payload():
+    """A streaming JSON body with padding below the cap must not be rejected."""
+    import json
+    payload = json.dumps({
+        "expression": "2+3",
+        "angle_unit": "rad",
+    }).encode()
+    response = client.post(
+        "/api/v1/evaluate",
+        content=body_stream_sync(payload),
+        headers={"Content-Type": "application/json"},
+    )
+    assert response.status_code == 200, response.status_code
+    assert response.json().get("result_approx") == pytest.approx(5.0)
+
+
+def test_in625_h2_sg31_declared_oversize_does_not_affect_next_request():
+    """A rejected large request must not poison subsequent same-client work."""
+    large = client.post(
+        "/api/v1/evaluate",
+        json={"expression": "1" * (1024 * 1024 + 1)},
+    )
+    assert large.status_code == 413
+    followup = client.post(
+        "/api/v1/evaluate", json={"expression": "6*7", "angle_unit": "rad"}
+    )
+    assert followup.status_code == 200
+    assert followup.json().get("result_approx") == pytest.approx(42.0)
