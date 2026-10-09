@@ -135,3 +135,15 @@ def test_in625_h2_sg18_reserved_word_request_preserves_following_calculation(exp
     result = probe.json()
     assert result.get("success") is True, (expression, result)
     assert result.get("result_approx") == pytest.approx(5.0), (expression, result)
+
+@pytest.mark.parametrize("case_id, expression", [
+    ("EN-SG-30 tab", "x\ty"),
+    ("EN-SG-30 newline", "x\ny"),
+])
+def test_in625_h2_sg30_additional_json_control_characters(case_id, expression):
+    """Additional JSON control characters are safely transported in-process."""
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": expression, "angle_unit": "rad"},
+    )
+    assert response.status_code not in (400, 500), (case_id, response.text[:200])
