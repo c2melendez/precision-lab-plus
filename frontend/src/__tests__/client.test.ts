@@ -257,6 +257,23 @@ describe("callApi", () => {
     expect(result.error_message).toMatch(/no-JSON/);
   });
 
+  it("SG28: respuesta JSON inválida tampoco deja un aborto tardío", async () => {
+    vi.useFakeTimers();
+    try {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        status: 200, json: () => Promise.resolve({ foo: "bar" }),
+      } as unknown as Response);
+      const result = await callApi("/evaluate", { expression: "1+1" });
+      expect(result.success).toBe(false);
+      expect(result.error_message).toMatch(/contrato MathResponse/);
+      const signal = (vi.mocked(globalThis.fetch).mock.calls[0][1] as RequestInit).signal as AbortSignal;
+      await vi.advanceTimersByTimeAsync(30_000);
+      expect(signal.aborted).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("sintetiza un MathResponse de error si el JSON no cumple el contrato mínimo", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       status: 200,
