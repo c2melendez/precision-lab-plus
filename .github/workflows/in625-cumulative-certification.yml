@@ -14,7 +14,7 @@ permissions:
 jobs:
   backend:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     env:
       CORS_ORIGINS: https://security-test.example
     defaults:
@@ -30,9 +30,9 @@ jobs:
             backend/requirements.txt
             backend/requirements-qa.txt
       - name: Install dependencies
-        run: pip install -r requirements.txt -r requirements-qa.txt pytest-cov
+        run: pip install -r requirements.txt -r requirements-qa.txt pytest-cov pytest-timeout
       - name: Backend regression
-        run: pytest -q --cov=app --cov-report=term-missing --cov-fail-under=75 --disable-warnings
+        run: pytest -vv -ra --durations=15 --timeout=60 --timeout-method=signal --cov=app --cov-report=term-missing --cov-fail-under=75 --disable-warnings
 
   frontend:
     runs-on: ubuntu-latest
