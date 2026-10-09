@@ -262,7 +262,7 @@ describe("callApi", () => {
       const result = await pending;
       expect(bodyAborted).toBe(true);
       expect(result.success).toBe(false);
-      expect(result.error_message).toMatch(/fallo de red/);
+      expect(result.error_message).toMatch(/tiempo máximo/);
     } finally {
       vi.useRealTimers();
     }
@@ -310,7 +310,7 @@ describe("callApi", () => {
       });
       const result = await pending;
       expect(result.success).toBe(false);
-      expect(result.error_message).toMatch(/fallo de red/);
+      expect(result.error_message).toMatch(/tiempo máximo/);
     } finally {
       vi.useRealTimers();
     }
@@ -334,7 +334,7 @@ describe("callApi", () => {
       }) } as Response);
       const result = await pending;
       expect(result.success).toBe(false);
-      expect(result.error_message).toMatch(/fallo de red/);
+      expect(result.error_message).toMatch(/tiempo máximo/);
     } finally {
       vi.useRealTimers();
     }
