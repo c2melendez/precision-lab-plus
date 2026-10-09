@@ -244,6 +244,30 @@ describe("callApi", () => {
     }
   });
 
+  it("SG28: timeout sigue activo durante lectura del cuerpo JSON", async () => {
+    vi.useFakeTimers();
+    try {
+      let bodyAborted = false;
+      globalThis.fetch = vi.fn().mockImplementation((_url: string, options: RequestInit) => Promise.resolve({
+        status: 200,
+        json: () => new Promise((_resolve, reject) => {
+          (options.signal as AbortSignal).addEventListener("abort", () => {
+            bodyAborted = true;
+            reject(new DOMException("Aborted", "AbortError"));
+          }, { once: true });
+        }),
+      } as Response));
+      const pending = callApi("/evaluate", { expression: "2+2" });
+      await vi.advanceTimersByTimeAsync(15_000);
+      const result = await pending;
+      expect(bodyAborted).toBe(true);
+      expect(result.success).toBe(false);
+      expect(result.error_message).toMatch(/tiempo máximo/);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("sintetiza un MathResponse de error ante una respuesta no-JSON", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       status: 502,
