@@ -335,3 +335,31 @@ def test_in625_h2_sg30_json_special_characters_have_structured_safe_response(exp
     assert response.headers.get("x-request-id") == body["request_id"], body
     assert "traceback" not in response.text.lower()
     assert "internal server error" not in response.text.lower()
+
+def test_in625_h2_sg29_twenty_concurrent_evaluations_are_isolated():
+    """SG29 backend tranche: 20 independent short calculations, four workers.
+
+    This does NOT validate the frontend 'last input wins' UI requirement.
+    No external network or expensive symbolic computation is involved.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    def evaluate_item(index):
+        response = client.post(
+            "/api/v1/evaluate",
+            json={"expression": f"{index}+1", "angle_unit": "rad"},
+        )
+        return index, response.status_code, response.json()
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        results = list(pool.map(evaluate_item, range(1, 21)))
+
+    assert len(results) == 20
+    ids = set()
+    for index, status, body in results:
+        assert status == 200, (index, status, body)
+        assert body.get("success") is True, (index, body)
+        assert body.get("result_approx") == pytest.approx(index + 1), (index, body)
+        assert body.get("request_id"), (index, body)
+        ids.add(body["request_id"])
+    assert len(ids) == 20, "Every concurrent response needs a unique request ID"
