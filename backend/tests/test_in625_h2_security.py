@@ -66,3 +66,18 @@ def test_in625_h2_sg17_assignment_does_not_leak_between_evaluations():
         assert rendered.strip() != "8", result
     else:
         assert result.get("error_code"), result
+
+@pytest.mark.parametrize("case_id, expression", [
+    ("EN-SG-30 quote", 'x"y'),
+    ("EN-SG-30 apostrophe", "x'y"),
+    ("EN-SG-30 slash", "x\\\\y"),
+    ("EN-SG-30 nul", "x\\x00y"),
+    ("EN-SG-30 crlf", "x\\r\\ny"),
+])
+def test_in625_h2_sg30_special_characters_are_valid_json_requests(case_id, expression):
+    """In-process JSON transport: malformed math should not crash the API."""
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": expression, "angle_unit": "rad"},
+    )
+    assert response.status_code not in (400, 500), (case_id, response.text[:200])
