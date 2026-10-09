@@ -1,0 +1,30 @@
+name: IN625 SG28 Plus Backend Isolation Prototype
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - qa/syntax-audit-in625-a1
+    paths:
+      - 'backend/app/services/interruptible.py'
+      - 'backend/tests/test_in625_sg28_interruptible.py'
+      - '.github/workflows/in625-sg28-backend-cancellation.yml'
+
+jobs:
+  sg28-backend-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install backend testing requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-qa.txt
+      - name: SG28 subprocess timeout and recovery
+        run: python -m pytest tests/test_in625_sg28_interruptible.py -q
