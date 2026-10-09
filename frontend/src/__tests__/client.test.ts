@@ -111,6 +111,35 @@ describe("callApi", () => {
     }
   });
 
+  it("SG28: antes del umbral de 15 segundos la petición sigue activa", async () => {
+    vi.useFakeTimers();
+    try {
+      let resolveFetch!: (value: Response) => void;
+      globalThis.fetch = vi.fn().mockImplementation(
+        () => new Promise<Response>((resolve) => { resolveFetch = resolve; }),
+      );
+
+      const pending = callApi("/evaluate", { expression: "1+1" });
+      const signal = (vi.mocked(globalThis.fetch).mock.calls[0][1] as RequestInit).signal as AbortSignal;
+      await vi.advanceTimersByTimeAsync(14_999);
+      expect(signal.aborted).toBe(false);
+
+      resolveFetch({
+        status: 200,
+        json: () => Promise.resolve({
+          success: true, operation: "evaluate", request_id: "sg28-before-limit",
+          result_text: "2", steps: [], has_detailed_steps: false,
+          warnings: [], duration_ms: 1,
+        }),
+      } as Response);
+      expect((await pending).success).toBe(true);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(signal.aborted).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("SG28: una petición completada limpia su temporizador y no se aborta después", async () => {
     vi.useFakeTimers();
     try {
