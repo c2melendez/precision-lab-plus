@@ -147,3 +147,15 @@ def test_in625_h2_sg30_additional_json_control_characters(case_id, expression):
         json={"expression": expression, "angle_unit": "rad"},
     )
     assert response.status_code not in (400, 500), (case_id, response.text[:200])
+
+@pytest.mark.parametrize("expression", ["clearall", "draw", "run", "last", "lambda", "S", "N"])
+def test_in625_h2_sg18_reserved_word_does_not_change_symbolic_variable(expression):
+    """SG18: after a reserved-token probe, a free symbol remains unbound."""
+    client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "rad"})
+    response = client.post("/api/v1/evaluate", json={"expression": "a+1", "angle_unit": "rad"})
+    assert response.status_code == 200, (expression, response.status_code)
+    result = response.json()
+    if result.get("success"):
+        assert result.get("result_approx") != 8, (expression, result)
+    else:
+        assert result.get("error_code"), (expression, result)
