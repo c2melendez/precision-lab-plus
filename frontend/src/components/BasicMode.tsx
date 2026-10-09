@@ -436,10 +436,11 @@ export function BasicMode() {
           }
         }
 
+        if (submissionId !== latestSubmissionRef.current) return;
         setLastResult(result);
         if (!result.success) setErrorMessage(result.error_message ?? "Ocurrió un error.");
       } finally {
-        setLoading(false);
+        if (submissionId === latestSubmissionRef.current) setLoading(false);
       }
       return;
     }
