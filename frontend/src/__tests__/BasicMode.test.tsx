@@ -487,4 +487,26 @@ describe("BasicMode", () => {
     expect(screen.getAllByText("SG29_CROSS_NEW").length).toBeGreaterThan(0);
   });
 
+
+  it("SG29: un error tardío de derivada no sustituye una integral reciente", async () => {
+    let resolveDerivative!: (value: any) => void;
+    let resolveIntegral!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveDerivative = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveIntegral = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "\\frac{d}{dx}(x^2)" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "\\int_{0}^{1} x^2\\,dx" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    resolveIntegral({ success: true, operation: "integral", request_id: "new", result_text: "SG29_CROSS_ERROR_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("SG29_CROSS_ERROR_NEW").length).toBeGreaterThan(0));
+    resolveDerivative({ success: false, operation: "derivative", request_id: "old", error_code: "PARSE_ERROR", error_message: "SG29_CROSS_STALE_ERROR", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_CROSS_STALE_ERROR")).not.toBeInTheDocument();
+    expect(screen.getAllByText("SG29_CROSS_ERROR_NEW").length).toBeGreaterThan(0);
+  });
+
 });
