@@ -38,6 +38,39 @@ describe("callApi", () => {
     expect(result.error_message).toMatch(/tiempo máximo/);
   });
 
+  it("SG28: tras una cancelación AbortError la siguiente evaluación se recupera", async () => {
+    const successfulResponse = {
+      success: true,
+      operation: "evaluate",
+      request_id: "sg28-recovered",
+      result_text: "42",
+      result_latex: "42",
+      steps: [],
+      has_detailed_steps: false,
+      warnings: [],
+      duration_ms: 1,
+    };
+    globalThis.fetch = vi.fn()
+      .mockRejectedValueOnce(new DOMException("Aborted", "AbortError"))
+      .mockResolvedValueOnce({
+        status: 200,
+        json: () => Promise.resolve(successfulResponse),
+      } as unknown as Response);
+
+    const cancelled = await callApi("/evaluate", { expression: "1+1" });
+    expect(cancelled.success).toBe(false);
+    expect(cancelled.error_message).toMatch(/tiempo máximo/);
+
+    const recovered = await callApi("/evaluate", { expression: "6*7" });
+    expect(recovered).toEqual(successfulResponse);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    const firstSignal = (vi.mocked(globalThis.fetch).mock.calls[0][1] as RequestInit).signal;
+    const secondSignal = (vi.mocked(globalThis.fetch).mock.calls[1][1] as RequestInit).signal;
+    expect(firstSignal).toBeInstanceOf(AbortSignal);
+    expect(secondSignal).toBeInstanceOf(AbortSignal);
+    expect(secondSignal).not.toBe(firstSignal);
+  });
+
   it("sintetiza un MathResponse de error ante una respuesta no-JSON", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       status: 502,
