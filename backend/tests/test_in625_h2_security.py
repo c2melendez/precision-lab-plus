@@ -232,3 +232,15 @@ def test_in625_h2_oversized_expression_rejected_at_request_boundary(case_id, exp
     body = response.json()
     assert body.get("success") is False, (case_id, body)
     assert body.get("error_code") == "VALIDATION_ERROR", (case_id, body)
+
+def test_in625_h2_sg31_five_mib_json_body_returns_413():
+    """EN-SG-31: explicit content-length 5 MiB is rejected before schema parsing."""
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": "1" * (5 * 1024 * 1024), "angle_unit": "rad"},
+    )
+    assert response.status_code == 413, response.status_code
+    body = response.json()
+    assert body.get("success") is False, body
+    assert body.get("error_code") == "PAYLOAD_TOO_LARGE", body
+    assert body.get("error_message"), body
