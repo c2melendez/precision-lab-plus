@@ -22,7 +22,7 @@ describe("callApi", () => {
     expect(typeof result.duration_ms).toBe("number");
   });
 
-  it("sintetiza un MathResponse de error ante un timeout (AbortError)", async () => {
+  it("sintetiza un MathResponse de error ante un AbortError sin timeout vencido", async () => {
     globalThis.fetch = vi.fn().mockImplementation(
       () =>
         new Promise((_resolve, reject) => {
@@ -35,7 +35,7 @@ describe("callApi", () => {
     expect(result.success).toBe(false);
     expect(result.error_code).toBe("INTERNAL_ERROR");
     expect(result.operation).toBe("derivative");
-    expect(result.error_message).toMatch(/tiempo máximo/);
+    expect(result.error_message).toMatch(/fallo de red/);
   });
 
   it("SG28: tras una cancelación AbortError la siguiente evaluación se recupera", async () => {
@@ -59,7 +59,7 @@ describe("callApi", () => {
 
     const cancelled = await callApi("/evaluate", { expression: "1+1" });
     expect(cancelled.success).toBe(false);
-    expect(cancelled.error_message).toMatch(/tiempo máximo/);
+    expect(cancelled.error_message).toMatch(/fallo de red/);
 
     const recovered = await callApi("/evaluate", { expression: "6*7" });
     expect(recovered).toEqual(successfulResponse);
@@ -262,7 +262,7 @@ describe("callApi", () => {
       const result = await pending;
       expect(bodyAborted).toBe(true);
       expect(result.success).toBe(false);
-      expect(result.error_message).toMatch(/tiempo máximo/);
+      expect(result.error_message).toMatch(/fallo de red/);
     } finally {
       vi.useRealTimers();
     }
@@ -310,7 +310,7 @@ describe("callApi", () => {
       });
       const result = await pending;
       expect(result.success).toBe(false);
-      expect(result.error_message).toMatch(/tiempo máximo/);
+      expect(result.error_message).toMatch(/fallo de red/);
     } finally {
       vi.useRealTimers();
     }
@@ -334,7 +334,7 @@ describe("callApi", () => {
       }) } as Response);
       const result = await pending;
       expect(result.success).toBe(false);
-      expect(result.error_message).toMatch(/tiempo máximo/);
+      expect(result.error_message).toMatch(/fallo de red/);
     } finally {
       vi.useRealTimers();
     }
