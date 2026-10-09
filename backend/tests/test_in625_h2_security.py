@@ -159,3 +159,13 @@ def test_in625_h2_sg18_reserved_word_does_not_change_symbolic_variable(expressio
         assert result.get("result_approx") != 8, (expression, result)
     else:
         assert result.get("error_code"), (expression, result)
+
+@pytest.mark.parametrize("expression", ["clearall", "draw", "run", "last", "lambda", "S", "N"])
+def test_in625_h2_sg18_reserved_word_cannot_corrupt_independent_numeric_result(expression):
+    """SG18: a second independent numeric operation is stable after a reserved token."""
+    client.post("/api/v1/evaluate", json={"expression": expression, "angle_unit": "rad"})
+    response = client.post("/api/v1/evaluate", json={"expression": "7*6", "angle_unit": "rad"})
+    assert response.status_code == 200, (expression, response.status_code)
+    result = response.json()
+    assert result.get("success") is True, (expression, result)
+    assert result.get("result_approx") == pytest.approx(42.0), (expression, result)
