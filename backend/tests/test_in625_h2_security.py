@@ -31,3 +31,21 @@ def test_in625_h2_rejects_python_constructs_without_evaluation(case_id, expressi
     assert result.get("success") is False, (case_id, result)
     assert result.get("error_code") == "PARSE_ERROR", (case_id, result)
     assert "traceback" not in str(result.get("error_message", "")).lower()
+
+# Additional variants explicitly listed in the source H2 security matrix.
+@pytest.mark.parametrize("case_id, expression", [
+    ("EN-SG-14 system", 'os.system("ls")'),
+    ("EN-SG-15 dict", "x.__dict__"),
+    ("EN-SG-16 Integer", "Integer(2)"),
+    ("EN-SG-16 Function", "Function('f')"),
+])
+def test_in625_h2_rejects_additional_python_variants(case_id, expression):
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": expression, "angle_unit": "rad"},
+    )
+    assert response.status_code == 200, (case_id, response.status_code)
+    result = response.json()
+    assert result.get("success") is False, (case_id, result)
+    assert result.get("error_code") == "PARSE_ERROR", (case_id, result)
+    assert "traceback" not in str(result.get("error_message", "")).lower()
