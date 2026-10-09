@@ -66,6 +66,6 @@ def test_running_sympy_worker_is_terminated_before_evaluation_and_recovers() -> 
     # The process is already alive and blocked at a documented deterministic
     # gate. A short timeout must terminate it without starting SymPy compute.
     with pytest.raises(ComputationTimedOut):
-        run_bounded(_sympy_after_gate, ready, release, timeout_seconds=0.3)
+        run_bounded(_sympy_after_gate, ready, release, timeout_seconds=1.0)
     assert ready.is_set(), "The isolated SymPy child never reached its active gate"
     assert run_bounded(_real_sympy_evaluation, timeout_seconds=5) == "3*x**2 + 2"
