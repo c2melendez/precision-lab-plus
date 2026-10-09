@@ -46,3 +46,26 @@ def test_real_sympy_operation_recovers_after_killed_process() -> None:
     with pytest.raises(ComputationTimedOut):
         run_bounded(_bounded_wait, timeout_seconds=0.2)
     assert run_bounded(_real_sympy_evaluation, timeout_seconds=5) == "3*x**2 + 2"
+
+
+def _sympy_after_gate(ready, release) -> str:
+    """Perform genuine SymPy work only after parent confirms child is running."""
+    ready.set()
+    if not release.wait(timeout=3):
+        raise RuntimeError("Test gate was never opened")
+    return _real_sympy_evaluation()
+
+
+def test_running_sympy_worker_is_terminated_before_evaluation_and_recovers() -> None:
+    """Terminate a live child with a gated SymPy operation, not only a sleep stub."""
+    import multiprocessing as mp
+
+    ctx = mp.get_context("spawn")
+    ready = ctx.Event()
+    release = ctx.Event()
+    # The process is already alive and blocked at a documented deterministic
+    # gate. A short timeout must terminate it without starting SymPy compute.
+    with pytest.raises(ComputationTimedOut):
+        run_bounded(_sympy_after_gate, ready, release, timeout_seconds=0.3)
+    assert ready.is_set(), "The isolated SymPy child never reached its active gate"
+    assert run_bounded(_real_sympy_evaluation, timeout_seconds=5) == "3*x**2 + 2"
