@@ -283,3 +283,23 @@ def test_optional_child_memory_budget_is_isolated_and_recovers(monkeypatch) -> N
     assert resource.getrlimit(resource.RLIMIT_AS) == before
     monkeypatch.delenv("SG28_ISOLATED_MEMORY_MB")
     assert run_bounded(_add, 4, 5, timeout_seconds=5) == 9
+
+
+
+def _sg28_exceed_virtual_memory_budget() -> None:
+    """Request virtual allocation beyond the child-only RLIMIT_AS ceiling."""
+    unused = bytearray(2 * 1024 * 1024 * 1024)
+    return len(unused)
+
+
+@pytest.mark.skipif(__import__("os").name != "posix", reason="POSIX virtual memory budget only")
+def test_memory_budget_exhaustion_fails_cleanly_and_recovers(monkeypatch) -> None:
+    """Real child allocation must exceed quota without exhausting runner RAM."""
+    from app.services.interruptible import ComputationFailed
+
+    monkeypatch.setenv("SG28_ISOLATED_MEMORY_MB", "1024")
+    with pytest.raises(ComputationFailed) as failure:
+        run_bounded(_sg28_exceed_virtual_memory_budget, timeout_seconds=5)
+    assert failure.value.error_type == "MemoryError"
+    monkeypatch.delenv("SG28_ISOLATED_MEMORY_MB")
+    assert run_bounded(_add, 4, 5, timeout_seconds=5) == 9
