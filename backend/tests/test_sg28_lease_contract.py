@@ -102,3 +102,29 @@ def test_nonpositive_ttl_is_rejected_without_mutating_active_lease():
         else:
             raise AssertionError("invalid lease duration unexpectedly accepted")
         assert gate.active == active
+
+
+def test_old_lease_cannot_release_current_even_after_multiple_turnovers():
+    gate = LeaseGate()
+    first = gate.acquire("worker-a", now=0, ttl=2)
+    second = gate.acquire("worker-b", now=2, ttl=2)
+    third = gate.acquire("worker-c", now=4, ttl=2)
+    assert first.generation < second.generation < third.generation
+    assert not gate.release(first)
+    assert not gate.release(second)
+    assert gate.active == third
+    assert gate.acquire("worker-d", now=5, ttl=2) is None
+    assert gate.release(third)
+
+
+def test_renewed_lease_blocks_successor_until_new_deadline():
+    gate = LeaseGate()
+    original = gate.acquire("worker-a", now=0, ttl=3)
+    renewed = gate.renew(original, now=2, ttl=6)
+    assert renewed.deadline == 8
+    assert gate.acquire("worker-b", now=3, ttl=2) is None
+    assert gate.acquire("worker-b", now=7, ttl=2) is None
+    successor = gate.acquire("worker-b", now=8, ttl=2)
+    assert successor.generation > renewed.generation
+    assert not gate.release(renewed)
+    assert gate.active == successor
