@@ -1627,3 +1627,9 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 ## 2026-10-10 — H2 physical TCP + actual SymPy child integration CI GREEN
 - Plus technical SHA `08f70c1b7aa6f894f5595b95afcd2a13a9001725`: cumulative run `38084223803` backend job `114307212013` SUCCESS **637 passed, 1 warning, coverage 85.69%**. `test_real_tcp_disconnect_cancels_actual_sympy_child_and_recovers` explicitly PASSED. Frontend job `114307212222` SUCCESS **751 passed / 28 TODO**, 102 modules, build 21.40s. Sibling H1d run `38084223804` SUCCESS.
 - Verified CI-only integration of real loopback TCP disconnect, actual spawned SymPy child and local K=1 capacity recovery. Does NOT certify globally coordinated capacity, multi-replica topology, or production configuration. H2 global OPEN, experimental isolation OFF in production.
+
+
+## 2026-10-10 — Shared K=1 multiprocessing characterization published, CI queued
+- Technical Plus SHA `167d0335197c624186e24ce486ccec1a8fa39366` adds `backend/tests/test_sg28_shared_admission_characterization.py`: two independent spawned Python interpreters use a manager-backed shared bounded semaphore K=1. One holds while another is denied; capacity recovers after release. This is a CI-only shared gate demonstration, not a durable distributed lease coordinator.
+- GitHub Actions automatically queued cumulative run `38084981053` and H1d `38084981061` for this SHA. Both were QUEUED when queried; **NO PASS CLAIM** until job logs confirmed.
+- Baseline remains 637 backend PASS on `38084223803`; global H2 OPEN; experimental isolation remains OFF in production.
