@@ -15,7 +15,7 @@ from app.schemas.responses import ErrorCode, MathResponse, OperationType, Result
 from app.services import evaluate_service, parsing
 from app.services.ast_validator import ComplexityLimitError
 from app.services.interruptible import ComputationCancelled, ComputationFailed, ComputationTimedOut
-from app.services.request_cancellation import IsolationCapacityExceeded, run_for_request
+from app.services.request_cancellation import IsolationCapacityExceeded, request_admission_lease, run_for_request
 
 def _sg28_ci_slow_evaluate(expression, angle_unit, substitutions):
     """Picklable E2E fixture; selected only under explicit CI test flags."""
@@ -100,8 +100,7 @@ def _error(request: Request, error_code: ErrorCode, message: str) -> MathRespons
     )
 
 
-@router.post("/evaluate", response_model=MathResponse)
-async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
+async def _evaluate_impl(payload: EvaluateRequest, request: Request, *, admission_reserved: bool = False) -> MathResponse:
     log_request_event(request.state.request_id, "evaluate_request", input_text=payload.expression)
 
     try:
@@ -111,7 +110,7 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
                 request,
                 (_sg28_ci_slow_evaluate if os.getenv('SG28_CI_SLOW', '0') == '1' and os.getenv('SG28_CI_OBSERVE', '0') == '1' and payload.expression == '7+11' else evaluate_service.evaluate),
                 payload.expression, payload.angle_unit, payload.substitutions,
-                timeout_seconds=6,
+                timeout_seconds=6, admission_reserved=admission_reserved,
             )
         else:
             result = evaluate_service.evaluate(
@@ -157,7 +156,7 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         )
 
     try:
-        presentation = (await run_for_request(request, _render_evaluate_presentation, result, payload.expression, timeout_seconds=4)
+        presentation = (await run_for_request(request, _render_evaluate_presentation, result, payload.expression, timeout_seconds=4, admission_reserved=admission_reserved)
                         if os.getenv("SG28_EVALUATE_ISOLATION", "0") == "1"
                         else _render_evaluate_presentation(result))
     except IsolationCapacityExceeded:
@@ -182,3 +181,16 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         **presentation,
         duration_ms=_duration_ms(request),
     )
+
+
+@router.post("/evaluate", response_model=MathResponse)
+async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
+    """Hold local quota across both phases when SG28 isolation is opted in."""
+    if os.getenv("SG28_EVALUATE_ISOLATION", "0") != "1":
+        return await _evaluate_impl(payload, request)
+    try:
+        with request_admission_lease():
+            return await _evaluate_impl(payload, request, admission_reserved=True)
+    except IsolationCapacityExceeded:
+        error = _error(request, ErrorCode.INTERNAL_ERROR, "Capacidad de cálculo temporalmente agotada.")
+        return JSONResponse(status_code=503, content=error.model_dump(mode="json"))
