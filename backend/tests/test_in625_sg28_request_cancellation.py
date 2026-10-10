@@ -71,3 +71,65 @@ def test_starlette_request_receives_asgi_disconnect_and_recovers() -> None:
         return await run_for_request(recovered, _add, 2, 3, timeout_seconds=4)
 
     assert asyncio.run(scenario()) == 5
+
+
+def _active_sympy_calculation(ready) -> None:
+    """Keep a spawned child busy doing real algebra until interrupted."""
+    import sympy
+
+    x = sympy.Symbol("x")
+    expr = x**3 + 2*x
+    ready.set()
+    while True:
+        expr = sympy.diff(expr, x) + x**3
+
+
+def _sympy_after_cancellation() -> str:
+    import sympy
+
+    x = sympy.Symbol("x")
+    return str(sympy.diff(x**3 + 2*x, x))
+
+
+def test_asgi_disconnect_interrupts_active_sympy_and_recovers() -> None:
+    """ASGI disconnect terminates an active SymPy child, not a sleeping stub."""
+    import multiprocessing as mp
+    from starlette.requests import Request
+
+    async def scenario() -> str:
+        ready = mp.get_context("spawn").Event()
+        messages: asyncio.Queue[dict] = asyncio.Queue()
+        scope = {
+            "type": "http", "method": "POST", "path": "/sg28-isolated",
+            "headers": [], "query_string": b"",
+        }
+
+        async def receive():
+            try:
+                return messages.get_nowait()
+            except asyncio.QueueEmpty:
+                return {"type": "http.request", "body": b"", "more_body": False}
+
+        request = Request(scope, receive=receive)
+        pending = asyncio.create_task(
+            run_for_request(request, _active_sympy_calculation, ready, timeout_seconds=6)
+        )
+        try:
+            assert await asyncio.to_thread(ready.wait, 3), "SymPy child did not start"
+            await messages.put({"type": "http.disconnect"})
+            with pytest.raises(ComputationCancelled, match="disconnected"):
+                await asyncio.wait_for(pending, timeout=4)
+        finally:
+            if not pending.done():
+                pending.cancel()
+                try:
+                    await pending
+                except (ComputationCancelled, asyncio.CancelledError):
+                    pass
+
+        clean_request = Request(scope, receive=receive)
+        return await run_for_request(
+            clean_request, _sympy_after_cancellation, timeout_seconds=5
+        )
+
+    assert asyncio.run(scenario()) == "3*x**2 + 2"
