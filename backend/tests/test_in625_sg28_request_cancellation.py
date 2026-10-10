@@ -491,3 +491,29 @@ def test_repeated_cancel_cycles_release_admission_and_recover() -> None:
             ) == iteration + 10
 
     asyncio.run(scenario())
+
+
+
+def test_timeout_releases_single_slot_and_allows_recovery(monkeypatch) -> None:
+    """SG28 resource gate: timeout must reap active work before releasing quota."""
+    import threading
+    import app.services.request_cancellation as bridge
+    from app.services.interruptible import ComputationTimedOut
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+
+    async def scenario() -> int:
+        task = asyncio.create_task(
+            bridge.run_for_request(FakeRequest(), _long_job, timeout_seconds=0.65)
+        )
+        await asyncio.sleep(0.15)
+        assert not task.done(), "Timed worker completed before admission probe"
+        with pytest.raises(bridge.IsolationCapacityExceeded):
+            await bridge.run_for_request(FakeRequest(), _add, 2, 3, timeout_seconds=3)
+        with pytest.raises(ComputationTimedOut):
+            await asyncio.wait_for(task, timeout=4)
+        return await bridge.run_for_request(
+            FakeRequest(), _add, 4, 5, timeout_seconds=5
+        )
+
+    assert asyncio.run(scenario()) == 9
