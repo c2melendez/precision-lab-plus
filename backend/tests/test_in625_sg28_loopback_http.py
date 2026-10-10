@@ -261,3 +261,40 @@ def test_public_evaluate_cpu_exhaustion_returns_timeout_mathresponse(monkeypatch
     assert body["error_code"] == "TIMEOUT"
     assert body["has_detailed_steps"] is False
     assert body["request_id"]
+
+
+def _sg28_public_memory_allocation(*_args) -> None:
+    """Use virtual address-space quota to fail allocation in isolated child."""
+    unused = bytearray(2 * 1024 * 1024 * 1024)
+    return len(unused)
+
+
+def test_public_evaluate_memory_exhaustion_returns_complexity_mathresponse(monkeypatch) -> None:
+    """Real child MemoryError must surface as a controlled public response."""
+    import os
+    import pytest
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.routers import evaluate as evaluate_router
+    from app.services.request_cancellation import run_for_request
+
+    if os.name != "posix":
+        pytest.skip("POSIX virtual memory quota only")
+
+    async def memory_bound_bridge(request, operation, *args, **kwargs):
+        return await run_for_request(
+            request, _sg28_public_memory_allocation, timeout_seconds=6,
+        )
+
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "1")
+    monkeypatch.setenv("SG28_ISOLATED_MEMORY_MB", "1024")
+    monkeypatch.setattr(evaluate_router, "run_for_request", memory_bound_bridge)
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is False
+    assert body["operation"] == "evaluate"
+    assert body["error_code"] == "COMPLEXITY_LIMIT"
+    assert body["has_detailed_steps"] is False
+    assert body["request_id"]
