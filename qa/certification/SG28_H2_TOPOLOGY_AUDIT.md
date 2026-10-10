@@ -51,3 +51,22 @@ Resolve Render workspace through user-confirmed selection, perform read-only top
 - New Plus technical commit `c36608ab11e5264ed759af510721d67d0532b2c1`: added real spawned SymPy child cancellation under caller-held K=1 lease and subsequent reuse. **CI verification pending**.
 - The pending test is ASGI-request-level (FakeRequest), not a physical TCP disconnect. No claim of integrated real socket + real isolated child cancellation yet.
 - Global admission and actual Render deployment topology remain unverified. Experimental production isolation stays disabled; H2 remains OPEN.
+
+
+## 2026-10-10 — H2 global quota design decision gate (NOT implemented)
+
+Current latest verified Plus technical SHA `08f70c1b7aa6f894f5595b95afcd2a13a9001725`:
+- Cumulative run `38084223803`: 637 backend passed, 1 warning, coverage 85.69%; frontend 751 passed, 28 TODO.
+- Real TCP socket close + spawned SymPy computation + local K=1 cancellation/recovery PASSED.
+- The process-local semaphore cannot be claimed as a fleet-wide capacity bound.
+
+Proposed distributed admission contract, conditional on confirmed Render topology:
+1. Separate `local_capacity` from `global_capacity`. Global quota applies across every process and replica; local semaphore remains a secondary safety ceiling.
+2. Define a central atomic grant with an opaque lease token, owner identifier, bounded expiration, and fencing generation. Grant MUST fail closed when central coordination is unavailable, unless an explicitly approved degraded mode is specified.
+3. A lease renews while its computation is active. The lease MUST NOT be released while the child coordinator is still running or being reaped. Expiration requires an explicit orphan-cleanup/fencing policy so a stale worker cannot continue alongside a newly admitted worker.
+4. Releasing or renewing someone else's token MUST fail. Duplicate release is idempotent; cross-worker retry must not create a second reservation.
+5. Counters and audit events include attempted/admitted/denied, active leases, expired leases, failed renewals, reaped worker outcomes, and lease ownership. Do not log credentials or computation input.
+6. Acceptance tests: two separate interpreters and two independent service replicas competing at K=1; load at K and K+1; crash and expired lease recovery; renewal and network partition; stale-token fencing; double-release; restart; real TCP disconnect with an actual child.
+7. Production guard: leave `SG28_EVALUATE_ISOLATION` disabled until design, failure modes, CI, staging and verified Render deployment topology are approved. This is NOT authorization to deploy a new coordinator.
+
+A concurrent shared-semaphore characterization test was drafted but its repository publication was blocked by tool safety controls. Therefore there is **no new global-quota test commit or green CI evidence** from this design step. H2 remains OPEN.
