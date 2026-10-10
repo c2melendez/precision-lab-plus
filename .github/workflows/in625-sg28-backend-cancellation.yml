@@ -10,6 +10,8 @@ on:
       - 'backend/tests/test_in625_sg28_interruptible.py'
       - 'backend/app/services/request_cancellation.py'
       - 'backend/app/routers/evaluate.py'
+      - 'backend/app/main.py'
+      - 'backend/app/services/disconnect_tracking.py'
       - 'backend/app/services/evaluate_service.py'
       - 'backend/app/schemas/responses.py'
       - 'backend/app/schemas/requests.py'
