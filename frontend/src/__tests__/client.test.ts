@@ -38,6 +38,37 @@ describe("callApi", () => {
     expect(result.error_message).toMatch(/fallo de red/);
   });
 
+  it("SG28: cancelar desde el usuario aborta fetch y permite recuperar", async () => {
+    const caller = new AbortController();
+    globalThis.fetch = vi.fn().mockImplementation((_url: string, init: RequestInit) =>
+      new Promise<Response>((_resolve, reject) => {
+        (init.signal as AbortSignal).addEventListener("abort", () =>
+          reject(new DOMException("Aborted", "AbortError")), { once: true });
+      }));
+    const pending = callApi("/evaluate", { expression: "2+3" }, { signal: caller.signal });
+    caller.abort();
+    const cancelled = await pending;
+    expect(cancelled.success).toBe(false);
+    expect(cancelled.error_message).toMatch(/cancelado por el usuario/);
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      status: 200, json: async () => ({
+        success: true, operation: "evaluate", request_id: "sg28-next",
+        result_text: "5", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1,
+      }),
+    } as Response);
+    const recovered = await callApi("/evaluate", { expression: "2+3" });
+    expect(recovered.success).toBe(true);
+  });
+
+  it("SG28: señal previamente cancelada no hace la petición", async () => {
+    const caller = new AbortController();
+    caller.abort();
+    globalThis.fetch = vi.fn();
+    const result = await callApi("/evaluate", { expression: "2+3" }, { signal: caller.signal });
+    expect(result.error_message).toMatch(/cancelado por el usuario/);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
   it("SG28: tras una cancelación AbortError la siguiente evaluación se recupera", async () => {
     const successfulResponse = {
       success: true,
