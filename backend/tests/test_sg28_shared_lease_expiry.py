@@ -1,0 +1,44 @@
+"""CI-only shared lease expiry characterization across spawned Python processes.
+
+Manager-backed synchronized state is a test fixture, NOT a production coordinator.
+No actual process crashes, remote replicas or network partition are simulated.
+"""
+import concurrent.futures
+import multiprocessing
+import os
+
+
+def _lease_attempt(shared, lock, now, role):
+    with lock:
+        lease = shared.get("lease")
+        if lease is not None and now < lease["expires"]:
+            return os.getpid(), role, False, lease["generation"]
+        generation = (lease["generation"] if lease else 0) + 1
+        shared["lease"] = {
+            "generation": generation, "owner": role, "expires": now + 5
+        }
+        return os.getpid(), role, True, generation
+
+
+def test_expired_shared_lease_is_replaced_across_interpreters():
+    ctx = multiprocessing.get_context("spawn")
+    with ctx.Manager() as manager:
+        shared = manager.dict()
+        lock = manager.Lock()
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=2, mp_context=ctx
+        ) as pool:
+            first = pool.submit(_lease_attempt, shared, lock, 0, "first")
+            first_pid, _, first_granted, first_generation = first.result(timeout=15)
+            second = pool.submit(_lease_attempt, shared, lock, 1, "second")
+            second_pid, _, second_granted, _ = second.result(timeout=15)
+            third = pool.submit(_lease_attempt, shared, lock, 5, "third")
+            _, _, third_granted, third_generation = third.result(timeout=15)
+
+        assert first_granted
+        assert not second_granted
+        assert third_granted
+        assert third_generation > first_generation
+        assert shared["lease"]["owner"] == "third"
+        # Worker PIDs are only observational: executor may reuse a process.
+        assert first_pid > 0 and second_pid > 0
