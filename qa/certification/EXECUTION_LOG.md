@@ -1681,3 +1681,9 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 ## 2026-10-10 — Shared lease expiry CI GREEN: Plus 649 backend
 - Plus technical SHA `e68d7d7f66156775be3427230cdacfc9217cb8e8`: cumulative run `38090329207` backend SUCCESS **649 passed / 1 warning / coverage 85.59%**, `test_expired_shared_lease_is_replaced_across_interpreters` explicitly PASSED. Frontend SUCCESS 751 passed / 28 TODO. H1d run `38090329193` SUCCESS 5 passed.
 - Manager-backed shared dict/lock and clock steps are a CI-only characterization. Independent interpreter participation per operation, coordinator crash recovery and production fleet quota are NOT proven. SG28/H2 OPEN; production isolation OFF.
+
+
+## 2026-10-10 — Truly concurrent distinct-process shared K=1 contention published, CI PENDING
+- Plus technical commit `d5a9b678a9eb7168aad7ca572d16e83da239edde` adds `test_two_distinct_workers_contend_atomically_for_shared_k1` to `backend/tests/test_sg28_shared_lease_expiry.py`: two spawned workers synchronize at shared barrier; both contest same lock-protected shared K=1 lease; asserts distinct PIDs, exactly one admission, and correct owner/generation.
+- This is a test-only Manager coordination fixture; no production distributed coordinator, crash recovery or Render topology certified. Exact-SHA Actions search initially returned no run; CI PENDING. Last verified baseline Plus 649 backend / 751 frontend.
+- SG28/H2 OPEN; experimental isolation production OFF.
