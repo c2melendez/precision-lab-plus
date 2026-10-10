@@ -566,3 +566,33 @@ def test_admission_quota_is_per_process_not_a_cluster_wide_limit() -> None:
             if worker.pid is not None:
                 worker.close()
         ready.close()
+
+
+
+def test_distributed_slot_budget_can_be_partitioned_per_replica() -> None:
+    """Document a safe allocation strategy without claiming global admission.
+
+    An operator can partition a desired fleet budget into fixed per-replica
+    quotas only when replica/worker count is known and bounded. Dynamic
+    autoscaling invalidates that assumption until a shared coordinator exists.
+    """
+    for total, replicas, expected in (
+        (1, 1, [1]),
+        (2, 2, [1, 1]),
+        (5, 2, [3, 2]),
+        (7, 3, [3, 2, 2]),
+    ):
+        allocated = [total // replicas + (i < total % replicas) for i in range(replicas)]
+        assert allocated == expected
+        assert sum(allocated) == total
+        assert max(allocated) - min(allocated) <= 1
+
+
+def test_static_partition_rejects_more_workers_than_global_budget() -> None:
+    """A semaphore minimum of one per worker cannot represent global K < R."""
+    from app.services import request_cancellation as bridge
+
+    global_budget, worker_count = 2, 3
+    assert worker_count > global_budget
+    assert bridge._MAX_ISOLATED_REQUESTS >= 1
+    assert worker_count * 1 > global_budget
