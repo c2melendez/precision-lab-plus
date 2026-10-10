@@ -719,3 +719,48 @@ def test_cancelled_handler_retains_slot_until_coordinator_thread_finishes(monkey
 
     assert asyncio.run(scenario()) == "recovered"
     assert calls == ["occupied", "recovered"]
+
+
+def test_interleaving_request_can_take_slot_between_evaluation_and_presentation(monkeypatch) -> None:
+    """Demonstrate phase-scoped admission gap without claiming an end-to-end lease.
+
+    After evaluation releases local K=1, another request can acquire the only
+    slot and block presentation. All work is mocked and bounded; this proves
+    the known design limitation rather than implementing distributed quotas.
+    """
+    import threading
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    interloper_entered = threading.Event()
+    interloper_release = threading.Event()
+
+    def controlled(operation, *args, timeout_seconds, cancel_event):
+        if operation == "other-request":
+            interloper_entered.set()
+            assert interloper_release.wait(timeout=3)
+        return operation
+
+    monkeypatch.setattr(bridge, "run_bounded", controlled)
+
+    async def scenario():
+        # Logical request A completes its evaluation phase and releases K=1.
+        assert await bridge.run_for_request(FakeRequest(), "evaluation-A") == "evaluation-A"
+        # Request B starts before A can acquire capacity for presentation.
+        other = asyncio.create_task(
+            bridge.run_for_request(FakeRequest(), "other-request")
+        )
+        try:
+            assert await asyncio.to_thread(interloper_entered.wait, 2)
+            with pytest.raises(bridge.IsolationCapacityExceeded):
+                await bridge.run_for_request(FakeRequest(), "presentation-A")
+            interloper_release.set()
+            assert await asyncio.wait_for(other, 3) == "other-request"
+        finally:
+            interloper_release.set()
+            if not other.done():
+                await asyncio.wait_for(other, 3)
+        # After B finishes, A may retry presentation, but no reservation exists.
+        assert await bridge.run_for_request(FakeRequest(), "presentation-A") == "presentation-A"
+
+    asyncio.run(scenario())
