@@ -141,3 +141,27 @@ def test_public_evaluate_disconnect_cancels_isolated_worker_and_recovers(monkeyp
         thread.join(timeout=5)
         listen.close()
         assert not thread.is_alive()
+
+
+
+def test_public_evaluate_exhausted_capacity_returns_structured_503(monkeypatch):
+    """Check the actual FastAPI route contract when admission is exhausted."""
+    from fastapi.testclient import TestClient
+    import app.services.request_cancellation as cancellation
+    from app.main import app
+
+    class NoCapacity:
+        def acquire(self, blocking=False):
+            return False
+
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "1")
+    monkeypatch.setattr(cancellation, "_ADMISSION", NoCapacity())
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+    assert response.status_code == 503
+    body = response.json()
+    assert body["success"] is False
+    assert body["operation"] == "evaluate"
+    assert body["request_id"]
+    assert body["error_code"] == "INTERNAL_ERROR"
+    assert "Capacidad" in body["error_message"]
