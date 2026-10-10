@@ -1622,3 +1622,8 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 - Plus technical SHA `08f70c1b7aa6f894f5595b95afcd2a13a9001725`: adds `test_real_tcp_disconnect_cancels_actual_sympy_child_and_recovers` to `backend/tests/test_sg28_tcp_disconnect.py`; real loopback TCP closure, spawned SymPy child, caller-held local K=1, cancellation and lease reuse. No production toggle.
 - **DO NOT CLAIM PASS:** no cumulative/SG28 CI run for new SHA yet inspected. Prior verified baseline: `38082715108` backend 636 passed / 85.67% coverage, frontend 751 passed; SG28 `38082715115` 69 passed.
 - H2 OPEN pending test CI and fleet quota/topology verification; production isolation OFF.
+
+
+## 2026-10-10 — H2 physical TCP + actual SymPy child integration CI GREEN
+- Plus technical SHA `08f70c1b7aa6f894f5595b95afcd2a13a9001725`: cumulative run `38084223803` backend job `114307212013` SUCCESS **637 passed, 1 warning, coverage 85.69%**. `test_real_tcp_disconnect_cancels_actual_sympy_child_and_recovers` explicitly PASSED. Frontend job `114307212222` SUCCESS **751 passed / 28 TODO**, 102 modules, build 21.40s. Sibling H1d run `38084223804` SUCCESS.
+- Verified CI-only integration of real loopback TCP disconnect, actual spawned SymPy child and local K=1 capacity recovery. Does NOT certify globally coordinated capacity, multi-replica topology, or production configuration. H2 global OPEN, experimental isolation OFF in production.
