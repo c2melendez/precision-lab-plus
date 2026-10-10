@@ -73,3 +73,47 @@ test("EN-SG-28 Plus browser evaluates against the real isolated backend", async 
   expect(body.request_id).toBeTruthy();
   await expect(page.locator('[aria-live="polite"]').last()).toContainText("5");
 });
+
+
+
+test("EN-SG-28 Plus browser preserves real isolated backend parse errors and recovers", async ({ page }) => {
+  // This path is never mocked; the flag is enabled only in the SG28 UI CI job.
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  await field.waitFor({ state: "visible" });
+  const enter = async (value: string) => {
+    await field.evaluate((el, v) => {
+      const mf = el as HTMLElement & { setValue: (value: string) => void };
+      mf.setValue(v);
+      el.dispatchEvent(new InputEvent("input", {
+        bubbles: true, inputType: "insertText", data: v,
+      }));
+    }, value);
+  };
+
+  await enter("x+(");
+  const failed = page.waitForResponse((response) =>
+    response.url().endsWith("/api/v1/evaluate") &&
+    response.request().method() === "POST"
+  );
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  const invalidResponse = await failed;
+  expect(invalidResponse.status()).toBe(200);
+  const invalidBody = await invalidResponse.json();
+  expect(invalidBody.success).toBe(false);
+  expect(invalidBody.error_code).toBe("PARSE_ERROR");
+  expect(invalidBody.request_id).toBeTruthy();
+
+  await enter("4+5");
+  const recovered = page.waitForResponse((response) =>
+    response.url().endsWith("/api/v1/evaluate") &&
+    response.request().method() === "POST"
+  );
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  const validResponse = await recovered;
+  expect(validResponse.status()).toBe(200);
+  const validBody = await validResponse.json();
+  expect(validBody.success).toBe(true);
+  expect(validBody.result_approx).toBe(9);
+  await expect(page.locator('[aria-live="polite"]').last()).toContainText("9");
+});
