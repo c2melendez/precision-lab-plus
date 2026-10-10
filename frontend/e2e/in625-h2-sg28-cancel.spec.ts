@@ -142,7 +142,9 @@ test("EN-SG-28 browser cancels real evaluation and recovers", async ({ page }) =
 
 test("EN-SG-28 browser Stop reaps the same live isolated worker PID", async ({ page }) => {
   const eventsPath = process.env.SG28_CI_EVENT_FILE;
-  test.skip(!eventsPath || process.platform !== "linux", "Linux CI process evidence required");
+  // In Linux CI missing instrumentation must FAIL, never silently SKIP the certification gate.
+  test.skip(process.platform !== "linux" || (!process.env.CI && !eventsPath), "Linux process evidence required");
+  if (process.env.CI) expect(eventsPath, "SG28_CI_EVENT_FILE must be configured in CI").toBeTruthy();
   type Event = { event: string; pid: number; time: number };
   const events = (): Event[] => {
     try {
