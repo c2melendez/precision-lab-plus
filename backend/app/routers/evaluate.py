@@ -3,6 +3,7 @@ app/routers/evaluate.py — `POST /evaluate` (spec, secciones 3, 4, 5, 6, 7, 9).
 """
 
 import time
+import os
 
 import sympy
 from fastapi import APIRouter, Request
@@ -12,6 +13,8 @@ from app.schemas.requests import EvaluateRequest
 from app.schemas.responses import ErrorCode, MathResponse, OperationType, ResultType
 from app.services import evaluate_service, parsing
 from app.services.ast_validator import ComplexityLimitError
+from app.services.interruptible import ComputationCancelled, ComputationFailed, ComputationTimedOut
+from app.services.request_cancellation import run_for_request
 
 router = APIRouter(tags=["evaluate"])
 
@@ -39,9 +42,34 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "evaluate_request", input_text=payload.expression)
 
     try:
-        result = evaluate_service.evaluate(
-            payload.expression, payload.angle_unit, payload.substitutions
-        )
+        if os.getenv("SG28_EVALUATE_ISOLATION", "0") == "1":
+            # Opt-in experimental path; default production behavior remains unchanged.
+            result = await run_for_request(
+                request, evaluate_service.evaluate,
+                payload.expression, payload.angle_unit, payload.substitutions,
+                timeout_seconds=6,
+            )
+        else:
+            result = evaluate_service.evaluate(
+                payload.expression, payload.angle_unit, payload.substitutions
+            )
+    except ComputationFailed as exc:
+        child_error_codes = {
+            "ParseSecurityError": ErrorCode.PARSE_ERROR,
+            "ComplexityLimitError": ErrorCode.COMPLEXITY_LIMIT,
+            "SubstitutionValidationError": ErrorCode.VALIDATION_ERROR,
+            "DomainErrorResult": ErrorCode.DOMAIN_ERROR,
+            "AttributeError": ErrorCode.DOMAIN_ERROR,
+            "ZeroDivisionError": ErrorCode.DOMAIN_ERROR,
+            "ValueError": ErrorCode.DOMAIN_ERROR,
+            "OverflowError": ErrorCode.DOMAIN_ERROR,
+        }
+        code = child_error_codes.get(exc.error_type, ErrorCode.INTERNAL_ERROR)
+        return _error(request, code, str(exc))
+    except ComputationTimedOut:
+        return _error(request, ErrorCode.TIMEOUT, "El cálculo excedió el tiempo permitido.")
+    except ComputationCancelled:
+        return _error(request, ErrorCode.TIMEOUT, "El cálculo fue interrumpido.")
     except parsing.ParseSecurityError as exc:
         return _error(request, ErrorCode.PARSE_ERROR, str(exc))
     except ComplexityLimitError as exc:
