@@ -151,6 +151,7 @@ function isValidMathResponseShape(body: unknown): body is MathResponse {
 export async function callApi(
   endpoint: string,
   payload: Record<string, unknown>,
+  options?: { signal?: AbortSignal },
 ): Promise<MathResponse> {
   if (!isKnownEndpoint(endpoint)) {
     throw new UnknownEndpointError(endpoint);
@@ -158,13 +159,20 @@ export async function callApi(
 
   const startTime = performance.now();
   const controller = new AbortController();
+  const externalSignal = options?.signal;
+  const abortFromCaller = () => controller.abort();
+  if (externalSignal?.aborted) controller.abort();
+  else externalSignal?.addEventListener("abort", abortFromCaller, { once: true });
   let timedOut = false;
   const timeoutId = setTimeout(() => {
     timedOut = true;
     controller.abort();
   }, REQUEST_TIMEOUT_MS);
 
+  const cancelledByCaller = () => !timedOut && Boolean(externalSignal?.aborted);
+  const cancelledResponse = () => synthesizeErrorResponse(endpoint, "Cálculo cancelado por el usuario.", startTime);
   try {
+    if (cancelledByCaller()) return cancelledResponse();
     const response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -176,6 +184,7 @@ export async function callApi(
     try {
       body = await response.json();
     } catch (error) {
+      if (cancelledByCaller()) return cancelledResponse();
       if (timedOut) {
         return synthesizeErrorResponse(
           endpoint,
@@ -190,7 +199,8 @@ export async function callApi(
       );
     }
 
-    // Rechaza respuestas tardías incluso si un adaptador de fetch ignora abort.
+    // Reject late responses even when a fetch adapter ignores abort.
+    if (cancelledByCaller()) return cancelledResponse();
     if (timedOut) {
       return synthesizeErrorResponse(
         endpoint,
@@ -209,6 +219,7 @@ export async function callApi(
 
     return body;
   } catch (error) {
+    if (cancelledByCaller()) return cancelledResponse();
     if (timedOut) {
       return synthesizeErrorResponse(
         endpoint,
@@ -223,5 +234,6 @@ export async function callApi(
     );
   } finally {
     clearTimeout(timeoutId);
+    externalSignal?.removeEventListener("abort", abortFromCaller);
   }
 }
