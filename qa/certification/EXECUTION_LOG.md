@@ -1703,3 +1703,9 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 ## 2026-10-10 — Shared silent-owner lease expiry VERIFIED in CI
 - Plus SHA `ebb5d2a1931de3ce461d968070a75ca492a074fe` cumulative run `38096115207`: backend `114342238976` SUCCESS **651 passed / 1 warning / coverage 85.59%**, `test_shared_lease_recovers_after_owner_becomes_unresponsive` explicitly PASSED. Frontend `114342239231` SUCCESS 751 passed / 28 TODO; H1d `38096115318` `114342239392` SUCCESS 5 passed.
 - Simulated TTL expiration with Manager-backed shared state only; NOT a coordinator crash or durable remote lease system. H2 global OPEN; SG28 production opt-in OFF.
+
+
+## 2026-10-10 — Fail-closed coordinator outage contract model published; CI PENDING
+- The most recent verified CI remains cumulative `38096115207`: backend 651 passed and frontend 751 passed; H1d `38096115318` green. No later technical run was returned at inspection.
+- Plus technical commit `af791596fcd5b2a46e3372d959df76f2786d25ed` adds `backend/tests/test_sg28_coordinator_failure_contract.py`: four test-only checks for connection/timeout/OS failures being rejected as coordinator unavailable, plus denial when an owner already holds a grant. These checks are injected fake-store/model behaviors, NOT a production admission adapter, real coordinator crash, or multi-replica failure evidence.
+- Exact-SHA Actions search returned no run immediately after publication; new CI remains UNVERIFIED. SG28/H2 global OPEN and production isolation OFF.
