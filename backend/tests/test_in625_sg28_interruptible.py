@@ -242,3 +242,25 @@ def test_opt_in_child_cpu_budget_applies_only_to_spawned_worker(monkeypatch) -> 
     assert resource.getrlimit(resource.RLIMIT_CPU) == parent_before
     monkeypatch.delenv("SG28_ISOLATED_CPU_SECONDS")
     assert run_bounded(_add, 2, 3, timeout_seconds=5) == 5
+
+
+def _sg28_cpu_bound_loop() -> None:
+    """Bounded by RLIMIT_CPU in POSIX spawned child only."""
+    value = 0
+    while True:
+        value = (value + 1) % 1_000_003
+
+
+@pytest.mark.skipif(__import__("os").name != "posix", reason="POSIX CPU limit only")
+def test_cpu_budget_exhaustion_reaps_child_and_recovers(monkeypatch) -> None:
+    """SG28: CPU-exhausted child exits before wall timeout; subsequent math works."""
+    import time
+    from app.services.interruptible import ComputationFailed
+
+    monkeypatch.setenv("SG28_ISOLATED_CPU_SECONDS", "1")
+    start = time.monotonic()
+    with pytest.raises(ComputationFailed, match="without a response"):
+        run_bounded(_sg28_cpu_bound_loop, timeout_seconds=6)
+    assert time.monotonic() - start < 5.5, "CPU ceiling did not end child in time"
+    monkeypatch.delenv("SG28_ISOLATED_CPU_SECONDS")
+    assert run_bounded(_add, 4, 5, timeout_seconds=5) == 9
