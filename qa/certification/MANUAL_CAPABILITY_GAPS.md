@@ -77,3 +77,11 @@ Estos puntos NO deben marcarse automáticamente como fallo del producto mientras
 ## 2026-10-09 — SG28 four Playwright tests verified PASS
 - GitHub Actions Lite SG28 run https://github.com/c2melendez/precision-lab-lite/actions/runs/38001591613, SHA `d9f36bde5759d2394ce6e9014137127e7d91c0b4`, job `114060683879`: **4/4 Playwright PASS (18.5s)**. Nueva prueba acredita terminación/recreación del worker matemático compilado con operación ordinaria. Gates del mismo SHA cumulative `38001591557`, build `38001591646`, H1d `38001591596`: SUCCESS.
 - Acreditado: ciclo de vida de workers, cancelación bajo mock, worker nativo ocupado acotado y reinicio de worker matemático. Sin acreditar: cancelación de cómputo matemático prolongado ya iniciado y cancelación efectiva del servidor Plus. SG28/H2 abiertos a efectos integrales.
+
+
+## SG28/H2 — Restricción de despliegue multirréplica (bloqueante)
+- **Confirmado por código:** `backend/app/services/request_cancellation.py` define `_ADMISSION = threading.BoundedSemaphore(_MAX_ISOLATED_REQUESTS)` en el ámbito del proceso Python. No comparte capacidad entre procesos de Uvicorn, máquinas o réplicas de Render.
+- Si existen `R` procesos independientes y cada uno permite `K` tareas simultáneas, la admisión agregada puede alcanzar `R × K`; no debe interpretarse `SG28_MAX_ISOLATED_REQUESTS` como límite global.
+- El endpoint `/api/v1/evaluate` invoca secuencialmente dos fases aisladas (cálculo y presentación), cada una adquiere/libera una cuota local. No hay reserva de capacidad global para la solicitud completa.
+- **Criterio para producción:** identificar cantidad de réplicas y workers, política de carga/colas, capacidad total de CPU y memoria, límite global o capacidad asignada por réplica, métricas y alertas, fallos parciales y política de rechazo HTTP; probarlo en un entorno aislado representativo y autorizar despliegue explícitamente.
+- **Estado:** CAPABILITY/DEPLOYMENT GAP — NO CERTIFICADO. SG28_EVALUATE_ISOLATION permanece desactivado por defecto. Los PASS del runner de una sola instancia no cierran este requisito.
