@@ -694,14 +694,19 @@ def test_cancelled_handler_retains_slot_until_coordinator_thread_finishes(monkey
         try:
             assert await asyncio.to_thread(entered.wait, 2)
             occupied.cancel()
-            with pytest.raises(asyncio.CancelledError):
-                await asyncio.wait_for(occupied, 2)
+            # The handler intentionally waits for coordinator cleanup before
+            # acknowledging cancellation. Assert saturation while it waits;
+            # awaiting the handler first would deadlock this test.
+            await asyncio.sleep(0)
+            assert not occupied.done(), "handler returned before coordinator cleanup"
             assert not finished.is_set(), "worker ended before saturation check"
             with pytest.raises(bridge.IsolationCapacityExceeded):
                 await bridge.run_for_request(FakeRequest(), "must-not-run")
             assert "must-not-run" not in calls
 
             release.set()
+            with pytest.raises(asyncio.CancelledError):
+                await asyncio.wait_for(occupied, 3)
             assert await asyncio.to_thread(finished.wait, 2)
             for _ in range(100):
                 try:
