@@ -98,6 +98,8 @@ export function BasicMode() {
   const [lastResult, setLastResult] = useState<MathResponse | null>(null);
   // SG29: prevent late responses from replacing the most recent basic request.
   const latestSubmissionRef = useRef(0);
+  const activeBasicRequest = useRef<AbortController | null>(null);
+  const [basicRequestActive, setBasicRequestActive] = useState(false);
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
@@ -533,13 +535,17 @@ export function BasicMode() {
           )
         : undefined;
 
+    activeBasicRequest.current?.abort();
+    const controller = new AbortController();
+    activeBasicRequest.current = controller;
+    setBasicRequestActive(true);
     setLoading(true);
     setErrorMessage(null);
     try {
       const result = isInequality
-        ? await submitAndRecord("/inequality", { inequality: trimmed }, trimmed)
+        ? await submitAndRecord("/inequality", { inequality: trimmed }, trimmed, { signal: controller.signal })
         : isEquation
-          ? await submitAndRecord("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed)
+          ? await submitAndRecord("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed, { signal: controller.signal })
           : await submitAndRecord(
               "/evaluate",
               {
@@ -548,6 +554,7 @@ export function BasicMode() {
                 ...(substitutionsPayload ? { substitutions: substitutionsPayload } : {}),
               },
               trimmed,
+              { signal: controller.signal },
             );
       if (submissionId !== latestSubmissionRef.current) return;
       setLastResult(result);
@@ -555,6 +562,10 @@ export function BasicMode() {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
     } finally {
+      if (activeBasicRequest.current === controller) {
+        activeBasicRequest.current = null;
+        setBasicRequestActive(false);
+      }
       if (submissionId === latestSubmissionRef.current) setLoading(false);
     }
   }
@@ -758,6 +769,17 @@ export function BasicMode() {
           onGraphExpression={handleGraphExpression}
         />
 
+        {basicRequestActive && (
+          <button type="button" onClick={() => {
+            ++latestSubmissionRef.current;
+            activeBasicRequest.current?.abort();
+            activeBasicRequest.current = null;
+            setBasicRequestActive(false);
+            setLoading(false);
+          }} aria-label="Detener cálculo" className="rounded-lg border px-4 py-2">
+            Detener cálculo
+          </button>
+        )}
         {systemRows && (
           <div className="-mt-4 flex flex-wrap items-center gap-2 px-2">
             <label htmlFor="system-variables-inline" className="text-xs text-muted">
