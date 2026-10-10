@@ -1195,3 +1195,68 @@ def test_outer_disconnect_tracker_sets_scope_event_when_consumed() -> None:
         assert scope["sg28_http_disconnected"].is_set()
 
     asyncio.run(scenario())
+
+
+def test_outer_tracker_disconnect_holds_reserved_slot_until_cleanup(monkeypatch) -> None:
+    """Combined in-process ASGI tracking and K=1 admission cleanup regression."""
+    import threading
+    from starlette.requests import Request
+    from app.services.disconnect_tracking import DisconnectTrackingMiddleware
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    entered = threading.Event()
+    finish = threading.Event()
+
+    def controlled(operation, *args, timeout_seconds, cancel_event):
+        entered.set()
+        assert finish.wait(5)
+        if cancel_event.is_set():
+            raise ComputationCancelled("worker interrupted")
+        return operation
+
+    monkeypatch.setattr(bridge, "run_bounded", controlled)
+
+    async def scenario():
+        queue = asyncio.Queue()
+        scope = {"type": "http", "method": "POST", "path": "/api/v1/evaluate",
+                 "headers": [], "query_string": b""}
+
+        async def receive():
+            return await queue.get()
+
+        async def send(message):
+            return None
+
+        async def downstream(sc, tracked_receive, send_message):
+            request = Request(sc, receive=tracked_receive)
+            with bridge.request_admission_lease():
+                pending = asyncio.create_task(
+                    bridge.run_for_request(request, "occupied", admission_reserved=True)
+                )
+                try:
+                    assert await asyncio.to_thread(entered.wait, 2)
+                    await queue.put({"type": "http.disconnect"})
+                    assert (await asyncio.wait_for(tracked_receive(), 2))["type"] == "http.disconnect"
+                    assert sc["sg28_http_disconnected"].is_set()
+                    await asyncio.sleep(0.075)
+                    assert not pending.done()
+                    with pytest.raises(bridge.IsolationCapacityExceeded):
+                        with bridge.request_admission_lease():
+                            pytest.fail("competing admission before worker cleanup")
+                    finish.set()
+                    with pytest.raises(ComputationCancelled, match="disconnected"):
+                        await asyncio.wait_for(pending, 3)
+                finally:
+                    finish.set()
+                    if not pending.done():
+                        try:
+                            await asyncio.wait_for(pending, 3)
+                        except ComputationCancelled:
+                            pass
+            with bridge.request_admission_lease():
+                assert not bridge._ADMISSION.acquire(blocking=False)
+
+        await DisconnectTrackingMiddleware(downstream)(scope, receive, send)
+
+    asyncio.run(scenario())
