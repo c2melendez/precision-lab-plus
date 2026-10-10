@@ -23,7 +23,7 @@ def _sg28_ci_slow_evaluate(expression, angle_unit, substitutions):
     return evaluate_service.evaluate(expression, angle_unit, substitutions)
 
 
-def _render_evaluate_presentation(result):
+def _render_evaluate_presentation(result, source_expression=None):
     """Render in an independent, killable SG28 worker if isolation is on."""
     warnings = []
     # H1 round-trip: el parser seguro construye el AST con evaluate=False
@@ -67,7 +67,11 @@ def _render_evaluate_presentation(result):
             result_text = "(resultado numérico demasiado grande para mostrarse)"
 
     try:
-        input_latex = sympy.latex(result.input_expr)
+        # Pickle may evaluate previously unevaluated SymPy AST nodes (2+3 -> 5).
+        # Reparse inside the bounded presentation child to retain original input LaTeX.
+        input_expr = (parsing.parse_expression_tree(source_expression)
+                      if source_expression is not None else result.input_expr)
+        input_latex = sympy.latex(input_expr)
     except ValueError:
         input_latex = None
 
@@ -153,7 +157,7 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         )
 
     try:
-        presentation = (await run_for_request(request, _render_evaluate_presentation, result, timeout_seconds=4)
+        presentation = (await run_for_request(request, _render_evaluate_presentation, result, payload.expression, timeout_seconds=4)
                         if os.getenv("SG28_EVALUATE_ISOLATION", "0") == "1"
                         else _render_evaluate_presentation(result))
     except IsolationCapacityExceeded:
