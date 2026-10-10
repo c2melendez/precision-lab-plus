@@ -47,6 +47,15 @@ def _child_main(send: Any, operation: Callable[..., Any], args: tuple[Any, ...])
             if not 1 <= seconds <= 8:
                 raise ValueError("SG28 CPU budget must be 1..8 seconds")
             resource.setrlimit(resource.RLIMIT_CPU, (seconds, seconds + 1))
+        # Virtual-address-space ceiling is likewise opt-in and child-only.
+        memory_mb = os.getenv("SG28_ISOLATED_MEMORY_MB")
+        if memory_mb and os.name == "posix":
+            import resource
+            megabytes = int(memory_mb)
+            if not 256 <= megabytes <= 4096:
+                raise ValueError("SG28 memory budget must be 256..4096 MiB")
+            ceiling = megabytes * 1024 * 1024
+            resource.setrlimit(resource.RLIMIT_AS, (ceiling, ceiling))
         send.send(("ok", operation(*args)))
     except Exception as exc:
         send.send(("error", (type(exc).__name__, str(exc))))
