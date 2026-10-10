@@ -68,6 +68,7 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         child_error_codes = {
             "ParseSecurityError": ErrorCode.PARSE_ERROR,
             "ComplexityLimitError": ErrorCode.COMPLEXITY_LIMIT,
+            "MemoryError": ErrorCode.COMPLEXITY_LIMIT,
             "SubstitutionValidationError": ErrorCode.VALIDATION_ERROR,
             "DomainErrorResult": ErrorCode.DOMAIN_ERROR,
             "AttributeError": ErrorCode.DOMAIN_ERROR,
