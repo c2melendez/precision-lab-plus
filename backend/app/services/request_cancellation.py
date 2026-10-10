@@ -45,9 +45,14 @@ async def run_for_request(
     operation: Callable[..., Any],
     *args: Any,
     timeout_seconds: float = 3.0,
+    admission_reserved: bool = False,
 ) -> Any:
-    """Cancel isolated work on client disconnect or coroutine cancellation."""
-    if not _ADMISSION.acquire(blocking=False):
+    """Cancel isolated work; optionally use a caller-held local admission lease.
+
+    Reserved calls must be inside request_admission_lease(). The caller owns
+    slot release after every worker coordinator has finished cleanup.
+    """
+    if not admission_reserved and not _ADMISSION.acquire(blocking=False):
         raise IsolationCapacityExceeded("Isolated evaluation capacity reached")
     cancelled = threading.Event()
     try:
@@ -59,7 +64,8 @@ async def run_for_request(
         )
         )
     except BaseException:
-        _ADMISSION.release()
+        if not admission_reserved:
+            _ADMISSION.release()
         raise
     try:
         while not task.done():
@@ -85,7 +91,8 @@ async def run_for_request(
     finally:
         cancelled.set()
         # A cancelled coroutine must not release capacity while its thread still runs.
-        if task.done():
-            _ADMISSION.release()
-        else:
-            task.add_done_callback(lambda _: _ADMISSION.release())
+        if not admission_reserved:
+            if task.done():
+                _ADMISSION.release()
+            else:
+                task.add_done_callback(lambda _: _ADMISSION.release())
