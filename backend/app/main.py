@@ -22,6 +22,7 @@ from app.core.exception_handlers import (
     validation_exception_handler,
 )
 from app.core.logging import configure_logging
+from app.services.disconnect_tracking import DisconnectTrackingMiddleware
 from app.routers import algebra, calculus, complex_analysis, evaluate, graphing, health, matrices, ode, phase2, statistics
 
 configure_logging()
@@ -111,6 +112,9 @@ async def request_context_middleware(request: Request, call_next):
         )
     return response
 
+
+# Outer ASGI wrapper records http.disconnect even if inner HTTP middleware consumes it.
+app.add_middleware(DisconnectTrackingMiddleware)
 
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(TimeoutError, timeout_exception_handler)
