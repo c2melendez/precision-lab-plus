@@ -397,3 +397,38 @@ def test_isolated_real_evaluate_error_maps_to_public_error_code(
         "ParseSecurityError": ErrorCode.PARSE_ERROR,
     }
     assert typed_mapping[captured.value.error_type].value == expected_code
+
+
+
+@pytest.mark.parametrize(
+    ("payload", "expected_success", "expected_error"),
+    [
+        ({"expression": "2+3"}, True, None),
+        ({"expression": "sin(30)", "angle_unit": "deg"}, True, None),
+        ({"expression": "x+("}, False, "PARSE_ERROR"),
+        ({"expression": "1/0"}, False, "DOMAIN_ERROR"),
+    ],
+)
+def test_opt_in_public_evaluate_http_contract(
+    monkeypatch, payload: dict, expected_success: bool, expected_error: str | None,
+) -> None:
+    """Hit the actual FastAPI route with and without process isolation."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    results = []
+    for enabled in ("0", "1"):
+        monkeypatch.setenv("SG28_EVALUATE_ISOLATION", enabled)
+        with TestClient(app) as client:
+            response = client.post("/api/v1/evaluate", json=payload)
+        assert response.status_code == 200
+        body = response.json()
+        assert body["success"] is expected_success
+        assert body["operation"] == "evaluate"
+        assert body["error_code"] == expected_error
+        assert body["has_detailed_steps"] is False
+        assert body["request_id"]
+        results.append(body)
+
+    for key in ("success", "operation", "error_code", "result_text", "result_latex"):
+        assert results[0][key] == results[1][key]
