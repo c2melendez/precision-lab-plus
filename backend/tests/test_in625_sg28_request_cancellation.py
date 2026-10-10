@@ -1062,3 +1062,55 @@ def test_opt_in_http_capacity_recovers_after_first_request_failure(monkeypatch) 
     assert good.status_code == 200
     assert good.json()["success"] is True
     assert good.json()["result_approx"] == pytest.approx(5.0)
+
+
+def test_reserved_disconnect_denies_competitor_until_coordinator_reaped(monkeypatch) -> None:
+    """Local K=1: disconnect cannot expose the slot before child cleanup ends.
+
+    This is a deterministic ASGI-request-bridge test using mocked coordinator
+    work, not a real network disconnection or a multi-process admission test.
+    """
+    import threading
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    entered = threading.Event()
+    release = threading.Event()
+
+    def controlled(operation, *args, timeout_seconds, cancel_event):
+        entered.set()
+        assert release.wait(timeout=5), "coordinator was never released"
+        if cancel_event.is_set():
+            raise ComputationCancelled("coordinator interrupted")
+        return operation
+
+    monkeypatch.setattr(bridge, "run_bounded", controlled)
+
+    async def scenario():
+        request = FakeRequest()
+        with bridge.request_admission_lease():
+            pending = asyncio.create_task(
+                bridge.run_for_request(request, "occupied", admission_reserved=True)
+            )
+            try:
+                assert await asyncio.to_thread(entered.wait, 2)
+                request.disconnected = True
+                await asyncio.sleep(0.075)
+                assert not pending.done(), "disconnect bypassed coordinator cleanup"
+                with pytest.raises(bridge.IsolationCapacityExceeded):
+                    with bridge.request_admission_lease():
+                        pytest.fail("competing request admitted before cleanup")
+                release.set()
+                with pytest.raises(ComputationCancelled, match="disconnected"):
+                    await asyncio.wait_for(pending, timeout=3)
+            finally:
+                release.set()
+                if not pending.done():
+                    try:
+                        await asyncio.wait_for(pending, timeout=3)
+                    except ComputationCancelled:
+                        pass
+        with bridge.request_admission_lease():
+            assert not bridge._ADMISSION.acquire(blocking=False)
+
+    asyncio.run(scenario())
