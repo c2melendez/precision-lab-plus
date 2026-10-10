@@ -178,6 +178,10 @@ test("EN-SG-28 browser Stop reaps the same live isolated worker PID", async ({ p
   await expect.poll(() => events().some(e => e.event === "finish" && e.pid === pid),
     { timeout: 5500, message: "Browser Stop did not reap the observed child" }).toBe(true);
   expect(() => process.kill(pid, 0)).toThrow();
+  const lifecycle = events();
+  const startedAt = lifecycle.find(e => e.event === "start" && e.pid === pid)!.time;
+  const finishedAt = lifecycle.find(e => e.event === "finish" && e.pid === pid)!.time;
+  expect(finishedAt - startedAt).toBeLessThan(3.8);
 
   await field.evaluate(el => {
     (el as HTMLElement & { setValue: (v: string) => void }).setValue("4+5");
