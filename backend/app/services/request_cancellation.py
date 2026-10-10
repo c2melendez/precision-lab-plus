@@ -31,7 +31,9 @@ async def run_for_request(
     )
     try:
         while not task.done():
-            if await request.is_disconnected():
+            # The outer ASGI tracker also sees disconnects consumed by HTTP middleware.
+            disconnect_event = getattr(request, "scope", {}).get("sg28_http_disconnected")
+            if (disconnect_event is not None and disconnect_event.is_set()) or await request.is_disconnected():
                 cancelled.set()
                 # Do not return before process coordinator performs cleanup.
                 try:
