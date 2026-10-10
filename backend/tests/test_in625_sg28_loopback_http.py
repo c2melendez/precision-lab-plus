@@ -298,3 +298,40 @@ def test_public_evaluate_memory_exhaustion_returns_complexity_mathresponse(monke
     assert body["error_code"] == "COMPLEXITY_LIMIT"
     assert body["has_detailed_steps"] is False
     assert body["request_id"]
+
+
+
+def test_public_evaluate_presentation_is_actually_isolated_and_parity_safe(monkeypatch) -> None:
+    """SG28: exercise both spawned phases, preserving the complete display contract."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.routers import evaluate as evaluate_router
+
+    original_bridge = evaluate_router.run_for_request
+    invoked: list[str] = []
+
+    async def tracing_bridge(request, operation, *args, **kwargs):
+        invoked.append(operation.__name__)
+        return await original_bridge(request, operation, *args, **kwargs)
+
+    monkeypatch.setattr(evaluate_router, "run_for_request", tracing_bridge)
+    expressions = ("2+3", "x+x", "1/3", "sin(30)", "x+(")
+    with TestClient(app) as client:
+        for expression in expressions:
+            bodies = []
+            for enabled in ("0", "1"):
+                invoked.clear()
+                monkeypatch.setenv("SG28_EVALUATE_ISOLATION", enabled)
+                response = client.post("/api/v1/evaluate", json={"expression": expression})
+                assert response.status_code == 200
+                bodies.append(response.json())
+                if enabled == "1":
+                    expected = (["evaluate", "_render_evaluate_presentation"]
+                                if bodies[-1]["success"] else ["evaluate"])
+                    assert invoked == expected
+                else:
+                    assert invoked == []
+            for key in ("success", "operation", "error_code", "result_type",
+                        "result_text", "result_latex", "input_latex",
+                        "result_approx", "warnings", "has_detailed_steps"):
+                assert bodies[0].get(key) == bodies[1].get(key), (expression, key)
