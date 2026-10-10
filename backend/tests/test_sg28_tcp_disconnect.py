@@ -118,8 +118,8 @@ def test_real_tcp_disconnect_keeps_local_k1_reserved_until_cleanup(monkeypatch):
 
         with socket.create_connection((host, port), timeout=3) as client:
             client.sendall(
-                b"POST /probe HTTP/1.1\\r\\nHost: localhost\\r\\n"
-                b"Content-Length: 0\\r\\nConnection: close\\r\\n\\r\\n"
+                b"POST /probe HTTP/1.1\r\nHost: localhost\r\n"
+                b"Content-Length: 0\r\nConnection: close\r\n\r\n"
             )
             assert entered.wait(4), "Coordinator did not acquire the local slot"
 
