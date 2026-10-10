@@ -8,8 +8,16 @@ from __future__ import annotations
 
 import multiprocessing as mp
 import os
+import json
 import time
 from typing import Any, Callable
+
+
+def _record_sg28_event(event: str, pid: int | None) -> None:
+    path = os.getenv('SG28_CI_EVENT_FILE')
+    if path and os.getenv('SG28_CI_OBSERVE', '0') == '1':
+        with open(path, 'a', encoding='utf-8') as log:
+            log.write(json.dumps({'event': event, 'pid': pid, 'time': time.monotonic()}) + '\n')
 
 
 class ComputationTimedOut(TimeoutError):
@@ -54,7 +62,7 @@ def run_bounded(
     try:
         process.start()
         if os.getenv('SG28_CI_OBSERVE', '0') == '1':
-            print(f'SG28_CHILD_START {process.pid}', flush=True)
+            _record_sg28_event('start', process.pid)
         send.close()
         deadline = time.monotonic() + timeout_seconds
         while True:
@@ -89,4 +97,4 @@ def run_bounded(
         pid = process.pid
         process.close()
         if os.getenv('SG28_CI_OBSERVE', '0') == '1':
-            print(f'SG28_CHILD_FINISH {pid}', flush=True)
+            _record_sg28_event('finish', pid)
