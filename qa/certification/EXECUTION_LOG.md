@@ -1676,3 +1676,8 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 - Technical SHA `e68d7d7f66156775be3427230cdacfc9217cb8e8` adds test-only `backend/tests/test_sg28_shared_lease_expiry.py`: synchronized Manager-backed shared lease at simulated times 0, 1 and 5; initial grant, denial during active TTL, successor grant upon expiry with incremented generation. Spawn-backed process pool used, but distinct worker PIDs are NOT asserted (executor may reuse workers).
 - No Action run for exact technical SHA returned on first inspection; CI outcome PENDING. Last verified baseline cumulative `38088648047`: backend 648 passed / 85.69% coverage, frontend 751 passed; H1d `38088648072` 5 passed.
 - This does not verify crashes, network partitions, durable distributed fencing or Render replica topology. H2 global OPEN; production SG28 isolation OFF.
+
+
+## 2026-10-10 — Shared lease expiry CI GREEN: Plus 649 backend
+- Plus technical SHA `e68d7d7f66156775be3427230cdacfc9217cb8e8`: cumulative run `38090329207` backend SUCCESS **649 passed / 1 warning / coverage 85.59%**, `test_expired_shared_lease_is_replaced_across_interpreters` explicitly PASSED. Frontend SUCCESS 751 passed / 28 TODO. H1d run `38090329193` SUCCESS 5 passed.
+- Manager-backed shared dict/lock and clock steps are a CI-only characterization. Independent interpreter participation per operation, coordinator crash recovery and production fleet quota are NOT proven. SG28/H2 OPEN; production isolation OFF.
