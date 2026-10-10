@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 
 test("EN-SG-28 Plus Basic cancels a pending request and recovers", async ({ page }) => {
@@ -134,6 +135,57 @@ test("EN-SG-28 browser cancels real evaluation and recovers", async ({ page }) =
   await expect(page.getByRole("button", { name: "Detener cálculo" })).toHaveCount(0);
   await enter("4+5");
   const reply = page.waitForResponse(resp => resp.url().endsWith("/api/v1/evaluate"));
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  expect((await (await reply).json()).result_approx).toBe(9);
+});
+
+
+test("EN-SG-28 browser Stop reaps the same live isolated worker PID", async ({ page }) => {
+  const eventsPath = process.env.SG28_CI_EVENT_FILE;
+  test.skip(!eventsPath || process.platform !== "linux", "Linux CI process evidence required");
+  type Event = { event: string; pid: number; time: number };
+  const events = (): Event[] => {
+    try {
+      return readFileSync(eventsPath!, "utf8").trim().split("\n")
+        .filter(Boolean).map((line) => JSON.parse(line) as Event);
+    } catch {
+      return [];
+    }
+  };
+
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  await field.waitFor({ state: "visible" });
+  await field.evaluate(el => {
+    (el as HTMLElement & { setValue: (v: string) => void }).setValue("7+11");
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, data: "7+11" }));
+  });
+  const baseline = events().length;
+  const sent = page.waitForRequest(req =>
+    req.url().endsWith("/api/v1/evaluate") && req.postData()?.includes("7+11") === true
+  );
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  await sent;
+  let pid = 0;
+  await expect.poll(() => {
+    const started = events().slice(baseline).find(e => e.event === "start");
+    pid = started?.pid ?? 0;
+    return pid > 0;
+  }, { timeout: 7000, message: "Isolated child never became observable" }).toBe(true);
+
+  expect(() => process.kill(pid, 0)).not.toThrow();
+  await page.getByRole("button", { name: "Detener cálculo" }).click();
+  await expect.poll(() => events().some(e => e.event === "finish" && e.pid === pid),
+    { timeout: 5500, message: "Browser Stop did not reap the observed child" }).toBe(true);
+  expect(() => process.kill(pid, 0)).toThrow();
+
+  await field.evaluate(el => {
+    (el as HTMLElement & { setValue: (v: string) => void }).setValue("4+5");
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, data: "4+5" }));
+  });
+  const reply = page.waitForResponse(resp =>
+    resp.url().endsWith("/api/v1/evaluate") && resp.request().postData()?.includes("4+5") === true
+  );
   await page.getByRole("button", { name: "Evaluar", exact: true }).click();
   expect((await (await reply).json()).result_approx).toBe(9);
 });
