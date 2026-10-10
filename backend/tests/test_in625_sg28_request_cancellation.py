@@ -517,3 +517,52 @@ def test_timeout_releases_single_slot_and_allows_recovery(monkeypatch) -> None:
         )
 
     assert asyncio.run(scenario()) == 9
+
+
+
+def _sg28_independent_admission_process(ready, release) -> None:
+    """Probe the actual admission model from a separate Python process."""
+    import threading
+    import app.services.request_cancellation as bridge
+
+    bridge._ADMISSION = threading.BoundedSemaphore(1)
+    first = bridge._ADMISSION.acquire(blocking=False)
+    second = bridge._ADMISSION.acquire(blocking=False)
+    ready.put((first, second))
+    release.wait(timeout=8)
+    if first:
+        bridge._ADMISSION.release()
+
+
+def test_admission_quota_is_per_process_not_a_cluster_wide_limit() -> None:
+    """H2 topology gap: two workers with K=1 each admit two concurrent slots.
+
+    This regression deliberately documents a production rollout blocker; it
+    must NOT be misreported as evidence of global cross-replica admission.
+    """
+    import multiprocessing as mp
+
+    ctx = mp.get_context("spawn")
+    ready = ctx.Queue()
+    release = ctx.Event()
+    workers = [
+        ctx.Process(target=_sg28_independent_admission_process, args=(ready, release))
+        for _ in range(2)
+    ]
+    try:
+        for worker in workers:
+            worker.start()
+        observed = [ready.get(timeout=6) for _ in workers]
+        assert observed == [(True, False), (True, False)]
+        # Aggregate capacity is 2 although each process has a limit of 1.
+        assert sum(admitted for admitted, _ in observed) == 2
+    finally:
+        release.set()
+        for worker in workers:
+            worker.join(timeout=4)
+            if worker.is_alive():
+                worker.terminate()
+                worker.join(timeout=2)
+            if worker.pid is not None:
+                worker.close()
+        ready.close()
