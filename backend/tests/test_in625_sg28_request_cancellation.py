@@ -1043,3 +1043,22 @@ def test_opt_in_http_concurrent_requests_reject_then_recover(monkeypatch) -> Non
         recovered = client.post("/api/v1/evaluate", json={"expression": "4+5"})
         assert recovered.status_code == 200
         assert recovered.json()["success"] is True
+
+
+def test_opt_in_http_capacity_recovers_after_first_request_failure(monkeypatch) -> None:
+    """A failed public evaluation must not strand the local request-wide slot."""
+    import threading
+    from fastapi.testclient import TestClient
+    from app.main import app
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "1")
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    with TestClient(app) as client:
+        bad = client.post("/api/v1/evaluate", json={"expression": "x+("})
+        assert bad.status_code != 503
+        assert bad.json()["success"] is False
+        good = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+    assert good.status_code == 200
+    assert good.json()["success"] is True
+    assert good.json()["result_approx"] == pytest.approx(5.0)
