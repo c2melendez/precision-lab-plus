@@ -1596,3 +1596,9 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 - Plus run `38080591813`: backend job `114296512716` SUCCESS **635 passed / 1 warning / coverage 85.69%**. `test_real_tcp_disconnect_keeps_local_k1_reserved_until_cleanup` explicitly PASSED. Frontend job `114296512758` SUCCESS **751 passed / 28 TODO**, 102 modules transformed, built in 21.49s.
 - Integration combines real loopback TCP client closure and mocked coordinator with deterministic cleanup delay, showing reserved local K=1 denies competitors until cleanup finishes, then recovers. Does NOT prove actual isolated child process termination, distributed/fleet global admission, or production deployment topology.
 - SG28/H2 remains OPEN; production experimental isolation OFF.
+
+
+## 2026-10-10 — H2 real child + TCP integration attempted; publication blocked
+- Confirmed baseline Plus run `38080591813`: backend 635 PASS; frontend 751 PASS. Existing tests separately cover spawned child cancellation after ASGI event, real loopback TCP disconnect, and TCP disconnect with mocked cleanup.
+- Attempted to publish an integrated loopback TCP + real spawned child + K=1 release regression; repository write was blocked by tool security controls. **No test commit or CI run resulted**. Do not mark this integration certified.
+- H2 OPEN: integrated real TCP/real child lifecycle and fleet topology remain pending. Experimental production isolation OFF.
