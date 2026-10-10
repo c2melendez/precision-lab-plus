@@ -20,14 +20,18 @@ class ComputationCancelled(RuntimeError):
 
 
 class ComputationFailed(RuntimeError):
-    """The isolated computation exited without returning a result."""
+    """The isolated computation failed, with its original error type retained."""
+
+    def __init__(self, message: str, error_type: str | None = None):
+        super().__init__(message)
+        self.error_type = error_type
 
 
 def _child_main(send: Any, operation: Callable[..., Any], args: tuple[Any, ...]) -> None:
     try:
         send.send(("ok", operation(*args)))
     except Exception as exc:
-        send.send(("error", f"{type(exc).__name__}: {exc}"))
+        send.send(("error", (type(exc).__name__, str(exc))))
     finally:
         send.close()
 
@@ -65,6 +69,9 @@ def run_bounded(
         except EOFError as exc:
             raise ComputationFailed("Child process exited without a response") from exc
         if status != "ok":
+            if isinstance(payload, tuple) and len(payload) == 2:
+                error_type, message = payload
+                raise ComputationFailed(f"{error_type}: {message}", str(error_type))
             raise ComputationFailed(str(payload))
         return payload
     finally:
