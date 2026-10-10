@@ -55,3 +55,89 @@ def test_real_tcp_disconnect_sets_outer_scope_event():
         thread.join(timeout=5)
         listener.close()
         assert not thread.is_alive(), "Temporary HTTP server failed to stop"
+
+
+def test_real_tcp_disconnect_keeps_local_k1_reserved_until_cleanup(monkeypatch):
+    """Socket close cannot free local admission while coordinator is still active.
+
+    Real network/ASGI signal; mock the isolated coordinator to control cleanup.
+    Does not establish multi-replica admission or actual subprocess termination.
+    """
+    import asyncio
+    from starlette.requests import Request
+    import uvicorn
+    import app.services.request_cancellation as bridge
+    from app.services.interruptible import ComputationCancelled
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    entered = threading.Event()
+    cancel_seen = threading.Event()
+    release = threading.Event()
+    completed = threading.Event()
+    outcomes = []
+
+    def controlled(operation, *args, timeout_seconds, cancel_event):
+        entered.set()
+        assert cancel_event.wait(7), "Disconnect was never forwarded to coordinator"
+        cancel_seen.set()
+        assert release.wait(7), "Coordinator cleanup was not released"
+        raise ComputationCancelled("coordinator cancelled")
+
+    monkeypatch.setattr(bridge, "run_bounded", controlled)
+
+    async def endpoint(scope, receive, send):
+        request = Request(scope, receive=receive)
+        try:
+            with bridge.request_admission_lease():
+                await bridge.run_for_request(
+                    request, lambda: None, admission_reserved=True
+                )
+        except ComputationCancelled:
+            outcomes.append("disconnected")
+        finally:
+            completed.set()
+
+    app = DisconnectTrackingMiddleware(endpoint)
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(5)
+    host, port = listener.getsockname()
+    server = uvicorn.Server(
+        uvicorn.Config(app, host=host, port=port, log_level="error", lifespan="off")
+    )
+    thread = threading.Thread(
+        target=server.run, kwargs={"sockets": [listener]}, daemon=True
+    )
+    try:
+        thread.start()
+        deadline = time.monotonic() + 5
+        while not server.started and time.monotonic() < deadline:
+            assert thread.is_alive(), "Temporary HTTP server did not start"
+            time.sleep(0.02)
+        assert server.started, "Temporary HTTP server startup timed out"
+
+        with socket.create_connection((host, port), timeout=3) as client:
+            client.sendall(
+                b"POST /probe HTTP/1.1\\r\\nHost: localhost\\r\\n"
+                b"Content-Length: 0\\r\\nConnection: close\\r\\n\\r\\n"
+            )
+            assert entered.wait(4), "Coordinator did not acquire the local slot"
+
+        assert cancel_seen.wait(5), "TCP close did not trigger cancellation"
+        assert not completed.is_set(), "Request completed before coordinator cleanup"
+        try:
+            with bridge.request_admission_lease():
+                raise AssertionError("Competing request admitted before cleanup")
+        except bridge.IsolationCapacityExceeded:
+            pass
+        release.set()
+        assert completed.wait(5), "Request did not finish after coordinator cleanup"
+        assert outcomes == ["disconnected"]
+        with bridge.request_admission_lease():
+            pass
+    finally:
+        release.set()
+        server.should_exit = True
+        thread.join(timeout=5)
+        listener.close()
+        assert not thread.is_alive(), "Temporary HTTP server did not stop"
