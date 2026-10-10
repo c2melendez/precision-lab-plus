@@ -873,3 +873,50 @@ def test_reserved_bridge_exception_keeps_lease_until_caller_exits(monkeypatch) -
         ) == 9
 
     asyncio.run(scenario())
+
+
+def test_reserved_bridge_cancellation_retains_lease_until_worker_cleanup(monkeypatch) -> None:
+    """A reserved request must retain admission until cancelled work is reaped."""
+    import threading
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    entered = threading.Event()
+    release = threading.Event()
+
+    def controlled(operation, *args, timeout_seconds, cancel_event):
+        entered.set()
+        assert release.wait(timeout=5), "worker cleanup never released"
+        return operation
+
+    monkeypatch.setattr(bridge, "run_bounded", controlled)
+
+    async def scenario():
+        with bridge.request_admission_lease():
+            pending = asyncio.create_task(
+                bridge.run_for_request(
+                    FakeRequest(), "occupied", admission_reserved=True,
+                )
+            )
+            try:
+                assert await asyncio.to_thread(entered.wait, 2)
+                pending.cancel()
+                await asyncio.sleep(0)
+                assert not pending.done(), "handler exited before coordinator cleanup"
+                with pytest.raises(bridge.IsolationCapacityExceeded):
+                    with bridge.request_admission_lease():
+                        pytest.fail("capacity leaked during cleanup")
+                release.set()
+                with pytest.raises(asyncio.CancelledError):
+                    await asyncio.wait_for(pending, 3)
+            finally:
+                release.set()
+                if not pending.done():
+                    try:
+                        await asyncio.wait_for(pending, 3)
+                    except asyncio.CancelledError:
+                        pass
+        with bridge.request_admission_lease():
+            assert not bridge._ADMISSION.acquire(blocking=False)
+
+    asyncio.run(scenario())
