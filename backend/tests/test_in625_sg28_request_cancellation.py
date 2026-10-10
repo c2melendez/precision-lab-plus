@@ -824,3 +824,52 @@ def test_real_local_request_admission_lease_recovers_on_exception(monkeypatch) -
             raise RuntimeError("synthetic failure")
     with bridge.request_admission_lease():
         assert not bridge._ADMISSION.acquire(blocking=False)
+
+
+def test_reserved_bridge_two_phases_preserve_single_local_lease(monkeypatch) -> None:
+    """The real bridge does not reacquire or release a caller-owned lease."""
+    import threading
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+
+    async def scenario() -> None:
+        with bridge.request_admission_lease():
+            for phase in ("evaluation", "presentation"):
+                assert await bridge.run_for_request(
+                    FakeRequest(), _add, 2, 3,
+                    timeout_seconds=5, admission_reserved=True,
+                ) == 5
+                with pytest.raises(bridge.IsolationCapacityExceeded):
+                    with bridge.request_admission_lease():
+                        pytest.fail("reserved slot became available in " + phase)
+        assert await bridge.run_for_request(
+            FakeRequest(), _add, 4, 5, timeout_seconds=5,
+        ) == 9
+
+    asyncio.run(scenario())
+
+
+def test_reserved_bridge_exception_keeps_lease_until_caller_exits(monkeypatch) -> None:
+    """Child failure never double-releases an outer admission lease."""
+    import threading
+    import app.services.request_cancellation as bridge
+    from app.services.interruptible import ComputationFailed
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+
+    async def scenario() -> None:
+        with bridge.request_admission_lease():
+            with pytest.raises(ComputationFailed):
+                await bridge.run_for_request(
+                    FakeRequest(), _evaluate_actual_service,
+                    "x+(", "rad", timeout_seconds=5, admission_reserved=True,
+                )
+            with pytest.raises(bridge.IsolationCapacityExceeded):
+                with bridge.request_admission_lease():
+                    pytest.fail("released while outer lease is still active")
+        assert await bridge.run_for_request(
+            FakeRequest(), _add, 4, 5, timeout_seconds=5,
+        ) == 9
+
+    asyncio.run(scenario())
