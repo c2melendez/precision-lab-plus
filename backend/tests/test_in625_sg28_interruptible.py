@@ -255,11 +255,11 @@ def _sg28_cpu_bound_loop() -> None:
 def test_cpu_budget_exhaustion_reaps_child_and_recovers(monkeypatch) -> None:
     """SG28: CPU-exhausted child exits before wall timeout; subsequent math works."""
     import time
-    from app.services.interruptible import ComputationFailed
+    from app.services.interruptible import ComputationTimedOut
 
     monkeypatch.setenv("SG28_ISOLATED_CPU_SECONDS", "1")
     start = time.monotonic()
-    with pytest.raises(ComputationFailed, match="without a response"):
+    with pytest.raises(ComputationTimedOut, match="CPU budget exceeded"):
         run_bounded(_sg28_cpu_bound_loop, timeout_seconds=6)
     assert time.monotonic() - start < 5.5, "CPU ceiling did not end child in time"
     monkeypatch.delenv("SG28_ISOLATED_CPU_SECONDS")
