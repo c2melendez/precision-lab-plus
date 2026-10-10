@@ -457,3 +457,37 @@ def test_isolation_capacity_rejects_second_request_and_recovers(monkeypatch) -> 
         return await bridge.run_for_request(FakeRequest(), _add, 2, 3, timeout_seconds=4)
 
     assert asyncio.run(scenario()) == 5
+
+
+
+def test_repeated_cancel_cycles_release_admission_and_recover() -> None:
+    """SG28-E2E-07 backend: repeated real child cancellation must not leak slots.
+
+    Each iteration disconnects a request during a bounded sleeping child,
+    then runs an independent real spawned calculation. A leaked admission slot
+    or unfinished coordinator causes a later iteration to fail.
+    """
+    async def scenario() -> None:
+        for iteration in range(4):
+            request = FakeRequest()
+            pending = asyncio.create_task(
+                run_for_request(request, _long_job, timeout_seconds=5)
+            )
+            try:
+                await asyncio.sleep(0.2)
+                request.disconnected = True
+                with pytest.raises(ComputationCancelled, match="disconnected"):
+                    await asyncio.wait_for(pending, timeout=4)
+            finally:
+                if not pending.done():
+                    pending.cancel()
+                    try:
+                        await pending
+                    except (ComputationCancelled, asyncio.CancelledError):
+                        pass
+
+            assert await run_for_request(
+                FakeRequest(), _add, iteration, 10, timeout_seconds=5
+            ) == iteration + 10
+
+    asyncio.run(scenario())
