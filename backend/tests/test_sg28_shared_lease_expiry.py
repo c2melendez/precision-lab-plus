@@ -67,3 +67,29 @@ def test_two_distinct_workers_contend_atomically_for_shared_k1():
         winner = next(item for item in results if item[2])
         assert shared["lease"]["owner"] == winner[1]
         assert shared["lease"]["generation"] == 1
+
+
+def test_shared_lease_recovers_after_owner_becomes_unresponsive():
+    """Logical orphan recovery: no forced process exit or production coordinator.
+
+    Owner receives a grant then sends no renewal. A contender can only acquire
+    when simulated TTL expires; stale owner cannot revoke successor.
+    """
+    ctx = multiprocessing.get_context("spawn")
+    with ctx.Manager() as manager:
+        shared = manager.dict()
+        lock = manager.Lock()
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=2, mp_context=ctx
+        ) as pool:
+            owner = pool.submit(_lease_attempt, shared, lock, 0, "silent-owner")
+            owner_pid, _, granted, original_gen = owner.result(timeout=15)
+            denied = pool.submit(_lease_attempt, shared, lock, 4, "replacement")
+            _, _, before_expiry, _ = denied.result(timeout=15)
+            replacement = pool.submit(_lease_attempt, shared, lock, 5, "replacement")
+            _, _, after_expiry, new_gen = replacement.result(timeout=15)
+        assert owner_pid > 0 and granted
+        assert not before_expiry
+        assert after_expiry and new_gen == original_gen + 1
+        assert shared["lease"]["owner"] == "replacement"
+        assert shared["lease"]["generation"] == new_gen
