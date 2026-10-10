@@ -253,3 +253,18 @@ def test_isolated_real_evaluate_service_preserves_results(
     assert result.approx_value == pytest.approx(expected)
     assert result.input_expr is not None
     assert result.expr is not None
+
+
+def test_isolated_real_evaluate_service_preserves_symbolic_result() -> None:
+    """The spawn bridge must retain symbolic output, not force float conversion."""
+    async def scenario():
+        return await run_for_request(
+            FakeRequest(), _evaluate_actual_service,
+            "x+1", "rad", timeout_seconds=6,
+        )
+
+    result = asyncio.run(scenario())
+    assert result.is_numeric is False
+    assert result.approx_value is None
+    assert str(result.expr) == "x + 1"
+    assert str(result.input_expr) == "x + 1"
