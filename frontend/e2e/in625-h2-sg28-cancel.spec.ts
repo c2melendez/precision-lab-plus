@@ -247,3 +247,55 @@ test("EN-SG-28 navigating away reaps pending worker and permits fresh evaluation
   expect((await (await reply).json()).result_approx).toBe(9);
   await expect(page.locator("body")).not.toContainText("999999");
 });
+
+
+test("EN-SG-28 closing browser tab reaps active isolated worker and recovers", async ({ page, context }) => {
+  const eventsPath = process.env.SG28_CI_EVENT_FILE;
+  test.skip(process.platform !== "linux" || (!process.env.CI && !eventsPath), "Linux process evidence required");
+  if (process.env.CI) expect(eventsPath, "SG28_CI_EVENT_FILE must be configured in CI").toBeTruthy();
+  const events = (): Array<{ event: string; pid: number; time: number }> => {
+    try {
+      return readFileSync(eventsPath!, "utf8").trim().split("\n")
+        .filter(Boolean).map((line) => JSON.parse(line));
+    } catch { return []; }
+  };
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  await field.waitFor({ state: "visible" });
+  await field.evaluate(el => {
+    (el as HTMLElement & { setValue: (v: string) => void }).setValue("7+11");
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, data: "7+11" }));
+  });
+  const baseline = events().length;
+  const sent = page.waitForRequest(req =>
+    req.url().endsWith("/api/v1/evaluate") && req.postData()?.includes("7+11") === true
+  );
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  await sent;
+  let pid = 0;
+  await expect.poll(() => {
+    pid = events().slice(baseline).find(e => e.event === "start")?.pid ?? 0;
+    return pid > 0;
+  }, { timeout: 7000 }).toBe(true);
+  expect(() => process.kill(pid, 0)).not.toThrow();
+
+  // A real page close, not a simulated click or mocked HTTP request.
+  await page.close();
+  await expect.poll(() => events().some(e => e.event === "finish" && e.pid === pid),
+    { timeout: 5500, message: "Closing browser tab left isolated PID running" }).toBe(true);
+  expect(() => process.kill(pid, 0)).toThrow();
+
+  const reopened = await context.newPage();
+  await reopened.goto("/");
+  const newField = reopened.locator("math-field").first();
+  await newField.waitFor({ state: "visible" });
+  await newField.evaluate(el => {
+    (el as HTMLElement & { setValue: (v: string) => void }).setValue("4+5");
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, data: "4+5" }));
+  });
+  const reply = reopened.waitForResponse(resp =>
+    resp.url().endsWith("/api/v1/evaluate") && resp.request().postData()?.includes("4+5") === true
+  );
+  await reopened.getByRole("button", { name: "Evaluar", exact: true }).click();
+  expect((await (await reply).json()).result_approx).toBe(9);
+});
