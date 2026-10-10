@@ -159,3 +159,68 @@ def test_isolated_child_failure_retains_structured_error_and_recovers() -> None:
     assert captured.value.error_type == "ValueError"
     assert "isolated sentinel" in str(captured.value)
     assert run_bounded(_add, 2, 3, timeout_seconds=5) == 5
+
+
+
+def _report_pid_then_compute_forever(pid_value, ready) -> None:
+    """Expose the real child PID before starting an active SymPy workload."""
+    import os
+    import sympy
+
+    pid_value.value = os.getpid()
+    ready.set()
+    x = sympy.Symbol("x")
+    expr = x**3 + 2*x
+    while True:
+        expr = sympy.diff(expr, x) + x**3
+
+
+@pytest.mark.skipif(__import__("os").name != "posix", reason="POSIX child PID liveness check")
+@pytest.mark.parametrize("stop_mode", ["timeout", "cancel"])
+def test_isolated_worker_pid_is_gone_after_interruption(stop_mode: str) -> None:
+    """Prove that the actual child PID is gone, not merely that an error returned."""
+    import multiprocessing as mp
+    import os
+    import threading
+
+    ctx = mp.get_context("spawn")
+    pid = ctx.Value("i", 0)
+    ready = ctx.Event()
+    stop = threading.Event()
+    observed_alive = []
+
+    def request_cancel_only_after_child_is_alive() -> None:
+        if ready.wait(timeout=3):
+            try:
+                os.kill(pid.value, 0)
+                observed_alive.append(True)
+            except ProcessLookupError:
+                observed_alive.append(False)
+            stop.set()
+
+    watcher = None
+    if stop_mode == "cancel":
+        watcher = threading.Thread(
+            target=request_cancel_only_after_child_is_alive, daemon=True
+        )
+        watcher.start()
+    try:
+        expected = ComputationCancelled if stop_mode == "cancel" else ComputationTimedOut
+        with pytest.raises(expected):
+            run_bounded(
+                _report_pid_then_compute_forever, pid, ready,
+                timeout_seconds=4 if stop_mode == "cancel" else 1.5,
+                cancel_event=stop if stop_mode == "cancel" else None,
+            )
+        assert ready.is_set(), "Child process never reported being active"
+        assert pid.value > 0, "Missing observed child PID"
+        if stop_mode == "cancel":
+            assert observed_alive == [True], "Worker not alive before cancel signal"
+        with pytest.raises(ProcessLookupError):
+            os.kill(pid.value, 0)
+    finally:
+        stop.set()
+        if watcher is not None:
+            watcher.join(timeout=2)
+
+    assert run_bounded(_add, 2, 3, timeout_seconds=5) == 5
