@@ -42,3 +42,28 @@ def test_expired_shared_lease_is_replaced_across_interpreters():
         assert shared["lease"]["owner"] == "third"
         # Worker PIDs are only observational: executor may reuse a process.
         assert first_pid > 0 and second_pid > 0
+
+
+def _simultaneous_claim(shared, lock, barrier, role):
+    """Two live spawned workers contend for the same shared lease."""
+    assert barrier.wait(timeout=12) in (0, 1)
+    return _lease_attempt(shared, lock, 0, role)
+
+
+def test_two_distinct_workers_contend_atomically_for_shared_k1():
+    ctx = multiprocessing.get_context("spawn")
+    with ctx.Manager() as manager:
+        shared = manager.dict()
+        lock = manager.Lock()
+        barrier = manager.Barrier(2)
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=2, mp_context=ctx
+        ) as pool:
+            left = pool.submit(_simultaneous_claim, shared, lock, barrier, "left")
+            right = pool.submit(_simultaneous_claim, shared, lock, barrier, "right")
+            results = [left.result(timeout=20), right.result(timeout=20)]
+        assert len({item[0] for item in results}) == 2
+        assert sorted(item[2] for item in results) == [False, True]
+        winner = next(item for item in results if item[2])
+        assert shared["lease"]["owner"] == winner[1]
+        assert shared["lease"]["generation"] == 1
