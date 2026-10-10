@@ -9,6 +9,7 @@ on:
       - 'frontend/playwright.config.ts'
       - 'backend/app/routers/evaluate.py'
       - 'backend/app/services/request_cancellation.py'
+      - 'backend/app/services/interruptible.py'
       - 'frontend/src/components/BasicMode.tsx'
       - 'frontend/src/api/client.ts'
       - 'frontend/src/api/submitWithHistory.ts'
@@ -36,3 +37,4 @@ jobs:
         working-directory: frontend
         env:
           SG28_EVALUATE_ISOLATION: '1'
+          SG28_CI_OBSERVE: '1'
