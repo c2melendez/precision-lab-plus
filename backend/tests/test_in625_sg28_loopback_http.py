@@ -222,3 +222,42 @@ def test_public_evaluate_isolation_matches_default_mathresponse(monkeypatch):
                     f"{expression!r}: public MathResponse field {field} differs: "
                     f"{original.get(field)!r} vs {isolated.get(field)!r}"
                 )
+
+
+
+def _sg28_public_cpu_spin(*_args) -> None:
+    """Picklable CPU-intensive operation for actual /evaluate HTTP contract."""
+    n = 0
+    while True:
+        n = (n + 1) % 1_000_003
+
+
+def test_public_evaluate_cpu_exhaustion_returns_timeout_mathresponse(monkeypatch) -> None:
+    """Real POSIX SIGXCPU must surface as public TIMEOUT, not HTTP 500."""
+    import os
+    import pytest
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.routers import evaluate as evaluate_router
+    from app.services.request_cancellation import run_for_request
+
+    if os.name != "posix":
+        pytest.skip("POSIX RLIMIT_CPU only")
+
+    async def cpu_bound_bridge(request, operation, *args, **kwargs):
+        return await run_for_request(
+            request, _sg28_public_cpu_spin, timeout_seconds=6,
+        )
+
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "1")
+    monkeypatch.setenv("SG28_ISOLATED_CPU_SECONDS", "1")
+    monkeypatch.setattr(evaluate_router, "run_for_request", cpu_bound_bridge)
+    with TestClient(app) as client:
+        result = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+    assert result.status_code == 200
+    body = result.json()
+    assert body["success"] is False
+    assert body["operation"] == "evaluate"
+    assert body["error_code"] == "TIMEOUT"
+    assert body["has_detailed_steps"] is False
+    assert body["request_id"]
