@@ -1633,3 +1633,8 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 - Technical Plus SHA `167d0335197c624186e24ce486ccec1a8fa39366` adds `backend/tests/test_sg28_shared_admission_characterization.py`: two independent spawned Python interpreters use a manager-backed shared bounded semaphore K=1. One holds while another is denied; capacity recovers after release. This is a CI-only shared gate demonstration, not a durable distributed lease coordinator.
 - GitHub Actions automatically queued cumulative run `38084981053` and H1d `38084981061` for this SHA. Both were QUEUED when queried; **NO PASS CLAIM** until job logs confirmed.
 - Baseline remains 637 backend PASS on `38084223803`; global H2 OPEN; experimental isolation remains OFF in production.
+
+
+## 2026-10-10 — Shared K=1 multiprocess gate VERIFIED
+- Plus technical SHA `167d0335197c624186e24ce486ccec1a8fa39366` cumulative run `38084981053`: backend job `114309506476` SUCCESS **638 passed / 1 warning / coverage 85.74%**; `test_shared_gate_denies_second_interpreter_and_recovers` explicitly PASSED. Frontend job `114309506744` SUCCESS **751 passed / 28 TODO**, 102 modules, build 22.88s. H1d `38084981061` job `114309506931` SUCCESS **5 passed**.
+- The shared semaphore uses multiprocessing Manager and is **test-only**, not a durable global lease or production distributed admission coordinator. SG28/H2 global OPEN pending failure/expiry/fencing handling and actual Render topology. Production SG28 opt-in remains OFF.
