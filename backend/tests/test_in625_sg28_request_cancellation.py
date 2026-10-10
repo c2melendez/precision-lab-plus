@@ -1173,3 +1173,25 @@ def test_reserved_starlette_asgi_disconnect_blocks_competitor_then_recovers(monk
             assert not bridge._ADMISSION.acquire(blocking=False)
 
     asyncio.run(scenario())
+
+
+def test_outer_disconnect_tracker_sets_scope_event_when_consumed() -> None:
+    """In-process ASGI middleware records disconnect consumed by an inner layer."""
+    from app.services.disconnect_tracking import DisconnectTrackingMiddleware
+
+    async def scenario():
+        queue = asyncio.Queue()
+        scope = {"type": "http"}
+        await queue.put({"type": "http.disconnect"})
+        async def receive():
+            return await queue.get()
+        async def send(message):
+            return None
+        async def downstream(scope, receive, send):
+            message = await receive()
+            assert message["type"] == "http.disconnect"
+            assert scope["sg28_http_disconnected"].is_set()
+        await DisconnectTrackingMiddleware(downstream)(scope, receive, send)
+        assert scope["sg28_http_disconnected"].is_set()
+
+    asyncio.run(scenario())
