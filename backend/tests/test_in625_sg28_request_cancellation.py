@@ -222,3 +222,34 @@ def test_concurrent_request_disconnect_does_not_cancel_independent_request() -> 
                         pass
 
     assert asyncio.run(scenario()) == ("cancelled", "3*x**2 + 2")
+
+
+def _evaluate_actual_service(expression: str, angle_unit: str = "rad"):
+    """Call the real evaluate service rather than a stand-in SymPy function."""
+    from app.services.evaluate_service import evaluate
+    return evaluate(expression, angle_unit)
+
+
+@pytest.mark.parametrize(
+    ("expression", "angle_unit", "expected"),
+    [
+        ("2+3", "rad", 5.0),
+        ("sin(30)", "deg", 0.5),
+        ("1/4", "rad", 0.25),
+    ],
+)
+def test_isolated_real_evaluate_service_preserves_results(
+    expression: str, angle_unit: str, expected: float,
+) -> None:
+    """Pre-integration gate: actual evaluate service remains usable in spawn."""
+    async def scenario():
+        return await run_for_request(
+            FakeRequest(), _evaluate_actual_service,
+            expression, angle_unit, timeout_seconds=6,
+        )
+
+    result = asyncio.run(scenario())
+    assert result.is_numeric is True
+    assert result.approx_value == pytest.approx(expected)
+    assert result.input_expr is not None
+    assert result.expr is not None
