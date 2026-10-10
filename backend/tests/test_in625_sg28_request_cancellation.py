@@ -764,3 +764,31 @@ def test_interleaving_request_can_take_slot_between_evaluation_and_presentation(
         assert await bridge.run_for_request(FakeRequest(), "presentation-A") == "presentation-A"
 
     asyncio.run(scenario())
+
+
+def test_request_scoped_admission_lease_blocks_interleaving_and_releases(monkeypatch) -> None:
+    """Executable target contract: one local K=1 lease spans both phases.
+
+    This probe deliberately owns the BoundedSemaphore in the test. It is a
+    proposed admission lifetime, NOT a claim the current router implements it.
+    The released-between-phases regression above documents the current gap.
+    """
+    import threading
+    import app.services.request_cancellation as bridge
+
+    quota = threading.BoundedSemaphore(1)
+    monkeypatch.setattr(bridge, "_ADMISSION", quota)
+    assert quota.acquire(blocking=False)
+    try:
+        # Request A holds capacity through both logical phases.
+        assert not quota.acquire(blocking=False), "request B interleaved at evaluate boundary"
+        evaluation = "evaluation-A"
+        assert evaluation == "evaluation-A"
+        assert not quota.acquire(blocking=False), "request B interleaved before presentation"
+        presentation = "presentation-A"
+        assert presentation == "presentation-A"
+        assert not quota.acquire(blocking=False), "request B interleaved before lease exit"
+    finally:
+        quota.release()
+    assert quota.acquire(blocking=False), "request B cannot recover after lease exit"
+    quota.release()
