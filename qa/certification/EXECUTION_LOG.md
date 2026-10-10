@@ -1670,3 +1670,9 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 ## 2026-10-10 — Lease generation stress CI GREEN (648 backend)
 - Plus technical SHA `15e9fa1c7c52d6f5d95f29064d6517e78db42e07`, cumulative run `38088648047`: backend job `114320351634` SUCCESS **648 passed, 1 warning, coverage 85.69%**; 50-generation stale lease fencing and exact-expiry renewal boundary explicitly PASSED. Frontend job `114320351445` SUCCESS 751 passed / 28 TODO. H1d run `38088648072` job `114320351577` SUCCESS 5 passed.
 - These remain deterministic in-memory lease model tests; crash-resilient distributed coordinator and Render topology NOT certified. H2 OPEN, isolation production OFF.
+
+
+## 2026-10-10 — Shared expiring lease characterization published; CI UNVERIFIED
+- Technical SHA `e68d7d7f66156775be3427230cdacfc9217cb8e8` adds test-only `backend/tests/test_sg28_shared_lease_expiry.py`: synchronized Manager-backed shared lease at simulated times 0, 1 and 5; initial grant, denial during active TTL, successor grant upon expiry with incremented generation. Spawn-backed process pool used, but distinct worker PIDs are NOT asserted (executor may reuse workers).
+- No Action run for exact technical SHA returned on first inspection; CI outcome PENDING. Last verified baseline cumulative `38088648047`: backend 648 passed / 85.69% coverage, frontend 751 passed; H1d `38088648072` 5 passed.
+- This does not verify crashes, network partitions, durable distributed fencing or Render replica topology. H2 global OPEN; production SG28 isolation OFF.
