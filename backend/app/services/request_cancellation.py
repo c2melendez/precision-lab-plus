@@ -6,6 +6,7 @@ executor thread, while the event loop checks for ASGI client disconnects.
 from __future__ import annotations
 
 import asyncio
+from contextlib import contextmanager
 import os
 import threading
 from typing import Any, Callable
@@ -21,6 +22,22 @@ _ADMISSION = threading.BoundedSemaphore(_MAX_ISOLATED_REQUESTS)
 
 class IsolationCapacityExceeded(RuntimeError):
     """The bounded isolated-worker pool has no available admission slot."""
+
+
+@contextmanager
+def request_admission_lease():
+    """Reserve one *local process* slot across a logical request's phases.
+
+    This opt-in primitive does not affect run_for_request's existing admission
+    behavior and is not yet wired into the public evaluate router. Callers must
+    finish/clean up their child coordinators before leaving the lease.
+    """
+    if not _ADMISSION.acquire(blocking=False):
+        raise IsolationCapacityExceeded("Isolated evaluation capacity reached")
+    try:
+        yield
+    finally:
+        _ADMISSION.release()
 
 
 async def run_for_request(
