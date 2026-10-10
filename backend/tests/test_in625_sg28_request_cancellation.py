@@ -366,3 +366,34 @@ def test_isolated_math_response_error_contract_survives_process_boundary() -> No
     assert result.result_type is None
     assert result.has_detailed_steps is False
     assert result.model_dump(mode="json")["error_code"] == "PARSE_ERROR"
+
+
+@pytest.mark.parametrize(
+    ("expression", "error_type", "expected_code"),
+    [
+        ("1/0", "DomainErrorResult", "DOMAIN_ERROR"),
+        ("x+(", "ParseSecurityError", "PARSE_ERROR"),
+    ],
+)
+def test_isolated_real_evaluate_error_maps_to_public_error_code(
+    expression: str, error_type: str, expected_code: str,
+) -> None:
+    """Check typed child failures map to the existing public error enum."""
+    from app.services.interruptible import ComputationFailed
+    from app.schemas.responses import ErrorCode
+
+    async def scenario():
+        return await run_for_request(
+            FakeRequest(), _evaluate_actual_service,
+            expression, "rad", timeout_seconds=6,
+        )
+
+    with pytest.raises(ComputationFailed) as captured:
+        asyncio.run(scenario())
+    assert captured.value.error_type == error_type
+
+    typed_mapping = {
+        "DomainErrorResult": ErrorCode.DOMAIN_ERROR,
+        "ParseSecurityError": ErrorCode.PARSE_ERROR,
+    }
+    assert typed_mapping[captured.value.error_type].value == expected_code
