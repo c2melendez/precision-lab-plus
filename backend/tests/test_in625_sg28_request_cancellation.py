@@ -657,3 +657,60 @@ def test_two_stage_request_admission_is_phase_scoped_not_end_to_end(monkeypatch)
     assert asyncio.run(scenario()) == ("evaluation", "presentation")
     # Both stages finished: no admission leak remains.
     assert asyncio.run(bridge.run_for_request(FakeRequest(), "recovery")) == "recovery"
+
+
+def test_cancelled_handler_retains_slot_until_coordinator_thread_finishes(monkeypatch) -> None:
+    """A cancelled handler cannot admit replacement work before cleanup ends.
+
+    Deterministic, single-process contract: this simulates a coordinator thread
+    stalled during its final cleanup. It makes no claims about cluster quotas,
+    live network disconnects, or process termination in a deployed server.
+    """
+    import threading
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    entered = threading.Event()
+    release = threading.Event()
+    finished = threading.Event()
+    calls = []
+
+    def controlled_worker(operation, *args, timeout_seconds, cancel_event):
+        calls.append(operation)
+        if operation == "occupied":
+            entered.set()
+            try:
+                assert release.wait(timeout=5), "cleanup release signal missing"
+            finally:
+                finished.set()
+        return operation
+
+    monkeypatch.setattr(bridge, "run_bounded", controlled_worker)
+
+    async def scenario():
+        occupied = asyncio.create_task(
+            bridge.run_for_request(FakeRequest(), "occupied")
+        )
+        try:
+            assert await asyncio.to_thread(entered.wait, 2)
+            occupied.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await asyncio.wait_for(occupied, 2)
+            assert not finished.is_set(), "worker ended before saturation check"
+            with pytest.raises(bridge.IsolationCapacityExceeded):
+                await bridge.run_for_request(FakeRequest(), "must-not-run")
+            assert "must-not-run" not in calls
+
+            release.set()
+            assert await asyncio.to_thread(finished.wait, 2)
+            for _ in range(100):
+                try:
+                    return await bridge.run_for_request(FakeRequest(), "recovered")
+                except bridge.IsolationCapacityExceeded:
+                    await asyncio.sleep(0.01)
+            pytest.fail("admission slot not returned after worker cleanup")
+        finally:
+            release.set()
+
+    assert asyncio.run(scenario()) == "recovered"
+    assert calls == ["occupied", "recovered"]
