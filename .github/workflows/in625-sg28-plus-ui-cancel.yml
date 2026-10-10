@@ -38,3 +38,5 @@ jobs:
         env:
           SG28_EVALUATE_ISOLATION: '1'
           SG28_CI_OBSERVE: '1'
+          SG28_CI_SLOW: '1'
+          SG28_CI_EVENT_FILE: '/tmp/sg28-plus-e2e-events.jsonl'
