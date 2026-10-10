@@ -6,12 +6,21 @@ executor thread, while the event loop checks for ASGI client disconnects.
 from __future__ import annotations
 
 import asyncio
+import os
 import threading
 from typing import Any, Callable
 
 from starlette.requests import Request
 
 from app.services.interruptible import ComputationCancelled, run_bounded
+
+# Per Python worker-process admission: fail closed when the budget is full.
+_MAX_ISOLATED_REQUESTS = max(1, min(int(os.getenv("SG28_MAX_ISOLATED_REQUESTS", "2")), 16))
+_ADMISSION = threading.BoundedSemaphore(_MAX_ISOLATED_REQUESTS)
+
+
+class IsolationCapacityExceeded(RuntimeError):
+    """The bounded isolated-worker pool has no available admission slot."""
 
 
 async def run_for_request(
@@ -21,14 +30,20 @@ async def run_for_request(
     timeout_seconds: float = 3.0,
 ) -> Any:
     """Cancel isolated work on client disconnect or coroutine cancellation."""
+    if not _ADMISSION.acquire(blocking=False):
+        raise IsolationCapacityExceeded("Isolated evaluation capacity reached")
     cancelled = threading.Event()
-    task = asyncio.create_task(
+    try:
+        task = asyncio.create_task(
         asyncio.to_thread(
             run_bounded, operation, *args,
             timeout_seconds=timeout_seconds,
             cancel_event=cancelled,
         )
-    )
+        )
+    except BaseException:
+        _ADMISSION.release()
+        raise
     try:
         while not task.done():
             # The outer ASGI tracker also sees disconnects consumed by HTTP middleware.
@@ -52,3 +67,8 @@ async def run_for_request(
         raise
     finally:
         cancelled.set()
+        # A cancelled coroutine must not release capacity while its thread still runs.
+        if task.done():
+            _ADMISSION.release()
+        else:
+            task.add_done_callback(lambda _: _ADMISSION.release())
