@@ -143,3 +143,19 @@ def test_running_sympy_process_is_terminated_then_recovers() -> None:
         run_bounded(_repeated_real_sympy_work, timeout_seconds=1.5)
     assert time.monotonic() - started < 4.0
     assert run_bounded(_real_sympy_evaluation, timeout_seconds=5) == "3*x**2 + 2"
+
+
+
+def _raise_structured_worker_error() -> None:
+    raise ValueError("isolated sentinel")
+
+
+def test_isolated_child_failure_retains_structured_error_and_recovers() -> None:
+    """Typed failures must cross the subprocess boundary without poisoning later jobs."""
+    from app.services.interruptible import ComputationFailed
+
+    with pytest.raises(ComputationFailed) as captured:
+        run_bounded(_raise_structured_worker_error, timeout_seconds=5)
+    assert captured.value.error_type == "ValueError"
+    assert "isolated sentinel" in str(captured.value)
+    assert run_bounded(_add, 2, 3, timeout_seconds=5) == 5
