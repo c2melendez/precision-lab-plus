@@ -7,6 +7,7 @@ evaluation before any production integration.
 from __future__ import annotations
 
 import multiprocessing as mp
+import os
 import time
 from typing import Any, Callable
 
@@ -52,6 +53,8 @@ def run_bounded(
     process = ctx.Process(target=_child_main, args=(send, operation, args), daemon=True)
     try:
         process.start()
+        if os.getenv('SG28_CI_OBSERVE', '0') == '1':
+            print(f'SG28_CHILD_START {process.pid}', flush=True)
         send.close()
         deadline = time.monotonic() + timeout_seconds
         while True:
@@ -83,4 +86,7 @@ def run_bounded(
             if process.is_alive():
                 process.kill()
                 process.join(timeout=1)
+        pid = process.pid
         process.close()
+        if os.getenv('SG28_CI_OBSERVE', '0') == '1':
+            print(f'SG28_CHILD_FINISH {pid}', flush=True)
