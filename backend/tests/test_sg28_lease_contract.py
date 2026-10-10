@@ -128,3 +128,34 @@ def test_renewed_lease_blocks_successor_until_new_deadline():
     assert successor.generation > renewed.generation
     assert not gate.release(renewed)
     assert gate.active == successor
+
+
+def test_many_sequential_lease_generations_cannot_be_cleared_by_old_tokens():
+    """A long sequence of expiries cannot resurrect any previous ownership."""
+    gate = LeaseGate()
+    historical = []
+    for generation in range(1, 51):
+        lease = gate.acquire(
+            "worker-" + str(generation), now=float(generation), ttl=1
+        )
+        assert lease is not None
+        assert lease.generation == generation
+        for stale in historical:
+            assert not gate.release(stale)
+            assert gate.active == lease
+        historical.append(lease)
+    assert gate.release(historical[-1])
+    assert gate.active is None
+
+
+def test_expiry_boundary_does_not_accept_outdated_renewal_after_regrant():
+    """At the exact TTL boundary a successor wins and stale renewal fails."""
+    gate = LeaseGate()
+    owner = gate.acquire("original", now=10, ttl=2)
+    replacement = gate.acquire("replacement", now=12, ttl=4)
+    assert replacement is not None
+    assert gate.renew(owner, now=12, ttl=10) is None
+    assert gate.active == replacement
+    assert not gate.release(owner)
+    assert gate.acquire("third", now=15.999, ttl=1) is None
+    assert gate.acquire("third", now=16, ttl=1) is not None
