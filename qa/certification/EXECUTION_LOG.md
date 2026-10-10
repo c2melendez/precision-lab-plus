@@ -1644,3 +1644,8 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 - Technical commit `463888bce05ce968b7ecee688e473c43cb34eae3` added `backend/tests/test_sg28_lease_contract.py`: three deterministic test-only lease model regressions for expiry successor fencing, renewal and duplicate release, and rejecting renewal of expired/stale lease.
 - GitHub automatically queued cumulative run `38085561575` and H1d `38085561630`; at recording time both QUEUED. **No green outcome asserted.** Previous verified baseline 638 backend, 751 frontend, H1d 5.
 - No shared production coordinator implemented; these tests model protocol properties only, not process crashes, network partitions, multi-replica integration or deployment readiness. H2 OPEN; production experimental isolation OFF.
+
+
+## 2026-10-10 — SG28 lease model regression CI GREEN (641 backend)
+- Plus technical SHA `463888bce05ce968b7ecee688e473c43cb34eae3`; cumulative run `38085561575` backend job `114311204439` SUCCESS **641 passed / 1 warning / coverage 85.69%**. All three tests in `test_sg28_lease_contract.py` explicitly PASSED (expiry successor fencing, renew/double release, reject expired renewal). Frontend job `114311204636` SUCCESS **751 passed / 28 TODO**; 102 modules, build 19.80s. H1d run `38085561630` SUCCESS.
+- These are deterministic in-memory CI-only lease contract tests, NOT proof of atomic distributed grant or lease safety after crashes/network partitions. Global H2 remains OPEN. Production experimental isolation OFF.
