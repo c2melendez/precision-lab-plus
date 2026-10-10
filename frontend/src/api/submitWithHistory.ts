@@ -16,7 +16,9 @@ export async function submitAndRecord(
   label: string,
   options?: { signal?: AbortSignal },
 ): Promise<MathResponse> {
-  const result = await callApi(endpoint, payload, options);
+  const result = options?.signal
+    ? await callApi(endpoint, payload, options)
+    : await callApi(endpoint, payload);
   if (options?.signal?.aborted) return result;
 
   useHistoryStore.getState().addEntry({
