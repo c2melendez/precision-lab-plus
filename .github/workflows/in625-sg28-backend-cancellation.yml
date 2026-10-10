@@ -10,6 +10,7 @@ on:
       - 'backend/tests/test_in625_sg28_interruptible.py'
       - 'backend/app/services/request_cancellation.py'
       - 'backend/tests/test_in625_sg28_request_cancellation.py'
+      - 'backend/tests/test_in625_sg28_loopback_http.py'
       - '.github/workflows/in625-sg28-backend-cancellation.yml'
 
 jobs:
@@ -29,4 +30,4 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt -r requirements-qa.txt
       - name: SG28 subprocess timeout and recovery
-        run: python -m pytest tests/test_in625_sg28_interruptible.py tests/test_in625_sg28_request_cancellation.py -q
+        run: python -m pytest tests/test_in625_sg28_interruptible.py tests/test_in625_sg28_request_cancellation.py tests/test_in625_sg28_loopback_http.py -q
