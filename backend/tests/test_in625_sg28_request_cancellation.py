@@ -1114,3 +1114,62 @@ def test_reserved_disconnect_denies_competitor_until_coordinator_reaped(monkeypa
             assert not bridge._ADMISSION.acquire(blocking=False)
 
     asyncio.run(scenario())
+
+
+def test_reserved_starlette_asgi_disconnect_blocks_competitor_then_recovers(monkeypatch) -> None:
+    """A real Starlette ASGI disconnect preserves local admission until cleanup.
+
+    The transport is an in-process ASGI receive channel, not an external socket.
+    """
+    import threading
+    from starlette.requests import Request
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    entered = threading.Event()
+    release = threading.Event()
+
+    def controlled(operation, *args, timeout_seconds, cancel_event):
+        entered.set()
+        assert release.wait(timeout=5)
+        if cancel_event.is_set():
+            raise ComputationCancelled("coordinator interrupted")
+        return operation
+
+    monkeypatch.setattr(bridge, "run_bounded", controlled)
+
+    async def scenario():
+        messages = asyncio.Queue()
+        scope = {"type": "http", "method": "POST", "path": "/api/v1/evaluate",
+                 "headers": [], "query_string": b""}
+
+        async def receive():
+            return await messages.get()
+
+        request = Request(scope, receive=receive)
+        with bridge.request_admission_lease():
+            pending = asyncio.create_task(
+                bridge.run_for_request(request, "occupied", admission_reserved=True)
+            )
+            try:
+                assert await asyncio.to_thread(entered.wait, 2)
+                await messages.put({"type": "http.disconnect"})
+                await asyncio.sleep(0.075)
+                assert not pending.done()
+                with pytest.raises(bridge.IsolationCapacityExceeded):
+                    with bridge.request_admission_lease():
+                        pytest.fail("competing request admitted before cleanup")
+                release.set()
+                with pytest.raises(ComputationCancelled, match="disconnected"):
+                    await asyncio.wait_for(pending, 3)
+            finally:
+                release.set()
+                if not pending.done():
+                    try:
+                        await asyncio.wait_for(pending, 3)
+                    except ComputationCancelled:
+                        pass
+        with bridge.request_admission_lease():
+            assert not bridge._ADMISSION.acquire(blocking=False)
+
+    asyncio.run(scenario())
