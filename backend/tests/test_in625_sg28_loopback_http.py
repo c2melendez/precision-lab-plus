@@ -165,3 +165,23 @@ def test_public_evaluate_exhausted_capacity_returns_structured_503(monkeypatch):
     assert body["request_id"]
     assert body["error_code"] == "INTERNAL_ERROR"
     assert "Capacidad" in body["error_message"]
+
+
+
+def test_public_evaluate_default_mode_does_not_use_isolation_capacity(monkeypatch):
+    """The SG28 experimental quota must not affect the default API route."""
+    from fastapi.testclient import TestClient
+    import app.services.request_cancellation as cancellation
+    from app.main import app
+
+    class NoCapacity:
+        def acquire(self, blocking=False):
+            raise AssertionError("Default evaluate must not enter SG28 admission")
+
+    monkeypatch.delenv("SG28_EVALUATE_ISOLATION", raising=False)
+    monkeypatch.setattr(cancellation, "_ADMISSION", NoCapacity())
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+    assert response.status_code == 200
+    assert response.json()["success"] is True
+    assert response.json()["result_approx"] == 5.0
