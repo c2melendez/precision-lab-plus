@@ -168,8 +168,9 @@ def test_asgi_handler_task_cancellation_interrupts_child_and_recovers() -> None:
 
 def _healthy_sympy_with_start_signal(ready) -> str:
     """Signal that an independent worker has really begun SymPy execution."""
+    result = _sympy_after_cancellation()
     ready.set()
-    return _sympy_after_cancellation()
+    return result
 
 def test_concurrent_request_disconnect_does_not_cancel_independent_request() -> None:
     """Cancel active SymPy without poisoning a simultaneous healthy SymPy call."""
