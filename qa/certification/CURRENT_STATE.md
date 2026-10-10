@@ -1206,3 +1206,12 @@ Plus commits 6d14933, fcf966c, b5d6b6c add isolated concurrency admission (2 def
 - La prueba usa `run_bounded` instrumentado y **NO** acredita cancelación real de SymPy, reserva de cupo end-to-end, coordinación entre procesos ni despliegue seguro.
 - CI en el SHA nuevo todavía SIN VERIFICAR en esta operación; no declarar PASS hasta leer runs/logs de SG28 backend, cumulative y H1d.
 - H2 sigue ABIERTO; `SG28_EVALUATE_ISOLATION` permanece OFF por defecto. Próximo paso: verificar las ejecuciones de ese commit, corregir cualquier fallo del harness, e investigar reserva end-to-end/aislamiento de admisión compartida sin activar producción.
+
+
+## 2026-10-10 — SG28 cancelled-handler admission cleanup regression (CI PENDING)
+- Plus technical commit `567ae15c3f0cb157a132c855ea8c85c678cf6d04` adds `test_cancelled_handler_retains_slot_until_coordinator_thread_finishes` to `backend/tests/test_in625_sg28_request_cancellation.py`.
+- Deterministic single-process test: cancel handler while mocked coordinator thread remains occupied; verify another request is rejected immediately without execution, then release cleanup and verify admission and successful computation recover.
+- This is a test-only commit; no backend admission algorithm, production flags, deployment or Lite product code modified.
+- CI evidence for this SHA NOT YET VERIFIED. Do not count as PASS before GitHub Actions SG28 and cumulative gates finish and logs are inspected.
+- SG28/H2 remains OPEN: per-process quotas are not global quotas; end-to-end request reservation and multi-replica topology/deployment tests remain unresolved. Keep `SG28_EVALUATE_ISOLATION` OFF in production.
+- Next: verify SG28 and cumulative Plus Actions for SHA 567ae15c, diagnose failures without modifying product prematurely; then add evidence to both repo logs.
