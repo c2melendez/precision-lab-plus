@@ -1002,3 +1002,44 @@ def test_opt_in_http_evaluate_recovers_after_capacity_503(monkeypatch) -> None:
     assert recovered.status_code == 200
     assert recovered.json()["success"] is True
     assert recovered.json()["result_approx"] == pytest.approx(9.0)
+
+
+def test_opt_in_http_concurrent_requests_reject_then_recover(monkeypatch) -> None:
+    """Two real HTTP clients contend for K=1; blocked request receives 503."""
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    from fastapi.testclient import TestClient
+    from app.main import app
+    import app.services.request_cancellation as bridge
+    import app.routers.evaluate as router_module
+
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "1")
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    entered = threading.Event()
+    release = threading.Event()
+    original = router_module.run_for_request
+
+    async def pause_first_phase(request, operation, *args, **kwargs):
+        if not entered.is_set():
+            entered.set()
+            assert await asyncio.to_thread(release.wait, 5)
+        return await original(request, operation, *args, **kwargs)
+
+    monkeypatch.setattr(router_module, "run_for_request", pause_first_phase)
+    with TestClient(app) as client, ThreadPoolExecutor(max_workers=1) as executor:
+        first = executor.submit(
+            client.post, "/api/v1/evaluate", json={"expression": "2+3"}
+        )
+        try:
+            assert entered.wait(3), "first request did not acquire admission"
+            denied = client.post("/api/v1/evaluate", json={"expression": "4+5"})
+            assert denied.status_code == 503
+            assert denied.json()["success"] is False
+        finally:
+            release.set()
+        accepted = first.result(timeout=10)
+        assert accepted.status_code == 200
+        assert accepted.json()["success"] is True
+        recovered = client.post("/api/v1/evaluate", json={"expression": "4+5"})
+        assert recovered.status_code == 200
+        assert recovered.json()["success"] is True
