@@ -1692,3 +1692,9 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 ## 2026-10-10 — SG28 concurrent distinct-worker shared admission VERIFIED
 - Plus SHA `d5a9b678a9eb7168aad7ca572d16e83da239edde` cumulative run `38093468330` backend `114334463820` SUCCESS **650 passed / 1 warning / 85.64% coverage**. `test_two_distinct_workers_contend_atomically_for_shared_k1` explicitly PASSED with distinct PIDs and exactly one shared K=1 grant. Frontend `114334463552` SUCCESS 751 passed / 28 TODO. H1d run `38093468338` SUCCESS.
 - This proves CI Manager-backed atomic shared fixture across processes, NOT actual production distributed lease, crash-recovery or Render topology. H2 OPEN; production isolation OFF.
+
+
+## 2026-10-10 — Shared lease silent-owner TTL recovery test PUBLISHED, CI PENDING
+- Plus technical SHA `ebb5d2a1931de3ce461d968070a75ca492a074fe` adds `test_shared_lease_recovers_after_owner_becomes_unresponsive` to CI-only shared state model. It proves denial before simulated TTL expiry and regrant after expiry with owner/generation updated, if CI passes. This does NOT simulate an actual worker/coordinator crash.
+- Auto-triggered cumulative run `38096115207` and H1d `38096115318` were QUEUED at inspection. Previous certified baseline 650 backend / 751 frontend. No new result claimed yet.
+- H2 global remains OPEN; Render topology pending and production isolation OFF.
