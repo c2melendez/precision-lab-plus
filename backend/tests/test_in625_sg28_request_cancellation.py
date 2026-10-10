@@ -133,3 +133,32 @@ def test_asgi_disconnect_interrupts_active_sympy_and_recovers() -> None:
         )
 
     assert asyncio.run(scenario()) == "3*x**2 + 2"
+
+
+def test_asgi_handler_task_cancellation_interrupts_child_and_recovers() -> None:
+    """Cancelling an ASGI handler must clean up active math before recovery."""
+    import multiprocessing as mp
+
+    async def scenario() -> str:
+        ready = mp.get_context("spawn").Event()
+        request = FakeRequest()
+        pending = asyncio.create_task(
+            run_for_request(request, _active_sympy_calculation, ready, timeout_seconds=6)
+        )
+        try:
+            assert await asyncio.to_thread(ready.wait, 3), "SymPy child did not start"
+            pending.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await asyncio.wait_for(pending, timeout=4)
+        finally:
+            if not pending.done():
+                pending.cancel()
+                try:
+                    await pending
+                except asyncio.CancelledError:
+                    pass
+        return await run_for_request(
+            FakeRequest(), _sympy_after_cancellation, timeout_seconds=5
+        )
+
+    assert asyncio.run(scenario()) == "3*x**2 + 2"
