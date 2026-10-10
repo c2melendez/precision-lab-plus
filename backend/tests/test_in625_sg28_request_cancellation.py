@@ -164,6 +164,13 @@ def test_asgi_handler_task_cancellation_interrupts_child_and_recovers() -> None:
     assert asyncio.run(scenario()) == "3*x**2 + 2"
 
 
+
+
+def _healthy_sympy_with_start_signal(ready) -> str:
+    """Signal that an independent worker has really begun SymPy execution."""
+    ready.set()
+    return _sympy_after_cancellation()
+
 def test_concurrent_request_disconnect_does_not_cancel_independent_request() -> None:
     """Cancel active SymPy without poisoning a simultaneous healthy SymPy call."""
     import multiprocessing as mp
@@ -177,13 +184,18 @@ def test_concurrent_request_disconnect_does_not_cancel_independent_request() -> 
                 disconnected, _active_sympy_calculation, ready, timeout_seconds=7
             )
         )
+        healthy_ready = mp.get_context("spawn").Event()
         healthy_task = None
         try:
             assert await asyncio.to_thread(ready.wait, 4), "SymPy child did not start"
             healthy_task = asyncio.create_task(
                 run_for_request(
-                    healthy, _sympy_after_cancellation, timeout_seconds=6
+                    healthy, _healthy_sympy_with_start_signal, healthy_ready,
+                    timeout_seconds=6
                 )
+            )
+            assert await asyncio.to_thread(healthy_ready.wait, 4), (
+                "Independent SymPy child did not start before cancellation"
             )
             disconnected.disconnected = True
             with pytest.raises(ComputationCancelled, match="disconnected"):
