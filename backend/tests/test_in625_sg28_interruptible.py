@@ -264,3 +264,22 @@ def test_cpu_budget_exhaustion_reaps_child_and_recovers(monkeypatch) -> None:
     assert time.monotonic() - start < 5.5, "CPU ceiling did not end child in time"
     monkeypatch.delenv("SG28_ISOLATED_CPU_SECONDS")
     assert run_bounded(_add, 4, 5, timeout_seconds=5) == 9
+
+
+
+def _sg28_read_memory_budget() -> tuple[int, int]:
+    import resource
+    return resource.getrlimit(resource.RLIMIT_AS)
+
+
+@pytest.mark.skipif(__import__("os").name != "posix", reason="POSIX virtual memory budget only")
+def test_optional_child_memory_budget_is_isolated_and_recovers(monkeypatch) -> None:
+    """Check opt-in child RLIMIT_AS without constraining FastAPI parent."""
+    import resource
+    before = resource.getrlimit(resource.RLIMIT_AS)
+    monkeypatch.setenv("SG28_ISOLATED_MEMORY_MB", "1024")
+    limit = 1024 * 1024 * 1024
+    assert run_bounded(_sg28_read_memory_budget, timeout_seconds=5) == (limit, limit)
+    assert resource.getrlimit(resource.RLIMIT_AS) == before
+    monkeypatch.delenv("SG28_ISOLATED_MEMORY_MB")
+    assert run_bounded(_add, 4, 5, timeout_seconds=5) == 9
