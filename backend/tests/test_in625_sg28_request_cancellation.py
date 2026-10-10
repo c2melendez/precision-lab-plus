@@ -331,3 +331,38 @@ def test_isolated_math_response_contract_survives_process_boundary() -> None:
     assert result.result_approx == pytest.approx(5.0)
     assert result.has_detailed_steps is False
     assert result.model_dump(mode="json")["request_id"] == "sg28-contract-probe"
+
+
+
+def _error_contract_roundtrip():
+    """Build the canonical error schema in a child (not the public router)."""
+    from app.schemas.responses import ErrorCode, MathResponse, OperationType
+    return MathResponse(
+        success=False,
+        operation=OperationType.EVALUATE,
+        request_id="sg28-error-probe",
+        has_detailed_steps=False,
+        error_code=ErrorCode.PARSE_ERROR,
+        error_message="Invalid mathematical expression",
+        duration_ms=0.0,
+    )
+
+
+def test_isolated_math_response_error_contract_survives_process_boundary() -> None:
+    """A typed error response must survive transport without becoming success."""
+    from app.schemas.responses import ErrorCode, MathResponse, OperationType
+
+    async def scenario():
+        return await run_for_request(
+            FakeRequest(), _error_contract_roundtrip, timeout_seconds=6,
+        )
+
+    result = asyncio.run(scenario())
+    assert isinstance(result, MathResponse)
+    assert result.success is False
+    assert result.operation == OperationType.EVALUATE
+    assert result.error_code == ErrorCode.PARSE_ERROR
+    assert result.error_message == "Invalid mathematical expression"
+    assert result.result_type is None
+    assert result.has_detailed_steps is False
+    assert result.model_dump(mode="json")["error_code"] == "PARSE_ERROR"
