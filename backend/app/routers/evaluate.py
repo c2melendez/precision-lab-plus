@@ -7,6 +7,7 @@ import os
 
 import sympy
 from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
 
 from app.core.logging import log_request_event
 from app.schemas.requests import EvaluateRequest
@@ -14,7 +15,7 @@ from app.schemas.responses import ErrorCode, MathResponse, OperationType, Result
 from app.services import evaluate_service, parsing
 from app.services.ast_validator import ComplexityLimitError
 from app.services.interruptible import ComputationCancelled, ComputationFailed, ComputationTimedOut
-from app.services.request_cancellation import run_for_request
+from app.services.request_cancellation import IsolationCapacityExceeded, run_for_request
 
 router = APIRouter(tags=["evaluate"])
 
@@ -53,6 +54,9 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
             result = evaluate_service.evaluate(
                 payload.expression, payload.angle_unit, payload.substitutions
             )
+    except IsolationCapacityExceeded:
+        error = _error(request, ErrorCode.INTERNAL_ERROR, "Capacidad de cálculo temporalmente agotada.")
+        return JSONResponse(status_code=503, content=error.model_dump(mode="json"))
     except ComputationFailed as exc:
         child_error_codes = {
             "ParseSecurityError": ErrorCode.PARSE_ERROR,
