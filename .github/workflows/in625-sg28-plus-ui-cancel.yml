@@ -1,0 +1,33 @@
+name: IN625 SG28 Plus UI Cancellation E2E
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - qa/syntax-audit-in625-a1
+    paths:
+      - 'frontend/e2e/in625-h2-sg28-cancel.spec.ts'
+      - 'frontend/src/components/BasicMode.tsx'
+      - 'frontend/src/api/client.ts'
+      - 'frontend/src/api/submitWithHistory.ts'
+      - '.github/workflows/in625-sg28-plus-ui-cancel.yml'
+jobs:
+  sg28-plus-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r backend/requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+        working-directory: frontend
+      - run: npm install --no-save --package-lock=false @playwright/test@1.63.0 @axe-core/playwright@4.13.0
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: npx playwright test e2e/in625-h2-sg28-cancel.spec.ts --project desktop-chromium
+        working-directory: frontend
