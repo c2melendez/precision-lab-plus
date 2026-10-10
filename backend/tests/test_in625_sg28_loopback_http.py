@@ -185,3 +185,40 @@ def test_public_evaluate_default_mode_does_not_use_isolation_capacity(monkeypatc
     assert response.status_code == 200
     assert response.json()["success"] is True
     assert response.json()["result_approx"] == 5.0
+
+
+
+def test_public_evaluate_isolation_matches_default_mathresponse(monkeypatch):
+    """SG28-E2E-06/09: compare real public MathResponse on both API paths.
+
+    Compare stable public fields, not request IDs or wall-clock duration.
+    This checks ordinary, symbolic and invalid input without mocking SymPy.
+    """
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    expressions = ("2+3", "x+x", "x+(")
+    with TestClient(app) as client:
+        for expression in expressions:
+            responses = []
+            for enabled in ("0", "1"):
+                monkeypatch.setenv("SG28_EVALUATE_ISOLATION", enabled)
+                response = client.post(
+                    "/api/v1/evaluate", json={"expression": expression}
+                )
+                assert response.status_code == 200
+                body = response.json()
+                assert body["request_id"]
+                assert body["operation"] == "evaluate"
+                responses.append(body)
+
+            original, isolated = responses
+            for field in (
+                "success", "operation", "result_type", "result_text",
+                "result_latex", "result_approx", "error_code",
+                "has_detailed_steps",
+            ):
+                assert isolated.get(field) == original.get(field), (
+                    f"{expression!r}: public MathResponse field {field} differs: "
+                    f"{original.get(field)!r} vs {isolated.get(field)!r}"
+                )
