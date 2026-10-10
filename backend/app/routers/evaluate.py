@@ -17,6 +17,12 @@ from app.services.ast_validator import ComplexityLimitError
 from app.services.interruptible import ComputationCancelled, ComputationFailed, ComputationTimedOut
 from app.services.request_cancellation import IsolationCapacityExceeded, run_for_request
 
+def _sg28_ci_slow_evaluate(expression, angle_unit, substitutions):
+    """Picklable E2E fixture; selected only under explicit CI test flags."""
+    time.sleep(4)
+    return evaluate_service.evaluate(expression, angle_unit, substitutions)
+
+
 router = APIRouter(tags=["evaluate"])
 
 _MAX_RESULT_LATEX_LENGTH = 10_000
@@ -46,7 +52,8 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         if os.getenv("SG28_EVALUATE_ISOLATION", "0") == "1":
             # Opt-in experimental path; default production behavior remains unchanged.
             result = await run_for_request(
-                request, evaluate_service.evaluate,
+                request,
+                (_sg28_ci_slow_evaluate if os.getenv('SG28_CI_SLOW', '0') == '1' and os.getenv('SG28_CI_OBSERVE', '0') == '1' and payload.expression == '7+11' else evaluate_service.evaluate),
                 payload.expression, payload.angle_unit, payload.substitutions,
                 timeout_seconds=6,
             )
