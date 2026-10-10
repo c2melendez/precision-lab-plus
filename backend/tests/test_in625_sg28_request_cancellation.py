@@ -293,3 +293,41 @@ def test_isolated_real_evaluate_service_rejects_invalid_input(
         asyncio.run(scenario())
     assert exception_name in str(captured.value)
     assert captured.value.error_type == exception_name
+
+
+
+def _evaluate_contract_roundtrip(expression: str):
+    """Exercise the actual response model inside the isolated process."""
+    from app.schemas.responses import MathResponse, OperationType, ResultType
+    result = _evaluate_actual_service(expression)
+    return MathResponse(
+        success=True,
+        operation=OperationType.EVALUATE,
+        request_id="sg28-contract-probe",
+        result_type=ResultType.SCALAR,
+        input_text=expression,
+        result_text=str(result.expr),
+        result_approx=result.approx_value,
+        has_detailed_steps=False,
+        duration_ms=0.0,
+    )
+
+
+def test_isolated_math_response_contract_survives_process_boundary() -> None:
+    """A real MathResponse must retain its public types after subprocess return."""
+    from app.schemas.responses import MathResponse, OperationType, ResultType
+
+    async def scenario():
+        return await run_for_request(
+            FakeRequest(), _evaluate_contract_roundtrip,
+            "2+3", timeout_seconds=6,
+        )
+
+    result = asyncio.run(scenario())
+    assert isinstance(result, MathResponse)
+    assert result.success is True
+    assert result.operation == OperationType.EVALUATE
+    assert result.result_type == ResultType.SCALAR
+    assert result.result_approx == pytest.approx(5.0)
+    assert result.has_detailed_steps is False
+    assert result.model_dump(mode="json")["request_id"] == "sg28-contract-probe"
