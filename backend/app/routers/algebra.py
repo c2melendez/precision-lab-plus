@@ -12,7 +12,7 @@ from fastapi import APIRouter, Request
 from app.core.logging import log_request_event
 from app.schemas.requests import ExpressionRequest, SolveRequest
 from app.schemas.responses import ErrorCode, MathResponse, OperationType, ResultType
-from app.services import algebra_service, parsing, solve_service
+from app.services import algebra_service, domain_analysis, parsing, solve_service, result_contract
 from app.services.ast_validator import ComplexityLimitError
 
 router = APIRouter(tags=["algebra"])
@@ -72,10 +72,27 @@ def _build_response(
 
     input_latex = _safe_latex(result.input_expr)
 
+    operation_name = {
+        OperationType.SIMPLIFY: "simplify",
+        OperationType.FACTOR: "factor",
+        OperationType.EXPAND: "expand",
+    }[operation]
+    result_kind = result_contract.classify_expression(result.input_expr)
+    result_views = result_contract.algebra_views(
+        result.input_expr,
+        result.result_expr,
+        result_kind,
+        operation_name,
+        steps=result.steps,
+        has_detailed_steps=result.has_detailed_steps,
+    )
+
     return MathResponse(
         success=True,
         operation=operation,
         request_id=request.state.request_id,
+        result_kind=result_kind,
+        result_views=result_views,
         result_type=ResultType.SCALAR,
         input_text=payload.expression,
         input_latex=input_latex,
@@ -142,10 +159,16 @@ async def solve(payload: SolveRequest, request: Request) -> MathResponse:
     warnings = list(result.warnings)
     result_data = result.solutions if result.result_type == ResultType.EQUATION_SOLUTIONS else None
 
+    solve_views = result_contract.equation_views(
+        result.input_eq, result.variable, result.solutions, result.result_type
+    )
+
     return MathResponse(
         success=True,
         operation=OperationType.SOLVE,
         request_id=request.state.request_id,
+        result_kind=result_contract.ResultKind.EQUATION,
+        result_views=solve_views,
         result_type=result.result_type,
         input_text=payload.equation,
         input_latex=_safe_latex(result.input_eq),
@@ -153,5 +176,6 @@ async def solve(payload: SolveRequest, request: Request) -> MathResponse:
         steps=result.steps,
         has_detailed_steps=result.has_detailed_steps,
         warnings=warnings,
+        domain_conditions=domain_analysis.extract_domain_conditions(result.input_eq),
         duration_ms=_duration_ms(request),
     )

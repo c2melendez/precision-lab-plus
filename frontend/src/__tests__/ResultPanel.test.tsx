@@ -334,4 +334,103 @@ describe("ResultPanel", () => {
       expect(text).toContain("-28");
     });
   });
+  it("combina vistas contextuales y formatos numéricos para una función evaluada", () => {
+    render(
+      <ResultPanel
+        result={{
+          ...baseResult,
+          result_kind: "trigonometric",
+          input_text: "sin(pi/6)",
+          input_latex: "\\sin\\left(\\frac{\\pi}{6}\\right)",
+          result_latex: "\\frac{1}{2}",
+          result_text: "1/2",
+          result_approx: 0.5,
+          result_views: [
+            {
+              key: "original",
+              label: "Original",
+              latex: "\\sin\\left(\\frac{\\pi}{6}\\right)",
+              kind: "trigonometric",
+              steps: [],
+              has_detailed_steps: false,
+            },
+            {
+              key: "result",
+              label: "Resultado",
+              latex: "\\frac{1}{2}",
+              kind: "trigonometric",
+              steps: [],
+              has_detailed_steps: false,
+            },
+          ],
+        }}
+        isLoading={false}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Original" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Resultado" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "dec" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "frac" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "dec" }));
+    expect(screen.getByText("0.5")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Original" }));
+    expect(screen.getByRole("button", { name: "Original" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("usa los pasos de la vista activa y no los mezcla con Original", () => {
+    render(
+      <ResultPanel
+        result={{
+          ...baseResult,
+          operation: "factor",
+          result_kind: "algebraic",
+          result_latex: "(x-2)(x+2)",
+          result_text: "(x - 2)*(x + 2)",
+          result_approx: null,
+          result_views: [
+            {
+              key: "original",
+              label: "Original",
+              latex: "x^2-4",
+              kind: "algebraic",
+              steps: [],
+              has_detailed_steps: false,
+            },
+            {
+              key: "factored",
+              label: "Factorizada",
+              latex: "(x-2)(x+2)",
+              kind: "algebraic",
+              steps: [
+                {
+                  index: 0,
+                  title: "Diferencia de cuadrados",
+                  description: "Se aplica a^2-b^2=(a-b)(a+b).",
+                  rule: "Diferencia de cuadrados",
+                  latex_before: "x^2-4",
+                  latex_after: "(x-2)(x+2)",
+                },
+              ],
+              has_detailed_steps: true,
+            },
+          ],
+          steps: [],
+          has_detailed_steps: false,
+        }}
+        isLoading={false}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Mostrar pasos detallados" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Original" }));
+    expect(screen.queryByRole("button", { name: "Mostrar pasos detallados" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Factorizada" }));
+    const toggle = screen.getByRole("button", { name: "Mostrar pasos detallados" });
+    fireEvent.click(toggle);
+    expect(screen.getByText("Diferencia de cuadrados")).toBeInTheDocument();
+  });
 });

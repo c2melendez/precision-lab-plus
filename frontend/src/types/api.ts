@@ -1084,6 +1084,12 @@ export interface components {
             operation: components["schemas"]["OperationType"];
             /** Request Id */
             request_id: string;
+            result_kind?: components["schemas"]["ResultKind"] | null;
+            /**
+             * Result Views
+             * @default []
+             */
+            result_views?: components["schemas"]["ResultView"][];
             result_type?: components["schemas"]["ResultType"] | null;
             /** Input Text */
             input_text?: string | null;
@@ -1218,6 +1224,31 @@ export interface components {
              * @enum {string}
              */
             query: "pmf" | "cdf" | "mean" | "variance";
+        };
+        /**
+         * ResultKind
+         * @enum {string}
+         */
+        ResultKind: "numeric" | "algebraic" | "rational" | "radical" | "logarithmic" | "exponential" | "trigonometric" | "complex" | "equation" | "inequality" | "calculus" | "matrix" | "graph" | "other";
+        /** ResultView */
+        ResultView: {
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /** Latex */
+            latex: string;
+            kind: components["schemas"]["ResultKind"];
+            /**
+             * Steps
+             * @default []
+             */
+            steps?: components["schemas"]["Step"][];
+            /**
+             * Has Detailed Steps
+             * @default false
+             */
+            has_detailed_steps?: boolean;
         };
         /**
          * ResultType
