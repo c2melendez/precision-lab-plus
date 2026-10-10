@@ -87,6 +87,12 @@ def run_bounded(
         try:
             status, payload = receive.recv()
         except EOFError as exc:
+            # POSIX CPU-budget exhaustion terminates the worker by SIGXCPU.
+            process.join(timeout=0.2)
+            if os.name == "posix" and os.getenv("SG28_ISOLATED_CPU_SECONDS"):
+                import signal
+                if process.exitcode == -signal.SIGXCPU:
+                    raise ComputationTimedOut("Isolated CPU budget exceeded") from exc
             raise ComputationFailed("Child process exited without a response") from exc
         if status != "ok":
             if isinstance(payload, tuple) and len(payload) == 2:
