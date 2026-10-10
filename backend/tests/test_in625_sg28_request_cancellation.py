@@ -792,3 +792,35 @@ def test_request_scoped_admission_lease_blocks_interleaving_and_releases(monkeyp
         quota.release()
     assert quota.acquire(blocking=False), "request B cannot recover after lease exit"
     quota.release()
+
+
+def test_real_local_request_admission_lease_holds_slot_across_phases(monkeypatch) -> None:
+    """Exercise real opt-in lease ownership, not the public router."""
+    import threading
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    with bridge.request_admission_lease():
+        assert not bridge._ADMISSION.acquire(blocking=False)
+        # A logical request owns one slot through evaluation and presentation.
+        for phase in ("evaluation", "presentation"):
+            assert phase in ("evaluation", "presentation")
+            with pytest.raises(bridge.IsolationCapacityExceeded):
+                with bridge.request_admission_lease():
+                    pytest.fail("a competing request entered during " + phase)
+        assert not bridge._ADMISSION.acquire(blocking=False)
+    with bridge.request_admission_lease():
+        assert not bridge._ADMISSION.acquire(blocking=False)
+
+
+def test_real_local_request_admission_lease_recovers_on_exception(monkeypatch) -> None:
+    """Exception paths release the local slot, including capacity failures."""
+    import threading
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    with pytest.raises(RuntimeError, match="synthetic failure"):
+        with bridge.request_admission_lease():
+            raise RuntimeError("synthetic failure")
+    with bridge.request_admission_lease():
+        assert not bridge._ADMISSION.acquire(blocking=False)
