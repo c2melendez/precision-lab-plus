@@ -1559,3 +1559,11 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 - Lite run `38077876180`, Build Diagnostic job `114288551397`: SUCCESS, 119 modules transformed, built in **5.12s**.
 - Supplied Plus run `38076842089` is the previously verified cumulative gate: backend job `114285492589` SUCCESS 632 passed / 1 warning / 85.64% coverage; frontend job `114285492490` SUCCESS 751 passed / 28 TODO. Not a new Plus test execution.
 - Scope remains: local semaphore tests only; no multiprocess/distributed admission or socket disconnect certification. H2 OPEN and production opt-in OFF.
+
+
+## 2026-10-10 — SG28 real process-boundary red diagnosed; spawn fix CI pending
+- Plus run `38078381782`: backend job `114290029605` FAILURE **632 passed / 1 failed / 1 warning**, 85.69% coverage. Failed `test_two_python_processes_hold_independent_local_k1_leases` (assertion on rejected/recovered); frontend job `114290029354` SUCCESS. Distinct worker PIDs assertion passed, but one or more per-process K=1 checks failed.
+- Root-cause hypothesis: inherited already-imported `_ADMISSION` semaphore initialized with K=2 under fork, despite changing `SG28_MAX_ISOLATED_REQUESTS` inside workers. This is a harness setup issue under investigation, not proof of a production defect.
+- Plus correction `fd0d3b6ac01d4a4dc5553ca907a97f9eae99ffea` uses explicit multiprocessing `spawn`, parent `monkeypatch.setenv()` before worker start, and checks `_MAX_ISOLATED_REQUESTS == 1` in each worker. **CI PENDING: no pass claim yet.**
+- Lite run `38078402555`: diagnostic job `114290085569` SUCCESS, 119 modules transformed, built in 6.03s.
+- H2 OPEN; this characterizes independent worker quotas only, not global admission, real HTTP socket cancellation, or fleet topology. Keep production isolation OFF.
