@@ -1649,3 +1649,9 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 ## 2026-10-10 — SG28 lease model regression CI GREEN (641 backend)
 - Plus technical SHA `463888bce05ce968b7ecee688e473c43cb34eae3`; cumulative run `38085561575` backend job `114311204439` SUCCESS **641 passed / 1 warning / coverage 85.69%**. All three tests in `test_sg28_lease_contract.py` explicitly PASSED (expiry successor fencing, renew/double release, reject expired renewal). Frontend job `114311204636` SUCCESS **751 passed / 28 TODO**; 102 modules, build 19.80s. H1d run `38085561630` SUCCESS.
 - These are deterministic in-memory CI-only lease contract tests, NOT proof of atomic distributed grant or lease safety after crashes/network partitions. Global H2 remains OPEN. Production experimental isolation OFF.
+
+
+## 2026-10-10 — SG28 lease-replay/stale-owner regressions published; CI queued
+- No new runs followed documentary-only commits before this technical change; latest certified technical SHA remained `463888bce05ce968b7ecee688e473c43cb34eae3` (641 backend / 751 frontend).
+- Plus technical commit `591900282da7ef96a154439f034eccffb9ce0de4` adds three test-only deterministic lease model scenarios: same-owner token replay cannot duplicate active admission, expired-owner renewal cannot displace successor, and nonpositive TTL is rejected without mutation.
+- Auto-triggered cumulative run `38086974503` and H1d `38086974500`, QUEUED on inspection. **Do not claim new PASS until job logs checked.** Tests are an in-memory contract model only, NOT durable multi-replica crash recovery. H2 OPEN; isolation production OFF.
