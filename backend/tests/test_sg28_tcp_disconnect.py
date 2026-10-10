@@ -141,3 +141,72 @@ def test_real_tcp_disconnect_keeps_local_k1_reserved_until_cleanup(monkeypatch):
         thread.join(timeout=5)
         listener.close()
         assert not thread.is_alive(), "Temporary HTTP server did not stop"
+
+
+def test_real_tcp_disconnect_cancels_actual_sympy_child_and_recovers(monkeypatch):
+    """Observe real TCP disconnect and spawned SymPy evaluation under local K=1."""
+    import asyncio
+    import multiprocessing as mp
+    from starlette.requests import Request
+    import uvicorn
+    import app.services.request_cancellation as bridge
+    from app.services.interruptible import ComputationCancelled
+    from tests.test_in625_sg28_request_cancellation import (
+        _active_sympy_calculation, _sympy_after_cancellation,
+    )
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    ready = mp.get_context("spawn").Event()
+    completed = threading.Event()
+    cancelled = threading.Event()
+
+    async def endpoint(scope, receive, send):
+        try:
+            with bridge.request_admission_lease():
+                await bridge.run_for_request(
+                    Request(scope, receive=receive),
+                    _active_sympy_calculation, ready,
+                    timeout_seconds=8, admission_reserved=True,
+                )
+        except ComputationCancelled:
+            cancelled.set()
+        finally:
+            completed.set()
+
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(5)
+    host, port = listener.getsockname()
+    server = uvicorn.Server(uvicorn.Config(
+        DisconnectTrackingMiddleware(endpoint),
+        host=host, port=port, log_level="error", lifespan="off",
+    ))
+    thread = threading.Thread(target=server.run, kwargs={"sockets": [listener]}, daemon=True)
+    try:
+        thread.start()
+        deadline = time.monotonic() + 6
+        while not server.started and time.monotonic() < deadline:
+            assert thread.is_alive()
+            time.sleep(0.02)
+        assert server.started
+        with socket.create_connection((host, port), timeout=4) as client:
+            client.sendall(
+                b"POST /probe HTTP/1.1\r\nHost: localhost\r\n"
+                b"Content-Length: 0\r\nConnection: close\r\n\r\n"
+            )
+            assert ready.wait(6), "SymPy child did not start"
+            assert not completed.is_set()
+            try:
+                with bridge.request_admission_lease():
+                    raise AssertionError("Concurrent admission while K=1 occupied")
+            except bridge.IsolationCapacityExceeded:
+                pass
+        assert completed.wait(7), "Disconnect did not finish process cleanup"
+        assert cancelled.is_set(), "Real TCP disconnect did not cancel spawned child"
+        with bridge.request_admission_lease():
+            assert bridge._ADMISSION.acquire(blocking=False) is False
+    finally:
+        server.should_exit = True
+        thread.join(timeout=6)
+        listener.close()
+        assert not thread.is_alive()
