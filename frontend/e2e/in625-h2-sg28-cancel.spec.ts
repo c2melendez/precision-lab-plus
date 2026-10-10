@@ -117,3 +117,23 @@ test("EN-SG-28 Plus browser preserves real isolated backend parse errors and rec
   expect(validBody.result_approx).toBe(9);
   await expect(page.locator('[aria-live="polite"]').last()).toContainText("9");
 });
+
+
+test("EN-SG-28 browser cancels real evaluation and recovers", async ({ page }) => {
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  const enter = (value: string) => field.evaluate((el, v) => {
+    (el as HTMLElement & { setValue: (value: string) => void }).setValue(v);
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, data: v }));
+  }, value);
+  await enter("2+3");
+  const sent = page.waitForRequest(req => req.url().endsWith("/api/v1/evaluate"));
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  await sent;
+  await page.getByRole("button", { name: "Detener cálculo" }).click();
+  await expect(page.getByRole("button", { name: "Detener cálculo" })).toHaveCount(0);
+  await enter("4+5");
+  const reply = page.waitForResponse(resp => resp.url().endsWith("/api/v1/evaluate"));
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  expect((await (await reply).json()).result_approx).toBe(9);
+});
