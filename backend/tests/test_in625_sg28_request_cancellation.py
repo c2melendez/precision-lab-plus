@@ -165,30 +165,38 @@ def test_asgi_handler_task_cancellation_interrupts_child_and_recovers() -> None:
 
 
 def test_concurrent_request_disconnect_does_not_cancel_independent_request() -> None:
-    """A cancelled request must not poison another independent isolated worker."""
-    async def scenario() -> tuple[str, int]:
+    """Cancel active SymPy without poisoning a simultaneous healthy SymPy call."""
+    import multiprocessing as mp
+
+    async def scenario() -> tuple[str, str]:
+        ready = mp.get_context("spawn").Event()
         disconnected = FakeRequest()
         healthy = FakeRequest()
         cancelled_task = asyncio.create_task(
-            run_for_request(disconnected, _long_job, timeout_seconds=5)
+            run_for_request(
+                disconnected, _active_sympy_calculation, ready, timeout_seconds=7
+            )
         )
-        healthy_task = asyncio.create_task(
-            run_for_request(healthy, _add, 2, 3, timeout_seconds=5)
-        )
+        healthy_task = None
         try:
-            await asyncio.sleep(0.25)
+            assert await asyncio.to_thread(ready.wait, 4), "SymPy child did not start"
+            healthy_task = asyncio.create_task(
+                run_for_request(
+                    healthy, _sympy_after_cancellation, timeout_seconds=6
+                )
+            )
             disconnected.disconnected = True
             with pytest.raises(ComputationCancelled, match="disconnected"):
-                await asyncio.wait_for(cancelled_task, timeout=4)
-            healthy_result = await asyncio.wait_for(healthy_task, timeout=5)
+                await asyncio.wait_for(cancelled_task, timeout=5)
+            healthy_result = await asyncio.wait_for(healthy_task, timeout=6)
             return "cancelled", healthy_result
         finally:
             for pending in (cancelled_task, healthy_task):
-                if not pending.done():
+                if pending is not None and not pending.done():
                     pending.cancel()
                     try:
                         await pending
                     except (asyncio.CancelledError, ComputationCancelled):
                         pass
 
-    assert asyncio.run(scenario()) == ("cancelled", 5)
+    assert asyncio.run(scenario()) == ("cancelled", "3*x**2 + 2")
