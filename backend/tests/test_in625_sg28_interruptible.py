@@ -224,3 +224,21 @@ def test_isolated_worker_pid_is_gone_after_interruption(stop_mode: str) -> None:
             watcher.join(timeout=2)
 
     assert run_bounded(_add, 2, 3, timeout_seconds=5) == 5
+
+
+
+def _sg28_read_cpu_budget() -> tuple[int, int]:
+    import resource
+    return resource.getrlimit(resource.RLIMIT_CPU)
+
+
+@pytest.mark.skipif(__import__("os").name != "posix", reason="POSIX CPU limit only")
+def test_opt_in_child_cpu_budget_applies_only_to_spawned_worker(monkeypatch) -> None:
+    """SG28: optional CPU ceiling is installed in child, not the API process."""
+    import resource
+    parent_before = resource.getrlimit(resource.RLIMIT_CPU)
+    monkeypatch.setenv("SG28_ISOLATED_CPU_SECONDS", "2")
+    assert run_bounded(_sg28_read_cpu_budget, timeout_seconds=5) == (2, 3)
+    assert resource.getrlimit(resource.RLIMIT_CPU) == parent_before
+    monkeypatch.delenv("SG28_ISOLATED_CPU_SECONDS")
+    assert run_bounded(_add, 2, 3, timeout_seconds=5) == 5
