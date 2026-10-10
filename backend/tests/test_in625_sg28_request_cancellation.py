@@ -949,3 +949,36 @@ def test_opt_in_http_evaluate_holds_one_lease_across_both_worker_phases(monkeypa
     assert len(observed) == 2
     with bridge.request_admission_lease():
         assert not bridge._ADMISSION.acquire(blocking=False)
+
+
+def test_opt_in_http_evaluate_returns_503_when_local_lease_is_exhausted(monkeypatch) -> None:
+    """Public HTTP admission must fail closed without starting calculation."""
+    import threading
+    from fastapi.testclient import TestClient
+    from app.main import app
+    import app.services.request_cancellation as bridge
+    import app.routers.evaluate as router_module
+
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "1")
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    calls = []
+
+    async def forbidden_worker(*args, **kwargs):
+        calls.append(True)
+        pytest.fail("isolated worker started without admission")
+
+    monkeypatch.setattr(router_module, "run_for_request", forbidden_worker)
+    with bridge.request_admission_lease():
+        with TestClient(app) as client:
+            response = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+        assert response.status_code == 503
+        body = response.json()
+        assert body["success"] is False
+        assert body["operation"] == "evaluate"
+        assert body["error_code"] == "INTERNAL_ERROR"
+        assert body["request_id"]
+        assert not calls
+
+    # Exhaustion must not permanently consume the slot.
+    with bridge.request_admission_lease():
+        assert not bridge._ADMISSION.acquire(blocking=False)
