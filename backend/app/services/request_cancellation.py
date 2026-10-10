@@ -1,6 +1,6 @@
 """SG28 experimental ASGI request-to-isolated-process cancellation bridge.
 
-Not wired into production routes. The blocking process coordinator runs in an
+Used by /evaluate only when SG28_EVALUATE_ISOLATION=1. The coordinator runs in an
 executor thread, while the event loop checks for ASGI client disconnects.
 """
 from __future__ import annotations
