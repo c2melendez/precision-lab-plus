@@ -33,7 +33,7 @@ jobs:
         working-directory: frontend
       - run: npx playwright install --with-deps chromium
         working-directory: frontend
-      - run: npx playwright test e2e/in625-h2-sg28-cancel.spec.ts --project desktop-chromium --workers=1
+      - run: npx playwright test e2e/in625-h2-sg28-cancel.spec.ts --project desktop-chromium --project tablet-chromium --project mobile-chromium --workers=1
         working-directory: frontend
         env:
           SG28_EVALUATE_ISOLATION: '1'
