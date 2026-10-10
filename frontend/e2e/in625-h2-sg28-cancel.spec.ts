@@ -195,3 +195,55 @@ test("EN-SG-28 browser Stop reaps the same live isolated worker PID", async ({ p
   await page.getByRole("button", { name: "Evaluar", exact: true }).click();
   expect((await (await reply).json()).result_approx).toBe(9);
 });
+
+
+test("EN-SG-28 navigating away reaps pending worker and permits fresh evaluation", async ({ page }) => {
+  const eventsPath = process.env.SG28_CI_EVENT_FILE;
+  test.skip(process.platform !== "linux" || (!process.env.CI && !eventsPath), "Linux process evidence required");
+  if (process.env.CI) expect(eventsPath, "SG28_CI_EVENT_FILE must be configured in CI").toBeTruthy();
+  const events = (): Array<{ event: string; pid: number; time: number }> => {
+    try {
+      return readFileSync(eventsPath!, "utf8").trim().split("\n")
+        .filter(Boolean).map((line) => JSON.parse(line));
+    } catch { return []; }
+  };
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  await field.waitFor({ state: "visible" });
+  await field.evaluate(el => {
+    (el as HTMLElement & { setValue: (v: string) => void }).setValue("7+11");
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, data: "7+11" }));
+  });
+  const baseline = events().length;
+  const sent = page.waitForRequest(req =>
+    req.url().endsWith("/api/v1/evaluate") && req.postData()?.includes("7+11") === true
+  );
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  await sent;
+  let pid = 0;
+  await expect.poll(() => {
+    pid = events().slice(baseline).find(e => e.event === "start")?.pid ?? 0;
+    return pid > 0;
+  }, { timeout: 7000 }).toBe(true);
+  expect(() => process.kill(pid, 0)).not.toThrow();
+  await page.getByRole("navigation", { name: "Modos de la calculadora" })
+    .getByRole("button", { name: "Gráficas" }).click();
+  await expect.poll(() => events().some(e => e.event === "finish" && e.pid === pid),
+    { timeout: 5500, message: "Mode switch did not reap active isolated PID" }).toBe(true);
+  expect(() => process.kill(pid, 0)).toThrow();
+
+  await page.getByRole("navigation", { name: "Modos de la calculadora" })
+    .getByRole("button", { name: "Científica" }).click();
+  const recoveredField = page.locator("math-field").first();
+  await recoveredField.waitFor({ state: "visible" });
+  await recoveredField.evaluate(el => {
+    (el as HTMLElement & { setValue: (v: string) => void }).setValue("4+5");
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, data: "4+5" }));
+  });
+  const reply = page.waitForResponse(resp =>
+    resp.url().endsWith("/api/v1/evaluate") && resp.request().postData()?.includes("4+5") === true
+  );
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  expect((await (await reply).json()).result_approx).toBe(9);
+  await expect(page.locator("body")).not.toContainText("999999");
+});
