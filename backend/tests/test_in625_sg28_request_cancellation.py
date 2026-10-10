@@ -982,3 +982,23 @@ def test_opt_in_http_evaluate_returns_503_when_local_lease_is_exhausted(monkeypa
     # Exhaustion must not permanently consume the slot.
     with bridge.request_admission_lease():
         assert not bridge._ADMISSION.acquire(blocking=False)
+
+
+def test_opt_in_http_evaluate_recovers_after_capacity_503(monkeypatch) -> None:
+    """Actual HTTP route rejects saturation, then processes math after release."""
+    import threading
+    from fastapi.testclient import TestClient
+    from app.main import app
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "1")
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    with TestClient(app) as client:
+        with bridge.request_admission_lease():
+            denied = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+            assert denied.status_code == 503
+            assert denied.json()["success"] is False
+        recovered = client.post("/api/v1/evaluate", json={"expression": "4+5"})
+    assert recovered.status_code == 200
+    assert recovered.json()["success"] is True
+    assert recovered.json()["result_approx"] == pytest.approx(9.0)
