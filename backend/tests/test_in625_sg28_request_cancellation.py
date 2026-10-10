@@ -920,3 +920,32 @@ def test_reserved_bridge_cancellation_retains_lease_until_worker_cleanup(monkeyp
             assert not bridge._ADMISSION.acquire(blocking=False)
 
     asyncio.run(scenario())
+
+
+def test_opt_in_http_evaluate_holds_one_lease_across_both_worker_phases(monkeypatch) -> None:
+    """Real route and two child phases share one local K=1 capacity lease."""
+    import threading
+    from fastapi.testclient import TestClient
+    from app.main import app
+    import app.services.request_cancellation as bridge
+    import app.routers.evaluate as router_module
+
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "1")
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    observed = []
+    original = router_module.run_for_request
+
+    async def traced(request, operation, *args, **kwargs):
+        assert kwargs.get("admission_reserved") is True
+        assert not bridge._ADMISSION.acquire(blocking=False)
+        observed.append(getattr(operation, "__name__", str(operation)))
+        return await original(request, operation, *args, **kwargs)
+
+    monkeypatch.setattr(router_module, "run_for_request", traced)
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+    assert response.status_code == 200
+    assert response.json()["success"] is True
+    assert len(observed) == 2
+    with bridge.request_admission_lease():
+        assert not bridge._ADMISSION.acquire(blocking=False)
