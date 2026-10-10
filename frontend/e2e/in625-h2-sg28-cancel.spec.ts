@@ -43,3 +43,33 @@ test("EN-SG-28 Plus Basic cancels a pending request and recovers", async ({ page
   await expect(page.locator("body")).not.toContainText("999999");
   await expect(page.locator('[aria-live="polite"]').last()).toContainText("9", { timeout: 15000 });
 });
+
+
+
+test("EN-SG-28 Plus browser evaluates against the real isolated backend", async ({ page }) => {
+  // No page.route interception: production API, Pydantic MathResponse and
+  // actual spawned evaluation worker are exercised together in CI.
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  await field.waitFor({ state: "visible" });
+  await field.evaluate((el) => {
+    const mf = el as HTMLElement & { setValue: (value: string) => void };
+    mf.setValue("2+3");
+    el.dispatchEvent(new InputEvent("input", {
+      bubbles: true, inputType: "insertText", data: "2+3",
+    }));
+  });
+  const responsePromise = page.waitForResponse(
+    (response) => response.url().endsWith("/api/v1/evaluate")
+      && response.request().method() === "POST",
+  );
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  const response = await responsePromise;
+  expect(response.status()).toBe(200);
+  const body = await response.json();
+  expect(body.success).toBe(true);
+  expect(body.operation).toBe("evaluate");
+  expect(body.result_approx).toBe(5);
+  expect(body.request_id).toBeTruthy();
+  await expect(page.locator('[aria-live="polite"]').last()).toContainText("5");
+});
