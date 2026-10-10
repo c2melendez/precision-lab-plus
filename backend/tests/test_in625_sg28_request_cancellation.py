@@ -292,3 +292,4 @@ def test_isolated_real_evaluate_service_rejects_invalid_input(
     with pytest.raises(ComputationFailed) as captured:
         asyncio.run(scenario())
     assert exception_name in str(captured.value)
+    assert captured.value.error_type == exception_name
