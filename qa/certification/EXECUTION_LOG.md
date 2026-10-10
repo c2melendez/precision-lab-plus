@@ -1616,3 +1616,9 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
   - SG28 run `38082715115`: job `114302764565` SUCCESS **69 passed, 1 warning**.
   - H1d run `38082715138`: job `114302764503` SUCCESS **5 passed**.
 - Correction: real spawned child cancellation under caller-held local K=1 and reuse is NOW CI-VERIFIED. This does not certify combined physical TCP transport plus spawned child within the same test, nor global replica admission. H2 OPEN; production opt-in OFF.
+
+
+## 2026-10-10 — SG28 physical TCP + spawned SymPy child integration PUBLISHED, CI PENDING
+- Plus technical SHA `08f70c1b7aa6f894f5595b95afcd2a13a9001725`: adds `test_real_tcp_disconnect_cancels_actual_sympy_child_and_recovers` to `backend/tests/test_sg28_tcp_disconnect.py`; real loopback TCP closure, spawned SymPy child, caller-held local K=1, cancellation and lease reuse. No production toggle.
+- **DO NOT CLAIM PASS:** no cumulative/SG28 CI run for new SHA yet inspected. Prior verified baseline: `38082715108` backend 636 passed / 85.67% coverage, frontend 751 passed; SG28 `38082715115` 69 passed.
+- H2 OPEN pending test CI and fleet quota/topology verification; production isolation OFF.
