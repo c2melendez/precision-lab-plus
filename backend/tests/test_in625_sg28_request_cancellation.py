@@ -268,3 +268,27 @@ def test_isolated_real_evaluate_service_preserves_symbolic_result() -> None:
     assert result.approx_value is None
     assert str(result.expr) == "x + 1"
     assert str(result.input_expr) == "x + 1"
+
+
+@pytest.mark.parametrize(
+    ("expression", "exception_name"),
+    [
+        ("1/0", "DomainErrorResult"),
+        ("x+(", "ParseSecurityError"),
+    ],
+)
+def test_isolated_real_evaluate_service_rejects_invalid_input(
+    expression: str, exception_name: str,
+) -> None:
+    """A child failure must not masquerade as a successful mathematical value."""
+    from app.services.interruptible import ComputationFailed
+
+    async def scenario():
+        return await run_for_request(
+            FakeRequest(), _evaluate_actual_service,
+            expression, "rad", timeout_seconds=6,
+        )
+
+    with pytest.raises(ComputationFailed) as captured:
+        asyncio.run(scenario())
+    assert exception_name in str(captured.value)
