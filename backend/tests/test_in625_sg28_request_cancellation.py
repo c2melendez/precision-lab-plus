@@ -1260,3 +1260,45 @@ def test_outer_tracker_disconnect_holds_reserved_slot_until_cleanup(monkeypatch)
         await DisconnectTrackingMiddleware(downstream)(scope, receive, send)
 
     asyncio.run(scenario())
+
+
+def test_real_child_cancelled_under_reserved_k1_then_reusable(monkeypatch) -> None:
+    """A spawned SymPy child must finish cleanup before caller releases K=1."""
+    import multiprocessing as mp
+    import threading
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+
+    async def scenario():
+        ready = mp.get_context("spawn").Event()
+        request = FakeRequest()
+        with bridge.request_admission_lease():
+            pending = asyncio.create_task(
+                bridge.run_for_request(
+                    request, _active_sympy_calculation, ready,
+                    timeout_seconds=7, admission_reserved=True,
+                )
+            )
+            try:
+                assert await asyncio.to_thread(ready.wait, 4)
+                request.disconnected = True
+                with pytest.raises(ComputationCancelled, match="disconnected"):
+                    await asyncio.wait_for(pending, 5)
+                with pytest.raises(bridge.IsolationCapacityExceeded):
+                    with bridge.request_admission_lease():
+                        pass
+            finally:
+                if not pending.done():
+                    pending.cancel()
+                    try:
+                        await pending
+                    except (ComputationCancelled, asyncio.CancelledError):
+                        pass
+        with bridge.request_admission_lease():
+            return await bridge.run_for_request(
+                FakeRequest(), _sympy_after_cancellation,
+                timeout_seconds=5, admission_reserved=True,
+            )
+
+    assert asyncio.run(scenario()) == "3*x**2 + 2"
