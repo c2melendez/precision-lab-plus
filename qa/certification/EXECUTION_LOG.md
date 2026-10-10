@@ -1608,3 +1608,11 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 - User supplied run `38082715138`. GitHub Actions returned only H1d job `114302764503` SUCCESS, **5 passed**. Warnings include Node 20 deprecation and deprecated Node.js APIs.
 - This is **not** a backend cumulative or SG28 run. New test `test_real_child_cancelled_under_reserved_k1_then_reusable` from commit `c36608ab11e5264ed759af510721d67d0532b2c1` remains **CI PENDING**. Do not infer 636 backend passing from H1d.
 - Latest verified cumulative baseline is Plus `38080591813`: 635 backend passed, frontend 751 passed / 28 TODO. H2 OPEN; isolation OFF in production.
+
+
+## 2026-10-10 — Reconciled sibling CI runs for Plus commit c36608ab (all GREEN)
+- Previous entry incorrectly treated supplied H1d-only URL `38082715138` as insufficient evidence and stated SG28 CI was pending. GitHub repository Actions run listing established sibling runs on same technical SHA `c36608ab11e5264ed759af510721d67d0532b2c1`:
+  - Cumulative run `38082715108`: backend job `114302764545` SUCCESS **636 passed, 1 warning, coverage 85.67%**, and `test_real_child_cancelled_under_reserved_k1_then_reusable` explicitly PASSED. Frontend job `114302764664` SUCCESS **751 passed / 28 TODO**, 102 modules built in 18.34s.
+  - SG28 run `38082715115`: job `114302764565` SUCCESS **69 passed, 1 warning**.
+  - H1d run `38082715138`: job `114302764503` SUCCESS **5 passed**.
+- Correction: real spawned child cancellation under caller-held local K=1 and reuse is NOW CI-VERIFIED. This does not certify combined physical TCP transport plus spawned child within the same test, nor global replica admission. H2 OPEN; production opt-in OFF.
