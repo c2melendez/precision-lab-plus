@@ -69,3 +69,36 @@ def test_expired_lease_cannot_be_renewed_by_previous_owner():
     assert successor.generation > lease.generation
     assert gate.renew(lease, now=2.5, ttl=2) is None
     assert gate.active == successor
+
+
+def test_active_lease_rejects_reused_token_until_expiry():
+    gate = LeaseGate()
+    first = gate.acquire("same-owner", now=0, ttl=5)
+    assert gate.acquire("same-owner", now=1, ttl=5) is None
+    second = gate.acquire("same-owner", now=5, ttl=5)
+    assert second.generation != first.generation
+    assert not gate.release(first)
+    assert gate.active == second
+
+
+def test_expired_renewal_does_not_reopen_capacity_for_stale_owner():
+    gate = LeaseGate()
+    old = gate.acquire("worker-a", now=0, ttl=3)
+    successor = gate.acquire("worker-b", now=3, ttl=8)
+    assert successor is not None
+    assert gate.renew(old, now=4, ttl=10) is None
+    assert gate.acquire("worker-c", now=4, ttl=5) is None
+    assert gate.active == successor
+
+
+def test_nonpositive_ttl_is_rejected_without_mutating_active_lease():
+    gate = LeaseGate()
+    active = gate.acquire("worker-a", now=0, ttl=5)
+    for invalid_ttl in (0, -1):
+        try:
+            gate.acquire("worker-b", now=1, ttl=invalid_ttl)
+        except AssertionError:
+            pass
+        else:
+            raise AssertionError("invalid lease duration unexpectedly accepted")
+        assert gate.active == active
