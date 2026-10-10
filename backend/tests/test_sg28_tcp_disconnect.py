@@ -10,6 +10,16 @@ import time
 from app.services.disconnect_tracking import DisconnectTrackingMiddleware
 
 
+def _real_sympy_child(ready):
+    import sympy
+    x = sympy.Symbol('x')
+    expression = x**3 + 2*x
+    ready.set()
+    while True:
+        expression = sympy.diff(expression, x) + x**3
+
+
+
 def test_real_tcp_disconnect_sets_outer_scope_event():
     import uvicorn
 
@@ -151,9 +161,7 @@ def test_real_tcp_disconnect_cancels_actual_sympy_child_and_recovers(monkeypatch
     import uvicorn
     import app.services.request_cancellation as bridge
     from app.services.interruptible import ComputationCancelled
-    from tests.test_in625_sg28_request_cancellation import (
-        _active_sympy_calculation, _sympy_after_cancellation,
-    )
+
 
     monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
     ready = mp.get_context("spawn").Event()
@@ -165,7 +173,7 @@ def test_real_tcp_disconnect_cancels_actual_sympy_child_and_recovers(monkeypatch
             with bridge.request_admission_lease():
                 await bridge.run_for_request(
                     Request(scope, receive=receive),
-                    _active_sympy_calculation, ready,
+                    _real_sympy_child, ready,
                     timeout_seconds=8, admission_reserved=True,
                 )
         except ComputationCancelled:
