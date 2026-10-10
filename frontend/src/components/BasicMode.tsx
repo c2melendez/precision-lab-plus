@@ -719,6 +719,17 @@ export function BasicMode() {
     );
   });
 
+  // SG28-E2E-08: leaving this module must cancel its pending HTTP work.
+  // Invalidate its response before aborting so an already-resolving promise
+  // cannot commit an obsolete result after the mode is unmounted.
+  useEffect(() => {
+    return () => {
+      ++latestSubmissionRef.current;
+      activeBasicRequest.current?.abort();
+      activeBasicRequest.current = null;
+    };
+  }, []);
+
   useEffect(() => {
     return () => clearKeyboardContent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
