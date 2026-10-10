@@ -33,7 +33,7 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       // QA-only: el frontend E2E vive en otro puerto/origen.
-      env: { CORS_ORIGINS: frontendOrigin, SG28_EVALUATE_ISOLATION: process.env.SG28_EVALUATE_ISOLATION ?? "0", SG28_CI_OBSERVE: process.env.SG28_CI_OBSERVE ?? "0" },
+      env: { CORS_ORIGINS: frontendOrigin, SG28_EVALUATE_ISOLATION: process.env.SG28_EVALUATE_ISOLATION ?? "0", SG28_CI_OBSERVE: process.env.SG28_CI_OBSERVE ?? "0", SG28_CI_SLOW: process.env.SG28_CI_SLOW ?? "0", SG28_CI_EVENT_FILE: process.env.SG28_CI_EVENT_FILE ?? "" },
     },
     {
       command: `npm run dev -- --host 127.0.0.1 --port ${frontendPort}`,
