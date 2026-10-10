@@ -73,7 +73,7 @@ describe("BasicMode", () => {
     expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
       expression: "2+2",
       angle_unit: "rad",
-    });
+    }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
   });
 
   it("incluye substitutions cuando el usuario añade una fila", async () => {
@@ -94,7 +94,7 @@ describe("BasicMode", () => {
       expression: "x+1",
       angle_unit: "rad",
       substitutions: { x: "3" },
-    });
+    }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
   });
 
   it("no llama a la API con una expresión vacía (payload inválido)", () => {
@@ -119,7 +119,7 @@ describe("BasicMode", () => {
     expect(mockedCallApi).toHaveBeenCalledWith("/solve", {
       equation: "2x+3=7",
       angle_unit: "rad",
-    });
+    }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
   });
 
   it("enruta a /inequality cuando el campo tiene < o >", async () => {
@@ -129,7 +129,7 @@ describe("BasicMode", () => {
 
     await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
 
-    expect(mockedCallApi).toHaveBeenCalledWith("/inequality", { inequality: "x+3>0" });
+    expect(mockedCallApi).toHaveBeenCalledWith("/inequality", { inequality: "x+3>0" }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
   });
 
   it("enruta a /solve/system cuando el campo tiene un entorno \\begin{cases}", async () => {
@@ -380,8 +380,8 @@ describe("BasicMode", () => {
     fireEvent.change(input, { target: { value: "x=4" } });
     fireEvent.submit(form);
     await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
-    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/solve", { equation: "x=2", angle_unit: "rad" });
-    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/solve", { equation: "x=4", angle_unit: "rad" });
+    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/solve", { equation: "x=2", angle_unit: "rad" }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/solve", { equation: "x=4", angle_unit: "rad" }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
     resolveSecond({ success: true, operation: "solve", request_id: "new", result_text: "SG29_SOLVE_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
     await waitFor(() => expect(screen.getAllByText("SG29_SOLVE_NEW")[0]).toBeInTheDocument());
     resolveFirst({ success: true, operation: "solve", request_id: "old", result_text: "SG29_SOLVE_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
@@ -403,8 +403,8 @@ describe("BasicMode", () => {
     fireEvent.change(input, { target: { value: "x>3" } });
     fireEvent.submit(form);
     await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
-    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/inequality", { inequality: "x>1" });
-    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/inequality", { inequality: "x>3" });
+    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/inequality", { inequality: "x>1" }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/inequality", { inequality: "x>3" }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
     resolveSecond({ success: true, operation: "solve", request_id: "new", result_text: "SG29_INEQ_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
     await waitFor(() => expect(screen.getAllByText("SG29_INEQ_NEW").length).toBeGreaterThan(0));
     resolveFirst({ success: true, operation: "solve", request_id: "old", result_text: "SG29_INEQ_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
@@ -548,7 +548,7 @@ describe("BasicMode", () => {
     fireEvent.submit(form);
     await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
     expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/matrix/determinant", { matrix: [["1", "2"], ["3", "4"]] });
-    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/evaluate", { expression: "2+2", angle_unit: "rad" });
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/evaluate", { expression: "2+2", angle_unit: "rad" }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
     resolveRecent({ success: true, operation: "evaluate", request_id: "new", result_text: "SG29_MATRIX_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
     await waitFor(() => expect(screen.getAllByText("SG29_MATRIX_NEW").length).toBeGreaterThan(0));
     resolveMatrix({ success: true, operation: "matrix_operation", request_id: "old", result_type: "scalar", result_text: "SG29_MATRIX_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
