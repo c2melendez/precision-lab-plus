@@ -38,6 +38,15 @@ class ComputationFailed(RuntimeError):
 
 def _child_main(send: Any, operation: Callable[..., Any], args: tuple[Any, ...]) -> None:
     try:
+        # SG28 optional POSIX CPU budget, limited to this spawned child.
+        # Opt-in only; independent of the existing wall-clock cancellation.
+        cpu_budget = os.getenv("SG28_ISOLATED_CPU_SECONDS")
+        if cpu_budget and os.name == "posix":
+            import resource
+            seconds = int(cpu_budget)
+            if not 1 <= seconds <= 8:
+                raise ValueError("SG28 CPU budget must be 1..8 seconds")
+            resource.setrlimit(resource.RLIMIT_CPU, (seconds, seconds + 1))
         send.send(("ok", operation(*args)))
     except Exception as exc:
         send.send(("error", (type(exc).__name__, str(exc))))
