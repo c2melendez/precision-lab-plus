@@ -42,3 +42,12 @@ Attempted to query connected Render services; API declined the request because n
 ## Safe next action
 
 Resolve Render workspace through user-confirmed selection, perform read-only topology inspection, and then design a topology-matched test. If workspace access is not available, proceed with locally reproducible multiprocess tests but retain the deployment evidence as BLOCKED. Production isolation remains OFF; SG28/H2 stays OPEN.
+
+
+## 2026-10-10 — Updated certified SG28/H2 evidence
+
+- Plus cumulative run `38080591813`: backend 635 passed / 1 warning / 85.69% coverage; frontend 751 passed / 28 TODO. CI demonstrated loopback TCP disconnect + local K=1 lease held until mocked coordinator cleanup completes.
+- Prior Plus run `38078685565`: distinct spawned Python processes independently hold their own local K=1 permits; that is evidence of **no global quota**.
+- New Plus technical commit `c36608ab11e5264ed759af510721d67d0532b2c1`: added real spawned SymPy child cancellation under caller-held K=1 lease and subsequent reuse. **CI verification pending**.
+- The pending test is ASGI-request-level (FakeRequest), not a physical TCP disconnect. No claim of integrated real socket + real isolated child cancellation yet.
+- Global admission and actual Render deployment topology remain unverified. Experimental production isolation stays disabled; H2 remains OPEN.
