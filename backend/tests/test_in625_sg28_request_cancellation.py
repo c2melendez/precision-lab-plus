@@ -596,3 +596,64 @@ def test_static_partition_rejects_more_workers_than_global_budget() -> None:
     assert worker_count > global_budget
     assert bridge._MAX_ISOLATED_REQUESTS >= 1
     assert worker_count * 1 > global_budget
+
+
+def test_two_stage_request_admission_is_phase_scoped_not_end_to_end(monkeypatch) -> None:
+    """Deterministic local gate: evaluation and presentation compete for one slot.
+
+    This proves admission/recovery per phase, NOT a reservation across the
+    complete HTTP request or an admission limit shared by other processes.
+    No real worker, production endpoint, or external load is involved.
+    """
+    import threading
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+    entered_evaluation = threading.Event()
+    release_evaluation = threading.Event()
+    entered_presentation = threading.Event()
+    release_presentation = threading.Event()
+
+    def bounded_probe(operation, *args, timeout_seconds, cancel_event):
+        if operation == "evaluation":
+            entered_evaluation.set()
+            assert release_evaluation.wait(timeout=3)
+        elif operation == "presentation":
+            entered_presentation.set()
+            assert release_presentation.wait(timeout=3)
+        return operation
+
+    monkeypatch.setattr(bridge, "run_bounded", bounded_probe)
+
+    async def scenario() -> tuple[str, str]:
+        evaluation = asyncio.create_task(
+            bridge.run_for_request(FakeRequest(), "evaluation")
+        )
+        presentation = None
+        try:
+            assert await asyncio.to_thread(entered_evaluation.wait, 2)
+            with pytest.raises(bridge.IsolationCapacityExceeded):
+                await bridge.run_for_request(FakeRequest(), "presentation")
+            release_evaluation.set()
+            assert await asyncio.wait_for(evaluation, 3) == "evaluation"
+
+            # The same logical HTTP request could still require presentation,
+            # yet its first-phase slot is already available to other requests.
+            presentation = asyncio.create_task(
+                bridge.run_for_request(FakeRequest(), "presentation")
+            )
+            assert await asyncio.to_thread(entered_presentation.wait, 2)
+            with pytest.raises(bridge.IsolationCapacityExceeded):
+                await bridge.run_for_request(FakeRequest(), "evaluation")
+            release_presentation.set()
+            return "evaluation", await asyncio.wait_for(presentation, 3)
+        finally:
+            release_evaluation.set()
+            release_presentation.set()
+            for task in (evaluation, presentation):
+                if task is not None and not task.done():
+                    await asyncio.wait_for(task, 3)
+
+    assert asyncio.run(scenario()) == ("evaluation", "presentation")
+    # Both stages finished: no admission leak remains.
+    assert asyncio.run(bridge.run_for_request(FakeRequest(), "recovery")) == "recovery"
