@@ -166,44 +166,53 @@ def test_asgi_handler_task_cancellation_interrupts_child_and_recovers() -> None:
 
 
 
-def _healthy_sympy_with_start_signal(ready) -> str:
-    """Signal that an independent worker has really begun SymPy execution."""
+def _healthy_sympy_with_start_signal(ready, release) -> str:
+    """Compute with SymPy, then remain active until independent cancel completes."""
     result = _sympy_after_cancellation()
     ready.set()
+    if not release.wait(timeout=5):
+        raise RuntimeError("Healthy worker release was not received")
     return result
 
+
 def test_concurrent_request_disconnect_does_not_cancel_independent_request() -> None:
-    """Cancel active SymPy without poisoning a simultaneous healthy SymPy call."""
+    """Cancel one active SymPy worker while a second completed math but is still running."""
     import multiprocessing as mp
 
     async def scenario() -> tuple[str, str]:
-        ready = mp.get_context("spawn").Event()
+        ctx = mp.get_context("spawn")
+        ready = ctx.Event()
+        healthy_ready = ctx.Event()
+        healthy_release = ctx.Event()
         disconnected = FakeRequest()
         healthy = FakeRequest()
         cancelled_task = asyncio.create_task(
             run_for_request(
-                disconnected, _active_sympy_calculation, ready, timeout_seconds=7
+                disconnected, _active_sympy_calculation, ready, timeout_seconds=8
             )
         )
-        healthy_ready = mp.get_context("spawn").Event()
         healthy_task = None
         try:
             assert await asyncio.to_thread(ready.wait, 4), "SymPy child did not start"
             healthy_task = asyncio.create_task(
                 run_for_request(
-                    healthy, _healthy_sympy_with_start_signal, healthy_ready,
-                    timeout_seconds=6
+                    healthy, _healthy_sympy_with_start_signal,
+                    healthy_ready, healthy_release, timeout_seconds=8
                 )
             )
             assert await asyncio.to_thread(healthy_ready.wait, 4), (
-                "Independent SymPy child did not start before cancellation"
+                "Independent SymPy child did not complete its calculation"
             )
+            assert not healthy_task.done(), "Independent worker exited before cancellation"
             disconnected.disconnected = True
             with pytest.raises(ComputationCancelled, match="disconnected"):
                 await asyncio.wait_for(cancelled_task, timeout=5)
-            healthy_result = await asyncio.wait_for(healthy_task, timeout=6)
+            assert not healthy_task.done(), "Cancellation affected the independent worker"
+            healthy_release.set()
+            healthy_result = await asyncio.wait_for(healthy_task, timeout=5)
             return "cancelled", healthy_result
         finally:
+            healthy_release.set()
             for pending in (cancelled_task, healthy_task):
                 if pending is not None and not pending.done():
                     pending.cancel()
