@@ -432,3 +432,28 @@ def test_opt_in_public_evaluate_http_contract(
 
     for key in ("success", "operation", "error_code", "result_text", "result_latex"):
         assert results[0][key] == results[1][key]
+
+
+
+def test_isolation_capacity_rejects_second_request_and_recovers(monkeypatch) -> None:
+    """Admission returns immediately when busy and frees slot after cancellation."""
+    import threading
+    import app.services.request_cancellation as bridge
+
+    monkeypatch.setattr(bridge, "_ADMISSION", threading.BoundedSemaphore(1))
+
+    async def scenario():
+        first = FakeRequest()
+        task = asyncio.create_task(
+            bridge.run_for_request(first, _long_job, timeout_seconds=4)
+        )
+        await asyncio.sleep(0.3)
+        assert not task.done(), "First worker exited before capacity test"
+        with pytest.raises(bridge.IsolationCapacityExceeded):
+            await bridge.run_for_request(FakeRequest(), _add, 2, 3, timeout_seconds=4)
+        first.disconnected = True
+        with pytest.raises(ComputationCancelled):
+            await task
+        return await bridge.run_for_request(FakeRequest(), _add, 2, 3, timeout_seconds=4)
+
+    assert asyncio.run(scenario()) == 5
