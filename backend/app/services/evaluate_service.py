@@ -108,7 +108,13 @@ def evaluate(
 ) -> EvaluateResult:
     substitution_map = _validate_and_parse_substitutions(substitutions)
 
-    input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
+    # A caller explicitly substituting a named multi-letter symbol retains
+    # that symbol. Without that declaration, the official SY-P-24/25
+    # juxtaposition convention interprets xy/xyz as letter products.
+    if expression.strip() in ("xy", "xyz") and expression.strip() in (substitutions or {}):
+        input_expr = sympy.Symbol(expression.strip())
+    else:
+        input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     expr = input_expr
 
     if angle_unit == "deg":
