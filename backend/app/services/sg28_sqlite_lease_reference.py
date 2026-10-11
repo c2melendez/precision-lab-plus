@@ -7,6 +7,7 @@ No cross-host clock guarantees, authentication, HTTP integration, or production 
 from __future__ import annotations
 
 import math
+import os
 import sqlite3
 
 from app.services.shared_admission_contract import SharedLease
@@ -14,6 +15,8 @@ from app.services.shared_admission_contract import SharedLease
 
 class SqliteLeaseReference:
     def __init__(self, db_path: str, clock):
+        if not isinstance(db_path, (str, os.PathLike)) or not str(db_path):
+            raise ValueError("persistent lease database path required")
         self.db_path = str(db_path)
         self.clock = clock
         with self._connect() as conn:
