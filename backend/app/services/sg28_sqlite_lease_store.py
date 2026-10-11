@@ -19,7 +19,7 @@ class LeaseRecord:
 
 class SQLiteLeaseStore:
     def __init__(self, path: str, *, ttl: float = 10.0):
-        if not (0 < ttl <= 60):
+        if type(ttl) not in (int, float) or not math.isfinite(ttl) or not (0 < ttl <= 60):
             raise ValueError("TTL outside test policy")
         self.path = path
         self.ttl = ttl
