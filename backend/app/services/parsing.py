@@ -709,6 +709,11 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
     validate_g3_structure(text)
     validate_length(text)
     normalized = normalize_unicode(text)
+    # Syntax309 SY-P-24/25: standalone mathematical letter juxtaposition
+    # denotes multiplication, not one multi-letter variable. Restrict to
+    # these canonical whole expressions to preserve named identifiers elsewhere.
+    if normalized.strip() in ("xy", "xyz"):
+        normalized = "*".join(normalized.strip())
 
     if not allow_equation:
         aggregate = _try_parse_finite_aggregate(normalized)
