@@ -37,7 +37,8 @@ class TcpSharedLeaseStore:
                 line = reader.readline(8193)
         if not line or len(line) > 8192 or not line.endswith(b"\n"):
             raise ConnectionError("coordinator reply missing or too large")
-        reply = json.loads(line.decode("utf-8"), object_pairs_hook=_unique_fields,\n                           parse_constant=lambda _: (_ for _ in ()).throw(ValueError("nonfinite coordinator value")))
+        reply = json.loads(line.decode("utf-8"), object_pairs_hook=_unique_fields,
+                           parse_constant=lambda _: (_ for _ in ()).throw(ValueError("nonfinite coordinator value")))
         if not isinstance(reply, dict):
             raise ValueError("coordinator reply must be an object")
         return reply
