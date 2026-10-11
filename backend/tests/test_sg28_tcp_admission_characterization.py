@@ -744,7 +744,11 @@ def test_server_clock_and_authenticated_owner_reject_client_time_spoofing(tmp_pa
     class ControlledHandler(socketserver.StreamRequestHandler):
         def handle(self):
             payload = json.loads(self.rfile.readline().decode("utf-8"))
-            identity = self.server.identities.get(payload.get("credential"))
+            credential = payload.get("credential")
+            identity = (
+                self.server.identities.get(credential)
+                if type(credential) is str else None
+            )
             if identity is None:
                 response = {"error": "unauthorized"}
             elif payload.get("op") == "grant":
@@ -795,6 +799,12 @@ def test_server_clock_and_authenticated_owner_reject_client_time_spoofing(tmp_pa
                 "op": "grant", "credential": "invalid",
                 "now": 10**12, "ttl": 10**12
             }) == {"error": "unauthorized"}
+            for invalid_credential in (None, 42, True, [], {}, ["credential-a"]):
+                denied = request(port, {
+                    "op": "grant", "credential": invalid_credential,
+                    "now": 10**12, "ttl": 10**12
+                })
+                assert denied == {"error": "unauthorized"}
             with _connect(db) as con:
                 assert con.execute(
                     "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
