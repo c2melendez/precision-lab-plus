@@ -63,3 +63,23 @@ def test_syp_concatenated_variables_via_http(case_id, expression, substitutions,
     body = response.json()
     assert body["success"] is True, (case_id, body)
     assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
+
+
+@pytest.mark.parametrize(
+    "case_id,expression,substitutions,expected",
+    [
+        ("SY-P-18", "8/2(2+2)", None, 16.0),
+        ("SY-P-19", "6/2(1+2)", None, 9.0),
+        ("SY-P-21", "1/2x", {"x": "6"}, 3.0),
+        ("SY-P-23", "a/bc", {"a": "12", "b": "3", "c": "2"}, 8.0),
+    ],
+)
+def test_syp_ambiguous_implicit_precedence_current_convention(case_id, expression, substitutions, expected):
+    """Characterize the current convention; a PASS does not certify a UI warning."""
+    assert ROWS[case_id]["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression, **({"substitutions": substitutions} if substitutions else {})})
+    assert response.status_code == 200, (case_id, response.text)
+    body = response.json()
+    assert body["success"] is True, (case_id, body)
+    assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
