@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-const source = readFileSync(fileURLToPath(new URL("../../../qa/certification/syntax309_sy_p_cases.jsonl", import.meta.url)), "utf8");
+const source = readFileSync("../../../qa/certification/syntax309_sy_p_cases.jsonl", "utf8");
 import { latexToBackendSyntax } from "../components/NaturalMathField";
 
 type Row = { id: string; operacion: string; entrada: string };
