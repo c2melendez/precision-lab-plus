@@ -205,3 +205,44 @@ def test_same_owner_stale_generation_cannot_release_reacquired_lease(tmp_path):
     assert _grant(db, "worker-b", 6, 10) is None
     assert _release(db, "worker-a", current_generation)
     assert _grant(db, "worker-b", 6, 10) == 3
+
+
+def _abrupt_storage_owner_exit(db, marker):
+    """Acquire test-only lease and terminate without releasing it."""
+    import os
+    generation = _grant(db, "crashed-worker", 0, 5)
+    if generation != 1:
+        os._exit(21)
+    with open(marker, "w", encoding="utf-8") as handle:
+        handle.write(str(generation))
+    os._exit(17)
+
+
+def test_storage_lease_expires_after_abrupt_owner_process_exit(tmp_path):
+    """Owner process death must not grant a successor before lease expiry."""
+    import multiprocessing
+
+    db = str(tmp_path / "abrupt-exit-sg28.sqlite")
+    marker = str(tmp_path / "owner-granted.txt")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    ctx = multiprocessing.get_context("spawn")
+    owner = ctx.Process(target=_abrupt_storage_owner_exit, args=(db, marker))
+    owner.start()
+    owner.join(timeout=15)
+    if owner.is_alive():
+        owner.terminate()
+        owner.join(timeout=5)
+    assert owner.exitcode == 17
+    assert (tmp_path / "owner-granted.txt").read_text(encoding="utf-8") == "1"
+    assert _grant(db, "successor", 4, 5) is None
+    assert _grant(db, "successor", 5, 5) == 2
+    assert not _release(db, "crashed-worker", 1)
+    with _connect(db) as con:
+        assert con.execute(
+            "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+        ).fetchone() == ("successor", 2, 10)
