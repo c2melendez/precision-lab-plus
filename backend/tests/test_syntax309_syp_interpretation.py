@@ -40,3 +40,26 @@ def test_syp_interpretation_numeric_witness_via_http(case_id):
     body = response.json()
     assert body["success"] is True, (case_id, body)
     assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
+
+
+# These tests intentionally send concatenated variables to the real parser.
+# Rewriting xy as x*y in the fixture would bypass the behavior under audit.
+@pytest.mark.parametrize(
+    "case_id,expression,substitutions,expected",
+    [
+        ("SY-P-24", "xy", {"x": "2", "y": "3"}, 6.0),
+        ("SY-P-25", "xyz", {"x": "2", "y": "3", "z": "5"}, 30.0),
+    ],
+)
+def test_syp_concatenated_variables_via_http(case_id, expression, substitutions, expected):
+    assert ROWS[case_id]["operacion"] == "interpretacion"
+    assert ROWS[case_id]["entrada"] == expression
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/v1/evaluate",
+            json={"expression": expression, "substitutions": substitutions},
+        )
+    assert response.status_code == 200, (case_id, response.text)
+    body = response.json()
+    assert body["success"] is True, (case_id, body)
+    assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
