@@ -81,7 +81,7 @@ def test_shared_boundary_rejects_invalid_lease_as_unavailable(reply):
         SharedAdmissionClient(BadStore()).acquire("a", 5)
 
 
-@pytest.mark.parametrize("ttl", [0, -1, 11])
+@pytest.mark.parametrize("ttl", [0, -1, 11, True, False, "5", None, float("nan"), float("inf"), float("-inf")])
 def test_shared_boundary_rejects_invalid_ttl_before_store_call(ttl):
     class MustNotCall:
         def acquire(self, owner, ttl):
@@ -98,3 +98,13 @@ def test_shared_boundary_does_not_accept_non_boolean_release_ack():
 
     with pytest.raises(SharedAdmissionUnavailable):
         SharedAdmissionClient(BadStore()).release(SharedLease("a", 1, 5))
+
+
+@pytest.mark.parametrize("owner", ["", None, 12, True])
+def test_shared_boundary_rejects_invalid_owner_before_store_call(owner):
+    class MustNotCall:
+        def acquire(self, owner, ttl):
+            pytest.fail("must reject before contacting coordinator")
+
+    with pytest.raises(ValueError):
+        SharedAdmissionClient(MustNotCall()).acquire(owner, 5)
