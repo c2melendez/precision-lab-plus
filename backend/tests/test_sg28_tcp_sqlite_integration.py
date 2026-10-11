@@ -113,3 +113,47 @@ def test_network_outage_fails_closed_and_restart_preserves_lease(tmp_path):
         restarted.shutdown()
         restarted.server_close()
         second_thread.join(timeout=3)
+
+
+def test_lost_grant_ack_denies_client_without_early_second_grant(tmp_path):
+    """Loopback lost-ACK characterization: NOT independent-host DIST-02."""
+    import pytest
+    from app.services.shared_admission_contract import (
+        SharedAdmissionRejected, SharedAdmissionUnavailable,
+    )
+
+    now = [30.0]
+    db = tmp_path / "lost-ack.sqlite"
+    store = SqliteLeaseReference(db, lambda: now[0])
+
+    class DropGrantAckHandler(socketserver.StreamRequestHandler):
+        def handle(self):
+            message = json.loads(self.rfile.readline(8193))
+            if message["op"] == "grant" and message["owner"] == "uncertain":
+                store.acquire(message["owner"], message["ttl"])
+                return  # Persisted grant, but close socket without ACK.
+            lease = store.acquire(message["owner"], message["ttl"])
+            response = {"granted": False} if lease is None else {
+                "granted": True, "owner": lease.owner,
+                "generation": lease.generation, "deadline": lease.deadline,
+            }
+            self.wfile.write((json.dumps(response) + "\n").encode())
+
+    server = _Server(("127.0.0.1", 0), DropGrantAckHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        port = server.server_address[1]
+        uncertain = SharedAdmissionClient(TcpSharedLeaseStore("127.0.0.1", port))
+        other = SharedAdmissionClient(TcpSharedLeaseStore("127.0.0.1", port))
+        with pytest.raises(SharedAdmissionUnavailable):
+            uncertain.acquire("uncertain", 5)
+        with pytest.raises(SharedAdmissionRejected):
+            other.acquire("other", 5)
+        now[0] = 35.0
+        recovered = other.acquire("other", 5)
+        assert recovered.generation == 2
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=3)
