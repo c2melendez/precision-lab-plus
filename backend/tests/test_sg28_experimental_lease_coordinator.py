@@ -77,11 +77,11 @@ def test_expired_lease_cannot_release_new_owner_slot_at_boundary():
     assert coordinator.acquire("third", 1) is None
 
 
-def test_deadline_overflow_fails_closed_without_consuming_generation():
+def test_unrepresentable_deadline_fails_closed_without_consuming_generation():
     import pytest
     now = [1.7976931348623157e308]
     coordinator = ExperimentalLeaseCoordinator(lambda: now[0])
-    with pytest.raises(RuntimeError, match="overflow"):
+    with pytest.raises(RuntimeError, match="not representable"):
         coordinator.acquire("a", 10)
     now[0] = 5.0
     lease = coordinator.acquire("b", 2)
