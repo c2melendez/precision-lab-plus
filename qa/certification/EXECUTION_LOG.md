@@ -1719,3 +1719,8 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 ## 2026-10-10 — Coordinator outage recovery model GREEN, 657 backend
 - Plus technical SHA `b56a48b3d0ff3c88f56289e70951d7e3bd39cffa`, cumulative run `38097699581`: backend **657 passed / 1 warning / 85.59% coverage**, tests `test_coordinator_recovers_without_granting_during_outage` and `test_coordinator_outage_does_not_erase_preexisting_owner` explicitly PASSED; frontend **751 passed / 28 TODO**. H1d run `38097699574` **5 passed**.
 - Tests operate on in-memory injected fake coordinator, not a production distributed service or actual coordinator crash. H2 OPEN; production isolation OFF.
+
+
+## 2026-10-10 — Experimental SQLite atomic admission fixture published; CI pending
+- Technical SHA `17bcb0a488a98f97b7e966ff062806e4ebc0666e` adds `backend/tests/test_sg28_sqlite_admission_characterization.py`, a CI-only disposable SQLite transaction fixture. Two concurrent threads race with BEGIN IMMEDIATE at K=1; owner+generation release is fenced; simulated expiry grants next generation. Initial code SHA `7c00566d` corrected in `17bcb0a4` to retain monotonic generation after release (tombstone rather than row deletion).
+- This is NOT a cross-host distributed coordinator, not two independent processes, and not production integration. Exact SHA CI search initially empty: test UNVERIFIED. Latest certified baseline remains Plus 657 backend/751 frontend, H1d 5. SG28/H2 OPEN; experimental isolation OFF in production.
