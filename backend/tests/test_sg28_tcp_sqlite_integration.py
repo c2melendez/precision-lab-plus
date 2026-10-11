@@ -34,6 +34,7 @@ class _Handler(socketserver.StreamRequestHandler):
 
 
 class _Server(socketserver.ThreadingTCPServer):
+    request_queue_size = 16  # Eight simultaneous disposable loopback clients.
     allow_reuse_address = True
     daemon_threads = True
 
@@ -177,7 +178,7 @@ def test_competing_tcp_clients_receive_single_grant_under_concurrency(tmp_path):
         port = server.server_address[1]
 
         def attempt(i):
-            client = SharedAdmissionClient(TcpSharedLeaseStore("127.0.0.1", port))
+            client = SharedAdmissionClient(TcpSharedLeaseStore("127.0.0.1", port, timeout=5))
             barrier.wait(timeout=10)
             try:
                 return client.acquire(f"tcp-worker-{i}", 5)
