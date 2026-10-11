@@ -423,3 +423,43 @@ def test_tcp_unknown_release_response_keeps_client_fail_closed(tmp_path):
         finally:
             server.shutdown()
             thread.join(timeout=5)
+
+
+def test_tcp_lease_does_not_authorize_other_owner_after_malformed_request(tmp_path):
+    """A truncated JSON request cannot grant admission or mutate active lease."""
+    db = str(tmp_path / "truncated-json.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as server:
+        server.db = db
+        port = server.server_address[1]
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            assert request(port, {"op": "grant", "owner": "first", "now": 0, "ttl": 5}) == {
+                "granted": True, "generation": 1
+            }
+            # Send an incomplete request over a disposable local TCP socket.
+            with socket.create_connection(("127.0.0.1", port), timeout=1.5) as conn:
+                conn.settimeout(1.5)
+                conn.sendall(b'{"op": "grant", "owner": "intruder",')
+                conn.shutdown(socket.SHUT_WR)
+                try:
+                    response = conn.recv(4096)
+                except (OSError, ConnectionError):
+                    response = b""
+            assert b'"granted": true' not in response.lower()
+            with _connect(db) as con:
+                assert con.execute(
+                    "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+                ).fetchone() == ("first", 1, 5)
+            assert request(port, {
+                "op": "grant", "owner": "second", "now": 1, "ttl": 5
+            })["granted"] is False
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
