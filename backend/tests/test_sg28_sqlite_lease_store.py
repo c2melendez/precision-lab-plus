@@ -56,7 +56,7 @@ def test_store_rejects_nonfinite_server_clock_without_mutating_lease(tmp_path):
     store = SQLiteLeaseStore(str(tmp_path / "nonfinite.sqlite"), ttl=10)
     first = store.acquire("first", now=100)
     assert first.generation == 1
-    for bad_now in (math.nan, math.inf, -math.inf, True):
+    for bad_now in (math.nan, math.inf, -math.inf, 1e308, True):
         with pytest.raises(ValueError, match="Invalid trusted lease parameters"):
             store.acquire("other", now=bad_now)
     assert store.acquire("other", now=105) is None
