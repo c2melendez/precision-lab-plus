@@ -6,7 +6,49 @@ import threading
 
 import pytest
 
-from test_sg28_sqlite_admission_characterization import _connect, _grant, _release
+import sqlite3
+
+
+def _connect(db):
+    con = sqlite3.connect(db, timeout=5, isolation_level=None)
+    con.execute("PRAGMA busy_timeout=5000")
+    return con
+
+
+def _grant(db, owner, now, ttl):
+    con = _connect(db)
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        row = con.execute("SELECT owner, generation, deadline FROM active_lease WHERE id=1").fetchone()
+        if row and now < row[2]:
+            con.execute("COMMIT")
+            return None
+        generation = (row[1] if row else 0) + 1
+        con.execute(
+            "INSERT INTO active_lease(id, owner, generation, deadline) VALUES(1, ?, ?, ?) "
+            "ON CONFLICT(id) DO UPDATE SET owner=excluded.owner, "
+            "generation=excluded.generation, deadline=excluded.deadline",
+            (owner, generation, now + ttl),
+        )
+        con.execute("COMMIT")
+        return generation
+    finally:
+        con.close()
+
+
+def _release(db, owner, generation):
+    con = _connect(db)
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        changed = con.execute(
+            "UPDATE active_lease SET deadline=-1 WHERE id=1 AND owner=? "
+            "AND generation=? AND deadline>=0", (owner, generation),
+        ).rowcount
+        con.execute("COMMIT")
+        return bool(changed)
+    finally:
+        con.close()
+
 
 
 class AdmissionHandler(socketserver.StreamRequestHandler):
