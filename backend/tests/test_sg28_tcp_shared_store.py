@@ -68,6 +68,8 @@ def test_tcp_store_accepts_valid_lease_and_release():
     ({"granted": False}, SharedAdmissionRejected),
     ({"error": "offline", "granted": False}, SharedAdmissionUnavailable),
     ({"unexpected": 1}, SharedAdmissionUnavailable),
+    ({"granted": True, "error": "coordinator unavailable", "owner": "a", "generation": 1, "deadline": 5}, SharedAdmissionUnavailable),
+    ({"granted": True, "error": None, "owner": "a", "generation": 1, "deadline": 5}, SharedAdmissionUnavailable),
 ])
 def test_tcp_store_fails_closed_on_missing_or_invalid_ack(reply, expected):
     server, thread = serve(lambda _: reply)
