@@ -119,3 +119,16 @@ def test_sqlite_release_rejects_boolean_generation_and_deadline_alias(tmp_path):
         store.release(SharedLease("a", lease.generation, True))
     assert store.acquire("b", 1) is None
     assert store.release(lease) is True
+
+
+def test_sqlite_generation_exhaustion_fails_closed(tmp_path):
+    import pytest
+    import sqlite3
+    path = tmp_path / "exhaustion.sqlite"
+    store = SqliteLeaseReference(path, lambda: 10.0)
+    with sqlite3.connect(path) as conn:
+        conn.execute("UPDATE lease_state SET generation=? WHERE slot=1", (9223372036854775807,))
+    with pytest.raises(RuntimeError, match="generation exhausted"):
+        store.acquire("a", 2)
+    with sqlite3.connect(path) as conn:
+        assert conn.execute("SELECT owner,generation FROM lease_state WHERE slot=1").fetchone() == (None, 9223372036854775807)
