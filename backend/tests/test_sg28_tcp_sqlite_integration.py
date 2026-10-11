@@ -157,3 +157,39 @@ def test_lost_grant_ack_denies_client_without_early_second_grant(tmp_path):
         server.shutdown()
         server.server_close()
         thread.join(timeout=3)
+
+
+def test_competing_tcp_clients_receive_single_grant_under_concurrency(tmp_path):
+    """Loopback concurrent K=1 characterization, NOT multi-host DIST-01."""
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+
+    now = [200.0]
+    server = _Server(("127.0.0.1", 0), _Handler)
+    server.lease_store = SqliteLeaseReference(tmp_path / "tcp-race.sqlite", lambda: now[0])
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        from app.services.shared_admission_contract import SharedAdmissionRejected
+        import pytest
+
+        barrier = Barrier(8)
+        port = server.server_address[1]
+
+        def attempt(i):
+            client = SharedAdmissionClient(TcpSharedLeaseStore("127.0.0.1", port))
+            barrier.wait(timeout=10)
+            try:
+                return client.acquire(f"tcp-worker-{i}", 5)
+            except SharedAdmissionRejected:
+                return None
+
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            grants = list(pool.map(attempt, range(8)))
+        accepted = [lease for lease in grants if lease is not None]
+        assert len(accepted) == 1
+        assert accepted[0].generation == 1
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=3)
