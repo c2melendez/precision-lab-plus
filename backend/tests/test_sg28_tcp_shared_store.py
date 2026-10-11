@@ -97,3 +97,19 @@ def test_tcp_store_rejects_ambiguous_or_nonfinite_raw_ack(raw_reply):
         server.shutdown()
         server.server_close()
         thread.join(timeout=3)
+
+
+@pytest.mark.parametrize("raw_reply", [
+    b'{"granted":true,"owner":"a","generation":1,"deadline":5}',
+    b'{"granted":true,"owner":"a","generation":1,"deadline":5}' + b" " * 8192 + b"\n",
+])
+def test_tcp_store_rejects_unterminated_or_oversized_ack(raw_reply):
+    server, thread = serve(lambda _: raw_reply)
+    try:
+        client = SharedAdmissionClient(TcpSharedLeaseStore("127.0.0.1", server.server_address[1]))
+        with pytest.raises(SharedAdmissionUnavailable):
+            client.acquire("a", 5)
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=3)
