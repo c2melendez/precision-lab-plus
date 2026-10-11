@@ -635,9 +635,16 @@ def test_spawned_clients_compete_at_expiry_after_lost_ack_restart(tmp_path):
             winners = [(owner, result) for _, owner, result in results if result["granted"]]
             assert len(winners) == 1
             assert winners[0][1] == {"granted": True, "generation": 2}
+            # Exercise the stale release from a different process, not the
+            # parent test runner that issued the initial grant.
+            with ctx.Pool(processes=1) as isolated:
+                stale_release = isolated.apply(request, (port, {
+                    "op": "release", "owner": "original", "generation": 1
+                }))
+            assert stale_release == {"released": False}
             assert request(port, {
-                "op": "release", "owner": "original", "generation": 1
-            }) == {"released": False}
+                "op": "grant", "owner": "intruder", "now": 6, "ttl": 5
+            })["granted"] is False
             with _connect(db) as con:
                 assert con.execute(
                     "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
