@@ -132,3 +132,32 @@ def test_sqlite_generation_exhaustion_fails_closed(tmp_path):
         store.acquire("a", 2)
     with sqlite3.connect(path) as conn:
         assert conn.execute("SELECT owner,generation FROM lease_state WHERE slot=1").fetchone() == (None, 9223372036854775807)
+
+
+def test_sqlite_lease_persists_across_independent_local_processes(tmp_path):
+    """Local multi-process proof only: not an independent-host DIST gate."""
+    import json
+    import subprocess
+    import sys
+
+    path = tmp_path / "separate-processes.sqlite"
+    script = (
+        "import json,sys\n"
+        "from app.services.sg28_sqlite_lease_reference import SqliteLeaseReference\n"
+        "store=SqliteLeaseReference(sys.argv[1],lambda:float(sys.argv[2]))\n"
+        "lease=store.acquire(sys.argv[3],5)\n"
+        "print(json.dumps(None if lease is None else [lease.owner,lease.generation,lease.deadline]))\n"
+    )
+    def acquire_in_process(owner, now):
+        result = subprocess.run(
+            [sys.executable, "-c", script, str(path), str(now), owner],
+            check=True, capture_output=True, text=True, timeout=10,
+        )
+        return json.loads(result.stdout.strip())
+
+    first = acquire_in_process("process-a", 10)
+    assert first == ["process-a", 1, 15.0]
+    assert acquire_in_process("process-b", 10) is None
+    successor = acquire_in_process("process-b", 15)
+    assert successor == ["process-b", 2, 20.0]
+    assert acquire_in_process("process-c", 15) is None
