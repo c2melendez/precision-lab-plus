@@ -9,6 +9,7 @@ from __future__ import annotations
 import math
 import os
 import sqlite3
+from contextlib import closing
 
 from app.services.shared_admission_contract import SharedLease
 
@@ -19,7 +20,7 @@ class SqliteLeaseReference:
             raise ValueError("persistent lease database path required")
         self.db_path = str(db_path)
         self.clock = clock
-        with self._connect() as conn:
+        with closing(self._connect()) as conn:
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS lease_state ("
                 "slot INTEGER PRIMARY KEY CHECK (slot=1), "
@@ -38,7 +39,7 @@ class SqliteLeaseReference:
     def acquire(self, owner: str, ttl: float) -> SharedLease | None:
         if not isinstance(owner, str) or not owner or type(ttl) not in (float, int) or not math.isfinite(ttl) or not 0 < ttl <= 10:
             raise ValueError("invalid lease request")
-        with self._connect() as conn:
+        with closing(self._connect()) as conn:
             conn.execute("BEGIN IMMEDIATE")
             try:
                 now = self.clock()
@@ -66,7 +67,7 @@ class SqliteLeaseReference:
     def release(self, lease: SharedLease) -> bool:
         if not isinstance(lease, SharedLease):
             raise ValueError("invalid lease")
-        with self._connect() as conn:
+        with closing(self._connect()) as conn:
             conn.execute("BEGIN IMMEDIATE")
             try:
                 row = conn.execute("SELECT owner,generation,deadline FROM lease_state WHERE slot=1").fetchone()
