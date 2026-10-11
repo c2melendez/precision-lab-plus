@@ -676,7 +676,7 @@ def test_tcp_untrusted_grant_reply_requires_positive_integer_generation():
     class ReplyHandler(socketserver.StreamRequestHandler):
         def handle(self):
             self.rfile.readline()
-            self.wfile.write((json.dumps(self.server.reply) + "\\n").encode("utf-8"))
+            self.wfile.write((json.dumps(self.server.reply) + "\n").encode("utf-8"))
 
     with AdmissionServer(("127.0.0.1", 0), ReplyHandler) as server:
         port = server.server_address[1]
