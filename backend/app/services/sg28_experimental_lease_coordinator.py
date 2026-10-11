@@ -31,8 +31,8 @@ class ExperimentalLeaseCoordinator:
             if self._active is not None and now < self._active.deadline:
                 return None
             deadline = now + ttl
-            if not math.isfinite(deadline):
-                raise RuntimeError("coordinator deadline overflow")
+            if not math.isfinite(deadline) or deadline <= now:
+                raise RuntimeError("coordinator deadline not representable")
             self._generation += 1
             self._active = SharedLease(owner, self._generation, deadline)
             return self._active
