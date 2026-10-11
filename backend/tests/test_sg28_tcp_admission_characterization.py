@@ -463,3 +463,48 @@ def test_tcp_lease_does_not_authorize_other_owner_after_malformed_request(tmp_pa
         finally:
             server.shutdown()
             thread.join(timeout=5)
+
+
+def test_tcp_coordinator_restart_preserves_fence_after_lost_grant_ack(tmp_path):
+    """Unknown grant outcome remains fail-closed across coordinator restart."""
+    db = str(tmp_path / "lost-grant-restart.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as first:
+        first.db = db
+        port = first.server_address[1]
+        worker = threading.Thread(target=first.serve_forever, daemon=True)
+        worker.start()
+        try:
+            assert request(port, {
+                "op": "grant_disconnect", "owner": "worker-a", "now": 0, "ttl": 5
+            })["granted"] is False
+        finally:
+            first.shutdown()
+            worker.join(timeout=5)
+
+    with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as recovered:
+        recovered.db = db
+        port = recovered.server_address[1]
+        worker = threading.Thread(target=recovered.serve_forever, daemon=True)
+        worker.start()
+        try:
+            assert request(port, {
+                "op": "grant", "owner": "worker-a", "now": 1, "ttl": 5
+            })["granted"] is False
+            assert request(port, {
+                "op": "grant", "owner": "worker-b", "now": 4, "ttl": 5
+            })["granted"] is False
+            assert request(port, {
+                "op": "grant", "owner": "worker-b", "now": 5, "ttl": 5
+            }) == {"granted": True, "generation": 2}
+            assert request(port, {
+                "op": "release", "owner": "worker-a", "generation": 1
+            }) == {"released": False}
+        finally:
+            recovered.shutdown()
+            worker.join(timeout=5)
