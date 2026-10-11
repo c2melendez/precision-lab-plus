@@ -185,3 +185,55 @@ def test_spawned_coordinator_and_distinct_clients_enforce_network_k1(tmp_path):
                 coordinator.terminate()
                 coordinator.join(timeout=5)
             assert coordinator.exitcode == 0
+
+
+def test_abrupt_tcp_coordinator_process_death_fails_closed_and_fences_restart(tmp_path):
+    """K=1 persists after coordinator SIGTERM; no admission during outage."""
+    import multiprocessing
+
+    db = str(tmp_path / "coordinator-crash.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    ctx = multiprocessing.get_context("spawn")
+    with ctx.Manager() as manager:
+        stop = manager.Event()
+        receiver, sender = ctx.Pipe(duplex=False)
+        coordinator = ctx.Process(target=_coordinator_process, args=(db, sender, stop))
+        coordinator.start()
+        sender.close()
+        try:
+            assert receiver.poll(15), "coordinator failed to start"
+            port = receiver.recv()
+            assert request(port, {"op": "grant", "owner": "first", "now": 0, "ttl": 5}) == {
+                "granted": True, "generation": 1
+            }
+            coordinator.terminate()
+            coordinator.join(timeout=10)
+            assert not coordinator.is_alive()
+            assert request(port, {"op": "grant", "owner": "second", "now": 5, "ttl": 5})["granted"] is False
+        finally:
+            receiver.close()
+            if coordinator.is_alive():
+                coordinator.terminate()
+                coordinator.join(timeout=5)
+
+        with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as restored:
+            restored.db = db
+            replacement_port = restored.server_address[1]
+            thread = threading.Thread(target=restored.serve_forever, daemon=True)
+            thread.start()
+            try:
+                assert request(replacement_port, {"op": "grant", "owner": "second", "now": 4, "ttl": 5})["granted"] is False
+                assert request(replacement_port, {"op": "grant", "owner": "second", "now": 5, "ttl": 5}) == {
+                    "granted": True, "generation": 2
+                }
+                assert request(replacement_port, {"op": "release", "owner": "first", "generation": 1}) == {
+                    "released": False
+                }
+            finally:
+                restored.shutdown()
+                thread.join(timeout=5)
