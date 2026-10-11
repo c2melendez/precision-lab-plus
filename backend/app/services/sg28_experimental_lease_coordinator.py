@@ -30,8 +30,11 @@ class ExperimentalLeaseCoordinator:
                 raise RuntimeError("coordinator clock unavailable")
             if self._active is not None and now < self._active.deadline:
                 return None
+            deadline = now + ttl
+            if not math.isfinite(deadline):
+                raise RuntimeError("coordinator deadline overflow")
             self._generation += 1
-            self._active = SharedLease(owner, self._generation, now + ttl)
+            self._active = SharedLease(owner, self._generation, deadline)
             return self._active
 
     def release(self, lease: SharedLease) -> bool:
