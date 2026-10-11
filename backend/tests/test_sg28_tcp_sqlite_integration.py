@@ -1,5 +1,6 @@
 """Disposable loopback TCP + durable SQLite integration. NOT multi-host DIST proof."""
 import json
+from contextlib import closing
 import socketserver
 import threading
 
@@ -20,7 +21,7 @@ class _Handler(socketserver.StreamRequestHandler):
             }
         elif message.get("op") == "release":
             # Deadline comes from the persisted coordinator record, not client input.
-            with store._connect() as conn:
+            with closing(store._connect()) as conn:
                 row = conn.execute(
                     "SELECT owner,generation,deadline FROM lease_state WHERE slot=1"
                 ).fetchone()
