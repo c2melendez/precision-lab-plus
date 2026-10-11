@@ -394,3 +394,32 @@ def test_tcp_lost_release_ack_retry_remains_fenced(tmp_path):
         finally:
             server.shutdown()
             thread.join(timeout=5)
+
+
+def test_tcp_unknown_release_response_keeps_client_fail_closed(tmp_path):
+    """A malformed response must never be treated as successful admission."""
+    db = str(tmp_path / "unknown-response.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as server:
+        server.db = db
+        port = server.server_address[1]
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            assert request(port, {
+                "op": "grant", "owner": "first", "now": 0, "ttl": 5
+            }) == {"granted": True, "generation": 1}
+            invalid = request(port, {"op": "unsupported"})
+            assert invalid.get("granted", False) is False
+            assert invalid == {"error": "unsupported operation"}
+            assert request(port, {
+                "op": "grant", "owner": "second", "now": 1, "ttl": 5
+            })["granted"] is False
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
