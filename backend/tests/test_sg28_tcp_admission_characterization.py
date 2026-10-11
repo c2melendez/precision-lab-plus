@@ -726,3 +726,91 @@ def test_tcp_untrusted_grant_reply_requires_positive_integer_generation():
         finally:
             server.shutdown()
             thread.join(timeout=5)
+
+
+def test_server_clock_and_authenticated_owner_reject_client_time_spoofing(tmp_path):
+    """Isolated security prototype: server owns time, TTL policy and owner mapping.
+
+    This is a test-only loopback characterization, not production TLS/mTLS.
+    """
+    db = str(tmp_path / "server-clock-security.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+
+    class ControlledHandler(socketserver.StreamRequestHandler):
+        def handle(self):
+            payload = json.loads(self.rfile.readline().decode("utf-8"))
+            identity = self.server.identities.get(payload.get("credential"))
+            if identity is None:
+                response = {"error": "unauthorized"}
+            elif payload.get("op") == "grant":
+                # Never honor caller-controlled 'now', 'ttl' or 'owner'.
+                generation = _grant(
+                    self.server.db, identity, self.server.clock["now"],
+                    self.server.fixed_ttl,
+                )
+                response = {"granted": generation is not None, "generation": generation}
+            elif payload.get("op") == "release":
+                generation = payload.get("generation")
+                if type(generation) is not int or generation < 1:
+                    response = {"released": False}
+                else:
+                    response = {"released": _release(self.server.db, identity, generation)}
+            else:
+                response = {"error": "unsupported operation"}
+            self.wfile.write((json.dumps(response) + "\n").encode("utf-8"))
+
+    with AdmissionServer(("127.0.0.1", 0), ControlledHandler) as server:
+        server.db = db
+        server.clock = {"now": 100}
+        server.fixed_ttl = 10
+        server.identities = {"credential-a": "identity-a", "credential-b": "identity-b"}
+        port = server.server_address[1]
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            assert request(port, {
+                "op": "grant", "credential": "credential-a",
+                "owner": "identity-b", "now": 10**9, "ttl": 10**9
+            }) == {"granted": True, "generation": 1}
+            with _connect(db) as con:
+                assert con.execute(
+                    "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+                ).fetchone() == ("identity-a", 1, 110)
+
+            # Time spoofing, unbounded TTL, and impersonation cannot bypass K=1.
+            assert request(port, {
+                "op": "grant", "credential": "credential-b",
+                "owner": "identity-a", "now": 10**12, "ttl": 0
+            }) == {"granted": False, "generation": None}
+            assert request(port, {
+                "op": "release", "credential": "credential-b",
+                "owner": "identity-a", "generation": 1
+            }) == {"released": False}
+            assert request(port, {
+                "op": "grant", "credential": "invalid",
+                "now": 10**12, "ttl": 10**12
+            }) == {"error": "unauthorized"}
+            with _connect(db) as con:
+                assert con.execute(
+                    "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+                ).fetchone() == ("identity-a", 1, 110)
+
+            server.clock["now"] = 110
+            assert request(port, {
+                "op": "grant", "credential": "credential-b", "now": 0, "ttl": 10**9
+            }) == {"granted": True, "generation": 2}
+            assert request(port, {
+                "op": "release", "credential": "credential-a", "generation": 1
+            }) == {"released": False}
+            with _connect(db) as con:
+                assert con.execute(
+                    "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+                ).fetchone() == ("identity-b", 2, 120)
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
