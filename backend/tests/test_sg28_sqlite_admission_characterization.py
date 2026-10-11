@@ -1,0 +1,93 @@
+"""SG28/H2: SQLite transaction-backed admission characterization (CI only).
+
+SQLite is a disposable shared-storage fixture. It is not a production
+multi-host coordinator and does not replace a distributed lease service.
+"""
+import sqlite3
+import threading
+from concurrent.futures import ThreadPoolExecutor
+
+
+def _connect(db):
+    con = sqlite3.connect(db, timeout=5, isolation_level=None)
+    con.execute("PRAGMA busy_timeout=5000")
+    return con
+
+
+def _grant(db, owner, now, ttl):
+    con = _connect(db)
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        row = con.execute(
+            "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+        ).fetchone()
+        if row and now < row[2]:
+            con.execute("COMMIT")
+            return None
+        generation = (row[1] if row else 0) + 1
+        con.execute(
+            "INSERT INTO active_lease(id, owner, generation, deadline) "
+            "VALUES(1, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET "
+            "owner=excluded.owner, generation=excluded.generation, "
+            "deadline=excluded.deadline",
+            (owner, generation, now + ttl),
+        )
+        con.execute("COMMIT")
+        return generation
+    finally:
+        con.close()
+
+
+def _release(db, owner, generation):
+    con = _connect(db)
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        affected = con.execute(
+            "DELETE FROM active_lease WHERE id=1 AND owner=? AND generation=?",
+            (owner, generation),
+        ).rowcount
+        con.execute("COMMIT")
+        return bool(affected)
+    finally:
+        con.close()
+
+
+def test_atomic_storage_gate_denies_racing_k1_claims(tmp_path):
+    db = str(tmp_path / "sg28.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    barrier = threading.Barrier(2)
+
+    def contender(owner):
+        barrier.wait(timeout=5)
+        return owner, _grant(db, owner, 0, 10)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(contender, x) for x in ("a", "b")]
+        results = [f.result(timeout=10) for f in futures]
+    winners = [(owner, gen) for owner, gen in results if gen is not None]
+    assert len(winners) == 1
+    owner, generation = winners[0]
+    assert generation == 1
+    assert not _release(db, "other", generation)
+    assert _release(db, owner, generation)
+    assert _grant(db, "next", 1, 10) == 1
+
+
+def test_storage_gate_expiry_fences_stale_release(tmp_path):
+    db = str(tmp_path / "sg28.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    old = _grant(db, "a", 0, 5)
+    new = _grant(db, "b", 5, 5)
+    assert new == old + 1
+    assert not _release(db, "a", old)
+    assert _grant(db, "c", 6, 5) is None
