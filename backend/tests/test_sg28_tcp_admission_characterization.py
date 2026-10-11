@@ -93,7 +93,9 @@ def request(port, payload):
             return {"granted": False, "error": "invalid coordinator response"}
         if result.get("granted") is True:
             generation = result.get("generation")
-            if type(generation) is not int or generation < 1:
+            if (payload.get("op") != "grant"
+                    or set(result) != {"granted", "generation"}
+                    or type(generation) is not int or generation < 1):
                 return {"granted": False, "error": "invalid coordinator grant"}
         elif result.get("granted") is False:
             pass
@@ -690,12 +692,15 @@ def test_tcp_untrusted_grant_reply_requires_positive_integer_generation():
                 {"granted": True, "generation": True},
                 {"granted": True, "generation": "7"},
                 {"granted": "true", "generation": 7},
+                {"granted": True, "generation": 7, "error": "unexpected"},
+                {"granted": True, "generation": 7, "released": True},
             ):
                 server.reply = reply
                 received = request(port, {"op": "grant", "owner": "test"})
                 assert received["granted"] is False, (reply, received)
             server.reply = {"granted": True, "generation": 7}
             assert request(port, {"op": "grant", "owner": "test"}) == server.reply
+            assert request(port, {"op": "release", "owner": "test", "generation": 7})["granted"] is False
         finally:
             server.shutdown()
             thread.join(timeout=5)
