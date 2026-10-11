@@ -46,3 +46,34 @@ def test_sg28_local_admission_released_after_exception(monkeypatch):
     # A failed request has fully relinquished its slot.
     with cancellation.request_admission_lease():
         pass
+
+
+def test_sg28_local_admission_released_after_async_task_cancellation(monkeypatch):
+    """Cancellation while holding a lease must free the one local slot."""
+    import asyncio
+
+    monkeypatch.setattr(cancellation, "_ADMISSION", threading.BoundedSemaphore(1))
+
+    async def scenario():
+        entered = asyncio.Event()
+
+        async def reserved():
+            with cancellation.request_admission_lease():
+                entered.set()
+                await asyncio.Event().wait()
+
+        task = asyncio.create_task(reserved())
+        try:
+            await asyncio.wait_for(entered.wait(), timeout=2)
+            with pytest.raises(cancellation.IsolationCapacityExceeded):
+                with cancellation.request_admission_lease():
+                    pytest.fail("Busy slot unexpectedly admitted another request")
+        finally:
+            task.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await asyncio.wait_for(task, timeout=2)
+
+        with cancellation.request_admission_lease():
+            pass
+
+    asyncio.run(scenario())
