@@ -62,3 +62,17 @@ def test_store_rejects_nonfinite_server_clock_without_mutating_lease(tmp_path):
     assert store.acquire("other", now=105) is None
     assert store.release("first", 1)
     assert store.acquire("next", now=105).generation == 2
+
+
+def test_store_rejects_unsafe_ttl_configuration_before_creating_database(tmp_path):
+    """The disposable coordinator must reject nonnumeric, nonfinite and boolean TTLs."""
+    import math
+    import pytest
+
+    for index, ttl in enumerate((True, False, None, "10", math.nan, math.inf,
+                                 -math.inf, 0, -1, 61)):
+        db = tmp_path / f"invalid_ttl_{index}.sqlite"
+        with pytest.raises(ValueError, match="TTL outside test policy"):
+            SQLiteLeaseStore(str(db), ttl=ttl)
+        assert not db.exists()
+    assert SQLiteLeaseStore(str(tmp_path / "valid.sqlite"), ttl=10).ttl == 10
