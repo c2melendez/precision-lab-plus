@@ -183,3 +183,25 @@ def test_stale_owner_release_cannot_revoke_live_successor(tmp_path):
     assert _grant(db, "third", 6, 10) is None
     assert _release(db, "new", second)
     assert _grant(db, "third", 6, 10) == 3
+
+
+def test_same_owner_stale_generation_cannot_release_reacquired_lease(tmp_path):
+    """Owner identity alone must not authorize releasing a later generation."""
+    db = str(tmp_path / "same-owner-fencing.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    old_generation = _grant(db, "worker-a", 0, 5)
+    current_generation = _grant(db, "worker-a", 5, 10)
+    assert (old_generation, current_generation) == (1, 2)
+    assert not _release(db, "worker-a", old_generation)
+    with _connect(db) as con:
+        assert con.execute(
+            "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+        ).fetchone() == ("worker-a", 2, 15)
+    assert _grant(db, "worker-b", 6, 10) is None
+    assert _release(db, "worker-a", current_generation)
+    assert _grant(db, "worker-b", 6, 10) == 3
