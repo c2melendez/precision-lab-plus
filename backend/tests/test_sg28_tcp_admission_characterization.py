@@ -118,3 +118,70 @@ def test_network_admission_fails_closed_during_coordinator_outage_and_recovers(t
         finally:
             replacement.shutdown()
             task.join(timeout=5)
+
+
+def _coordinator_process(db, ready, stop):
+    """Independent spawned coordinator, using only disposable loopback TCP."""
+    with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as server:
+        server.db = db
+        ready.send(server.server_address[1])
+        ready.close()
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            stop.wait(timeout=20)
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
+
+
+def _independent_client(port, owner, barrier):
+    import os
+    barrier.wait(timeout=10)
+    result = request(port, {"op": "grant", "owner": owner, "now": 0, "ttl": 5})
+    return os.getpid(), owner, result
+
+
+def test_spawned_coordinator_and_distinct_clients_enforce_network_k1(tmp_path):
+    """Separate PIDs traverse real TCP and exactly one client receives K=1."""
+    import multiprocessing
+    from concurrent.futures import ProcessPoolExecutor
+
+    db = str(tmp_path / "independent-tcp.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    ctx = multiprocessing.get_context("spawn")
+    with ctx.Manager() as manager:
+        stop = manager.Event()
+        receiver, sender = ctx.Pipe(duplex=False)
+        coordinator = ctx.Process(target=_coordinator_process, args=(db, sender, stop))
+        coordinator.start()
+        sender.close()
+        try:
+            assert receiver.poll(15), "coordinator did not publish its port"
+            port = receiver.recv()
+            receiver.close()
+            barrier = manager.Barrier(2)
+            with ProcessPoolExecutor(max_workers=2, mp_context=ctx) as pool:
+                futures = [
+                    pool.submit(_independent_client, port, owner, barrier)
+                    for owner in ("client-a", "client-b")
+                ]
+                results = [future.result(timeout=20) for future in futures]
+            assert len({pid for pid, _, _ in results}) == 2
+            assert coordinator.pid not in {pid for pid, _, _ in results}
+            winners = [(owner, value["generation"]) for _, owner, value in results if value["granted"]]
+            assert len(winners) == 1
+            assert winners[0][1] == 1
+            assert request(port, {"op": "grant", "owner": "third", "now": 1, "ttl": 5})["granted"] is False
+        finally:
+            stop.set()
+            coordinator.join(timeout=10)
+            if coordinator.is_alive():
+                coordinator.terminate()
+                coordinator.join(timeout=5)
+            assert coordinator.exitcode == 0
