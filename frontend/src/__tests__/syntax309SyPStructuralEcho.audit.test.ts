@@ -35,4 +35,15 @@ describe("Syntax309 SY-P — Plus frontend conversion structural witnesses", () 
     expect(out).toContain("x");
     expect(out).toMatch(/\^|\*\*/);
   });
+
+  it("SY-P-24: concatenated xy preserves two operand letters", () => {
+    const out = convert("SY-P-24").toLowerCase();
+    expect(out).toMatch(/x\s*\*?\s*y/);
+    expect(out).not.toMatch(/\bxy\s*\(/);
+  });
+  it("SY-P-25: concatenated xyz preserves all operand letters in order", () => {
+    const out = convert("SY-P-25").toLowerCase();
+    expect(out).toMatch(/x\s*\*?\s*y\s*\*?\s*z/);
+    expect(out).not.toMatch(/\bxyz\s*\(/);
+  });
 });
