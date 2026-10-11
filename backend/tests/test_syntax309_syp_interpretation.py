@@ -124,3 +124,21 @@ def test_syp_32_undefined_single_letter_function_is_not_invented():
     body = response.json()
     assert body["success"] is True, body
     assert body["result_approx"] == pytest.approx(8.0)
+
+
+@pytest.mark.parametrize(
+    "expression,expected",
+    [("(a/b)*c", 8.0), ("a/(b*c)", 2.0)],
+)
+def test_syp_23_explicit_grouping_distinguishes_two_readings(expression, expected):
+    """Explicit parenthesization is unambiguous; bare a/bc remains unsettled."""
+    assert ROWS["SY-P-23"]["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": expression,
+            "substitutions": {"a": "12", "b": "3", "c": "2"},
+        })
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] == pytest.approx(expected)
