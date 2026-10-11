@@ -1749,3 +1749,8 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 ## 2026-10-10 — Atomic SQLite exact-expiry successor race GREEN: 661 backend
 - Plus technical SHA `894087ed7a8dd6b603cb9f4e9c34c7e27243442b`, cumulative run `38099409315`: backend **661 passed / 1 warning / 85.77% coverage**, `test_storage_gate_concurrent_expiry_has_single_successor` explicitly PASSED; frontend **751 passed / 28 TODO**. H1d `38099409317`: **5 passed**.
 - SQLite test-only same-host transactional state, NOT distributed coordinator/multi-host certification. H2 OPEN; production isolation OFF.
+
+
+## 2026-10-10 — Stale-owner delayed release fencing test published; CI PENDING
+- Plus technical commit `dd968bca8981d4c9ef124c4342bf97dfdd1c7a19` adds `test_stale_owner_release_cannot_revoke_live_successor` to test-only SQLite storage characterization. Verifies obsolete owner cannot invalidate active successor and next generation increments after legitimate release.
+- Cumulative `38100438228` and H1d `38100438231` observed QUEUED; no new PASS claimed. Last certified Plus backend 661 PASS / frontend 751 PASS. SQLite fixture is not a production distributed coordinator. H2 OPEN; production SG28 isolation OFF.
