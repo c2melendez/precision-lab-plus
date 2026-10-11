@@ -65,7 +65,10 @@ class SqliteLeaseReference:
                 raise
 
     def release(self, lease: SharedLease) -> bool:
-        if not isinstance(lease, SharedLease):
+        if (not isinstance(lease, SharedLease) or not isinstance(lease.owner, str)
+                or not lease.owner or type(lease.generation) is not int
+                or lease.generation < 1 or type(lease.deadline) not in (int, float)
+                or not math.isfinite(lease.deadline) or lease.deadline <= 0):
             raise ValueError("invalid lease")
         with closing(self._connect()) as conn:
             conn.execute("BEGIN IMMEDIATE")
