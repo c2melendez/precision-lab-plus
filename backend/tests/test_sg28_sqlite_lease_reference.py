@@ -79,3 +79,28 @@ def test_sqlite_rejects_invalid_database_paths():
     for value in (None, "", 42, True):
         with pytest.raises(ValueError):
             SqliteLeaseReference(value, lambda: 1.0)
+
+
+def test_sqlite_connections_closed_on_success_rejection_and_error(tmp_path, monkeypatch):
+    import pytest
+    import sqlite3
+    from app.services.sg28_sqlite_lease_reference import SqliteLeaseReference
+
+    class TrackedConnection(sqlite3.Connection):
+        def close(self):
+            closed.append(self)
+            return super().close()
+
+    closed = []
+    store = SqliteLeaseReference(tmp_path / "tracked.sqlite", lambda: 10.0)
+    def tracked_connect():
+        return sqlite3.connect(store.db_path, timeout=2, isolation_level=None, factory=TrackedConnection)
+    monkeypatch.setattr(store, "_connect", tracked_connect)
+    lease = store.acquire("a", 2)
+    assert store.acquire("b", 2) is None
+    assert store.release(lease) is True
+    assert store.release(lease) is False
+    store.clock = lambda: float("nan")
+    with pytest.raises(RuntimeError):
+        store.acquire("c", 2)
+    assert len(closed) == 5
