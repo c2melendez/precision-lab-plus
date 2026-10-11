@@ -43,7 +43,7 @@ def _release(db, owner, generation):
     try:
         con.execute("BEGIN IMMEDIATE")
         affected = con.execute(
-            "DELETE FROM active_lease WHERE id=1 AND owner=? AND generation=?",
+            "UPDATE active_lease SET deadline=-1 WHERE id=1 AND owner=? AND generation=? AND deadline>=0",
             (owner, generation),
         ).rowcount
         con.execute("COMMIT")
@@ -75,7 +75,7 @@ def test_atomic_storage_gate_denies_racing_k1_claims(tmp_path):
     assert generation == 1
     assert not _release(db, "other", generation)
     assert _release(db, owner, generation)
-    assert _grant(db, "next", 1, 10) == 1
+    assert _grant(db, "next", 1, 10) == 2
 
 
 def test_storage_gate_expiry_fences_stale_release(tmp_path):
