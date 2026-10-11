@@ -61,6 +61,9 @@ class AdmissionHandler(socketserver.StreamRequestHandler):
         if data["op"] == "grant":
             generation = _grant(self.server.db, data["owner"], data["now"], data["ttl"])
             response = {"granted": generation is not None, "generation": generation}
+        elif data["op"] == "release_disconnect":
+            _release(self.server.db, data["owner"], data["generation"])
+            return
         elif data["op"] == "release":
             response = {"released": _release(self.server.db, data["owner"], data["generation"])}
         else:
@@ -342,6 +345,44 @@ def test_tcp_lost_release_ack_does_not_revoke_successor(tmp_path):
                 "granted": True, "generation": 2
             }
             # Model a client resending release because its previous reply was lost.
+            assert request(port, {"op": "release", "owner": "first", "generation": 1}) == {
+                "released": False
+            }
+            assert request(port, {"op": "grant", "owner": "third", "now": 2, "ttl": 5})["granted"] is False
+            with _connect(db) as con:
+                assert con.execute(
+                    "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+                ).fetchone() == ("second", 2, 6)
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
+
+
+def test_tcp_lost_release_ack_retry_remains_fenced(tmp_path):
+    """Commit release but drop reply; duplicate retry cannot evict successor."""
+    db = str(tmp_path / "lost-release-ack.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as server:
+        server.db = db
+        port = server.server_address[1]
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            assert request(port, {"op": "grant", "owner": "first", "now": 0, "ttl": 5}) == {
+                "granted": True, "generation": 1
+            }
+            uncertain = request(port, {
+                "op": "release_disconnect", "owner": "first", "generation": 1
+            })
+            assert uncertain["granted"] is False
+            assert request(port, {"op": "grant", "owner": "second", "now": 1, "ttl": 5}) == {
+                "granted": True, "generation": 2
+            }
             assert request(port, {"op": "release", "owner": "first", "generation": 1}) == {
                 "released": False
             }
