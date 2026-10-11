@@ -38,7 +38,8 @@ class SQLiteLeaseStore:
     def acquire(self, owner: str, *, now: float) -> LeaseRecord | None:
         """Now must come from the trusted coordinator clock, not a remote client."""
         if (type(owner) is not str or not owner or type(now) not in (int, float)
-                or not math.isfinite(now) or not math.isfinite(now + self.ttl)):
+                or not math.isfinite(now) or not math.isfinite(now + self.ttl)
+                or now + self.ttl <= now):
             raise ValueError("Invalid trusted lease parameters")
         with self._connect() as con:
             con.execute("BEGIN IMMEDIATE")
