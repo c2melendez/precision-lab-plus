@@ -518,3 +518,59 @@ def test_tcp_coordinator_restart_preserves_fence_after_lost_grant_ack(tmp_path):
         finally:
             recovered.shutdown()
             worker.join(timeout=5)
+
+
+def test_tcp_restart_after_lost_grant_ack_keeps_k1_for_competing_clients(tmp_path):
+    """At lease expiry after lost ACK + restart, only one TCP client wins."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    db = str(tmp_path / "lost-grant-race.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as first:
+        first.db = db
+        port = first.server_address[1]
+        worker = threading.Thread(target=first.serve_forever, daemon=True)
+        worker.start()
+        try:
+            assert request(port, {
+                "op": "grant_disconnect", "owner": "original", "now": 0, "ttl": 5
+            })["granted"] is False
+        finally:
+            first.shutdown()
+            worker.join(timeout=5)
+
+    with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as recovered:
+        recovered.db = db
+        port = recovered.server_address[1]
+        worker = threading.Thread(target=recovered.serve_forever, daemon=True)
+        worker.start()
+        try:
+            gate = threading.Barrier(2)
+
+            def contend(owner):
+                gate.wait(timeout=5)
+                return owner, request(port, {
+                    "op": "grant", "owner": owner, "now": 5, "ttl": 5
+                })
+
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                futures = [pool.submit(contend, owner) for owner in ("a", "b")]
+                results = [future.result(timeout=10) for future in futures]
+            winners = [(owner, result) for owner, result in results if result["granted"]]
+            assert len(winners) == 1
+            assert winners[0][1] == {"granted": True, "generation": 2}
+            assert request(port, {
+                "op": "release", "owner": "original", "generation": 1
+            }) == {"released": False}
+            with _connect(db) as con:
+                assert con.execute(
+                    "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+                ).fetchone() == (winners[0][0], 2, 10)
+        finally:
+            recovered.shutdown()
+            worker.join(timeout=5)
