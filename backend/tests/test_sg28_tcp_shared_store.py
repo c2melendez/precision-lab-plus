@@ -61,6 +61,8 @@ def test_tcp_store_accepts_valid_lease_and_release():
     (None, SharedAdmissionUnavailable),
     ({"granted": True, "owner": "wrong", "generation": 1, "deadline": 5}, SharedAdmissionUnavailable),
     ({"granted": True, "owner": "a", "generation": 0, "deadline": 5}, SharedAdmissionUnavailable),
+    ({"granted": True, "owner": "a", "generation": 1, "deadline": True}, SharedAdmissionUnavailable),
+    ({"granted": True, "owner": "a", "generation": 1, "deadline": False}, SharedAdmissionUnavailable),
     ({"granted": False}, SharedAdmissionRejected),
     ({"error": "offline", "granted": False}, SharedAdmissionUnavailable),
     ({"unexpected": 1}, SharedAdmissionUnavailable),
