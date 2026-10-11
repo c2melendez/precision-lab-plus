@@ -115,3 +115,20 @@ def test_tcp_store_rejects_unterminated_or_oversized_ack(raw_reply):
         server.shutdown()
         server.server_close()
         thread.join(timeout=3)
+
+
+@pytest.mark.parametrize("ack", [
+    {"released": True, "error": "coordinator failure"},
+    {"released": False, "error": None},
+])
+def test_tcp_store_rejects_contradictory_release_ack(ack):
+    server, thread = serve(lambda _: ack)
+    try:
+        client = SharedAdmissionClient(TcpSharedLeaseStore("127.0.0.1", server.server_address[1]))
+        from app.services.shared_admission_contract import SharedLease
+        with pytest.raises(SharedAdmissionUnavailable):
+            client.release(SharedLease("a", 1, 5))
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=3)
