@@ -69,3 +69,47 @@ def test_tcp_client_against_persistent_loopback_sqlite_coordinator(tmp_path):
         server.shutdown()
         server.server_close()
         thread.join(timeout=3)
+
+
+def test_network_outage_fails_closed_and_restart_preserves_lease(tmp_path):
+    """Loopback fault simulation only, NOT distributed DIST-03/DIST-04 proof."""
+    import pytest
+    from app.services.shared_admission_contract import (
+        SharedAdmissionRejected, SharedAdmissionUnavailable,
+    )
+
+    now = [20.0]
+    db_path = tmp_path / "outage.sqlite"
+    first_server = _Server(("127.0.0.1", 0), _Handler)
+    first_server.lease_store = SqliteLeaseReference(db_path, lambda: now[0])
+    port = first_server.server_address[1]
+    thread = threading.Thread(target=first_server.serve_forever, daemon=True)
+    thread.start()
+    client_a = SharedAdmissionClient(TcpSharedLeaseStore("127.0.0.1", port))
+    client_b = SharedAdmissionClient(TcpSharedLeaseStore("127.0.0.1", port))
+    try:
+        lease = client_a.acquire("a", 5)
+    finally:
+        first_server.shutdown()
+        first_server.server_close()
+        thread.join(timeout=3)
+
+    with pytest.raises(SharedAdmissionUnavailable):
+        client_b.acquire("b", 5)
+
+    restarted = _Server(("127.0.0.1", port), _Handler)
+    restarted.lease_store = SqliteLeaseReference(db_path, lambda: now[0])
+    second_thread = threading.Thread(target=restarted.serve_forever, daemon=True)
+    second_thread.start()
+    try:
+        with pytest.raises(SharedAdmissionRejected):
+            client_b.acquire("b", 5)
+        now[0] = lease.deadline
+        recovered = client_b.acquire("b", 5)
+        assert recovered.generation == lease.generation + 1
+        assert client_a.release(lease) is False
+        assert client_b.release(recovered) is True
+    finally:
+        restarted.shutdown()
+        restarted.server_close()
+        second_thread.join(timeout=3)
