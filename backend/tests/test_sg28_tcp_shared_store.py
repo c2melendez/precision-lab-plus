@@ -82,10 +82,10 @@ def test_tcp_store_fails_closed_on_missing_or_invalid_ack(reply, expected):
 
 
 @pytest.mark.parametrize("raw_reply", [
-    b'{"granted":false,"granted":true,"owner":"a","generation":1,"deadline":5}\\n',
-    b'{"granted":true,"owner":"a","generation":1,"generation":2,"deadline":5}\\n',
-    b'{"granted":true,"owner":"a","generation":1,"deadline":NaN}\\n',
-    b'{"granted":true,"owner":"a","generation":1,"deadline":Infinity}\\n',
+    b'{"granted":false,"granted":true,"owner":"a","generation":1,"deadline":5}\n',
+    b'{"granted":true,"owner":"a","generation":1,"generation":2,"deadline":5}\n',
+    b'{"granted":true,"owner":"a","generation":1,"deadline":NaN}\n',
+    b'{"granted":true,"owner":"a","generation":1,"deadline":Infinity}\n',
 ])
 def test_tcp_store_rejects_ambiguous_or_nonfinite_raw_ack(raw_reply):
     server, thread = serve(lambda _: raw_reply)
