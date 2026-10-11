@@ -71,6 +71,8 @@ def test_shared_boundary_fails_closed_during_outage_with_existing_lease():
     SharedLease("a", 1, float("nan")),
     SharedLease("a", 1, float("inf")),
     SharedLease("a", 1, float("-inf")),
+    SharedLease("a", 1, 0),
+    SharedLease("a", 1, -1),
 ])
 def test_shared_boundary_rejects_invalid_lease_as_unavailable(reply):
     class BadStore:
@@ -121,6 +123,8 @@ def test_shared_boundary_rejects_invalid_owner_before_store_call(owner):
     SharedLease("a", 1, float("nan")),
     SharedLease("a", 1, float("inf")),
     SharedLease("a", 1, float("-inf")),
+    SharedLease("a", 1, 0),
+    SharedLease("a", 1, -1),
 ])
 def test_shared_boundary_invalid_release_lease_never_contacts_store(lease):
     class MustNotCall:
