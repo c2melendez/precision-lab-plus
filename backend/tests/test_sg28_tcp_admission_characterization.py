@@ -98,11 +98,14 @@ def request(port, payload):
                     or type(generation) is not int or generation < 1):
                 return {"granted": False, "error": "invalid coordinator grant"}
         elif result.get("granted") is False:
-            pass
+            if payload.get("op") not in ("grant", "grant_disconnect"):
+                return {"granted": False, "error": "unexpected coordinator response"}
         elif type(result.get("released")) is bool:
-            pass
+            if payload.get("op") not in ("release", "release_disconnect") or set(result) != {"released"}:
+                return {"granted": False, "error": "unexpected coordinator response"}
         elif isinstance(result.get("error"), str):
-            pass
+            if set(result) != {"error"}:
+                return {"granted": False, "error": "unexpected coordinator response"}
         else:
             return {"granted": False, "error": "invalid coordinator response"}
         return result
@@ -700,6 +703,11 @@ def test_tcp_untrusted_grant_reply_requires_positive_integer_generation():
                 assert received["granted"] is False, (reply, received)
             server.reply = {"granted": True, "generation": 7}
             assert request(port, {"op": "grant", "owner": "test"}) == server.reply
+            assert request(port, {"op": "release", "owner": "test", "generation": 7})["granted"] is False
+            server.reply = {"released": True}
+            assert request(port, {"op": "grant", "owner": "test"})["granted"] is False
+            assert request(port, {"op": "release", "owner": "test", "generation": 7}) == {"released": True}
+            server.reply = {"released": True, "granted": True, "generation": 7}
             assert request(port, {"op": "release", "owner": "test", "generation": 7})["granted"] is False
         finally:
             server.shutdown()
