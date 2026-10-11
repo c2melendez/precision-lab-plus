@@ -75,3 +75,15 @@ def test_expired_lease_cannot_release_new_owner_slot_at_boundary():
     assert new is not None and new.generation > old.generation
     assert coordinator.release(old) is False
     assert coordinator.acquire("third", 1) is None
+
+
+def test_deadline_overflow_fails_closed_without_consuming_generation():
+    import pytest
+    now = [1.7976931348623157e308]
+    coordinator = ExperimentalLeaseCoordinator(lambda: now[0])
+    with pytest.raises(RuntimeError, match="overflow"):
+        coordinator.acquire("a", 10)
+    now[0] = 5.0
+    lease = coordinator.acquire("b", 2)
+    assert lease.generation == 1
+    assert lease.deadline == 7.0
