@@ -108,3 +108,24 @@ def test_shared_boundary_rejects_invalid_owner_before_store_call(owner):
 
     with pytest.raises(ValueError):
         SharedAdmissionClient(MustNotCall()).acquire(owner, 5)
+
+
+@pytest.mark.parametrize("lease", [
+    None,
+    {"owner": "a", "generation": 1, "deadline": 5},
+    SharedLease("", 1, 5),
+    SharedLease("a", 0, 5),
+    SharedLease("a", True, 5),
+    SharedLease("a", 1.5, 5),
+    SharedLease("a", 1, True),
+    SharedLease("a", 1, float("nan")),
+    SharedLease("a", 1, float("inf")),
+    SharedLease("a", 1, float("-inf")),
+])
+def test_shared_boundary_invalid_release_lease_never_contacts_store(lease):
+    class MustNotCall:
+        def release(self, lease):
+            pytest.fail("invalid lease must not contact coordinator")
+
+    with pytest.raises(SharedAdmissionUnavailable):
+        SharedAdmissionClient(MustNotCall()).release(lease)
