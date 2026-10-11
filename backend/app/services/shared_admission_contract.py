@@ -55,9 +55,7 @@ class SharedAdmissionClient:
             or type(lease.generation) is not int
             or lease.generation < 1
             or type(lease.deadline) not in (int, float)
-            or lease.deadline != lease.deadline
-            or lease.deadline == float("inf")
-            or lease.deadline == float("-inf")
+            or not 0 < lease.deadline < float("inf")
         ):
             raise SharedAdmissionUnavailable("invalid shared lease response")
         return lease
@@ -70,7 +68,7 @@ class SharedAdmissionClient:
             or type(lease.generation) is not int
             or lease.generation < 1
             or type(lease.deadline) not in (int, float)
-            or not float("-inf") < lease.deadline < float("inf")
+            or not 0 < lease.deadline < float("inf")
         ):
             raise SharedAdmissionUnavailable("invalid shared lease release request")
         try:
