@@ -59,4 +59,6 @@ class TcpSharedLeaseStore:
         response = self._exchange({"op": "release", "owner": lease.owner, "generation": lease.generation})
         if type(response.get("released")) is not bool:
             raise ValueError("unconfirmed lease release")
+        if "error" in response:
+            raise ValueError("contradictory coordinator release acknowledgement")
         return response["released"]
