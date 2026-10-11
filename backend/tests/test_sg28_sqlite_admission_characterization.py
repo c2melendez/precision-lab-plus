@@ -161,3 +161,25 @@ def test_storage_gate_concurrent_expiry_has_single_successor(tmp_path):
             "SELECT owner, generation FROM active_lease WHERE id=1"
         ).fetchone()
     assert stored == winners[0]
+
+
+def test_stale_owner_release_cannot_revoke_live_successor(tmp_path):
+    """Old lease holder's delayed release cannot invalidate a live successor."""
+    db = str(tmp_path / "fenced-release.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    first = _grant(db, "old", 0, 5)
+    second = _grant(db, "new", 5, 10)
+    assert (first, second) == (1, 2)
+    assert not _release(db, "old", first)
+    with _connect(db) as con:
+        assert con.execute(
+            "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+        ).fetchone() == ("new", 2, 15)
+    assert _grant(db, "third", 6, 10) is None
+    assert _release(db, "new", second)
+    assert _grant(db, "third", 6, 10) == 3
