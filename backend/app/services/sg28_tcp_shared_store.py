@@ -51,6 +51,8 @@ class TcpSharedLeaseStore:
             return None
         if response.get("granted") is not True:
             raise ValueError("unconfirmed lease grant")
+        if "error" in response:
+            raise ValueError("contradictory coordinator grant acknowledgement")
         return SharedLease(response.get("owner"), response.get("generation"), response.get("deadline"))
 
     def release(self, lease: SharedLease) -> bool:
