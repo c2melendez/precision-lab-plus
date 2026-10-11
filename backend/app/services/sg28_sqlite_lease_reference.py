@@ -52,6 +52,8 @@ class SqliteLeaseReference:
                 deadline = now + ttl
                 if not math.isfinite(deadline) or deadline <= now:
                     raise RuntimeError("invalid lease deadline")
+                if type(row[1]) is not int or row[1] < 0 or row[1] >= 9223372036854775807:
+                    raise RuntimeError("lease generation exhausted or corrupt")
                 generation = row[1] + 1
                 conn.execute(
                     "UPDATE lease_state SET owner=?,generation=?,deadline=? WHERE slot=1",
