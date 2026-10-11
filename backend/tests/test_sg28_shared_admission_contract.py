@@ -66,6 +66,8 @@ def test_shared_boundary_fails_closed_during_outage_with_existing_lease():
     {"owner": "a", "generation": 1, "deadline": 5},
     SharedLease("wrong-owner", 1, 5),
     SharedLease("a", 0, 5),
+    SharedLease("a", True, 5),
+    SharedLease("a", 1.5, 5),
     SharedLease("a", 1, float("nan")),
     SharedLease("a", 1, float("inf")),
     SharedLease("a", 1, float("-inf")),
