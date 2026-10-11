@@ -71,7 +71,6 @@ def test_syp_concatenated_variables_via_http(case_id, expression, substitutions,
         ("SY-P-18", "8/2(2+2)", None, 16.0),
         ("SY-P-19", "6/2(1+2)", None, 9.0),
         ("SY-P-21", "1/2x", {"x": "6"}, 3.0),
-        ("SY-P-23", "a/bc", {"a": "12", "b": "3", "c": "2"}, 8.0),
     ],
 )
 def test_syp_ambiguous_implicit_precedence_current_convention(case_id, expression, substitutions, expected):
@@ -83,3 +82,30 @@ def test_syp_ambiguous_implicit_precedence_current_convention(case_id, expressio
     body = response.json()
     assert body["success"] is True, (case_id, body)
     assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
+
+
+@pytest.mark.xfail(strict=True, reason="SY-P-23: bc currently parsed as a named symbol; no declared splitting convention")
+def test_syp_23_separate_b_c_substitutions_pending():
+    """Known product/convention gap: do not certify as PASS."""
+    assert ROWS["SY-P-23"]["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": "a/bc",
+            "substitutions": {"a": "12", "b": "3", "c": "2"},
+        })
+    assert response.status_code == 200
+    assert response.json()["result_approx"] == pytest.approx(8.0)
+
+
+def test_syp_23_existing_named_bc_identifier_convention():
+    """Current behavior: bc denotes a single symbol, so a/bc can be numeric."""
+    assert ROWS["SY-P-23"]["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": "a/bc",
+            "substitutions": {"a": "12", "bc": "6"},
+        })
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] == pytest.approx(2.0)
