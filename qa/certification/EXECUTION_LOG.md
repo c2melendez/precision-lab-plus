@@ -1709,3 +1709,8 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 - The most recent verified CI remains cumulative `38096115207`: backend 651 passed and frontend 751 passed; H1d `38096115318` green. No later technical run was returned at inspection.
 - Plus technical commit `af791596fcd5b2a46e3372d959df76f2786d25ed` adds `backend/tests/test_sg28_coordinator_failure_contract.py`: four test-only checks for connection/timeout/OS failures being rejected as coordinator unavailable, plus denial when an owner already holds a grant. These checks are injected fake-store/model behaviors, NOT a production admission adapter, real coordinator crash, or multi-replica failure evidence.
 - Exact-SHA Actions search returned no run immediately after publication; new CI remains UNVERIFIED. SG28/H2 global OPEN and production isolation OFF.
+
+
+## 2026-10-10 — Coordinator outage fail-closed model VERIFIED (655 backend)
+- Plus technical SHA `af791596fcd5b2a46e3372d959df76f2786d25ed`; cumulative run `38096742454`: backend **655 passed / 1 warning / 85.69% coverage**, including 4 tests in `test_sg28_coordinator_failure_contract.py` explicitly PASSED; frontend **751 passed / 28 TODO**. H1d run `38096742451` **5 passed**.
+- Fail-closed behavior was verified against an injected fake-store/model adapter only, NOT a deployed shared admission coordinator or actual network partition/crash. H2 OPEN, SG28 production opt-in OFF.
