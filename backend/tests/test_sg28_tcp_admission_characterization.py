@@ -142,10 +142,10 @@ def _coordinator_process(db, ready, stop):
             thread.join(timeout=5)
 
 
-def _independent_client(port, owner, barrier):
+def _independent_client(port, owner, barrier, now=0):
     import os
     barrier.wait(timeout=10)
-    result = request(port, {"op": "grant", "owner": owner, "now": 0, "ttl": 5})
+    result = request(port, {"op": "grant", "owner": owner, "now": now, "ttl": 5})
     return os.getpid(), owner, result
 
 
@@ -574,3 +574,62 @@ def test_tcp_restart_after_lost_grant_ack_keeps_k1_for_competing_clients(tmp_pat
         finally:
             recovered.shutdown()
             worker.join(timeout=5)
+
+
+def test_spawned_clients_compete_at_expiry_after_lost_ack_restart(tmp_path):
+    """Distinct client PIDs compete for K=1 after a lost ACK and TCP restart.
+
+    All processes remain on one CI host; this is NOT independent-host proof.
+    """
+    import multiprocessing
+    from concurrent.futures import ProcessPoolExecutor
+
+    db = str(tmp_path / "spawned-lost-ack-restart.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as first:
+        first.db = db
+        port = first.server_address[1]
+        server_thread = threading.Thread(target=first.serve_forever, daemon=True)
+        server_thread.start()
+        try:
+            assert request(port, {
+                "op": "grant_disconnect", "owner": "original", "now": 0, "ttl": 5
+            })["granted"] is False
+        finally:
+            first.shutdown()
+            server_thread.join(timeout=5)
+
+    ctx = multiprocessing.get_context("spawn")
+    with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as recovered:
+        recovered.db = db
+        port = recovered.server_address[1]
+        server_thread = threading.Thread(target=recovered.serve_forever, daemon=True)
+        server_thread.start()
+        try:
+            with ctx.Manager() as manager:
+                barrier = manager.Barrier(2)
+                with ProcessPoolExecutor(max_workers=2, mp_context=ctx) as pool:
+                    futures = [
+                        pool.submit(_independent_client, port, owner, barrier, 5)
+                        for owner in ("client-a", "client-b")
+                    ]
+                    results = [future.result(timeout=20) for future in futures]
+            assert len({pid for pid, _, _ in results}) == 2
+            winners = [(owner, result) for _, owner, result in results if result["granted"]]
+            assert len(winners) == 1
+            assert winners[0][1] == {"granted": True, "generation": 2}
+            assert request(port, {
+                "op": "release", "owner": "original", "generation": 1
+            }) == {"released": False}
+            with _connect(db) as con:
+                assert con.execute(
+                    "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+                ).fetchone() == (winners[0][0], 2, 10)
+        finally:
+            recovered.shutdown()
+            server_thread.join(timeout=5)
