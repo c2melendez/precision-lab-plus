@@ -77,3 +77,17 @@ def test_sg28_local_admission_released_after_async_task_cancellation(monkeypatch
             pass
 
     asyncio.run(scenario())
+
+
+def test_sg28_local_admission_released_after_nested_exception_group(monkeypatch):
+    """Cleanup must occur even when multiple request phases fail together."""
+    monkeypatch.setattr(cancellation, "_ADMISSION", threading.BoundedSemaphore(1))
+    with pytest.raises(ExceptionGroup) as captured:
+        with cancellation.request_admission_lease():
+            raise ExceptionGroup("phase failures", [
+                ValueError("evaluate failed"),
+                RuntimeError("render failed"),
+            ])
+    assert {type(exc) for exc in captured.value.exceptions} == {ValueError, RuntimeError}
+    with cancellation.request_admission_lease():
+        pass
