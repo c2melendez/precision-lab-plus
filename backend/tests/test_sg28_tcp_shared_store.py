@@ -15,7 +15,9 @@ class Handler(socketserver.StreamRequestHandler):
     def handle(self):
         request = json.loads(self.rfile.readline())
         response = self.server.responder(request)
-        if response is not None:
+        if isinstance(response, bytes):
+            self.wfile.write(response)
+        elif response is not None:
             self.wfile.write((json.dumps(response) + "\n").encode())
 
 
@@ -72,6 +74,24 @@ def test_tcp_store_fails_closed_on_missing_or_invalid_ack(reply, expected):
     try:
         client = SharedAdmissionClient(TcpSharedLeaseStore("127.0.0.1", server.server_address[1]))
         with pytest.raises(expected):
+            client.acquire("a", 5)
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=3)
+
+
+@pytest.mark.parametrize("raw_reply", [
+    b'{"granted":false,"granted":true,"owner":"a","generation":1,"deadline":5}\\n',
+    b'{"granted":true,"owner":"a","generation":1,"generation":2,"deadline":5}\\n',
+    b'{"granted":true,"owner":"a","generation":1,"deadline":NaN}\\n',
+    b'{"granted":true,"owner":"a","generation":1,"deadline":Infinity}\\n',
+])
+def test_tcp_store_rejects_ambiguous_or_nonfinite_raw_ack(raw_reply):
+    server, thread = serve(lambda _: raw_reply)
+    try:
+        client = SharedAdmissionClient(TcpSharedLeaseStore("127.0.0.1", server.server_address[1]))
+        with pytest.raises(SharedAdmissionUnavailable):
             client.acquire("a", 5)
     finally:
         server.shutdown()
