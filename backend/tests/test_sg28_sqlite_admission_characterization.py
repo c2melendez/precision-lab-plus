@@ -126,3 +126,38 @@ def test_atomic_storage_gate_across_distinct_spawned_processes(tmp_path):
     assert winners[0][1] == 1
     with _connect(db) as con:
         assert con.execute("SELECT owner FROM active_lease WHERE id=1").fetchone()[0] == winners[0][0]
+
+
+def test_storage_gate_concurrent_expiry_has_single_successor(tmp_path):
+    """Expired lease has exactly one next-generation owner under contention."""
+    db = str(tmp_path / "expired-sg28.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    assert _grant(db, "old-owner", 0, 5) == 1
+    barrier = threading.Barrier(2)
+
+    def contender(owner):
+        barrier.wait(timeout=5)
+        return owner, _grant(db, owner, 5, 5)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = [
+            f.result(timeout=10)
+            for f in (
+                pool.submit(contender, "successor-a"),
+                pool.submit(contender, "successor-b"),
+            )
+        ]
+    winners = [(owner, generation) for owner, generation in results if generation is not None]
+    assert len(winners) == 1
+    assert winners[0][1] == 2
+    assert not _release(db, "old-owner", 1)
+    with _connect(db) as con:
+        stored = con.execute(
+            "SELECT owner, generation FROM active_lease WHERE id=1"
+        ).fetchone()
+    assert stored == winners[0]
