@@ -104,3 +104,18 @@ def test_sqlite_connections_closed_on_success_rejection_and_error(tmp_path, monk
     with pytest.raises(RuntimeError):
         store.acquire("c", 2)
     assert len(closed) == 5
+
+
+def test_sqlite_release_rejects_boolean_generation_and_deadline_alias(tmp_path):
+    import pytest
+    from app.services.shared_admission_contract import SharedLease
+    path = tmp_path / "type-alias.sqlite"
+    store = SqliteLeaseReference(path, lambda: 0.0)
+    lease = store.acquire("a", 1)
+    assert lease.generation == 1 and lease.deadline == 1.0
+    with pytest.raises(ValueError):
+        store.release(SharedLease("a", True, lease.deadline))
+    with pytest.raises(ValueError):
+        store.release(SharedLease("a", lease.generation, True))
+    assert store.acquire("b", 1) is None
+    assert store.release(lease) is True
