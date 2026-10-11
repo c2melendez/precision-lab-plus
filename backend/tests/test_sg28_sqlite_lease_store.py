@@ -46,3 +46,19 @@ def test_store_restart_retains_active_lease(tmp_path):
     assert restored.acquire("b", now=59) is None
     assert restored.acquire("b", now=60).generation == 2
     assert not original.release("a", 1)
+
+
+def test_store_rejects_nonfinite_server_clock_without_mutating_lease(tmp_path):
+    """Nonfinite/overflow times must not bypass a previously held global slot."""
+    import math
+    import pytest
+
+    store = SQLiteLeaseStore(str(tmp_path / "nonfinite.sqlite"), ttl=10)
+    first = store.acquire("first", now=100)
+    assert first.generation == 1
+    for bad_now in (math.nan, math.inf, -math.inf, 1e308, True):
+        with pytest.raises(ValueError, match="Invalid trusted lease parameters"):
+            store.acquire("other", now=bad_now)
+    assert store.acquire("other", now=105) is None
+    assert store.release("first", 1)
+    assert store.acquire("next", now=105).generation == 2
