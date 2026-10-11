@@ -41,7 +41,7 @@ class SharedAdmissionClient:
         self._store = store
 
     def acquire(self, owner: str, ttl: float) -> SharedLease:
-        if not owner or not (0 < ttl <= 10):
+        if not isinstance(owner, str) or not owner or type(ttl) not in (int, float) or not (0 < ttl <= 10):
             raise ValueError("owner and bounded positive ttl required")
         try:
             lease = self._store.acquire(owner, ttl)
