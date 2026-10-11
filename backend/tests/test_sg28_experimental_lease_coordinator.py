@@ -54,3 +54,24 @@ def test_invalid_clock_fails_without_generating_lease():
         coordinator.acquire("a", 2)
     now[0] = 7.0
     assert coordinator.acquire("a", 2).generation == 1
+
+
+def test_release_reacquire_does_not_reuse_generation_for_same_owner():
+    coordinator = ExperimentalLeaseCoordinator(lambda: 10.0)
+    first = coordinator.acquire("same", 5)
+    assert coordinator.release(first) is True
+    second = coordinator.acquire("same", 5)
+    assert second.generation > first.generation
+    assert coordinator.release(first) is False
+    assert coordinator.acquire("other", 5) is None
+
+
+def test_expired_lease_cannot_release_new_owner_slot_at_boundary():
+    now = [100.0]
+    coordinator = ExperimentalLeaseCoordinator(lambda: now[0])
+    old = coordinator.acquire("first", 1)
+    now[0] = old.deadline
+    new = coordinator.acquire("second", 1)
+    assert new is not None and new.generation > old.generation
+    assert coordinator.release(old) is False
+    assert coordinator.acquire("third", 1) is None
