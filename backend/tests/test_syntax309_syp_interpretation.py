@@ -109,3 +109,18 @@ def test_syp_23_existing_named_bc_identifier_convention():
     body = response.json()
     assert body["success"] is True, body
     assert body["result_approx"] == pytest.approx(2.0)
+
+
+
+def test_syp_32_undefined_single_letter_function_is_not_invented():
+    """SY-P-32: f(x+1) is a product under the permitted single-letter convention."""
+    assert ROWS["SY-P-32"]["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": "f(x+1)",
+            "substitutions": {"f": "2", "x": "3"},
+        })
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] == pytest.approx(8.0)
