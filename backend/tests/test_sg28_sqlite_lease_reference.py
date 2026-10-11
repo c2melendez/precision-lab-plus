@@ -47,3 +47,28 @@ def test_failed_clock_rolls_back_transaction_and_counter(tmp_path):
         store.acquire("bad", 1)
     now[0] = 1.0
     assert store.acquire("good", 1).generation == 1
+
+
+def test_sqlite_release_fencing_survives_restart_after_expiry(tmp_path):
+    path = tmp_path / "lease-restart.sqlite"
+    now = [10.0]
+    first_store = SqliteLeaseReference(path, lambda: now[0])
+    old = first_store.acquire("same-owner", 2)
+    now[0] = 12.0
+    new_store = SqliteLeaseReference(path, lambda: now[0])
+    new = new_store.acquire("same-owner", 2)
+    assert new.generation == old.generation + 1
+    assert first_store.release(old) is False
+    assert SqliteLeaseReference(path, lambda: now[0]).acquire("racer", 2) is None
+    assert new_store.release(new) is True
+
+
+def test_sqlite_generation_persists_after_early_release_and_reopen(tmp_path):
+    path = tmp_path / "lease-release.sqlite"
+    first_store = SqliteLeaseReference(path, lambda: 10.0)
+    first = first_store.acquire("owner", 5)
+    assert first_store.release(first) is True
+    reopened = SqliteLeaseReference(path, lambda: 10.0)
+    second = reopened.acquire("owner", 5)
+    assert second.generation == first.generation + 1
+    assert reopened.release(first) is False
