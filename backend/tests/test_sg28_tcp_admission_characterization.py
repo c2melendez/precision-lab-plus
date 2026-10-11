@@ -278,3 +278,40 @@ def test_lost_grant_acknowledgement_fails_closed_and_preserves_fencing(tmp_path)
         finally:
             server.shutdown()
             thread.join(timeout=5)
+
+
+def test_tcp_duplicate_retry_after_lost_ack_remains_unadmitted(tmp_path):
+    """Retry of a grant whose reply was lost must not bypass active K=1 lease."""
+    db = str(tmp_path / "retry-after-lost-ack.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as server:
+        server.db = db
+        port = server.server_address[1]
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            first = request(port, {
+                "op": "grant_disconnect", "owner": "worker-a", "now": 0, "ttl": 5
+            })
+            assert first["granted"] is False
+            retry = request(port, {
+                "op": "grant", "owner": "worker-a", "now": 1, "ttl": 5
+            })
+            assert retry["granted"] is False
+            assert request(port, {
+                "op": "grant", "owner": "worker-b", "now": 2, "ttl": 5
+            })["granted"] is False
+            assert request(port, {
+                "op": "grant", "owner": "worker-a", "now": 5, "ttl": 5
+            }) == {"granted": True, "generation": 2}
+            assert request(port, {
+                "op": "release", "owner": "worker-a", "generation": 1
+            }) == {"released": False}
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
