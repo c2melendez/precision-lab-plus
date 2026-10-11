@@ -54,6 +54,10 @@ def _release(db, owner, generation):
 class AdmissionHandler(socketserver.StreamRequestHandler):
     def handle(self):
         data = json.loads(self.rfile.readline().decode("utf-8"))
+        if data["op"] == "grant_disconnect":
+            # Commit the grant but intentionally lose the acknowledgement.
+            _grant(self.server.db, data["owner"], data["now"], data["ttl"])
+            return
         if data["op"] == "grant":
             generation = _grant(self.server.db, data["owner"], data["now"], data["ttl"])
             response = {"granted": generation is not None, "generation": generation}
@@ -237,3 +241,40 @@ def test_abrupt_tcp_coordinator_process_death_fails_closed_and_fences_restart(tm
             finally:
                 restored.shutdown()
                 thread.join(timeout=5)
+
+
+def test_lost_grant_acknowledgement_fails_closed_and_preserves_fencing(tmp_path):
+    """A committed grant with dropped TCP reply must never count as client admission."""
+    db = str(tmp_path / "lost-ack.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as server:
+        server.db = db
+        port = server.server_address[1]
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            uncertain = request(port, {
+                "op": "grant_disconnect", "owner": "lost-ack", "now": 0, "ttl": 5
+            })
+            assert uncertain["granted"] is False
+            with _connect(db) as con:
+                assert con.execute(
+                    "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+                ).fetchone() == ("lost-ack", 1, 5)
+            assert request(port, {
+                "op": "grant", "owner": "another", "now": 1, "ttl": 5
+            })["granted"] is False
+            assert request(port, {
+                "op": "grant", "owner": "another", "now": 5, "ttl": 5
+            }) == {"granted": True, "generation": 2}
+            assert request(port, {
+                "op": "release", "owner": "lost-ack", "generation": 1
+            }) == {"released": False}
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
