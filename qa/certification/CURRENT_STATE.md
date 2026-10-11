@@ -2212,3 +2212,9 @@ Plus commits 6d14933, fcf966c, b5d6b6c add isolated concurrency admission (2 def
 
 ## 2026-10-11 — SY-P actual gate
 Plus commit `681d4f2e` corrects fixture loading path in frontend tests. Cumulative run `38181685203` and H1d `38181685192` were in progress at verification; pending final conclusions. Next: inspect these two jobs; if green add per-ID semantic coverage for SY-P-24/25 and ambiguous conventions.
+
+
+## 2026-10-11 — SY-P Plus cumulative green and operand-order extension
+- Plus technical SHA `681d4f2ea078011dd47da0f6bb7173b046f289a4`: cumulative `38181685203` SUCCESS (frontend and backend), H1d `38181685192` SUCCESS. Fixture loading harness is now validated, without changes to product.
+- Next test-only Plus commit `d94adaa7e25836d6e226958b3c06bd3898db7cf1` extends `frontend/src/__tests__/syntax309SyPStructuralEcho.audit.test.ts` with official IDs SY-P-24 (`xy`) and SY-P-25 (`xyz`) operand-order frontend-conversion witnesses. These assert ordered preservation, NOT AST-level disambiguation, evaluation proof or visible UI echo. Commit is awaiting CI evidence; do not mark PASS until matching cumulative run completed.
+- Next exact action: inspect Plus cumulative/H1d for SHA d94adaa7, fix any confirmed failures, strengthen independent AST/semantic probes for SY-P-24/25, then convention cases SY-P-18/19/21/23/32, and maintain Lite/Plus parity. SG28 DIST remains BLOCKED pending authorized independent hosts.
