@@ -91,3 +91,38 @@ def test_storage_gate_expiry_fences_stale_release(tmp_path):
     assert new == old + 1
     assert not _release(db, "a", old)
     assert _grant(db, "c", 6, 5) is None
+
+
+def _spawned_storage_contender(db, barrier, owner):
+    import os
+    barrier.wait(timeout=15)
+    return os.getpid(), owner, _grant(db, owner, 0, 10)
+
+
+def test_atomic_storage_gate_across_distinct_spawned_processes(tmp_path):
+    """Two distinct spawned interpreters share one SQLite file and K=1."""
+    import multiprocessing
+    from concurrent.futures import ProcessPoolExecutor
+
+    db = str(tmp_path / "multiprocess-sg28.sqlite")
+    with _connect(db) as con:
+        con.execute(
+            "CREATE TABLE active_lease(id INTEGER PRIMARY KEY, "
+            "owner TEXT NOT NULL, generation INTEGER NOT NULL, "
+            "deadline REAL NOT NULL)"
+        )
+    ctx = multiprocessing.get_context("spawn")
+    with ctx.Manager() as manager:
+        barrier = manager.Barrier(2)
+        with ProcessPoolExecutor(max_workers=2, mp_context=ctx) as pool:
+            futures = [
+                pool.submit(_spawned_storage_contender, db, barrier, owner)
+                for owner in ("process-a", "process-b")
+            ]
+            results = [future.result(timeout=25) for future in futures]
+    assert len({pid for pid, _, _ in results}) == 2
+    winners = [(owner, generation) for _, owner, generation in results if generation is not None]
+    assert len(winners) == 1
+    assert winners[0][1] == 1
+    with _connect(db) as con:
+        assert con.execute("SELECT owner FROM active_lease WHERE id=1").fetchone()[0] == winners[0][0]
