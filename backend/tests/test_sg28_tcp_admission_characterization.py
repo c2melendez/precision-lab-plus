@@ -86,7 +86,24 @@ def request(port, payload):
                 data = reply.readline()
         if not data:
             return {"granted": False, "error": "coordinator disconnected"}
-        return json.loads(data)
+        result = json.loads(data)
+        # A remote coordinator's reply is untrusted. Never treat an incomplete,
+        # forged, or wrongly typed grant as authorization to start computation.
+        if not isinstance(result, dict):
+            return {"granted": False, "error": "invalid coordinator response"}
+        if result.get("granted") is True:
+            generation = result.get("generation")
+            if type(generation) is not int or generation < 1:
+                return {"granted": False, "error": "invalid coordinator grant"}
+        elif result.get("granted") is False:
+            pass
+        elif type(result.get("released")) is bool:
+            pass
+        elif isinstance(result.get("error"), str):
+            pass
+        else:
+            return {"granted": False, "error": "invalid coordinator response"}
+        return result
     except (OSError, ValueError, json.JSONDecodeError):
         return {"granted": False, "error": "coordinator unavailable"}
 
@@ -652,3 +669,33 @@ def test_spawned_clients_compete_at_expiry_after_lost_ack_restart(tmp_path):
         finally:
             recovered.shutdown()
             server_thread.join(timeout=5)
+
+
+def test_tcp_untrusted_grant_reply_requires_positive_integer_generation():
+    """Test-only client refuses malformed grant responses over actual loopback TCP."""
+    class ReplyHandler(socketserver.StreamRequestHandler):
+        def handle(self):
+            self.rfile.readline()
+            self.wfile.write((json.dumps(self.server.reply) + "\\n").encode("utf-8"))
+
+    with AdmissionServer(("127.0.0.1", 0), ReplyHandler) as server:
+        port = server.server_address[1]
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            for reply in (
+                True, [], "approved", {"granted": True},
+                {"granted": True, "generation": 0},
+                {"granted": True, "generation": -1},
+                {"granted": True, "generation": True},
+                {"granted": True, "generation": "7"},
+                {"granted": "true", "generation": 7},
+            ):
+                server.reply = reply
+                received = request(port, {"op": "grant", "owner": "test"})
+                assert received["granted"] is False, (reply, received)
+            server.reply = {"granted": True, "generation": 7}
+            assert request(port, {"op": "grant", "owner": "test"}) == server.reply
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
