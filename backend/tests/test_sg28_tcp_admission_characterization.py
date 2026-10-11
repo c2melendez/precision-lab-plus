@@ -487,6 +487,12 @@ def test_tcp_coordinator_restart_preserves_fence_after_lost_grant_ack(tmp_path):
             first.shutdown()
             worker.join(timeout=5)
 
+    # The lease persists even though its grant acknowledgement was lost.
+    with _connect(db) as con:
+        assert con.execute(
+            "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+        ).fetchone() == ("worker-a", 1, 5)
+
     with AdmissionServer(("127.0.0.1", 0), AdmissionHandler) as recovered:
         recovered.db = db
         port = recovered.server_address[1]
@@ -505,6 +511,10 @@ def test_tcp_coordinator_restart_preserves_fence_after_lost_grant_ack(tmp_path):
             assert request(port, {
                 "op": "release", "owner": "worker-a", "generation": 1
             }) == {"released": False}
+            with _connect(db) as con:
+                assert con.execute(
+                    "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+                ).fetchone() == ("worker-b", 2, 10)
         finally:
             recovered.shutdown()
             worker.join(timeout=5)
