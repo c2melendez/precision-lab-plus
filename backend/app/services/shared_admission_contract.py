@@ -63,6 +63,16 @@ class SharedAdmissionClient:
         return lease
 
     def release(self, lease: SharedLease) -> bool:
+        if (
+            not isinstance(lease, SharedLease)
+            or not isinstance(lease.owner, str)
+            or not lease.owner
+            or type(lease.generation) is not int
+            or lease.generation < 1
+            or type(lease.deadline) not in (int, float)
+            or not float("-inf") < lease.deadline < float("inf")
+        ):
+            raise SharedAdmissionUnavailable("invalid shared lease release request")
         try:
             result = self._store.release(lease)
         except Exception as exc:
