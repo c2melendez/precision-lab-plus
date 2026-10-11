@@ -72,3 +72,10 @@ def test_sqlite_generation_persists_after_early_release_and_reopen(tmp_path):
     second = reopened.acquire("owner", 5)
     assert second.generation == first.generation + 1
     assert reopened.release(first) is False
+
+
+def test_sqlite_rejects_invalid_database_paths():
+    import pytest
+    for value in (None, "", 42, True):
+        with pytest.raises(ValueError):
+            SqliteLeaseReference(value, lambda: 1.0)
