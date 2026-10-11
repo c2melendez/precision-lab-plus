@@ -611,6 +611,18 @@ def test_spawned_clients_compete_at_expiry_after_lost_ack_restart(tmp_path):
         server_thread = threading.Thread(target=recovered.serve_forever, daemon=True)
         server_thread.start()
         try:
+            # After a lost ACK, even another client process must fail closed
+            # before the original persisted lease expires.
+            with ctx.Pool(processes=1) as isolated:
+                prior = isolated.apply(request, (port, {
+                    "op": "grant", "owner": "early-client", "now": 4, "ttl": 5
+                }))
+            assert prior["granted"] is False
+            with _connect(db) as con:
+                assert con.execute(
+                    "SELECT owner, generation, deadline FROM active_lease WHERE id=1"
+                ).fetchone() == ("original", 1, 5)
+
             with ctx.Manager() as manager:
                 barrier = manager.Barrier(2)
                 with ProcessPoolExecutor(max_workers=2, mp_context=ctx) as pool:
