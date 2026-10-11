@@ -54,7 +54,7 @@ class SharedAdmissionClient:
             or lease.owner != owner
             or type(lease.generation) is not int
             or lease.generation < 1
-            or not isinstance(lease.deadline, (int, float))
+            or type(lease.deadline) not in (int, float)
             or lease.deadline != lease.deadline
             or lease.deadline == float("inf")
             or lease.deadline == float("-inf")
