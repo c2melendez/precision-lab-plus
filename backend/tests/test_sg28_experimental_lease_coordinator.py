@@ -87,3 +87,27 @@ def test_unrepresentable_deadline_fails_closed_without_consuming_generation():
     lease = coordinator.acquire("b", 2)
     assert lease.generation == 1
     assert lease.deadline == 7.0
+
+
+def test_expired_generation_remains_fenced_across_multiple_replacements():
+    now = [10.0]
+    coordinator = ExperimentalLeaseCoordinator(lambda: now[0])
+    old = coordinator.acquire("a", 1)
+    for i in range(1, 8):
+        now[0] += 1
+        successor = coordinator.acquire(f"worker-{i}", 1)
+        assert successor.generation == i + 1
+        assert coordinator.release(old) is False
+        assert coordinator.acquire("intruder", 1) is None
+        old = successor
+
+
+def test_failed_release_does_not_mutate_owner_or_generation():
+    coordinator = ExperimentalLeaseCoordinator(lambda: 20.0)
+    first = coordinator.acquire("a", 3)
+    from app.services.shared_admission_contract import SharedLease
+    assert coordinator.release(SharedLease("b", first.generation, first.deadline)) is False
+    assert coordinator.release(SharedLease("a", first.generation + 1, first.deadline)) is False
+    assert coordinator.acquire("b", 3) is None
+    assert coordinator.release(first) is True
+    assert coordinator.acquire("b", 3).generation == first.generation + 1
