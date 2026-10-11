@@ -1744,3 +1744,8 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 ## 2026-10-10 — Transactional shared lease exact-expiry successor race PENDING CI
 - Plus technical SHA `894087ed7a8dd6b603cb9f4e9c34c7e27243442b` adds `test_storage_gate_concurrent_expiry_has_single_successor` to CI-only SQLite characterization: concurrent contenders at exact TTL boundary, one winner at generation 2, stale release rejected. Not yet verified.
 - Auto-triggered cumulative `38099409315` and H1d `38099409317` observed QUEUED. Prior certified baseline 660 backend / 751 frontend and H1d 5. This is single-host SQLite test fixture, NOT multi-host coordination. SG28/H2 OPEN, production isolation OFF.
+
+
+## 2026-10-10 — Atomic SQLite exact-expiry successor race GREEN: 661 backend
+- Plus technical SHA `894087ed7a8dd6b603cb9f4e9c34c7e27243442b`, cumulative run `38099409315`: backend **661 passed / 1 warning / 85.77% coverage**, `test_storage_gate_concurrent_expiry_has_single_successor` explicitly PASSED; frontend **751 passed / 28 TODO**. H1d `38099409317`: **5 passed**.
+- SQLite test-only same-host transactional state, NOT distributed coordinator/multi-host certification. H2 OPEN; production isolation OFF.
