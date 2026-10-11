@@ -32,3 +32,17 @@ def test_sg28_distinct_local_pools_can_each_admit_one():
         second.release()
     # Independent pools are not a global budget. This test does NOT launch
     # multiple interpreters, exercise HTTP, or validate deployment topology.
+
+
+def test_sg28_local_admission_released_after_exception(monkeypatch):
+    """An exception inside a reserved request must not permanently exhaust its slot."""
+    monkeypatch.setattr(cancellation, "_ADMISSION", threading.BoundedSemaphore(1))
+    with pytest.raises(RuntimeError, match="synthetic request failure"):
+        with cancellation.request_admission_lease():
+            with pytest.raises(cancellation.IsolationCapacityExceeded):
+                with cancellation.request_admission_lease():
+                    pytest.fail("A second request must not acquire the occupied slot")
+            raise RuntimeError("synthetic request failure")
+    # A failed request has fully relinquished its slot.
+    with cancellation.request_admission_lease():
+        pass
