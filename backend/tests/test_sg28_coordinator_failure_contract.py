@@ -52,3 +52,29 @@ def test_contender_denied_when_coordinator_tracks_active_owner():
     assert adapter.try_admit("worker-a")
     assert not adapter.try_admit("worker-b")
     assert store.owner == "worker-a"
+
+
+def test_coordinator_recovers_without_granting_during_outage():
+    """A transient fake coordinator outage must not silently admit requests."""
+    store = FakeStore(ConnectionError("temporarily unavailable"))
+    adapter = AdmissionAdapter(store)
+    with pytest.raises(CoordinationUnavailable):
+        adapter.try_admit("worker-a")
+    assert store.owner is None
+
+    store.failure = None
+    assert adapter.try_admit("worker-b")
+    assert not adapter.try_admit("worker-c")
+    assert store.owner == "worker-b"
+
+
+def test_coordinator_outage_does_not_erase_preexisting_owner():
+    store = FakeStore()
+    adapter = AdmissionAdapter(store)
+    assert adapter.try_admit("worker-a")
+    store.failure = TimeoutError("temporary outage")
+    with pytest.raises(CoordinationUnavailable):
+        adapter.try_admit("worker-b")
+    assert store.owner == "worker-a"
+    store.failure = None
+    assert not adapter.try_admit("worker-b")
