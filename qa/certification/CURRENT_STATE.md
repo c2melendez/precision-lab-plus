@@ -2208,3 +2208,7 @@ Plus commits 6d14933, fcf966c, b5d6b6c add isolated concurrency admission (2 def
 - Plus commit 4d621827: cumulative 38181398861 frontend Typecheck FAILED, TS2345: `URL` not assignable to `string` in `readFileSync` for SY-P official JSONL fixture; backend was still in progress at observation. Classification HARNESS/TYPES, not math engine.
 - Plus follow-up technical commit 82ef3b571ceaa7c680d2d9d1e8c518e64da702f7 adds `fileURLToPath(new URL(...))` in `frontend/src/__tests__/syntax309SyPStructuralEcho.audit.test.ts`; no oracle relaxation or product changes. CI auto-triggered on same SHA: cumulative https://github.com/c2melendez/precision-lab-plus/actions/runs/38181436873 and H1d https://github.com/c2melendez/precision-lab-plus/actions/runs/38181436874, both QUEUED at last check.
 - Siguiente paso exacto: verificar Typecheck y tests del gate 38181436873 y H1d 38181436874; si hay errores, clasificarlos y corregirlos; tras PASS, ampliar por ID los oráculos SY-P-24/25 y conventions SY-P-18/19/21/23/32. No declarar SY-P certificado todavía.
+
+
+## 2026-10-11 — SY-P actual gate
+Plus commit `681d4f2e` corrects fixture loading path in frontend tests. Cumulative run `38181685203` and H1d `38181685192` were in progress at verification; pending final conclusions. Next: inspect these two jobs; if green add per-ID semantic coverage for SY-P-24/25 and ambiguous conventions.
