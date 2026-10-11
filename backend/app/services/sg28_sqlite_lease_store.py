@@ -5,6 +5,7 @@ SQLite transactions serialize grants within a shared filesystem/CI host.
 """
 from __future__ import annotations
 
+import math
 import sqlite3
 from dataclasses import dataclass
 
@@ -36,7 +37,8 @@ class SQLiteLeaseStore:
 
     def acquire(self, owner: str, *, now: float) -> LeaseRecord | None:
         """Now must come from the trusted coordinator clock, not a remote client."""
-        if type(owner) is not str or not owner or type(now) not in (int, float):
+        if (type(owner) is not str or not owner or type(now) not in (int, float)
+                or not math.isfinite(now) or not math.isfinite(now + self.ttl)):
             raise ValueError("Invalid trusted lease parameters")
         with self._connect() as con:
             con.execute("BEGIN IMMEDIATE")
