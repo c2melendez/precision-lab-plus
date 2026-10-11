@@ -1751,3 +1751,8 @@ Plus commits 6d14933, fcf966c, b5d6b6c add isolated concurrency admission (2 def
 - New strictly unused/experimental adapter defines shared lease protocol, validates owner/generation/deadline, rejects unavailable/invalid grants and uncertain releases, and differentiates contention from coordinator failures. Tests cover refusal under contention, outage fail-closed with retained lease, stale release, invalid acknowledgements and bounds. **Not wired to public evaluate route; no actual network coordinator implemented.**
 - CI is PENDING for final technical SHA `c0c4fa1e58fecafec1deeebd6411d15541561399`. Earlier 679-backend green run `38116952183` does not verify this change.
 - DIST-01..08 remain **BLOCKED**, requiring explicit disposable independent-host infrastructure, coordinator implementation and integration, plus observed fault/partition tests. Production opt-in OFF.
+
+## 2026-10-11 UTC — SG28 shared admission adapter contract CI GREEN
+- Plus technical SHA `c0c4fa1e58fecafec1deeebd6411d15541561399`: cumulative run `38117204625` SUCCESS; backend job `114404363647` **691 PASS / 1 warning / 85.76% coverage**, explicitly PASS all 12 shared admission contract cases; frontend job `114404363484` **751 PASS / 28 TODO**, 69 files. H1d run `38117204618`, job `114404363602` **5 PASS**.
+- Verified new `SharedAdmissionClient` boundary with fake stores only. No actual remote coordinator, no public /evaluate connection. DIST-01..08 remain BLOCKED/NOT CERTIFIED.
+- Next work: implement an isolated real network transport and bounded, fenced shared lease backing for disposable integration, then use authorized independent-host topology for distributed acceptance; maintain production opt-in OFF.
