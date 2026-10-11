@@ -1,0 +1,78 @@
+"""Disposable single-host SQLite lease reference for SG28, NOT a network coordinator.
+
+This exercises transactional persistence and fencing across local process restarts.
+Uses a caller-supplied clock representing ONE coordinator's persistent time base.
+No cross-host clock guarantees, authentication, HTTP integration, or production use.
+"""
+from __future__ import annotations
+
+import math
+import sqlite3
+
+from app.services.shared_admission_contract import SharedLease
+
+
+class SqliteLeaseReference:
+    def __init__(self, db_path: str, clock):
+        self.db_path = str(db_path)
+        self.clock = clock
+        with self._connect() as conn:
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS lease_state ("
+                "slot INTEGER PRIMARY KEY CHECK (slot=1), "
+                "owner TEXT, generation INTEGER NOT NULL, deadline REAL NOT NULL)"
+            )
+            conn.execute(
+                "INSERT OR IGNORE INTO lease_state(slot,owner,generation,deadline) "
+                "VALUES (1,NULL,0,0)"
+            )
+
+    def _connect(self):
+        conn = sqlite3.connect(self.db_path, timeout=2, isolation_level=None)
+        conn.execute("PRAGMA busy_timeout=2000")
+        return conn
+
+    def acquire(self, owner: str, ttl: float) -> SharedLease | None:
+        if not isinstance(owner, str) or not owner or type(ttl) not in (float, int) or not math.isfinite(ttl) or not 0 < ttl <= 10:
+            raise ValueError("invalid lease request")
+        with self._connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                now = self.clock()
+                if type(now) not in (int, float) or not math.isfinite(now):
+                    raise RuntimeError("invalid coordinator clock")
+                row = conn.execute("SELECT owner,generation,deadline FROM lease_state WHERE slot=1").fetchone()
+                if row[0] is not None and now < row[2]:
+                    conn.execute("ROLLBACK")
+                    return None
+                deadline = now + ttl
+                if not math.isfinite(deadline) or deadline <= now:
+                    raise RuntimeError("invalid lease deadline")
+                generation = row[1] + 1
+                conn.execute(
+                    "UPDATE lease_state SET owner=?,generation=?,deadline=? WHERE slot=1",
+                    (owner, generation, deadline),
+                )
+                conn.execute("COMMIT")
+                return SharedLease(owner, generation, deadline)
+            except BaseException:
+                if conn.in_transaction:
+                    conn.execute("ROLLBACK")
+                raise
+
+    def release(self, lease: SharedLease) -> bool:
+        if not isinstance(lease, SharedLease):
+            raise ValueError("invalid lease")
+        with self._connect() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                row = conn.execute("SELECT owner,generation,deadline FROM lease_state WHERE slot=1").fetchone()
+                matched = (row[0], row[1], row[2]) == (lease.owner, lease.generation, lease.deadline)
+                if matched:
+                    conn.execute("UPDATE lease_state SET owner=NULL WHERE slot=1")
+                conn.execute("COMMIT")
+                return matched
+            except BaseException:
+                if conn.in_transaction:
+                    conn.execute("ROLLBACK")
+                raise
