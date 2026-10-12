@@ -412,3 +412,43 @@ test("SY-P-23 UI: paréntesis exteriores permiten bc explícitamente definida", 
   expect(outcome.kind).toBe("result");
   expect(canonical(outcome.value)).toMatch(/^2(?:\.0+)?$/);
 });
+
+
+test("SY-P-23: paréntesis redundantes sin bc definida bloquean envío", async ({ page }) => {
+  await page.goto("./");
+  for (const expression of ["((a/bc))", "(((a/bc)))"]) {
+    await setInput(page, expression);
+    let requests = 0;
+    const track = (req: import("@playwright/test").Request) => {
+      if (req.method() === "POST" && req.url().includes("/evaluate")) requests++;
+    };
+    page.on("request", track);
+    await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+    await expect(page.getByText("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.")).toBeVisible();
+    expect(requests, expression).toBe(0);
+    page.off("request", track);
+  }
+});
+
+test("SY-P-23: paréntesis redundantes conservan bc definida", async ({ page }) => {
+  await page.goto("./");
+  const details = page.locator("details").filter({ hasText: "Sustituciones" });
+  await details.locator("summary").click();
+  for (const [name, value] of [["a", "12"], ["bc", "6"], ["b", "3"], ["c", "2"]] as const) {
+    await page.getByRole("button", { name: "Añadir sustitución" }).click();
+    const index = await page.getByRole("textbox", { name: /^Nombre de la variable/ }).count();
+    await page.getByRole("textbox", { name: "Nombre de la variable " + index }).fill(name);
+    await page.getByRole("textbox", { name: "Valor de la variable " + index }).fill(value);
+  }
+  for (const expression of ["((a/bc))", "(((a/bc)))"]) {
+    await setInput(page, expression);
+    const outgoing = page.waitForRequest(req => req.url().includes("/evaluate") && req.method() === "POST");
+    const pending = submit(page);
+    const payload = (await outgoing).postDataJSON() as { expression: string; substitutions: Record<string, string> };
+    expect(payload.expression, expression).toBe("a/bc");
+    expect(payload.substitutions).toMatchObject({ a: "12", bc: "6", b: "3", c: "2" });
+    const outcome = await pending;
+    expect(outcome.kind).toBe("result");
+    expect(canonical(outcome.value)).toMatch(/^2(?:\.0+)?$/);
+  }
+});
