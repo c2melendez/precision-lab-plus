@@ -519,9 +519,11 @@ export function BasicMode() {
     // SY-P-23: preserve an explicitly defined compound identifier. MathLive SSR
     // otherwise serializes plain a/bc as "a/b c", changing its meaning.
     const namedBc = substitutions.some((row) => row.name.trim() === "bc" && row.value.trim() !== "");
-    const trimmed = namedBc && /^a\s*\/\s*bc$/.test(latex.trim())
-      ? "a/bc"
-      : latexToBackendSyntax(latex);
+    const compoundBcExpression = namedBc && (
+      /^a\s*\/\s*bc$/.test(latex.trim()) ||
+      /^\\frac\s*\{a\}\s*\{bc\}$/.test(latex.trim())
+    );
+    const trimmed = compoundBcExpression ? "a/bc" : latexToBackendSyntax(latex);
     if (!trimmed) {
       setValidationError("La expresión no puede estar vacía.");
       return;
