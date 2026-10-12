@@ -376,3 +376,17 @@ test("SY-P-23 UI: después del bloqueo se puede calcular una agrupación explíc
   expect(result.kind).toBe("result");
   expect(canonical(result.value)).toMatch(/^8(?:\.0+)?$/);
 });
+
+test("SY-P-23 UI: a/bc entre paréntesis también requiere desambiguación", async ({ page }) => {
+  await page.goto("./");
+  await setInput(page, "(a/bc)");
+  let requests = 0;
+  const track = (req: import("@playwright/test").Request) => {
+    if (req.method() === "POST" && req.url().includes("/evaluate")) requests++;
+  };
+  page.on("request", track);
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  await expect(page.getByText("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.")).toBeVisible();
+  expect(requests).toBe(0);
+  page.off("request", track);
+});
