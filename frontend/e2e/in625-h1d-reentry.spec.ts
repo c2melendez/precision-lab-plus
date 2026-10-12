@@ -236,7 +236,17 @@ test("SY-P-23 UI: bc compuesto pendiente de paridad con endpoint", async ({ page
   const warning = page.getByRole("status", { name: "Convención de división ambigua" });
   await setInput(page, "a/bc");
   await expect(warning).toBeVisible();
-  const named = await submit(page);
+  const requestPromise = page.waitForRequest(request => request.url().includes("/evaluate") && request.method() === "POST");
+  const namedPromise = submit(page);
+  const outbound = await requestPromise;
+  const payload = outbound.postDataJSON() as { expression?: string; substitutions?: Record<string, string> };
+  console.log("SY_P_23_OUTBOUND", JSON.stringify({
+    mathliveValue: await page.locator("math-field").first().evaluate(el => (el as HTMLElement & { value?: string }).value ?? ""),
+    expression: payload.expression,
+    substitutions: payload.substitutions,
+  }));
+  expect(payload.substitutions, "UI must transmit both bc and separate b,c").toMatchObject({a: "12", bc: "6", b: "3", c: "2"});
+  const named = await namedPromise;
   expect(named.kind).toBe("result");
   expect(canonical(named.value)).toMatch(/^2(?:\\.0+)?$/);
 });
