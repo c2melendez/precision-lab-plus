@@ -682,10 +682,10 @@ test("SY-P-23 Plus: fracciones LaTeX numéricas compuestas conservan evaluación
   await page.goto("./");
   const warning = page.getByRole("status", { name: "Convención de división ambigua" });
   for (const [expression, expected] of [
-    [String.raw`1+\\frac{12}{3*2}`, 3],
-    [String.raw`2*(\\frac{12}{3})`, 8],
-    [String.raw`\\frac{12}{3*2}+3`, 5],
-    [String.raw`(\\frac{12}{3})*2+1`, 9],
+    [String.raw`1+\frac{12}{3*2}`, 3],
+    [String.raw`2*(\frac{12}{3})`, 8],
+    [String.raw`\frac{12}{3*2}+3`, 5],
+    [String.raw`(\frac{12}{3})*2+1`, 9],
   ] as const) {
     await setInput(page, expression);
     await expect(warning, expression).toHaveCount(0);
