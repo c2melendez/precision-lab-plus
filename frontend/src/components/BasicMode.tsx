@@ -539,7 +539,8 @@ export function BasicMode() {
     const namedBc = substitutions.some((row) => row.name.trim() === "bc" && row.value.trim() !== "");
     const compoundBcExpression = namedBc && isBareCompoundBc;
     // Ambiguous input without a defined bc requires explicit grouping.
-    const ambiguousBcOccurrence = /(?:^|[^a-zA-Z])a\s*\/\s*bc(?=$|[^a-zA-Z])|\\\\frac\s*\{a\}\s*\{bc\}/.test(latex);\n    const unresolvedBcExpression = !namedBc && (isBareCompoundBc || ambiguousBcOccurrence);
+    const ambiguousBcOccurrence = /(?:^|[^a-zA-Z])a\s*\/\s*bc(?=$|[^a-zA-Z])|\\frac\s*\{a\}\s*\{bc\}/.test(latex);
+    const unresolvedBcExpression = !namedBc && (isBareCompoundBc || ambiguousBcOccurrence);
     if (unresolvedBcExpression) {
       setValidationError("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.");
       return;
