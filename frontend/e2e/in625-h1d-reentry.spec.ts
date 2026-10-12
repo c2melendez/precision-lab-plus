@@ -489,3 +489,41 @@ test("SY-P-23: fracción LaTeX parentetizada preserva bc compuesta definida", as
   expect(outcome.kind).toBe("result");
   expect(canonical(outcome.value)).toMatch(/^2(?:\.0+)?$/);
 });
+
+
+test("SY-P-23: fracción LaTeX con paréntesis redundantes bloquea o conserva bc", async ({ page }) => {
+  await page.goto("./");
+  const expressions = [String.raw`((\frac{a}{bc}))`, String.raw`(((\frac{a}{bc})))`];
+  for (const expression of expressions) {
+    await setInput(page, expression);
+    const requests: string[] = [];
+    const track = (req: import("@playwright/test").Request) => {
+      if (req.url().includes("/evaluate") && req.method() === "POST") requests.push(req.url());
+    };
+    page.on("request", track);
+    await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+    await expect(page.getByText("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.")).toBeVisible();
+    expect(requests, expression).toHaveLength(0);
+    page.off("request", track);
+  }
+
+  const details = page.locator("details").filter({ hasText: "Sustituciones" });
+  await details.locator("summary").click();
+  for (const [name, value] of [["a", "12"], ["bc", "6"], ["b", "3"], ["c", "2"]] as const) {
+    await page.getByRole("button", { name: "Añadir sustitución" }).click();
+    const index = await page.getByRole("textbox", { name: /^Nombre de la variable/ }).count();
+    await page.getByRole("textbox", { name: "Nombre de la variable " + index }).fill(name);
+    await page.getByRole("textbox", { name: "Valor de la variable " + index }).fill(value);
+  }
+  for (const expression of expressions) {
+    await setInput(page, expression);
+    const outbound = page.waitForRequest(req => req.url().includes("/evaluate") && req.method() === "POST");
+    const pending = submit(page);
+    const body = (await outbound).postDataJSON() as { expression: string; substitutions: Record<string, string> };
+    expect(body.expression, expression).toBe("a/bc");
+    expect(body.substitutions).toMatchObject({ a: "12", bc: "6", b: "3", c: "2" });
+    const outcome = await pending;
+    expect(outcome.kind).toBe("result");
+    expect(canonical(outcome.value), expression).toMatch(/^2(?:\.0+)?$/);
+  }
+});
