@@ -527,7 +527,8 @@ export function BasicMode() {
     // An explicit grouping is required for the b*c interpretations.
     const unresolvedBcExpression = !namedBc && (
       /^a\s*\/\s*bc$/.test(latex.trim()) ||
-      /^\\frac\s*\{a\}\s*\{bc\}$/.test(latex.trim())
+      /^\\frac\s*\{a\}\s*\{bc\}$/.test(latex.trim()) ||
+      /^\(\s*a\s*\/\s*bc\s*\)$/.test(latex.trim())
     );
     if (unresolvedBcExpression) {
       setValidationError("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.");
