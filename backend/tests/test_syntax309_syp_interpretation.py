@@ -196,3 +196,21 @@ def test_syp_23_redundant_numerator_grouping_preserves_explicit_product(expressi
     body = response.json()
     assert body["success"] is True, body
     assert body["result_approx"] == pytest.approx(8.0, rel=1e-9, abs=1e-12)
+
+
+@pytest.mark.parametrize(
+    "expression,expected",
+    [("(a/b)*c", 7.5), ("a/(b*c)", 1.2), ("((a)/(b*c))", 1.2)],
+)
+def test_syp_23_decimal_witness_with_named_bc_shadow(expression, expected):
+    """Explicit multiplication must not become a named bc even with fractional inputs."""
+    assert ROWS["SY-P-23"]["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": expression,
+            "substitutions": {"a": "9", "b": "3", "c": "2.5", "bc": "99"},
+        })
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
