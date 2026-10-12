@@ -261,3 +261,25 @@ def test_syp_23_named_bc_in_extended_expression_with_separate_b_c_present(expres
     body = response.json()
     assert body["success"] is True, (expression, body)
     assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
+
+
+@pytest.mark.parametrize(
+    "expression,expected",
+    [
+        ("(1+a/bc)", 3.0),
+        ("((2*(a/bc)))", 4.0),
+        ("(a/bc+3)", 5.0),
+    ],
+)
+def test_syp_23_named_bc_extended_expression_outer_parentheses(expression, expected):
+    """Outer grouping must preserve a declared compound identifier bc."""
+    assert ROWS["SY-P-23"]["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": expression,
+            "substitutions": {"a": "12", "bc": "6", "b": "3", "c": "2"},
+        })
+    assert response.status_code == 200, (expression, response.text)
+    body = response.json()
+    assert body["success"] is True, (expression, body)
+    assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
