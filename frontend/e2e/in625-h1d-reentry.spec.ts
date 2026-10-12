@@ -621,3 +621,20 @@ test("SY-P-23: el aviso detecta a/bc dentro de expresiones mayores sin alterar M
     await expect(warning, expression).toHaveCount(0);
   }
 });
+
+
+test("SY-P-23 Plus: entradas extendidas sin bc definida nunca envían POST", async ({ page }) => {
+  await page.goto("./");
+  for (const expression of ["1+a/bc", "2*(a/bc)", "a/bc+3"]) {
+    await setInput(page, expression);
+    const requests: string[] = [];
+    const track = (req: import("@playwright/test").Request) => {
+      if (req.method() === "POST" && req.url().includes("/evaluate")) requests.push(req.url());
+    };
+    page.on("request", track);
+    await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+    await expect(page.getByText("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.")).toBeVisible();
+    expect(requests, expression).toHaveLength(0);
+    page.off("request", track);
+  }
+});
