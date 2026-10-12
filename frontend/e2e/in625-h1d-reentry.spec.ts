@@ -221,3 +221,26 @@ test("SY-P-23 canal UI a resultado: agrupaciones explícitas no se confunden", a
     expect(canonical(actual.value), expression + " => " + actual.value).toContain(expected);
   }
 });
+
+test("SY-P-23 canal completo: bc nombrada frente a producto explícito", async ({ page }) => {
+  await page.goto("./");
+  const substitutions = page.locator("details").filter({ hasText: "Sustituciones" });
+  await substitutions.locator("summary").click();
+  for (const [name, value] of [["a", "12"], ["bc", "6"], ["b", "3"], ["c", "2"]] as const) {
+    await page.getByRole("button", { name: "Añadir sustitución" }).click();
+    const rowIndex = await page.getByRole("textbox", { name: /^Nombre de la variable/ }).count();
+    await page.getByRole("textbox", { name: `Nombre de la variable ${rowIndex}` }).fill(name);
+    await page.getByRole("textbox", { name: `Valor de la variable ${rowIndex}` }).fill(value);
+  }
+  const warning = page.getByRole("status", { name: "Convención de división ambigua" });
+  await setInput(page, "a/bc");
+  await expect(warning).toBeVisible();
+  const named = await submit(page);
+  expect(named.kind).toBe("result");
+  expect(canonical(named.value)).toMatch(/^2(?:\\.0+)?$/);
+  await setInput(page, "(a/b)*c");
+  await expect(warning).toHaveCount(0);
+  const product = await submit(page);
+  expect(product.kind).toBe("result");
+  expect(canonical(product.value)).toMatch(/^8(?:\\.0+)?$/);
+});
