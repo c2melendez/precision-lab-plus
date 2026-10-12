@@ -516,21 +516,30 @@ export function BasicMode() {
       return;
     }
 
-    // SY-P-23: preserve an explicitly defined compound identifier. MathLive SSR
-    // otherwise serializes plain a/bc as "a/b c", changing its meaning.
+    // SY-P-23: unwrap only balanced parentheses enclosing the WHOLE input.
+    // MathLive otherwise converts the defined compound name bc to b*c.
+    let bcCandidate = latex.trim();
+    while (bcCandidate.startsWith("(") && bcCandidate.endsWith(")")) {
+      let depth = 0;
+      let outerWrap = true;
+      for (let i = 0; i < bcCandidate.length; i++) {
+        if (bcCandidate[i] === "(") depth++;
+        else if (bcCandidate[i] === ")") depth--;
+        if (depth < 0 || (depth === 0 && i < bcCandidate.length - 1)) {
+          outerWrap = false;
+          break;
+        }
+      }
+      if (!outerWrap || depth !== 0) break;
+      bcCandidate = bcCandidate.slice(1, -1).trim();
+    }
+    const isBareCompoundBc =
+      /^a\s*\/\s*bc$/.test(bcCandidate) ||
+      /^\\frac\s*\{a\}\s*\{bc\}$/.test(bcCandidate);
     const namedBc = substitutions.some((row) => row.name.trim() === "bc" && row.value.trim() !== "");
-    const compoundBcExpression = namedBc && (
-      /^a\s*\/\s*bc$/.test(latex.trim()) ||
-      /^\\frac\s*\{a\}\s*\{bc\}$/.test(latex.trim()) ||
-      /^\(\s*a\s*\/\s*bc\s*\)$/.test(latex.trim())
-    );
-    // SY-P-23: do not evaluate a bare ambiguous division without a defined bc.
-    // An explicit grouping is required for the b*c interpretations.
-    const unresolvedBcExpression = !namedBc && (
-      /^a\s*\/\s*bc$/.test(latex.trim()) ||
-      /^\\frac\s*\{a\}\s*\{bc\}$/.test(latex.trim()) ||
-      /^\(\s*a\s*\/\s*bc\s*\)$/.test(latex.trim())
-    );
+    const compoundBcExpression = namedBc && isBareCompoundBc;
+    // Ambiguous input without a defined bc requires explicit grouping.
+    const unresolvedBcExpression = !namedBc && isBareCompoundBc;
     if (unresolvedBcExpression) {
       setValidationError("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.");
       return;
