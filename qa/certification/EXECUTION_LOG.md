@@ -3015,3 +3015,8 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 - Auditoría del nuevo oráculo E2E detectó una debilidad: esperaba request-id no vacío, pero podía aceptar un request-id antiguo. Commit Lite 52a25c9be8f627dcf90dab28391f40783614648a exige request-id distinto al previo para el cálculo posterior al error, manteniendo verificación matemática 8/2.
 - Gates nuevos Lite SHA 52a25c9: H1d 38299092558, cumulative 38299092743, build 38299092512, inicialmente QUEUED. Verificar que pasan sin retries.
 - SY-P-23 OPEN y SG28 multihost BLOCKED. No atribuir estabilidad permanente a una sola corrida.
+
+## 2026-10-12 — SY-P-23: corregir timeout en la prueba de request-id posterior a error
+- Lite 52a25c9: H1d 38299092558 FAILURE tras timeout de 30 s por getAttribute en status inexistente; acumulativo 38299092743 y build 38299092512 SUCCESS.
+- Lite 190ed5ac528d939fc1d2e8c14bfafbc77b86f971: check count() antes de getAttribute y mantener comprobación de ID nuevo; H1d 38299836244, acumulativo 38299836203, build 38299836197 pendientes.
+- SY-P-23 OPEN; SG28 multihost BLOCKED.
