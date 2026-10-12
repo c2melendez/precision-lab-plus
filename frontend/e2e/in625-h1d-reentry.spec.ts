@@ -364,3 +364,15 @@ test("SY-P-23 UI: entrada ambigua sin bc definida exige desambiguación", async 
     page.off("request", onRequest);
   }
 });
+
+test("SY-P-23 UI: después del bloqueo se puede calcular una agrupación explícita", async ({ page }) => {
+  await page.goto("./");
+  await setInput(page, "a/bc");
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  await expect(page.getByText("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.")).toBeVisible();
+  await setInput(page, "(12/3)*2");
+  await expect(page.getByRole("status", { name: "Convención de división ambigua" })).toHaveCount(0);
+  const result = await submit(page);
+  expect(result.kind).toBe("result");
+  expect(canonical(result.value)).toMatch(/^8(?:\.0+)?$/);
+});
