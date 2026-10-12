@@ -638,3 +638,15 @@ test("SY-P-23 Plus: entradas extendidas sin bc definida nunca envían POST", asy
     page.off("request", track);
   }
 });
+
+
+test("SY-P-23 Plus: identificadores vecinos no disparan bloqueo específico de a/bc", async ({ page }) => {
+  await page.goto("./");
+  const warning = page.getByRole("status", { name: "Convención de división ambigua" });
+  for (const expression of ["aa/bc", "a/bcd", "xa/bc", "a/bcx"]) {
+    await setInput(page, expression);
+    await expect(warning, expression).toHaveCount(0);
+    await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+    await expect(page.getByText("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.")).toHaveCount(0);
+  }
+});
