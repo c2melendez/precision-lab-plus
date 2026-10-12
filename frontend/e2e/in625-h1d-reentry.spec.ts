@@ -552,3 +552,21 @@ test("SY-P-23: agrupación explícita no se confunde con bc definida", async ({ 
     expect(canonical(outcome.value), expression).toBe(expected);
   }
 });
+
+
+test("SY-P-23: paréntesis exteriores no ocultan multiplicación explícita", async ({ page }) => {
+  await page.goto("./");
+  const cases = [
+    ["(12/3)*2", "8"],
+    ["((12/3))*2", "8"],
+    ["12/((3*2))", "2"],
+    ["((12/(3*2)))", "2"],
+  ] as const;
+  for (const [expression, expected] of cases) {
+    await setInput(page, expression);
+    await expect(page.getByRole("status", { name: "Convención de división ambigua" })).toHaveCount(0);
+    const output = await submit(page);
+    expect(output.kind, expression).toBe("result");
+    expect(canonical(output.value), expression).toMatch(new RegExp("^" + expected + "(?:\\\\.0+)?$"));
+  }
+});
