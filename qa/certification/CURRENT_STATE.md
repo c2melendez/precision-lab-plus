@@ -2628,3 +2628,6 @@ Plus commit `681d4f2e` corrects fixture loading path in frontend tests. Cumulati
 - Nuevo cambio técnico Lite e2e/in625-h1d-reentry.spec.ts commit 79a1bf93cd6ec8253d8e57c1e48592d6f886005e: prueba aviso accesible ante `(a/bc)`, `((a/bc))`, `(\\frac{a}{bc})`, conservación exacta del valor MathLive y ausencia de aviso para `(a/b)*c`, `a/(b*c)` y `((a/(b*c)))`. Protege la política informativa existente de Lite; no transforma la expresión ni modifica parser.
 - GitHub Actions SHA 79a1bf93: H1d 38274443504, acumulativo 38274443523, build 38274443477, todos IN_PROGRESS en última consulta. No declarar PASS hasta conclusión y logs verificados.
 - Próximo paso: verificar esas tres corridas y corregir cualquier fallo demostrado. Después comparar el aviso entre Lite y Plus y decidir brecha contractual, sin debilitar el XFAIL de Plus. SY-P-23 OPEN; SG28 multihost BLOCKED.
+
+
+## 2026-10-12 — SY-P-23 aviso bilateral: Lite H1d 38274443504, cumulative 38274443523 y build 38274443477 SUCCESS en SHA 79a1bf93. Plus publicó test E2E homólogo en SHA b4df99c70, runs H1d 38277095820 y cumulative 38277095768 pendientes de conclusión. Lite advierte; Plus además bloquea envío ambiguo sin bc definida. SY-P-23 OPEN; SG28 multihost BLOCKED. Próximo paso: verificar los runs Plus y corregir cualquier fallo.
