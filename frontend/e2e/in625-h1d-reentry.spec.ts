@@ -567,6 +567,6 @@ test("SY-P-23: paréntesis exteriores no ocultan multiplicación explícita", as
     await expect(page.getByRole("status", { name: "Convención de división ambigua" })).toHaveCount(0);
     const output = await submit(page);
     expect(output.kind, expression).toBe("result");
-    expect(canonical(output.value), expression).toMatch(new RegExp("^" + expected + "(?:\\\\.0+)?$"));
+    expect(Number(canonical(output.value)), expression).toBe(Number(expected));
   }
 });
