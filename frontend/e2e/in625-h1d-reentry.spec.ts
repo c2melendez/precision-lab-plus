@@ -266,3 +266,25 @@ test("SY-P-23 UI: agrupación (a/b)*c sigue dando 8 con sustituciones", async ({
   expect(result.kind).toBe("result");
   expect(canonical(result.value)).toMatch(/^8(?:\\.0+)?$/);
 });
+
+test("SY-P-23: bc definida conserva lectura con b y c simultáneos", async ({ page }) => {
+  await page.goto("./");
+  const substitutions = page.locator("details").filter({ hasText: "Sustituciones" });
+  await substitutions.locator("summary").click();
+  for (const [name, value] of [["a", "12"], ["bc", "6"], ["b", "3"], ["c", "2"]] as const) {
+    await page.getByRole("button", { name: "Añadir sustitución" }).click();
+    const index = await page.getByRole("textbox", { name: /^Nombre de la variable/ }).count();
+    await page.getByRole("textbox", { name: `Nombre de la variable ${index}` }).fill(name);
+    await page.getByRole("textbox", { name: `Valor de la variable ${index}` }).fill(value);
+  }
+  await setInput(page, "a/bc");
+  const requestPromise = page.waitForRequest(req => req.url().includes("/evaluate") && req.method() === "POST");
+  const resultPromise = submit(page);
+  const request = await requestPromise;
+  const payload = request.postDataJSON() as { expression: string; substitutions: Record<string, string> };
+  expect(payload.expression).toBe("a/bc");
+  expect(payload.substitutions).toMatchObject({ a: "12", bc: "6", b: "3", c: "2" });
+  const result = await resultPromise;
+  expect(result.kind).toBe("result");
+  expect(canonical(result.value)).toMatch(/^2(?:\\.0+)?$/);
+});
