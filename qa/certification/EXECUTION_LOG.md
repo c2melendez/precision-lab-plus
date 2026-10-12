@@ -2569,3 +2569,9 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 - Se añadió prueba Playwright en el spec H1d para advertencia visible y desaparición al sustituir la entrada por `2+3`.
 - Último commit técnico c2melendez/precision-lab-plus: `d2d3133cb3a467fa7c27711ce49bd322d52bae31`. CI disparado automáticamente: H1d 38186581202 y cumulative 38186581218, ambos pendientes de resultado a la última consulta.
 - Siguiente paso exacto: verificar jobs/logs de estos dos runs (mismo SHA), corregir si hay rojo de harness/UI sin reducir oráculos; comprobar `\\frac{a}{bc}` renderizado por MathLive en E2E, y después probar variantes `(a/b)*c`, `a/(b*c)`, y variable compuesta `bc` por canales de entrada y resultado. Mantener SY-P-23 abierto y XFAIL estricto mientras no exista evidencia integral. SG28 multi-host sigue bloqueado por falta de prueba externa.
+
+
+## 2026-10-11 — SY-P-23: UI warning PASS, explicit grouping E2E pending
+- Anterior test de aviso accesible verde: Plus H1d `38186581202`, cumulative `38186581218`; Lite H1d `38186583828`, cumulative `38186583862`, build `38186583818`. Esta evidencia prueba la advertencia visual para MathLive \frac{a}{bc} y su limpieza al ingresar 2+3, no interpretación matemática universal.
+- Nueva regresión E2E publicada: `(a/b)*c`, `a/(b*c)`, `2+3` no deben producir aviso falso; entrada `a/bc` sí debe advertir. Último SHA técnico del repositorio `39640ac2f94c4d8bd448c7ffadfba734358ca614`; H1d `38186910679`, acumulativo `38186910672` disparados, sin resultado final en observación.
+- Siguiente paso: confirmar jobs de esos runs; si hay fallo identificar normalización MathLive vs defecto de UI, corregir y revalidar. SY-P-23 permanece OPEN en cuanto a semántica cruda `a/bc`; Plus strict XFAIL separado de b/c no se convierte en PASS. SG28 distribuido requiere prueba externa.
