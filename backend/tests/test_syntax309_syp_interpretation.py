@@ -214,3 +214,28 @@ def test_syp_23_decimal_witness_with_named_bc_shadow(expression, expected):
     body = response.json()
     assert body["success"] is True, body
     assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
+
+
+@pytest.mark.parametrize(
+    "expression,expected",
+    [
+        ("1+(a/b)*c", 9.0),
+        ("1+a/(b*c)", 3.0),
+        ("2*((a/b)*c)", 16.0),
+        ("2*(a/(b*c))", 4.0),
+        ("(a/b)*c+3", 11.0),
+        ("a/(b*c)+3", 5.0),
+    ],
+)
+def test_syp_23_compound_context_preserves_explicit_grouping_with_bc_shadow(expression, expected):
+    """Independent numeric evidence for both grouped readings even when bc exists."""
+    assert ROWS["SY-P-23"]["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": expression,
+            "substitutions": {"a": "12", "bc": "99", "b": "3", "c": "2"},
+        })
+    assert response.status_code == 200, (expression, response.text)
+    body = response.json()
+    assert body["success"] is True, (expression, body)
+    assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
