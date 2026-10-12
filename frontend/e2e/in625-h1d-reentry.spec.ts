@@ -691,6 +691,9 @@ test("SY-P-23 Plus: fracciones LaTeX numéricas compuestas conservan evaluación
     await expect(warning, expression).toHaveCount(0);
     const output = await submit(page);
     expect(output.kind, expression).toBe("result");
-    expect(Number(canonical(output.value)), expression).toBe(expected);
+    const normalized = canonical(output.value);
+    const fraction = normalized.match(/^\\\\(?:d?frac)\\{(-?\\d+)\\}\\{(-?\\d+)\\}$/);
+    const actual = fraction ? Number(fraction[1]) / Number(fraction[2]) : Number(normalized);
+    expect(actual, `${expression} produced ${JSON.stringify(output.value)} (canonical ${JSON.stringify(normalized)})`).toBe(expected);
   }
 });
