@@ -570,3 +570,18 @@ test("SY-P-23: paréntesis exteriores no ocultan multiplicación explícita", as
     expect(Number(canonical(output.value)), expression).toBe(Number(expected));
   }
 });
+
+
+test("SY-P-23: las fracciones numéricas LaTeX con paréntesis no activan ambigüedad", async ({ page }) => {
+  await page.goto("./");
+  for (const [expression, expected] of [
+    [String.raw`(\frac{12}{3})*2`, 8],
+    [String.raw`(\frac{12}{3*2})`, 2],
+  ] as const) {
+    await setInput(page, expression);
+    await expect(page.getByRole("status", { name: "Convención de división ambigua" })).toHaveCount(0);
+    const outcome = await submit(page);
+    expect(outcome.kind, expression).toBe("result");
+    expect(Number(canonical(outcome.value)), expression).toBe(expected);
+  }
+});
