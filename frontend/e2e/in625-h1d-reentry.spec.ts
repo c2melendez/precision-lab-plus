@@ -527,3 +527,28 @@ test("SY-P-23: fracción LaTeX con paréntesis redundantes bloquea o conserva bc
     expect(canonical(outcome.value), expression).toMatch(/^2(?:\.0+)?$/);
   }
 });
+
+
+test("SY-P-23: agrupación explícita no se confunde con bc definida", async ({ page }) => {
+  await page.goto("./");
+  const details = page.locator("details").filter({ hasText: "Sustituciones" });
+  await details.locator("summary").click();
+  for (const [name, value] of [["a", "12"], ["bc", "6"], ["b", "3"], ["c", "2"]] as const) {
+    await page.getByRole("button", { name: "Añadir sustitución" }).click();
+    const index = await page.getByRole("textbox", { name: /^Nombre de la variable/ }).count();
+    await page.getByRole("textbox", { name: "Nombre de la variable " + index }).fill(name);
+    await page.getByRole("textbox", { name: "Valor de la variable " + index }).fill(value);
+  }
+  for (const [expression, expected] of [["((a/b)*c)", "8"], ["((a/(b*c)))", "2"]] as const) {
+    await setInput(page, expression);
+    await expect(page.getByRole("status", { name: "Convención de división ambigua" })).toHaveCount(0);
+    const outbound = page.waitForRequest(req => req.url().includes("/evaluate") && req.method() === "POST");
+    const pending = submit(page);
+    const payload = (await outbound).postDataJSON() as { expression: string; substitutions: Record<string, string> };
+    expect(payload.expression, expression).not.toBe("a/bc");
+    expect(payload.substitutions).toMatchObject({ a: "12", bc: "6", b: "3", c: "2" });
+    const outcome = await pending;
+    expect(outcome.kind).toBe("result");
+    expect(canonical(outcome.value), expression).toBe(expected);
+  }
+});
