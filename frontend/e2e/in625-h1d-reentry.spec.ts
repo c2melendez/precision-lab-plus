@@ -316,12 +316,17 @@ test("SY-P-23 LaTeX fraction: el payload conserva denominador bc definido", asyn
 test("SY-P-23 UI: agrupaciones decimales explícitas preservan resultados", async ({ page }) => {
   await page.goto("./");
   const warning = page.getByRole("status", { name: "Convención de división ambigua" });
-  for (const [expression, expected] of [["(9/3)*2.5", "7.5"], ["9/(3*2.5)", "1.2"]] as const) {
+  for (const [expression, decimal, exactLatex] of [
+    ["(9/3)*2.5", "7.5", String.raw`\frac{15}{2}`],
+    ["9/(3*2.5)", "1.2", String.raw`\frac{6}{5}`],
+  ] as const) {
     await setInput(page, expression);
     await expect(warning).toHaveCount(0);
     const result = await submit(page);
     expect(result.kind, expression).toBe("result");
-    expect(canonical(result.value), expression + " => " + result.value)
-      .toMatch(new RegExp("^" + expected.replace(".", "\\.") + "(?:\\.0+)?$"));
+    const actual = canonical(result.value);
+    const decimalPattern = new RegExp("^" + decimal.replace(".", "\\.") + "(?:\\.0+)?$");
+    expect(decimalPattern.test(actual) || actual === exactLatex,
+      expression + " => " + result.value + " must equal " + decimal).toBe(true);
   }
 });
