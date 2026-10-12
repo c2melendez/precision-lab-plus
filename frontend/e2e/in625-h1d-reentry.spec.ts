@@ -390,3 +390,19 @@ test("SY-P-23 UI: a/bc entre paréntesis también requiere desambiguación", asy
   expect(requests).toBe(0);
   page.off("request", track);
 });
+
+test("SY-P-23 UI: paréntesis exteriores permiten bc explícitamente definida", async ({ page }) => {
+  await page.goto("./");
+  const details = page.locator("details").filter({ hasText: "Sustituciones" });
+  await details.locator("summary").click();
+  for (const [name, value] of [["a", "12"], ["bc", "6"], ["b", "3"], ["c", "2"]] as const) {
+    await page.getByRole("button", { name: "Añadir sustitución" }).click();
+    const index = await page.getByRole("textbox", { name: /^Nombre de la variable/ }).count();
+    await page.getByRole("textbox", { name: `Nombre de la variable ${index}` }).fill(name);
+    await page.getByRole("textbox", { name: `Valor de la variable ${index}` }).fill(value);
+  }
+  await setInput(page, "(a/bc)");
+  const outcome = await submit(page);
+  expect(outcome.kind).toBe("result");
+  expect(canonical(outcome.value)).toMatch(/^2(?:\.0+)?$/);
+});
