@@ -402,7 +402,13 @@ test("SY-P-23 UI: paréntesis exteriores permiten bc explícitamente definida", 
     await page.getByRole("textbox", { name: `Valor de la variable ${index}` }).fill(value);
   }
   await setInput(page, "(a/bc)");
-  const outcome = await submit(page);
+  const outgoing = page.waitForRequest(req => req.url().includes("/evaluate") && req.method() === "POST");
+  const pending = submit(page);
+  const request = await outgoing;
+  const payload = request.postDataJSON() as { expression: string; substitutions: Record<string, string> };
+  expect(payload.expression, "La agrupación externa debe preservar bc como identificador compuesto").toBe("a/bc");
+  expect(payload.substitutions).toMatchObject({ a: "12", bc: "6", b: "3", c: "2" });
+  const outcome = await pending;
   expect(outcome.kind).toBe("result");
   expect(canonical(outcome.value)).toMatch(/^2(?:\.0+)?$/);
 });
