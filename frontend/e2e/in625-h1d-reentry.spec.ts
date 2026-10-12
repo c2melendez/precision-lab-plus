@@ -585,3 +585,21 @@ test("SY-P-23: las fracciones numéricas LaTeX con paréntesis no activan ambig�
     expect(Number(canonical(outcome.value)), expression).toBe(expected);
   }
 });
+
+
+test("SY-P-23 Plus: aviso con paréntesis preserva entrada y se elimina al desambiguar", async ({ page }) => {
+  await page.goto("./");
+  const warning = page.getByRole("status", { name: "Convención de división ambigua" });
+  const field = page.locator("math-field").first();
+  for (const expression of ["(a/bc)", "((a/bc))", String.raw`(\frac{a}{bc})`]) {
+    await setInput(page, expression);
+    await expect(warning, expression).toBeVisible();
+    await expect(warning).toContainText("(a/b)*c");
+    await expect(warning).toContainText("a/(b*c)");
+    expect(await field.evaluate(el => (el as HTMLElement & {value?: string}).value), expression).toBe(expression);
+  }
+  for (const expression of ["(a/b)*c", "a/(b*c)", "((a/(b*c)))"]) {
+    await setInput(page, expression);
+    await expect(warning, expression).toHaveCount(0);
+  }
+});
