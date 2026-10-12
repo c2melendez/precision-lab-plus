@@ -676,3 +676,21 @@ test("SY-P-23 Plus: límites de identificador dentro de fracciones LaTeX y subex
     await expect(blocked, expression).toHaveCount(0);
   }
 });
+
+
+test("SY-P-23 Plus: fracciones LaTeX numéricas compuestas conservan evaluación explícita", async ({ page }) => {
+  await page.goto("./");
+  const warning = page.getByRole("status", { name: "Convención de división ambigua" });
+  for (const [expression, expected] of [
+    [String.raw`1+\\frac{12}{3*2}`, 3],
+    [String.raw`2*(\\frac{12}{3})`, 8],
+    [String.raw`\\frac{12}{3*2}+3`, 5],
+    [String.raw`(\\frac{12}{3})*2+1`, 9],
+  ] as const) {
+    await setInput(page, expression);
+    await expect(warning, expression).toHaveCount(0);
+    const output = await submit(page);
+    expect(output.kind, expression).toBe("result");
+    expect(Number(canonical(output.value)), expression).toBe(expected);
+  }
+});
