@@ -166,3 +166,18 @@ def test_syp_23_named_bc_does_not_shadow_explicit_b_times_c(expression, substitu
     body = response.json()
     assert body["success"] is True, body
     assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
+
+
+@pytest.mark.parametrize("expression", ["a/(b*c)", "((a)/(b*c))"])
+def test_syp_23_redundant_fraction_grouping_preserves_explicit_product(expression):
+    """Parenthesis differences must not change numeric meaning or consume named bc."""
+    assert ROWS["SY-P-23"]["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": expression,
+            "substitutions": {"a": "12", "bc": "99", "b": "3", "c": "2"},
+        })
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["success"] is True, body
+    assert body["result_approx"] == pytest.approx(2.0, rel=1e-9, abs=1e-12)
