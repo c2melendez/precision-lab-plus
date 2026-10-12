@@ -521,7 +521,8 @@ export function BasicMode() {
     const namedBc = substitutions.some((row) => row.name.trim() === "bc" && row.value.trim() !== "");
     const compoundBcExpression = namedBc && (
       /^a\s*\/\s*bc$/.test(latex.trim()) ||
-      /^\\frac\s*\{a\}\s*\{bc\}$/.test(latex.trim())
+      /^\\frac\s*\{a\}\s*\{bc\}$/.test(latex.trim()) ||
+      /^\(\s*a\s*\/\s*bc\s*\)$/.test(latex.trim())
     );
     // SY-P-23: do not evaluate a bare ambiguous division without a defined bc.
     // An explicit grouping is required for the b*c interpretations.
