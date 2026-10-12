@@ -697,3 +697,20 @@ test("SY-P-23 Plus: fracciones LaTeX numéricas compuestas conservan evaluación
     expect(actual, `${expression} produced ${JSON.stringify(output.value)} (canonical ${JSON.stringify(normalized)})`).toBe(expected);
   }
 });
+
+test("SY-P-23 Plus: fracciones compuestas numéricas rechazan falsa ambigüedad y permiten repetir evaluación", async ({ page }) => {
+  await page.goto("./");
+  const warning = page.getByRole("status", { name: "Convención de división ambigua" });
+  for (const expression of [
+    String.raw`\\frac{12}{3*2}+3`,
+    String.raw`2*(\\frac{12}{3})`,
+  ]) {
+    await setInput(page, expression);
+    await expect(warning, expression).toHaveCount(0);
+    const first = await submit(page);
+    expect(first.kind, expression).toBe("result");
+    const second = await submit(page);
+    expect(second.kind, expression).toBe("result");
+    expect(canonical(second.value), expression).toBe(canonical(first.value));
+  }
+});
