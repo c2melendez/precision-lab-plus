@@ -516,7 +516,12 @@ export function BasicMode() {
       return;
     }
 
-    const trimmed = latexToBackendSyntax(latex);
+    // SY-P-23: preserve an explicitly defined compound identifier. MathLive SSR
+    // otherwise serializes plain a/bc as "a/b c", changing its meaning.
+    const namedBc = substitutions.some((row) => row.name.trim() === "bc" && row.value.trim() !== "");
+    const trimmed = namedBc && /^a\s*\/\s*bc$/.test(latex.trim())
+      ? "a/bc"
+      : latexToBackendSyntax(latex);
     if (!trimmed) {
       setValidationError("La expresión no puede estar vacía.");
       return;
