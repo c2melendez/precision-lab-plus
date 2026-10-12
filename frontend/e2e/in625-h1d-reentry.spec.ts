@@ -650,3 +650,29 @@ test("SY-P-23 Plus: identificadores vecinos no disparan bloqueo específico de a
     await expect(page.getByText("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.")).toHaveCount(0);
   }
 });
+
+ 
+// SY-P-23: a/bc is a whole-token policy, including inside LaTeX fractions and larger expressions.
+// Neighboring identifiers must never be rewritten or rejected by the bc-specific guard.
+test("SY-P-23 Plus: límites de identificador dentro de fracciones LaTeX y subexpresiones", async ({ page }) => {
+  await page.goto("./");
+  const warning = page.getByRole("status", { name: "Convención de división ambigua" });
+  const blocked = page.getByText("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.");
+  const field = page.locator("math-field").first();
+  for (const expression of [
+    String.raw`\\frac{aa}{bc}`,
+    String.raw`\\frac{a}{bcd}`,
+    String.raw`\\frac{xa}{bc}`,
+    String.raw`\\frac{a}{bcx}`,
+    "1+aa/bc",
+    "2*(a/bcd)",
+    "xa/bc+3",
+    "3*(a/bcx)",
+  ]) {
+    await setInput(page, expression);
+    await expect(warning, expression).toHaveCount(0);
+    expect(await field.evaluate(el => (el as HTMLElement & { value?: string }).value), expression).toBe(expression);
+    await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+    await expect(blocked, expression).toHaveCount(0);
+  }
+});
