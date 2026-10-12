@@ -222,8 +222,7 @@ test("SY-P-23 canal UI a resultado: agrupaciones explícitas no se confunden", a
   }
 });
 
-test("SY-P-23 UI: bc compuesto pendiente de paridad con endpoint", async ({ page }) => {
-  test.fail(true, "SY-P-23 UI renders a/bc as a*b*c-style precedence (8), while named bc backend produces 2; retain as known product/channel gap");
+test("SY-P-23 UI: bc compuesto preservado hasta endpoint", async ({ page }) => {
   await page.goto("./");
   const substitutions = page.locator("details").filter({ hasText: "Sustituciones" });
   await substitutions.locator("summary").click();
