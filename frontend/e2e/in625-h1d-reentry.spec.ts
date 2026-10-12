@@ -347,3 +347,20 @@ test("SY-P-23 UI: agrupaciones decimales con paréntesis redundantes", async ({ 
     expect(pattern.test(value) || value === exact, expression + " => " + result.value).toBe(true);
   }
 });
+
+test("SY-P-23 UI: entrada ambigua sin bc definida exige desambiguación", async ({ page }) => {
+  await page.goto("./");
+  for (const input of ["a/bc", String.raw`\frac{a}{bc}`]) {
+    await setInput(page, input);
+    await expect(page.getByRole("status", { name: "Convención de división ambigua" })).toBeVisible();
+    let requests = 0;
+    const onRequest = (req: import("@playwright/test").Request) => {
+      if (req.method() === "POST" && req.url().includes("/evaluate")) requests++;
+    };
+    page.on("request", onRequest);
+    await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+    await expect(page.getByText("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.")).toBeVisible();
+    expect(requests, input).toBe(0);
+    page.off("request", onRequest);
+  }
+});
