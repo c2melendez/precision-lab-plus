@@ -37,3 +37,9 @@ Para comunicar una interpretación matemática inequívoca, solicitar paréntesi
 - Plus commit técnico `e03fd1871fab60db3a31ff4126e730df4b0e6071`, ruta `frontend/src/components/BasicMode.tsx`, gate acumulativo iniciado `38186538399`.
 - Lite commit técnico `0b07e42c17730a7ca8e44d3e92c6f76abd0e28b7`, ruta `src/modes/BasicScientific/BasicScientificMode.tsx`, gate acumulativo iniciado `38186542231`.
 - Los gates posteriores no estaban terminados en la observación. PENDIENTE: confirmar final y añadir prueba E2E del aviso con edición MathLive, además de verificar expresiones agrupadas sin advertencia falsa. No cerrar SY-P-23 ni convertir XFAIL en PASS.
+
+
+## 2026-10-11 — Verificación CI de entrada textual y fracción LaTeX
+- En Plus, las formas `a/bc` y `\\frac{a}{bc}` preservan el símbolo compuesto `bc` **cuando hay una sustitución no vacía para `bc`**, mediante la corrección acotada de `frontend/src/components/BasicMode.tsx` (SHA técnico `34734b232058b730be3c986c68773cea62755e6e`). No se altera el parseo genérico de otras entradas ambiguas.
+- H1d [38195286920](https://github.com/c2melendez/precision-lab-plus/actions/runs/38195286920), cumulative [38195286916](https://github.com/c2melendez/precision-lab-plus/actions/runs/38195286916) y SG28 UI [38195286929](https://github.com/c2melendez/precision-lab-plus/actions/runs/38195286929) = SUCCESS sobre ese SHA. Se valida payload `a/bc` y resultado `2` con `a=12`, `bc=6`, `b=3`, `c=2`, incluida la representación LaTeX.
+- **Alcance pendiente:** no inferir semántica universal de `a/bc` sin sustitución compuesta, ni dar por resuelta la lectura alternativa de `b*c`; permanece XFAIL estricto en el backend. Lite actualmente no expone las mismas sustituciones de variables en su flujo Científica (usa `parseExpression` y `dispatchWorker`); no es correcto declarar paridad funcional de ese escenario. SG28 multihost sigue pendiente de evidencia externa.
