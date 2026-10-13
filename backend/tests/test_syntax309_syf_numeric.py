@@ -155,3 +155,24 @@ def test_syf15_17_logarithm_base_contract_http(case_id, expression, expected):
     data = response.json()
     assert data["success"] is True, (case_id, data)
     assert data["result_approx"] == pytest.approx(expected, abs=1e-10)
+
+
+@pytest.mark.parametrize("case_id,expression,substitutions,expected", [
+    ("SY-F-18", "log(x,2)+1", {"x": "8"}, 4.0),
+    ("SY-F-19", "log(b,a)", {"a": "2", "b": "8"}, 3.0),
+    ("SY-F-20", "ln(e)", {}, 1.0),
+])
+def test_syf18_20_log_precedence_base_change_and_natural_e_http(case_id, expression, substitutions, expected):
+    """Backend syntax controls; source LaTeX still requires a separate frontend parser gate."""
+    assert ROWS[case_id]["operacion"] in ("interpretacion", "equivalente", "valor")
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": expression, "substitutions": substitutions,
+        })
+    assert response.status_code == 200, (case_id, response.text)
+    data = response.json()
+    assert data["success"] is True, (case_id, data)
+    assert data["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-10)
+    if case_id == "SY-F-18":
+        import math
+        assert data["result_approx"] != pytest.approx(math.log2(9), abs=1e-4)
