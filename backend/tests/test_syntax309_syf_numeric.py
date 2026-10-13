@@ -121,3 +121,21 @@ def test_syf12_pythagorean_identity_http(value):
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(1.0, abs=1e-9)
+
+
+@pytest.mark.parametrize("case_id,expression,expected,incorrect", [
+    ("SY-F-13", "log(x^2)", __import__("math").log(4), __import__("math").log(2)**2),
+    ("SY-F-14", "(log(x))^2", __import__("math").log(2)**2, __import__("math").log(4)),
+])
+def test_syf13_14_log_power_grouping_http(case_id, expression, expected, incorrect):
+    """Backend semantic witnesses only; original LaTeX grouping is a frontend concern."""
+    assert ROWS[case_id]["operacion"] == ("interpretacion" if case_id == "SY-F-13" else "convencion")
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": expression, "substitutions": {"x": "2"},
+        })
+    assert response.status_code == 200, (case_id, response.text)
+    data = response.json()
+    assert data["success"] is True, (case_id, data)
+    assert data["result_approx"] == pytest.approx(expected, abs=1e-9, rel=1e-9)
+    assert data["result_approx"] != pytest.approx(incorrect, abs=1e-4)
