@@ -2990,3 +2990,10 @@ Plus commit `681d4f2e` corrects fixture loading path in frontend tests. Cumulati
 - Nuevo test paramétrico Plus `test_syp_23_negative_named_identifier_preserves_explicit_multiplication` en commit técnico `5afdead008ac1bf7c46fab57f0652b51450ab052`: para a=12, bc=-6, b=-3, c=-2, se esperan respectivamente a/bc=-2, a/(b*c)=2 y (a/b)*c=8. Son oráculos numéricos independientes por HTTP, no cambios al parser ni resolución de ambigüedad.
 - CI automática Plus para el SHA: cumulative `38348411161` e H1d `38348411111` observados IN_PROGRESS; sin PASS atribuido al nuevo test hasta revisar jobs y logs. Lite mantiene matriz/contrato original; no se considera la prueba Plus como equivalencia E2E bilateral.
 - Siguiente paso Frente B: verificar estas corridas; ante fallo diagnosticar parser/oráculo/test. Localizar e incorporar testigos funcionalmente equivalentes en Lite a través de la entrada pública y certificar paridad; después pasar al siguiente caso Syntax 309 independiente. Frente A SG28/DIST continúa separado y bloqueado solo para certificación multinodo real.
+
+
+## 2026-10-12 — Syntax309 SY-P-23 bilateral signed witnesses
+- Plus commit `5afdead008ac1bf7c46fab57f0652b51450ab052`: cumulative `38348411161` SUCCESS y H1d `38348411111` SUCCESS. Test con signos para identificador `bc` y productos explícitos.
+- Lite commit `9976ce9e51991ddf557a671450880bb9bc9e15b5`: prueba signed de `(a/b)*c=8` y `a/(b*c)=2`, con `a=12,b=-3,c=-2`; confirma tokenización raw `a/bc` como letras separadas. No se falsea paridad semántica: Plus admite identificador nombrado `bc` y Lite actualmente lo separa. SY-P-23 no se declara cerrado.
+- CI Lite nuevo SHA: build `38348692189`, cumulative `38348692114`, H1d `38348692139`, IN_PROGRESS al observar; pendiente verificar logs/conclusión.
+- Siguiente objetivo Frente B: revisar gates Lite; diagnosticar rojos si aparecen y establecer contrato explícito para ambigüedad `a/bc` antes de cerrar SY-P-23. Frente A DIST/SG28 continúa bloqueado solo respecto a certificación real multinodo.
