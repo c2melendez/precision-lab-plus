@@ -78,6 +78,13 @@ def test_authenticated_tls_exchange_grant_release_and_wrong_server(tmp_path):
             ):
                 with pytest.raises(DistributedAdmissionUnavailable):
                     exchange(invalid)
+            # Trusted CA alone is insufficient if the server hostname differs.
+            wrong_hostname = CoordinatorTLSConfig(
+                config.host, config.port, "other.staging.internal",
+                server_cert, client_cert, client_key,
+            )
+            with pytest.raises(DistributedAdmissionUnavailable):
+                make_mtls_exchange(wrong_hostname)({"op": "grant"})
             untrusted = CoordinatorTLSConfig(
                 config.host, config.port, config.server_name,
                 wrong_cert, client_cert, client_key,
