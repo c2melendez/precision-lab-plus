@@ -112,3 +112,19 @@ def test_remote_probe_rejects_multicast_tls_identity(tmp_path, server_name):
                                    config.client_key_file)
     with pytest.raises(DistributedAdmissionUnavailable, match="non-loopback"):
         assess(invalid, explicitly_disposable=True)
+
+
+@pytest.mark.parametrize("invalid", [None, 12, True, [], {}, " ", "\\t"])
+@pytest.mark.parametrize("field", ["host", "server_name"])
+def test_remote_probe_invalid_identity_types_fail_closed(tmp_path, invalid, field):
+    config = _config(tmp_path)
+    values = {
+        "host": config.host, "port": config.port,
+        "server_name": config.server_name,
+        "ca_file": config.ca_file,
+        "client_cert_file": config.client_cert_file,
+        "client_key_file": config.client_key_file,
+    }
+    values[field] = invalid
+    with pytest.raises(DistributedAdmissionUnavailable, match="address"):
+        assess(CoordinatorTLSConfig(**values), explicitly_disposable=True)
