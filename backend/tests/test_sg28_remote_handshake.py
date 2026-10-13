@@ -1,5 +1,6 @@
 """No-network regressions for explicit SG28 remote mTLS probe."""
 import pytest
+import ssl
 from app.services.distributed_admission import DistributedAdmissionUnavailable
 from app.services.distributed_tls_transport import CoordinatorTLSConfig
 from qa.sg28_remote_handshake import probe
