@@ -65,3 +65,19 @@ def test_disposable_remote_probe_does_not_contact_coordinator(tmp_path, monkeypa
     result = assess(_config(tmp_path), explicitly_disposable=True)
     assert result["network_test_executed"] is False
     assert result["dist01_certified"] is False
+
+
+@pytest.mark.parametrize("server_name", ["", "localhost", "127.0.0.1"])
+def test_remote_probe_requires_nonlocal_server_identity(tmp_path, server_name):
+    config = _config(tmp_path)
+    invalid = CoordinatorTLSConfig(config.host, config.port, server_name,
+                                   config.ca_file, config.client_cert_file,
+                                   config.client_key_file)
+    if not server_name:
+        with pytest.raises(DistributedAdmissionUnavailable, match="address"):
+            assess(invalid, explicitly_disposable=True)
+    else:
+        # A static readiness report does not establish remote TLS server identity.
+        result = assess(invalid, explicitly_disposable=True)
+        assert result["network_test_executed"] is False
+        assert result["dist01_certified"] is False
