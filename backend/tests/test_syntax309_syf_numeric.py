@@ -269,3 +269,31 @@ def test_syf29_arcsin_outside_real_domain_http():
         approx = data.get("result_approx")
         assert approx is None or not (isinstance(approx, (int, float)) and math.isfinite(approx)), data
         assert "i" in str(data.get("result_text", "")) or "I" in str(data.get("result_text", "")) or "complex" in str(data.get("result_type", "")).lower(), data
+
+
+@pytest.mark.parametrize("x,y", [("9", "2"), ("16", "3")])
+def test_syf30_root_scope_multiplies_outside_radical_http(x, y):
+    """Explicit backend scope witness; original source LaTeX is checked in Lite."""
+    import math
+    assert ROWS["SY-F-30"]["operacion"] == "interpretacion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": "sqrt(x)*y", "substitutions": {"x": x, "y": y}
+        })
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(math.sqrt(float(x)) * float(y), abs=1e-9)
+    assert data["result_approx"] != pytest.approx(math.sqrt(float(x) * float(y)), abs=1e-4)
+
+
+def test_syf31_sqrt_three_http():
+    """SY-F-31 backend meaning; no claim about frontend unbraced-LaTeX parsing."""
+    import math
+    assert ROWS["SY-F-31"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "sqrt(3)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(math.sqrt(3), abs=1e-9)
