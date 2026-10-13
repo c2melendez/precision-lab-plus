@@ -246,3 +246,26 @@ def test_syf28_nested_trigonometric_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(math.sin(1), abs=1e-9)
+
+
+def test_syf29_arcsin_outside_real_domain_http():
+    """SY-F-29: a real-domain error or an explicitly declared complex result.
+
+    A 200 response containing a silent real scalar/NaN is not acceptable.
+    This is a backend-only witness, not certification of source \\arcsin2 LaTeX.
+    """
+    assert ROWS["SY-F-29"]["operacion"] == "error"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "asin(2)"})
+    assert response.status_code < 500, response.text
+    data = response.json()
+    if data.get("success") is False:
+        assert data.get("error_code") == "DOMAIN_ERROR", data
+        assert isinstance(data.get("error_message"), str) and data["error_message"].strip(), data
+    else:
+        # Complex output must be unambiguously marked; a real scalar isn't a
+        # valid value for arcsin(2) on the real domain.
+        import math
+        approx = data.get("result_approx")
+        assert approx is None or not (isinstance(approx, (int, float)) and math.isfinite(approx)), data
+        assert "i" in str(data.get("result_text", "")) or "I" in str(data.get("result_text", "")) or "complex" in str(data.get("result_type", "")).lower(), data
