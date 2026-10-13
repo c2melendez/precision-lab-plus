@@ -128,3 +128,19 @@ def test_remote_probe_invalid_identity_types_fail_closed(tmp_path, invalid, fiel
     values[field] = invalid
     with pytest.raises(DistributedAdmissionUnavailable, match="address"):
         assess(CoordinatorTLSConfig(**values), explicitly_disposable=True)
+
+
+@pytest.mark.parametrize("host", ["127.1", "127.0.1", "2130706433", "0177.0.0.1", "0x7f000001"])
+def test_remote_probe_rejects_legacy_ipv4_loopback_spellings(tmp_path, host):
+    with pytest.raises(DistributedAdmissionUnavailable, match="non-loopback"):
+        assess(_config(tmp_path, host=host), explicitly_disposable=True)
+
+
+@pytest.mark.parametrize("server_name", ["127.1", "2130706433", "0x7f000001"])
+def test_remote_probe_rejects_legacy_ipv4_tls_identity(tmp_path, server_name):
+    config = _config(tmp_path)
+    invalid = CoordinatorTLSConfig(config.host, config.port, server_name,
+                                   config.ca_file, config.client_cert_file,
+                                   config.client_key_file)
+    with pytest.raises(DistributedAdmissionUnavailable, match="non-loopback"):
+        assess(invalid, explicitly_disposable=True)
