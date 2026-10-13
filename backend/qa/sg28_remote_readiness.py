@@ -6,6 +6,7 @@ capacity, modifies leases, runs calculations, or logs credentials.
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
 import sys
@@ -14,14 +15,28 @@ from app.services.distributed_admission import DistributedAdmissionUnavailable
 from app.services.distributed_tls_transport import CoordinatorTLSConfig
 
 
+def _is_local_or_unroutable(value: str) -> bool:
+    """Reject local endpoints, including alternate loopback IP spellings."""
+    name = value.strip().rstrip(".").lower()
+    if name == "localhost" or name.endswith(".localhost"):
+        return True
+    try:
+        address = ipaddress.ip_address(name.strip("[]"))
+    except ValueError:
+        return False
+    if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped:
+        address = address.ipv4_mapped
+    return address.is_loopback or address.is_unspecified or address.is_link_local
+
+
 def assess(config: CoordinatorTLSConfig, *, explicitly_disposable: bool) -> dict:
     """Static configuration validation only; no network connection is opened."""
     if not explicitly_disposable:
         raise DistributedAdmissionUnavailable("Disposable staging authorization required")
     config.validate()
-    if config.host in ("localhost", "127.0.0.1", "::1"):
+    if _is_local_or_unroutable(config.host):
         raise DistributedAdmissionUnavailable("Independent-host probe needs a non-loopback coordinator")
-    if config.server_name in ("localhost", "127.0.0.1", "::1"):
+    if _is_local_or_unroutable(config.server_name):
         raise DistributedAdmissionUnavailable("Remote coordinator requires a non-loopback TLS identity")
     return {
         "ready_for_connectivity_probe": True,
