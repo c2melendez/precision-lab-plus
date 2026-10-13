@@ -37,3 +37,31 @@ def test_remote_probe_requires_all_trust_material(tmp_path):
     (tmp_path / "key.pem").unlink()
     with pytest.raises(DistributedAdmissionUnavailable, match="trust material missing"):
         assess(config, explicitly_disposable=True)
+
+
+@pytest.mark.parametrize("host", ["localhost", "127.0.0.1", "::1"])
+def test_disposable_remote_probe_never_accepts_local_host(tmp_path, host):
+    with pytest.raises(DistributedAdmissionUnavailable, match="non-loopback"):
+        assess(_config(tmp_path, host=host), explicitly_disposable=True)
+
+
+@pytest.mark.parametrize("port", [0, -1, 65536])
+def test_disposable_remote_probe_rejects_invalid_port(tmp_path, port):
+    config = _config(tmp_path)
+    invalid = CoordinatorTLSConfig(config.host, port, config.server_name,
+                                   config.ca_file, config.client_cert_file,
+                                   config.client_key_file)
+    with pytest.raises(DistributedAdmissionUnavailable, match="address"):
+        assess(invalid, explicitly_disposable=True)
+
+
+def test_disposable_remote_probe_does_not_contact_coordinator(tmp_path, monkeypatch):
+    import socket
+
+    def unexpected_connection(*args, **kwargs):
+        raise AssertionError("static readiness must not open network sockets")
+
+    monkeypatch.setattr(socket, "create_connection", unexpected_connection)
+    result = assess(_config(tmp_path), explicitly_disposable=True)
+    assert result["network_test_executed"] is False
+    assert result["dist01_certified"] is False
