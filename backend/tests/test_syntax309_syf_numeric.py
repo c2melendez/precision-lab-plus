@@ -72,3 +72,22 @@ def test_syf07_inverse_tangent_numeric_via_http():
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(math.pi / 4, rel=1e-9, abs=1e-12)
     assert data["result_approx"] != pytest.approx(1 / math.tan(1), abs=1e-4)
+
+
+@pytest.mark.parametrize("case_id,expression,value,expected,different", [
+    ("SY-F-01", "sin(x)+1", "2", 1 + __import__("math").sin(2), __import__("math").sin(3)),
+    ("SY-F-02", "sin(x)*cos(x)", "1", __import__("math").sin(1)*__import__("math").cos(1), __import__("math").sin(__import__("math").cos(1))),
+    ("SY-F-08", "sin(2*x)", "1", __import__("math").sin(2), 2*__import__("math").sin(1)),
+])
+def test_syf01_02_08_explicit_scope_backend_witness(case_id, expression, value, expected, different):
+    """Backend-only control: original LaTeX grouping must be checked by frontend/parser tests."""
+    assert ROWS[case_id]["operacion"] in ("interpretacion", "convencion")
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": expression, "substitutions": {"x": value}
+        })
+    assert response.status_code == 200, (case_id, response.text)
+    data = response.json()
+    assert data["success"] is True, (case_id, data)
+    assert data["result_approx"] == pytest.approx(expected, abs=1e-9, rel=1e-9)
+    assert data["result_approx"] != pytest.approx(different, abs=1e-4)
