@@ -176,3 +176,34 @@ def test_syf18_20_log_precedence_base_change_and_natural_e_http(case_id, express
     if case_id == "SY-F-18":
         import math
         assert data["result_approx"] != pytest.approx(math.log2(9), abs=1e-4)
+
+
+@pytest.mark.parametrize("case_id,expression", [
+    ("SY-F-21", "asinh(1)"),
+    ("SY-F-22", "asinh(1)"),
+])
+def test_syf21_22_inverse_hyperbolic_sine_http(case_id, expression):
+    """Backend numerical witness; source MathLive notation requires separate E2E."""
+    import math
+    assert ROWS[case_id]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, (case_id, response.text)
+    data = response.json()
+    assert data["success"] is True, (case_id, data)
+    assert data["result_approx"] == pytest.approx(math.asinh(1), abs=1e-9)
+
+
+@pytest.mark.parametrize("x", ["0", "1", "2"])
+def test_syf23_hyperbolic_identity_http(x):
+    import math
+    assert ROWS["SY-F-23"]["operacion"] == "equivalente"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": "cosh(x)^2-sinh(x)^2",
+            "substitutions": {"x": x},
+        })
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(1.0, abs=1e-9)
