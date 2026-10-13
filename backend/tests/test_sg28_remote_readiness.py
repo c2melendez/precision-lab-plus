@@ -114,7 +114,7 @@ def test_remote_probe_rejects_multicast_tls_identity(tmp_path, server_name):
         assess(invalid, explicitly_disposable=True)
 
 
-@pytest.mark.parametrize("invalid", [None, 12, True, [], {}, " ", "\\t"])
+@pytest.mark.parametrize("invalid", [None, 12, True, [], {}, " ", "\t"])
 @pytest.mark.parametrize("field", ["host", "server_name"])
 def test_remote_probe_invalid_identity_types_fail_closed(tmp_path, invalid, field):
     config = _config(tmp_path)
