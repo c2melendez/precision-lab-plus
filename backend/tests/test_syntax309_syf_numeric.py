@@ -139,3 +139,19 @@ def test_syf13_14_log_power_grouping_http(case_id, expression, expected, incorre
     assert data["success"] is True, (case_id, data)
     assert data["result_approx"] == pytest.approx(expected, abs=1e-9, rel=1e-9)
     assert data["result_approx"] != pytest.approx(incorrect, abs=1e-4)
+
+
+@pytest.mark.parametrize("case_id,expression,expected", [
+    ("SY-F-15", "log(100)", 2.0),
+    ("SY-F-16", "log(8,2)", 3.0),
+    ("SY-F-17", "log(1000,10)", 3.0),
+])
+def test_syf15_17_logarithm_base_contract_http(case_id, expression, expected):
+    """Explicit HTTP syntax tests: common log defaults to ten, bases remain explicit."""
+    assert ROWS[case_id]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, (case_id, response.text)
+    data = response.json()
+    assert data["success"] is True, (case_id, data)
+    assert data["result_approx"] == pytest.approx(expected, abs=1e-10)
