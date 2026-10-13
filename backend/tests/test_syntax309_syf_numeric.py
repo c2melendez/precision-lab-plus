@@ -91,3 +91,33 @@ def test_syf01_02_08_explicit_scope_backend_witness(case_id, expression, value, 
     assert data["success"] is True, (case_id, data)
     assert data["result_approx"] == pytest.approx(expected, abs=1e-9, rel=1e-9)
     assert data["result_approx"] != pytest.approx(different, abs=1e-4)
+
+ 
+@pytest.mark.parametrize("case_id,expression", [
+    ("SY-F-10", "sin(pi/6)"),
+    ("SY-F-11", "sin(30*pi/180)"),
+])
+def test_syf10_11_explicit_degree_translation_http(case_id, expression):
+    """Backend translation witness only; original degree glyph needs a UI/parser gate."""
+    assert ROWS[case_id]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, (case_id, response.text)
+    data = response.json()
+    assert data["success"] is True, (case_id, data)
+    assert data["result_approx"] == pytest.approx(0.5, abs=1e-10)
+
+
+@pytest.mark.parametrize("value", ["0", "0.7", "2"])
+def test_syf12_pythagorean_identity_http(value):
+    """At independent input values, cosine squared plus sine squared must equal one."""
+    assert ROWS["SY-F-12"]["operacion"] == "equivalente"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": "cos(x)^2+sin(x)^2",
+            "substitutions": {"x": value},
+        })
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(1.0, abs=1e-9)
