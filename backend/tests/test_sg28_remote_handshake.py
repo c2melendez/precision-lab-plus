@@ -99,3 +99,26 @@ def test_remote_handshake_transport_errors_fail_closed(tmp_path, monkeypatch, fa
     monkeypatch.setattr(socket, "create_connection", raise_connection)
     with pytest.raises(DistributedAdmissionUnavailable, match="handshake failed"):
         probe(_config(tmp_path), explicitly_disposable=True)
+
+
+def test_tls_certificate_loading_failure_fails_closed_before_network(tmp_path, monkeypatch):
+    import socket
+    import ssl
+    class FakeContext:
+        def load_cert_chain(self, *args):
+            raise ssl.SSLError("invalid client certificate")
+    monkeypatch.setattr(ssl, "create_default_context", lambda *a, **k: FakeContext())
+    monkeypatch.setattr(socket, "create_connection", lambda *a, **k: pytest.fail("network contacted"))
+    with pytest.raises(DistributedAdmissionUnavailable, match="handshake failed"):
+        probe(_config(tmp_path), explicitly_disposable=True)
+
+
+def test_tls_context_creation_failure_fails_closed_before_network(tmp_path, monkeypatch):
+    import socket
+    import ssl
+    def broken_context(*args, **kwargs):
+        raise ssl.SSLError("invalid CA bundle")
+    monkeypatch.setattr(ssl, "create_default_context", broken_context)
+    monkeypatch.setattr(socket, "create_connection", lambda *a, **k: pytest.fail("network contacted"))
+    with pytest.raises(DistributedAdmissionUnavailable, match="handshake failed"):
+        probe(_config(tmp_path), explicitly_disposable=True)
