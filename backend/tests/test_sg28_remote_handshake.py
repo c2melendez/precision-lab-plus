@@ -207,3 +207,27 @@ def test_tls_uses_configured_ca_and_bounded_tcp_timeout(tmp_path, monkeypatch):
     assert observed["connection"] == ((config.host, config.port), config.timeout_seconds)
     assert result == {"mtls_handshake_verified": True, "admission_request_sent": False,
                       "dist01_certified": False, "dist08_certified": False}
+
+
+def test_remote_tls_socket_timeout_fails_closed_without_admission(tmp_path, monkeypatch):
+    import socket
+    class FakePlain:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+    class FakeSecure:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def settimeout(self, timeout):
+            assert timeout == 2.0
+            raise TimeoutError("TLS peer socket timeout setup failed")
+        def getpeercert(self): pytest.fail("peer accepted after timeout failure")
+        def sendall(self, *args): pytest.fail("admission transmitted after TLS timeout")
+    class FakeContext:
+        verify_mode = ssl.CERT_NONE
+        check_hostname = False
+        def load_cert_chain(self, *args): pass
+        def wrap_socket(self, *args, **kwargs): return FakeSecure()
+    monkeypatch.setattr(ssl, "create_default_context", lambda *a, **k: FakeContext())
+    monkeypatch.setattr(socket, "create_connection", lambda *a, **k: FakePlain())
+    with pytest.raises(DistributedAdmissionUnavailable, match="handshake failed"):
+        probe(_config(tmp_path), explicitly_disposable=True)
