@@ -61,3 +61,25 @@ def test_failed_tcp_does_not_claim_handshake(tmp_path, monkeypatch):
     monkeypatch.setattr(socket, "create_connection", lambda *a, **k: (_ for _ in ()).throw(ConnectionRefusedError()))
     with pytest.raises(DistributedAdmissionUnavailable, match="handshake failed"):
         probe(_config(tmp_path), explicitly_disposable=True)
+
+
+@pytest.mark.parametrize("peer_certificate", [None, {}])
+def test_missing_peer_identity_fails_closed_without_admission(tmp_path, monkeypatch, peer_certificate):
+    import socket
+    import ssl
+    class FakeSecure:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def settimeout(self, timeout): pass
+        def getpeercert(self): return peer_certificate
+        def sendall(self, *args): pytest.fail("admission message sent")
+    class FakePlain:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+    class FakeContext:
+        def load_cert_chain(self, *args): pass
+        def wrap_socket(self, *args, **kwargs): return FakeSecure()
+    monkeypatch.setattr(ssl, "create_default_context", lambda *a, **k: FakeContext())
+    monkeypatch.setattr(socket, "create_connection", lambda *a, **k: FakePlain())
+    with pytest.raises(DistributedAdmissionUnavailable, match="peer identity"):
+        probe(_config(tmp_path), explicitly_disposable=True)
