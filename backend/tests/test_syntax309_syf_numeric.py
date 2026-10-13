@@ -223,3 +223,26 @@ def test_syf24_26_hyperbolic_and_exponential_http(case_id, expression, expected)
     data = response.json()
     assert data["success"] is True, (case_id, data)
     assert data["result_approx"] == pytest.approx(expected, abs=1e-9, rel=1e-9)
+
+
+@pytest.mark.parametrize("x", ["0.4", "1.2"])
+def test_syf27_adjacent_sine_product_http(x):
+    import math
+    assert ROWS["SY-F-27"]["operacion"] == "equivalente"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "sin(x)*sin(x)", "substitutions": {"x": x}})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(math.sin(float(x)) ** 2, abs=1e-9)
+    assert data["result_approx"] != pytest.approx(math.sin(float(x)**2), abs=1e-4)
+
+def test_syf28_nested_trigonometric_http():
+    import math
+    assert ROWS["SY-F-28"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "sin(cos(tan(0)))"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(math.sin(1), abs=1e-9)
