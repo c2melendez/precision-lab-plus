@@ -23,7 +23,7 @@ def assess(config: CoordinatorTLSConfig, *, explicitly_disposable: bool) -> dict
         raise DistributedAdmissionUnavailable("Independent-host probe needs a non-loopback coordinator")
     return {
         "ready_for_connectivity_probe": True,
-        "tls_identity_check": True,
+        "tls_identity_check_configured": True,
         "authorization": "disposable_staging_only",
         "network_test_executed": False,
         "dist01_certified": False,
