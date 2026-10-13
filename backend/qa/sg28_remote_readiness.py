@@ -26,7 +26,8 @@ def _is_local_or_unroutable(value: str) -> bool:
         return False
     if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped:
         address = address.ipv4_mapped
-    return address.is_loopback or address.is_unspecified or address.is_link_local
+    return (address.is_loopback or address.is_unspecified
+            or address.is_link_local or address.is_multicast)
 
 
 def assess(config: CoordinatorTLSConfig, *, explicitly_disposable: bool) -> dict:
