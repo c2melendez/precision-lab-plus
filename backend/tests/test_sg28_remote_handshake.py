@@ -1,0 +1,63 @@
+"""No-network regressions for explicit SG28 remote mTLS probe."""
+import pytest
+from app.services.distributed_admission import DistributedAdmissionUnavailable
+from app.services.distributed_tls_transport import CoordinatorTLSConfig
+from qa.sg28_remote_handshake import probe
+
+def _config(tmp_path):
+    paths = [tmp_path / name for name in ("ca.pem", "client.pem", "key.pem")]
+    for path in paths:
+        path.write_text("static fixture only", encoding="utf-8")
+    return CoordinatorTLSConfig("coordinator.staging.internal", 443,
+                                "coordinator.staging.internal", *(str(p) for p in paths))
+
+def test_denied_authorization_never_initializes_tls(tmp_path, monkeypatch):
+    import ssl
+    monkeypatch.setattr(ssl, "create_default_context", lambda *a, **k: pytest.fail("TLS initialized"))
+    with pytest.raises(DistributedAdmissionUnavailable, match="authorization required"):
+        probe(_config(tmp_path), explicitly_disposable=False)
+
+def test_bad_local_host_never_initializes_tls(tmp_path, monkeypatch):
+    import ssl
+    monkeypatch.setattr(ssl, "create_default_context", lambda *a, **k: pytest.fail("TLS initialized"))
+    c = _config(tmp_path)
+    invalid = CoordinatorTLSConfig("127.0.0.1", c.port, c.server_name,
+                                   c.ca_file, c.client_cert_file, c.client_key_file)
+    with pytest.raises(DistributedAdmissionUnavailable, match="non-loopback"):
+        probe(invalid, explicitly_disposable=True)
+
+def test_tls_handshake_sends_no_admission_messages(tmp_path, monkeypatch):
+    import socket
+    import ssl
+    class FakeSecure:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def settimeout(self, timeout): assert timeout == 2.0
+        def getpeercert(self): return {"subject": ((("commonName", "coordinator.staging.internal"),),)}
+        def send(self, *args): pytest.fail("protocol data transmitted")
+        def sendall(self, *args): pytest.fail("protocol data transmitted")
+        def recv(self, *args): pytest.fail("protocol data received")
+    class FakePlain:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+    class FakeContext:
+        def load_cert_chain(self, certfile, keyfile): pass
+        def wrap_socket(self, plain, *, server_hostname):
+            assert server_hostname == "coordinator.staging.internal"
+            return FakeSecure()
+    context = FakeContext()
+    monkeypatch.setattr(ssl, "create_default_context", lambda *a, **k: context)
+    monkeypatch.setattr(socket, "create_connection", lambda *a, **k: FakePlain())
+    result = probe(_config(tmp_path), explicitly_disposable=True)
+    assert result == {"mtls_handshake_verified": True, "admission_request_sent": False,
+                      "dist01_certified": False, "dist08_certified": False}
+
+def test_failed_tcp_does_not_claim_handshake(tmp_path, monkeypatch):
+    import socket
+    import ssl
+    class FakeContext:
+        def load_cert_chain(self, *args): pass
+    monkeypatch.setattr(ssl, "create_default_context", lambda *a, **k: FakeContext())
+    monkeypatch.setattr(socket, "create_connection", lambda *a, **k: (_ for _ in ()).throw(ConnectionRefusedError()))
+    with pytest.raises(DistributedAdmissionUnavailable, match="handshake failed"):
+        probe(_config(tmp_path), explicitly_disposable=True)
