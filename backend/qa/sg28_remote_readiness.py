@@ -9,6 +9,7 @@ import argparse
 import ipaddress
 import json
 import os
+import socket
 import sys
 
 from app.services.distributed_admission import DistributedAdmissionUnavailable
@@ -23,7 +24,12 @@ def _is_local_or_unroutable(value: str) -> bool:
     try:
         address = ipaddress.ip_address(name.strip("[]"))
     except ValueError:
-        return False
+        # inet_aton recognizes legacy short and integer IPv4 forms such as
+        # 127.1 or 2130706433; reject their local equivalents without DNS.
+        try:
+            address = ipaddress.IPv4Address(socket.inet_aton(name))
+        except (OSError, ValueError):
+            return False
     if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped:
         address = address.ipv4_mapped
     return (address.is_loopback or address.is_unspecified
