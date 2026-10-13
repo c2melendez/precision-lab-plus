@@ -83,3 +83,18 @@ def test_missing_peer_identity_fails_closed_without_admission(tmp_path, monkeypa
     monkeypatch.setattr(socket, "create_connection", lambda *a, **k: FakePlain())
     with pytest.raises(DistributedAdmissionUnavailable, match="peer identity"):
         probe(_config(tmp_path), explicitly_disposable=True)
+
+
+@pytest.mark.parametrize("failure", [TimeoutError("timeout"), ConnectionResetError("reset"),
+                                      ssl.SSLError("handshake"), OSError("unreachable")])
+def test_remote_handshake_transport_errors_fail_closed(tmp_path, monkeypatch, failure):
+    import socket
+    import ssl
+    class FakeContext:
+        def load_cert_chain(self, *args): pass
+    monkeypatch.setattr(ssl, "create_default_context", lambda *a, **k: FakeContext())
+    def raise_connection(*args, **kwargs):
+        raise failure
+    monkeypatch.setattr(socket, "create_connection", raise_connection)
+    with pytest.raises(DistributedAdmissionUnavailable, match="handshake failed"):
+        probe(_config(tmp_path), explicitly_disposable=True)
