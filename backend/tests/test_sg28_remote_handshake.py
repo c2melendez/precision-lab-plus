@@ -231,3 +231,27 @@ def test_remote_tls_socket_timeout_fails_closed_without_admission(tmp_path, monk
     monkeypatch.setattr(socket, "create_connection", lambda *a, **k: FakePlain())
     with pytest.raises(DistributedAdmissionUnavailable, match="handshake failed"):
         probe(_config(tmp_path), explicitly_disposable=True)
+
+
+def test_peer_certificate_read_failure_closes_without_admission(tmp_path, monkeypatch):
+    import socket
+    class FakePlain:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+    class FakeSecure:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def settimeout(self, timeout): assert timeout == 2.0
+        def getpeercert(self): raise ssl.SSLError("peer certificate read failed")
+        def send(self, *args): pytest.fail("admission data sent")
+        def sendall(self, *args): pytest.fail("admission data sent")
+        def recv(self, *args): pytest.fail("admission data received")
+    class FakeContext:
+        verify_mode = ssl.CERT_NONE
+        check_hostname = False
+        def load_cert_chain(self, *args): pass
+        def wrap_socket(self, *args, **kwargs): return FakeSecure()
+    monkeypatch.setattr(ssl, "create_default_context", lambda *a, **k: FakeContext())
+    monkeypatch.setattr(socket, "create_connection", lambda *a, **k: FakePlain())
+    with pytest.raises(DistributedAdmissionUnavailable, match="handshake failed"):
+        probe(_config(tmp_path), explicitly_disposable=True)
