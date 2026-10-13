@@ -59,3 +59,16 @@ def test_syf04_05_function_power_and_inverse_via_http(case_id, expression, expec
     data = response.json()
     assert data["success"] is True, (case_id, data)
     assert data["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
+
+
+def test_syf07_inverse_tangent_numeric_via_http():
+    """Explicit backend syntax witness, separate from MathLive interpretation."""
+    import math
+    assert ROWS["SY-F-07"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "atan(1)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(math.pi / 4, rel=1e-9, abs=1e-12)
+    assert data["result_approx"] != pytest.approx(1 / math.tan(1), abs=1e-4)
