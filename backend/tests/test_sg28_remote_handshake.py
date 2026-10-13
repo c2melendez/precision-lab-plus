@@ -122,3 +122,20 @@ def test_tls_context_creation_failure_fails_closed_before_network(tmp_path, monk
     monkeypatch.setattr(socket, "create_connection", lambda *a, **k: pytest.fail("network contacted"))
     with pytest.raises(DistributedAdmissionUnavailable, match="handshake failed"):
         probe(_config(tmp_path), explicitly_disposable=True)
+
+
+def test_tls_server_hostname_is_checked_before_handshake_payload(tmp_path, monkeypatch):
+    import socket
+    import ssl
+    class FakePlain:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+    class FakeContext:
+        def load_cert_chain(self, *args): pass
+        def wrap_socket(self, plain, *, server_hostname):
+            assert server_hostname == "coordinator.staging.internal"
+            raise ssl.SSLCertVerificationError("hostname mismatch")
+    monkeypatch.setattr(ssl, "create_default_context", lambda *a, **k: FakeContext())
+    monkeypatch.setattr(socket, "create_connection", lambda *a, **k: FakePlain())
+    with pytest.raises(DistributedAdmissionUnavailable, match="handshake failed"):
+        probe(_config(tmp_path), explicitly_disposable=True)
