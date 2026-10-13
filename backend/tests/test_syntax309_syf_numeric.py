@@ -1,0 +1,31 @@
+"""Syntax309 SY-F initial numeric witnesses through Plus HTTP.
+
+Official LaTeX is translated explicitly into backend notation. This validates
+backend evaluation only, not MathLive or UI interpretation.
+"""
+import json
+import os
+from pathlib import Path
+
+os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
+import pytest
+from fastapi.testclient import TestClient
+from app.main import app
+
+DATA = Path(__file__).resolve().parents[2] / "qa/certification/syntax309_cases.jsonl"
+ROWS = {r["id"]: r for r in (json.loads(line) for line in DATA.read_text(encoding="utf-8").splitlines() if line.strip())}
+WITNESSES = [("SY-F-09", "sin(pi/6)", 0.5), ("SY-F-06", "(sin(pi/6))^(-1)", 2.0)]
+
+def test_syf_source_and_scope():
+    assert sum(r["seccion"] == "F" for r in ROWS.values()) == 48
+    for case_id, _, _ in WITNESSES:
+        assert ROWS[case_id]["operacion"] == "valor"
+
+@pytest.mark.parametrize("case_id,expression,expected", WITNESSES)
+def test_syf_numeric_witness_via_http(case_id, expression, expected):
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, (case_id, response.text)
+    data = response.json()
+    assert data["success"] is True, (case_id, data)
+    assert data["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
