@@ -139,3 +139,32 @@ def test_tls_server_hostname_is_checked_before_handshake_payload(tmp_path, monke
     monkeypatch.setattr(socket, "create_connection", lambda *a, **k: FakePlain())
     with pytest.raises(DistributedAdmissionUnavailable, match="handshake failed"):
         probe(_config(tmp_path), explicitly_disposable=True)
+
+
+def test_ssl_context_forces_server_identity_verification(tmp_path, monkeypatch):
+    import socket
+    import ssl
+    class FakePlain:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+    class FakeSecure:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def settimeout(self, timeout): pass
+        def getpeercert(self): return {"subject": ((("commonName", "coordinator.staging.internal"),),)}
+    class StrictContext:
+        def __init__(self):
+            self.verify_mode = ssl.CERT_NONE
+            self.check_hostname = False
+        def load_cert_chain(self, *args): pass
+        def wrap_socket(self, plain, *, server_hostname):
+            assert self.verify_mode == ssl.CERT_REQUIRED
+            assert self.check_hostname is True
+            assert server_hostname == "coordinator.staging.internal"
+            return FakeSecure()
+    context = StrictContext()
+    monkeypatch.setattr(ssl, "create_default_context", lambda *a, **k: context)
+    monkeypatch.setattr(socket, "create_connection", lambda *a, **k: FakePlain())
+    result = probe(_config(tmp_path), explicitly_disposable=True)
+    assert result["mtls_handshake_verified"] is True
+    assert result["admission_request_sent"] is False
