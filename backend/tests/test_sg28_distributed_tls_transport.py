@@ -96,3 +96,20 @@ def test_tls_transport_requires_explicit_trust_files(tmp_path):
     )
     with pytest.raises(DistributedAdmissionUnavailable):
         make_mtls_exchange(config)
+
+
+@pytest.mark.parametrize("timeout", [0, -1, 10.01, float("nan"), float("inf"),
+                                     float("-inf"), True, False, "2", None])
+def test_tls_transport_rejects_invalid_timeout_without_network(tmp_path, monkeypatch, timeout):
+    import socket
+
+    def forbidden_network(*args, **kwargs):
+        raise AssertionError("invalid configuration attempted network access")
+
+    monkeypatch.setattr(socket, "create_connection", forbidden_network)
+    config = CoordinatorTLSConfig(
+        "127.0.0.1", 5000, "localhost",
+        str(tmp_path / "not-a-ca"), "missing-client", "missing-key", timeout,
+    )
+    with pytest.raises(DistributedAdmissionUnavailable, match="timeout"):
+        make_mtls_exchange(config)
