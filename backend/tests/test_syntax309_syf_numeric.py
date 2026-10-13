@@ -29,3 +29,18 @@ def test_syf_numeric_witness_via_http(case_id, expression, expected):
     data = response.json()
     assert data["success"] is True, (case_id, data)
     assert data["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
+
+
+def test_syf03_sine_argument_power_not_function_power():
+    """SY-F-03: numeric substitution distinguishes sin(x^2) from sin(x)^2."""
+    import math
+    assert ROWS["SY-F-03"]["operacion"] == "interpretacion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": "sin(x^2)", "substitutions": {"x": "2"}
+        })
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(math.sin(4), rel=1e-9, abs=1e-12)
+    assert data["result_approx"] != pytest.approx(math.sin(2) ** 2, abs=1e-4)
