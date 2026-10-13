@@ -21,6 +21,8 @@ def assess(config: CoordinatorTLSConfig, *, explicitly_disposable: bool) -> dict
     config.validate()
     if config.host in ("localhost", "127.0.0.1", "::1"):
         raise DistributedAdmissionUnavailable("Independent-host probe needs a non-loopback coordinator")
+    if config.server_name in ("localhost", "127.0.0.1", "::1"):
+        raise DistributedAdmissionUnavailable("Remote coordinator requires a non-loopback TLS identity")
     return {
         "ready_for_connectivity_probe": True,
         "tls_identity_check_configured": True,
