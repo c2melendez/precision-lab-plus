@@ -207,3 +207,19 @@ def test_syf23_hyperbolic_identity_http(x):
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(1.0, abs=1e-9)
+
+
+@pytest.mark.parametrize("case_id,expression,expected", [
+    ("SY-F-24", "sech(0)", 1.0),
+    ("SY-F-25", "exp(2)", __import__("math").exp(2)),
+    ("SY-F-26", "exp(ln(3))", 3.0),
+])
+def test_syf24_26_hyperbolic_and_exponential_http(case_id, expression, expected):
+    """Explicit backend syntax witness, independent of original MathLive LaTeX."""
+    assert ROWS[case_id]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, (case_id, response.text)
+    data = response.json()
+    assert data["success"] is True, (case_id, data)
+    assert data["result_approx"] == pytest.approx(expected, abs=1e-9, rel=1e-9)
