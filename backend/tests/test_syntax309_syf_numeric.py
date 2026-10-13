@@ -44,3 +44,18 @@ def test_syf03_sine_argument_power_not_function_power():
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(math.sin(4), rel=1e-9, abs=1e-12)
     assert data["result_approx"] != pytest.approx(math.sin(2) ** 2, abs=1e-4)
+
+
+@pytest.mark.parametrize("case_id,expression,expected", [
+    ("SY-F-04", "(sin(pi/6))^2", 0.25),
+    ("SY-F-05", "asin(1/2)", 0.5235987755982988),
+])
+def test_syf04_05_function_power_and_inverse_via_http(case_id, expression, expected):
+    """Explicit backend syntax witnesses; NOT an assertion about MathLive parsing."""
+    assert ROWS[case_id]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, (case_id, response.text)
+    data = response.json()
+    assert data["success"] is True, (case_id, data)
+    assert data["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
