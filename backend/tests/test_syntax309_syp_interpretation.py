@@ -305,3 +305,25 @@ def test_syp_23_named_bc_value_is_independent_of_b_times_c(expression, expected)
     body = response.json()
     assert body["success"] is True, (expression, body)
     assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
+
+
+@pytest.mark.parametrize(
+    "expression,expected",
+    [
+        ("a/bc", -2.0),
+        ("a/(b*c)", 2.0),
+        ("(a/b)*c", 8.0),
+    ],
+)
+def test_syp_23_negative_named_identifier_preserves_explicit_multiplication(expression, expected):
+    """Sign-sensitive independent witness: bc is not interchangeable with b*c."""
+    assert ROWS["SY-P-23"]["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": expression,
+            "substitutions": {"a": "12", "bc": "-6", "b": "-3", "c": "-2"},
+        })
+    assert response.status_code == 200, (expression, response.text)
+    body = response.json()
+    assert body["success"] is True, (expression, body)
+    assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-12)
