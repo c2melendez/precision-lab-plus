@@ -27,7 +27,9 @@ class CoordinatorTLSConfig:
     timeout_seconds: float = 2.0
 
     def validate(self) -> None:
-        if not self.host or not self.server_name or type(self.port) is not int or not 1 <= self.port <= 65535:
+        if (not isinstance(self.host, str) or not self.host.strip()
+                or not isinstance(self.server_name, str) or not self.server_name.strip()
+                or type(self.port) is not int or not 1 <= self.port <= 65535):
             raise DistributedAdmissionUnavailable("Invalid coordinator address")
         if (type(self.timeout_seconds) not in (float, int)
                 or not math.isfinite(self.timeout_seconds)
