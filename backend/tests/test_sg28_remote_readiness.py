@@ -97,3 +97,18 @@ def test_remote_probe_rejects_alternate_local_tls_identity(tmp_path, server_name
                                    config.client_key_file)
     with pytest.raises(DistributedAdmissionUnavailable, match="non-loopback"):
         assess(invalid, explicitly_disposable=True)
+
+@pytest.mark.parametrize("host", ["224.0.0.1", "239.255.255.250", "ff02::1"])
+def test_remote_probe_rejects_multicast_coordinator(tmp_path, host):
+    with pytest.raises(DistributedAdmissionUnavailable, match="non-loopback"):
+        assess(_config(tmp_path, host=host), explicitly_disposable=True)
+
+
+@pytest.mark.parametrize("server_name", ["224.0.0.1", "ff02::1"])
+def test_remote_probe_rejects_multicast_tls_identity(tmp_path, server_name):
+    config = _config(tmp_path)
+    invalid = CoordinatorTLSConfig(config.host, config.port, server_name,
+                                   config.ca_file, config.client_cert_file,
+                                   config.client_key_file)
+    with pytest.raises(DistributedAdmissionUnavailable, match="non-loopback"):
+        assess(invalid, explicitly_disposable=True)
