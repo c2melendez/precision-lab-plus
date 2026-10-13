@@ -124,8 +124,8 @@ def test_syf12_pythagorean_identity_http(value):
 
 
 @pytest.mark.parametrize("case_id,expression,expected,incorrect", [
-    ("SY-F-13", "log(x^2)", __import__("math").log(4), __import__("math").log(2)**2),
-    ("SY-F-14", "(log(x))^2", __import__("math").log(2)**2, __import__("math").log(4)),
+    ("SY-F-13", "ln(x^2)", __import__("math").log(4), __import__("math").log(2)**2),
+    ("SY-F-14", "(ln(x))^2", __import__("math").log(2)**2, __import__("math").log(4)),
 ])
 def test_syf13_14_log_power_grouping_http(case_id, expression, expected, incorrect):
     """Backend semantic witnesses only; original LaTeX grouping is a frontend concern."""
