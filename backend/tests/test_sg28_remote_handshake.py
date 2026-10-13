@@ -168,3 +168,42 @@ def test_ssl_context_forces_server_identity_verification(tmp_path, monkeypatch):
     result = probe(_config(tmp_path), explicitly_disposable=True)
     assert result["mtls_handshake_verified"] is True
     assert result["admission_request_sent"] is False
+
+
+def test_tls_uses_configured_ca_and_bounded_tcp_timeout(tmp_path, monkeypatch):
+    import socket
+    observed = {}
+    config = _config(tmp_path)
+    class FakePlain:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+    class FakeSecure:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def settimeout(self, timeout):
+            assert timeout == config.timeout_seconds
+        def getpeercert(self):
+            return {"subject": ((('commonName', config.server_name),),)}
+    class FakeContext:
+        verify_mode = ssl.CERT_NONE
+        check_hostname = False
+        def load_cert_chain(self, certfile, keyfile):
+            assert (certfile, keyfile) == (config.client_cert_file, config.client_key_file)
+        def wrap_socket(self, plain, *, server_hostname):
+            assert server_hostname == config.server_name
+            assert self.verify_mode == ssl.CERT_REQUIRED
+            assert self.check_hostname is True
+            return FakeSecure()
+    def context_factory(purpose, *, cafile):
+        observed["context"] = (purpose, cafile)
+        return FakeContext()
+    def connection_factory(address, *, timeout):
+        observed["connection"] = (address, timeout)
+        return FakePlain()
+    monkeypatch.setattr(ssl, "create_default_context", context_factory)
+    monkeypatch.setattr(socket, "create_connection", connection_factory)
+    result = probe(config, explicitly_disposable=True)
+    assert observed["context"] == (ssl.Purpose.SERVER_AUTH, config.ca_file)
+    assert observed["connection"] == ((config.host, config.port), config.timeout_seconds)
+    assert result == {"mtls_handshake_verified": True, "admission_request_sent": False,
+                      "dist01_certified": False, "dist08_certified": False}
