@@ -6,6 +6,7 @@ No fallback to plaintext, no implicit trust, no persistent connections.
 from __future__ import annotations
 
 import json
+import math
 import socket
 import ssl
 from dataclasses import dataclass
@@ -28,7 +29,9 @@ class CoordinatorTLSConfig:
     def validate(self) -> None:
         if not self.host or not self.server_name or type(self.port) is not int or not 1 <= self.port <= 65535:
             raise DistributedAdmissionUnavailable("Invalid coordinator address")
-        if not 0 < self.timeout_seconds <= 10:
+        if (type(self.timeout_seconds) not in (float, int)
+                or not math.isfinite(self.timeout_seconds)
+                or not 0 < self.timeout_seconds <= 10):
             raise DistributedAdmissionUnavailable("Invalid coordinator timeout")
         if not all(isinstance(path, str) and path and Path(path).is_file()
                    for path in (self.ca_file, self.client_cert_file, self.client_key_file)):
