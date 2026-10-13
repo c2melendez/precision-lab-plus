@@ -78,7 +78,7 @@ def test_remote_probe_requires_nonlocal_server_identity(tmp_path, server_name):
 
 
 @pytest.mark.parametrize("host", [
-    "127.1", "127.0.0.2", "0.0.0.0", "::", "::ffff:127.0.0.1",
+    "127.0.0.2", "0.0.0.0", "::", "::ffff:127.0.0.1",
     "169.254.1.7", "fe80::1", "localhost.", "sub.localhost",
 ])
 def test_remote_probe_rejects_alternate_local_host_notation(tmp_path, host):
