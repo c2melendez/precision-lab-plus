@@ -179,3 +179,26 @@ def test_sye28_original_zero_denominator_domain_error_and_recovery():
         MathResponse.model_validate(recovered)
         assert recovered["success"] is True and recovered["result_approx"] == 5, recovered
         assert recovered["request_id"] != data["request_id"], (data, recovered)
+
+
+def test_sye29_zero_over_zero_indeterminate_error_and_recovery():
+    row = ROWS["SY-E-29"]
+    assert row["operacion"] == "error"
+    assert row["entrada"] == r"\frac{0}{0}"
+    assert "indeterminado" in row["esperado"]
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression":"0/0"})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is False, data
+        assert data["error_code"] == "DOMAIN_ERROR", data
+        assert any(s in (data["error_message"] or "").lower() for s in ("indeterm", "0/0")), data
+        assert data["result_text"] is None and data["result_latex"] is None, data
+        assert data["result_approx"] is None, data
+        response2 = client.post("/api/v1/evaluate", json={"expression":"2+3"})
+        assert response2.status_code == 200, response2.text
+        recovered = response2.json()
+        MathResponse.model_validate(recovered)
+        assert recovered["success"] is True and recovered["result_approx"] == 5, recovered
+        assert recovered["request_id"] != data["request_id"], (data,recovered)
