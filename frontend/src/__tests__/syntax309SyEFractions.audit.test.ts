@@ -520,3 +520,21 @@ describe("SY-N-29 locale-sensitive decimal comma", () => {
     expect(converted === "1.5+2" || converted === "1,5+2").toBe(true);
   });
 });
+
+
+describe("SY-N-30 thousands separator convention", () => {
+  it("does not silently reinterpret the original 1{,}000+1", () => {
+    const row = rows["SY-N-30"];
+    expect(row.entrada).toBe("1{,}000+1");
+    expect(row.operacion).toBe("convencion");
+    let translated: string;
+    try {
+      translated = latexToBackendSyntax(row.entrada).replace(/\\s+/g, "");
+    } catch (error) {
+      expect(String(error).length).toBeGreaterThan(0);
+      return;
+    }
+    // Converter may retain thousands punctuation for backend rejection, or normalize to 1000+1.
+    expect(["1000+1", "1{,}000+1", "1,000+1"], translated).toContain(translated);
+  });
+});
