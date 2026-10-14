@@ -607,3 +607,26 @@ def test_syn16_power_of_two_exact_http_and_reentry():
         assert repeated["success"] is True, repeated
         assert repeated["request_id"] != result["request_id"], repeated
         assert repeated["result_text"] == expected and repeated["result_latex"] == expected, repeated
+
+
+def test_syn17_unsafe_js_integer_stays_exact_http_and_reentry():
+    row = ROWS["SY-N-17"]
+    expected = "9007199254740993"
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == expected
+    assert row["esperado"] == expected
+    with TestClient(app) as client:
+        reply = client.post("/api/v1/evaluate", json={"expression": expected})
+        assert reply.status_code == 200, reply.text
+        result = reply.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert result["result_text"] == expected and result["result_latex"] == expected, result
+        assert result["error_code"] is None, result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert repeated["request_id"] != result["request_id"], repeated
+        assert repeated["result_text"] == expected and repeated["result_latex"] == expected, repeated
