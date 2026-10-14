@@ -51,6 +51,8 @@ from sympy import (
     csc,
     csch,
     exp,
+    floor,
+    ceiling,
     gcd,
     lcm,
     log,
@@ -181,6 +183,9 @@ ALLOWED_FUNCTIONS = {
     # stdev/variance) que su equivalente en la Lite. "sort" NO se portó
     # (ver stat_functions.py, no encaja en el contrato escalar de
     # /evaluate sin cambios más profundos).
+    "floor": floor,
+    "ceil": ceiling,
+    "ceiling": ceiling,
     "min": Min,
     "max": Max,
     "range": Range,
