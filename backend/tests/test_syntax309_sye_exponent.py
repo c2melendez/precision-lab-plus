@@ -21,3 +21,16 @@ def test_sye01_braced_two_digit_exponent_explicit_backend():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(1024, abs=1e-9)
+
+
+def test_sye02_ascii_two_digit_exponent_backend_http():
+    """SY-E-02 original ASCII 2^10 must be 1024, not 2^1 * 0."""
+    row = ROWS["SY-E-02"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == "2^10"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(1024, abs=1e-9)
