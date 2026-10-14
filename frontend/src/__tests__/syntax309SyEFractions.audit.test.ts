@@ -250,3 +250,16 @@ describe("SY-N-09 exact decimal product original LaTeX", () => {
     expect(converted).not.toContain("434.99999999999994");
   });
 });
+
+
+describe("SY-N-10 original exact decimal product", () => {
+  it("preserves all decimal digits and the multiplier", () => {
+    const row = rows["SY-N-10"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("1.005\\times1000");
+    expect(row.esperado).toBe("1005");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(["1.005*1000", "1.005(1000)", "(1.005)*1000"]).toContain(converted);
+    expect(latexToBackendSyntax("1005").trim()).toBe("1005");
+  });
+});

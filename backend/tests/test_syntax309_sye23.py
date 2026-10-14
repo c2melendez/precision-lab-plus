@@ -421,3 +421,30 @@ def test_syn09_decimal_product_http_exact_and_reentry():
         MathResponse.model_validate(repeated)
         assert repeated["success"] is True, repeated
         assert sympy.sympify(repeated["result_text"]) == sympy.Integer(435), repeated
+
+
+def test_syn10_decimal_product_exact_http_and_result_reentry():
+    row = ROWS["SY-N-10"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == r"1.005\times1000"
+    assert row["esperado"] == "1005"
+    # Explicit backend translation; original LaTeX converter tested independently.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "1.005*1000"})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert result["operation"] == "evaluate" and result["result_type"] == "scalar", result
+        assert result["input_text"] == "1.005*1000" and result["request_id"], result
+        assert result["result_text"] == "1005" and result["result_latex"] == "1005", result
+        assert result["result_approx"] == 1005, result
+        assert result["error_code"] is None and result["error_message"] is None, result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert repeated["request_id"] != result["request_id"], repeated
+        assert repeated["result_text"] == "1005" and repeated["result_latex"] == "1005", repeated
+        assert repeated["result_approx"] == 1005, repeated
