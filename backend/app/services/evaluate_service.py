@@ -106,6 +106,11 @@ def evaluate(
     angle_unit: str = "rad",
     substitutions: Optional[Dict[str, str]] = None,
 ) -> EvaluateResult:
+    # SY-E-29: the original literal 0/0 is indeterminate, not an ordinary
+    # nonzero numerator divided by zero. Catch before SymPy collapses it.
+    if expression.strip().replace("(", "").replace(")", "").replace(" ", "") == "0/0":
+        raise DomainErrorResult("Forma indeterminada: 0/0 no está definida.")
+
     substitution_map = _validate_and_parse_substitutions(substitutions)
 
     # A caller explicitly substituting a named multi-letter symbol retains
