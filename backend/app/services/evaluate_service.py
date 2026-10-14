@@ -120,6 +120,18 @@ def evaluate(
             "Factorial no definido para números no enteros; utilice Gamma."
         )
 
+    # SY-N-24: keep literal factorial input bounded, but do not reject its
+    # exact computed integer merely because the result exceeds the 64-digit
+    # limit intended for user-supplied integer literals.
+    literal_factorial = re.fullmatch(r"\s*(\d{1,3})\s*!\s*", expression)
+    if literal_factorial and int(literal_factorial.group(1)) <= 170 and not substitutions:
+        operand = int(literal_factorial.group(1))
+        exact = sympy.Integer(math.factorial(operand))
+        return EvaluateResult(
+            expr=exact, input_expr=sympy.factorial(sympy.Integer(operand), evaluate=False),
+            is_numeric=True, approx_value=float(exact)
+        )
+
     substitution_map = _validate_and_parse_substitutions(substitutions)
 
     # A caller explicitly substituting a named multi-letter symbol retains
