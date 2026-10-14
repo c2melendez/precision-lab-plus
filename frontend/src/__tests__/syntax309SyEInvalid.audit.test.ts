@@ -17,4 +17,8 @@ describe("Syntax309 SY-E-11 original source before Plus conversion", () => {
   it.each(["SY-E-09", "SY-E-10"])("%s preserves explicit grouping", id => {
     expect(() => latexToBackendSyntax(rows[id].entrada)).not.toThrow();
   });
+  it.each(["x^{2} ^{3}", "x^{2^{3}}^{4}", "x^{y^{2}^{3}}"])("rejects repeated superscripts in %s", input => {
+    expect(() => latexToBackendSyntax(input)).toThrowError(/superíndice|exponente/i);
+  });
+
 });

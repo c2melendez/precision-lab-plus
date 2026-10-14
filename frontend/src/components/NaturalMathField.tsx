@@ -21,6 +21,27 @@ import { useCallback, useEffect, useId, useRef } from "react";
 import type { MathfieldElement, MathfieldElementAttributes } from "mathlive";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 
+// Reject a repeated braced superscript before conversion loses its grouping.
+function hasRepeatedBracedSuperscript(source: string): boolean {
+  for (let i = 0; i < source.length; i++) {
+    if (source[i] !== "^") continue;
+    let start = i + 1;
+    while (/\s/.test(source[start] ?? "") && start < source.length) start++;
+    if (source[start] !== "{") continue;
+    let depth = 1;
+    let end = start + 1;
+    while (end < source.length && depth > 0) {
+      if (source[end] === "{") depth++;
+      else if (source[end] === "}") depth--;
+      end++;
+    }
+    if (depth !== 0) continue; // Existing malformed-group validation owns this case.
+    while (end < source.length && /\s/.test(source[end])) end++;
+    if (source[end] === "^") return true;
+  }
+  return false;
+}
+
 function normalizeExternalSyntaxF3c(input: string): string {
   let out = input.trim();
 
@@ -560,6 +581,9 @@ function normalizeLocalizedLatexAliases(input: string): string {
 }
 
 export function latexToBackendSyntax(latex: string): string {
+  if (hasRepeatedBracedSuperscript(latex)) {
+    throw new Error("Doble superíndice sin agrupar: usa (x^{2})^{3} o x^{2^{3}}.");
+  }
   if (latex.trim() === "") return "";
 
   // Exact keyboard DMS notation: convert degrees/minutes/seconds before
