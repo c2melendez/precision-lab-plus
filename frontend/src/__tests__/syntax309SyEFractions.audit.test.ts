@@ -334,3 +334,16 @@ describe("SY-N-15 exact large integer source", () => {
     expect(latexToBackendSyntax(row.esperado).trim()).toBe(row.esperado);
   });
 });
+
+
+describe("SY-N-15 exact large integer conversion", () => {
+  it("preserves the original exponent, addition and all 21 output digits", () => {
+    const row = rows["SY-N-15"];
+    const expected = "100000000000000000001";
+    expect(row.entrada).toBe("10^{20}+1");
+    expect(row.esperado).toBe(expected);
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(["10^20+1", "(10^20)+1", "10**20+1", "(10**20)+1"]).toContain(converted);
+    expect(latexToBackendSyntax(expected)).toBe(expected);
+  });
+});
