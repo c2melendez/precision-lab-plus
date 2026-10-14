@@ -374,3 +374,14 @@ describe("SY-N-17 integer above JS safe integer", () => {
     expect(latexToBackendSyntax(row.entrada).trim()).toBe(expected);
   });
 });
+
+
+describe("SY-N-18 percent input", () => {
+  it("converts the original 12 percent into the exact fractional value", () => {
+    const row = rows["SY-N-18"];
+    expect(row.entrada).toBe("12\\%");
+    expect(row.esperado).toBe("0.12");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(["12/100", "(12)/100", "12*(1/100)", "0.12", "12%"]).toContain(converted);
+  });
+});
