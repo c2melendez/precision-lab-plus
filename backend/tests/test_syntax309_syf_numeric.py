@@ -407,3 +407,14 @@ def test_syf41_floor_backend_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(3.0, abs=1e-9)
+
+
+def test_syf42_ceiling_backend_http():
+    """SY-F-42: ceil(3.2)=4 via backend; original MathLive LaTeX not covered."""
+    assert ROWS["SY-F-42"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "ceil(3.2)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(4.0, abs=1e-9)
