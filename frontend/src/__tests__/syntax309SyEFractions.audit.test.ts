@@ -347,3 +347,18 @@ describe("SY-N-15 exact large integer conversion", () => {
     expect(latexToBackendSyntax(expected)).toBe(expected);
   });
 });
+
+
+describe("SY-N-16 exact large integer power conversion", () => {
+  it("preserves exponent and exact 31-digit result", () => {
+    const row = rows["SY-N-16"];
+    const expected = "1267650600228229401496703205376";
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("2^{100}");
+    expect(row.esperado).toBe(expected);
+    expect(["2^100", "2^(100)", "2**100", "2**(100)"]).toContain(
+      latexToBackendSyntax(row.entrada).replace(/\s+/g, "")
+    );
+    expect(latexToBackendSyntax(expected).trim()).toBe(expected);
+  });
+});
