@@ -113,3 +113,15 @@ describe("SY-E-28 source conversion for undefined fraction", () => {
     expect(["1/0", "(1)/(0)", "(1/0)", "((1)/(0))"]).toContain(converted);
   });
 });
+
+
+describe("SY-E-29 zero over zero source conversion", () => {
+  it("retains indeterminate operands for domain-error handling", () => {
+    const row = rows["SY-E-29"];
+    expect(row.operacion).toBe("error");
+    expect(row.entrada).toBe("\\frac{0}{0}");
+    expect(row.esperado).toMatch(/indeterminado/);
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(["0/0", "(0)/(0)", "(0/0)", "((0)/(0))"]).toContain(converted);
+  });
+});
