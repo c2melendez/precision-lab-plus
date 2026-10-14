@@ -1104,3 +1104,21 @@ def test_syd06_square_bracketed_sum_normalized_http_and_reentry():
         MathResponse.model_validate(again)
         assert again["success"] is True and again["request_id"] != data["request_id"], again
         assert sympy.sympify(again["result_text"]) == sympy.Integer(9), again
+
+def test_syd07_braces_group_or_set_requires_explicit_convention():
+    row = ROWS["SY-D-07"]
+    assert row["entrada"] == r"\{1+2\}\cdot3"
+    assert row["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code in (200, 400, 422), response.text
+        data = response.json()
+        if response.status_code == 200:
+            MathResponse.model_validate(data)
+            if data["success"]:
+                assert sympy.sympify(data["result_text"]) == sympy.Integer(9), data
+            else:
+                assert data["error_code"] in {"PARSE_ERROR", "VALIDATION_ERROR"}, data
+                assert data["error_message"], data
+        else:
+            assert data.get("detail") or data.get("error_message"), data
