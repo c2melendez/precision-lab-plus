@@ -321,3 +321,16 @@ describe("SY-N-14 squared radical cancellation", () => {
     expect(latexToBackendSyntax("0").trim()).toBe("0");
   });
 });
+
+
+describe("SY-N-15 exact large integer source", () => {
+  it("keeps the power and trailing unit rather than flattening to an unsafe float", () => {
+    const row = rows["SY-N-15"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("10^{20}+1");
+    expect(row.esperado).toBe("100000000000000000001");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(["10^20+1", "10^(20)+1", "10**20+1", "10**(20)+1"]).toContain(converted);
+    expect(latexToBackendSyntax(row.esperado).trim()).toBe(row.esperado);
+  });
+});
