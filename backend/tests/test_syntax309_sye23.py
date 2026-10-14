@@ -722,3 +722,31 @@ def test_syn21_zero_factorial_http_and_reentry():
         assert repeated["request_id"] != result["request_id"], repeated
         assert repeated["result_text"] == "1" and repeated["result_latex"] == "1", repeated
         assert repeated["result_approx"] == 1, repeated
+
+
+
+def test_syn22_negative_factorial_http_error_and_recovery():
+    row = ROWS["SY-N-22"]
+    assert row["operacion"] == "error"
+    assert row["entrada"] == "(-1)!"
+    assert "factorial no definido" in row["esperado"]
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "(-1)!"})
+        assert response.status_code in (200, 400, 422), response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is False, result
+        assert result["request_id"], result
+        assert result["error_code"] in ("DOMAIN_ERROR", "VALIDATION_ERROR"), result
+        assert result["error_message"] and any(
+            word in result["error_message"].lower()
+            for word in ("factorial", "negative", "negativo", "domain", "dominio", "definido")
+        ), result
+        assert result.get("result_text") in (None, ""), result
+        again = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+        assert again.status_code == 200, again.text
+        recovered = again.json()
+        MathResponse.model_validate(recovered)
+        assert recovered["success"] is True, recovered
+        assert recovered["result_text"] == "5" and recovered["result_latex"] == "5", recovered
+        assert recovered["request_id"] != result["request_id"], recovered
