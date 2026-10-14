@@ -1063,3 +1063,21 @@ def test_syd04_mismatched_parenthesis_bracket_http_explicit_error():
         else:
             assert data.get("detail") or data.get("error_message"), data
         assert data.get("result_text") not in ("3", 3), data
+
+
+def test_syd05_mismatched_latex_left_right_delimiters_explicit_error():
+    row = ROWS["SY-D-05"]
+    assert row["entrada"] == r"\left(1+2\right]"
+    assert row["operacion"] == "error"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code in (200, 400, 422), response.text
+        data = response.json()
+        if response.status_code == 200:
+            MathResponse.model_validate(data)
+            assert data["success"] is False, data
+            assert data["error_code"] in {"PARSE_ERROR", "VALIDATION_ERROR"}, data
+            assert data["error_message"], data
+        else:
+            assert data.get("detail") or data.get("error_message"), data
+        assert data.get("result_text") not in ("3", 3), data
