@@ -1122,3 +1122,25 @@ def test_syd07_braces_group_or_set_requires_explicit_convention():
                 assert data["error_message"], data
         else:
             assert data.get("detail") or data.get("error_message"), data
+
+def test_syd08_parenthesized_power_normalized_http_and_reentry():
+    row = ROWS["SY-D-08"]
+    assert row["entrada"] == r"\left(1+2\right)^{2}"
+    assert row["operacion"] == "valor"
+    assert row["esperado"] == "9"
+    # Plus HTTP receives normalized expression, not a MathLive browser event.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "(1+2)**2"})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        assert sympy.sympify(data["result_text"]) == sympy.Integer(9), data
+        assert data["result_approx"] == pytest.approx(9), data
+        assert data["error_code"] is None, data
+        reentry = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert reentry.status_code == 200, reentry.text
+        again = reentry.json()
+        MathResponse.model_validate(again)
+        assert again["success"] is True, again
+        assert sympy.sympify(again["result_text"]) == sympy.Integer(9), again
