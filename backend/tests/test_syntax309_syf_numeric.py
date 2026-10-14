@@ -451,3 +451,14 @@ def test_syf45_gcd_backend_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(6.0, abs=1e-9)
+
+
+def test_syf46_lcm_backend_http():
+    """SY-F-46: explicit backend lcm(4,6)=12; original MathLive source not covered."""
+    assert ROWS["SY-F-46"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "lcm(4,6)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(12.0, abs=1e-9)
