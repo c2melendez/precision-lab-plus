@@ -400,3 +400,15 @@ describe("SY-N-19 original percent multiplication", () => {
     expect(latexToBackendSyntax("100").trim()).toBe("100");
   });
 });
+
+
+describe("SY-N-20 factorial original source", () => {
+  it("preserves the factorial operator when converting 5!", () => {
+    const row = rows["SY-N-20"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("5!");
+    expect(row.esperado).toBe("120");
+    expect(latexToBackendSyntax(row.entrada).trim()).toBe("5!");
+    expect(latexToBackendSyntax("120").trim()).toBe("120");
+  });
+});
