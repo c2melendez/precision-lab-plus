@@ -14,6 +14,7 @@ a valores PURAMENTE numéricos (sin variables libres) — si no, `VALIDATION_ERR
 
 from dataclasses import dataclass
 import math
+import re
 from typing import Dict, Optional
 
 import sympy
@@ -110,6 +111,14 @@ def evaluate(
     # nonzero numerator divided by zero. Catch before SymPy collapses it.
     if expression.strip().replace("(", "").replace(")", "").replace(" ", "") == "0/0":
         raise DomainErrorResult("Forma indeterminada: 0/0 no está definida.")
+
+    # SY-N-23: factorial of an explicit fractional number is outside the
+    # integer-factorial convention of this endpoint. Reject clearly before
+    # generic parser syntax errors; preserve 0! and positive integer factorial.
+    if re.fullmatch(r"\s*[+-]?(?:\d+\.\d+|\d+/\d+)\s*!\s*", expression):
+        raise DomainErrorResult(
+            "Factorial no definido para números no enteros; utilice Gamma."
+        )
 
     substitution_map = _validate_and_parse_substitutions(substitutions)
 
