@@ -382,3 +382,17 @@ def test_syf38_39_abs_translated_backend_http(case_id):
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(3.0, abs=1e-9)
+
+
+@pytest.mark.parametrize("x,expected", [("-3", 1.0), ("0", 2.0), ("5", 3.0)])
+def test_syf40_explicit_nested_absolute_backend(x, expected):
+    """Only explicit abs(abs(x)-2) backend meaning; typed bars remain a UI gate."""
+    assert ROWS["SY-F-40"]["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": "abs(abs(x)-2)", "substitutions": {"x": x},
+        })
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(expected, abs=1e-9)
