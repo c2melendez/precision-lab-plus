@@ -1424,3 +1424,24 @@ def test_syu06_unicode_multiplication_http_and_reentry():
         MathResponse.model_validate(again)
         assert again["success"] is True and again["result_text"] == "12", again
         assert again["request_id"] != data["request_id"], again
+
+
+def test_syu07_unicode_division_http_and_reentry():
+    row = ROWS["SY-U-07"]
+    assert row["entrada"] == "12÷4"
+    assert row["operacion"] == "valor"
+    assert row["esperado"] == "3"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        assert data["result_text"] == "3" and data["result_latex"] == "3", data
+        assert data["result_approx"] == 3 and data["error_code"] is None, data
+        repeated = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert repeated.status_code == 200, repeated.text
+        again = repeated.json()
+        MathResponse.model_validate(again)
+        assert again["success"] is True and again["result_text"] == "3", again
+        assert again["request_id"] != data["request_id"], again
