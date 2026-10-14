@@ -1,5 +1,11 @@
 # Current Certification State
 
+## SY-N-31 — precisión selector exacto, corrección de test (2026-10-14)
+- SHA `2e9ab861b240118e62f9697014a7a1e42fbef301`: cumulative [38611979484](https://github.com/c2melendez/precision-lab-plus/actions/runs/38611979484) FAILURE solo frontend; 819 PASS, 1 FAIL, 28 TODO. H1d [38611979475](https://github.com/c2melendez/precision-lab-plus/actions/runs/38611979475) SUCCESS; backend SUCCESS. Error confirmado: `fireEvent.click(findFormat("exact")!)` recibe undefined porque el botón de formato exacto se etiqueta `exacto` en `frontend/src/components/ResultPanel.tsx`. No es una regresión del producto.
+- Corregido `frontend/src/__tests__/ResultPanel.test.tsx` commit `89a8385824e08ce7a100e5b321add6a376d3acfa`: identificar botón `exacto` sin reducir aserciones de KaTeX, fracción ni control de formato.
+- Nuevos runs SHA: cumulative [38612502423](https://github.com/c2melendez/precision-lab-plus/actions/runs/38612502423), H1d [38612502472](https://github.com/c2melendez/precision-lab-plus/actions/runs/38612502472), QUEUED al verificar. Siguiente: revisar resultado del gate final, logs frontend y ampliar prueba equivalente en Lite. SY-N-31 OPEN hasta comprobar cobertura bilateral suficiente.
+
+
 ## SY-N-31 — corrección de harness UI Plus (2026-10-14)
 - Plus SHA `6cec66863c358067b641243335a9fb29c85829b5`: cumulative [38610765034](https://github.com/c2melendez/precision-lab-plus/actions/runs/38610765034) FAILED (frontend: 819 PASS, 1 FAIL, 28 TODO; backend PASS); H1d [38610765109](https://github.com/c2melendez/precision-lab-plus/actions/runs/38610765109) SUCCESS. Falla de harness `jsdom`: Testing Library `getByRole` al recorrer KaTeX detonó `Array.prototype.forEach called on null or undefined` en `getComputedStyle`, no falla matemática probada.
 - Corregido test de UI `frontend/src/__tests__/ResultPanel.test.tsx` SHA `2e9ab861b240118e62f9697014a7a1e42fbef301`: query de botones acotada al contenedor y checks de notación KaTeX/retorno a exacto conservados.
