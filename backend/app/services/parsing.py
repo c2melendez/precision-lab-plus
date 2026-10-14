@@ -371,7 +371,7 @@ def normalize_unicode(text: str) -> str:
     """Normaliza símbolos seguros antes del parser de SymPy."""
     text = text.replace("π", "pi").replace("∞", "oo")
     # Normalize unambiguous arithmetic Unicode without changing identifier semantics.
-    text = text.replace("×", "*").replace("÷", "/")
+    text = text.replace("×", "*").replace("÷", "/").replace("·", "*")
     text = _expand_sqrt_tokens(text)
     # Porcentaje postfix de calculadora: 50% -> (50)/100. Se limita a
     # átomos simples o un único grupo parentizado para no inventar una
