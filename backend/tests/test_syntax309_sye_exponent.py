@@ -34,3 +34,18 @@ def test_sye02_ascii_two_digit_exponent_backend_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(1024, abs=1e-9)
+
+
+def test_sye03_power_with_explicit_substitution_http():
+    """SY-E-03: translated power and substitution; natural-language LaTeX annotation not tested in UI."""
+    row = ROWS["SY-E-03"]
+    assert row["operacion"] == "valor"
+    assert "x^{12}" in row["entrada"] and "x=2" in row["entrada"]
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={
+            "expression": "x^12", "substitutions": {"x": "2"}
+        })
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(4096, abs=1e-9)
