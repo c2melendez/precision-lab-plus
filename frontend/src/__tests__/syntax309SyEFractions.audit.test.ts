@@ -173,3 +173,17 @@ describe("SY-N-01 leading decimal original source", () => {
     expect([".5", "0.5"]).toContain(converted);
   });
 });
+
+
+describe("SY-N-04 scientific multiplication original LaTeX", () => {
+  it("converts the original scientific product without interpreting e-notation", () => {
+    const row = rows["SY-N-04"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("1.2\\times10^{3}");
+    expect(row.esperado).toBe("1200");
+    const converted = latexToBackendSyntax(row.entrada);
+    expect(converted).not.toContain("\\times");
+    expect(converted).toMatch(/10/);
+    expect(converted).toMatch(/3/);
+  });
+});
