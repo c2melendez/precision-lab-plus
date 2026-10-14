@@ -918,3 +918,31 @@ def test_syn28_euler_identity_decimal_and_http_reentry():
         assert repeated["request_id"] != result["request_id"], repeated
         assert sympy.sympify(repeated["result_text"], locals={"e": sympy.E}) == sympy.E, repeated
         assert format(repeated["result_approx"], ".9f") == "2.718281828", repeated
+
+
+def test_syn29_decimal_comma_explicit_http_convention_and_recovery():
+    row = ROWS["SY-N-29"]
+    assert row["entrada"] == "1,5+2"
+    assert row["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code in (200, 400, 422), response.text
+        data = response.json()
+        # Supported decimal-comma convention must evaluate to 7/2. Otherwise
+        # it must reject visibly; never silently return a different number.
+        if response.status_code == 200:
+            MathResponse.model_validate(data)
+            if data["success"]:
+                assert sympy.sympify(data["result_text"]) == sympy.Rational(7, 2), data
+                assert data["result_approx"] == pytest.approx(3.5), data
+                assert data["error_code"] is None, data
+            else:
+                assert data["error_code"] and data["error_message"], data
+        else:
+            assert data.get("detail"), data
+        recovery = client.post("/api/v1/evaluate", json={"expression": "1.5+2"})
+        assert recovery.status_code == 200, recovery.text
+        recovered = recovery.json()
+        MathResponse.model_validate(recovered)
+        assert recovered["success"] is True, recovered
+        assert recovered["result_approx"] == pytest.approx(3.5), recovered
