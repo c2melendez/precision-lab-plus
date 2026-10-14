@@ -237,3 +237,16 @@ describe("SY-N-08 original decimal subtraction", () => {
     expect(converted).not.toContain("0.09999999999999998");
   });
 });
+
+
+describe("SY-N-09 exact decimal product original LaTeX", () => {
+  it("preserves 4.35 times 100 as a numeric product", () => {
+    const row = rows["SY-N-09"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("4.35\\times100");
+    expect(row.esperado).toBe("435");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(["4.35*100", "4.35(100)", "(4.35)*100"]).toContain(converted);
+    expect(converted).not.toContain("434.99999999999994");
+  });
+});
