@@ -150,3 +150,14 @@ describe("SY-E-31 adjacent fraction convention", () => {
     expect(["2*(1/3)", "2*(1)/(3)", "2(1/3)", "2(1)/(3)", "2*1/3", "2*1/(3)"]).toContain(converted);
   });
 });
+
+
+describe("SY-E-31 convention for adjacent fraction", () => {
+  it("uses multiplication for numeric adjacency", () => {
+    const row = rows["SY-E-31"];
+    expect(row.operacion).toBe("convencion");
+    expect(row.entrada).toBe("2\\frac{1}{3}");
+    const source = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(["2*(1/3)", "2*(1)/(3)", "2(1/3)", "2(1)/(3)", "2*1/3", "2*1/(3)"]).toContain(source);
+  });
+});
