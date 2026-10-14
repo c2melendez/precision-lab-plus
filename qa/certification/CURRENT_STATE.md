@@ -1,5 +1,11 @@
 # Current Certification State
 
+## SY-N-31 — diagnóstico y corrección del gate Plus (2026-10-14)
+- Acumulativo Plus [38606501880](https://github.com/c2melendez/precision-lab-plus/actions/runs/38606501880) SHA 70c0221a: FAIL frontend 2 tests, 817 PASS, 28 TODO; backend PASS. Log job 115998643049 confirmó: fixture `String.raw` tenía doble barra en prueba y expectativa legacy `8.888889e-1` en ResultPanel.test.tsx. Estos fallos son de prueba/formato, no regresión del motor SymPy.
+- Formatter actual `formatScientificLatex` retorna `\\times` correctamente (se verificó origen vigente). Cambio test `frontend/src/__tests__/ResultPanel.test.tsx` SHA d71438c2610ebe04a01f7e2a2b48248b08a6522f comprueba mantisa KaTeX; fixture `frontend/src/components/formatNumber.syntax309.test.ts` corregido para una barra literal en raw strings, SHA `606522ec873b3ff56f70c4eb61fd0d78e27923b4`.
+- Próximo gate obligatorio: buscar cumulative + H1d `push` en SHA `606522ec873b3ff56f70c4eb61fd0d78e27923b4`, leer job frontend y confirmar ejecución del test nuevo; si falla, corregir causa confirmada y rerun por nuevo push. No declarar PASS en este SHA hasta evidencia. UI E2E real aún pendiente; SY-N-31 OPEN.
+
+
 ## SY-N-31 — corrección de presentación Plus (2026-10-14)
 - Lite SHA b88c7e5a272123943b60178725baa15bbc3e3a72: cumulative 38604145396, H1d 38604145815, build 38604145540 COMPLETED/SUCCESS. Formatter comprobado; E2E de selección/render no acreditado.
 - Plus `frontend/src/components/formatNumber.ts` SHA 20e938275c8e7eda503844b2b2020de7053d94df agrega `formatScientificLatex` (nueve decimales de mantisa, LaTeX); `frontend/src/components/ResultPanel.tsx` SHA 78390b398090d35878fa4f5e80b313f8c78913d2 visualiza con MathRenderer en `scn`, sin cambiar resultado exacto; test nuevo `frontend/src/components/formatNumber.syntax309.test.ts` SHA 70c0221a9c72772d350aa948f0297d7b9c2e4279, corregido 0c68c36c8294189263ef5eca785c2c279b441c3a.
