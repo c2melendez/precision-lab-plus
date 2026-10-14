@@ -259,3 +259,50 @@ def test_sye08_10_real_integer_power_anchors_http(case_id, x, expected):
             data = response.json()
             assert data["success"] is True, (case_id, x, data)
             assert data["result_approx"] == pytest.approx(expected, rel=1e-12, abs=1e-12), (case_id, expression, x, data)
+
+# Fixed independent anchors: 8*sqrt(2), 1/sqrt(2), and -8.
+DECIMAL_AND_NEGATIVE_POWER_CASES = [
+    [
+        "SY-E-14",
+        "2^{3.5}",
+        "11.31370850",
+        "2^3.5",
+        11.313708498984761
+    ],
+    [
+        "SY-E-15",
+        "2^{-0.5}",
+        "0.7071067812",
+        "2^(-0.5)",
+        0.7071067811865476
+    ],
+    [
+        "SY-E-16",
+        "(-2)^{3}",
+        "-8",
+        "(-2)^3",
+        -8
+    ]
+]
+
+@pytest.mark.parametrize("case_id, source, displayed, expression, expected", DECIMAL_AND_NEGATIVE_POWER_CASES)
+def test_sye14_16_decimal_and_negative_power_http(case_id, source, displayed, expression, expected):
+    """Backend HTTP semantics only; original LaTeX MathLive UI remains separate."""
+    row = ROWS[case_id]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == source
+    assert row["esperado"] == displayed
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+        assert response.status_code == 200, (case_id, response.text)
+        data = response.json()
+        assert data["success"] is True, (case_id, data)
+        assert data["result_approx"] == pytest.approx(expected, rel=1e-12, abs=1e-12), (case_id, data)
+        if case_id == "SY-E-16":
+            # Preserve grouped negative base versus negation of an even power.
+            for control, answer in [("(-2)^2", 4), ("-2^2", -4)]:
+                result = client.post("/api/v1/evaluate", json={"expression": control})
+                assert result.status_code == 200, result.text
+                payload = result.json()
+                assert payload["success"] is True, payload
+                assert payload["result_approx"] == answer, (control, payload)
