@@ -276,3 +276,16 @@ describe("SY-N-11 original rational multiplication", () => {
     expect(latexToBackendSyntax("1").trim()).toBe("1");
   });
 });
+
+
+describe("SY-N-12 decimal plus abbreviated fraction", () => {
+  it("preserves the decimal, addition and complete half fraction", () => {
+    const row = rows["SY-N-12"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("1.5+\\frac12");
+    expect(row.esperado).toBe("2");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(["1.5+1/2", "1.5+(1/2)", "1.5+(1)/(2)", "1.5+((1)/(2))"], converted).toContain(converted);
+    expect(latexToBackendSyntax("2").trim()).toBe("2");
+  });
+});
