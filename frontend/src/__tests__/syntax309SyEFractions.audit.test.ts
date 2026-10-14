@@ -161,3 +161,15 @@ describe("SY-E-31 convention for adjacent fraction", () => {
     expect(["2*(1/3)", "2*(1)/(3)", "2(1/3)", "2(1)/(3)", "2*1/3", "2*1/(3)"]).toContain(source);
   });
 });
+
+
+describe("SY-N-01 leading decimal original source", () => {
+  it("converts .5 to the equivalent numeric backend input", () => {
+    const row = rows["SY-N-01"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe(".5");
+    expect(row.esperado).toBe("0.5");
+    const converted = latexToBackendSyntax(row.entrada).trim();
+    expect([".5", "0.5"]).toContain(converted);
+  });
+});
