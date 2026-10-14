@@ -4404,3 +4404,10 @@ Esta actualización prevalece sobre las fotografías históricas conservadas deb
 - Gate nuevo Plus cumulative 38624871948 y H1d 38624871537; Lite cumulative 38624843113, H1d 38624843112, build 38624843128, native E2E 38624843192. En ejecución al último chequeo. SY-D-01 OPEN hasta revisar resultado y corregir capas pertinentes.
 - SG28/H2 OPEN y DIST multinodo BLOCKED; no producción.
 
+
+## SY-D-01 closed / SY-D-02 started — 2026-10-14
+- SY-D-01 PASS bilateral in tested scope: Lite SHA 330f767d69fb750e703252e974602a7a840c5271 cumulative 38624843113, H1d 38624843112, build 38624843128, scientific E2E 38624843192 SUCCESS; Plus SHA 278a8146ba50f341d7f0784e749b1862280058fa cumulative 38624871948 and H1d 38624871537 SUCCESS.
+- New SY-D-02 literal 2+3): extra closing parenthesis must produce an explicit error. Plus test backend/tests/test_syntax309_sye23.py SHA 6d880c8ebb5a182a26e832eb908aaa6a629396bc; Lite test tests/syntax309SyE23.audit.test.ts SHA 5e920cea270979ea8cc66d9a70f925001d073580.
+- Plus new cumulative 38625477765, H1d 38625477804 queued; Lite cumulative 38625444359, H1d 38625444330, build 38625444465, scientific E2E 38625444456 in progress. SY-D-02 OPEN pending actual SHA evidence.
+- Syntax309 OPEN; SG28/H2 OPEN; DIST multinodo BLOCKED.
+
