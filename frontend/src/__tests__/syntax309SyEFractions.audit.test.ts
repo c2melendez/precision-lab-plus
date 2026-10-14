@@ -587,3 +587,14 @@ describe("SY-U-04 ASCII multiplication", () => {
     expect(latexToBackendSyntax("12").trim()).toBe("12");
   });
 });
+
+describe("SY-U-05 ASCII division", () => {
+  it("converts original ASCII division and reentry", () => {
+    const row = rows["SY-U-05"];
+    expect(row.entrada).toBe("12/4");
+    expect(row.operacion).toBe("valor");
+    expect(row.esperado).toBe("3");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("12/4");
+    expect(latexToBackendSyntax("3").trim()).toBe("3");
+  });
+});
