@@ -79,3 +79,43 @@ def test_sye18_original_cube_root_power_principal_complex_http():
     cubed = actual * actual * actual
     assert cubed.real == pytest.approx(-8, abs=1e-12), data
     assert cubed.imag == pytest.approx(0, abs=1e-12), data
+
+
+def test_sye19_declared_zero_to_zero_convention_http():
+    row = ROWS["SY-E-19"]
+    assert row["operacion"] == "convencion"
+    assert row["entrada"] == "0^{0}"
+    assert "convención declarada" in row["esperado"]
+    expression = "0^0"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    MathResponse.model_validate(data)
+    assert data["success"] is True, data
+    assert data["operation"] == "evaluate" and data["result_type"] == "scalar", data
+    assert data["input_text"] == expression and data["request_id"], data
+    assert data["result_text"] == "1" and data["result_latex"] == "1", data
+    assert data["result_approx"] == 1, data
+    assert data["error_code"] is None and data["error_message"] is None, data
+
+def test_sye20_zero_negative_power_clear_domain_error_and_recovery_http():
+    row = ROWS["SY-E-20"]
+    assert row["operacion"] == "error"
+    assert row["entrada"] == "0^{-1}"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "0^(-1)"})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is False, data
+        assert data["operation"] == "evaluate" and data["request_id"], data
+        assert data["error_code"] == "DOMAIN_ERROR", data
+        assert any(word in data["error_message"].lower() for word in ("cero", "zero", "divisi")), data
+        assert data["result_approx"] is None, data
+        assert data["result_text"] is None and data["result_latex"] is None, data
+        recovery = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+        assert recovery.status_code == 200, recovery.text
+        recovered = recovery.json()
+        assert recovered["success"] is True and recovered["result_approx"] == 5, recovered
+        assert recovered["request_id"] != data["request_id"], (data, recovered)
