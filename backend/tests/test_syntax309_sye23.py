@@ -1166,3 +1166,25 @@ def test_syd09_parenthesized_fraction_power_exact_http_and_reentry():
         MathResponse.model_validate(again)
         assert again["success"] is True, again
         assert sympy.sympify(again["result_text"]) == sympy.Rational(1, 4), again
+
+def test_syd10_adjacent_parentheses_implicit_product_http_and_reentry():
+    row = ROWS["SY-D-10"]
+    assert row["entrada"] == "(1+2)(3+4)"
+    assert row["operacion"] == "valor"
+    assert row["esperado"] == "21"
+    # Direct HTTP input probes backend implicit multiplication, not MathLive editor.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        assert sympy.sympify(data["result_text"]) == sympy.Integer(21), data
+        assert data["result_approx"] == pytest.approx(21), data
+        assert data["error_code"] is None, data
+        repeat = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert repeat.status_code == 200, repeat.text
+        again = repeat.json()
+        MathResponse.model_validate(again)
+        assert again["success"] is True, again
+        assert sympy.sympify(again["result_text"]) == sympy.Integer(21), again
