@@ -259,8 +259,8 @@ describe("ResultPanel", () => {
       expect(rendered).not.toBeNull();
       expect(rendered?.textContent).toContain("3.333333333");
       expect(rendered?.textContent).toContain("10");
-      fireEvent.click(findFormat("exact")!);
-      expect(findFormat("exact")).toHaveAttribute("aria-pressed", "true");
+      fireEvent.click(findFormat("exacto")!);
+      expect(findFormat("exacto")).toHaveAttribute("aria-pressed", "true");
       expect(container.querySelector(".katex")?.textContent).toContain("3000000");
       expect(Array.from(container.querySelectorAll("button")).find(button => button.textContent?.trim() === "Copiar resultado")).toBeEnabled();
     });
