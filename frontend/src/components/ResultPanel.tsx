@@ -11,7 +11,7 @@
 import { useState } from "react";
 
 import type { EquationSolution, MathResponse } from "../api/client";
-import { formatResultApprox } from "./formatNumber";
+import { formatResultApprox, formatScientificLatex } from "./formatNumber";
 import { parseFracLatex, toMixedFracLatex } from "./fractionDisplay";
 import { MathRenderer } from "./MathRenderer";
 import { StepList } from "./StepList";
@@ -186,8 +186,9 @@ export function ResultPanel({ result, isLoading }: ResultPanelProps) {
             }
             if (format === "scn") {
               const n = result.result_approx != null ? Number(result.result_approx) : NaN;
-              return Number.isFinite(n) ? (
-                <p className="a11y-scale-result-lg text-ink">{n.toExponential(6)}</p>
+              const scientific = formatScientificLatex(n);
+              return scientific !== null ? (
+                <MathRenderer latex={scientific} fallbackText={n.toExponential(9)} className="a11y-scale-result-lg" />
               ) : (
                 <p className="text-sm text-muted">No hay un valor numérico para notación científica.</p>
               );
