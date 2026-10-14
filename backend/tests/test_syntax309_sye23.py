@@ -146,7 +146,7 @@ def test_sye27_improper_fraction_exact_http_and_reentry():
         assert data["operation"] == "evaluate" and data["result_type"] == "scalar", data
         assert data["input_text"] == expression and data["request_id"], data
         assert sympy.sympify(data["result_text"]) == sympy.Rational(22, 7), data
-        assert data["result_latex"] == r"\frac{22}{7}\approx3.142857143", data
+        assert data["result_latex"] == r"\frac{22}{7}", data
         assert data["result_approx"] == pytest.approx(22/7, rel=1e-15), data
         assert data["error_code"] is None and data["error_message"] is None, data
         reentry = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
