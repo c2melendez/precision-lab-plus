@@ -139,3 +139,31 @@ def test_sye19_20_valid_power_controls_are_preserved(expression, expected):
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == expected, data
+
+
+def test_sye21_exact_half_http_response_and_actual_result_reentry():
+    row = ROWS["SY-E-21"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == r"\frac12"
+    assert row["esperado"] == r"\frac{1}{2}"
+    expression = "1/2"  # Explicit HTTP translation; original source conversion tested separately.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        assert data["operation"] == "evaluate" and data["result_type"] == "scalar", data
+        assert data["request_id"] and data["input_text"] == expression, data
+        assert data["result_text"] == "1/2", data
+        assert data["result_latex"] == r"\frac{1}{2}", data
+        assert data["result_approx"] == 0.5, data
+        assert data["error_code"] is None and data["error_message"] is None, data
+        assert math.isfinite(data["duration_ms"]) and data["duration_ms"] >= 0, data
+        reentry = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert reentry.status_code == 200, reentry.text
+        returned = reentry.json()
+        MathResponse.model_validate(returned)
+        assert returned["success"] is True, returned
+        assert returned["request_id"] != data["request_id"], returned
+        assert returned["result_text"] == "1/2" and returned["result_approx"] == 0.5, returned
