@@ -429,3 +429,14 @@ def test_syf43_sign_of_negative_five_backend_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(-1.0, abs=1e-9)
+
+
+def test_syf44_modulo_backend_http():
+    """SY-F-44: explicit mod(10,3) backend witness; original LaTeX remains unverified."""
+    assert ROWS["SY-F-44"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "mod(10,3)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(1.0, abs=1e-9)
