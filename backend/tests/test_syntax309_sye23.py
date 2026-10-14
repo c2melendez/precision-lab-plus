@@ -1249,3 +1249,23 @@ def test_syd13_ten_nested_parentheses_exact_http_and_reentry():
         MathResponse.model_validate(again)
         assert again["success"] is True, again
         assert sympy.sympify(again["result_text"]) == sympy.Integer(1), again
+
+def test_syd14_double_parentheses_exact_http_and_reentry():
+    row = ROWS["SY-D-14"]
+    assert row["entrada"] == "((2))"
+    assert row["operacion"] == "valor"
+    assert row["esperado"] == "2"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        assert sympy.sympify(data["result_text"]) == sympy.Integer(2), data
+        assert data["error_code"] is None, data
+        repeated = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert repeated.status_code == 200, repeated.text
+        again = repeated.json()
+        MathResponse.model_validate(again)
+        assert again["success"] is True, again
+        assert sympy.sympify(again["result_text"]) == sympy.Integer(2), again
