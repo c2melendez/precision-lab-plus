@@ -449,3 +449,14 @@ describe("SY-N-23 non-integer factorial source", () => {
     expect(latexToBackendSyntax("2+3")).toBe("2+3");
   });
 });
+
+
+describe("SY-N-24 large factorial original source", () => {
+  it("keeps 100! intact and does not round its source into JavaScript Number", () => {
+    const row = rows["SY-N-24"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("100!");
+    expect(latexToBackendSyntax(row.entrada).trim()).toBe("100!");
+    expect(row.nota).toMatch(/158 dígitos/);
+  });
+});
