@@ -47,3 +47,35 @@ def test_sye17_default_principal_complex_power_http_and_response():
     squared = actual * actual
     assert squared.real == pytest.approx(-2, abs=1e-12), data
     assert squared.imag == pytest.approx(0, abs=1e-12), data
+
+
+def test_sye18_original_cube_root_power_principal_complex_http():
+    row = ROWS["SY-E-18"]
+    assert row["operacion"] == "convencion"
+    assert row["entrada"] == r"(-8)^{\frac{1}{3}}"
+    assert "declarar" in row["nota"]
+    expression = "(-8)^(1/3)"  # Same original power, not cbrt()/root().
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    MathResponse.model_validate(data)
+    assert data["success"] is True, data
+    assert data["operation"] == "evaluate" and data["result_type"] == "scalar", data
+    assert data["request_id"] and data["input_text"] == expression, data
+    assert data["result_approx"] is None, data
+    assert data["error_code"] is None and data["error_message"] is None, data
+    assert isinstance(data["result_text"], str) and data["result_text"], data
+    assert isinstance(data["result_latex"], str) and data["result_latex"], data
+    assert math.isfinite(data["duration_ms"]) and data["duration_ms"] >= 0, data
+    # A principal-power expression is valid exact notation even before expansion into a+bI.
+    represented = sympy.sympify(data["result_text"], locals={"I": sympy.I, "sqrt": sympy.sqrt})
+    assert not represented.free_symbols, data
+    actual = complex(represented.evalf(17))
+    assert math.isfinite(actual.real) and math.isfinite(actual.imag), data
+    assert actual.real == pytest.approx(1, rel=1e-12, abs=1e-12), data
+    assert actual.imag > 0, data
+    assert actual.imag == pytest.approx(1.7320508075688772, rel=1e-12, abs=1e-12), data
+    cubed = actual * actual * actual
+    assert cubed.real == pytest.approx(-8, abs=1e-12), data
+    assert cubed.imag == pytest.approx(0, abs=1e-12), data
