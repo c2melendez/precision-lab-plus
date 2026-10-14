@@ -650,3 +650,26 @@ def test_syn18_percent_exact_http_and_reentry():
         MathResponse.model_validate(repeated)
         assert repeated["success"] is True, repeated
         assert sympy.sympify(repeated["result_text"]) == sympy.Rational(3, 25), repeated
+
+
+def test_syn19_percent_multiplication_http_and_reentry():
+    row = ROWS["SY-N-19"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == r"50\%\times200"
+    assert row["esperado"] == "100"
+    expression = "(50/100)*200"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert result["result_text"] == "100" and result["result_latex"] == "100", result
+        assert result["result_approx"] == 100, result
+        assert result["error_code"] is None and result["error_message"] is None, result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert repeated["result_text"] == "100" and repeated["result_latex"] == "100", repeated
