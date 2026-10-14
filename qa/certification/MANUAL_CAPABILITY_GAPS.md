@@ -85,3 +85,10 @@ Estos puntos NO deben marcarse automáticamente como fallo del producto mientras
 - El endpoint `/api/v1/evaluate` invoca secuencialmente dos fases aisladas (cálculo y presentación), cada una adquiere/libera una cuota local. No hay reserva de capacidad global para la solicitud completa.
 - **Criterio para producción:** identificar cantidad de réplicas y workers, política de carga/colas, capacidad total de CPU y memoria, límite global o capacidad asignada por réplica, métricas y alertas, fallos parciales y política de rechazo HTTP; probarlo en un entorno aislado representativo y autorizar despliegue explícitamente.
 - **Estado:** CAPABILITY/DEPLOYMENT GAP — NO CERTIFICADO. SG28_EVALUATE_ISOLATION permanece desactivado por defecto. Los PASS del runner de una sola instancia no cierran este requisito.
+
+
+## 2026-10-14 — SY-E-11..13: fuente y recuperación de componentes
+- Fuente LaTeX original: rechazo automatizado verificado en Lite parser y Plus conversor (SY-E-11 doble superíndice, SY-E-12 exponente vacío, SY-E-13 falta base).
+- Plus Científica/Simple: seis pruebas de componente verifican alerta, ausencia de llamadas al helper HTTP, carga desactivada y recuperación con 2+3; el editor es un input simulado, guard y conversión reales.
+- Límite pendiente: la serialización/canonicalización de estas entradas crudas por MathLive nativo y su error visible en navegador real. No contabilizarlo como PASS por el test del editor simulado. Preservar validación antes del editor/conversión cuando MathLive reformatea la fuente.
+- SG28 E2E de cancelación 38514811429 acredita su propia regresión 21/21 desktop/tablet/mobile; no sustituye la evidencia de exponentes ni la coordinación multinodo independiente.
