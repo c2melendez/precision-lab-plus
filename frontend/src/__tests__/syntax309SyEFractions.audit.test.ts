@@ -632,3 +632,15 @@ describe("SY-U-08 Unicode middle dot multiplication", () => {
     expect(latexToBackendSyntax("12").trim()).toBe("12");
   });
 });
+
+
+describe("SY-U-09 Unicode minus", () => {
+  it("translates original Unicode minus to subtraction for backend", () => {
+    const row = rows["SY-U-09"];
+    expect(row.entrada).toBe("2−1");
+    expect(row.operacion).toBe("valor");
+    expect(row.esperado).toBe("1");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("2-1");
+    expect(latexToBackendSyntax("1").trim()).toBe("1");
+  });
+});
