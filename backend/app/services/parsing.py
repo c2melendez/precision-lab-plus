@@ -716,7 +716,7 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
     normalized = normalize_unicode(text)
     # SY-N-01: normalize a leading-dot decimal only at a numeric boundary.
     # Preserve attribute-access rejection (foo.bar, __class__, etc.).
-    normalized = re.sub(r"(?<![A-Za-z0-9_.])\\.(?=\\d)", "0.", normalized)
+    normalized = re.sub(r"(?<![A-Za-z0-9_.])\.(?=\d)", "0.", normalized)
     # Syntax309 SY-P-24/25: standalone mathematical letter juxtaposition
     # denotes multiplication, not one multi-letter variable. Restrict to
     # these canonical whole expressions to preserve named identifiers elsewhere.
