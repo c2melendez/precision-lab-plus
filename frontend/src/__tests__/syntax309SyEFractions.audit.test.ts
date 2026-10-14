@@ -77,3 +77,16 @@ describe("SY-E-25 original text-style fraction conversion", () => {
     expect(["3/4", "(3)/(4)", "(3/4)", "((3)/(4))"], expected).toContain(expected);
   });
 });
+
+describe("SY-E-26 original fraction addition conversion", () => {
+  it("converts the whole original sum and its expected result consistently", () => {
+    const row = rows["SY-E-26"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("\\frac{1}{3}+\\frac{1}{6}");
+    expect(row.esperado).toBe("\\frac{1}{2}");
+    const source = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    const expected = latexToBackendSyntax(row.esperado).replace(/\s+/g, "");
+    expect(["1/3+1/6", "(1)/(3)+(1)/(6)", "(1/3)+(1/6)"], source).toContain(source);
+    expect(["1/2", "(1)/(2)", "(1/2)", "((1)/(2))"], expected).toContain(expected);
+  });
+});
