@@ -418,3 +418,14 @@ def test_syf42_ceiling_backend_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(4.0, abs=1e-9)
+
+
+def test_syf43_sign_of_negative_five_backend_http():
+    """Explicit sign(-5) backend contract; does not cover original MathLive LaTeX."""
+    assert ROWS["SY-F-43"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "sign(-5)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(-1.0, abs=1e-9)
