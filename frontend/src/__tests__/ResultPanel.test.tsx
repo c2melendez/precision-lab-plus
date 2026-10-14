@@ -239,7 +239,7 @@ describe("ResultPanel", () => {
     it("formato 'scn' muestra notación científica", () => {
       render(<ResultPanel result={fractionResult} isLoading={false} />);
       fireEvent.click(screen.getByRole("button", { name: "scn" }));
-      expect(screen.getByText(/8\.888889e-1/)).toBeInTheDocument();
+      expect(document.querySelector(".katex")?.textContent).toContain("8.888888889");
     });
 
     it("formato 'frac' muestra la fracción cuando result_latex ya es \\frac{}{}", () => {
