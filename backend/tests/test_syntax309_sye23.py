@@ -1027,3 +1027,21 @@ def test_syd02_extra_closing_parenthesis_http_is_explicit_error():
         else:
             assert data.get("detail") or data.get("error_message"), data
         assert data.get("result_text") not in ("5", 5), data
+
+
+def test_syd03_empty_parentheses_http_is_explicit_error():
+    row = ROWS["SY-D-03"]
+    assert row["entrada"] == "()"
+    assert row["operacion"] == "error"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code in (200, 400, 422), response.text
+        data = response.json()
+        if response.status_code == 200:
+            MathResponse.model_validate(data)
+            assert data["success"] is False, data
+            assert data["error_code"] in {"PARSE_ERROR", "VALIDATION_ERROR"}, data
+            assert data["error_message"], data
+        else:
+            assert data.get("detail") or data.get("error_message"), data
+        assert data.get("result_text") not in ("0", "1", 0, 1), data
