@@ -1,5 +1,11 @@
 # Current Certification State
 
+## SY-N-31 — corrección de harness UI Plus (2026-10-14)
+- Plus SHA `6cec66863c358067b641243335a9fb29c85829b5`: cumulative [38610765034](https://github.com/c2melendez/precision-lab-plus/actions/runs/38610765034) FAILED (frontend: 819 PASS, 1 FAIL, 28 TODO; backend PASS); H1d [38610765109](https://github.com/c2melendez/precision-lab-plus/actions/runs/38610765109) SUCCESS. Falla de harness `jsdom`: Testing Library `getByRole` al recorrer KaTeX detonó `Array.prototype.forEach called on null or undefined` en `getComputedStyle`, no falla matemática probada.
+- Corregido test de UI `frontend/src/__tests__/ResultPanel.test.tsx` SHA `2e9ab861b240118e62f9697014a7a1e42fbef301`: query de botones acotada al contenedor y checks de notación KaTeX/retorno a exacto conservados.
+- Gates sobre SHA final: cumulative [38611979484](https://github.com/c2melendez/precision-lab-plus/actions/runs/38611979484), H1d [38611979475](https://github.com/c2melendez/precision-lab-plus/actions/runs/38611979475), inicialmente QUEUED. Confirmar resultados/job frontend antes de PASS. SY-N-31 OPEN hasta evidencia bilateral suficiente; prueba E2E navegador completo pendiente.
+
+
 ## SY-N-31 — comprobación de UI Plus (2026-10-14)
 - Confirmados PASS Plus SHA `606522ec873b3ff56f70c4eb61fd0d78e27923b4`: cumulative [38609824717](https://github.com/c2melendez/precision-lab-plus/actions/runs/38609824717) (frontend y backend SUCCESS) y H1d [38609824649](https://github.com/c2melendez/precision-lab-plus/actions/runs/38609824649) SUCCESS. Oráculo formatter y regresión antigua corregidos.
 - Añadido test de interacción componente UI `frontend/src/__tests__/ResultPanel.test.tsx` SHA `6cec66863c358067b641243335a9fb29c85829b5`: clic en `scn`, estado `aria-pressed`, visualización KaTeX de mantisa de SY-N-31, retorno a `exact` con fracción original y acción de copiar disponible. No sustituir por esto prueba nativa de navegador MathLive completo.
