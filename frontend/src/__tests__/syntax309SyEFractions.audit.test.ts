@@ -103,3 +103,13 @@ describe("SY-E-27 original improper fraction conversion", () => {
     expect(["22/7", "(22)/(7)", "(22/7)", "((22)/(7))"], expected).toContain(expected);
   });
 });
+
+describe("SY-E-28 source conversion for undefined fraction", () => {
+  it("preserves denominator zero for backend domain validation", () => {
+    const row = rows["SY-E-28"];
+    expect(row.operacion).toBe("error");
+    expect(row.entrada).toBe("\\frac{1}{0}");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(["1/0", "(1)/(0)", "(1/0)", "((1)/(0))"]).toContain(converted);
+  });
+});
