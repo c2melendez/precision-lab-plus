@@ -385,3 +385,18 @@ describe("SY-N-18 percent input", () => {
     expect(["12/100", "(12)/100", "12*(1/100)", "0.12", "12%"]).toContain(converted);
   });
 });
+
+
+describe("SY-N-19 original percent multiplication", () => {
+  it("converts fifty percent times two hundred without dropping multiplication", () => {
+    const row = rows["SY-N-19"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("50\\%\\times200");
+    expect(row.esperado).toBe("100");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(converted).not.toContain("\\times");
+    expect(converted).toContain("200");
+    expect(converted).toMatch(/50|0\.5|1\/2/);
+    expect(latexToBackendSyntax("100").trim()).toBe("100");
+  });
+});
