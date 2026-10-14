@@ -128,6 +128,14 @@ def evaluate(
         return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=False)
 
     # Sin variables libres sin sustituir -> numérico (sección 6).
+
+    # Diagnose a zero denominator while the original power structure is
+    # still available; evalf may collapse it to an uninformative zoo/nan.
+    # The zero exponent is not negative: preserve the declared 0^0=1 convention.
+    for node in sympy.preorder_traversal(expr):
+        if isinstance(node, sympy.Pow) and node.base.is_zero is True and node.exp.is_negative is True:
+            raise DomainErrorResult("División entre cero: cero no admite exponentes negativos.")
+
     # Fix (suite de regresión v1.1, caso E147: tan(pi/2) evaluate daba un
     # número finito gigante en vez de clasificarse como indefinido). El
     # parser preserva "pi/2" en forma exacta (Rational * pi, no un

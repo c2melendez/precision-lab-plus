@@ -119,3 +119,23 @@ def test_sye20_zero_negative_power_clear_domain_error_and_recovery_http():
         recovered = recovery.json()
         assert recovered["success"] is True and recovered["result_approx"] == 5, recovered
         assert recovered["request_id"] != data["request_id"], (data, recovered)
+
+
+@pytest.mark.parametrize("expression", ["0^(-2)", "1/0"])
+def test_sye20_related_zero_denominators_have_specific_domain_feedback(expression):
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is False and data["error_code"] == "DOMAIN_ERROR", data
+    assert "cero" in data["error_message"].lower(), data
+    assert data["result_approx"] is None, data
+
+@pytest.mark.parametrize("expression, expected", [("0^1", 0), ("0^2", 0), ("2^(-1)", 0.5)])
+def test_sye19_20_valid_power_controls_are_preserved(expression, expected):
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == expected, data
