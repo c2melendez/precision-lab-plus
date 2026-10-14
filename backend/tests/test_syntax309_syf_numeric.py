@@ -341,3 +341,21 @@ def test_syf33_generic_root_keeps_declared_complex_principal_branch():
     import sympy
     complex_value = complex(sympy.N(sympy.sympify(data["result_text"])))
     assert abs(complex_value.imag) > 1e-9, data
+
+
+@pytest.mark.parametrize("expression,expected", [
+    ("sqrt((-3)^2)", 3.0),
+    ("sqrt((3)^2)", 3.0),
+    ("cbrt((-3)^3)", -3.0),
+    ("cbrt((3)^3)", 3.0),
+    ("root((-2)^4,4)", 2.0),
+])
+def test_syf36_real_indexed_root_parity_explicit_backend(expression, expected):
+    """Real even/odd root parity on concrete witnesses; source LaTeX unverified."""
+    assert ROWS["SY-F-36"]["operacion"] == "equivalente"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, (expression, response.text)
+    data = response.json()
+    assert data["success"] is True, (expression, data)
+    assert data["result_approx"] == pytest.approx(expected, abs=1e-9)
