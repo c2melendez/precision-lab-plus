@@ -16,7 +16,15 @@ describe("IN625 Parte B / B1 Exponentes — UI → backend",()=>{
     ["EN-EX-29","e^{2x+1}"],["EN-EX-30","e^\\pi"],["EN-EX-31","e^{i\\pi}"],["EN-EX-32a","\\exp(x)"],
     ["EN-EX-32b","\\exp x"],["EN-EX-33","2^{-2^{2}}"],["EN-EX-34","x_1^2"],["EN-EX-35","x^{2}_{1}"]
   ];
-  for(const [id,input] of cases) it(`${id}: sin TeX residual`,()=>{noTex(input);});
+  for(const [id,input] of cases) {
+    if (id === "EN-EX-23") {
+      it("EN-EX-23: rejects ambiguous double superscript per SY-E-11", () => {
+        expect(() => c(input)).toThrowError(/superíndice|exponente/i);
+      });
+    } else {
+      it(`${id}: sin TeX residual`, () => { noTex(input); });
+    }
+  }
 
   it("multidigit exponents stay grouped",()=>{
     for(const input of ["2^{10}","2^10","x^{100}","x^23"]){
