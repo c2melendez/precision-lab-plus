@@ -491,3 +491,13 @@ describe("SY-N-27 pi source conversion", () => {
     expect(latexToBackendSyntax("\\pi").trim()).toBe("pi");
   });
 });
+
+
+describe("SY-N-28 Euler constant source conversion", () => {
+  it("preserves e as a constant rather than a truncated decimal", () => {
+    const row = rows["SY-N-28"];
+    expect(row.entrada).toBe("e");
+    expect(row.esperado).toBe("2.718281828");
+    expect(latexToBackendSyntax(row.entrada).trim()).toBe("e");
+  });
+});
