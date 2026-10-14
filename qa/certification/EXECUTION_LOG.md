@@ -4389,3 +4389,9 @@ Esta actualización prevalece sobre las fotografías históricas conservadas deb
 - Corregido test de UI `frontend/src/__tests__/ResultPanel.test.tsx` SHA `2e9ab861b240118e62f9697014a7a1e42fbef301`: query de botones acotada al contenedor y checks de notación KaTeX/retorno a exacto conservados.
 - Gates sobre SHA final: cumulative [38611979484](https://github.com/c2melendez/precision-lab-plus/actions/runs/38611979484), H1d [38611979475](https://github.com/c2melendez/precision-lab-plus/actions/runs/38611979475), inicialmente QUEUED. Confirmar resultados/job frontend antes de PASS. SY-N-31 OPEN hasta evidencia bilateral suficiente; prueba E2E navegador completo pendiente.
 
+
+## SY-N-31 — precisión selector exacto, corrección de test (2026-10-14)
+- SHA `2e9ab861b240118e62f9697014a7a1e42fbef301`: cumulative [38611979484](https://github.com/c2melendez/precision-lab-plus/actions/runs/38611979484) FAILURE solo frontend; 819 PASS, 1 FAIL, 28 TODO. H1d [38611979475](https://github.com/c2melendez/precision-lab-plus/actions/runs/38611979475) SUCCESS; backend SUCCESS. Error confirmado: `fireEvent.click(findFormat("exact")!)` recibe undefined porque el botón de formato exacto se etiqueta `exacto` en `frontend/src/components/ResultPanel.tsx`. No es una regresión del producto.
+- Corregido `frontend/src/__tests__/ResultPanel.test.tsx` commit `89a8385824e08ce7a100e5b321add6a376d3acfa`: identificar botón `exacto` sin reducir aserciones de KaTeX, fracción ni control de formato.
+- Nuevos runs SHA: cumulative [38612502423](https://github.com/c2melendez/precision-lab-plus/actions/runs/38612502423), H1d [38612502472](https://github.com/c2melendez/precision-lab-plus/actions/runs/38612502472), QUEUED al verificar. Siguiente: revisar resultado del gate final, logs frontend y ampliar prueba equivalente en Lite. SY-N-31 OPEN hasta comprobar cobertura bilateral suficiente.
+
