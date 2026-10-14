@@ -26,7 +26,7 @@ const rows = Object.fromEntries(readFileSync("../qa/certification/syntax309_case
 const mockedSubmit = vi.mocked(submitAndRecord);
 beforeEach(() => {
   mockedSubmit.mockReset();
-  useUIStore.setState({ activeMode: "basic", isLoading: false, errorMessage: null });
+  useUIStore.setState({ activeMode: "basic", isLoading: false, lastErrorMessage: null });
   mockedSubmit.mockResolvedValue({
     success: true, operation: "evaluate", request_id: "recovered",
     result_text: "5", result_latex: "5", result_approx: 5,
