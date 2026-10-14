@@ -412,3 +412,15 @@ describe("SY-N-20 factorial original source", () => {
     expect(latexToBackendSyntax("120").trim()).toBe("120");
   });
 });
+
+
+describe("SY-N-21 zero factorial original source", () => {
+  it("preserves postfix factorial and converts its result for reentry", () => {
+    const row = rows["SY-N-21"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("0!");
+    expect(row.esperado).toBe("1");
+    expect(latexToBackendSyntax(row.entrada).trim()).toBe("0!");
+    expect(latexToBackendSyntax(row.esperado).trim()).toBe("1");
+  });
+});
