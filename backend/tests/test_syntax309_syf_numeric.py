@@ -396,3 +396,14 @@ def test_syf40_explicit_nested_absolute_backend(x, expected):
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(expected, abs=1e-9)
+
+
+def test_syf41_floor_backend_http():
+    """SY-F-41 floor(3.7)=3 via explicit backend notation; raw MathLive LaTeX is not covered."""
+    assert ROWS["SY-F-41"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "floor(3.7)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(3.0, abs=1e-9)
