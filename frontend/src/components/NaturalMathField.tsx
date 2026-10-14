@@ -561,6 +561,12 @@ function normalizeLocalizedLatexAliases(input: string): string {
 }
 
 export function latexToBackendSyntax(latex: string): string {
+  // SY-N-30: MathLive's {,} may mean a decimal mark or thousands grouping.
+  // With three following digits and no declared locale, conversion to "."
+  // silently turns 1{,}000+1 into 2. Reject instead of changing meaning.
+  if (/\d{1,3}\{,\}\d{3}(?!\d)/.test(latex)) {
+    throw new Error("Separador ambiguo: declara si la coma es decimal o de miles.");
+  }
   // SY-N-05: explicit calculator-e convention; keep bare 1e3 rejected by backend.
   if (/^1\\mathrm\{e\}3$/.test(latex.trim())) return "1000";
   // SY-E-30: incomplete fraction cannot be silently converted to a valid value.
