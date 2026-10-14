@@ -561,6 +561,10 @@ function normalizeLocalizedLatexAliases(input: string): string {
 }
 
 export function latexToBackendSyntax(latex: string): string {
+  // SY-E-30: incomplete fraction cannot be silently converted to a valid value.
+  if (/\\frac\s*\{[^{}]+\}\s*\{\s*\}/.test(latex)) {
+    throw new Error("Denominador vacío: completa el denominador de la fracción.");
+  }
   validateExponentSource(latex);
   if (latex.trim() === "") return "";
 
