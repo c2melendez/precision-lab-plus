@@ -538,3 +538,15 @@ describe("SY-N-30 thousands separator convention", () => {
     expect(["1000+1", "1{,}000+1", "1,000+1"], translated).toContain(translated);
   });
 });
+
+
+describe("SY-U-01 original multiplication sign", () => {
+  it("converts the complete source to multiplication and preserves result reentry", () => {
+    const row = rows["SY-U-01"];
+    expect(row.entrada).toBe("3\\times4");
+    expect(row.operacion).toBe("valor");
+    expect(row.esperado).toBe("12");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("3*4");
+    expect(latexToBackendSyntax("12").trim()).toBe("12");
+  });
+});
