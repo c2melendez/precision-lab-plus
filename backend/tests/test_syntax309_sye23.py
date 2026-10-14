@@ -630,3 +630,23 @@ def test_syn17_unsafe_js_integer_stays_exact_http_and_reentry():
         assert repeated["success"] is True, repeated
         assert repeated["request_id"] != result["request_id"], repeated
         assert repeated["result_text"] == expected and repeated["result_latex"] == expected, repeated
+
+
+def test_syn18_percent_exact_http_and_reentry():
+    row = ROWS["SY-N-18"]
+    assert row["entrada"] == r"12\%"
+    assert row["esperado"] == "0.12"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "12/100"})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert sympy.sympify(result["result_text"]) == sympy.Rational(3, 25), result
+        assert result["result_approx"] == 0.12, result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert sympy.sympify(repeated["result_text"]) == sympy.Rational(3, 25), repeated
