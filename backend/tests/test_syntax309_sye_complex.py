@@ -167,3 +167,45 @@ def test_sye21_exact_half_http_response_and_actual_result_reentry():
         assert returned["success"] is True, returned
         assert returned["request_id"] != data["request_id"], returned
         assert returned["result_text"] == "1/2" and returned["result_approx"] == 0.5, returned
+
+
+def test_sye22_nested_fraction_symbolic_domain_and_substitutions_http():
+    row = ROWS["SY-E-22"]
+    assert row["entrada"] == r"\frac{1}{1+\frac{1}{x}}"
+    expression = "1/(1+1/x)"  # Explicit translation; no native editor claim.
+    x = sympy.Symbol("x")
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        represented = sympy.sympify(data["result_text"])
+        assert sympy.simplify(represented - x/(x+1)) == 0, data
+        assert data["result_latex"] and data["result_approx"] is None, data
+        conditions = [sympy.sympify(c["text"]) for c in data["domain_conditions"]]
+        assert len(conditions) >= 2, data
+        for value, expected in [(1, 0.5), (2, 2/3), (-2, 2)]:
+            assert all(c.subs(x, value) == sympy.true for c in conditions), data
+            sampled = client.post("/api/v1/evaluate", json={
+                "expression": expression, "substitutions": {"x": str(value)},
+            }).json()
+            assert sampled["success"] is True, sampled
+            assert sampled["result_approx"] == pytest.approx(expected), sampled
+            reentry = client.post("/api/v1/evaluate", json={
+                "expression": data["result_text"], "substitutions": {"x": str(value)},
+            }).json()
+            assert reentry["success"] is True, reentry
+            assert reentry["result_approx"] == pytest.approx(expected), reentry
+        for value in [0, -1]:
+            # At least one original restriction explicitly excludes each point.
+            assert any(c.subs(x, value) == sympy.false for c in conditions), data
+            invalid_response = client.post("/api/v1/evaluate", json={
+                "expression": expression, "substitutions": {"x": str(value)},
+            })
+            assert invalid_response.status_code == 200, invalid_response.text
+            invalid = invalid_response.json()
+            MathResponse.model_validate(invalid)
+            assert invalid["success"] is False, invalid
+            assert invalid["error_code"] == "DOMAIN_ERROR", invalid
+            assert invalid["result_text"] is None and invalid["result_approx"] is None, invalid
