@@ -530,3 +530,30 @@ def test_syn13_squared_radical_http_exact_and_reentry():
         assert repeated["request_id"] != result["request_id"], repeated
         assert repeated["result_text"] == "2" and repeated["result_latex"] == "2", repeated
         assert repeated["result_approx"] == 2, repeated
+
+
+def test_syn14_squared_radical_minus_two_http_exact_zero_and_reentry():
+    row = ROWS["SY-N-14"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == r"(\sqrt{2})^2-2"
+    assert row["esperado"] == "0"
+    expression = "(sqrt(2))^2-2"  # Frontend original source conversion tested independently.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert result["operation"] == "evaluate" and result["result_type"] == "scalar", result
+        assert result["input_text"] == expression and result["request_id"], result
+        assert result["result_text"] == "0" and result["result_latex"] == "0", result
+        assert result["result_approx"] == 0, result
+        assert result["error_code"] is None and result["error_message"] is None, result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert repeated["request_id"] != result["request_id"], repeated
+        assert repeated["result_text"] == "0" and repeated["result_latex"] == "0", repeated
+        assert repeated["result_approx"] == 0, repeated
