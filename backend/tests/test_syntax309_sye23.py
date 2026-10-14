@@ -853,13 +853,12 @@ def test_syn26_factorial_171_exact_or_explicit_overflow_and_recovery():
         MathResponse.model_validate(result)
         assert result["request_id"], result
         assert "Infinity" not in str(result) and "NaN" not in str(result), result
-        if result["success"]:
-            assert result["result_text"] == exact, result
-            assert result["result_approx"] is None, result
-        else:
-            assert result["error_code"] in ("DOMAIN_ERROR", "COMPLEXITY_LIMIT", "UNSUPPORTED_OPERATION"), result
-            assert any(s in (result["error_message"] or "").lower() for s in
-                ("desbord", "overflow", "límite", "limite", "factorial", "grande")), result
+        # Plus now supports this bounded exact result beyond float range.
+        assert result["success"] is True, result
+        assert result["result_text"] == exact, result
+        assert result["result_latex"] == exact, result
+        assert result["result_approx"] is None, result
+        assert result["error_code"] is None and result["error_message"] is None, result
         again = client.post("/api/v1/evaluate", json={"expression": "2+3"})
         assert again.status_code == 200, again.text
         recovered = again.json()

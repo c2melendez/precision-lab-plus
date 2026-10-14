@@ -123,13 +123,15 @@ def evaluate(
     # SY-N-24: keep literal factorial input bounded, but do not reject its
     # exact computed integer merely because the result exceeds the 64-digit
     # limit intended for user-supplied integer literals.
+    # 171! remains a bounded exact integer, but exceeds finite float range;
+    # omit only its optional approximation instead of rejecting the result.
     literal_factorial = re.fullmatch(r"\s*(\d{1,3})\s*!\s*", expression)
-    if literal_factorial and int(literal_factorial.group(1)) <= 170 and not substitutions:
+    if literal_factorial and int(literal_factorial.group(1)) <= 171 and not substitutions:
         operand = int(literal_factorial.group(1))
         exact = sympy.Integer(math.factorial(operand))
         return EvaluateResult(
             expr=exact, input_expr=sympy.factorial(sympy.Integer(operand), evaluate=False),
-            is_numeric=True, approx_value=float(exact)
+            is_numeric=True, approx_value=float(exact) if operand <= 170 else None
         )
 
     substitution_map = _validate_and_parse_substitutions(substitutions)
