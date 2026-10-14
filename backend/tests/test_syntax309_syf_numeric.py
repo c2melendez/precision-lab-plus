@@ -338,4 +338,6 @@ def test_syf33_generic_root_keeps_declared_complex_principal_branch():
     data = response.json()
     assert data["success"] is True, data
     assert data.get("result_approx") is None, data
-    assert "I" in str(data.get("result_text", "")) or "i" in str(data.get("result_text", "")), data
+    import sympy
+    complex_value = complex(sympy.N(sympy.sympify(data["result_text"])))
+    assert abs(complex_value.imag) > 1e-9, data
