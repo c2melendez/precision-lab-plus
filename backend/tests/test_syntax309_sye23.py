@@ -750,3 +750,33 @@ def test_syn22_negative_factorial_http_error_and_recovery():
         assert recovered["success"] is True, recovered
         assert recovered["result_text"] == "5" and recovered["result_latex"] == "5", recovered
         assert recovered["request_id"] != result["request_id"], recovered
+
+
+
+def test_syn23_non_integer_factorial_gamma_or_clear_error_and_recovery():
+    row = ROWS["SY-N-23"]
+    assert row["operacion"] == "convencion"
+    assert row["entrada"] == "2.5!"
+    assert "Gamma o aviso" in row["nota"]
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "2.5!"})
+        assert response.status_code in (200, 400, 422), response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["request_id"], result
+        if result["success"]:
+            assert response.status_code == 200, result
+            assert result["error_code"] is None, result
+            assert result["result_approx"] == pytest.approx(3.3233509704478426, rel=1e-8), result
+        else:
+            assert result["error_code"] in ("DOMAIN_ERROR", "VALIDATION_ERROR", "UNSUPPORTED_OPERATION"), result
+            assert result["error_message"] and any(word in result["error_message"].lower()
+                for word in ("factorial", "gamma", "integer", "entero", "domain", "dominio")), result
+            assert result.get("result_text") in (None, ""), result
+        again = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+        assert again.status_code == 200, again.text
+        recovered = again.json()
+        MathResponse.model_validate(recovered)
+        assert recovered["success"] is True, recovered
+        assert recovered["result_text"] == "5", recovered
+        assert recovered["request_id"] != result["request_id"], recovered
