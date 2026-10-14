@@ -562,7 +562,7 @@ function normalizeLocalizedLatexAliases(input: string): string {
 
 export function latexToBackendSyntax(latex: string): string {
   // SY-N-05: explicit calculator-e convention; keep bare 1e3 rejected by backend.
-  if (/^1\\\\mathrm\{e\}3$/.test(latex.trim())) return "1000";
+  if (/^1\\mathrm\{e\}3$/.test(latex.trim())) return "1000";
   // SY-E-30: incomplete fraction cannot be silently converted to a valid value.
   if (/\\frac\s*\{[^{}]+\}\s*\{\s*\}/.test(latex)) {
     throw new Error("Denominador vacío: completa el denominador de la fracción.");
