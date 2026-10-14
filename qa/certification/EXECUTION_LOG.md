@@ -3521,3 +3521,10 @@ Verified Plus technical SHA `a0986e5f6c61efcf636f0eaa3c1ac7355ff5c032`: SG28 run
 - Published official SY-F-40 nested absolute bar tests Lite SHA 93603c2ad1bd5a9588f515ddd826a0e071d892d2: test accepts mathematically correct | |x|-2 | across x=-3,0,5, or meaningful ambiguity/delimiter feedback. CI cumulative 38503507177, H1d 38503507167, build 38503507118 in progress initially.
 - Plus backend-only explicit abs(abs(x)-2) witnesses SHA 97880a23a694ea92f4bb8dea64d1a3d56690faf4, cumulative 38503514125 and H1d 38503514179 queued initially. Cannot use this to claim keyboard typed-bar handling.
 - Next: diagnose latest CI, refine SY-F-40 semantic error discrimination if needed, then advance SY-F-41 per official matrix. Syntax309 OPEN; SG28/DIST multinode BLOCKED.
+
+
+### 2026-10-13 — SY-F-40 latest CI checkpoint
+- Plus SHA 97880a23a694ea92f4bb8dea64d1a3d56690faf4 cumulative 38503514125 and H1d 38503514179 SUCCESS, but backend-only explicit abs(abs(x)-2), not typed original bars.
+- Lite first SY-F-40 SHA 93603c2ad1bd5a9588f515ddd826a0e071d892d2 cumulative 38503507177 FAILURE. Parser update e480f2e6082058a76d3f339eb24859b9020d9665 added generic \\vert translation, but cumulative 38503643938 still FAILURE. Diagnostic problem: error object stringified as [object Object] in test, concealing cause.
+- Lite test diagnostic SHA c21ab4e058a92c5e99e031b5fa233453b7c754d0 now surfaces actual error.message; cumulative 38503798382, H1d 38503798264, build 38503798331 in progress at last check. Do not certify Lite SY-F-40 until passing CI and correct semantic behavior or useful explicit ambiguity feedback.
+- Next: inspect Lite current failure details and fix correct layer, then official SY-F-41. Syntax309 OPEN; SG28/DIST independent-host certification BLOCKED.
