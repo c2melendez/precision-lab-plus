@@ -535,7 +535,7 @@ def test_syn13_squared_radical_http_exact_and_reentry():
 def test_syn14_squared_radical_minus_two_http_exact_zero_and_reentry():
     row = ROWS["SY-N-14"]
     assert row["operacion"] == "valor"
-    assert row["entrada"] == r"(\sqrt{2})^2-2"
+    assert row["entrada"] == r"\left(\sqrt{2}\right)^{2}-2"
     assert row["esperado"] == "0"
     expression = "(sqrt(2))^2-2"  # Frontend original source conversion tested independently.
     with TestClient(app) as client:
