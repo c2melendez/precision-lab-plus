@@ -620,3 +620,15 @@ describe("SY-U-07 Unicode division", () => {
     expect(latexToBackendSyntax("3").trim()).toBe("3");
   });
 });
+
+
+describe("SY-U-08 Unicode middle dot multiplication", () => {
+  it("preserves original middle dot and exact result reentry", () => {
+    const row = rows["SY-U-08"];
+    expect(row.entrada).toBe("3·4");
+    expect(row.operacion).toBe("valor");
+    expect(row.esperado).toBe("12");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("3*4");
+    expect(latexToBackendSyntax("12").trim()).toBe("12");
+  });
+});
