@@ -598,3 +598,13 @@ describe("SY-U-05 ASCII division", () => {
     expect(latexToBackendSyntax("3").trim()).toBe("3");
   });
 });
+
+describe("SY-U-06 Unicode multiplication", () => {
+  it("converts original Unicode source and result for reentry", () => {
+    const row = rows["SY-U-06"];
+    expect(row.entrada).toBe("3×4");
+    expect(row.esperado).toBe("12");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("3*4");
+    expect(latexToBackendSyntax("12").trim()).toBe("12");
+  });
+});
