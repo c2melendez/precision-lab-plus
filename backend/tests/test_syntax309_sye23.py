@@ -970,3 +970,24 @@ def test_syn30_thousands_grouping_explicit_http_translation_and_recovery():
         assert repeated["success"] is True, repeated
         assert repeated["request_id"] != value["request_id"], repeated
         assert sympy.sympify(repeated["result_text"]) == sympy.Integer(1001), repeated
+
+
+def test_syn31_small_rational_scientific_value_and_http_reentry():
+    row = ROWS["SY-N-31"]
+    assert row["entrada"] == r"\\frac{1}{3000000}"
+    assert row["esperado"] == r"3.333333333\\times10^{-7}"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "1/3000000"})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        assert sympy.sympify(data["result_text"]) == sympy.Rational(1, 3000000), data
+        assert data["result_approx"] == pytest.approx(1 / 3000000, rel=1e-9), data
+        assert data["error_code"] is None, data
+        repeated = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert repeated.status_code == 200, repeated.text
+        again = repeated.json()
+        MathResponse.model_validate(again)
+        assert again["success"] is True and again["request_id"] != data["request_id"], again
+        assert sympy.sympify(again["result_text"]) == sympy.Rational(1, 3000000), again
