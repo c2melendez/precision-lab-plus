@@ -501,3 +501,22 @@ describe("SY-N-28 Euler constant source conversion", () => {
     expect(latexToBackendSyntax(row.entrada).trim()).toBe("e");
   });
 });
+
+
+describe("SY-N-29 locale-sensitive decimal comma", () => {
+  it("does not silently turn 1,5+2 into an unrelated expression", () => {
+    const row = rows["SY-N-29"];
+    expect(row.entrada).toBe("1,5+2");
+    expect(row.operacion).toBe("convencion");
+    let converted: string;
+    try {
+      converted = latexToBackendSyntax(row.entrada).trim();
+    } catch (error) {
+      expect(String(error).trim().length).toBeGreaterThan(0);
+      return; // Explicit warning/rejection is permitted.
+    }
+    // Conversion must retain the decimal comma or normalize it to a decimal point.
+    // Removing it, or silently interpreting it as an expression separator, is forbidden.
+    expect(converted === "1.5+2" || converted === "1,5+2").toBe(true);
+  });
+});
