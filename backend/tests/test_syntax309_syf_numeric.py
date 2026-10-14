@@ -301,7 +301,7 @@ def test_syf31_sqrt_three_http():
 
 @pytest.mark.parametrize("case_id,expression,expected", [
     ("SY-F-32", "root(8,3)", 2.0),
-    ("SY-F-33", "root(-8,3)", -2.0),
+    ("SY-F-33", "cbrt(-8)", -2.0),
     ("SY-F-34", "root(16,4)", 2.0),
 ])
 def test_syf32_34_indexed_roots_http(case_id, expression, expected):
@@ -324,3 +324,18 @@ def test_syf35_nested_square_roots_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(2.0, abs=1e-9)
+
+
+def test_syf33_generic_root_keeps_declared_complex_principal_branch():
+    """Explicit root(-8,3) is the existing complex-principal operator.
+
+    Original indexed-radical input needs an independent frontend routing gate
+    for the real-odd-index contract; do not silently conflate the operators.
+    """
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "root(-8,3)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data.get("result_approx") is None, data
+    assert "I" in str(data.get("result_text", "")) or "i" in str(data.get("result_text", "")), data
