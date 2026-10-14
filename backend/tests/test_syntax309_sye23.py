@@ -310,3 +310,25 @@ def test_syn04_scientific_multiplication_http_and_reentry():
         MathResponse.model_validate(repeated)
         assert repeated["success"] is True, repeated
         assert sympy.sympify(repeated["result_text"]) == sympy.Integer(1200), repeated
+
+
+def test_syn05_explicit_calculator_e_http_and_reentry():
+    row = ROWS["SY-N-05"]
+    assert row["operacion"] == "convencion"
+    assert row["entrada"] == r"1\mathrm{e}3"
+    assert "1000" in row["esperado"]
+    # UI translation is independently covered by the frontend test.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "1000"})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert sympy.sympify(result["result_text"]) == sympy.Integer(1000), result
+        assert result["result_approx"] == 1000, result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert sympy.sympify(repeated["result_text"]) == sympy.Integer(1000), repeated
