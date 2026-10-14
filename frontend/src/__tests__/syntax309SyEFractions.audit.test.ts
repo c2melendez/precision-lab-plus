@@ -50,3 +50,17 @@ describe("SY-E-22/23 nested fraction original LaTeX conversion", () => {
     expect(["2/3", "(2)/(3)", "(2/3)", "((2)/(3))"]).toContain(output);
   });
 });
+
+
+describe("SY-E-24 original display-style fraction conversion", () => {
+  it("converts the whole original dfrac and its expected result consistently", () => {
+    const row = rows["SY-E-24"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("\\dfrac{3}{4}");
+    expect(row.esperado).toBe("\\frac{3}{4}");
+    const source = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    const expected = latexToBackendSyntax(row.esperado).replace(/\s+/g, "");
+    expect(["3/4", "(3)/(4)", "(3/4)", "((3)/(4))"], source).toContain(source);
+    expect(["3/4", "(3)/(4)", "(3/4)", "((3)/(4))"], expected).toContain(expected);
+  });
+});
