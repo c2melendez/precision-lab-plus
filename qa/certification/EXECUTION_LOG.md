@@ -4424,3 +4424,9 @@ Esta actualización prevalece sobre las fotografías históricas conservadas deb
 - Nuevo caso SY-D-04: (1+2] debe rechazar incompatibilidad de delimitadores. Plus HTTP test backend/tests/test_syntax309_sye23.py commit 1fbbea3aa8287d1fa970e36571586157992586b7; Lite parser test tests/syntax309SyE23.audit.test.ts commit 1ce2331cfe593fa8209d043183e34a5721aeb35f.
 - Gates nuevos Plus cumulative 38629079636 y H1d 38629079940 QUEUED; Lite cumulative 38629071681, H1d 38629071960, build 38629071977, E2E 38629072116 IN_PROGRESS. SY-D-04 OPEN hasta validación de SHA. SG28/H2 OPEN, DIST multinodo BLOCKED.
 
+
+## SY-D-04 PASS bilateral / SY-D-05 OPEN (2026-10-14)
+- SY-D-04 PASS: Lite SHA 1ce2331cfe593fa8209d043183e34a5721aeb35f cumulative 38629071681, H1d 38629071960, build 38629071977, E2E 38629072116 SUCCESS. Plus SHA 1fbbea3aa8287d1fa970e36571586157992586b7 cumulative 38629079636 y H1d 38629079940 SUCCESS.
+- SY-D-05 oficial entrada \\left(1+2\\right], resultado error claro por delimitadores incompatibles. Test Plus backend/tests/test_syntax309_sye23.py commit f48762ac3cb214f8dba997b0f2872fc7b06864a5, test Lite tests/syntax309SyE23.audit.test.ts commit 7f607f463ae02f571c408f645092d97f9575e042.
+- Gates Plus cumulative 38629847054 y H1d 38629846290 IN_PROGRESS; Lite cumulative 38629857801, H1d 38629857566, build 38629857861 y E2E 38629857766 QUEUED. SY-D-05 OPEN pendiente de confirmar y revisar logs. SG28/H2 OPEN, DIST BLOCKED.
+
