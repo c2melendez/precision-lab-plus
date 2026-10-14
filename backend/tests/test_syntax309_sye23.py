@@ -864,3 +864,29 @@ def test_syn26_factorial_171_exact_or_explicit_overflow_and_recovery():
         recovered = again.json()
         MathResponse.model_validate(recovered)
         assert recovered["success"] is True and recovered["result_text"] == "5", recovered
+
+
+def test_syn27_pi_exact_identity_approximation_and_http_reentry():
+    import math
+    row = ROWS["SY-N-27"]
+    assert row["entrada"] == r"\pi"
+    assert row["esperado"] == "3.141592654"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "pi"})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert result["result_text"] == "pi" and result["result_latex"] == r"\pi", result
+        assert math.isfinite(result["result_approx"]), result
+        assert abs(result["result_approx"] - 3.141592653589793) < 5e-10, result
+        assert format(result["result_approx"], ".9f") == "3.141592654", result
+        assert result["error_code"] is None and result["error_message"] is None, result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert repeated["request_id"] != result["request_id"], repeated
+        assert repeated["result_text"] == "pi", repeated
+        assert format(repeated["result_approx"], ".9f") == "3.141592654", repeated

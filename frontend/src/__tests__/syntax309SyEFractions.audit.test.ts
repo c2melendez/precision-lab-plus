@@ -480,3 +480,14 @@ describe("SY-N-26 overflow boundary factorial source", () => {
     expect(latexToBackendSyntax(row.entrada).trim()).toBe("171!");
   });
 });
+
+
+describe("SY-N-27 pi source conversion", () => {
+  it("preserves the exact constant in original source and returned LaTeX", () => {
+    const row = rows["SY-N-27"];
+    expect(row.entrada).toBe("\\pi");
+    expect(row.esperado).toBe("3.141592654");
+    expect(latexToBackendSyntax(row.entrada).trim()).toBe("pi");
+    expect(latexToBackendSyntax("\\pi").trim()).toBe("pi");
+  });
+});
