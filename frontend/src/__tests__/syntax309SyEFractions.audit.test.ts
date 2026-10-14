@@ -40,13 +40,13 @@ describe("SY-E-22/23 nested fraction original LaTeX conversion", () => {
     const converted = latexToBackendSyntax(row.entrada);
     expect(converted).not.toContain("\\frac");
     // Original operands must remain nested rather than flattening 1/2/3/4.
-    const compact = converted.replace(/\\s+/g, "");
+    const compact = converted.replace(/\s+/g, "");
     expect(compact).toMatch(/1/);
     expect(compact).toMatch(/2/);
     expect(compact).toMatch(/3/);
     expect(compact).toMatch(/4/);
     expect(compact).toContain("/");
-    const output = latexToBackendSyntax(row.esperado).replace(/\\s+/g, "");
+    const output = latexToBackendSyntax(row.esperado).replace(/\s+/g, "");
     expect(["2/3", "(2)/(3)", "(2/3)", "((2)/(3))"]).toContain(output);
   });
 });
