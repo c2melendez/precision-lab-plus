@@ -64,3 +64,16 @@ describe("SY-E-24 original display-style fraction conversion", () => {
     expect(["3/4", "(3)/(4)", "(3/4)", "((3)/(4))"], expected).toContain(expected);
   });
 });
+
+describe("SY-E-25 original text-style fraction conversion", () => {
+  it("converts the whole original tfrac and its expected result consistently", () => {
+    const row = rows["SY-E-25"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("\\tfrac{3}{4}");
+    expect(row.esperado).toBe("\\frac{3}{4}");
+    const source = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    const expected = latexToBackendSyntax(row.esperado).replace(/\s+/g, "");
+    expect(["3/4", "(3)/(4)", "(3/4)", "((3)/(4))"], source).toContain(source);
+    expect(["3/4", "(3)/(4)", "(3/4)", "((3)/(4))"], expected).toContain(expected);
+  });
+});
