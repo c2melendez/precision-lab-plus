@@ -608,3 +608,15 @@ describe("SY-U-06 Unicode multiplication", () => {
     expect(latexToBackendSyntax("12").trim()).toBe("12");
   });
 });
+
+
+describe("SY-U-07 Unicode division", () => {
+  it("preserves original division symbol and exact result reentry", () => {
+    const row = rows["SY-U-07"];
+    expect(row.entrada).toBe("12÷4");
+    expect(row.operacion).toBe("valor");
+    expect(row.esperado).toBe("3");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("12/4");
+    expect(latexToBackendSyntax("3").trim()).toBe("3");
+  });
+});
