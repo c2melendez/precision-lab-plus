@@ -531,7 +531,7 @@ describe("SY-N-30 thousands separator convention", () => {
     try {
       translated = latexToBackendSyntax(row.entrada).replace(/\\s+/g, "");
     } catch (error) {
-      expect(String(error).length).toBeGreaterThan(0);
+      expect(String(error)).toMatch(/separador|ambiguo|miles|decimal/i);
       return;
     }
     // Converter may retain thousands punctuation for backend rejection, or normalize to 1000+1.
