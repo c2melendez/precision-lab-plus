@@ -1144,3 +1144,25 @@ def test_syd08_parenthesized_power_normalized_http_and_reentry():
         MathResponse.model_validate(again)
         assert again["success"] is True, again
         assert sympy.sympify(again["result_text"]) == sympy.Integer(9), again
+
+def test_syd09_parenthesized_fraction_power_exact_http_and_reentry():
+    row = ROWS["SY-D-09"]
+    assert row["entrada"] == r"\left(\frac{1}{2}\right)^{2}"
+    assert row["operacion"] == "valor"
+    assert row["esperado"] == r"\frac{1}{4}"
+    # HTTP normalized math; MathLive-to-HTTP conversion is not evidenced by this test.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "(1/2)**2"})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        assert sympy.sympify(data["result_text"]) == sympy.Rational(1, 4), data
+        assert data["result_approx"] == pytest.approx(0.25), data
+        assert data["error_code"] is None, data
+        repeat = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert repeat.status_code == 200, repeat.text
+        again = repeat.json()
+        MathResponse.model_validate(again)
+        assert again["success"] is True, again
+        assert sympy.sympify(again["result_text"]) == sympy.Rational(1, 4), again
