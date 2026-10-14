@@ -289,3 +289,19 @@ describe("SY-N-12 decimal plus abbreviated fraction", () => {
     expect(latexToBackendSyntax("2").trim()).toBe("2");
   });
 });
+
+
+describe("SY-N-13 original squared radical", () => {
+  it("preserves the radical and exponent when converting the complete source", () => {
+    const row = rows["SY-N-13"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("\\sqrt{2}^{2}");
+    expect(row.esperado).toBe("2");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(converted).not.toContain("\\sqrt");
+    expect(converted).toMatch(/sqrt|\^|\*\*/i);
+    expect(converted).toContain("2");
+    expect(converted).not.toContain("2.0000000000000004");
+    expect(latexToBackendSyntax("2").trim()).toBe("2");
+  });
+});
