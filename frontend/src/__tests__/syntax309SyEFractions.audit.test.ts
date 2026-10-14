@@ -305,3 +305,19 @@ describe("SY-N-13 original squared radical", () => {
     expect(latexToBackendSyntax("2").trim()).toBe("2");
   });
 });
+
+
+describe("SY-N-14 squared radical cancellation", () => {
+  it("keeps the radical power and subtraction in the original complete expression", () => {
+    const row = rows["SY-N-14"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("(\\sqrt{2})^2-2");
+    expect(row.esperado).toBe("0");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(converted).not.toContain("\\sqrt");
+    expect(converted).toMatch(/sqrt|\^|\*\*/);
+    expect(converted).toContain("-2");
+    expect(converted).not.toContain("0.0000000000000004");
+    expect(latexToBackendSyntax("0").trim()).toBe("0");
+  });
+});
