@@ -470,3 +470,13 @@ describe("SY-N-25 large factorial near finite float boundary", () => {
     expect(latexToBackendSyntax(row.entrada).trim()).toBe("170!");
   });
 });
+
+
+describe("SY-N-26 overflow boundary factorial source", () => {
+  it("preserves the factorial notation without evaluating it through JavaScript Number", () => {
+    const row = rows["SY-N-26"];
+    expect(row.entrada).toBe("171!");
+    expect(row.esperado).toMatch(/Infinity/);
+    expect(latexToBackendSyntax(row.entrada).trim()).toBe("171!");
+  });
+});
