@@ -267,3 +267,24 @@ def test_syn02_trailing_decimal_http_and_reentry():
         MathResponse.model_validate(repeated)
         assert repeated["success"] is True, repeated
         assert sympy.sympify(repeated["result_text"]) == sympy.Integer(5), repeated
+
+
+def test_syn03_leading_zero_integer_http_and_reentry():
+    row = ROWS["SY-N-03"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == "00012"
+    assert row["esperado"] == "12"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert sympy.sympify(result["result_text"]) == sympy.Integer(12), result
+        assert result["result_approx"] == 12, result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert sympy.sympify(repeated["result_text"]) == sympy.Integer(12), repeated
