@@ -440,3 +440,14 @@ def test_syf44_modulo_backend_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(1.0, abs=1e-9)
+
+
+def test_syf45_gcd_backend_http():
+    """SY-F-45 gcd(12,18)=6 via explicit backend call; original LaTeX not covered."""
+    assert ROWS["SY-F-45"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "gcd(12,18)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(6.0, abs=1e-9)
