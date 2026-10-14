@@ -424,3 +424,16 @@ describe("SY-N-21 zero factorial original source", () => {
     expect(latexToBackendSyntax(row.esperado).trim()).toBe("1");
   });
 });
+
+
+describe("SY-N-22 negative factorial source", () => {
+  it("retains the negative operand and factorial operator for domain validation", () => {
+    const row = rows["SY-N-22"];
+    expect(row.operacion).toBe("error");
+    expect(row.entrada).toBe("(-1)!");
+    expect(row.esperado).toMatch(/factorial no definido/i);
+    const source = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(["(-1)!", "(-1)!"].includes(source)).toBe(true);
+    expect(latexToBackendSyntax("2+3")).toBe("2+3");
+  });
+});
