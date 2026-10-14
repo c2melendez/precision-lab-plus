@@ -1,5 +1,14 @@
 # Current Certification State
 
+## Estado vigente — SY-E-29 indeterminación 0/0 — 2026-10-14
+- Rama canónica bilateral qa/syntax-audit-in625-a1. SY-E-28 PASS en alcance probatorio anterior: Lite SHA 92599b8bd6ab5173972ab16070a5a6ea998ab596, cumulative 38529541491/H1d 38529541214/build 38529541187 SUCCESS; Plus SHA 0922e0b09ddf318c3acaea68f8993adc9b8ebf75, cumulative 38529553628 y H1d 38529553662 SUCCESS.
+- Fixture oficial SY-E-29: \frac{0}{0}, operacion=error, esperado error claro: indeterminado. No aprobar por mensaje genérico de división entre cero si no distingue 0/0.
+- Lite tests/syntax309SyE23.audit.test.ts: prueba original -> parser/evaluate -> DOMAIN_ERROR específico, handler de worker y recuperación 2+3. Primer SHA 6421c94eecb1227590f622c48d82873502fdbe1b, cumulative 38529981106 FAILURE por HARNESS, fallo de sintaxis del literal regex de test (esbuild línea 188), no evidencia de fallo matemático. Corrección SHA 7e9547f9d7d1f46794df4f3283c449066fa0f339 simplifica matcher a /indeterm|0.*0/i sin debilitar el requisito de diferenciación; nuevos cumulative 38530120709/H1d 38530120708/build 38530120710 activados, en curso al último chequeo.
+- Plus frontend/src/__tests__/syntax309SyEFractions.audit.test.ts SHA e5b67f92ad2576fe7be274ca711cf3d630382ac5 conserva 0/0 desde la fuente LaTeX; backend/tests/test_syntax309_sye23.py SHA técnico final b92ca7a5f765d858f78863af2f53122ea185a506 prueba HTTP real, MathResponse, DOMAIN_ERROR y texto específico de indeterminación, ausencia de resultados, recuperación de solicitud. Plus cumulative 38530033515/H1d 38530033534 en curso al último chequeo. Traducción backend explícita no acredita edición MathLive/browser E2E.
+- SY-E-29 IMPLEMENTED, pendiente cierre bilateral por CI del SHA relevante; diagnosticar y corregir rojos (producto/harness/oráculo/infraestructura) sin falsos PASS.
+- Siguiente caso después del cierre: SY-E-30 \frac{x}{} exige error claro por denominador vacío. Syntax309 global OPEN; SG28 H2 OPEN; DIST multinodo BLOCKED. Sin producción.
+
+
 ## Estado vigente — SY-E-28 división entre cero — 2026-10-14
 - Rama canónica bilateral: qa/syntax-audit-in625-a1.
 - SY-E-27: Lite SHA f4b7c3bfcab49a806e2409dae305650c3bad0a32: cumulative 38528496932, H1d 38528496898 y build 38528496900 SUCCESS. Plus SHA 5c71dc8c6aade0d91c6e785bf1ee556ee9df1610: cumulative 38528558739 y H1d 38528558761 SUCCESS. PASS acotado, no prueba MathLive/browser real.
