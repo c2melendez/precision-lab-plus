@@ -157,3 +157,25 @@ def test_sye27_improper_fraction_exact_http_and_reentry():
         assert repeated["request_id"] != data["request_id"], repeated
         assert sympy.sympify(repeated["result_text"]) == sympy.Rational(22, 7), repeated
         assert repeated["result_approx"] == pytest.approx(22/7, rel=1e-15), repeated
+
+def test_sye28_original_zero_denominator_domain_error_and_recovery():
+    row = ROWS["SY-E-28"]
+    assert row["operacion"] == "error"
+    assert row["entrada"] == r"\frac{1}{0}"
+    assert "división entre cero" in row["esperado"]
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "1/0"})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is False, data
+        assert data["error_code"] == "DOMAIN_ERROR", data
+        assert any(term in data["error_message"].lower() for term in ("cero", "zero", "divisi")), data
+        assert data["result_text"] is None and data["result_latex"] is None, data
+        assert data["result_approx"] is None, data
+        recovered_response = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+        assert recovered_response.status_code == 200, recovered_response.text
+        recovered = recovered_response.json()
+        MathResponse.model_validate(recovered)
+        assert recovered["success"] is True and recovered["result_approx"] == 5, recovered
+        assert recovered["request_id"] != data["request_id"], (data, recovered)
