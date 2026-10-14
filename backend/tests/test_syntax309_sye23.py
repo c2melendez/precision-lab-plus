@@ -673,3 +673,25 @@ def test_syn19_percent_multiplication_http_and_reentry():
         MathResponse.model_validate(repeated)
         assert repeated["success"] is True, repeated
         assert repeated["result_text"] == "100" and repeated["result_latex"] == "100", repeated
+
+
+def test_syn20_factorial_five_http_and_reentry():
+    row = ROWS["SY-N-20"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == "5!"
+    assert row["esperado"] == "120"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "5!"})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert result["result_text"] == "120" and result["result_latex"] == "120", result
+        assert result["result_approx"] == 120, result
+        assert result["error_code"] is None and result["error_message"] is None, result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert repeated["result_text"] == "120" and repeated["result_latex"] == "120", repeated
