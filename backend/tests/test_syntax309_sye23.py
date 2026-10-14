@@ -399,3 +399,25 @@ def test_syn08_decimal_subtraction_http_and_reentry():
         MathResponse.model_validate(repeated)
         assert repeated["success"] is True, repeated
         assert sympy.sympify(repeated["result_text"]) == sympy.Rational(1, 10), repeated
+
+
+def test_syn09_decimal_product_http_exact_and_reentry():
+    row = ROWS["SY-N-09"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == r"4.35\times100"
+    assert row["esperado"] == "435"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "4.35*100"})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert sympy.sympify(result["result_text"]) == sympy.Integer(435), result
+        assert result["result_approx"] == 435, result
+        assert "434.99999999999994" not in str(result), result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert sympy.sympify(repeated["result_text"]) == sympy.Integer(435), repeated
