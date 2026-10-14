@@ -1,5 +1,11 @@
 # Current Certification State
 
+## SY-N-31 — corrección de presentación Plus (2026-10-14)
+- Lite SHA b88c7e5a272123943b60178725baa15bbc3e3a72: cumulative 38604145396, H1d 38604145815, build 38604145540 COMPLETED/SUCCESS. Formatter comprobado; E2E de selección/render no acreditado.
+- Plus `frontend/src/components/formatNumber.ts` SHA 20e938275c8e7eda503844b2b2020de7053d94df agrega `formatScientificLatex` (nueve decimales de mantisa, LaTeX); `frontend/src/components/ResultPanel.tsx` SHA 78390b398090d35878fa4f5e80b313f8c78913d2 visualiza con MathRenderer en `scn`, sin cambiar resultado exacto; test nuevo `frontend/src/components/formatNumber.syntax309.test.ts` SHA 70c0221a9c72772d350aa948f0297d7b9c2e4279, corregido 0c68c36c8294189263ef5eca785c2c279b441c3a.
+- CI detectada SHA anterior 70c0221a: cumulative 38606501880, H1d 38606501716 IN_PROGRESS al consultar. Validar runs sobre SHA final 0c68c36 antes de PASS; asegurar que el test frontend se ejecuta realmente en el gate, pues un workflow verde sin ese test no certifica la presentación. Render/click E2E pendiente. SY-N-31 OPEN; SG28/H2 OPEN; DIST multinodo BLOCKED.
+
+
 ## SY-N-31 — reconciliación CI verificada (2026-10-14)
 - Rama bilateral: `qa/syntax-audit-in625-a1`.
 - Lite SHA `5f080ce8ca21f87297958531cc5687b3ac6fc104`: cumulative [38602654265](https://github.com/c2melendez/precision-lab-lite/actions/runs/38602654265), H1d [38602653779](https://github.com/c2melendez/precision-lab-lite/actions/runs/38602653779) y build [38602653848](https://github.com/c2melendez/precision-lab-lite/actions/runs/38602653848) COMPLETED/SUCCESS.
