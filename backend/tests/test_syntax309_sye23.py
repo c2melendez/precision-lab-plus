@@ -288,3 +288,25 @@ def test_syn03_leading_zero_integer_http_and_reentry():
         MathResponse.model_validate(repeated)
         assert repeated["success"] is True, repeated
         assert sympy.sympify(repeated["result_text"]) == sympy.Integer(12), repeated
+
+
+def test_syn04_scientific_multiplication_http_and_reentry():
+    row = ROWS["SY-N-04"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == r"1.2\times10^{3}"
+    assert row["esperado"] == "1200"
+    # The UI converts LaTeX multiplication/exponents to this backend expression.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "1.2*10^3"})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert sympy.sympify(result["result_text"]) == sympy.Integer(1200), result
+        assert result["result_approx"] == 1200, result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert sympy.sympify(repeated["result_text"]) == sympy.Integer(1200), repeated
