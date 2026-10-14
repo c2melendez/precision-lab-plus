@@ -99,3 +99,24 @@ def test_sye06_fractional_power_real_domain_http(x, expected):
             data = response.json()
             assert data["success"] is True, data
             assert data["result_approx"] == pytest.approx(expected, rel=1e-12, abs=1e-12), (expression, x, data)
+
+
+@pytest.mark.parametrize("x, expected", [
+    ("0", 0), ("1/16", 0.25), ("1/4", 0.5), ("1", 1),
+    ("4", 2), ("9", 3), ("16", 4), ("100", 10),
+])
+def test_sye07_decimal_power_real_domain_http(x, expected):
+    """Explicit backend x^0.5 witnesses; source UI and complex branches remain open."""
+    row = ROWS["SY-E-07"]
+    assert row["operacion"] == "equivalente"
+    assert row["entrada"] == "x^{0.5}"
+    assert row["esperado"] == r"\sqrt{x}"
+    with TestClient(app) as client:
+        for expression in ("x^0.5", "sqrt(x)"):
+            response = client.post("/api/v1/evaluate", json={
+                "expression": expression, "substitutions": {"x": x},
+            })
+            assert response.status_code == 200, response.text
+            data = response.json()
+            assert data["success"] is True, data
+            assert data["result_approx"] == pytest.approx(expected, rel=1e-12, abs=1e-12), (expression, x, data)
