@@ -4365,3 +4365,9 @@ Esta actualización prevalece sobre las fotografías históricas conservadas deb
 - SY-N-31: PASS del oráculo numérico/valor exacto/reentrada dentro del alcance de suites existentes; presentación matemática UI a nueve decimales científicos sin evidencia E2E suficiente. No atribuir certificación de visualización a `toExponential(9)` del propio test ni a `result_approx` HTTP.
 - Próximo paso ejecutable: localizar componente de presentación/formateo de Lite y Plus y agregar pruebas permanentes que ejerzan el render/selección de forma científica real (esperado `3.333333333\\times10^{-7}`), conservando fracción exacta y reentrada. Ejecutar gates por SHA y revisar logs antes de certificar el criterio visual; después avanzar al siguiente fixture oficial de Syntax309. SG28/H2 OPEN; DIST multinodo BLOCKED; no cambios en producción.
 
+
+## SY-N-31 — corrección de presentación Plus (2026-10-14)
+- Lite SHA b88c7e5a272123943b60178725baa15bbc3e3a72: cumulative 38604145396, H1d 38604145815, build 38604145540 COMPLETED/SUCCESS. Formatter comprobado; E2E de selección/render no acreditado.
+- Plus `frontend/src/components/formatNumber.ts` SHA 20e938275c8e7eda503844b2b2020de7053d94df agrega `formatScientificLatex` (nueve decimales de mantisa, LaTeX); `frontend/src/components/ResultPanel.tsx` SHA 78390b398090d35878fa4f5e80b313f8c78913d2 visualiza con MathRenderer en `scn`, sin cambiar resultado exacto; test nuevo `frontend/src/components/formatNumber.syntax309.test.ts` SHA 70c0221a9c72772d350aa948f0297d7b9c2e4279, corregido 0c68c36c8294189263ef5eca785c2c279b441c3a.
+- CI detectada SHA anterior 70c0221a: cumulative 38606501880, H1d 38606501716 IN_PROGRESS al consultar. Validar runs sobre SHA final 0c68c36 antes de PASS; asegurar que el test frontend se ejecuta realmente en el gate, pues un workflow verde sin ese test no certifica la presentación. Render/click E2E pendiente. SY-N-31 OPEN; SG28/H2 OPEN; DIST multinodo BLOCKED.
+
