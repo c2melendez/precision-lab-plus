@@ -359,3 +359,14 @@ def test_syf36_real_indexed_root_parity_explicit_backend(expression, expected):
     data = response.json()
     assert data["success"] is True, (expression, data)
     assert data["result_approx"] == pytest.approx(expected, abs=1e-9)
+
+
+def test_syf37_absolute_value_http():
+    """Explicit backend abs(-3) witness; original LaTeX source not covered."""
+    assert ROWS["SY-F-37"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "abs(-3)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(3.0, abs=1e-9)
