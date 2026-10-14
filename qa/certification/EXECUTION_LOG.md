@@ -4411,3 +4411,10 @@ Esta actualización prevalece sobre las fotografías históricas conservadas deb
 - Plus new cumulative 38625477765, H1d 38625477804 queued; Lite cumulative 38625444359, H1d 38625444330, build 38625444465, scientific E2E 38625444456 in progress. SY-D-02 OPEN pending actual SHA evidence.
 - Syntax309 OPEN; SG28/H2 OPEN; DIST multinodo BLOCKED.
 
+
+## SY-D-02 PASS bilateral / SY-D-03 abierto (2026-10-14)
+- SY-D-02 PASS en alcance: Lite SHA 5e920cea270979ea8cc66d9a70f925001d073580: cumulative 38625444359, H1d 38625444330, build 38625444465 y científico E2E 38625444456 SUCCESS. Plus SHA 6d880c8ebb5a182a26e832eb908aaa6a629396bc cumulative 38625477765 y H1d 38625477804 SUCCESS.
+- Nuevo SY-D-03: entrada (), error claro de paréntesis vacíos. Test Plus backend/tests/test_syntax309_sye23.py SHA e1314fa42eb827fa86bf84b6682084667092968e; test Lite tests/syntax309SyE23.audit.test.ts SHA 7b3a62f0692471814c3947d0ca533c66f215c0a8.
+- Nuevos gates Plus cumulative 38627177726 y H1d 38627177431 IN_PROGRESS; Lite cumulative 38627185469 y científico E2E 38627185399 QUEUED al consultar. SY-D-03 OPEN hasta confirmar gates por SHA.
+- SG28/H2 OPEN, DIST multinodo BLOCKED; sin producción.
+
