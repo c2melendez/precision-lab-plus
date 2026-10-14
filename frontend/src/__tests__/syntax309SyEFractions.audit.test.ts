@@ -187,3 +187,14 @@ describe("SY-N-04 scientific multiplication original LaTeX", () => {
     expect(converted).toMatch(/3/);
   });
 });
+
+
+describe("SY-N-05 calculator-e convention", () => {
+  it("converts exact original to 1000 without enabling bare scientific syntax", () => {
+    const row = rows["SY-N-05"];
+    expect(row.operacion).toBe("convencion");
+    expect(row.entrada).toBe("1\\mathrm{e}3");
+    expect(row.nota).toMatch(/aceptarla o rechazarla/);
+    expect(latexToBackendSyntax(row.entrada)).toBe("1000");
+  });
+});
