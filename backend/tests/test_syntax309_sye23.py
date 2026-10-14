@@ -991,3 +991,21 @@ def test_syn31_small_rational_scientific_value_and_http_reentry():
         MathResponse.model_validate(again)
         assert again["success"] is True and again["request_id"] != data["request_id"], again
         assert sympy.sympify(again["result_text"]) == sympy.Rational(1, 3000000), again
+
+
+def test_syd01_unclosed_parenthesis_http_rejected_without_silent_evaluation():
+    row = ROWS["SY-D-01"]
+    assert row["entrada"] == "(2+3"
+    assert row["operacion"] == "error"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code in (200, 400, 422), response.text
+        data = response.json()
+        if response.status_code == 200:
+            MathResponse.model_validate(data)
+            assert data["success"] is False, data
+            assert data["error_code"] in {"PARSE_ERROR", "VALIDATION_ERROR"}, data
+            assert data["error_message"], data
+        else:
+            assert data.get("detail") or data.get("error_message"), data
+        assert "result_text" not in data or data["result_text"] not in ("5", 5), data
