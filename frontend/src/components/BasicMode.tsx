@@ -44,6 +44,7 @@ import type { MathfieldElement } from "mathlive";
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
 import { useUIStore } from "../store/useUIStore";
+import { validateExponentSource } from "./exponentSourceValidation";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useLayoutModeStore } from "../store/useLayoutModeStore";
 import { CalculatorScreen } from "./CalculatorScreen";
@@ -335,6 +336,12 @@ export function BasicMode() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    try {
+      validateExponentSource(latex);
+    } catch (error) {
+      setValidationError(error instanceof Error ? error.message : "Exponente inválido.");
+      return;
+    }
     const submissionId = ++latestSubmissionRef.current;
 
     // H1 EN-RE-12: una unión de intervalos producida por el propio solver
