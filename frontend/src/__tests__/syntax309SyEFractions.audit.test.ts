@@ -90,3 +90,16 @@ describe("SY-E-26 original fraction addition conversion", () => {
     expect(["1/2", "(1)/(2)", "(1/2)", "((1)/(2))"], expected).toContain(expected);
   });
 });
+
+describe("SY-E-27 original improper fraction conversion", () => {
+  it("converts the whole original fraction and its expected result consistently", () => {
+    const row = rows["SY-E-27"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("\\frac{22}{7}");
+    expect(row.esperado).toBe("\\frac{22}{7}\\approx3.142857143");
+    const source = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    const expected = latexToBackendSyntax("\\frac{22}{7}").replace(/\s+/g, "");
+    expect(["22/7", "(22)/(7)", "(22/7)", "((22)/(7))"], source).toContain(source);
+    expect(["22/7", "(22)/(7)", "(22/7)", "((22)/(7))"], expected).toContain(expected);
+  });
+});
