@@ -1377,3 +1377,28 @@ def test_syu04_ascii_multiplication_http_and_reentry():
         assert again["success"] is True, again
         assert again["request_id"] != data["request_id"], again
         assert again["result_text"] == "12" and again["result_approx"] == 12, again
+
+def test_syu05_ascii_division_http_and_reentry():
+    row = ROWS["SY-U-05"]
+    assert row["entrada"] == "12/4"
+    assert row["operacion"] == "valor"
+    assert row["esperado"] == "3"
+    expression = row["entrada"]
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        assert data["operation"] == "evaluate" and data["result_type"] == "scalar", data
+        assert data["input_text"] == expression and data["request_id"], data
+        assert data["result_text"] == "3" and data["result_latex"] == "3", data
+        assert data["result_approx"] == 3, data
+        assert data["error_code"] is None and data["error_message"] is None, data
+        response2 = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert response2.status_code == 200, response2.text
+        again = response2.json()
+        MathResponse.model_validate(again)
+        assert again["success"] is True, again
+        assert again["request_id"] != data["request_id"], again
+        assert again["result_text"] == "3" and again["result_approx"] == 3, again
