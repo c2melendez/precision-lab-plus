@@ -198,3 +198,16 @@ describe("SY-N-05 calculator-e convention", () => {
     expect(latexToBackendSyntax(row.entrada)).toBe("1000");
   });
 });
+
+
+describe("SY-N-06 decimal precision original source", () => {
+  it("preserves the decimal operands without adding binary floating artifacts", () => {
+    const row = rows["SY-N-06"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("0.1+0.2");
+    expect(row.esperado).toBe("0.3");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(converted).toBe("0.1+0.2");
+    expect(converted).not.toContain("0.30000000000000004");
+  });
+});
