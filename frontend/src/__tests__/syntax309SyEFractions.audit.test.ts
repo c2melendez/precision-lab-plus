@@ -460,3 +460,13 @@ describe("SY-N-24 large factorial original source", () => {
     expect(row.nota).toMatch(/158 dígitos/);
   });
 });
+
+
+describe("SY-N-25 large factorial near finite float boundary", () => {
+  it("keeps 170! unchanged in the backend source", () => {
+    const row = rows["SY-N-25"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("170!");
+    expect(latexToBackendSyntax(row.entrada).trim()).toBe("170!");
+  });
+});
