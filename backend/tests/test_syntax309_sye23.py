@@ -202,3 +202,25 @@ def test_sye29_zero_over_zero_indeterminate_error_and_recovery():
         MathResponse.model_validate(recovered)
         assert recovered["success"] is True and recovered["result_approx"] == 5, recovered
         assert recovered["request_id"] != data["request_id"], (data,recovered)
+
+
+def test_sye31_fraction_adjacency_declared_as_product_and_reentry():
+    row = ROWS["SY-E-31"]
+    assert row["operacion"] == "convencion"
+    assert row["entrada"] == r"2\frac{1}{3}"
+    assert "Número mixto o producto: declarar" in row["nota"]
+    # The frontend converts adjacency to multiplication; not mixed-number addition.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "2*(1/3)"})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert sympy.sympify(result["result_text"]) == sympy.Rational(2, 3), result
+        assert result["result_approx"] == pytest.approx(2/3), result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert sympy.sympify(repeated["result_text"]) == sympy.Rational(2, 3), repeated
