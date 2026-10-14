@@ -974,8 +974,8 @@ def test_syn30_thousands_grouping_explicit_http_translation_and_recovery():
 
 def test_syn31_small_rational_scientific_value_and_http_reentry():
     row = ROWS["SY-N-31"]
-    assert row["entrada"] == r"\\frac{1}{3000000}"
-    assert row["esperado"] == r"3.333333333\\times10^{-7}"
+    assert row["entrada"] == r"\frac{1}{3000000}"
+    assert row["esperado"] == r"3.333333333\times10^{-7}"
     with TestClient(app) as client:
         response = client.post("/api/v1/evaluate", json={"expression": "1/3000000"})
         assert response.status_code == 200, response.text
