@@ -1081,3 +1081,26 @@ def test_syd05_mismatched_latex_left_right_delimiters_explicit_error():
         else:
             assert data.get("detail") or data.get("error_message"), data
         assert data.get("result_text") not in ("3", 3), data
+
+
+def test_syd06_square_bracketed_sum_normalized_http_and_reentry():
+    row = ROWS["SY-D-06"]
+    assert row["entrada"] == r"[1+2]\cdot3"
+    assert row["operacion"] == "valor"
+    assert row["esperado"] == "9"
+    # Plus HTTP accepts normalized expression; frontend MathLive conversion is not asserted here.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "(1+2)*3"})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        assert sympy.sympify(data["result_text"]) == sympy.Integer(9), data
+        assert data["result_approx"] == pytest.approx(9), data
+        assert data["error_code"] is None, data
+        again_response = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert again_response.status_code == 200, again_response.text
+        again = again_response.json()
+        MathResponse.model_validate(again)
+        assert again["success"] is True and again["request_id"] != data["request_id"], again
+        assert sympy.sympify(again["result_text"]) == sympy.Integer(9), again
