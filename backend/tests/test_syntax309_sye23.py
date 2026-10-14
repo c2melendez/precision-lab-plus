@@ -946,3 +946,27 @@ def test_syn29_decimal_comma_explicit_http_convention_and_recovery():
         MathResponse.model_validate(recovered)
         assert recovered["success"] is True, recovered
         assert recovered["result_approx"] == pytest.approx(3.5), recovered
+
+
+def test_syn30_thousands_grouping_explicit_http_translation_and_recovery():
+    row = ROWS["SY-N-30"]
+    assert row["entrada"] == "1{,}000+1"
+    assert row["operacion"] == "convencion"
+    # The frontend rejects ambiguous original punctuation without a locale.
+    # This backend probe checks the explicitly ungrouped value, not MathLive conversion.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "1000+1"})
+        assert response.status_code == 200, response.text
+        value = response.json()
+        MathResponse.model_validate(value)
+        assert value["success"] is True, value
+        assert sympy.sympify(value["result_text"]) == sympy.Integer(1001), value
+        assert value["result_approx"] == pytest.approx(1001), value
+        assert value["error_code"] is None, value
+        reentry = client.post("/api/v1/evaluate", json={"expression": value["result_text"]})
+        assert reentry.status_code == 200, reentry.text
+        repeated = reentry.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert repeated["request_id"] != value["request_id"], repeated
+        assert sympy.sympify(repeated["result_text"]) == sympy.Integer(1001), repeated
