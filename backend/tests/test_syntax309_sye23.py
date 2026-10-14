@@ -73,3 +73,31 @@ def test_sye24_display_fraction_exact_http_and_reentry():
         assert repeated["request_id"] != data["request_id"], repeated
         assert sympy.sympify(repeated["result_text"]) == sympy.Rational(3, 4), repeated
         assert repeated["result_approx"] == 0.75, repeated
+
+
+def test_sye25_text_fraction_exact_http_and_reentry():
+    row = ROWS["SY-E-25"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == r"\tfrac{3}{4}"
+    assert row["esperado"] == r"\frac{3}{4}"
+    expression = "(3)/(4)"  # Explicit translation; original UI conversion verified separately.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        assert data["operation"] == "evaluate" and data["result_type"] == "scalar", data
+        assert data["input_text"] == expression and data["request_id"], data
+        assert sympy.sympify(data["result_text"]) == sympy.Rational(3, 4), data
+        assert data["result_latex"] == r"\frac{3}{4}", data
+        assert data["result_approx"] == 0.75, data
+        assert data["error_code"] is None and data["error_message"] is None, data
+        reentry = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert reentry.status_code == 200, reentry.text
+        repeated = reentry.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert repeated["request_id"] != data["request_id"], repeated
+        assert sympy.sympify(repeated["result_text"]) == sympy.Rational(3, 4), repeated
+        assert repeated["result_approx"] == 0.75, repeated
