@@ -83,7 +83,7 @@ def test_valid_decimal_point():
     assert body["result_approx"] == pytest.approx(3.14)
 
 
-@pytest.mark.parametrize("expression", [".5", "5.", "1e5"])
+@pytest.mark.parametrize("expression", ["1e5", "foo.bar", "5.__class__"])
 def test_invalid_decimal_or_scientific_notation(expression):
     response = _evaluate(expression=expression)
     body = response.json()
