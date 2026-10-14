@@ -120,6 +120,18 @@ def evaluate(
     if angle_unit == "deg":
         expr = _apply_degree_conversion(expr)
 
+    # Inspect each original denominator BEFORE substitution reconstructs and
+    # simplifies the whole expression (1/(1+1/x) at x=0 can otherwise become 0).
+    # Keep this structural: do not impose real-only root/log restrictions on
+    # the existing complex evaluation convention.
+    for node in sympy.preorder_traversal(expr):
+        if isinstance(node, sympy.Pow):
+            exponent = node.exp.subs(substitution_map) if substitution_map else node.exp
+            if exponent.is_negative is True:
+                base = node.base.subs(substitution_map) if substitution_map else node.base
+                if base.is_zero is True:
+                    raise DomainErrorResult("División entre cero: un denominador original es cero.")
+
     if substitution_map:
         expr = expr.subs(substitution_map)
 

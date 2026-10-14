@@ -209,3 +209,16 @@ def test_sye22_nested_fraction_symbolic_domain_and_substitutions_http():
             assert invalid["success"] is False, invalid
             assert invalid["error_code"] == "DOMAIN_ERROR", invalid
             assert invalid["result_text"] is None and invalid["result_approx"] is None, invalid
+
+
+@pytest.mark.parametrize("expression, substitutions", [
+    ("1/(1+1/x)", {"x": "0"}),
+    ("(x^2-1)/(x-1)", {"x": "1"}),
+    ("1/(1+1/0)", None),
+])
+def test_sye22_original_zero_denominator_cannot_be_cancelled(expression, substitutions):
+    with TestClient(app) as client:
+        data = client.post("/api/v1/evaluate", json={
+            "expression": expression, "substitutions": substitutions,
+        }).json()
+    assert data["success"] is False and data["error_code"] == "DOMAIN_ERROR", data

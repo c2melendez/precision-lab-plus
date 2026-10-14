@@ -13,6 +13,7 @@ from app.core.logging import log_request_event
 from app.schemas.requests import EvaluateRequest
 from app.schemas.responses import ErrorCode, MathResponse, OperationType, ResultType
 from app.services import evaluate_service, parsing
+from app.services.domain_analysis import extract_domain_conditions
 from app.services.ast_validator import ComplexityLimitError
 from app.services.interruptible import ComputationCancelled, ComputationFailed, ComputationTimedOut
 from app.services.request_cancellation import IsolationCapacityExceeded, request_admission_lease, run_for_request
@@ -66,17 +67,20 @@ def _render_evaluate_presentation(result, source_expression=None):
         except ValueError:
             result_text = "(resultado numérico demasiado grande para mostrarse)"
 
+    domain_conditions = []
     try:
         # Pickle may evaluate previously unevaluated SymPy AST nodes (2+3 -> 5).
         # Reparse inside the bounded presentation child to retain original input LaTeX.
         input_expr = (parsing.parse_expression_tree(source_expression)
                       if source_expression is not None else result.input_expr)
+        domain_conditions = extract_domain_conditions(input_expr)
         input_latex = sympy.latex(input_expr)
     except ValueError:
         input_latex = None
 
     return {"warnings": warnings, "input_latex": input_latex,
-            "result_latex": result_latex, "result_text": result_text}
+            "result_latex": result_latex, "result_text": result_text,
+            "domain_conditions": domain_conditions}
 
 
 router = APIRouter(tags=["evaluate"])
