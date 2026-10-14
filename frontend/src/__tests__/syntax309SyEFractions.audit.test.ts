@@ -211,3 +211,16 @@ describe("SY-N-06 decimal precision original source", () => {
     expect(converted).not.toContain("0.30000000000000004");
   });
 });
+
+
+describe("SY-N-07 original multiplication LaTeX", () => {
+  it("converts the source to equivalent backend arithmetic", () => {
+    const row = rows["SY-N-07"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("0.1\\times3");
+    expect(row.esperado).toBe("0.3");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(["0.1*3", "0.1(3)", "(0.1)*3"]).toContain(converted);
+    expect(converted).not.toContain("0.30000000000000004");
+  });
+});
