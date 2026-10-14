@@ -437,3 +437,15 @@ describe("SY-N-22 negative factorial source", () => {
     expect(latexToBackendSyntax("2+3")).toBe("2+3");
   });
 });
+
+
+describe("SY-N-23 non-integer factorial source", () => {
+  it("preserves postfix factorial and the decimal argument for backend convention", () => {
+    const row = rows["SY-N-23"];
+    expect(row.operacion).toBe("convencion");
+    expect(row.entrada).toBe("2.5!");
+    expect(row.nota).toMatch(/Gamma o aviso/);
+    expect(latexToBackendSyntax(row.entrada).trim()).toBe("2.5!");
+    expect(latexToBackendSyntax("2+3")).toBe("2+3");
+  });
+});
