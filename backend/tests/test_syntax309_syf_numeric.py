@@ -473,3 +473,14 @@ def test_syf47_maximum_backend_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(5.0, abs=1e-9)
+
+
+def test_syf48_minimum_backend_http():
+    """SY-F-48 min(1,5,3)=1 in backend; raw source MathLive UI unverified."""
+    assert ROWS["SY-F-48"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "min(1,5,3)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(1.0, abs=1e-9)
