@@ -576,3 +576,14 @@ describe("SY-U-03 original cdot multiplication", () => {
 });
 
 
+
+describe("SY-U-04 ASCII multiplication", () => {
+  it("converts original ASCII multiplication and reentry", () => {
+    const row = rows["SY-U-04"];
+    expect(row.entrada).toBe("3*4");
+    expect(row.operacion).toBe("valor");
+    expect(row.esperado).toBe("12");
+    expect(latexToBackendSyntax(row.entrada).replace(/\\s+/g, "")).toBe("3*4");
+    expect(latexToBackendSyntax("12").trim()).toBe("12");
+  });
+});
