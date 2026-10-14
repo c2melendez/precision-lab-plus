@@ -125,3 +125,16 @@ describe("SY-E-29 zero over zero source conversion", () => {
     expect(["0/0", "(0)/(0)", "(0/0)", "((0)/(0))"]).toContain(converted);
   });
 });
+
+
+describe("SY-E-30 empty denominator original source", () => {
+  it("rejects an empty denominator clearly and preserves later conversion", () => {
+    const row = rows["SY-E-30"];
+    expect(row.operacion).toBe("error");
+    expect(row.entrada).toBe("\\frac{x}{}");
+    expect(row.esperado).toContain("denominador vacío");
+    expect(() => latexToBackendSyntax(row.entrada)).toThrow(/denominador|denominator|vacío|empty/i);
+    const recovered = latexToBackendSyntax("\\frac{1}{2}").replace(/\s+/g, "");
+    expect(["1/2","(1)/(2)","(1/2)","((1)/(2))"]).toContain(recovered);
+  });
+});
