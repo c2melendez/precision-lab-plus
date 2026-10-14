@@ -297,3 +297,19 @@ def test_syf31_sqrt_three_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(math.sqrt(3), abs=1e-9)
+
+
+@pytest.mark.parametrize("case_id,expression,expected", [
+    ("SY-F-32", "root(8,3)", 2.0),
+    ("SY-F-33", "root(-8,3)", -2.0),
+    ("SY-F-34", "root(16,4)", 2.0),
+])
+def test_syf32_34_indexed_roots_http(case_id, expression, expected):
+    """Explicit HTTP backend notation only, not MathLive source-LaTeX parsing."""
+    assert ROWS[case_id]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, (case_id, response.text)
+    data = response.json()
+    assert data["success"] is True, (case_id, data)
+    assert data["result_approx"] == pytest.approx(expected, abs=1e-9)
