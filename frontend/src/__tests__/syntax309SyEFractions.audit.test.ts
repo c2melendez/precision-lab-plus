@@ -263,3 +263,16 @@ describe("SY-N-10 original exact decimal product", () => {
     expect(latexToBackendSyntax("1005").trim()).toBe("1005");
   });
 });
+
+
+describe("SY-N-11 original rational multiplication", () => {
+  it("preserves the exact fraction and multiplier without a truncated decimal", () => {
+    const row = rows["SY-N-11"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("\\frac{1}{3}\\times3");
+    expect(row.esperado).toBe("1");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(["1/3*3", "(1/3)*3", "(1)/(3)*3", "((1)/(3))*3"], converted).toContain(converted);
+    expect(latexToBackendSyntax("1").trim()).toBe("1");
+  });
+});
