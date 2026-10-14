@@ -550,3 +550,15 @@ describe("SY-U-01 original multiplication sign", () => {
     expect(latexToBackendSyntax("12").trim()).toBe("12");
   });
 });
+
+
+describe("SY-U-02 original division sign", () => {
+  it("converts the complete source to division and preserves result reentry", () => {
+    const row = rows["SY-U-02"];
+    expect(row.entrada).toBe("12\\div4");
+    expect(row.operacion).toBe("valor");
+    expect(row.esperado).toBe("3");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("12/4");
+    expect(latexToBackendSyntax("3").trim()).toBe("3");
+  });
+});
