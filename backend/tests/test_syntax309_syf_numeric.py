@@ -313,3 +313,14 @@ def test_syf32_34_indexed_roots_http(case_id, expression, expected):
     data = response.json()
     assert data["success"] is True, (case_id, data)
     assert data["result_approx"] == pytest.approx(expected, abs=1e-9)
+
+
+def test_syf35_nested_square_roots_http():
+    """SY-F-35 backend numerical witness; no claim for source MathLive LaTeX."""
+    assert ROWS["SY-F-35"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "sqrt(sqrt(16))"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(2.0, abs=1e-9)
