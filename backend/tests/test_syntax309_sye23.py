@@ -695,3 +695,30 @@ def test_syn20_factorial_five_http_and_reentry():
         MathResponse.model_validate(repeated)
         assert repeated["success"] is True, repeated
         assert repeated["result_text"] == "120" and repeated["result_latex"] == "120", repeated
+
+
+
+def test_syn21_zero_factorial_http_and_reentry():
+    row = ROWS["SY-N-21"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == "0!"
+    assert row["esperado"] == "1"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "0!"})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert result["operation"] == "evaluate" and result["result_type"] == "scalar", result
+        assert result["input_text"] == "0!" and result["request_id"], result
+        assert result["result_text"] == "1" and result["result_latex"] == "1", result
+        assert result["result_approx"] == 1, result
+        assert result["error_code"] is None and result["error_message"] is None, result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert repeated["request_id"] != result["request_id"], repeated
+        assert repeated["result_text"] == "1" and repeated["result_latex"] == "1", repeated
+        assert repeated["result_approx"] == 1, repeated
