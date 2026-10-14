@@ -354,3 +354,26 @@ def test_syn06_exact_decimal_addition_http_and_reentry():
         MathResponse.model_validate(repeated)
         assert repeated["success"] is True, repeated
         assert sympy.sympify(repeated["result_text"]) == sympy.Rational(3, 10), repeated
+
+
+def test_syn07_decimal_multiplication_http_and_reentry():
+    row = ROWS["SY-N-07"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == r"0.1\times3"
+    assert row["esperado"] == "0.3"
+    # Explicit frontend-to-backend translation of the original LaTeX multiplication.
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "0.1*3"})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert sympy.sympify(result["result_text"]) == sympy.Rational(3, 10), result
+        assert result["result_approx"] == 0.3, result
+        assert "0.30000000000000004" not in str(result), result
+        again = client.post("/api/v1/evaluate", json={"expression": result["result_text"]})
+        assert again.status_code == 200, again.text
+        repeated = again.json()
+        MathResponse.model_validate(repeated)
+        assert repeated["success"] is True, repeated
+        assert sympy.sympify(repeated["result_text"]) == sympy.Rational(3, 10), repeated
