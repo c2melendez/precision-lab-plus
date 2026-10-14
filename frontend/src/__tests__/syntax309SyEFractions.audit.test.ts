@@ -362,3 +362,15 @@ describe("SY-N-16 exact large integer power conversion", () => {
     expect(latexToBackendSyntax(expected).trim()).toBe(expected);
   });
 });
+
+
+describe("SY-N-17 integer above JS safe integer", () => {
+  it("retains the entire input without passing it through Number", () => {
+    const row = rows["SY-N-17"];
+    const expected = "9007199254740993";
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe(expected);
+    expect(row.esperado).toBe(expected);
+    expect(latexToBackendSyntax(row.entrada).trim()).toBe(expected);
+  });
+});
