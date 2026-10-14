@@ -224,3 +224,16 @@ describe("SY-N-07 original multiplication LaTeX", () => {
     expect(converted).not.toContain("0.30000000000000004");
   });
 });
+
+
+describe("SY-N-08 original decimal subtraction", () => {
+  it("converts exact operands without introducing a binary floating artifact", () => {
+    const row = rows["SY-N-08"];
+    expect(row.operacion).toBe("valor");
+    expect(row.entrada).toBe("1-0.9");
+    expect(row.esperado).toBe("0.1");
+    const converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, "");
+    expect(converted).toBe("1-0.9");
+    expect(converted).not.toContain("0.09999999999999998");
+  });
+});
