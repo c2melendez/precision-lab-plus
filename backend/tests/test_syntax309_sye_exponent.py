@@ -62,3 +62,19 @@ def test_sye04_negative_exponent_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(0.001, abs=1e-12)
+
+
+def test_sye05_nested_powers_explicit_backend_http():
+    """SY-E-05: explicit backend grouping; source MathLive LaTeX UI not covered."""
+    row = ROWS["SY-E-05"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == "2^{2^{2}}"
+    assert row["esperado"] == "16"
+    # The unequal-exponent control exposes wrong left-associative grouping.
+    with TestClient(app) as client:
+        for expression, expected in [("2^(2^2)", 16), ("2^(3^2)", 512), ("(2^3)^2", 64)]:
+            response = client.post("/api/v1/evaluate", json={"expression": expression})
+            assert response.status_code == 200, response.text
+            data = response.json()
+            assert data["success"] is True, data
+            assert data["result_approx"] == expected, (expression, data)
