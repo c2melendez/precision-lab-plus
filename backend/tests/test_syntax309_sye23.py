@@ -809,3 +809,31 @@ def test_syn24_hundred_factorial_exact_or_valid_scientific_and_recovery():
         recovered = again.json()
         MathResponse.model_validate(recovered)
         assert recovered["success"] is True and recovered["result_text"] == "5", recovered
+
+
+
+def test_syn25_factorial_170_finite_exact_or_approx_and_recovery():
+    import math
+    row = ROWS["SY-N-25"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == "170!"
+    exact = str(math.factorial(170))
+    assert len(exact) == 307
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "170!"})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        MathResponse.model_validate(result)
+        assert result["success"] is True, result
+        assert result["request_id"] and result["error_code"] is None, result
+        numeric = result["result_approx"]
+        assert result["result_text"] == exact or (
+            numeric is not None and math.isfinite(numeric)
+            and numeric == pytest.approx(7.257415615307999e306, rel=1e-8)
+        ), result
+        assert "Infinity" not in str(result) and "NaN" not in str(result), result
+        again = client.post("/api/v1/evaluate", json={"expression": "2+3"})
+        assert again.status_code == 200, again.text
+        recovered = again.json()
+        MathResponse.model_validate(recovered)
+        assert recovered["success"] is True and recovered["result_text"] == "5", recovered
