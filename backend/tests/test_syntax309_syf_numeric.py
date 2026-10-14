@@ -462,3 +462,14 @@ def test_syf46_lcm_backend_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(12.0, abs=1e-9)
+
+
+def test_syf47_maximum_backend_http():
+    """SY-F-47 max(1,5,3)=5 in backend; not a raw MathLive LaTeX UI test."""
+    assert ROWS["SY-F-47"]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "max(1,5,3)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(5.0, abs=1e-9)
