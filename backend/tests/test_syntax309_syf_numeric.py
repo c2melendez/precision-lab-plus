@@ -370,3 +370,15 @@ def test_syf37_absolute_value_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(3.0, abs=1e-9)
+
+
+@pytest.mark.parametrize("case_id", ["SY-F-38", "SY-F-39"])
+def test_syf38_39_abs_translated_backend_http(case_id):
+    """Explicit backend abs syntax only; MathLive LaTeX and typed bars unverified."""
+    assert ROWS[case_id]["operacion"] == "valor"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "abs(-3)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(3.0, abs=1e-9)
