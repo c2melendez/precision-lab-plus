@@ -1,5 +1,11 @@
 # Current Certification State
 
+## SY-N-31 — comprobación de UI Plus (2026-10-14)
+- Confirmados PASS Plus SHA `606522ec873b3ff56f70c4eb61fd0d78e27923b4`: cumulative [38609824717](https://github.com/c2melendez/precision-lab-plus/actions/runs/38609824717) (frontend y backend SUCCESS) y H1d [38609824649](https://github.com/c2melendez/precision-lab-plus/actions/runs/38609824649) SUCCESS. Oráculo formatter y regresión antigua corregidos.
+- Añadido test de interacción componente UI `frontend/src/__tests__/ResultPanel.test.tsx` SHA `6cec66863c358067b641243335a9fb29c85829b5`: clic en `scn`, estado `aria-pressed`, visualización KaTeX de mantisa de SY-N-31, retorno a `exact` con fracción original y acción de copiar disponible. No sustituir por esto prueba nativa de navegador MathLive completo.
+- Runs nuevos SHA prueba UI: cumulative [38610765034](https://github.com/c2melendez/precision-lab-plus/actions/runs/38610765034), H1d [38610765109](https://github.com/c2melendez/precision-lab-plus/actions/runs/38610765109) QUEUED al comprobar. Verificar logs del frontend y resultado en mismo SHA; si falla corregir test/producto según diagnóstico. SY-N-31 OPEN hasta evidencia verificable y cobertura visual bilateral. SG28/H2 OPEN, DIST BLOCKED.
+
+
 ## SY-N-31 — diagnóstico y corrección del gate Plus (2026-10-14)
 - Acumulativo Plus [38606501880](https://github.com/c2melendez/precision-lab-plus/actions/runs/38606501880) SHA 70c0221a: FAIL frontend 2 tests, 817 PASS, 28 TODO; backend PASS. Log job 115998643049 confirmó: fixture `String.raw` tenía doble barra en prueba y expectativa legacy `8.888889e-1` en ResultPanel.test.tsx. Estos fallos son de prueba/formato, no regresión del motor SymPy.
 - Formatter actual `formatScientificLatex` retorna `\\times` correctamente (se verificó origen vigente). Cambio test `frontend/src/__tests__/ResultPanel.test.tsx` SHA d71438c2610ebe04a01f7e2a2b48248b08a6522f comprueba mantisa KaTeX; fixture `frontend/src/components/formatNumber.syntax309.test.ts` corregido para una barra literal en raw strings, SHA `606522ec873b3ff56f70c4eb61fd0d78e27923b4`.
