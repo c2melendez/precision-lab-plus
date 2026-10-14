@@ -49,3 +49,16 @@ def test_sye03_power_with_explicit_substitution_http():
     data = response.json()
     assert data["success"] is True, data
     assert data["result_approx"] == pytest.approx(4096, abs=1e-9)
+
+
+def test_sye04_negative_exponent_http():
+    """SY-E-04 explicit backend power only, not source LaTeX UI."""
+    row = ROWS["SY-E-04"]
+    assert row["operacion"] == "valor"
+    assert row["entrada"] == "10^{-3}"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": "10^(-3)"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["success"] is True, data
+    assert data["result_approx"] == pytest.approx(0.001, abs=1e-12)
