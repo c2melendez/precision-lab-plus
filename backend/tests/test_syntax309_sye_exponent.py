@@ -120,3 +120,142 @@ def test_sye07_decimal_power_real_domain_http(x, expected):
             data = response.json()
             assert data["success"] is True, data
             assert data["result_approx"] == pytest.approx(expected, rel=1e-12, abs=1e-12), (expression, x, data)
+
+# Explicit translations are traceable to the official source fixture.
+# Independent anchors avoid using this backend to generate its own oracle.
+REAL_INTEGER_POWER_CASES = {
+    "SY-E-08": [
+        "x^{-1}",
+        "\\frac{1}{x}",
+        [
+            "x^(-1)",
+            "1/x"
+        ],
+        [
+            [
+                -4,
+                -0.25
+            ],
+            [
+                -1,
+                -1
+            ],
+            [
+                -0.25,
+                -4
+            ],
+            [
+                0.25,
+                4
+            ],
+            [
+                1,
+                1
+            ],
+            [
+                4,
+                0.25
+            ]
+        ]
+    ],
+    "SY-E-09": [
+        "\\left(x^{2}\\right)^{3}",
+        "x^{6}",
+        [
+            "(x^2)^3",
+            "x^6"
+        ],
+        [
+            [
+                -3,
+                729
+            ],
+            [
+                -2,
+                64
+            ],
+            [
+                -1,
+                1
+            ],
+            [
+                0,
+                0
+            ],
+            [
+                0.5,
+                0.015625
+            ],
+            [
+                2,
+                64
+            ],
+            [
+                3,
+                729
+            ]
+        ]
+    ],
+    "SY-E-10": [
+        "x^{2^{3}}",
+        "x^{8}",
+        [
+            "x^(2^3)",
+            "x^8"
+        ],
+        [
+            [
+                -3,
+                6561
+            ],
+            [
+                -2,
+                256
+            ],
+            [
+                -1,
+                1
+            ],
+            [
+                0,
+                0
+            ],
+            [
+                0.5,
+                0.00390625
+            ],
+            [
+                2,
+                256
+            ],
+            [
+                3,
+                6561
+            ]
+        ]
+    ]
+}
+
+@pytest.mark.parametrize("case_id, x, expected", [
+    (case_id, x, expected)
+    for case_id, (_, _, _, anchors) in REAL_INTEGER_POWER_CASES.items()
+    for x, expected in anchors
+])
+def test_sye08_10_real_integer_power_anchors_http(case_id, x, expected):
+    """Backend-only real witnesses; original MathLive/keyboard UI not covered."""
+    source, equivalent, expressions, _ = REAL_INTEGER_POWER_CASES[case_id]
+    row = ROWS[case_id]
+    assert row["operacion"] == "equivalente"
+    assert row["entrada"] == source
+    assert row["esperado"] == equivalent
+    if case_id == "SY-E-08":
+        assert x != 0  # Excluded domain; zero-base error belongs to SY-E-20.
+    with TestClient(app) as client:
+        for expression in expressions:
+            response = client.post("/api/v1/evaluate", json={
+                "expression": expression, "substitutions": {"x": str(x)},
+            })
+            assert response.status_code == 200, (case_id, response.text)
+            data = response.json()
+            assert data["success"] is True, (case_id, x, data)
+            assert data["result_approx"] == pytest.approx(expected, rel=1e-12, abs=1e-12), (case_id, expression, x, data)
