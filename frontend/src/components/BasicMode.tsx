@@ -336,13 +336,13 @@ export function BasicMode() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    const submissionId = ++latestSubmissionRef.current;
     try {
       validateExponentSource(latex);
     } catch (error) {
       setValidationError(error instanceof Error ? error.message : "Exponente inválido.");
       return;
     }
-    const submissionId = ++latestSubmissionRef.current;
 
     // H1 EN-RE-12: una unión de intervalos producida por el propio solver
     // es una salida matemática válida, aunque no sea una expresión
