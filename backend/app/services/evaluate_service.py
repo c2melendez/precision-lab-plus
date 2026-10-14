@@ -207,6 +207,15 @@ def evaluate(
         try:
             candidate = float(numeric_value)
             approx = candidate if math.isfinite(candidate) else None
+            # SY-N-14: evalf of unevaluated exact radicals may leave a tiny
+            # nonzero residual even when the expression is identically zero.
+            # Only normalize after a symbolic proof, never by tolerance alone.
+            if approx is not None and approx != 0 and abs(approx) < 1e-12:
+                try:
+                    if sympy.simplify(expr).is_zero is True:
+                        approx = 0.0
+                except (AttributeError, ZeroDivisionError, ValueError, OverflowError):
+                    pass
         except (OverflowError, TypeError, ValueError):
             # IN625 D3: la aproximación IEEE-754 es opcional; nunca debe
             # destruir ni impedir devolver el resultado simbólico exacto.
