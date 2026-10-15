@@ -25,6 +25,7 @@ def test_syv20_symbolic_binomial_general_identity_domain_and_reentry():
         assert data["success"] is True and data["operation"] == "evaluate", data
         assert data["result_type"] == "scalar" and data["result_approx"] is None, data
         assert data["request_id"] and data["error_code"] is None, data
+        assert "binomial" not in data["result_text"] and "nCr" not in data["result_text"], data
         value = sp.sympify(data["result_text"].replace("^", "**"))
         assert value.free_symbols == {n}
         assert sp.simplify(value - n*(n-1)/2) == 0
