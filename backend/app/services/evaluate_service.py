@@ -178,6 +178,18 @@ def evaluate(
         body = parsing.parse_expression_tree(f"{base_name}^{power}", allow_equation=False)
         expression = str(sympy.diff(body, sympy.Symbol(variable)))
 
+    # SY-V-08: second-order Leibniz notation, bounded monomial only.
+    leibniz_second = re.fullmatch(
+        r"\s*\\frac\{d\^\{2\}\}\{d([A-Za-z])\^\{2\}\}\s*([A-Za-z])\^\{([0-9]{1,2})\}\s*",
+        expression,
+    )
+    if leibniz_second:
+        variable, base_name, power = leibniz_second.groups()
+        if variable != base_name:
+            raise parsing.ParseSecurityError("La variable de derivación debe coincidir con el monomio.")
+        body = parsing.parse_expression_tree(f"{base_name}^{power}", allow_equation=False)
+        expression = str(sympy.diff(body, sympy.Symbol(variable), 2))
+
     substitution_map = _validate_and_parse_substitutions(substitutions)
 
     # A caller explicitly substituting a named multi-letter symbol retains
