@@ -1522,3 +1522,21 @@ def test_syu11_unicode_superscript_convention_http():
             assert repeated.json()["success"] is True, repeated.json()
         else:
             assert data["error_code"] is not None and data["error_message"], data
+
+
+def test_syu12_unicode_square_root_convention_http():
+    row = ROWS["SY-U-12"]
+    assert row["entrada"] == "√4"
+    assert row["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        data = response.json()
+        MathResponse.model_validate(data)
+        if data["success"]:
+            assert sympy.sympify(data["result_text"]) == 2, data
+            assert data["result_approx"] == 2, data
+            repeated = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+            assert repeated.status_code == 200 and repeated.json()["success"] is True
+            assert sympy.sympify(repeated.json()["result_text"]) == 2
+        else:
+            assert data["error_code"] is not None and data["error_message"], data
