@@ -721,3 +721,22 @@ describe("SY-V-14 right reciprocal limit intent", () => {
     expect(latexToBackendSyntax("\\infty").trim()).toBe("oo");
   });
 });
+
+
+describe("SY-V-15 reciprocal limit at infinity intent", () => {
+  it("extracts the infinite point and preserves the entire quotient", () => {
+    const row = rows["SY-V-15"];
+    expect(row.entrada).toBe("\\lim_{x\\to\\infty}\\frac{1}{x}");
+    expect(row.operacion).toBe("valor");
+    expect(row.esperado).toBe("0");
+    const intent = detectCalculusIntent(row.entrada);
+    expect(intent?.kind).toBe("limit");
+    if (!intent || intent.kind !== "limit") throw new Error("Expected limit intent");
+    expect(intent.variable).toBe("x");
+    expect(intent.point).toBe("oo");
+    expect(intent.direction).toBe("both");
+    const body = latexToBackendSyntax(intent.innerLatex).replace(/\s+/g, "");
+    expect(["1/x", "(1)/(x)", "(1/x)", "((1)/(x))"]).toContain(body);
+    expect(latexToBackendSyntax("0").trim()).toBe("0");
+  });
+});
