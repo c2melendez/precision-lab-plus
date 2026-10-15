@@ -1,3 +1,4 @@
+import {splitSystemLatex} from "../components/systemSplit";
 import {readFileSync} from "node:fs";
 import {describe,expect,it} from "vitest";
 import {detectMatrixIntent} from "../components/matrixIntent";
@@ -19,5 +20,13 @@ describe("SY-M-04 real matrix intent",()=>{
   expect(detectMatrixIntent(array.replace("{cc}","{cr}"))?.kind).toBe("literal");
   expect(detectMatrixIntent(array.replace("{cc}","{xx}"))).toBeNull();
   expect(detectMatrixIntent(array.replace("\\end{array}","\\end{pmatrix}"))).toBeNull();
+ }); it("routes numeric arrays away from systems but keeps relation arrays",()=>{
+  const numeric=String.raw`\det\begin{array}{cc}1&2\\3&4\end{array}`;
+  expect(splitSystemLatex(numeric)).toBeNull();
+  const system=String.raw`\begin{array}{c}x+y=3\\x-y=1\end{array}`;
+  expect(splitSystemLatex(system)).toEqual(["x+y=3","x-y=1"]);
+  const inequalities=String.raw`\begin{array}{c}x\ge 0\\x\le 2\end{array}`;
+  expect(splitSystemLatex(inequalities)).toHaveLength(2);
  });
+
 });
