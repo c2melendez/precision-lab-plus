@@ -164,6 +164,20 @@ def evaluate(
         argument_expr = parsing.parse_expression_tree(argument, allow_equation=False)
         expression = str(body_expr.subs(sympy.Symbol(variable), argument_expr))
 
+    # Syntax309 SY-V-07: first-order Leibniz notation from the keyboard.
+    # Accept only a single variable and a bounded monomial body; parse the
+    # body with the existing safe parser rather than evaluating raw LaTeX.
+    leibniz_first = re.fullmatch(
+        r"\s*\\\\frac\{d\}\{d([A-Za-z])\}\s*([A-Za-z])\^\{([0-9]{1,2})\}\s*",
+        expression,
+    )
+    if leibniz_first:
+        variable, base_name, power = leibniz_first.groups()
+        if variable != base_name:
+            raise parsing.ParseSecurityError("La variable de derivación debe coincidir con el monomio.")
+        body = parsing.parse_expression_tree(f"{base_name}^{power}", allow_equation=False)
+        expression = str(sympy.diff(body, sympy.Symbol(variable)))
+
     substitution_map = _validate_and_parse_substitutions(substitutions)
 
     # A caller explicitly substituting a named multi-letter symbol retains
