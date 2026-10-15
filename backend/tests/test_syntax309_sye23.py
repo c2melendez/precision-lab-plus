@@ -1768,3 +1768,29 @@ def test_syu23_leading_multiplication_operator_http_error():
         else:
             assert data.get("detail") or data.get("error_message"), data
         assert data.get("result_text") not in ("2", 2), data
+
+
+def test_syu24_spaced_numerals_declared_convention_http():
+    row = ROWS["SY-U-24"]
+    assert row["entrada"] == r"2\ 3"
+    assert row["operacion"] == "convencion"
+    assert "Dos números separados por espacio" in row["nota"]
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code in (200, 400, 422), response.text
+        data = response.json()
+        if response.status_code == 200:
+            MathResponse.model_validate(data)
+            if data["success"]:
+                value = sympy.sympify(data["result_text"])
+                assert value in (6, 23), data
+                repeated = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+                assert repeated.status_code == 200, repeated.text
+                again = repeated.json()
+                MathResponse.model_validate(again)
+                assert again["success"] is True and sympy.sympify(again["result_text"]) == value, again
+            else:
+                assert data["error_code"] in {"PARSE_ERROR", "VALIDATION_ERROR"}, data
+                assert data["error_message"], data
+        else:
+            assert data.get("detail") or data.get("error_message"), data
