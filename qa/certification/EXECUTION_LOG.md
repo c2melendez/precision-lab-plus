@@ -5150,3 +5150,6 @@ Fixture i^{2}, operacion=convencion, esperado -1 como unidad imaginaria o i^{2} 
 - SY-Q-05 fixture oficial `x=x+1`, resolver, esperado sin solución. Pruebas publicadas Lite tests/syntax309SyQ05.audit.test.ts commit d9a61c0c10cb122e6b28e925e3437dbd7780b5d2; Plus backend/tests/test_syntax309_syq05.py commit acd173a4dd7cd0c4471b9becd54e7f9843115ecb. Se verifican contradicción, ecuación invertida x+1=x y control identidad x=x, mediante solveAlgebra Lite y POST /api/v1/solve Plus.
 - CI por push: Lite cumulative 38720680733, H1d 38720680663, build 38720680665, científico E2E genérico 38720680708 (QUEUED inicial); Plus cumulative 38720685408 y H1d 38720685572 (IN_PROGRESS inicial). SY-Q-05 OPEN hasta resultado por SHA y logs; corregir el fallo confirmado sin disminuir el oráculo.
 - Siguiente paso: verificar CI, cerrar SY-Q-05 si los gates pasan y examinar siguiente fixture oficial SY-Q-06. Syntax309/IN625/H2/SG28 OPEN; DIST-01..08 BLOCKED, sin producción.
+
+
+2026-10-15 SY-Q-06: Lite inequality regression SHA 8a49b7de5f3517383afe6ec8878a90f4dd838482; Plus oracle-only SHA 7b3284aca8125f9f337ef49f6117d184d0f3de51. Plus public inequality solving not yet certified; mark CAPABILITY/BLOCKED rather than PASS. New cumulative CI Lite 38721683568 and Plus 38721690451 pending first verdict.
