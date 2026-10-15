@@ -1727,3 +1727,24 @@ def test_syu21_leading_double_unary_minus_http_and_reentry():
         MathResponse.model_validate(again)
         assert again["success"] is True and sympy.sympify(again["result_text"]) == 3
         assert again["request_id"] != data["request_id"]
+
+
+def test_syu22_incomplete_trailing_operator_http_error():
+    row = ROWS["SY-U-22"]
+    assert row["entrada"] == "2+"
+    assert row["operacion"] == "error"
+    assert "expresión incompleta" in row["esperado"]
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code in (200, 400, 422), response.text
+        data = response.json()
+        if response.status_code == 200:
+            MathResponse.model_validate(data)
+            assert data["success"] is False, data
+            assert data["error_code"] in {"PARSE_ERROR", "VALIDATION_ERROR"}, data
+            assert data["error_message"], data
+            message = str(data["error_message"])
+            assert any(t in message.lower() for t in ("incomplet", "oper", "syntax", "sintax", "expres", "unexpected"))
+        else:
+            assert data.get("detail") or data.get("error_message"), data
+        assert data.get("result_text") not in ("2", 2), data
