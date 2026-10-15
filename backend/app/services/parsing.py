@@ -369,6 +369,8 @@ def validate_length(text: str) -> None:
 
 def normalize_unicode(text: str) -> str:
     """Normaliza símbolos seguros antes del parser de SymPy."""
+    # U+00A0 is a nonbreaking space, not part of the mathematical token.
+    text = text.replace("\u00a0", " ")
     # LaTeX spacing commands are whitespace, never identifiers or operations.
     text = re.sub(r"\\(?:,|;|!|:| )", " ", text)
     text = text.replace("π", "pi").replace("∞", "oo")
