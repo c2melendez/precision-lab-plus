@@ -790,3 +790,14 @@ describe("SY-V-19 original binomial conversion", () => {
     expect(latexToBackendSyntax("10").trim()).toBe("10");
   });
 });
+
+
+describe("SY-V-20 original symbolic binomial conversion", () => {
+  it("preserves the symbolic first argument and fixed second argument", () => {
+    const row = rows["SY-V-20"];
+    expect(row.entrada).toBe("\\binom{n}{2}");
+    expect(row.operacion).toBe("equivalente");
+    expect(row.esperado).toBe("\\frac{n(n-1)}{2}");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("nCr(n,2)");
+  });
+});
