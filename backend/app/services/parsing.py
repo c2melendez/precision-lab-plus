@@ -375,6 +375,12 @@ def normalize_unicode(text: str) -> str:
     text = re.sub(r"\\(?:,|;|!|:| )", " ", text)
     # Fullwidth decimal digits and arithmetic operators have unambiguous ASCII equivalents.
     text = text.translate(str.maketrans("０１２３４５６７８９＋－", "0123456789+-"))
+    # SY-V-23: narrow numeric rectangular conjugate source; SymPy's
+    # allowlisted conj() retains the mathematical operator semantics.
+    text = re.sub(
+        r"\\overline\\{\\s*([+-]?\\d+(?:\\.\\d+)?)\\s*([+-])\\s*(\\d+(?:\\.\\d+)?)\\s*i\\s*\\}",
+        lambda m: f"conj({m.group(1)}{m.group(2)}{m.group(3)}*i)", text,
+    )
     # Syntax309 SY-V-02: a single-letter variable with a numeric LaTeX
     # subscript is one identifier. Preserve index distinction and allow the
     # rendered SymPy form (x_1) to be evaluated again on reentry.
