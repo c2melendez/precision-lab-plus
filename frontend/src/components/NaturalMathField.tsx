@@ -576,6 +576,16 @@ export function latexToBackendSyntax(latex: string): string {
   validateExponentSource(latex);
   if (latex.trim() === "") return "";
 
+  // MathLive serializes \binom{a}{b} as an infix "choose", which the
+  // backend does not recognize as the calculator combination function.
+  // Preserve whole, flat-braced binomials before generic ASCII conversion.
+  const binomial = latex.trim().match(/^\\binom\s*\{([^{}]+)\}\s*\{([^{}]+)\}$/);
+  if (binomial) {
+    return "nCr(" + latexToBackendSyntax(binomial[1]) + "," +
+      latexToBackendSyntax(binomial[2]) + ")";
+  }
+
+
   // Exact keyboard DMS notation: convert degrees/minutes/seconds before
   // MathLive can reinterpret prime marks as derivatives.
   const dms = latex.trim().match(/^([+-]?\d+(?:\.\d+)?)°(\d+(?:\.\d+)?)′(?:(\d+(?:\.\d+)?)″)?$/);

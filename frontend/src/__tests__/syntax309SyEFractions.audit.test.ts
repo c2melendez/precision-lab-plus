@@ -784,6 +784,9 @@ describe("SY-V-19 original binomial conversion", () => {
     expect(row.operacion).toBe("valor");
     expect(row.esperado).toBe("10");
     expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("nCr(5,2)");
+    expect(latexToBackendSyntax("\\binom{6}{2}").replace(/\s+/g, "")).toBe("nCr(6,2)");
+    expect(latexToBackendSyntax("\\binom{5}{0}").replace(/\s+/g, "")).toBe("nCr(5,0)");
+    expect(latexToBackendSyntax("\\binom{1+4}{2}").replace(/\s+/g, "")).toBe("nCr(1+4,2)");
     expect(latexToBackendSyntax("10").trim()).toBe("10");
   });
 });
