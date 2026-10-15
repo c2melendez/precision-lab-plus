@@ -173,6 +173,8 @@ def _quadratic_steps(
 def solve_equation(
     equation_text: str, variable_name: Optional[str], angle_unit: str = "rad"
 ) -> SolveResult:
+    convention_warnings = (["Sin signo =: en Resolver se interpreta la expresión como una ecuación igual a 0."]
+                           if "=" not in parsing.normalize_unicode(equation_text) else [])
     eq = parsing.parse_expression_tree(equation_text, allow_equation=True)
     free_symbols = sorted(eq.free_symbols, key=lambda s: s.name)
 
@@ -187,7 +189,7 @@ def solve_equation(
             # versiones) — se compara la diferencia como antes.
             is_identity = sympy.simplify(eq.lhs - eq.rhs) == 0
             result_type = ResultType.IDENTITY if is_identity else ResultType.CONTRADICTION
-        return SolveResult(eq, None, result_type, [], [], False, [])
+        return SolveResult(eq, None, result_type, [], [], False, convention_warnings)
 
     # IN625 E3d2: una ecuación puede ser una identidad aunque tenga
     # símbolos libres (p. ej. sin(x)^2+cos(x)^2=1 o una identidad
@@ -195,9 +197,9 @@ def solve_equation(
     # lista de raíces arbitrarias para una proposición verdadera para
     # todo valor del dominio.
     if sympy.simplify(eq.lhs - eq.rhs) == 0:
-        return SolveResult(eq, None, ResultType.IDENTITY, [], [], False, [])
+        return SolveResult(eq, None, ResultType.IDENTITY, [], [], False, convention_warnings)
 
-    warnings: List[str] = []
+    warnings: List[str] = list(convention_warnings)
     if variable_name:
         candidates = parsing.extract_candidate_identifiers(variable_name)
         if candidates != [variable_name]:
