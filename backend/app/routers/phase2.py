@@ -249,6 +249,7 @@ async def inequality_system(payload: InequalitySystemRequest, request: Request) 
     log_request_event(request.state.request_id, "inequality_system_request")
 
     parsed_constraints = []
+    parsed_relations = []
     for text in payload.inequalities:
         try:
             rel = parsing.parse_inequality_tree(text)
@@ -257,6 +258,30 @@ async def inequality_system(payload: InequalitySystemRequest, request: Request) 
         except ComplexityLimitError as exc:
             return _error(request, OperationType.INEQUALITY_SYSTEM, ErrorCode.COMPLEXITY_LIMIT, str(exc))
         parsed_constraints.append((rel.lhs - rel.rhs, rel.rel_op))
+        parsed_relations.append(rel)
+
+    # SY-Q-17: one-dimensional systems are intersections, not polygons.
+    if len(payload.variables) == 1:
+        variable = payload.variables[0]
+        try:
+            symbol = phase2_service._validate_variable(variable)
+            free_symbols = set().union(*(rel.free_symbols for rel in parsed_relations))
+            if free_symbols - {symbol}:
+                return _error(request, OperationType.INEQUALITY_SYSTEM, ErrorCode.INVALID_VARIABLE,
+                              "Las inecuaciones contienen variables distintas de la indicada.")
+            result = phase2_service.compute_chained_inequality(parsed_relations, variable)
+        except parsing.ParseSecurityError as exc:
+            return _error(request, OperationType.INEQUALITY_SYSTEM, ErrorCode.PARSE_ERROR, str(exc))
+        except (NotImplementedError, ValueError, TypeError) as exc:
+            return _error(request, OperationType.INEQUALITY_SYSTEM, ErrorCode.UNSUPPORTED_OPERATION,
+                          "No se pudo resolver la intersección real: " + str(exc))
+        return MathResponse(
+            success=True, operation=OperationType.INEQUALITY_SYSTEM,
+            request_id=request.state.request_id, result_type=ResultType.SCALAR,
+            input_text="; ".join(payload.inequalities), result_text=str(result.solution_set),
+            result_latex=sympy.latex(result.solution_set), has_detailed_steps=False,
+            warnings=result.warnings, duration_ms=_duration_ms(request),
+        )
 
     try:
         result = linear_inequality_system.solve_linear_inequality_system(
