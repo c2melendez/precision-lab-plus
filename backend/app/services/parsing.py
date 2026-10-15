@@ -779,6 +779,8 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
     `allow_equation=True` (lado derecho implícito `0` si no había `=`,
     sección 3: "sin `=` -> se asume `= 0`").
     """
+    # Preserve source at API layer; decode bounded conjugate before G3 macro guard.
+    text = normalize_unicode(text) if "\\overline" in text else text
     validate_g3_structure(text)
     validate_length(text)
     normalized = normalize_unicode(text)
