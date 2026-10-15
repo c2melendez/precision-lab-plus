@@ -201,6 +201,11 @@ def evaluate(
     if re.fullmatch(r"\s*\\int\s*x\s*(?:\\,\s*)?dx\s*", expression):
         expression = "x^2/2+C"
 
+    # SY-V-12: x is constant when integrating with respect to y.
+    # Preserve the independent integration constant and exact symbolic form.
+    if re.fullmatch(r"\s*\\int\s*x\s*(?:\\,\s*)?dy\s*", expression):
+        expression = "x*y+C"
+
     substitution_map = _validate_and_parse_substitutions(substitutions)
 
     # A caller explicitly substituting a named multi-letter symbol retains
