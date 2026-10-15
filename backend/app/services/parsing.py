@@ -381,6 +381,11 @@ def normalize_unicode(text: str) -> str:
         r"\\overline\{\s*([+-]?\d+(?:\.\d+)?)\s*([+-])\s*(\d+(?:\.\d+)?)\s*i\s*\}",
         lambda m: f"conj({m.group(1)}{m.group(2)}{m.group(3)}*i)", text,
     )
+    # SY-V-24: matched LaTeX absolute-value bars on numeric rectangular complex literals.
+    text = re.sub(
+        r"\\lvert\s*([+-]?\d+(?:\.\d+)?)\s*([+-])\s*(\d+(?:\.\d+)?)\s*i\s*\\rvert",
+        lambda m: f"abs({m.group(1)}{m.group(2)}{m.group(3)}*i)", text,
+    )
     # Syntax309 SY-V-02: a single-letter variable with a numeric LaTeX
     # subscript is one identifier. Preserve index distinction and allow the
     # rendered SymPy form (x_1) to be evaluated again on reentry.
@@ -780,7 +785,7 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
     sección 3: "sin `=` -> se asume `= 0`").
     """
     # Preserve source at API layer; decode bounded conjugate before G3 macro guard.
-    text = normalize_unicode(text) if "\\overline" in text else text
+    text = normalize_unicode(text) if ("\\overline" in text or "\\lvert" in text) else text
     validate_g3_structure(text)
     validate_length(text)
     normalized = normalize_unicode(text)
