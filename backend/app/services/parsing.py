@@ -369,6 +369,8 @@ def validate_length(text: str) -> None:
 
 def normalize_unicode(text: str) -> str:
     """Normaliza símbolos seguros antes del parser de SymPy."""
+    # LaTeX spacing commands are whitespace, never identifiers or operations.
+    text = re.sub(r"\\(?:,|;|!|:| )", " ", text)
     text = text.replace("π", "pi").replace("∞", "oo")
     # Normalize unambiguous arithmetic Unicode without changing identifier semantics.
     text = text.replace("×", "*").replace("÷", "/").replace("·", "*").replace("−", "-")
