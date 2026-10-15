@@ -192,7 +192,7 @@ def evaluate(
 
     # SY-V-09: bounded indefinite-integral form from the official matrix.
     # Preserve the arbitrary integration constant, unlike a definite integral.
-    if re.fullmatch(r"\s*\\int\s*x\s*\\,\s*dx\s*", expression):
+    if re.fullmatch(r"\s*\\int\s*x\s*(?:\\,\s*)?dx\s*", expression):
         expression = "x^2/2+C"
 
     substitution_map = _validate_and_parse_substitutions(substitutions)
