@@ -689,6 +689,14 @@ def _parse_side(side_text: str, local_dict: Dict[str, object]) -> sympy.Expr:
     return expr
 
 
+def symbolic_pair_binomial_variable(text: str) -> Optional[str]:
+    """Ordinary combinations nCr(symbol,2), distinct from generalized real binomials."""
+    m = re.fullmatch(r"\s*nCr\(\s*([A-Za-z])\s*,\s*2\s*\)\s*", text)
+    if m is None or m.group(1) in ALLOWED_CONSTANTS:
+        return None
+    return m.group(1)
+
+
 def symbolic_identity_sum_bound(text: str) -> Optional[str]:
     """Recognize the bounded closed-form family; never parse arbitrary Sum ASTs."""
     m = re.fullmatch(
