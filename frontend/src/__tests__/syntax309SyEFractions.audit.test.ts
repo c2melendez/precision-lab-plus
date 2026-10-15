@@ -775,3 +775,15 @@ describe("SY-V-18 original finite product conversion", () => {
     expect(latexToBackendSyntax("120").trim()).toBe("120");
   });
 });
+
+
+describe("SY-V-19 original binomial conversion", () => {
+  it("preserves both arguments and combination semantics", () => {
+    const row = rows["SY-V-19"];
+    expect(row.entrada).toBe("\\binom{5}{2}");
+    expect(row.operacion).toBe("valor");
+    expect(row.esperado).toBe("10");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("nCr(5,2)");
+    expect(latexToBackendSyntax("10").trim()).toBe("10");
+  });
+});
