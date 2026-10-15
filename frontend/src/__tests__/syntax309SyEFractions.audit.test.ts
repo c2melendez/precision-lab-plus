@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { detectCalculusIntent } from "../components/calculusIntent";
 import { latexToBackendSyntax } from "../components/NaturalMathField";
 
 const rows = Object.fromEntries(
@@ -681,5 +682,24 @@ describe("SY-U-12 Unicode root convention", () => {
     try { converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, ""); }
     catch (error) { expect(String(error).length).toBeGreaterThan(0); return; }
     expect(["sqrt(4)", "√4", "\\sqrt{4}", "\\sqrt4"]).toContain(converted);
+  });
+});
+
+
+describe("SY-V-13 original limit intent and conversion", () => {
+  it("extracts the original two-sided limit and keeps the full sine quotient", () => {
+    const row = rows["SY-V-13"];
+    expect(row.entrada).toBe("\\lim_{x\\to0}\\frac{\\sin x}{x}");
+    expect(row.operacion).toBe("valor");
+    expect(row.esperado).toBe("1");
+    const intent = detectCalculusIntent(row.entrada);
+    expect(intent?.kind).toBe("limit");
+    if (!intent || intent.kind !== "limit") throw new Error("Expected limit intent");
+    expect(intent.variable).toBe("x");
+    expect(intent.point).toBe("0");
+    expect(intent.direction).toBe("both");
+    const body = latexToBackendSyntax(intent.innerLatex).replace(/\s+/g, "");
+    expect(["sin(x)/x", "(sin(x))/(x)", "(sin(x)/x)", "((sin(x))/(x))", "(sin(x))/x"]).toContain(body);
+    expect(latexToBackendSyntax("1").trim()).toBe("1");
   });
 });
