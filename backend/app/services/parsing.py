@@ -689,6 +689,19 @@ def _parse_side(side_text: str, local_dict: Dict[str, object]) -> sympy.Expr:
     return expr
 
 
+def permutation_alias_args(text: str) -> Optional[Tuple[int, int]]:
+    """Bounded bare P(n,r), never a globally reserved user-function name."""
+    match = re.fullmatch(r"\s*P\(\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*\)\s*", text)
+    if match is None:
+        return None
+    if len(match.group(1).lstrip("+-")) > 3 or len(match.group(2).lstrip("+-")) > 3:
+        raise ParseSecurityError("Permutaciones: se requiere 0 <= r <= n <= 170, con enteros.")
+    n, r = map(int, match.groups())
+    if not (0 <= r <= n <= 170):
+        raise ParseSecurityError("Permutaciones: se requiere 0 <= r <= n <= 170, con enteros.")
+    return n, r
+
+
 def symbolic_pair_binomial_variable(text: str) -> Optional[str]:
     """Ordinary combinations nCr(symbol,2), distinct from generalized real binomials."""
     m = re.fullmatch(r"\s*nCr\(\s*([A-Za-z])\s*,\s*2\s*\)\s*", text)
@@ -780,6 +793,12 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
         normalized = "*".join(normalized.strip())
 
     if not allow_equation:
+        permutation = permutation_alias_args(normalized)
+        if permutation is not None:
+            value = FallingFactorial(*permutation)
+            from app.services import ast_validator
+            ast_validator.check_complexity_limits(value)
+            return value
         aggregate = _try_parse_finite_aggregate(normalized)
         if aggregate is not None:
             return aggregate

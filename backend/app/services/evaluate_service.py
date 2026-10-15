@@ -43,6 +43,7 @@ class EvaluateResult:
     approx_value: Optional[float] = None
     sum_bound: Optional[str] = None
     binomial_variable: Optional[str] = None
+    permutation_alias: bool = False
 
 
 def _validate_and_parse_substitutions(
@@ -208,6 +209,9 @@ def evaluate(
     if re.fullmatch(r"\s*\\int\s*x\s*(?:\\,\s*)?dy\s*", expression):
         expression = "x*y+C"
 
+    permutation_alias = parsing.permutation_alias_args(expression) is not None
+    if permutation_alias and "P" in (substitutions or {}):
+        raise SubstitutionValidationError("P está declarada; use nPr para permutaciones sin ambigüedad.")
     substitution_map = _validate_and_parse_substitutions(substitutions)
     binomial_variable = parsing.symbolic_pair_binomial_variable(expression)
     if binomial_variable is not None:
@@ -259,7 +263,7 @@ def evaluate(
 
     if expr.free_symbols:
         # Variables libres sin sustituir -> resultado simbólico (sección 6).
-        return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=False, sum_bound=sum_bound, binomial_variable=binomial_variable)
+        return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=False, sum_bound=sum_bound, binomial_variable=binomial_variable, permutation_alias=permutation_alias)
 
     # Sin variables libres sin sustituir -> numérico (sección 6).
 
@@ -338,4 +342,4 @@ def evaluate(
             # destruir ni impedir devolver el resultado simbólico exacto.
             approx = None
 
-    return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=True, approx_value=approx, sum_bound=sum_bound, binomial_variable=binomial_variable)
+    return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=True, approx_value=approx, sum_bound=sum_bound, binomial_variable=binomial_variable, permutation_alias=permutation_alias)

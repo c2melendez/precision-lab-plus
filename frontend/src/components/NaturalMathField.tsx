@@ -576,6 +576,17 @@ export function latexToBackendSyntax(latex: string): string {
   validateExponentSource(latex);
   if (latex.trim() === "") return "";
 
+  // Preserve bare numeric P for the backend's explicitly declared permutation alias.
+  // Do not reserve P globally or rewrite a complete local function definition.
+  if (/^\s*P\(\s*[+-]?\d+\s*,\s*[+-]?\d+\s*\)\s*$/.test(latex)) {
+    return latex.replace(/\s+/g, "");
+  }
+  if (/^\s*P\([A-Za-z](?:,[A-Za-z])?\)\s*=/.test(latex) &&
+      /^[A-Za-z0-9_+\-*/^().,;=\s]+$/.test(latex)) {
+    return latex.trim();
+  }
+
+
   // MathLive serializes \binom{a}{b} as an infix "choose", which the
   // backend does not recognize as the calculator combination function.
   // Preserve whole, flat-braced binomials before generic ASCII conversion.

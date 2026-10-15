@@ -31,6 +31,8 @@ def _render_evaluate_presentation(result, source_expression=None):
         warnings.append(f"{result.sum_bound} debe ser un entero no negativo para esta suma simbólica.")
     if getattr(result, "binomial_variable", None) is not None:
         warnings.append(f"{result.binomial_variable} debe ser un entero no negativo para combinaciones.")
+    if getattr(result, "permutation_alias", False):
+        warnings.append("P(n,r) se interpreta como permutaciones (nPr); una definición local de P prevalece.")
     # H1 round-trip: el parser seguro construye el AST con evaluate=False
     # para no ejecutar/simplificar durante el parseo. Esa forma puede
     # conservar artefactos como 1*(1/3) o asin(1/2) sin reducir. La salida
