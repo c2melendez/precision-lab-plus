@@ -1504,3 +1504,21 @@ def test_syu10_en_dash_convention_http():
             assert repeated.status_code == 200 and repeated.json()["result_text"] == "1"
         else:
             assert data["error_code"] is not None and data["error_message"], data
+
+
+def test_syu11_unicode_superscript_convention_http():
+    row = ROWS["SY-U-11"]
+    assert row["entrada"] == "x²"
+    assert row["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        data = response.json()
+        MathResponse.model_validate(data)
+        if data["success"]:
+            x = sympy.Symbol("x")
+            assert sympy.simplify(sympy.sympify(data["result_text"]) - x**2) == 0, data
+            repeated = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+            assert repeated.status_code == 200, repeated.text
+            assert repeated.json()["success"] is True, repeated.json()
+        else:
+            assert data["error_code"] is not None and data["error_message"], data
