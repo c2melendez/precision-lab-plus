@@ -383,8 +383,8 @@ def normalize_unicode(text: str) -> str:
     # exponent only in the pi-times-single-variable expression. Keep the
     # conversion narrow to avoid changing other identifier conventions.
     text = re.sub(
-        r"(?<![A-Za-z0-9_])\\\\pi\\s*(?:\\\\cdot\\s*)?([A-Za-z])\\s*\\^\\{([0-9]+)\\}(?![A-Za-z0-9_])",
-        r"pi*\\1^\\2", text,
+        r"(?<![A-Za-z0-9_])\\pi\s*(?:\\cdot\s*)?([A-Za-z])\s*\^\{([0-9]+)\}(?![A-Za-z0-9_])",
+        r"pi*\1^\2", text,
     )
     text = text.replace("π", "pi").replace("∞", "oo")
     # Normalize unambiguous arithmetic Unicode without changing identifier semantics.
