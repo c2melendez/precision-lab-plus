@@ -670,3 +670,16 @@ describe("SY-U-11 Unicode superscript convention", () => {
     expect(["x^2", "x**2", "x²", "x^{2}"]).toContain(converted);
   });
 });
+
+
+describe("SY-U-12 Unicode root convention", () => {
+  it("preserves root value or explicitly rejects source", () => {
+    const row = rows["SY-U-12"];
+    expect(row.entrada).toBe("√4");
+    expect(row.operacion).toBe("convencion");
+    let converted: string;
+    try { converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, ""); }
+    catch (error) { expect(String(error).length).toBeGreaterThan(0); return; }
+    expect(["sqrt(4)", "√4", "\\sqrt{4}", "\\sqrt4"]).toContain(converted);
+  });
+});
