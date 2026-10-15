@@ -1844,3 +1844,26 @@ def test_syv01_uppercase_and_lowercase_remain_independent_http_reentry():
         MathResponse.model_validate(again)
         assert again["success"] is True, again
         assert sympy.sympify(again["result_text"]).free_symbols == {X, x}, again
+
+
+def test_syv02_distinct_subscripted_variables_http_and_reentry():
+    row = ROWS["SY-V-02"]
+    assert row["entrada"] == r"x_{1}+x_{2}"
+    assert row["operacion"] == "interpretacion"
+    assert row["esperado"] == r"x_{1}+x_{2}"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        result = sympy.sympify(data["result_text"])
+        assert len(result.free_symbols) == 2, data
+        names = {str(s) for s in result.free_symbols}
+        assert len(names) == 2 and all("1" in name or "2" in name for name in names), data
+        repeated = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert repeated.status_code == 200, repeated.text
+        again = repeated.json()
+        MathResponse.model_validate(again)
+        assert again["success"] is True, again
+        assert {str(s) for s in sympy.sympify(again["result_text"]).free_symbols} == names, again
