@@ -1,5 +1,14 @@
 # Current Certification State
 
+## 2026-10-14 — SY-V-07 Lite PASS, Plus parsing fix en CI
+- Lite SHA 3eba65831df2244890bf792db03ea9278baaca4c: cumulative 38684945679, H1d 38684945718, build 38684945701, E2E genérico 38684945790 SUCCESS. El E2E genérico no certifica UI específica.
+- Plus SHA 7e649e2e7437aab3900b8370d7bc0e9a157c479a: cumulative 38684958975 FAILURE con 1162 PASS/1 FAIL/1 XFAIL, test test_syv07_first_derivative_original_source_http_roundtrip retornó success=false para entrada oficial `\\frac{d}{dx}x^{2}`. H1d 38684959038 SUCCESS; causa producto/parser, no oráculo.
+- Plus backend/app/services/evaluate_service.py: fix Leibniz acotado SHA 306efc86938780c765699fa4727dfce61f982b23, corrección de escape regex SHA ab81668bce680d16867e3f4446f0ae3856ca6dce. Se preserva SymPy y parser seguro; sin modificar el esperado 2x. Nuevos gates sobre ab81668: cumulative 38686792285, H1d 38686792521, SG28 prototipo 38686792382 IN_PROGRESS al consultar.
+- SY-V-07 OPEN hasta evidencia final Plus SHA ab81668. Syntax309 OPEN, H2/SG28 OPEN, DIST multinodo real BLOCKED; no deploy.
+### Siguiente paso exacto
+Revisar logs y resultados de Plus cumulative 38686792285, H1d 38686792521 y SG28 38686792382 en SHA ab81668. Si falla, diagnosticar/corregir sin relajar pruebas. Si PASS, cerrar SY-V-07 bilateral y añadir SY-V-08 `\\frac{d^{2}}{dx^{2}}x^{3}` esperado `6x` a las pruebas permanentes de ambos motores.
+
+
 ## 2026-10-14 — SY-V-06 PASS bilateral; SY-V-07 CI iniciado
 - SY-V-06 Lite SHA 176e8c50d9a9aaf4d7c95014194e5d0d20fc3f5b: cumulative 38684054970, H1d 38684054978, build 38684055070, E2E genérico 38684055315 SUCCESS. Plus SHA dff3816e9ef71de40e67c4ec291f948becff314d: cumulative 38684070724, H1d 38684070696 y SG28 prototipo 38684070692 SUCCESS. La aprobación es de alcance automatizado, no certificación multinodo ni prueba UI específica.
 - SY-V-07 caso oficial entrada `\\frac{d}{dx}x^{2}`, esperado `2x` con equivalencia y reentrada. Lite test tests/syntax309SyE23.audit.test.ts SHA 3eba65831df2244890bf792db03ea9278baaca4c; Plus test backend/tests/test_syntax309_syv07.py SHA 7e649e2e7437aab3900b8370d7bc0e9a157c479a.
