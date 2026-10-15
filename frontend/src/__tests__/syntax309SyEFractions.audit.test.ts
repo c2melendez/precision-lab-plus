@@ -801,3 +801,16 @@ describe("SY-V-20 original symbolic binomial conversion", () => {
     expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("nCr(n,2)");
   });
 });
+
+
+describe("SY-V-21 permutation alias and local-function boundary", () => {
+  it("preserves bare numeric P and a complete local P definition without conflating them", () => {
+    const row = rows["SY-V-21"];
+    expect(row.entrada).toBe("P(5,2)");
+    expect(row.esperado).toBe("20");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("P(5,2)");
+    const local = "P(x,y)=x+y;P(5,2)";
+    expect(latexToBackendSyntax(local).replace(/\s+/g, "")).toBe(local);
+    expect(latexToBackendSyntax("20").trim()).toBe("20");
+  });
+});
