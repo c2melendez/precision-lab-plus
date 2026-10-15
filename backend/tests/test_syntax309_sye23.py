@@ -1540,3 +1540,25 @@ def test_syu12_unicode_square_root_convention_http():
             assert sympy.sympify(repeated.json()["result_text"]) == 2
         else:
             assert data["error_code"] is not None and data["error_message"], data
+
+
+def test_syu13_unicode_pi_http_precision_and_reentry():
+    row = ROWS["SY-U-13"]
+    assert row["entrada"] == "π"
+    assert row["operacion"] == "valor"
+    assert row["esperado"] == "3.141592654"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        assert data["error_code"] is None, data
+        assert round(float(data["result_approx"]), 9) == float(row["esperado"]), data
+        repeated = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert repeated.status_code == 200, repeated.text
+        again = repeated.json()
+        MathResponse.model_validate(again)
+        assert again["success"] is True, again
+        assert round(float(again["result_approx"]), 9) == float(row["esperado"]), again
+        assert again["request_id"] != data["request_id"]
