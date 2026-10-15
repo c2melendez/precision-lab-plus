@@ -168,7 +168,7 @@ def evaluate(
     # Accept only a single variable and a bounded monomial body; parse the
     # body with the existing safe parser rather than evaluating raw LaTeX.
     leibniz_first = re.fullmatch(
-        r"\s*\\\\frac\{d\}\{d([A-Za-z])\}\s*([A-Za-z])\^\{([0-9]{1,2})\}\s*",
+        r"\s*\\frac\{d\}\{d([A-Za-z])\}\s*([A-Za-z])\^\{([0-9]{1,2})\}\s*",
         expression,
     )
     if leibniz_first:
