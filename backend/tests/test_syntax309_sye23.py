@@ -1487,3 +1487,20 @@ def test_syu09_unicode_minus_http_and_reentry():
         MathResponse.model_validate(again)
         assert again["success"] is True and again["result_text"] == "1", again
         assert again["request_id"] != data["request_id"], again
+
+
+def test_syu10_en_dash_convention_http():
+    row = ROWS["SY-U-10"]
+    assert row["entrada"] == "2–1"
+    assert row["operacion"] == "convencion"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        data = response.json()
+        MathResponse.model_validate(data)
+        if data["success"]:
+            assert data["result_text"] == "1" and data["result_approx"] == 1, data
+            assert data["error_code"] is None, data
+            repeated = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+            assert repeated.status_code == 200 and repeated.json()["result_text"] == "1"
+        else:
+            assert data["error_code"] is not None and data["error_message"], data
