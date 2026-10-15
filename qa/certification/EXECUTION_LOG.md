@@ -5153,3 +5153,10 @@ Fixture i^{2}, operacion=convencion, esperado -1 como unidad imaginaria o i^{2} 
 
 
 2026-10-15 SY-Q-06: Lite inequality regression SHA 8a49b7de5f3517383afe6ec8878a90f4dd838482; Plus oracle-only SHA 7b3284aca8125f9f337ef49f6117d184d0f3de51. Plus public inequality solving not yet certified; mark CAPABILITY/BLOCKED rather than PASS. New cumulative CI Lite 38721683568 and Plus 38721690451 pending first verdict.
+
+
+### 2026-10-15 — SY-Q-06 reconciled; SY-Q-07 strict inequalities
+- SY-Q-06 Lite product inequality path passed SHA 8a49b7de5f3517383afe6ec8878a90f4dd838482: cumulative 38721683568, H1d 38721683445, build 38721683450, generic UI 38721683346 SUCCESS. Plus SHA 7b3284aca8125f9f337ef49f6117d184d0f3de51 cumulative 38721690451 and H1d 38721690511 SUCCESS ONLY for independent SymPy reference oracle; Plus user-facing inequality resolution remains CAPABILITY/BLOCKED. Do not claim bilateral product PASS.
+- SY-Q-07 official `x^{2}<4` expected open interval (-2,2). Lite real solver regression tests/syntax309SyQ07.audit.test.ts SHA 4f081bc6c42089f6b390526d76964b2f818bfec5 verifies strict vs inclusive endpoints. Plus independent reference oracle backend/tests/test_syntax309_syq07_oracle.py SHA 48e9d3a8c7f014fd005f90c6e2e1bf541cdb359b; this is NOT a product endpoint test.
+- Push CI on technical SHAs: Lite cumulative 38722495994, H1d 38722495873, build 38722495987, generic UI 38722495826 initially IN_PROGRESS; Plus cumulative 38722507876 and H1d 38722507844 initially QUEUED. No SY-Q-07 PASS until result and logs. Plus remains BLOCKED for product inequality coverage even if reference gate is green.
+- Next: inspect SHA-specific CI and fix any product/harness failure. Independently design and implement guarded public univariate-inequality integration in Plus with explicit response contract and route tests before claiming bilateral Q-06/Q-07. Then advance official SY-Q-08. Syntax309/IN625/H2/SG28 OPEN; DIST multinode BLOCKED; no production deployment.
