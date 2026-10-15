@@ -134,6 +134,19 @@ def evaluate(
             is_numeric=True, approx_value=float(exact) if operand <= 170 else None
         )
 
+    # Syntax309 SY-V-04: a one-variable function definition followed by
+    # its call is evaluated in one request. No persistent function registry.
+    definition_call = re.fullmatch(
+        r"\s*([A-Za-z])\(([A-Za-z])\)\s*=\s*([^;]+);\s*(?:\\\s*)?\1\(([^()]*)\)\s*",
+        expression,
+    )
+    if definition_call:
+        _, variable, body, argument = definition_call.groups()
+        body = re.sub(r"\^\{([0-9]+)\}", r"^\1", body)
+        body_expr = parsing.parse_expression_tree(body, allow_equation=False)
+        argument_expr = parsing.parse_expression_tree(argument, allow_equation=False)
+        expression = str(body_expr.subs(sympy.Symbol(variable), argument_expr))
+
     substitution_map = _validate_and_parse_substitutions(substitutions)
 
     # A caller explicitly substituting a named multi-letter symbol retains
