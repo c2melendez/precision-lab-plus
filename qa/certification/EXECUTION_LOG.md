@@ -4730,3 +4730,6 @@ Comprobar resultados/logs de SY-U-22 por SHA; corregir capa pertinente si hay fa
 ### Siguiente paso exacto
 Inspeccionar SY-U-23 acumulativos y logs por SHA; si FALLA clasificar y corregir sin relajar oráculo; tras PASS bilateral iniciar fixture oficial SY-U-24.
 
+
+## 2026-10-14 — SY-U-24 started
+SY-U-23 PASS bilateral. SY-U-24 test added in Plus commit 34ab6aa90f31a18ce63cef35ff6786c39cbe917e; cumulative run 38673939037 and H1d 38673939095 started. Lite test commit 6bb22766ef8f13e433696e9d77cf70ebfaeedecb; cumulative 38673929601, H1d 38673929554, build 38673929553 and generic E2E 38673929606 started. SY-U-24 remains OPEN pending final CI evidence. Next: SY-U-25. SG28/H2 and multinode remain open/blocked.
