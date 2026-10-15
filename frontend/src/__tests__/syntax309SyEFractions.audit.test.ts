@@ -763,3 +763,15 @@ describe("SY-V-17 original symbolic sum conversion", () => {
     expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("sum(k,k,1,n)");
   });
 });
+
+
+describe("SY-V-18 original finite product conversion", () => {
+  it("preserves product operation, body, index and both limits", () => {
+    const row = rows["SY-V-18"];
+    expect(row.entrada).toBe("\\prod_{k=1}^{5}k");
+    expect(row.operacion).toBe("valor");
+    expect(row.esperado).toBe("120");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("product(k,k,1,5)");
+    expect(latexToBackendSyntax("120").trim()).toBe("120");
+  });
+});
