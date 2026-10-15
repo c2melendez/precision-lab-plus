@@ -212,6 +212,10 @@ def solve_equation(
         var = free_symbols[0]
         warnings.append(f"Variable inferida automáticamente: '{var}'.")
 
+    parameters = [str(symbol) for symbol in free_symbols if symbol != var]
+    if var in free_symbols and parameters:
+        warnings.append(f"Se despeja {var}; parámetros libres: {', '.join(parameters)}.")
+
     has_direct_trig = _equation_has_direct_trig_of_variable(eq, var)
 
     steps_and_solutions = _linear_steps(eq, var)
