@@ -1664,3 +1664,24 @@ def test_syu18_consecutive_plus_minus_http_and_reentry():
         again = repeated.json()
         MathResponse.model_validate(again)
         assert again["success"] is True and sympy.sympify(again["result_text"]) == -1
+
+
+def test_syu19_consecutive_minus_operators_http_and_reentry():
+    row = ROWS["SY-U-19"]
+    assert row["entrada"] == "2--3"
+    assert row["operacion"] == "valor"
+    assert row["esperado"] == "5"
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        assert sympy.sympify(data["result_text"]) == 5, data
+        assert data["result_approx"] == 5 and data["error_code"] is None, data
+        repeated = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert repeated.status_code == 200, repeated.text
+        again = repeated.json()
+        MathResponse.model_validate(again)
+        assert again["success"] is True and sympy.sympify(again["result_text"]) == 5
+        assert again["request_id"] != data["request_id"]
