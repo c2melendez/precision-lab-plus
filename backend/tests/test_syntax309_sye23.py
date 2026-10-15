@@ -1820,3 +1820,27 @@ def test_syu25_consecutive_plus_convention_http():
                 assert data["error_message"], data
         else:
             assert data.get("detail") or data.get("error_message"), data
+
+
+def test_syv01_uppercase_and_lowercase_remain_independent_http_reentry():
+    row = ROWS["SY-V-01"]
+    assert row["entrada"] == "X+x"
+    assert row["operacion"] == "interpretacion"
+    assert row["esperado"] == "X+x"
+    X, x = sympy.symbols("X x")
+    expected = X + x
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": row["entrada"]})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        MathResponse.model_validate(data)
+        assert data["success"] is True, data
+        result = sympy.sympify(data["result_text"])
+        assert sympy.simplify(result - expected) == 0, data
+        assert result.free_symbols == {X, x}, data
+        repeated = client.post("/api/v1/evaluate", json={"expression": data["result_text"]})
+        assert repeated.status_code == 200, repeated.text
+        again = repeated.json()
+        MathResponse.model_validate(again)
+        assert again["success"] is True, again
+        assert sympy.sympify(again["result_text"]).free_symbols == {X, x}, again
