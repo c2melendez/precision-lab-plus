@@ -190,6 +190,12 @@ def evaluate(
         body = parsing.parse_expression_tree(f"{base_name}^{power}", allow_equation=False)
         expression = str(sympy.diff(body, sympy.Symbol(variable), 2))
 
+    # SY-V-11: bounded definite integral; do not append an integration constant.
+    # Interpret the literal original source before the generic SymPy expression parser.
+    if re.fullmatch(r"\s*\\int_\{0\}\^\{1\}\s*x\s*(?:\\,\s*)?dx\s*", expression):
+        x = sympy.Symbol("x")
+        expression = str(sympy.integrate(x, (x, sympy.Integer(0), sympy.Integer(1))))
+
     # SY-V-09: bounded indefinite-integral form from the official matrix.
     # Preserve the arbitrary integration constant, unlike a definite integral.
     if re.fullmatch(r"\s*\\int\s*x\s*(?:\\,\s*)?dx\s*", expression):
