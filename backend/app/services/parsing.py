@@ -373,6 +373,8 @@ def normalize_unicode(text: str) -> str:
     text = text.replace("\u00a0", " ")
     # LaTeX spacing commands are whitespace, never identifiers or operations.
     text = re.sub(r"\\(?:,|;|!|:| )", " ", text)
+    # Fullwidth decimal digits and arithmetic operators have unambiguous ASCII equivalents.
+    text = text.translate(str.maketrans("０１２３４５６７８９＋－", "0123456789+-"))
     text = text.replace("π", "pi").replace("∞", "oo")
     # Normalize unambiguous arithmetic Unicode without changing identifier semantics.
     text = text.replace("×", "*").replace("÷", "/").replace("·", "*").replace("−", "-")
