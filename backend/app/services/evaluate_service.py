@@ -134,6 +134,23 @@ def evaluate(
             is_numeric=True, approx_value=float(exact) if operand <= 170 else None
         )
 
+    # Syntax309 SY-V-06: ephemeral two-variable function, no global state.
+    pair_call = re.fullmatch(
+        r"\s*([A-Za-z])\(([A-Za-z]),([A-Za-z])\)\s*=\s*([^;]+);\s*(?:\\\s*)?\1\(([^(),]+),([^(),]+)\)\s*",
+        expression,
+    )
+    if pair_call:
+        _, first, second, body, first_arg, second_arg = pair_call.groups()
+        if first == second:
+            raise parsing.ParseSecurityError("Los parámetros deben ser distintos.")
+        body_expr = parsing.parse_expression_tree(body, allow_equation=False)
+        first_expr = parsing.parse_expression_tree(first_arg, allow_equation=False)
+        second_expr = parsing.parse_expression_tree(second_arg, allow_equation=False)
+        expression = str(body_expr.subs(
+            {sympy.Symbol(first): first_expr, sympy.Symbol(second): second_expr},
+            simultaneous=True,
+        ))
+
     # Syntax309 SY-V-04: a one-variable function definition followed by
     # its call is evaluated in one request. No persistent function registry.
     definition_call = re.fullmatch(
