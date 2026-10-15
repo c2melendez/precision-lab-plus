@@ -41,6 +41,7 @@ class EvaluateResult:
     input_expr: sympy.Expr
     is_numeric: bool
     approx_value: Optional[float] = None
+    sum_bound: Optional[str] = None
 
 
 def _validate_and_parse_substitutions(
@@ -207,6 +208,14 @@ def evaluate(
         expression = "x*y+C"
 
     substitution_map = _validate_and_parse_substitutions(substitutions)
+    sum_bound = parsing.symbolic_identity_sum_bound(expression)
+    if sum_bound is not None:
+        bound_value = substitution_map.get(sympy.Symbol(sum_bound))
+        if bound_value is not None:
+            bound_value = sympy.simplify(bound_value)
+            if bound_value.is_integer is not True or bound_value.is_nonnegative is not True:
+                raise DomainErrorResult("La cota de la suma debe ser un entero no negativo.")
+
 
     # A caller explicitly substituting a named multi-letter symbol retains
     # that symbol. Without that declaration, the official SY-P-24/25
@@ -237,7 +246,7 @@ def evaluate(
 
     if expr.free_symbols:
         # Variables libres sin sustituir -> resultado simbólico (sección 6).
-        return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=False)
+        return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=False, sum_bound=sum_bound)
 
     # Sin variables libres sin sustituir -> numérico (sección 6).
 
@@ -316,4 +325,4 @@ def evaluate(
             # destruir ni impedir devolver el resultado simbólico exacto.
             approx = None
 
-    return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=True, approx_value=approx)
+    return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=True, approx_value=approx, sum_bound=sum_bound)

@@ -27,6 +27,8 @@ def _sg28_ci_slow_evaluate(expression, angle_unit, substitutions):
 def _render_evaluate_presentation(result, source_expression=None):
     """Render in an independent, killable SG28 worker if isolation is on."""
     warnings = []
+    if getattr(result, "sum_bound", None) is not None:
+        warnings.append(f"{result.sum_bound} debe ser un entero no negativo para esta suma simbólica.")
     # H1 round-trip: el parser seguro construye el AST con evaluate=False
     # para no ejecutar/simplificar durante el parseo. Esa forma puede
     # conservar artefactos como 1*(1/3) o asin(1/2) sin reducir. La salida

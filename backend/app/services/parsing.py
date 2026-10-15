@@ -689,6 +689,20 @@ def _parse_side(side_text: str, local_dict: Dict[str, object]) -> sympy.Expr:
     return expr
 
 
+def symbolic_identity_sum_bound(text: str) -> Optional[str]:
+    """Recognize the bounded closed-form family; never parse arbitrary Sum ASTs."""
+    m = re.fullmatch(
+        r"\s*sum\(\s*\(?\s*([A-Za-z])\s*\)?\s*,\s*\1\s*,\s*1\s*,\s*([A-Za-z])\s*\)\s*",
+        text,
+    )
+    if not m:
+        return None
+    index, upper = m.groups()
+    if index == upper or upper in ALLOWED_CONSTANTS:
+        return None
+    return upper
+
+
 def _try_parse_finite_aggregate(text: str) -> Optional[sympy.Basic]:
     """Parse calculator ``sum``/``product`` without allowing raw Sum/Product AST input.
 
@@ -712,6 +726,14 @@ def _try_parse_finite_aggregate(text: str) -> Optional[sympy.Basic]:
     body = _parse_side(body_text, local_dict)
     lower = parse_expression_tree(lower_text, allow_equation=False)
     upper = parse_expression_tree(upper_text, allow_equation=False)
+    if (symbolic_identity_sum_bound(text) is not None
+            and body == index and lower == 1 and upper.is_Symbol):
+        # Exact polynomial identity on the declared nonnegative-integer domain.
+        # No symbolic iteration and no relaxation of the finite-range guard.
+        value = upper * (upper + 1) / 2
+        from app.services import ast_validator
+        ast_validator.check_complexity_limits(value)
+        return value
     if not (lower.is_Integer and upper.is_Integer):
         raise ParseSecurityError("Los límites de suma/productoria deben ser enteros.")
     if abs(int(upper) - int(lower)) > 10_000:

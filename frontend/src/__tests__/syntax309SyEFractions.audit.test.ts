@@ -752,3 +752,14 @@ describe("SY-V-16 original finite sum conversion", () => {
     expect(latexToBackendSyntax("55").trim()).toBe("55");
   });
 });
+
+
+describe("SY-V-17 original symbolic sum conversion", () => {
+  it("keeps the symbolic upper bound rather than substituting a numeric witness", () => {
+    const row = rows["SY-V-17"];
+    expect(row.entrada).toBe("\\sum_{k=1}^{n}k");
+    expect(row.operacion).toBe("equivalente");
+    expect(row.esperado).toBe("\\frac{n(n+1)}{2}");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("sum(k,k,1,n)");
+  });
+});
