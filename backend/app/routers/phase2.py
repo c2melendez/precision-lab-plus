@@ -175,7 +175,7 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
     # additive path does not affect the original ordered-inequality parser.
     import re
     normalized_neq = payload.inequality.replace("\\neq", "!=").replace("≠", "!=").replace(" ", "")
-    point_exclusion = re.fullmatch(r"([A-Za-z])!=([+-]?(?:[0-9]+(?:\\.[0-9]+)?|\\.[0-9]+))", normalized_neq)
+    point_exclusion = re.fullmatch(r"([A-Za-z])!=([+-]?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+))", normalized_neq)
     if point_exclusion:
         variable_name, excluded_text = point_exclusion.groups()
         if payload.variable is not None and payload.variable != variable_name:
