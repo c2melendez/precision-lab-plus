@@ -171,6 +171,25 @@ async def solve_system(payload: SolveSystemRequest, request: Request) -> MathRes
 async def inequality(payload: InequalityRequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "inequality_request")
 
+    # SY-Q-09: strict point exclusion on the real line. The guarded
+    # additive path does not affect the original ordered-inequality parser.
+    import re
+    normalized_neq = payload.inequality.replace("\\neq", "!=").replace("≠", "!=").replace(" ", "")
+    point_exclusion = re.fullmatch(r"([A-Za-z])!=([+-]?(?:[0-9]+(?:\\.[0-9]+)?|\\.[0-9]+))", normalized_neq)
+    if point_exclusion:
+        variable_name, excluded_text = point_exclusion.groups()
+        if payload.variable is not None and payload.variable != variable_name:
+            return _error(request, OperationType.INEQUALITY, ErrorCode.INVALID_VARIABLE, "La variable no coincide con la desigualdad.")
+        excluded = sympy.Rational(excluded_text)
+        solution_set = sympy.S.Reals - sympy.FiniteSet(excluded)
+        return MathResponse(
+            success=True, operation=OperationType.INEQUALITY,
+            request_id=request.state.request_id, result_type=ResultType.SCALAR,
+            input_text=payload.inequality, result_text=str(solution_set),
+            result_latex=sympy.latex(solution_set), has_detailed_steps=False,
+            duration_ms=_duration_ms(request),
+        )
+
     try:
         chained = parsing.parse_chained_inequalities(payload.inequality)
         parsed = None if chained else parsing.parse_inequality_tree(payload.inequality)
