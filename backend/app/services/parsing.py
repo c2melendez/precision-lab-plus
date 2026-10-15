@@ -375,6 +375,10 @@ def normalize_unicode(text: str) -> str:
     text = re.sub(r"\\(?:,|;|!|:| )", " ", text)
     # Fullwidth decimal digits and arithmetic operators have unambiguous ASCII equivalents.
     text = text.translate(str.maketrans("０１２３４５６７８９＋－", "0123456789+-"))
+    # Syntax309 SY-V-02: a single-letter variable with a numeric LaTeX
+    # subscript is one identifier. Preserve index distinction and allow the
+    # rendered SymPy form (x_1) to be evaluated again on reentry.
+    text = re.sub(r"(?<![A-Za-z0-9_])([A-Za-z])_\\{([0-9]+)\\}", r"\\1_\\2", text)
     text = text.replace("π", "pi").replace("∞", "oo")
     # Normalize unambiguous arithmetic Unicode without changing identifier semantics.
     text = text.replace("×", "*").replace("÷", "/").replace("·", "*").replace("−", "-")
