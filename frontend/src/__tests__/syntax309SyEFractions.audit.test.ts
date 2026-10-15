@@ -740,3 +740,15 @@ describe("SY-V-15 reciprocal limit at infinity intent", () => {
     expect(latexToBackendSyntax("0").trim()).toBe("0");
   });
 });
+
+
+describe("SY-V-16 original finite sum conversion", () => {
+  it("preserves the complete body, index and inclusive limits", () => {
+    const row = rows["SY-V-16"];
+    expect(row.entrada).toBe("\\sum_{k=1}^{10}k");
+    expect(row.operacion).toBe("valor");
+    expect(row.esperado).toBe("55");
+    expect(latexToBackendSyntax(row.entrada).replace(/\s+/g, "")).toBe("sum(k,k,1,10)");
+    expect(latexToBackendSyntax("55").trim()).toBe("55");
+  });
+});
