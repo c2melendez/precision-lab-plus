@@ -657,3 +657,16 @@ describe("SY-U-10 Unicode en dash convention", () => {
     expect(["2-1", "2–1"]).toContain(converted);
   });
 });
+
+
+describe("SY-U-11 Unicode superscript convention", () => {
+  it("preserves x squared or explicitly rejects it", () => {
+    const row = rows["SY-U-11"];
+    expect(row.entrada).toBe("x²");
+    expect(row.operacion).toBe("convencion");
+    let converted: string;
+    try { converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, ""); }
+    catch (error) { expect(String(error).length).toBeGreaterThan(0); return; }
+    expect(["x^2", "x**2", "x²", "x^{2}"]).toContain(converted);
+  });
+});
