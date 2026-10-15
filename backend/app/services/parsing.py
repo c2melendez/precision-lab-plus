@@ -379,6 +379,13 @@ def normalize_unicode(text: str) -> str:
     # subscript is one identifier. Preserve index distinction and allow the
     # rendered SymPy form (x_1) to be evaluated again on reentry.
     text = re.sub(r"(?<![A-Za-z0-9_])([A-Za-z])_\{([0-9]+)\}", r"\1_\2", text)
+    # SY-V-03: accept the canonical LaTeX constant and a braced integer
+    # exponent only in the pi-times-single-variable expression. Keep the
+    # conversion narrow to avoid changing other identifier conventions.
+    text = re.sub(
+        r"(?<![A-Za-z0-9_])\\\\pi\\s*(?:\\\\cdot\\s*)?([A-Za-z])\\s*\\^\\{([0-9]+)\\}(?![A-Za-z0-9_])",
+        r"pi*\\1^\\2", text,
+    )
     text = text.replace("π", "pi").replace("∞", "oo")
     # Normalize unambiguous arithmetic Unicode without changing identifier semantics.
     text = text.replace("×", "*").replace("÷", "/").replace("·", "*").replace("−", "-")
