@@ -644,3 +644,16 @@ describe("SY-U-09 Unicode minus", () => {
     expect(latexToBackendSyntax("1").trim()).toBe("1");
   });
 });
+
+
+describe("SY-U-10 Unicode en dash convention", () => {
+  it("must not silently misinterpret original source", () => {
+    const row = rows["SY-U-10"];
+    expect(row.entrada).toBe("2–1");
+    expect(row.operacion).toBe("convencion");
+    let converted: string;
+    try { converted = latexToBackendSyntax(row.entrada).replace(/\s+/g, ""); }
+    catch (error) { expect(String(error).length).toBeGreaterThan(0); return; }
+    expect(["2-1", "2–1"]).toContain(converted);
+  });
+});
