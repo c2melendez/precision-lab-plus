@@ -5095,3 +5095,8 @@ Fixture i^{2}, operacion=convencion, esperado -1 como unidad imaginaria o i^{2} 
 - SY-V-25: Lite SHA 2c2acd4ce60fb10e7815fc8d524e1818d2a8b121 cumulative 38710733254 SUCCESS (100 archivos PASS), H1d 38710733176 seguía ejecutándose. Plus SHA e8fe2d351e22a5eaf12a2368aa64a27342f193d1 cumulative 38710741404 y H1d 38710741426 IN_PROGRESS. SY-V-25 OPEN hasta confirmación por SHA bilateral.
 - Bloqueos globales H2/SG28 OPEN, DIST multinodo BLOCKED.
 
+
+## 2026-10-15 — SY-V-26
+- SY-V-25 gates acumulativos y H1d SUCCESS en Lite 38710733254 / 38710733176 y Plus 38710741404 / 38710741426.
+- Tests SY-V-26 publicados: Lite 1aa2d2d3ff27e83f5cdf86b2405a7a985de29413 y Plus 7caee589013c85c5b36283046b3a4d4c88608e61.
+- CI en curso: Lite cumulative 38711679361, Plus cumulative 38711691444. Conservar objetivo OPEN hasta verificación por SHA.
