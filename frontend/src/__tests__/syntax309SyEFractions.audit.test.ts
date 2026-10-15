@@ -703,3 +703,21 @@ describe("SY-V-13 original limit intent and conversion", () => {
     expect(latexToBackendSyntax("1").trim()).toBe("1");
   });
 });
+
+
+describe("SY-V-14 right reciprocal limit intent", () => {
+  it("preserves the right-hand direction, quotient and infinity point syntax", () => {
+    const row = rows["SY-V-14"];
+    expect(row.entrada).toBe("\\lim_{x\\to0^{+}}\\frac{1}{x}");
+    expect(row.esperado).toBe("+\\infty");
+    const intent = detectCalculusIntent(row.entrada);
+    expect(intent?.kind).toBe("limit");
+    if (!intent || intent.kind !== "limit") throw new Error("Expected limit intent");
+    expect(intent.variable).toBe("x");
+    expect(intent.point).toBe("0");
+    expect(intent.direction).toBe("right");
+    const body = latexToBackendSyntax(intent.innerLatex).replace(/\s+/g, "");
+    expect(["1/x", "(1)/(x)", "(1/x)", "((1)/(x))"]).toContain(body);
+    expect(latexToBackendSyntax("\\infty").trim()).toBe("oo");
+  });
+});
