@@ -30,3 +30,6 @@ No reconstruir el contexto desde chat, ZIPs ni handoffs históricos. Verificar H
 
 ## Regla de sincronización
 Toda modificación sustantiva debe reflejarse en ambos repositorios durante la misma operación lógica.
+
+## Tablero global
+Consultar [GLOBAL_CERTIFICATION_DASHBOARD.md](GLOBAL_CERTIFICATION_DASHBOARD.md) para alcance por módulo, evidencia, bloqueos y pendientes. Actualizarlo con los cierres bilaterales; sus conteos de tests no son porcentajes de requisitos certificados.
