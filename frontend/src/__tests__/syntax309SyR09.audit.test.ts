@@ -10,7 +10,7 @@ describe("SY-R-09 original antiderivative and derivative routing", () => {
   const actual = latexToBackendSyntax(source).replace(/\s/g,"");
   console.log("SY-R-09 converted",actual);
   const term = variable+"^"+power;
-  expect([ "("+term+")/"+power+"+C", "(("+term+")/"+power+")+C", term+"/"+power+"+C", "("+term+"/"+power+")+C" ]).toContain(actual);
+  expect(actual).toBe("("+term+")/("+power+")+C");
  });
  it("extracts explicit x and the full unchanged antiderivative body", () => {
   const intent = detectCalculusIntent(String.raw`\frac{d}{dx}\left(` + row.entrada + String.raw`\right)`);

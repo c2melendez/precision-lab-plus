@@ -18,6 +18,8 @@ def post(client, endpoint, **payload):
 @pytest.mark.parametrize("source, variable, expected, derivative, dc", [
     ("x^3/3+C", "x", "x^3/3+C", "x^2", 1),
     ("y^4/4+C", "y", "y^4/4+C", "y^3", 1),
+    ("(x^3)/(3)+C", "x", "x^3/3+C", "x^2", 1),
+    ("(y^4)/(4)+C", "y", "y^4/4+C", "y^3", 1),
     ("x^3/3+7*C", "x", "x^3/3+7*C", "x^2", 7),
 ])
 def test_syr09_exact_constant_reentry_and_real_derivative(source, variable, expected, derivative, dc):
