@@ -641,6 +641,10 @@ export function latexToBackendSyntax(latex: string): string {
   }
   latex = normalizeExternalSyntaxF3c(normalizeExternalSyntax(normalizeUnicodePaste(normalizePastedLatex(latex))));
   latex = normalizeLocalizedLatexAliases(latex);
+  // SY-S-06: unary inverse tangent with an ungrouped scalar argument.
+  // Limit to a whole standalone input; never capture trailing operators.
+  const inverseTangentScalar = /^\\\\arctan\\s*([+-]?\\d+(?:\\.\\d+)?)$/.exec(latex.trim());
+  if (inverseTangentScalar) return "atan("+inverseTangentScalar[1]+")";
   // SY-S-01/02/03/04/05: a whole unparenthesized fraction is the trig argument.
   // Convert its cells before MathLive can split sin(pi)/6 or tan(pi)/4.
   const trigFraction = /^\\(sin|tan|cot|csc|arcsin)\s*\\(?:frac|dfrac|tfrac)\s*\{([^{}]+)\}\s*\{([^{}]+)\}$/.exec(latex.trim());
