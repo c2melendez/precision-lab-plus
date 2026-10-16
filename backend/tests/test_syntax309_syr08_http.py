@@ -12,6 +12,7 @@ from app.schemas.responses import MathResponse
     ("1+2*i", 1, 2),
     ("3-4i", 3, -4),
     ("-2+3i", -2, 3),
+    ("(1+2i)^2", -3, 4),
 ])
 def test_syr08_exact_complex_components_and_reentry(witness, real, imag):
     def check(result):
