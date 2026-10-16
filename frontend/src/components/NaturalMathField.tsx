@@ -575,7 +575,7 @@ export function latexToBackendSyntax(latex: string): string {
   }
   // SY-S-06: preserve the complete localized inverse-tangent scalar before
   // generic MathLive and alias normalization concatenate the function and digit.
-  const arctgScalar = /^\\\\(?:operatorname|mathrm|text)\\{arctg\\}\\s*([+-]?\\d+(?:\\.\\d+)?)$/i.exec(latex.trim());
+  const arctgScalar = /^\\(?:operatorname|mathrm|text)\\{arctg\\}\\s*([+-]?\\d+(?:\\.\\d+)?)$/i.exec(latex.trim());
   if (arctgScalar) return "atan("+arctgScalar[1]+")";
   validateExponentSource(latex);
   if (latex.trim() === "") return "";
