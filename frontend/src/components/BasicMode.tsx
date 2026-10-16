@@ -392,7 +392,16 @@ export function BasicMode() {
       return;
     }
 
-    const matrixIntent = detectMatrixIntent(latex);
+    let matrixIntent: ReturnType<typeof detectMatrixIntent>;
+    try {
+      matrixIntent = detectMatrixIntent(latex);
+    } catch (error) {
+      setValidationError(error instanceof Error ? error.message : "La matriz no es válida.");
+      setLastResult(null);
+      setLoading(false);
+      setErrorMessage(null);
+      return;
+    }
     if (matrixIntent) {
       setValidationError(null);
       setLoading(true);
