@@ -522,6 +522,8 @@ const LOCALIZED_LATEX_ALIAS_MAP: Record<string, string> = {
   // MathLive puede descartar el macro no estándar \\csch. Emitirlo como texto de función
   // preserva el nombre hasta collapseKnownFunctionNames, igual que acsch/asech/acoth.
   cosech: "\\mathrm{csch}",
+  // SY-R-05: canonical inverse-hyperbolic-sine alias before MathLive splits it.
+  arsinh: "\\operatorname{asinh}",
   argsenh: "\\operatorname{asinh}",
   arcsenh: "\\operatorname{asinh}",
   argcosh: "\\operatorname{acosh}",
