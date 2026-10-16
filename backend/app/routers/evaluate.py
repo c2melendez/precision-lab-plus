@@ -88,8 +88,10 @@ def _render_evaluate_presentation(result, source_expression=None):
     try:
         # Pickle may evaluate previously unevaluated SymPy AST nodes (2+3 -> 5).
         # Reparse inside the bounded presentation child to retain original input LaTeX.
-        input_expr = (parsing.parse_expression_tree(source_expression)
-                      if source_expression is not None else result.input_expr)
+        presentation_source = (evaluate_service.normalize_inline_substitution(source_expression)[0]
+                               if source_expression is not None else None)
+        input_expr = (parsing.parse_expression_tree(presentation_source)
+                      if presentation_source is not None else result.input_expr)
         domain_conditions = extract_domain_conditions(input_expr)
         input_latex = sympy.latex(input_expr)
     except ValueError:

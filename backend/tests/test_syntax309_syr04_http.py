@@ -45,3 +45,18 @@ def test_syr04_rejects_non_numeric_non_finite_or_conflicting_bindings(payload):
         response = client.post("/api/v1/evaluate", json=payload)
         result = MathResponse.model_validate(response.json())
         assert not result.success, result
+
+
+def test_syr04_complete_mathresponse_parity_isolation_off_on(monkeypatch):
+    snapshots = []
+    for enabled in ("0", "1"):
+        monkeypatch.setenv("SG28_EVALUATE_ISOLATION", enabled)
+        with TestClient(app) as client:
+            response = client.post("/api/v1/evaluate", json={"expression": OFFICIAL, "angle_unit": "rad"})
+            assert response.status_code == 200, response.text
+            result = MathResponse.model_validate(response.json())
+            assert result.success, result
+            assert result.input_text == OFFICIAL and result.input_latex is not None, result
+            assert abs(result.result_approx - 0.3678794412) <= 1e-9 * 0.3678794412, result
+            snapshots.append(result.model_dump(exclude={"request_id", "duration_ms"}))
+    assert snapshots[0] == snapshots[1]

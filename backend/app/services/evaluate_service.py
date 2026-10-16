@@ -122,24 +122,9 @@ def _plain_inline_math(source: str) -> str:
     return text.replace("{", "(").replace("}", ")")
 
 
-def evaluate(
-    expression: str,
-    angle_unit: str = "rad",
-    substitutions: Optional[Dict[str, str]] = None,
-) -> EvaluateResult:
-    # SY-S-11: bounded Spanish natural-language substitution form from the
-    # official fixture. Accept only a single variable and one exact value;
-    # the ordinary safe parser still evaluates the translated expression.
-    normalized_sen = (expression.replace("\\ ", " ")
-                      .replace("\\text{con}", " con ")
-                      .replace("\\frac{\\pi}{6}", "pi/6"))
-    inline_sen = re.fullmatch(
-        r"\s*sen\(([A-Za-z])\)\s+con\s+\1\s*=\s*pi/6\s*",
-        normalized_sen,
-    )
-    if inline_sen and not substitutions:
-        expression = "sin(pi/6)"
-
+def normalize_inline_substitution(
+    expression: str, substitutions: Optional[Dict[str, str]] = None,
+) -> tuple[str, Optional[Dict[str, str]]]:
     # SY-R-04: one explicit finite real binding, using the same safe parser
     # and substitutions path as the structured API. No result-specific branch.
     normalized_inline = (expression.replace("\\text{con}", " con ")
@@ -159,6 +144,29 @@ def evaluate(
             raise SubstitutionValidationError("El valor inline debe ser un número real finito.")
         expression = _plain_inline_math(body)
         substitutions = {variable: value}
+
+    return expression, substitutions
+
+
+def evaluate(
+    expression: str,
+    angle_unit: str = "rad",
+    substitutions: Optional[Dict[str, str]] = None,
+) -> EvaluateResult:
+    # SY-S-11: bounded Spanish natural-language substitution form from the
+    # official fixture. Accept only a single variable and one exact value;
+    # the ordinary safe parser still evaluates the translated expression.
+    normalized_sen = (expression.replace("\\ ", " ")
+                      .replace("\\text{con}", " con ")
+                      .replace("\\frac{\\pi}{6}", "pi/6"))
+    inline_sen = re.fullmatch(
+        r"\s*sen\(([A-Za-z])\)\s+con\s+\1\s*=\s*pi/6\s*",
+        normalized_sen,
+    )
+    if inline_sen and not substitutions:
+        expression = "sin(pi/6)"
+
+    expression, substitutions = normalize_inline_substitution(expression, substitutions)
 
     # SY-S-12: Spanish root-function alias. Keep the same safe parser and
     # domain rules as sqrt(); never evaluate arbitrary user code.
