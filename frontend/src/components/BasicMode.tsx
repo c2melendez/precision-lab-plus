@@ -407,6 +407,14 @@ export function BasicMode() {
       setLoading(true);
       setErrorMessage(null);
       try {
+        if (matrixIntent.kind === "absolute") {
+          const result = await submitAndRecord("/evaluate",
+            {expression:"abs("+latexToBackendSyntax(matrixIntent.scalar)+")",angle_unit:angleUnit},latex);
+          if (submissionId !== latestSubmissionRef.current) return;
+          setLastResult(result);
+          if (!result.success) setErrorMessage(result.error_message ?? "Ocurrió un error.");
+          return;
+        }
         if (matrixIntent.kind === "literal" || matrixIntent.kind === "basis") {
           const resultLatex = matrixIntent.kind === "basis"
             ? "\\left("+matrixIntent.matrix[0].join(", ")+"\\right)" : latex.trim();
