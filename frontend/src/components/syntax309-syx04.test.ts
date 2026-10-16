@@ -11,6 +11,13 @@ describe("SY-X-04: 500 explicit x addends", () => {
     expect(normalized.split("+")).toHaveLength(500);
   });
 
+  it("preserves whitespace-separated addends without truncation", () => {
+    const value = Array(500).fill("x").join(" + ");
+    const actual = latexToBackendSyntax(value);
+    const compact = actual.replace(/\s+/g, "");
+    expect(compact).toBe(Array(500).fill("x").join("+"));
+  });
+
   it("does not retain a previous long input after converting a shorter expression", () => {
     const source = Array(500).fill("x").join("+");
     latexToBackendSyntax(source);
