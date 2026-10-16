@@ -1,3 +1,7 @@
+## 2026-10-16 — Lite scientific E2E preflight synchronization
+- Lite technical CI commit `69f8763d53e2bf76869cb789dace412e624e47f1` adds Playwright spec discovery before Chromium installation in `syntax309-scientific-e2e.yml`. This prevents syntax/load errors from wasting browser installation and full E2E execution. No PASS is inferred.
+- Plus CURRENT_STATE synchronized; runs for Lite SY-R-12 and SY-X-04 and Plus SY-X-04 remain unverified via push workflow listing. No redundant manual dispatch.
+
 ## 2026-10-16 — SY-X-04: prueba de frontera HTTP 500/501
 - Plus commit técnico `22d6d5928af9857c0a4851e5987a862cb0f562a2`: amplía `backend/tests/test_syntax309_syx04_http_limit.py` con frontera exacta del schema: 500 caracteres para expresión `2+3` con espacios finales (esperado HTTP 200, resultado 5), 501 caracteres (HTTP 422 `VALIDATION_ERROR`) y recuperación posterior (200, resultado 5). Se conserva el caso original de 500 sumandos (999 caracteres), rechazo 422 y recuperación.
 - No se ha alterado `EvaluateRequest.expression` max_length=500, ni se considera que un rechazo 422 certifique el resultado 500x. Estado: prueba incorporada, PENDING CI para SHA 22d6d592; si falla la frontera aceptada, investigar parser/normalización real antes de cambiar expectativas o contrato.
