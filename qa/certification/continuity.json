@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 3,
+  "revision": 4,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "e6562fa11016706dbd4c8f0e26f6dc5eaff6cb2b",
-  "baseline_case": "SY-X-03",
-  "baseline_status": "PASS_SCOPED",
+  "technical_baseline_sha": "6d594187e241d6a2491590e13582999ac0b9fd3c",
+  "baseline_case": "AUDIT-REMEDIATION",
+  "baseline_status": "PENDING_CI",
   "global_certification": "OPEN",
   "prose_only_paths": [
     "README.md",
@@ -36,13 +36,14 @@
       "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "security": {
-      "workflow": ".github/workflows/s25-security.yml",
+      "workflow": ".github/workflows/certification-dependency-gates.yml",
       "inputs": [
         "*"
       ],
       "acceptance_revision": "2026-10-16-continuity-v1",
       "allow_reuse": false,
-      "max_evidence_age_hours": 24
+      "max_evidence_age_hours": 24,
+      "dispatch_policy": "Do not rerun unchanged BLOCKED dependencies; inspect recorded failed job until advisory/lock or approved migration changes"
     },
     "fixture_integrity": {
       "workflow": ".github/workflows/syntax309-integrity.yml",
@@ -78,6 +79,13 @@
         "*"
       ],
       "acceptance_revision": "2026-10-16-native-X01-X03-v1"
+    },
+    "mutation_frontend_preflight": {
+      "workflow": ".github/workflows/s19-plus-frontend-preflight.yml",
+      "inputs": [
+        "*"
+      ],
+      "acceptance_revision": "2026-10-16-S19-rendered-policy-v1"
     }
   },
   "evidence_by_channel": {
@@ -104,14 +112,13 @@
     }
   },
   "next_action": {
-    "id": "VERIFY-CONSOLIDATED-CI",
+    "id": "VERIFY-NATIVE-CLEAR-AND-S19-HARNESS",
     "status": "WAIT",
-    "action": "Inspect the recorded existing Actions runs and their jobs/logs. Do not dispatch duplicates. Continue independent documentation; diagnose only a concrete failed gate.",
+    "action": "Inspect runs on technical SHA 6d594187e241d6a2491590e13582999ac0b9fd3c for the actual editor-clear fix and rendered keyboard policy. Existing runs already cover this revision; do not dispatch duplicates.",
     "exit_criteria": [
-      "Every recorded run concluded and logs reviewed",
-      "Original evidence retained when a run reuses prior results",
-      "PASS/FAIL/BLOCKED recorded per channel",
-      "One next executable task chosen"
+      "Native desktop then tablet/mobile actual results reviewed",
+      "Cumulative/H1d and S19 initial-run reviewed",
+      "Initial-run PASS never claimed as mutation score"
     ]
   },
   "blockers": [
@@ -160,49 +167,35 @@
   "work_in_progress": {
     "id": "AUDIT-REMEDIATION-20261016",
     "status": "CI_RUNNING",
-    "changes": [
-      "Continuity ledger and conservative input fingerprints",
-      "Exact-SHA CI evidence guard",
-      "source-map-js patch update",
-      "SY-X-04 expanded input and contract boundaries",
-      "Native X01-X03 and conversion error containment"
-    ],
-    "technical_sha": "e6562fa11016706dbd4c8f0e26f6dc5eaff6cb2b",
+    "technical_sha": "6d594187e241d6a2491590e13582999ac0b9fd3c",
     "runs": [
       {
-        "id": 38983505293,
-        "workflow": ".github/workflows/in625-syntax-native.yml",
+        "id": 38983949570,
+        "workflow": ".github/workflows/s19-plus-frontend-preflight.yml",
         "status": "in_progress",
         "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983505293"
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949570"
       },
       {
-        "id": 38983505151,
-        "workflow": ".github/workflows/in625-sg28-plus-ui-cancel.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983505151"
-      },
-      {
-        "id": 38983505232,
-        "workflow": ".github/workflows/certification-dependency-gates.yml",
-        "status": "queued",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983505232"
-      },
-      {
-        "id": 38983505183,
+        "id": 38983949345,
         "workflow": ".github/workflows/in625-cumulative-certification.yml",
         "status": "in_progress",
         "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983505183"
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949345"
       },
       {
-        "id": 38983505161,
+        "id": 38983949508,
         "workflow": ".github/workflows/in625-h1d-reentry.yml",
         "status": "in_progress",
         "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983505161"
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949508"
+      },
+      {
+        "id": 38983949600,
+        "workflow": ".github/workflows/in625-syntax-native.yml",
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949600"
       }
     ]
   },
