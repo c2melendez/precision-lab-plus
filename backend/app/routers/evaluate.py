@@ -44,6 +44,12 @@ def _render_evaluate_presentation(result, source_expression=None):
         display_expr = result.expr
 
     try:
+        # Keep the displayed LaTeX consistent with the canonical scalar text.
+        # Unevaluated reciprocal trig ASTs can format as csc(pi/6) even though
+        # the mathematical value is exactly 2. Trig simplification is bounded
+        # to expressions containing reciprocal trigonometric functions.
+        if display_expr.has(sympy.csc, sympy.sec, sympy.cot):
+            display_expr = sympy.trigsimp(display_expr)
         result_latex = sympy.latex(display_expr)
         # H1 round-trip: SymPy representa el logaritmo natural con \\log,
         # pero Precision Lab reserva \\log para base 10 y usa \\ln para
