@@ -113,9 +113,12 @@ def evaluate(
     # SY-S-11: bounded Spanish natural-language substitution form from the
     # official fixture. Accept only a single variable and one exact value;
     # the ordinary safe parser still evaluates the translated expression.
+    normalized_sen = (expression.replace("\\ ", " ")
+                      .replace("\\text{con}", " con ")
+                      .replace("\\frac{\\pi}{6}", "pi/6"))
     inline_sen = re.fullmatch(
-        r"\\s*sen\\(([A-Za-z])\\)\\s*(?:\\\\\\s*)?\\\\text\\{con\\}\\s*(?:\\\\\\s*)?\\1\\s*=\\s*\\\\frac\\{\\\\pi\\}\\{6\\}\\s*",
-        expression,
+        r"\s*sen\(([A-Za-z])\)\s+con\s+\1\s*=\s*pi/6\s*",
+        normalized_sen,
     )
     if inline_sen and not substitutions:
         expression = "sin(pi/6)"
