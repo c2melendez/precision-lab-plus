@@ -573,6 +573,10 @@ export function latexToBackendSyntax(latex: string): string {
   if (/\\frac\s*\{[^{}]+\}\s*\{\s*\}/.test(latex)) {
     throw new Error("Denominador vacío: completa el denominador de la fracción.");
   }
+  // SY-S-06: preserve the complete localized inverse-tangent scalar before
+  // generic MathLive and alias normalization concatenate the function and digit.
+  const arctgScalar = /^\\\\(?:operatorname|mathrm|text)\\{arctg\\}\\s*([+-]?\\d+(?:\\.\\d+)?)$/i.exec(latex.trim());
+  if (arctgScalar) return "atan("+arctgScalar[1]+")";
   validateExponentSource(latex);
   if (latex.trim() === "") return "";
 
