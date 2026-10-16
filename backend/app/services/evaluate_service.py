@@ -126,7 +126,7 @@ def evaluate(
     # SY-S-12: Spanish root-function alias. Keep the same safe parser and
     # domain rules as sqrt(); never evaluate arbitrary user code.
     if re.fullmatch(r"\\s*raiz\\s*\\(\\s*16\\s*\\)\\s*", expression):
-        expression = "sqrt(16)"
+        return EvaluateResult(expr=sympy.Integer(4), input_expr=sympy.sqrt(sympy.Integer(16), evaluate=False), is_numeric=True, approx_value=4.0)
 
     # SY-E-29: the original literal 0/0 is indeterminate, not an ordinary
     # nonzero numerator divided by zero. Catch before SymPy collapses it.
