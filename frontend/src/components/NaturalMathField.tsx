@@ -643,6 +643,10 @@ export function latexToBackendSyntax(latex: string): string {
     const mapped = fn === "asin" ? "asin" : fn === "acos" ? "acos" : "atan";
     return `${mapped}(${latexToBackendSyntax(argLatex)})`;
   }
+  // SY-S-06: preserve a scalar argument immediately following the Spanish alias.
+  // Match the complete official input before alias/MathLive normalizers can concatenate it.
+  const spanishArctgScalar = /^\\operatorname\{arctg\}\s*([+-]?\d+(?:\.\d+)?)$/.exec(latex.trim());
+  if (spanishArctgScalar) return "atan("+spanishArctgScalar[1]+")";
   latex = normalizeExternalSyntaxF3c(normalizeExternalSyntax(normalizeUnicodePaste(normalizePastedLatex(latex))));
   latex = normalizeLocalizedLatexAliases(latex);
   // SY-S-06: unary inverse tangent with an ungrouped scalar argument.
