@@ -271,6 +271,10 @@ def validate_g3_structure(text: str) -> None:
     Esta capa no evalúa matemáticas. Evita que parse_expr/SymPy conviertan
     entradas claramente incompletas en errores internos o mensajes genéricos.
     """
+    # SY-X-02: recognize layout-only input before stripping its final escaped space.
+    # Keep unknown commands and mathematical tokens for the existing validation.
+    if not re.sub(r"\\(?:[,;!: ]|qquad\b|quad\b)", "", text).strip():
+        raise ParseSecurityError("Escriba una expresión antes de calcular.")
     raw = text.strip()
 
     if not raw:
