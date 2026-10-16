@@ -105,6 +105,23 @@ def _apply_degree_conversion(expr: sympy.Expr) -> sympy.Expr:
     return expr.replace(_is_direct_trig, _convert)
 
 
+def _plain_inline_math(source: str) -> str:
+    """Bounded arithmetic/identifier source; braces group powers, never code."""
+    text = source.replace("\\left", "").replace("\\right", "").strip()
+    if not re.fullmatch(r"[A-Za-z0-9_+\-*/^().,\s{}]+", text):
+        raise parsing.ParseSecurityError("Sintaxis no admitida en la sustitución inline.")
+    stack = []
+    for char in text:
+        if char in "({":
+            stack.append(char)
+        elif char in ")}":
+            if not stack or stack.pop() != ({"}": "{", ")": "("}[char]):
+                raise parsing.ParseSecurityError("Agrupación desequilibrada en sustitución inline.")
+    if stack:
+        raise parsing.ParseSecurityError("Agrupación incompleta en sustitución inline.")
+    return text.replace("{", "(").replace("}", ")")
+
+
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
@@ -122,6 +139,26 @@ def evaluate(
     )
     if inline_sen and not substitutions:
         expression = "sin(pi/6)"
+
+    # SY-R-04: one explicit finite real binding, using the same safe parser
+    # and substitutions path as the structured API. No result-specific branch.
+    normalized_inline = (expression.replace("\\text{con}", " con ")
+                         .replace("\\mathrm{con}", " con ").replace("\\ ", " "))
+    inline = re.fullmatch(r"\s*(.+?)\s+con\s+([A-Za-z])\s*=\s*(.+?)\s*", normalized_inline, re.S)
+    if inline:
+        body, variable, raw_value = inline.groups()
+        if len(re.findall(r"\bcon\b", normalized_inline)) != 1:
+            raise SubstitutionValidationError("Solo se admite una sustitución inline.")
+        if variable in {"e", "i", "E", "I"}:
+            raise SubstitutionValidationError("No se puede sustituir una constante reservada.")
+        if substitutions:
+            raise SubstitutionValidationError("No mezcle sustituciones inline con substitutions.")
+        value = _plain_inline_math(raw_value)
+        parsed_value = _validate_and_parse_substitutions({variable: value})[sympy.Symbol(variable)]
+        if parsed_value.is_real is not True or parsed_value.is_finite is not True:
+            raise SubstitutionValidationError("El valor inline debe ser un número real finito.")
+        expression = _plain_inline_math(body)
+        substitutions = {variable: value}
 
     # SY-S-12: Spanish root-function alias. Keep the same safe parser and
     # domain rules as sqrt(); never evaluate arbitrary user code.

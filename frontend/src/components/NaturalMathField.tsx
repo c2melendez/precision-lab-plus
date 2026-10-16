@@ -561,6 +561,17 @@ function normalizeLocalizedLatexAliases(input: string): string {
 }
 
 export function latexToBackendSyntax(latex: string): string {
+  // SY-R-04: preserve the explicit binding separator before MathLive can
+  // turn its prose into identifiers. Recursively convert only the two math
+  // fragments; finite numeric validation remains in the backend parser.
+  const normalizedInline = latex.replace(/\\(?:text|mathrm)\s*\{con\}/g, " con ").replace(/\\ /g, " ");
+  const inline = normalizedInline.match(/^\s*(.+?)\s+con\s+([A-Za-z])\s*=\s*(.+?)\s*$/s);
+  if (inline) {
+    if ((normalizedInline.match(/\s+con\s+/g) ?? []).length !== 1) throw new Error("Solo se admite una sustitución inline.");
+    const [, body, variable, value] = inline;
+    if (["e", "i", "E", "I"].includes(variable)) throw new Error("No se puede sustituir una constante reservada.");
+    return "(" + latexToBackendSyntax(body) + ") con " + variable + "=(" + latexToBackendSyntax(value) + ")";
+  }
   // SY-N-30: MathLive's {,} may mean a decimal mark or thousands grouping.
   // With three following digits and no declared locale, conversion to "."
   // silently turns 1{,}000+1 into 2. Reject instead of changing meaning.
