@@ -1,3 +1,4 @@
+import {isNamedVectorDotSource} from "./matrixIntent";
 /**
  * src/components/systemSplit.ts
  *
@@ -69,6 +70,7 @@ function splitTopLevelComma(text: string): string[] | null {
 }
 
 export function splitFreeSystemLatex(latex: string): string[] | null {
+  if (isNamedVectorDotSource(latex)) return null;
   const text = latex.trim();
   if (!text) return null;
 
