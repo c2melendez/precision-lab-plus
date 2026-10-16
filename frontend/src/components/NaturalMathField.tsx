@@ -641,11 +641,11 @@ export function latexToBackendSyntax(latex: string): string {
   }
   latex = normalizeExternalSyntaxF3c(normalizeExternalSyntax(normalizeUnicodePaste(normalizePastedLatex(latex))));
   latex = normalizeLocalizedLatexAliases(latex);
-  // SY-S-01: a whole unparenthesized fraction is the sine argument.
-  // Convert its cells before MathLive can split sin(pi)/6.
-  const sineFraction = /^\\sin\s*\\(?:frac|dfrac|tfrac)\s*\{([^{}]+)\}\s*\{([^{}]+)\}$/.exec(latex.trim());
-  if (sineFraction) {
-    return "sin(("+latexToBackendSyntax(sineFraction[1])+")/("+latexToBackendSyntax(sineFraction[2])+"))";
+  // SY-S-01/02: a whole unparenthesized fraction is the trig argument.
+  // Convert its cells before MathLive can split sin(pi)/6 or tan(pi)/4.
+  const trigFraction = /^\\(sin|tan)\s*\\(?:frac|dfrac|tfrac)\s*\{([^{}]+)\}\s*\{([^{}]+)\}$/.exec(latex.trim());
+  if (trigFraction) {
+    return trigFraction[1]+"(("+latexToBackendSyntax(trigFraction[2])+")/("+latexToBackendSyntax(trigFraction[3])+"))";
   }
 
   // IN625 D1 — normalización numérica que debe ocurrir antes de que
