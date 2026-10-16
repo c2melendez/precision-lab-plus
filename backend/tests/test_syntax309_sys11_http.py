@@ -8,7 +8,7 @@ from app.schemas.responses import MathResponse
 
 
 def test_sys11_inline_spanish_substitution_http_and_reentry():
-    source = r"sen(x)\\ \\text{con}\\ x=\\frac{\\pi}{6}"
+    source = r"sen(x)\ \text{con}\ x=\frac{\pi}{6}"
     with TestClient(app) as client:
         response = client.post("/api/v1/evaluate", json={"expression": source, "angle_unit": "rad"})
         assert response.status_code == 200, response.text
