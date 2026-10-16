@@ -407,8 +407,9 @@ export function BasicMode() {
       setLoading(true);
       setErrorMessage(null);
       try {
-        if (matrixIntent.kind === "literal") {
-          const resultLatex = latex.trim();
+        if (matrixIntent.kind === "literal" || matrixIntent.kind === "basis") {
+          const resultLatex = matrixIntent.kind === "basis"
+            ? "\\left("+matrixIntent.matrix[0].join(", ")+"\\right)" : latex.trim();
           setLastResult({
             success: true,
             operation: "matrix_operation",
@@ -419,7 +420,7 @@ export function BasicMode() {
             result_text: resultLatex,
             steps: [],
             has_detailed_steps: false,
-            warnings: [],
+            warnings: matrixIntent.kind === "basis" ? ["Coordenadas en la base canónica: ("+matrixIntent.matrix[0].join(", ")+")."] : [],
             duration_ms: 0,
           });
           return;
