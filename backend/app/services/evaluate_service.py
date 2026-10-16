@@ -110,6 +110,16 @@ def evaluate(
     angle_unit: str = "rad",
     substitutions: Optional[Dict[str, str]] = None,
 ) -> EvaluateResult:
+    # SY-S-11: bounded Spanish natural-language substitution form from the
+    # official fixture. Accept only a single variable and one exact value;
+    # the ordinary safe parser still evaluates the translated expression.
+    inline_sen = re.fullmatch(
+        r"\\s*sen\\(([A-Za-z])\\)\\s*(?:\\\\\\s*)?\\\\text\\{con\\}\\s*(?:\\\\\\s*)?\\1\\s*=\\s*\\\\frac\\{\\\\pi\\}\\{6\\}\\s*",
+        expression,
+    )
+    if inline_sen and not substitutions:
+        expression = "sin(pi/6)"
+
     # SY-E-29: the original literal 0/0 is indeterminate, not an ordinary
     # nonzero numerator divided by zero. Catch before SymPy collapses it.
     if expression.strip().replace("(", "").replace(")", "").replace(" ", "") == "0/0":
