@@ -641,9 +641,9 @@ export function latexToBackendSyntax(latex: string): string {
   }
   latex = normalizeExternalSyntaxF3c(normalizeExternalSyntax(normalizeUnicodePaste(normalizePastedLatex(latex))));
   latex = normalizeLocalizedLatexAliases(latex);
-  // SY-S-01/02: a whole unparenthesized fraction is the trig argument.
+  // SY-S-01/02/03: a whole unparenthesized fraction is the trig argument.
   // Convert its cells before MathLive can split sin(pi)/6 or tan(pi)/4.
-  const trigFraction = /^\\(sin|tan)\s*\\(?:frac|dfrac|tfrac)\s*\{([^{}]+)\}\s*\{([^{}]+)\}$/.exec(latex.trim());
+  const trigFraction = /^\\(sin|tan|cot)\s*\\(?:frac|dfrac|tfrac)\s*\{([^{}]+)\}\s*\{([^{}]+)\}$/.exec(latex.trim());
   if (trigFraction) {
     return trigFraction[1]+"(("+latexToBackendSyntax(trigFraction[2])+")/("+latexToBackendSyntax(trigFraction[3])+"))";
   }
