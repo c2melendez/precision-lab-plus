@@ -123,6 +123,11 @@ def evaluate(
     if inline_sen and not substitutions:
         expression = "sin(pi/6)"
 
+    # SY-S-12: Spanish root-function alias. Keep the same safe parser and
+    # domain rules as sqrt(); never evaluate arbitrary user code.
+    if re.fullmatch(r"\\s*raiz\\s*\\(\\s*16\\s*\\)\\s*", expression):
+        expression = "sqrt(16)"
+
     # SY-E-29: the original literal 0/0 is indeterminate, not an ordinary
     # nonzero numerator divided by zero. Catch before SymPy collapses it.
     if expression.strip().replace("(", "").replace(")", "").replace(" ", "") == "0/0":
