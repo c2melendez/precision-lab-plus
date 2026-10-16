@@ -1,5 +1,11 @@
 # Current Certification State
 
+## 2026-10-16 — SY-X-04: oráculo exacto y recuperación independiente
+- Lite commit técnico `1a0da3fafae1dcd2d654b527ac85ce45d47a52a2` refuerza `e2e/syntax309-syx04.spec.ts`: la aserción previa `/500\\s*x/` admitía falsos positivos como `1500x`; ahora exige texto completo de `500x` (se permite asterisco explícito), captura `request_id` y exige uno distinto tras `2+3=5`, y comprueba ausencia de errores de página. Conserva 500 sumandos originales y serialización completa. Clasificación: mejora del ORÁCULO/HARNESS, no corrección del producto.
+- El cambio entra al workflow científico ya registrado, pero no se confirmó run ni resultado CI para este SHA. No declarar PASS, no forzar corridas adicionales; para validación de trabajos pendientes consultar el seguimiento GitHub Lite #50. El bloqueo HTTP Plus (>500 caracteres), SY-R-12, H2/SG28 y DIST se mantienen según su evidencia.
+- Siguiente tarea no bloqueada: revisar el oráculo de SY-X-04 Plus y la matriz posterior de Syntax309 sin modificar el contrato de longitud; registrar evidencias verificables por SHA cuando estén disponibles.
+
+
 ## 2026-10-16 — Continuidad: preflight científico Lite
 - Lite publicó `69f8763d53e2bf76869cb789dace412e624e47f1` en `.github/workflows/syntax309-scientific-e2e.yml`: `npx playwright test --list e2e/syntax309-*.spec.ts` precede la instalación de Chromium para detectar specs inválidos antes de E2E. Es prevención de fallos del harness, no prueba matemática aprobada.
 - Falta recuperar por workflow/rama la corrida push y sus jobs; la consulta de runs por commit solo ve PR. SY-R-12 permanece OPEN y SY-X-04 permanece pendiente de evidencia Lite/Plus. No relanzar corridas antiguas ni afirmar PASS.
