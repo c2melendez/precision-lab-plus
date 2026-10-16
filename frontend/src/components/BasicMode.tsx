@@ -425,7 +425,7 @@ export function BasicMode() {
           return;
         }
 
-        const matrixA = (matrixIntent.kind === "multiply" ? matrixIntent.left : matrixIntent.matrix)
+        const matrixA = ((matrixIntent.kind === "multiply" || matrixIntent.kind === "dot") ? matrixIntent.left : matrixIntent.matrix)
           .map((row) => row.map((cell) => latexToBackendSyntax(cell)));
         let result: MathResponse;
 
@@ -441,7 +441,7 @@ export function BasicMode() {
           const matrixB = matrixIntent.right.map((row) => row.map((cell) => latexToBackendSyntax(cell)));
           result = await submitAndRecord(
             "/matrix/operations",
-            { operation: "multiply", matrix_a: matrixA, matrix_b: matrixB },
+            { operation: matrixIntent.kind === "dot" ? "dot" : "multiply", matrix_a: matrixA, matrix_b: matrixB },
             latex,
           );
         }
