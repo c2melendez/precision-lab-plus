@@ -16,7 +16,7 @@ def test_sys11_inline_spanish_substitution_http_and_reentry():
         assert result.success, result
         assert math.isclose(float(result.result_approx), 0.5, rel_tol=0, abs_tol=1e-12)
         assert result.result_text == "1/2", result.result_text
-        assert result.result_latex == r"\\frac{1}{2}", result.result_latex
+        assert result.result_latex == r"\frac{1}{2}", result.result_latex
         replay = client.post("/api/v1/evaluate", json={"expression": result.result_text, "angle_unit": "rad"})
         restored = MathResponse.model_validate(replay.json())
         assert restored.success, restored
