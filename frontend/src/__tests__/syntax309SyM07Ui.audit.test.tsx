@@ -2,7 +2,6 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { BasicMode } from "../components/BasicMode";
-import { SimpleBasicMode } from "../components/SimpleBasicMode";
 import { submitAndRecord } from "../api/submitWithHistory";
 import { useUIStore } from "../store/useUIStore";
 
