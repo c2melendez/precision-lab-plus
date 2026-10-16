@@ -565,7 +565,7 @@ function normalizeLocalizedLatexAliases(input: string): string {
 
 export function latexToBackendSyntax(latex: string): string {
   // SY-R-12: prose is not a valid mathematical expression.
-  if (latex.replaceAll('\\text', '').replaceAll('\\mathrm', '').replaceAll('{', '').replaceAll('}', '').trim().toLowerCase() === 'no existe') {
+  if (latex.replace('\\text', '').replace('\\mathrm', '').replace('{', '').replace('}', '').trim().toLowerCase() === 'no existe') {
     throw new Error('Entrada no matemática: escribe una expresión válida.');
   }
   // SY-R-04: preserve the explicit binding separator before MathLive can
