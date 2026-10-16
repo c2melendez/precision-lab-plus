@@ -373,6 +373,17 @@ def normalize_unicode(text: str) -> str:
     text = text.replace("\u00a0", " ")
     # LaTeX spacing commands are whitespace, never identifiers or operations.
     text = re.sub(r"\\(?:,|;|!|:| )", " ", text)
+    # SY-R-13: bounded scalar LaTeX atoms use the same exact power syntax
+    # as the frontend converter. No evaluation or extra allowed functions.
+    # Numeric fractions also permit an exact rational substitution value.
+    text = re.sub(
+        r"\\frac\s*\{\s*([+-]?\d+)\s*\}\s*\{\s*([+-]?\d+)\s*\}",
+        lambda m: f"(({m.group(1)})/({m.group(2)}))", text,
+    )
+    text = re.sub(
+        r"\\sqrt\s*\[\s*([1-9]\d?)\s*\]\s*\{\s*([A-Za-z]|[+-]?\d+(?:\.\d+)?)\s*\}",
+        lambda m: f"(({m.group(2)})^(1/({m.group(1)})))", text,
+    )
     # Fullwidth decimal digits and arithmetic operators have unambiguous ASCII equivalents.
     text = text.translate(str.maketrans("０１２３４５６７８９＋－", "0123456789+-"))
     # SY-V-23: narrow numeric rectangular conjugate source; SymPy's

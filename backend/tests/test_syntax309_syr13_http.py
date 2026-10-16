@@ -15,6 +15,7 @@ from app.schemas.responses import MathResponse
     ({"expression": r"\sqrt[3]{y}\ \text{con}\ y=64"}, sp.Integer(4)),
     ({"expression": r"\sqrt[3]{x}\ \text{con}\ x=\frac{1}{8}"}, sp.Rational(1, 2)),
     ({"expression": r"\sqrt[3]{x}\ \text{con}\ x=0"}, sp.Integer(0)),
+    ({"expression": r"\sqrt[4]{x}", "substitutions": {"x": "16"}}, sp.Integer(2)),
 ])
 def test_syr13_exact_value_and_result_text_reentry(payload, expected):
     def check(result):
@@ -30,3 +31,17 @@ def test_syr13_exact_value_and_result_text_reentry(payload, expected):
         response = client.post("/api/v1/evaluate", json={"expression": first.result_text})
         assert response.status_code == 200, response.text
         check(MathResponse.model_validate(response.json()))
+
+
+@pytest.mark.parametrize("source", [
+    r"\sqrt[0]{x}\ \text{con}\ x=27",
+    r"\sqrt[3]{}\ \text{con}\ x=27",
+    r"\sqrt[3]{__import__('os')}\ \text{con}\ x=27",
+])
+def test_syr13_rejects_unsupported_or_malformed_indexed_root(source):
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": source})
+        assert response.status_code == 200, response.text
+        result = MathResponse.model_validate(response.json())
+        assert not result.success and result.error_code.value == "PARSE_ERROR", result
+        assert result.error_message, result
