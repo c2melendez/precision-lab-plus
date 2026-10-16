@@ -70,6 +70,11 @@ def _render_evaluate_presentation(result, source_expression=None):
             warnings.append("Resultado LaTeX omitido: excede los 10,000 caracteres (sección 4).")
         try:
             result_text = str(display_expr)
+            # SymPy prints natural logarithms as log(...), while our input
+            # parser reserves log(...) for base 10. Preserve round-trip
+            # semantics explicitly in the plain-text result as in LaTeX.
+            if display_expr.has(sympy.log):
+                result_text = result_text.replace("log(", "ln(")
         except ValueError:
             result_text = "(resultado numérico demasiado grande para mostrarse)"
 
