@@ -1,15 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { latexToBackendSyntax } from "../components/NaturalMathField";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { latexToBackendSyntax, NaturalMathField } from "../components/NaturalMathField";
 
-const inputSrc = readFileSync("src/components/NaturalMathField.tsx", "utf8");
 const keyboardSrc = readFileSync("src/components/NaturalMathKeyboard.tsx", "utf8");
 
 describe("IN625 G1a — contrato estructural del teclado", () => {
   it("EN-TC-24 desactiva autocorrección/capitalización móvil", () => {
-    expect(inputSrc).toContain('autoCapitalize="off"');
-    expect(inputSrc).toContain('autoCorrect="off"');
-    expect(inputSrc).toContain("spellCheck={false}");
+    // Verify rendered policy: mutation instrumentation rewrites source literals.
+    const markup = renderToStaticMarkup(createElement(NaturalMathField, {
+      latex: "", onLatexChange: () => {}, ariaLabel: "Entrada de contrato",
+    }));
+    expect(markup).toMatch(/\bautoCapitalize="off"/i);
+    expect(markup).toMatch(/\bautoCorrect="off"/i);
+    expect(markup).toMatch(/\bspellCheck="false"/i);
   });
 
   it("EN-TC-18 plantillas virtuales x², xʸ, raíz y fracción", () => {

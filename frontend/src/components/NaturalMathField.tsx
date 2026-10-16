@@ -808,8 +808,8 @@ export function NaturalMathField({
 
     el.addEventListener("input", handleInput);
     return () => el.removeEventListener("input", handleInput);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onLatexChange]);
+    // Compare against the current controlled value, including clearing after a result.
+  }, [latex, onLatexChange]);
 
   // Fase Y (spec_rediseno_visual.md sección 11) — restricción dura: el
   // teclado SIEMPRE inicia colapsado, y uno de los 2 mecanismos

@@ -15,6 +15,7 @@ import urllib.parse
 import urllib.request
 
 PROFILES = {
+    "plus-mutation-preflight": {"mutation-frontend-preflight": ["Stryker frontend initial run"]},
     "lite-cumulative": {"cumulative": ["Certification continuity and CI guard regressions", "Typecheck", "Unit and parity regression", "Production build"]},
     "plus-cumulative": {
         "backend": ["Certification continuity and CI guard regressions", "Backend regression"],
