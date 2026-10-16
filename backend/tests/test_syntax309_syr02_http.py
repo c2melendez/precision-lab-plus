@@ -19,9 +19,9 @@ def test_syr02_numeric_value_exact_mathresponse_and_reentry():
         exact = sp.sympify(result.result_text)
         assert sp.simplify(exact - sp.sympify(witness)) == 0 and not exact.has(sp.Float), result
         assert result.result_approx is not None and math.isfinite(result.result_approx), result
-        assert abs(result.result_approx - expected) <= 1e-9 * max(1, abs(expected)), result
+        assert abs(result.result_approx - expected) <= 1e-9 * abs(expected), result
         again = client.post("/api/v1/evaluate", json={"expression": result.result_text, "angle_unit": "rad"})
         assert again.status_code == 200, again.text
         restored = MathResponse.model_validate(again.json())
         assert restored.success and sp.simplify(sp.sympify(restored.result_text) - exact) == 0, restored
-        assert abs(restored.result_approx - expected) <= 1e-9 * max(1, abs(expected)), restored
+        assert abs(restored.result_approx - expected) <= 1e-9 * abs(expected), restored
