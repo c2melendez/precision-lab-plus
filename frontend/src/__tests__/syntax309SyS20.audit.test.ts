@@ -12,8 +12,11 @@ describe("SY-S-20 explicit degrees preserve sine argument", () => {
   expect(actual).toBe("sin(((30)*pi/180))");
   expect((actual.match(/pi/g) ?? []).length).toBe(1);
  });
- it("agrees with native degree superscript serialization", () => {
-  const source = String.raw`\sin\left(30^{\circ}\right)`;
+ it.each([
+  String.raw`\operatorname{sen}\left(30^{\circ}\right)`,
+  String.raw`\operatorname{sen}\left(30^\circ\right)`,
+  String.raw`\operatorname{sen}\left(30\degree\right)`,
+ ])("agrees with native degree serialization %s", source => {
   expect(latexToBackendSyntax(source).replace(/\s/g, "")).toBe("sin(((30)*pi/180))");
  });
 });

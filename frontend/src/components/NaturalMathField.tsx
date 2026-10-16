@@ -714,7 +714,14 @@ export function latexToBackendSyntax(latex: string): string {
     .replace(/\\csch\^\{-1\}/g, "\\mathrm{acsch}")
     .replace(/\\sech\^\{-1\}/g, "\\mathrm{asech}")
     .replace(/\\coth\^\{-1\}/g, "\\mathrm{acoth}");
-  const ascii = convertLatexToAsciiMath(latexWithReciprocalHyperbolicInverses);
+  // SY-S-19/20: MathLive serializes the degree key as ^{\circ} or
+  // ^\circ. Preserve its angular meaning before ASCII conversion, which
+  // otherwise emits the unsupported exponent artifact "^@".
+  const latexWithDegrees = latexWithReciprocalHyperbolicInverses
+    .replace(/\^\{\\circ\}/g, "°")
+    .replace(/\^\\circ/g, "°")
+    .replace(/\\degree\b/g, "°");
+  const ascii = convertLatexToAsciiMath(latexWithDegrees);
   const asciiAggregate = rewriteFiniteAggregateAscii(ascii);
   if (asciiAggregate) return asciiAggregate;
 
