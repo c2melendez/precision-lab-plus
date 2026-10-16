@@ -1,6 +1,7 @@
 name: S19 Mutation Baseline
 
 on:
+  workflow_call:
   pull_request:
     paths:
       - "backend/**"

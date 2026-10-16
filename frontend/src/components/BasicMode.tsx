@@ -575,7 +575,14 @@ export function BasicMode() {
       setValidationError("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.");
       return;
     }
-    const trimmed = compoundBcExpression ? "a/bc" : latexToBackendSyntax(latex);
+    let trimmed: string;
+    try {
+      trimmed = compoundBcExpression ? "a/bc" : latexToBackendSyntax(latex);
+    } catch (error) {
+      // Conversion errors are local validation, before any HTTP request.
+      setValidationError(error instanceof Error ? error.message : "La expresión no es válida.");
+      return;
+    }
     if (!trimmed) {
       setValidationError("La expresión no puede estar vacía.");
       return;
