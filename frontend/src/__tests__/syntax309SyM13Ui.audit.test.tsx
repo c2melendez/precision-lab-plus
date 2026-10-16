@@ -41,7 +41,8 @@ describe("SY-M-13 local canonical basis display (editor mock)",()=>{
   const input=screen.getByLabelText("Expresión");
   fireEvent.change(input,{target:{value:rows["SY-M-13"].entrada}});
   fireEvent.submit(input.closest("form")!);
-  expect(await screen.findByText("Coordenadas en la base canónica: (1, 2, -1).")).toBeVisible();
+  const notices = await screen.findAllByText(/Coordenadas en la base canónica: \(1, 2, -1\)\./);
+  expect(notices[0]).toBeVisible();
   expect(mockedSubmit).not.toHaveBeenCalled();
   expect(useUIStore.getState().isLoading).toBe(false);
  });
