@@ -1,3 +1,7 @@
+## 2026-10-16 — SY-X-04 Plus: ensayo matemático interno independiente del límite HTTP
+- Plus commit `20d739d2644847357a28e52383f3ec134819ac53` agrega `backend/tests/test_syntax309_syx04_service.py`. Envía al servicio matemático los 500 sumandos literales de x (999 caracteres), sin atajo `500*x`, y compara el resultado con `500*x` usando equivalencia simbólica SymPy. Además prueba recuperación independiente con 2+3=5.
+- Objetivo: separar capacidad del parser/motor del bloqueo contractual de HTTP `max_length=500`, sin alterarlo ni falsificar certificación E2E. El ensayo puede encontrar límites de complejidad reales; resultado todavía NO verificado por CI. Si falla, identificar clase de error y no relajar oráculo; ver issue Lite #50 para resultados por SHA. SY-X-04 sigue OPEN; SG28/H2 y DIST sin cambios.
+
 ## 2026-10-16 — SY-X-04 Plus: 500 términos con espacios
 - Test nuevo en commit Plus `a2fbdece01c08e1ce5eae90a6a285c293cae9783`, archivo `frontend/src/components/syntax309-syx04.test.ts`. Verifica conservación de 500 sumandos separados por espacios alrededor de +, sin truncamiento tras conversión.
 - Prueba publicada, resultado CI aún no verificado. El contrato HTTP de Plus continúa limitado a 500 caracteres. Estado SY-X-04 OPEN; seguimiento de corridas en Lite issue #50.
