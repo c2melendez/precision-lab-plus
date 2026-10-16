@@ -564,6 +564,8 @@ function normalizeLocalizedLatexAliases(input: string): string {
 }
 
 export function latexToBackendSyntax(latex: string): string {
+  // SY-X-02: detect layout-only source before trimming its final escaped space.
+  if (!latex.replace(/\\(?:[,;!: ]|qquad\b|quad\b)/g, "").trim()) return "";
   // SY-R-12: prose is not a valid mathematical expression.
   if (latex.replace('\\text', '').replace('\\mathrm', '').replace('{', '').replace('}', '').trim().toLowerCase() === 'no existe') {
     throw new Error('Entrada no matemática: escribe una expresión válida.');
