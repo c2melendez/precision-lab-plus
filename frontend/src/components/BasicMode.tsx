@@ -438,7 +438,12 @@ export function BasicMode() {
           .map((row) => row.map((cell) => latexToBackendSyntax(cell)));
         let result: MathResponse;
 
-        if (matrixIntent.kind === "inverse") {
+        if (matrixIntent.kind === "scale") {
+          const scalar = latexToBackendSyntax(matrixIntent.scalar);
+          const diagonal = matrixA.map((_,r)=>matrixA.map((__,col)=>r===col ? scalar : "0"));
+          result = await submitAndRecord("/matrix/operations",
+            {operation:"multiply",matrix_a:diagonal,matrix_b:matrixA},latex);
+        } else if (matrixIntent.kind === "inverse") {
           result = await submitAndRecord("/matrix/inverse", { matrix: matrixA }, latex);
         } else if (matrixIntent.kind === "transpose") {
           result = await submitAndRecord("/matrix/transpose", { matrix: matrixA }, latex);
