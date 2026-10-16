@@ -1,3 +1,7 @@
+## 2026-10-16 — SY-X-04 Plus: 500 términos con espacios
+- Test nuevo en commit Plus `a2fbdece01c08e1ce5eae90a6a285c293cae9783`, archivo `frontend/src/components/syntax309-syx04.test.ts`. Verifica conservación de 500 sumandos separados por espacios alrededor de +, sin truncamiento tras conversión.
+- Prueba publicada, resultado CI aún no verificado. El contrato HTTP de Plus continúa limitado a 500 caracteres. Estado SY-X-04 OPEN; seguimiento de corridas en Lite issue #50.
+
 ## 2026-10-16 — SY-X-04: propuesta de resolución contractual, no aprobada
 - Documento de decisión bilateral `qa/certification/SY_X_04_LENGTH_DECISION.md` (Plus `dc11c29aad94fba662c1a101ef22de841eb5b4da`; Lite `cb7d0ce4af9d7ab19b8f07a85d3ebbbce2540748`). Evalúa conservar max_length=500 con capability parcial, ampliar expresamente a >=999 caracteres tras autorización y pruebas de límites de recursos, o introducir API versionada. No se modificó contrato ni motor.
 - Preferencia de diseño sujeta a aprobación: ampliar acotadamente EvaluateRequest a un valor documentado (p.ej. 1024), solo tras analizar parser, límites AST, SG28, seguridad, clientes y gates de regresión, con entrada literal intacta; mientras tanto no declarar SY-X-04 Plus HTTP PASS. Corridas pendientes bajo issue Lite #50.
