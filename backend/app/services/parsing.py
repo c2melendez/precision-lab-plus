@@ -401,7 +401,7 @@ def normalize_unicode(text: str) -> str:
     # Keep both bars and optional left/right sizing paired; accept no arbitrary content, and
     # delegate the resulting abs() to the existing safe expression parser.
     text = re.sub(
-        r"(?:\\left\\lvert\s*([A-Za-z])\s*\\right\\rvert|\\lvert\s*([A-Za-z])\s*\\rvert)",
+        r"(?:\\left\\lvert\s*([A-Za-z])\s*\\right\\rvert|(?<!\\left)\\lvert\s*([A-Za-z])\s*\\rvert)",
         lambda m: f"abs({m.group(1) or m.group(2)})", text,
     )
     # Syntax309 SY-V-02: a single-letter variable with a numeric LaTeX

@@ -107,6 +107,7 @@ def _apply_degree_conversion(expr: sympy.Expr) -> sympy.Expr:
 
 def _plain_inline_math(source: str) -> str:
     """Bounded arithmetic/identifier source; braces group powers, never code."""
+    parsing.validate_g3_structure(source)
     text = parsing.normalize_unicode(source).replace("\\left", "").replace("\\right", "").strip()
     if not re.fullmatch(r"[A-Za-z0-9_+\-*/^().,\s{}]+", text):
         raise parsing.ParseSecurityError("Sintaxis no admitida en la sustitución inline.")
