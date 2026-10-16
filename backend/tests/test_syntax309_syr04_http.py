@@ -16,6 +16,8 @@ OFFICIAL = r"e^{-x^{2}}\ \text{con}\ x=1"
     ({"expression": "e^{-x^{2}} con x=2"}, sp.exp(-4)),
     ({"expression": "e^{-y^{2}} con y=-1"}, sp.exp(-1)),
     ({"expression": "2^{-x^{2}} con x=1"}, sp.Rational(1, 2)),
+    ({"expression": "(e^(-x^2)) con x=(1)"}, sp.exp(-1)),
+    ({"expression": "(2^(-y^2)) con y=(-2)"}, sp.Rational(1, 16)),
 ])
 def test_syr04_source_exact_value_and_reentry(payload, exact):
     with TestClient(app) as client:
@@ -45,6 +47,7 @@ def test_syr04_rejects_non_numeric_non_finite_or_conflicting_bindings(payload):
         response = client.post("/api/v1/evaluate", json=payload)
         result = MathResponse.model_validate(response.json())
         assert not result.success, result
+        assert result.error_code.value == "VALIDATION_ERROR" and result.error_message, result
 
 
 def test_syr04_complete_mathresponse_parity_isolation_off_on(monkeypatch):
