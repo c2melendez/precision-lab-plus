@@ -12,6 +12,9 @@ function splitMatrixBody(body: string): string[][] {
   const rows = body.split(/\\\\/).map((r) => r.trim()).filter(Boolean);
   if (rows.length === 0) throw new Error("La matriz no puede estar vacía.");
   const matrix = rows.map((row) => row.split("&").map((c) => c.trim()));
+  if (matrix.every(row => row.every(cell => !cell.trim() || /^\\placeholder(?:\{[^{}]*\})?$/.test(cell.trim())))) {
+    throw new Error("La matriz no puede estar vacía.");
+  }
   // A blank cell inserted by the editor is missing input, not numeric zero.
   if (matrix.some(row => row.some(cell => !cell.trim() || /^\\placeholder(?:\{[^{}]*\})?$/.test(cell.trim())))) {
     throw new Error("Todas las filas de la matriz deben tener la misma longitud; completa las celdas vacías.");

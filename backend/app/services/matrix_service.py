@@ -117,7 +117,9 @@ def _parse_matrix_cell(text: str) -> sympy.Expr:
 
 
 def parse_matrix(cells: List[List[str]]) -> sympy.Matrix:
-    if not cells or not cells[0] or any(len(row) != len(cells[0]) for row in cells):
+    if not cells or all(not row for row in cells):
+        raise parsing.ParseSecurityError("La matriz no puede estar vacía.")
+    if not cells[0] or any(len(row) != len(cells[0]) for row in cells):
         raise parsing.ParseSecurityError("Todas las filas de la matriz deben tener la misma longitud y al menos una celda.")
     rows = [[_parse_matrix_cell(cell) for cell in row] for row in cells]
     return sympy.Matrix(rows)
