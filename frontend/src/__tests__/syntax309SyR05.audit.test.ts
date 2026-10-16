@@ -8,9 +8,10 @@ describe("SY-R-05 original arsinh alias", () => {
   expect(row.esperado).toBe("0.881373587");
   const actual = latexToBackendSyntax(row.entrada);
   console.log("SY-R-05 converted", actual);
-  expect(actual.replace(/\s/g, "")).toBe("asinh(1)");
+  expect(actual.trim()).toMatch(/^asinh\s*\(\s*1\s*\)$/);
  });
  it.each(["-1", "2"])("preserves another argument %s", value => {
-  expect(latexToBackendSyntax(String.raw`\operatorname{arsinh}\left(` + value + String.raw`\right)`).replace(/\s/g, "")).toBe("asinh(" + value + ")");
+  const actual = latexToBackendSyntax(String.raw`\operatorname{arsinh}\left(` + value + String.raw`\right)`);
+  expect(actual.trim()).toMatch(new RegExp("^asinh\\s*\\(\\s*" + value + "\\s*\\)$"));
  });
 });

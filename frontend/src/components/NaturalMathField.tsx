@@ -279,6 +279,7 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "log",
   "Log",
   "csch",
+  "asinh",
   "acsch",
   "asech",
   "acoth",
