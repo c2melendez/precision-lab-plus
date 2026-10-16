@@ -398,11 +398,11 @@ def normalize_unicode(text: str) -> str:
         lambda m: f"abs({m.group(1)}{m.group(2)}{m.group(3)}*i)", text,
     )
     # SY-Q-10: bounded one-letter absolute-value expression from MathLive.
-    # Keep both bars paired, accept no arbitrary content between them, and
+    # Keep both bars and optional left/right sizing paired; accept no arbitrary content, and
     # delegate the resulting abs() to the existing safe expression parser.
     text = re.sub(
-        r"\\lvert\s*([A-Za-z])\s*\\rvert",
-        lambda m: f"abs({m.group(1)})", text,
+        r"(?:\\left\\lvert\s*([A-Za-z])\s*\\right\\rvert|\\lvert\s*([A-Za-z])\s*\\rvert)",
+        lambda m: f"abs({m.group(1) or m.group(2)})", text,
     )
     # Syntax309 SY-V-02: a single-letter variable with a numeric LaTeX
     # subscript is one identifier. Preserve index distinction and allow the

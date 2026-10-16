@@ -32,3 +32,16 @@ def test_syr14_absolute_value_sign_and_reentry(payload, expected):
         response = client.post("/api/v1/evaluate", json={"expression": first.result_text})
         assert response.status_code == 200, response.text
         check(MathResponse.model_validate(response.json()))
+
+
+@pytest.mark.parametrize("source", [
+    r"\left\lvert x\rvert\ \text{con}\ x=-4",
+    r"\lvert x\right\rvert\ \text{con}\ x=-4",
+])
+def test_syr14_rejects_unpaired_sizing_delimiters(source):
+    with TestClient(app) as client:
+        response = client.post("/api/v1/evaluate", json={"expression": source})
+        assert response.status_code == 200, response.text
+        result = MathResponse.model_validate(response.json())
+        assert not result.success and result.error_code.value == "PARSE_ERROR", result
+        assert result.error_message, result
