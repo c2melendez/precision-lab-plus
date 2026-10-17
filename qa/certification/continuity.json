@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 34,
+  "revision": 35,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "298a3c48a9cc140142852242aa88a481d4dcc311",
   "baseline_case": "SY-X-15",
-  "baseline_status": "WAIT_CI",
+  "baseline_status": "VERIFIED_WITH_BLOCKERS",
   "global_certification": "OPEN",
   "prose_only_paths": [
     "README.md",
@@ -79,7 +79,7 @@
       "inputs": [
         "*"
       ],
-      "acceptance_revision": "2026-10-17-native-through-X14-limit-v1"
+      "acceptance_revision": "2026-10-17-native-through-X15-inert-text-v1"
     },
     "mutation_frontend_preflight": {
       "workflow": ".github/workflows/s19-plus-frontend-preflight.yml",
@@ -91,9 +91,9 @@
   },
   "evidence_by_channel": {
     "converter": {
-      "run_id": 39014327670,
-      "job_id": 117343176638,
-      "technical_sha": "a66dac769c3212cb8e3dfe9951030eec0bd4711d",
+      "run_id": 39015624925,
+      "job_id": 117347040368,
+      "technical_sha": "298a3c48a9cc140142852242aa88a481d4dcc311",
       "status": "PASS_SCOPED",
       "counts": {
         "pass": 1005,
@@ -103,22 +103,22 @@
       "evidence_executed": true
     },
     "http": {
-      "run_id": 39014327670,
-      "job_id": 117343176826,
-      "technical_sha": "a66dac769c3212cb8e3dfe9951030eec0bd4711d",
+      "run_id": 39015624925,
+      "job_id": 117347040283,
+      "technical_sha": "298a3c48a9cc140142852242aa88a481d4dcc311",
       "status": "PASS_SCOPED",
       "counts": {
-        "pass": 1479,
+        "pass": 1480,
         "xfail": 3
       },
       "logs_reviewed": true,
       "evidence_executed": true,
-      "coverage": 88.07
+      "coverage": 88.11
     },
     "native_ui": {
-      "run_id": 39014327763,
-      "job_id": 117343177054,
-      "technical_sha": "a66dac769c3212cb8e3dfe9951030eec0bd4711d",
+      "run_id": 39015624985,
+      "job_id": 117347040663,
+      "technical_sha": "298a3c48a9cc140142852242aa88a481d4dcc311",
       "status": "PASS_SCOPED",
       "cases": [
         "SY-R-13",
@@ -136,10 +136,11 @@
         "SY-X-10",
         "SY-X-11",
         "SY-X-12",
-        "SY-X-14"
+        "SY-X-14",
+        "SY-X-15"
       ],
       "counts": {
-        "pass": 48,
+        "pass": 54,
         "skip": 0
       },
       "profiles": [
@@ -149,15 +150,21 @@
       ],
       "logs_reviewed": true,
       "evidence_executed": true,
-      "acceptance_revision": "2026-10-17-native-through-X14-limit-v1",
+      "acceptance_revision": "2026-10-17-native-through-X15-inert-text-v1",
       "case_scopes": {
-        "SY-X-14": "Readable AST-limit rejection and real recovery only; mathematical oracle remains BLOCKED"
+        "SY-X-14": "Readable AST-limit rejection and real recovery only; mathematical oracle remains BLOCKED",
+        "SY-X-15": "Original script-in-text inert/error; zero recorded payload-script nodes/dialogs/pageerrors; actual recovery/reentry. Separate positive detector control in closed ShadowRoot, not a general XSS audit."
+      },
+      "probe_controls": {
+        "case": "SY-X-15",
+        "tests": 3,
+        "scope": "Harness must detect intentionally inserted application/json script node without execution, one per profile; included in test totals"
       }
     },
     "frontend_unit": {
-      "run_id": 39014327670,
-      "job_id": 117343176638,
-      "technical_sha": "a66dac769c3212cb8e3dfe9951030eec0bd4711d",
+      "run_id": 39015624925,
+      "job_id": 117347040368,
+      "technical_sha": "298a3c48a9cc140142852242aa88a481d4dcc311",
       "status": "PASS_SCOPED",
       "counts": {
         "pass": 1005,
@@ -167,17 +174,17 @@
       "evidence_executed": true
     },
     "backend_http": {
-      "run_id": 39014327670,
-      "job_id": 117343176826,
-      "technical_sha": "a66dac769c3212cb8e3dfe9951030eec0bd4711d",
+      "run_id": 39015624925,
+      "job_id": 117347040283,
+      "technical_sha": "298a3c48a9cc140142852242aa88a481d4dcc311",
       "status": "PASS_SCOPED",
       "counts": {
-        "pass": 1479,
+        "pass": 1480,
         "xfail": 3
       },
       "logs_reviewed": true,
       "evidence_executed": true,
-      "coverage": 88.07
+      "coverage": 88.11
     },
     "mutation_frontend_initial_run": {
       "run_id": 38992878879,
@@ -189,9 +196,9 @@
       "mutation_score": null
     },
     "h1d": {
-      "run_id": 39014327685,
-      "job_id": 117343176497,
-      "technical_sha": "a66dac769c3212cb8e3dfe9951030eec0bd4711d",
+      "run_id": 39015624876,
+      "job_id": 117347040211,
+      "technical_sha": "298a3c48a9cc140142852242aa88a481d4dcc311",
       "status": "PASS_SCOPED",
       "counts": {
         "pass": 38
@@ -241,20 +248,20 @@
     }
   },
   "next_action": {
-    "id": "SY-X-15-BILATERAL",
-    "status": "WAIT_CI",
+    "id": "SY-X-16-BILATERAL",
+    "status": "READY",
     "repository": "c2melendez/precision-lab-plus",
     "paired_repository": "c2melendez/precision-lab-lite",
     "files": [
       "qa/certification/syntax309_cases.jsonl"
     ],
-    "action": "Inspect existing exact-SHA X15 native/cumulative/H1d runs; no duplicate dispatch. Native product case must show inert text or error, no dialog/pageerror/payload-script node, real finite recovery. Positive detector control is separate harness evidence, not payload execution in product.",
+    "action": "Verify original LaTeX input command targeting /etc/passwd is ignored/rejected without file reading. Inspect parser/render paths first; detect attempted access with safe instrumentation rather than reading the real host file. Confirm original MathLive ingestion, applicable Worker/HTTP behavior, finite recovery/reentry and3Chromium profiles. Inspect existing scoped runs and do not repeat blocked campaigns.",
     "exit_criteria": [
-      "Pin original text/script source and oracle unchanged; never execute or insert it as active HTML",
-      "Inspect actual output/error/render paths; original source ingestion must remain identifiable",
-      "Prove no payload dialog/script execution or active HTML insertion; text or explicit error are acceptable outcomes",
-      "Actual Worker/HTTP and native desktop/tablet/mobile, finite recovery/reentry and distinct request IDs",
-      "Review exact-SHA scoped CI and update bilateral index; no duplicate dispatch, unrelated dependency/mutation campaign or X14 retry"
+      "Pin exact original source and no-file-read oracle unchanged",
+      "No host-file contents read or displayed; detect any attempted access using controlled spies/synthetic sentinels without exposing actual files",
+      "Clear ignored-command/rejection behavior through actual parser/Worker/HTTP and relevant rendering paths",
+      "Native desktop/tablet/mobile ingestion and finite recovery/reentry, new request IDs, no unexpected network/dialog side effects",
+      "Review exact-SHA logs and synchronize bilateral ledger; no redundant dispatch or X14 retry before preconditions change"
     ]
   },
   "blockers": [
@@ -332,36 +339,36 @@
   ],
   "work_in_progress": {
     "id": "SY-X-15-BILATERAL",
-    "status": "WAIT_CI",
+    "status": "VERIFIED_SCOPED",
     "technical_sha": "298a3c48a9cc140142852242aa88a481d4dcc311",
     "paired_technical_sha": "102bc45292f449854dc30bbdedaaac88d1cb64cc",
     "runs": [
       {
         "id": 39015624876,
         "workflow": ".github/workflows/in625-h1d-reentry.yml",
-        "status": "in_progress",
-        "conclusion": null,
+        "status": "completed",
+        "conclusion": "success",
         "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39015624876",
-        "logs_reviewed": false,
-        "evidence_executed": false
+        "logs_reviewed": true,
+        "evidence_executed": true
       },
       {
         "id": 39015624925,
         "workflow": ".github/workflows/in625-cumulative-certification.yml",
-        "status": "in_progress",
-        "conclusion": null,
+        "status": "completed",
+        "conclusion": "success",
         "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39015624925",
-        "logs_reviewed": false,
-        "evidence_executed": false
+        "logs_reviewed": true,
+        "evidence_executed": true
       },
       {
         "id": 39015624985,
         "workflow": ".github/workflows/in625-syntax-native.yml",
-        "status": "in_progress",
-        "conclusion": null,
+        "status": "completed",
+        "conclusion": "success",
         "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39015624985",
-        "logs_reviewed": false,
-        "evidence_executed": false
+        "logs_reviewed": true,
+        "evidence_executed": true
       }
     ]
   },
@@ -635,11 +642,32 @@
       "limitations": "Original-domain metadata and visible restriction verified in Lite. Reentering x alone starts a new expression and does not prove restriction metadata persistence. Plus mathematical50-layer oracle is not certified by rejection tests."
     },
     "SY-X-15": {
-      "status": "WAIT_CI",
+      "status": "PASS_SCOPED",
       "original_source": "\\text{<script>alert(1)</script>}",
       "oracle": "inert text or clear error; no script execution or active HTML insertion",
       "local_evidence": "Lite parser and actual Worker handler reject; Plus HTTP rejects as JSON error, no result; finite recovery/reentry pass",
-      "native_scope": "Document and MathLive shadow roots observed, real dialogs recorded/dismissed then asserted absent. Separate positive control inserts application/json script in closed ShadowRoot and requires detection without execution."
+      "native_scope": "Document and MathLive shadow roots observed, real dialogs recorded/dismissed then asserted absent. Separate positive control inserts application/json script in closed ShadowRoot and requires detection without execution.",
+      "technical_sha": "298a3c48a9cc140142852242aa88a481d4dcc311",
+      "paired_technical_sha": "102bc45292f449854dc30bbdedaaac88d1cb64cc",
+      "native_run": 39015624985,
+      "cumulative_run": 39015624925,
+      "h1d_run": 39015624876,
+      "profiles": [
+        "desktop-chromium",
+        "tablet-chromium",
+        "mobile-chromium"
+      ],
+      "native_assertions": {
+        "original_payload_retained_in_MathLive": true,
+        "complete_inert_text_or_clear_error": true,
+        "payload_script_nodes": 0,
+        "dialogs": 0,
+        "pageerrors": 0,
+        "document_and_shadow_roots_observed": true,
+        "positive_detector_control_pass": true,
+        "native_recovery_distinct_success_ids": 2
+      },
+      "limitations": "One canonical fixture and tested UI/error/result/recovery paths only; no universal XSS audit or all keys/OS/engines/Reuse-button claim. Raw HTTP/Worker rejection is separate from native local rejection; detector control is not payload execution in product."
     }
   },
   "verification_proofs": {
@@ -682,6 +710,16 @@
       "logs_reviewed": true,
       "technical_sha": "a66dac769c3212cb8e3dfe9951030eec0bd4711d",
       "new_mutation_campaigns": 0
+    },
+    "x15_scope": {
+      "canonical_fixture_preserved": true,
+      "native_profiles": 3,
+      "detector_positive_controls": 3,
+      "payload_nodes_dialogs_pageerrors_zero": true,
+      "logs_reviewed": true,
+      "technical_sha": "298a3c48a9cc140142852242aa88a481d4dcc311",
+      "new_dependency_mutation_campaigns": 0,
+      "product_engine_renderer_changes": 0
     }
   },
   "historical_mutation_reference": {
