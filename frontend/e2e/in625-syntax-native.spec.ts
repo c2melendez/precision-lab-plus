@@ -365,3 +365,63 @@ test("SY-X-11 native astronomical nested power rejects before expansion and reco
     contentType:"application/json"
   });
 });
+
+test("SY-X-12 native non-elementary integral notice, finite integral recovery and reentry", async ({page}, testInfo) => {
+  test.setTimeout(60_000);
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  await expect(field).toBeVisible();
+  const source = fixture("SY-X-12");
+  expect(source).toBe(String.raw`\int\sin\left(x^{x}\right)dx`);
+  await enter(field, source);
+  const pending = page.waitForResponse(response =>
+    response.url().endsWith("/api/v1/integral") && response.request().method() === "POST");
+  await page.getByRole("button", {name:"Evaluar", exact:true}).click();
+  const response = await pending;
+  expect(response.status()).toBe(200);
+  const payload = response.request().postDataJSON() as {expression: string; variable: string; lower_bound?: string; upper_bound?: string};
+  expect(payload.variable).toBe("x");
+  expect(payload.lower_bound).toBeUndefined();
+  expect(payload.upper_bound).toBeUndefined();
+  const integrand = payload.expression.replace(/\s/g, "");
+  expect(integrand).toMatch(/sin/i);
+  expect(integrand).not.toMatch(/integral/i);
+  const rejected = await response.json();
+  expect(rejected.success).toBe(false);
+  expect(rejected.error_code).toBe("UNSUPPORTED_OPERATION");
+  expect(rejected.result_text).toBeNull();
+  expect(rejected.result_latex).toBeNull();
+  expect(String(rejected.error_message)).toContain("Sin forma elemental");
+  const alert = page.getByRole("alert").filter({hasText:"UNSUPPORTED_OPERATION"});
+  await expect(alert).toContainText("Sin forma elemental");
+  await expect(page.locator(".a11y-scale-result-lg")).toHaveCount(0);
+
+  await enter(field, String.raw`\int x\,dx`);
+  const finitePending = page.waitForResponse(http =>
+    http.url().endsWith("/api/v1/integral") && http.request().method() === "POST");
+  await page.getByRole("button", {name:"Evaluar", exact:true}).click();
+  const finiteResponse = await finitePending;
+  expect(finiteResponse.status()).toBe(200);
+  expect(String(finiteResponse.request().postDataJSON().expression).replace(/\s/g, "")).toBe("x");
+  const finite = await finiteResponse.json();
+  expect(finite.success).toBe(true);
+  expect(String(finite.result_text)).toMatch(/x\*\*2\/2/);
+  expect(String(finite.result_text)).toContain("+ C");
+  expect(String(finite.result_text)).not.toMatch(/Integral/);
+  expect(finite.request_id).toBeTruthy();
+  expect(finite.request_id).not.toBe(rejected.request_id);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+
+  const recovered = await evaluate(page, field, "2+3", 5);
+  const reentered = await evaluate(page, field, recovered.reentry, 5);
+  expect(new Set([rejected.request_id, finite.request_id, recovered.requestId, reentered.requestId]).size).toBe(4);
+  expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-12-native-http-evidence", {
+    body: JSON.stringify({
+      source, project: testInfo.project.name, integrand, rejected, finite, recovered, reentered, errors,
+    }, null, 2),
+    contentType: "application/json",
+  });
+});
