@@ -6,6 +6,7 @@ on:
     paths:
       - 'frontend/src/**'
       - 'frontend/e2e/in625-syntax-native.spec.ts'
+      - 'frontend/e2e/scriptInertProbe.ts'
       - 'frontend/package*.json'
       - 'frontend/playwright.config.ts'
       - 'backend/app/**'
@@ -17,6 +18,7 @@ on:
     paths:
       - 'frontend/src/**'
       - 'frontend/e2e/in625-syntax-native.spec.ts'
+      - 'frontend/e2e/scriptInertProbe.ts'
       - 'frontend/package*.json'
       - 'frontend/playwright.config.ts'
       - 'backend/app/**'
