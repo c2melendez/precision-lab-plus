@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 13,
+  "revision": 14,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "9e054de4e68621cf06c2a72236e585e6c9a5387c",
   "baseline_case": "SY-X-05",
-  "baseline_status": "WAIT_CI",
+  "baseline_status": "VERIFIED_WITH_BLOCKERS",
   "global_certification": "OPEN",
   "prose_only_paths": [
     "README.md",
@@ -106,9 +106,9 @@
       }
     },
     "native_ui": {
-      "run_id": 38989356810,
-      "job_id": 117268022611,
-      "technical_sha": "f4b4f68203d8154ae4de9d5ca275589707cad654",
+      "run_id": 38990031387,
+      "job_id": 117270150526,
+      "technical_sha": "9e054de4e68621cf06c2a72236e585e6c9a5387c",
       "status": "PASS_SCOPED",
       "cases": [
         "SY-X-01",
@@ -116,10 +116,11 @@
         "SY-X-03",
         "SY-R-12",
         "SY-R-13",
-        "SY-R-14"
+        "SY-R-14",
+        "SY-X-05"
       ],
       "counts": {
-        "pass": 18,
+        "pass": 21,
         "skip": 0
       },
       "profiles": [
@@ -129,30 +130,30 @@
       ],
       "logs_reviewed": true,
       "evidence_executed": true,
-      "acceptance_revision": "2026-10-17-native-X01-X03-R12-R14-v1"
+      "acceptance_revision": "2026-10-17-native-X01-X03-R12-R14-X05-v1"
     },
     "frontend_unit": {
-      "run_id": 38989356854,
-      "job_id": 117268023304,
-      "technical_sha": "f4b4f68203d8154ae4de9d5ca275589707cad654",
+      "run_id": 38990031487,
+      "job_id": 117270151027,
+      "technical_sha": "9e054de4e68621cf06c2a72236e585e6c9a5387c",
       "status": "PASS_SCOPED",
       "counts": {
-        "pass": 992,
+        "pass": 996,
         "todo": 28
       },
       "logs_reviewed": true,
       "evidence_executed": true
     },
     "backend_http": {
-      "run_id": 38989356854,
-      "job_id": 117268023103,
-      "technical_sha": "f4b4f68203d8154ae4de9d5ca275589707cad654",
+      "run_id": 38990031487,
+      "job_id": 117270151113,
+      "technical_sha": "9e054de4e68621cf06c2a72236e585e6c9a5387c",
       "status": "PASS_SCOPED",
       "counts": {
-        "pass": 1455,
+        "pass": 1459,
         "xfail": 2
       },
-      "coverage": 87.94,
+      "coverage": 87.98,
       "logs_reviewed": true,
       "evidence_executed": true
     },
@@ -166,9 +167,9 @@
       "mutation_score": null
     },
     "h1d": {
-      "run_id": 38989356927,
-      "job_id": 117268023480,
-      "technical_sha": "f4b4f68203d8154ae4de9d5ca275589707cad654",
+      "run_id": 38990031422,
+      "job_id": 117270150663,
+      "technical_sha": "9e054de4e68621cf06c2a72236e585e6c9a5387c",
       "status": "PASS_SCOPED",
       "counts": {
         "pass": 38
@@ -189,9 +190,20 @@
     }
   },
   "next_action": {
-    "id": "SY-X-05-BILATERAL",
-    "status": "WAIT",
-    "action": "Inspect recorded Lite and Plus automatic runs; do not redispatch. Verify native depth30 ingestion, HTTP/Worker evidence and pertinent cumulative/H1d logs."
+    "id": "SY-X-06-BILATERAL",
+    "status": "READY",
+    "repository": "c2melendez/precision-lab-plus",
+    "paired_repository": "c2melendez/precision-lab-lite",
+    "files": [
+      "qa/certification/syntax309_cases.jsonl"
+    ],
+    "action": "Cover canonical SY-X-06 descriptive10000-character input in both products. Inspect declared length/security budgets and existing evidence first; document deterministic exact-length expansion and real ingestion. Accept processing without blocking OR explicit readable length rejection per original oracle; preserve recovery/reentry and do not loosen limits to manufacture PASS.",
+    "exit_criteria": [
+      "Pin original fixture/oracle; document actual10000-character expanded source and ingestion boundary, with no shortened stand-in",
+      "Bounded responsive UI with real execution or explicit readable length rejection; verify recovery and reentry through actual applicable path",
+      "Distinguish local ingestion/converter validation, Worker and rawHTTP behavior; no backend evidence invented for local rejection",
+      "Focused diagnosis then pertinent CI, logs reviewed; bilateral ledger and one next task updated; do not repeat unchanged X04/S25/SG28 blockers"
+    ]
   },
   "blockers": [
     {
@@ -238,30 +250,36 @@
   ],
   "work_in_progress": {
     "id": "SY-X-05-BILATERAL",
-    "status": "WAIT_CI",
+    "status": "VERIFIED_SCOPED",
     "technical_sha": "9e054de4e68621cf06c2a72236e585e6c9a5387c",
     "paired_technical_sha": "cdcaefb8d317e2303b4b89da92afb7a7a994f698",
     "runs": [
       {
+        "id": 38990031487,
+        "workflow": ".github/workflows/in625-cumulative-certification.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38990031487",
+        "logs_reviewed": true,
+        "evidence_executed": true
+      },
+      {
         "id": 38990031422,
         "workflow": ".github/workflows/in625-h1d-reentry.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38990031422"
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38990031422",
+        "logs_reviewed": true,
+        "evidence_executed": true
       },
       {
         "id": 38990031387,
         "workflow": ".github/workflows/in625-syntax-native.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38990031387"
-      },
-      {
-        "id": 38990031487,
-        "workflow": ".github/workflows/in625-cumulative-certification.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38990031487"
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38990031387",
+        "logs_reviewed": true,
+        "evidence_executed": true
       }
     ]
   },
@@ -328,6 +346,21 @@
         "2+3 recovery"
       ],
       "limitations": "MathLive setValue/input; typed scalar declaration resolves to abs(-4) before HTTP; not every key/OS or Reuse button"
+    },
+    "SY-X-05": {
+      "status": "PASS_SCOPED",
+      "expanded_grouping_depth": 30,
+      "expanded_source_length": 61,
+      "official_expected": "1",
+      "lite_native_run": 38990035597,
+      "plus_native_run": 38990031387,
+      "controls": [
+        "depth30 around7 =>7",
+        "depth30 around2+3 =>5",
+        "output reentry",
+        "2+3 recovery"
+      ],
+      "limitations": "MathLive assignment/input; native Chromium3profiles only; grouping depth is not AST depth"
     }
   },
   "verification_proofs": {
