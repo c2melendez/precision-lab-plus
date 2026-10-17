@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 44,
+  "revision": 45,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "4ee6a9db00dbd49790f661715ca53d5ed3995071",
-  "baseline_case": "SY-X-19",
+  "technical_baseline_sha": "102c5beddefe61adb09e255cf647dc9dd4c9aec8",
+  "baseline_case": "SY-X-20",
   "baseline_status": "VERIFIED_WITH_BLOCKERS",
   "global_certification": "OPEN",
   "prose_only_paths": [
@@ -264,20 +264,19 @@
     }
   },
   "next_action": {
-    "id": "SY-X-20-BILATERAL",
-    "status": "READY",
-    "repository": "c2melendez/precision-lab-plus",
-    "paired_repository": "c2melendez/precision-lab-lite",
+    "id": "SY-X-21-BILATERAL",
+    "status": "IN_PROGRESS",
+    "repository": "c2melendez/precision-lab-lite",
+    "paired_repository": "c2melendez/precision-lab-plus",
     "files": [
       "qa/certification/syntax309_cases.jsonl"
     ],
-    "action": "Verify exact original 😀+1 fixture gives a clear invalid-character error, preserving Unicode codepoint/source through MathLive and applicable parser/Worker/HTTP paths. Require visible rejection without false result and finite real recovery/reentry with distinct IDs on3Chromium profiles. Distinguish programmatic insertion from physical keyboard/IME/OS coverage; reuse reviewed equivalent evidence, preserve blockers and do not repeat S19/S25 campaigns without changed preconditions.",
+    "action": "Complete exact original U+200B zero-width source native MathLive ingestion, actual parse/Worker/HTTP oracle (exact 3 or clear error), no false result, and real recovery with distinct IDs on desktop/tablet/mobile Chromium. Review exact technical SHAs and runs; synchronize bilateral logs and advance only once accepted.",
     "exit_criteria": [
-      "Original source and invalid-character oracle unchanged, Unicode codepoint pinned",
-      "Applicable raw parser/Worker/HTTP rejection, no false mathematical result, recovery/reentry and distinct IDs",
-      "MathLive source ingestion and clear native rejection on desktop/tablet/mobile Chromium; document channel differences honestly",
-      "Review exact-SHA jobs/logs and synchronize bilateral state; TODO/XFAIL/SKIP not PASS",
-      "No duplicate campaigns or unchanged-blocker retries; global certification remains OPEN"
+      "Preserve exact U+200B original fixture and official 3-or-error oracle",
+      "Document parser/Worker/HTTP output under real tests, preserving honest channel differences",
+      "Native desktop/tablet/mobile input and recovery with finite distinct real IDs",
+      "Check exact-SHA runs and logs; TODO/XFAIL not PASS; global certification OPEN"
     ]
   },
   "blockers": [
@@ -386,7 +385,22 @@
         "logs_reviewed": true,
         "evidence_executed": true
       }
-    ]
+    ],
+    "syx20_checkpoint": {
+      "status": "VERIFIED_BILATERAL",
+      "technical_sha": "102c5beddefe61adb09e255cf647dc9dd4c9aec8",
+      "cumulative_run_id": 39060228785,
+      "h1d_run_id": 39060228822,
+      "native_run_id": 39054070141,
+      "evidence": "Plus backend 1493 PASS/3 XFAIL on native SHA c0cc849; E2E native 72 PASS on c0cc849; cumulative/H1d on SY-X-21 SHA 102c5be PASS."
+    },
+    "syx21_checkpoint": {
+      "status": "IN_PROGRESS",
+      "fixture": "1\\u200b+\\u200b2",
+      "cumulative_run_id": 39060228785,
+      "h1d_run_id": 39060228822,
+      "notes": "Parser regression checked by cumulative; native three-profile and Worker-specific coverage remain pending."
+    }
   },
   "cases": {
     "SY-X-03": {
