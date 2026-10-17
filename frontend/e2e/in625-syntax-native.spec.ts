@@ -723,3 +723,44 @@ test("SY-X-21 native zero-width source has exact value or clear error and recove
     contentType:"application/json"
   });
 });
+
+
+test("SY-X-22 native 10000-digit source rejects clearly or stays exact, then recovers",async({page},testInfo)=>{
+  test.setTimeout(120000);
+  const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
+  await page.goto("/");
+  const field=page.locator("math-field").first();await expect(field).toBeVisible();
+  const source="9".repeat(10000)+"+1";
+  expect(source.length).toBe(10002);
+  await field.evaluate((node,value)=>{
+    (node as HTMLElement & {setValue(v:string):void}).setValue(value);
+    node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));
+  },source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const alert=page.getByRole("alert").first();
+  const result=page.locator(".a11y-scale-result-lg").first();
+  await expect.poll(async()=>{
+    if(await alert.isVisible().catch(()=>false))return "error";
+    if(await result.isVisible().catch(()=>false))return "value";
+    return "pending";
+  },{timeout:30000}).not.toBe("pending");
+  const rejected=await alert.isVisible().catch(()=>false);
+  const notice=rejected?(await alert.innerText()).trim():"";
+  if(rejected){
+    expect(notice).toMatch(/longitud|tamañ|l[ií]mit|demasiad|car[aá]cter|inv[aá]lid|expresi[oó]n|sintaxis/i);
+    await expect(result).toHaveCount(0);
+  }else{
+    const exact="1"+"0".repeat(10000);
+    for(const value of (await result.innerText()).trim().split(/\s+/))expect(value).toBe(exact);
+    expect(serialized.replace(/\s/g,"")).toContain("9".repeat(10000));
+  }
+  const first=await evaluate(page,field,"2+3",5);
+  const second=await evaluate(page,field,first.reentry,5);
+  expect(first.requestId).not.toBe(second.requestId);
+  expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-22-native-evidence",{
+    body:JSON.stringify({sourceLength:source.length,serializedLength:serialized.length,rejected,notice,project:testInfo.project.name,first,second,errors},null,2),
+    contentType:"application/json"
+  });
+});
