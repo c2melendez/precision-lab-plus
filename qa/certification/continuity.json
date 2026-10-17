@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 46,
+  "revision": 47,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "102c5beddefe61adb09e255cf647dc9dd4c9aec8",
@@ -264,19 +264,12 @@
     }
   },
   "next_action": {
-    "id": "SY-X-22-BILATERAL",
+    "id": "SYNTAX309-RECONCILE-GAPS",
     "status": "IN_PROGRESS",
-    "repository": "c2melendez/precision-lab-lite",
-    "paired_repository": "c2melendez/precision-lab-plus",
+    "action": "Reconcile remaining Syntax309 gaps after scoped bilateral X22 PASS, preserving X04 Plus, X14 Plus, P23 and global OPEN; choose next independent actionable case without repeating unchanged gates.",
     "files": [
-      "qa/certification/syntax309_cases.jsonl"
-    ],
-    "action": "Test canonical 10,000-digit integer + 1 source in parser, actual Worker/HTTP and native MathLive for Lite and Plus. Accept only exact integer or a clear size notice, never floating-point approximation; prove reentry/recovery in three Chromium profiles and inspect exact-SHA CI evidence.",
-    "exit_criteria": [
-      "Preserve original 10,000-digit input contractual length and no float conversion",
-      "Exact integer result or explicit size rejection with bounded behavior",
-      "Native desktop/tablet/mobile plus real Worker/HTTP recovery and traceable distinct requests",
-      "Review real executed jobs/logs and record bilateral evidence; global certification remains OPEN"
+      "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md",
+      "qa/certification/MANUAL_CAPABILITY_GAPS.md"
     ]
   },
   "blockers": [
@@ -992,6 +985,22 @@
       },
       "evidence_executed": true,
       "notes": "Lite 453 native PASS 3 Chromium profiles; Plus native 25 desktop and 50 tablet/mobile PASS, backend 1494 PASS 3 XFAIL, frontend 1006 PASS 28 TODO; global OPEN."
+    },
+    "SY-X-22-20261017": {
+      "status": "PASS_SCOPED_BILATERAL",
+      "evidence_executed": true,
+      "lite": {
+        "technical_sha": "827508f6d99abe83aff41d1d5a9f608154ce8358",
+        "native_run": 39071672864,
+        "cumulative_run": 39071672809,
+        "h1d_run": 39071672827
+      },
+      "plus": {
+        "technical_sha": "50bd683135de67134c48edd2eea56aad529987e2",
+        "native_run": 39068704322,
+        "cumulative_run": 39068704268,
+        "h1d_run": 39068704250
+      }
     }
   },
   "historical_mutation_reference": {
