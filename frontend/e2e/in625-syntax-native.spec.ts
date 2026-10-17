@@ -287,7 +287,7 @@ test("SY-X-09 native extreme power bounded HTTP rejection and finite reentry", a
   await page.getByRole("button", { name: "Evaluar", exact: true }).click();
   const response = await responsePromise;
   expect(response.status()).toBe(200);
-  expect(response.request().postDataJSON().expression).toBe("99999999999^99999999999");
+  expect(response.request().postDataJSON().expression).toBe("99999999999^(99999999999)");
   const rejected = await response.json();
   expect(rejected.success).toBe(false);
   expect(rejected.error_code).toBe("COMPLEXITY_LIMIT");
