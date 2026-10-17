@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 47,
+  "revision": 48,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "102c5beddefe61adb09e255cf647dc9dd4c9aec8",
@@ -264,11 +264,11 @@
     }
   },
   "next_action": {
-    "id": "SYNTAX309-RECONCILE-GAPS",
+    "id": "SY-P-23-CONVENTION-REVIEW",
     "status": "IN_PROGRESS",
-    "action": "Reconcile remaining Syntax309 gaps after scoped bilateral X22 PASS, preserving X04 Plus, X14 Plus, P23 and global OPEN; choose next independent actionable case without repeating unchanged gates.",
+    "action": "Inspect canonical a/bc ambiguity and compare bilateral parsers and acceptance before implementing tests; do not mark PASS absent explicit contract. Preserve X04/X14 Plus BLOCKED and global OPEN.",
     "files": [
-      "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md",
+      "qa/certification/syntax309_cases.jsonl",
       "qa/certification/MANUAL_CAPABILITY_GAPS.md"
     ]
   },
