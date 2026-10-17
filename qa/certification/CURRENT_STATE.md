@@ -1,5 +1,11 @@
 # Estado vigente de certificación — Precision Lab Lite / Plus
 
+## 2026-10-17 — SY-X-22 native E2E submitted
+Lite prior SHA 4405bc6cd74bfcec2520d3efb8638fe21620c9ff: cumulative 39067482969 SUCCESS (1626 PASS,30 TODO; includes X22 parser+Worker-boundary tests), native 39067482997 SUCCESS (453 PASS previous scope), H1d 39067483007 SUCCESS (21 PASS).
+Plus native X22 SHA 50bd683135de67134c48edd2eea56aad529987e2: native 39068704322; cumulative 39068704268; H1d 39068704250. Lite native X22 SHA 1d8839048b6adfa1a123bd5af8e4e7729fce9c3d: native 39068724679; cumulative 39068724683; H1d 39068724701. At capture runs QUEUED; results not yet accredited. Both E2E tests use MathLive, 10000-digit source, exact/rejection policy, and recovery.
+Next objective: review these exact-SHA jobs/logs on both repos; fix only demonstrated failures, then reconcile X22 acceptance and preserve global OPEN.
+
+
 ## SY-X-22: coverage and CI checkpoint
 Plus HTTP regression SHA 04da8cc6, cumulative run 39066547036 PASS (1495 backend PASS/3 XFAIL, 1006 frontend PASS/28 TODO), H1d 39066547016 PASS. Lite parser regression SHA 60680a573db8164dc17fd275f01666b040dcd4c4; cumulative 39066850403, native 39066850464, H1d 39066850417 running at checkpoint, not yet PASS. Next: inspect Lite test logs and complete actual Worker and native UI case for both products, preserving exact 10000-digit oracle or clear size rejection. No repeated dispatch, global OPEN.
 
