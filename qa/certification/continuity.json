@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 12,
+  "revision": 13,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "f4b4f68203d8154ae4de9d5ca275589707cad654",
-  "baseline_case": "SY-R-14",
-  "baseline_status": "VERIFIED_WITH_BLOCKERS",
+  "technical_baseline_sha": "9e054de4e68621cf06c2a72236e585e6c9a5387c",
+  "baseline_case": "SY-X-05",
+  "baseline_status": "WAIT_CI",
   "global_certification": "OPEN",
   "prose_only_paths": [
     "README.md",
@@ -78,7 +78,7 @@
       "inputs": [
         "*"
       ],
-      "acceptance_revision": "2026-10-17-native-X01-X03-R12-R14-v1"
+      "acceptance_revision": "2026-10-17-native-X01-X03-R12-R14-X05-v1"
     },
     "mutation_frontend_preflight": {
       "workflow": ".github/workflows/s19-plus-frontend-preflight.yml",
@@ -190,19 +190,8 @@
   },
   "next_action": {
     "id": "SY-X-05-BILATERAL",
-    "status": "READY",
-    "repository": "c2melendez/precision-lab-plus",
-    "paired_repository": "c2melendez/precision-lab-lite",
-    "files": [
-      "qa/certification/syntax309_cases.jsonl"
-    ],
-    "action": "Advance independent SY-X-05 in both products. Read canonical descriptive fixture and expand exactly30 balanced parenthesis levels around1, preserving actual depth at ingestion. Inspect existing evidence and parser/AST/UI limits first; diagnose correct layer without changing oracle or pre-simplifying to1. SY-X-04 Plus remains blocked separately.",
-    "exit_criteria": [
-      "Document deterministic expansion from canonical30-level fixture, actual source length/depth and expected1",
-      "Real applicable native Lite/Plus input path, exact visible result1, output reentry and recovery; distinguish converter normalization from parser raw-source coverage",
-      "Focused diagnosis before changes; maintain existing security budgets and classify any conflict explicitly",
-      "Review only pertinent newly changed suites; reuse unaffected evidence, record SHA/run/logs in both ledgers and one next task"
-    ]
+    "status": "WAIT",
+    "action": "Inspect recorded Lite and Plus automatic runs; do not redispatch. Verify native depth30 ingestion, HTTP/Worker evidence and pertinent cumulative/H1d logs."
   },
   "blockers": [
     {
@@ -248,37 +237,31 @@
     }
   ],
   "work_in_progress": {
-    "id": "PLUS-NATIVE-SY-R-14",
-    "status": "VERIFIED_SCOPED",
-    "repository": "c2melendez/precision-lab-plus",
-    "technical_sha": "f4b4f68203d8154ae4de9d5ca275589707cad654",
+    "id": "SY-X-05-BILATERAL",
+    "status": "WAIT_CI",
+    "technical_sha": "9e054de4e68621cf06c2a72236e585e6c9a5387c",
+    "paired_technical_sha": "cdcaefb8d317e2303b4b89da92afb7a7a994f698",
     "runs": [
       {
-        "id": 38989356810,
-        "workflow": ".github/workflows/in625-syntax-native.yml",
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38989356810",
-        "logs_reviewed": true,
-        "evidence_executed": true
-      },
-      {
-        "id": 38989356927,
+        "id": 38990031422,
         "workflow": ".github/workflows/in625-h1d-reentry.yml",
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38989356927",
-        "logs_reviewed": true,
-        "evidence_executed": true
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38990031422"
       },
       {
-        "id": 38989356854,
+        "id": 38990031387,
+        "workflow": ".github/workflows/in625-syntax-native.yml",
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38990031387"
+      },
+      {
+        "id": 38990031487,
         "workflow": ".github/workflows/in625-cumulative-certification.yml",
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38989356854",
-        "logs_reviewed": true,
-        "evidence_executed": true
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38990031487"
       }
     ]
   },
