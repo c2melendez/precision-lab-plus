@@ -18,3 +18,23 @@ def test_syx12_canonical_integral_unevaluated_is_flagged_not_invented():
     assert value==unresolved
     assert not steps and not detailed
     assert any("Sin forma elemental" in message for message in warnings)
+
+def test_syx12_http_reports_unresolved_integral_not_success():
+    import os
+    os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
+    from fastapi.testclient import TestClient
+    from app.main import app
+    x = sp.Symbol("x")
+    integrand = sp.sin(x**x)
+    unresolved = sp.Integral(integrand, x)
+    model = svc.IntegralResult(integrand, unresolved, [], False, ["Sin forma elemental identificada"], False)
+    with patch.object(svc, "integrate_expression", return_value=model):
+        with TestClient(app) as client:
+            response = client.post("/api/v1/integral", json={"expression": "sin(x**x)", "variable": "x"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is False
+    assert body["error_code"] == "UNSUPPORTED_OPERATION"
+    assert body["result_latex"] is None
+    assert body["result_text"] is None
+    assert "Sin forma elemental" in body["error_message"]
