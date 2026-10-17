@@ -167,7 +167,9 @@ test("SY-X-06 native10000-character source, readable HTTP length rejection and r
   expect(rejected.success).toBe(false);
   expect(rejected.error_code).toBe("VALIDATION_ERROR");
   expect(rejected.result_latex).toBeNull();
-  await expect(page.getByRole("alert")).toContainText("Entrada demasiado larga: el máximo permitido es de 500 caracteres.");
+  const resultAlert = page.locator('form[aria-labelledby="basic-mode-heading"]').getByRole("alert");
+  await expect(resultAlert).toContainText("VALIDATION_ERROR");
+  await expect(resultAlert).toContainText("Entrada demasiado larga: el máximo permitido es de 500 caracteres.");
   const recovered = await evaluate(page, field, "2+3", 5);
   const reentered = await evaluate(page, field, recovered.reentry, 5);
   expect(new Set([rejected.request_id, recovered.requestId, reentered.requestId]).size).toBe(3);
