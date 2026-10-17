@@ -181,6 +181,47 @@ test("SY-X-06 native10000-character source, readable HTTP length rejection and r
   });
 });
 
+test("SY-X-08 native principal complex root, HTTP reentry and finite recovery", async ({ page }, testInfo) => {
+  const errors: string[] = [];
+  const evidence: unknown[] = [];
+  const ids: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  await expect(field).toBeVisible();
+  const canonical = fixture("SY-X-08");
+  expect(canonical).toBe(String.raw`\sqrt{-1}`);
+  async function complex(source: string, backend: string) {
+    await enter(field, source);
+    const pending = page.waitForResponse(response => response.url().endsWith("/api/v1/evaluate") && response.request().method() === "POST");
+    await page.getByRole("button", {name:"Evaluar", exact:true}).click();
+    const response = await pending;
+    expect(response.status()).toBe(200);
+    expect(response.request().postDataJSON().expression).toBe(backend);
+    const body = await response.json();
+    expect(body.success).toBe(true);
+    expect(body.result_type).toBe("scalar");
+    expect(body.result_text).toBe("I");
+    expect(body.result_latex).toBe("i");
+    expect(body.result_approx).toBeNull();
+    expect(body.error_code).toBeNull();
+    expect(body.request_id).toBeTruthy();
+    await expect(page.locator('[aria-live="polite"] .a11y-scale-result-lg .katex-html').last()).toHaveText("i");
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    ids.push(body.request_id);
+    evidence.push({source, backend, body});
+    return body.result_latex as string;
+  }
+  await complex(await complex(canonical, "sqrt(-1)"), "i");
+  ids.push((await evaluate(page, field, "i^2", -1)).requestId);
+  const recovery = await evaluate(page, field, "2+3", 5);
+  const again = await evaluate(page, field, recovery.reentry, 5);
+  ids.push(recovery.requestId, again.requestId);
+  expect(new Set(ids).size).toBe(5);
+  expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-08-native-http-evidence", {body:JSON.stringify({domain:"existing principal complex branch", canonical, project:testInfo.project.name, evidence, ids, errors},null,2),contentType:"application/json"});
+});
+
 const rejectionMessages: Record<string, string> = {
   "SY-X-01": "La expresión no puede estar vacía.",
   "SY-X-02": "La expresión no puede estar vacía.",
