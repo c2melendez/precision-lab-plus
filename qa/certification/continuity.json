@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 30,
+  "revision": 31,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "acd55e4b3cadf37b4c2e81dd044a5a95ad08d3c7",
   "baseline_case": "SY-X-13",
-  "baseline_status": "WAIT_CI",
+  "baseline_status": "VERIFIED_WITH_BLOCKERS",
   "global_certification": "OPEN",
   "prose_only_paths": [
     "README.md",
@@ -79,7 +79,7 @@
       "inputs": [
         "*"
       ],
-      "acceptance_revision": "2026-10-17-native-X01-X03-R12-R14-X05-X08-v1"
+      "acceptance_revision": "2026-10-17-native-through-X13-v1"
     },
     "mutation_frontend_preflight": {
       "workflow": ".github/workflows/s19-plus-frontend-preflight.yml",
@@ -91,9 +91,9 @@
   },
   "evidence_by_channel": {
     "converter": {
-      "run_id": 38995949507,
-      "job_id": 117288432926,
-      "technical_sha": "948d6dbb501e79b9e4fca13548586ca7a88d9a80",
+      "run_id": 39013565024,
+      "job_id": 117340938230,
+      "technical_sha": "acd55e4b3cadf37b4c2e81dd044a5a95ad08d3c7",
       "status": "PASS_SCOPED",
       "counts": {
         "pass": 1005,
@@ -103,37 +103,42 @@
       "evidence_executed": true
     },
     "http": {
-      "run_id": 38995949507,
-      "job_id": 117288432718,
-      "technical_sha": "948d6dbb501e79b9e4fca13548586ca7a88d9a80",
+      "run_id": 39013565024,
+      "job_id": 117340938052,
+      "technical_sha": "acd55e4b3cadf37b4c2e81dd044a5a95ad08d3c7",
       "status": "PASS_SCOPED",
       "counts": {
-        "pass": 1468,
+        "pass": 1478,
         "xfail": 2
       },
       "logs_reviewed": true,
       "evidence_executed": true,
-      "coverage": 88
+      "coverage": 88.11
     },
     "native_ui": {
-      "run_id": 38995949534,
-      "job_id": 117288433288,
-      "technical_sha": "948d6dbb501e79b9e4fca13548586ca7a88d9a80",
+      "run_id": 39013565049,
+      "job_id": 117340938063,
+      "technical_sha": "acd55e4b3cadf37b4c2e81dd044a5a95ad08d3c7",
       "status": "PASS_SCOPED",
       "cases": [
-        "SY-X-01",
-        "SY-X-02",
-        "SY-X-03",
-        "SY-R-12",
         "SY-R-13",
         "SY-R-14",
         "SY-X-05",
         "SY-X-06",
+        "SY-X-08",
+        "SY-X-13",
+        "SY-X-01",
+        "SY-X-02",
+        "SY-X-03",
+        "SY-R-12",
         "SY-X-07",
-        "SY-X-08"
+        "SY-X-09",
+        "SY-X-10",
+        "SY-X-11",
+        "SY-X-12"
       ],
       "counts": {
-        "pass": 30,
+        "pass": 45,
         "skip": 0
       },
       "profiles": [
@@ -143,12 +148,12 @@
       ],
       "logs_reviewed": true,
       "evidence_executed": true,
-      "acceptance_revision": "2026-10-17-native-X01-X03-R12-R14-X05-X08-v1"
+      "acceptance_revision": "2026-10-17-native-through-X13-v1"
     },
     "frontend_unit": {
-      "run_id": 38995949507,
-      "job_id": 117288432926,
-      "technical_sha": "948d6dbb501e79b9e4fca13548586ca7a88d9a80",
+      "run_id": 39013565024,
+      "job_id": 117340938230,
+      "technical_sha": "acd55e4b3cadf37b4c2e81dd044a5a95ad08d3c7",
       "status": "PASS_SCOPED",
       "counts": {
         "pass": 1005,
@@ -158,17 +163,17 @@
       "evidence_executed": true
     },
     "backend_http": {
-      "run_id": 38995949507,
-      "job_id": 117288432718,
-      "technical_sha": "948d6dbb501e79b9e4fca13548586ca7a88d9a80",
+      "run_id": 39013565024,
+      "job_id": 117340938052,
+      "technical_sha": "acd55e4b3cadf37b4c2e81dd044a5a95ad08d3c7",
       "status": "PASS_SCOPED",
       "counts": {
-        "pass": 1468,
+        "pass": 1478,
         "xfail": 2
       },
       "logs_reviewed": true,
       "evidence_executed": true,
-      "coverage": 88
+      "coverage": 88.11
     },
     "mutation_frontend_initial_run": {
       "run_id": 38992878879,
@@ -180,9 +185,9 @@
       "mutation_score": null
     },
     "h1d": {
-      "run_id": 38995949509,
-      "job_id": 117288432594,
-      "technical_sha": "948d6dbb501e79b9e4fca13548586ca7a88d9a80",
+      "run_id": 39013564974,
+      "job_id": 117340937810,
+      "technical_sha": "acd55e4b3cadf37b4c2e81dd044a5a95ad08d3c7",
       "status": "PASS_SCOPED",
       "counts": {
         "pass": 38
@@ -232,19 +237,20 @@
     }
   },
   "next_action": {
-    "id": "SY-X-13-BILATERAL",
-    "status": "WAIT_CI",
+    "id": "SY-X-14-BILATERAL",
+    "status": "READY",
     "repository": "c2melendez/precision-lab-plus",
     "paired_repository": "c2melendez/precision-lab-lite",
     "files": [
       "qa/certification/syntax309_cases.jsonl"
     ],
-    "action": "Inspect exact-SHA X13 native/cumulative/H1d runs in work_in_progress; no redispatch. Native output reentry uses actual result LaTeX ln, not SymPy result_text log. Close only after reviewed logs in three profiles.",
+    "action": "Read exact50-level nested reciprocal fixture/oracle. Construct the literal50 layers without pre-simplifying; inspect existing input/AST budgets first. Verify parity50=>x preserving original x!=0 and controls for odd depth as applicable. If channel limits block original source, record precise blocker without loosening limits or claiming PASS. Review existing scoped evidence and avoid redundant Actions.",
     "exit_criteria": [
-      "Pin original source and expected derivative unchanged",
-      "Compare symbolic derivative by mathematical equivalence and correct nesting, not fragile string equality",
-      "Verify Lite Worker and Plus HTTP with actual CAS, desktop/tablet/mobile and finite recovery/reentry",
-      "Inspect scoped CI results by exact SHA; record bilateral evidence without redundant dispatch"
+      "Pin descriptive canonical fixture and document exact operational expansion with50 reciprocal layers",
+      "Read Plus length500/AST200/depth30 and Lite declared budgets before bounded execution",
+      "Verify parity and original x!=0 restriction, no false extension atzero or hidden pre-simplification",
+      "Actual applicable MathLive and Worker/HTTP channels, recovery/reentry in three Chromium profiles",
+      "If original fixture cannot pass channel budgets, keep explicit scoped blocker; synchronize exact-SHA evidence and next actionable step without rerunning unchanged rejection"
     ]
   },
   "blockers": [
@@ -301,43 +307,43 @@
     {
       "id": "MUTATION-S19",
       "status": "OPEN",
-      "evidence": "38992878940 backend mutmut SUCCESS; frontend117278929718 CANCELLED after Vitest Worker exit1 in BasicModeConversionError.test.tsx, no mutation report.",
-      "next_action": "Diagnose frontend worker failure before repeating identical input. New X08 campaign has distinct added tests; inspect existing run only.",
+      "evidence": "Latest recorded frontend38995800990/job117288029860 CANCELLED after693test initialrunSUCCESS, no final report; logs reviewed. Earlier38992878940 had Worker exit1 before cancellation. No global mutation score.",
+      "next_action": "Diagnose existing frontend campaign cause and resource/progress evidence before repeating equivalent inputs; do not rerun historical Lite pin/npm. New X13 tests did not trigger a campaign.",
       "responsible_role": "certification maintainer"
     }
   ],
   "work_in_progress": {
     "id": "SY-X-13-BILATERAL",
-    "status": "WAIT_CI",
+    "status": "VERIFIED_SCOPED",
     "technical_sha": "acd55e4b3cadf37b4c2e81dd044a5a95ad08d3c7",
     "paired_technical_sha": "76edee1a40df93d3945acb1b426d0bc190a67e2c",
     "runs": [
       {
-        "id": 39013565024,
-        "workflow": ".github/workflows/in625-cumulative-certification.yml",
-        "status": "queued",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39013565024",
-        "logs_reviewed": false,
-        "evidence_executed": false
+        "id": 39013564974,
+        "workflow": ".github/workflows/in625-h1d-reentry.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39013564974",
+        "logs_reviewed": true,
+        "evidence_executed": true
       },
       {
         "id": 39013565049,
         "workflow": ".github/workflows/in625-syntax-native.yml",
-        "status": "in_progress",
-        "conclusion": null,
+        "status": "completed",
+        "conclusion": "success",
         "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39013565049",
-        "logs_reviewed": false,
-        "evidence_executed": false
+        "logs_reviewed": true,
+        "evidence_executed": true
       },
       {
-        "id": 39013564974,
-        "workflow": ".github/workflows/in625-h1d-reentry.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39013564974",
-        "logs_reviewed": false,
-        "evidence_executed": false
+        "id": 39013565024,
+        "workflow": ".github/workflows/in625-cumulative-certification.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39013565024",
+        "logs_reviewed": true,
+        "evidence_executed": true
       }
     ]
   },
@@ -565,6 +571,25 @@
         "finite recovery and reentry"
       ],
       "limitations": "Only scoped MathLive/Worker/HTTP in 3 Chromium profiles; global certification remains OPEN"
+    },
+    "SY-X-13": {
+      "status": "PASS_SCOPED",
+      "original_source": "\\frac{d}{dx}x^{x^{x}}",
+      "original_expected": "x^{x^{x}}\\left(x^{x}(\\ln x+1)\\ln x+x^{x-1}\\right)",
+      "technical_sha": "acd55e4b3cadf37b4c2e81dd044a5a95ad08d3c7",
+      "paired_technical_sha": "76edee1a40df93d3945acb1b426d0bc190a67e2c",
+      "native_run": 39013565049,
+      "cumulative_run": 39013565024,
+      "h1d_run": 39013564974,
+      "domain": "x>0; no complex-branch identity claim",
+      "controls": [
+        "original nested precedence",
+        "exact symbolic equivalence to unchanged oracle",
+        "actual visible LaTeX output reentry",
+        "finite recovery2+3=5 and result reentry",
+        "four distinct request IDs, zero pageerrors"
+      ],
+      "limitations": "MathLive assignment/input in desktop/tablet/mobile Chromium; no all-keys/OS/other engines or Reuse-button claim. Raw SymPy result_text(log) is not calculator reentry grammar; native reentry uses actual ln LaTeX."
     }
   },
   "verification_proofs": {
@@ -584,6 +609,19 @@
       "doc_only_actions": 0,
       "observed_at": "2026-10-17T02:47:43.954Z",
       "scope": "Fresh exact-SHA run/job/log observations; conservative missing gates are not a dispatch authorization, apply blockers and component router."
+    },
+    "x13_scope": {
+      "original_fixture_preserved": true,
+      "native_profiles": 3,
+      "logs_reviewed": true,
+      "scoped_gates": [
+        "cumulative",
+        "h1d",
+        "syntax_native"
+      ],
+      "technical_sha": "acd55e4b3cadf37b4c2e81dd044a5a95ad08d3c7",
+      "new_mutation_campaigns": 0,
+      "baseline_note": "Reconciled from obsolete X08 baseline to current X13; prior X09..12 records retained."
     }
   },
   "historical_mutation_reference": {
@@ -705,7 +743,7 @@
       "id": 38995800990,
       "repository": "c2melendez/precision-lab-plus",
       "technical_sha": "122711fc0161468d8cb619b6ad2aa9a88295b5eb",
-      "status": "SCOPED_MUTATIONS_RUNNING",
+      "status": "COMPLETED_WITH_FRONTEND_CANCEL",
       "jobs": [
         {
           "id": 117287980387,
@@ -740,8 +778,8 @@
         {
           "id": 117288029860,
           "name": "mutation / plus-frontend-stryker",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "cancelled"
         },
         {
           "id": 117288029927,
@@ -756,7 +794,7 @@
           "conclusion": "skipped"
         }
       ],
-      "instruction": "Backend mutmut117288029927 SUCCESS: actual mutations and logs reviewed; no global score inferred. Inspect only existing frontend117288029860 still running. BackendsecurityPASS; unrelated npm/Litepin SKIPPED not PASS."
+      "instruction": "Frontend117288029860 CANCELLED; initial693tests passed but no final mutation report. Logs reviewed, no inferred score/cause. Backend mutation already reviewedSUCCESS; no identical retry."
     }
   ],
   "campaign_evidence_reviews": [
