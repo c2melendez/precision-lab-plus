@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 4,
+  "revision": 5,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "6d594187e241d6a2491590e13582999ac0b9fd3c",
   "baseline_case": "AUDIT-REMEDIATION",
-  "baseline_status": "PENDING_CI",
+  "baseline_status": "VERIFIED_WITH_BLOCKERS",
   "global_certification": "OPEN",
   "prose_only_paths": [
     "README.md",
@@ -106,19 +106,70 @@
       }
     },
     "native_ui": {
-      "run_id": null,
-      "status": "PENDING",
-      "case_scope": "Recent SY-R/SY-X cases; unit converter and HTTP are not native UI evidence"
+      "run_id": 38983949600,
+      "job_id": 117250942193,
+      "technical_sha": "6d594187e241d6a2491590e13582999ac0b9fd3c",
+      "status": "PASS_SCOPED",
+      "cases": [
+        "SY-X-01",
+        "SY-X-02",
+        "SY-X-03"
+      ],
+      "counts": {
+        "pass": 9,
+        "skip": 0
+      },
+      "profiles": [
+        "desktop-chromium",
+        "tablet-chromium",
+        "mobile-chromium"
+      ]
+    },
+    "frontend_unit": {
+      "run_id": 38983949345,
+      "job_id": 117250941129,
+      "technical_sha": "6d594187e241d6a2491590e13582999ac0b9fd3c",
+      "status": "PASS_SCOPED",
+      "counts": {
+        "pass": 984,
+        "todo": 28
+      }
+    },
+    "backend_http": {
+      "run_id": 38983949345,
+      "job_id": 117250941417,
+      "technical_sha": "6d594187e241d6a2491590e13582999ac0b9fd3c",
+      "status": "PASS_SCOPED",
+      "counts": {
+        "pass": 1455,
+        "xfail": 2
+      },
+      "coverage": 87.87
+    },
+    "mutation_frontend_initial_run": {
+      "run_id": 38983949570,
+      "job_id": 117250941805,
+      "technical_sha": "6d594187e241d6a2491590e13582999ac0b9fd3c",
+      "status": "PASS_HARNESS_ONLY",
+      "initial_tests": 759,
+      "mutations_tested": false,
+      "mutation_score": null
     }
   },
   "next_action": {
-    "id": "VERIFY-NATIVE-CLEAR-AND-S19-HARNESS",
-    "status": "WAIT",
-    "action": "Inspect runs on technical SHA 6d594187e241d6a2491590e13582999ac0b9fd3c for the actual editor-clear fix and rendered keyboard policy. Existing runs already cover this revision; do not dispatch duplicates.",
+    "id": "PLUS-NATIVE-SY-R-12",
+    "status": "READY",
+    "repository": "c2melendez/precision-lab-plus",
+    "files": [
+      "frontend/e2e/in625-syntax-native.spec.ts",
+      "qa/certification/syntax309_cases.jsonl"
+    ],
+    "action": "Cover original SY-R-12 nonmathematical text through actual Plus MathLive/UI and recovery/reentry; inspect prior evidence first. Reuse unaffected evidence and do not repeat approved Lite suites or unchanged SG28/security blockers.",
     "exit_criteria": [
-      "Native desktop then tablet/mobile actual results reviewed",
-      "Cumulative/H1d and S19 initial-run reviewed",
-      "Initial-run PASS never claimed as mutation score"
+      "Original fixture and explicit readable rejection, no invented HTTP on local rejection",
+      "Real HTTP recovery and output reentry with fresh request IDs",
+      "Desktop focused diagnosis then remaining required profiles",
+      "Pertinent same-input evidence reviewed, ledger updated"
     ]
   },
   "blockers": [
@@ -166,49 +217,66 @@
   ],
   "work_in_progress": {
     "id": "AUDIT-REMEDIATION-20261016",
-    "status": "CI_RUNNING",
+    "status": "VERIFIED_WITH_BLOCKERS",
     "technical_sha": "6d594187e241d6a2491590e13582999ac0b9fd3c",
     "runs": [
       {
-        "id": 38983949570,
-        "workflow": ".github/workflows/s19-plus-frontend-preflight.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949570"
-      },
-      {
-        "id": 38983949345,
-        "workflow": ".github/workflows/in625-cumulative-certification.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949345"
+        "id": 38983949600,
+        "workflow": ".github/workflows/in625-syntax-native.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949600"
       },
       {
         "id": 38983949508,
         "workflow": ".github/workflows/in625-h1d-reentry.yml",
-        "status": "in_progress",
-        "conclusion": null,
+        "status": "completed",
+        "conclusion": "success",
         "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949508"
       },
       {
-        "id": 38983949600,
-        "workflow": ".github/workflows/in625-syntax-native.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949600"
+        "id": 38983949345,
+        "workflow": ".github/workflows/in625-cumulative-certification.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949345"
+      },
+      {
+        "id": 38983949570,
+        "workflow": ".github/workflows/s19-plus-frontend-preflight.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949570"
       }
     ]
   },
   "cases": {
     "SY-X-03": {
       "status": "PASS_SCOPED",
-      "native_plus": "CI_PENDING"
+      "native_plus": "PASS_SCOPED_X01_X03",
+      "native_plus_run": 38983949600
     },
     "SY-X-04": {
       "status": "PARTIAL_BLOCKED",
-      "lite": "LOCAL_PASS_CI_PENDING",
-      "plus_http": "BLOCKED_LENGTH_AND_AST",
+      "lite": "PASS_SCOPED_NATIVE_AND_WORKER",
+      "plus_http": "BLOCKED_LENGTH_PARSER_AND_AST",
+      "plus_math_oracle": "STRICT_XFAIL_NOT_PASS",
       "official_expected": "500x"
     }
-  }
+  },
+  "verification_proofs": {
+    "mechanism_tests": 34,
+    "doc_only_checkpoints_triggered_actions": 0,
+    "real_input_fingerprint_reuse": "Lite cumulative38983494314 across documentary HEAD",
+    "stale_next_action_protection": "Plus technical HEAD changed => RECONCILE,next_action=null"
+  },
+  "pending_legacy_runs": [
+    {
+      "id": 38983505232,
+      "job_id": 117249561875,
+      "scope": "Lite pinned-reference frontend mutation campaign",
+      "status": "last observed in_progress",
+      "instruction": "Inspect existing job; do not start another identical campaign. Parent already contains S25/frontend and historical S19/frontend failures."
+    }
+  ]
 }
