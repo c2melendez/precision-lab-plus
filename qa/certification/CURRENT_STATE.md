@@ -1,3 +1,18 @@
+# SY-X-08 — WAIT_CI
+
+Inspeccionar las corridas exactas registradas en continuity.json. No ejecutar de nuevo.
+
+
+## 2026-10-17 UTC — SY-X-08 publicado, WAIT_CI
+SHA 122711fc0161468d8cb619b6ad2aa9a88295b5eb; par 378510f0092d4c50c321fc59ce1abb87e732aa72. Contrato previo complejo principal (SY-E-17/18, SY-R-08): evaluadores generales admiten i; no se inventa un selector real. Fixture original sqrt(-1), exactitud i, reentrada, i^2=-1, control sqrt(-4)=2i y recuperación 2+3=5 pasan localmente (Worker-handler Lite/conversor Plus/HTTP Plus). Sin cambio de motor. Ingesta MathLive/Worker real/HTTP y 3 perfiles aún pendientes de CI.
+- [.github/workflows/certification-dependency-gates.yml](https://github.com/c2melendez/precision-lab-plus/actions/runs/38995800990) — inspeccionar run existente, no relanzar.
+- [.github/workflows/in625-cumulative-certification.yml](https://github.com/c2melendez/precision-lab-plus/actions/runs/38995800998) — inspeccionar run existente, no relanzar.
+- [.github/workflows/in625-h1d-reentry.yml](https://github.com/c2melendez/precision-lab-plus/actions/runs/38995800975) — inspeccionar run existente, no relanzar.
+- [.github/workflows/in625-syntax-native.yml](https://github.com/c2melendez/precision-lab-plus/actions/runs/38995800956) — inspeccionar run existente, no relanzar.
+Campaña38992878940 reconciliada: backendmutmutSUCCESS con mutaciones reales; frontend117278929718CANCELLED tras Worker exit1 en BasicModeConversionError.test.tsx, sin informe final. No inferir score ni causa de cancelación. S19 integralOPEN.
+
+## Fotografía anterior (evidencia histórica)
+
 # Estado vigente de certificación — Precision Lab Lite / Plus
 
 Corte: 2026-10-17 UTC (2026-10-16 Honduras). Certificación global **OPEN**; porcentaje reconciliado **ND**.
