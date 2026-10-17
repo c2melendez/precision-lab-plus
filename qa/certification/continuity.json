@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 20,
+  "revision": 21,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "cc89d7ccd36dfdfe15b14e72215920c62508ab00",
   "baseline_case": "SY-X-07",
-  "baseline_status": "WAIT_CI",
+  "baseline_status": "VERIFIED_WITH_BLOCKERS",
   "global_certification": "OPEN",
   "prose_only_paths": [
     "README.md",
@@ -106,9 +106,9 @@
       }
     },
     "native_ui": {
-      "run_id": 38991931537,
-      "job_id": 117275994242,
-      "technical_sha": "ff647a581a4a6d9b5423231ded44c3bc5fbb3088",
+      "run_id": 38992878912,
+      "job_id": 117278879589,
+      "technical_sha": "cc89d7ccd36dfdfe15b14e72215920c62508ab00",
       "status": "PASS_SCOPED",
       "cases": [
         "SY-X-01",
@@ -118,10 +118,11 @@
         "SY-R-13",
         "SY-R-14",
         "SY-X-05",
-        "SY-X-06"
+        "SY-X-06",
+        "SY-X-07"
       ],
       "counts": {
-        "pass": 24,
+        "pass": 27,
         "skip": 0
       },
       "profiles": [
@@ -131,46 +132,46 @@
       ],
       "logs_reviewed": true,
       "evidence_executed": true,
-      "acceptance_revision": "2026-10-17-native-X01-X03-R12-R14-X05-X06-v1"
+      "acceptance_revision": "2026-10-17-native-X01-X03-R12-R14-X05-X07-v1"
     },
     "frontend_unit": {
-      "run_id": 38991931540,
-      "job_id": 117275994080,
-      "technical_sha": "ff647a581a4a6d9b5423231ded44c3bc5fbb3088",
+      "run_id": 38992878873,
+      "job_id": 117278879310,
+      "technical_sha": "cc89d7ccd36dfdfe15b14e72215920c62508ab00",
       "status": "PASS_SCOPED",
       "counts": {
-        "pass": 997,
+        "pass": 1004,
         "todo": 28
       },
       "logs_reviewed": true,
       "evidence_executed": true
     },
     "backend_http": {
-      "run_id": 38991931540,
-      "job_id": 117275993836,
-      "technical_sha": "ff647a581a4a6d9b5423231ded44c3bc5fbb3088",
+      "run_id": 38992878873,
+      "job_id": 117278879340,
+      "technical_sha": "cc89d7ccd36dfdfe15b14e72215920c62508ab00",
       "status": "PASS_SCOPED",
       "counts": {
-        "pass": 1460,
+        "pass": 1467,
         "xfail": 2
       },
-      "coverage": 88,
+      "coverage": 88.04,
       "logs_reviewed": true,
       "evidence_executed": true
     },
     "mutation_frontend_initial_run": {
-      "run_id": 38986979633,
-      "job_id": 117260612344,
-      "technical_sha": "b90f15e11d6b48a953aa37319afda711dcf58e2e",
+      "run_id": 38992878879,
+      "job_id": 117278879294,
+      "technical_sha": "cc89d7ccd36dfdfe15b14e72215920c62508ab00",
       "status": "PASS_HARNESS_ONLY",
       "initial_tests": 759,
       "mutations_tested": false,
       "mutation_score": null
     },
     "h1d": {
-      "run_id": 38991931544,
-      "job_id": 117275994209,
-      "technical_sha": "ff647a581a4a6d9b5423231ded44c3bc5fbb3088",
+      "run_id": 38992878877,
+      "job_id": 117278879296,
+      "technical_sha": "cc89d7ccd36dfdfe15b14e72215920c62508ab00",
       "status": "PASS_SCOPED",
       "counts": {
         "pass": 38
@@ -206,12 +207,34 @@
       "logs_reviewed": true,
       "mutations_executed": false,
       "security_executed": false
+    },
+    "sg28_isolation": {
+      "run_id": 38992878918,
+      "job_id": 117278879701,
+      "technical_sha": "cc89d7ccd36dfdfe15b14e72215920c62508ab00",
+      "status": "PASS_ISOLATION_REGRESSION_ONLY_NOT_DIST",
+      "counts": {
+        "pass": 69
+      },
+      "logs_reviewed": true,
+      "evidence_executed": true
     }
   },
   "next_action": {
-    "id": "SY-X-07-BILATERAL",
-    "status": "WAIT",
-    "action": "Inspect existing recorded Lite/Plus runs; no redispatch. Verify original infinity-minus-infinity rejection, finite controls and native recovery/reentry. Review scoped campaign separately, no fake PASS from skips."
+    "id": "SY-X-08-BILATERAL",
+    "status": "READY",
+    "repository": "c2melendez/precision-lab-plus",
+    "paired_repository": "c2melendez/precision-lab-lite",
+    "files": [
+      "qa/certification/syntax309_cases.jsonl"
+    ],
+    "action": "Continue original sqrt(-1) fixture in both products. Read existing real/complex conventions and declared UI/channel domain first. Verify clear rejection in real-only channels and exact i in complex-capable channels as applicable; do not silently invent or change the domain. Inspect prior complex evidence, then native recovery/reentry and relevant scoped gates.",
+    "exit_criteria": [
+      "Pin original fixture/oracle; document each tested channel's existing real/complex contract and capabilities",
+      "No accidental NaN/false real success; verify exact i and applicable reentry where complex is supported, or explicit real-domain rejection",
+      "Actual original-source MathLive ingestion, real applicable execution, finite recovery and new request IDs in3Chromium profiles",
+      "Review new pertinent logs; use component router and WAIT for existing equivalent campaigns, no unrelated Lite pin/npm repeats; synchronize bilateral ledger"
+    ]
   },
   "blockers": [
     {
@@ -263,55 +286,65 @@
       "next_action": "Use per-job router; do not infer full S19/S25 PASS from skipped components",
       "responsible_role": "certification maintainer",
       "verification_run": 38991931463
+    },
+    {
+      "id": "MUTATION-S19",
+      "status": "OPEN",
+      "evidence": "Old Plusfrontend117272639609 CANCELLED,no finalscore; current affected jobs117278929669/117278929718in progress;759testinitialrun is not mutation",
+      "next_action": "Inspect existing38992878940, do not duplicate. No full S19PASS before actual outcomes reviewed.",
+      "responsible_role": "certification maintainer"
     }
   ],
   "work_in_progress": {
     "id": "SY-X-07-BILATERAL",
-    "status": "WAIT_CI",
+    "status": "VERIFIED_SCOPED",
     "technical_sha": "cc89d7ccd36dfdfe15b14e72215920c62508ab00",
     "paired_technical_sha": "f0d3106d351aebc49b6a5715efd92690c44ec843",
     "runs": [
       {
-        "id": 38992878879,
-        "workflow": ".github/workflows/s19-plus-frontend-preflight.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38992878879"
+        "id": 38992878918,
+        "workflow": ".github/workflows/in625-sg28-backend-cancellation.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38992878918",
+        "logs_reviewed": true,
+        "evidence_executed": true
       },
       {
         "id": 38992878877,
         "workflow": ".github/workflows/in625-h1d-reentry.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38992878877"
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38992878877",
+        "logs_reviewed": true,
+        "evidence_executed": true
       },
       {
-        "id": 38992878940,
-        "workflow": ".github/workflows/certification-dependency-gates.yml",
-        "status": "queued",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38992878940"
-      },
-      {
-        "id": 38992878873,
-        "workflow": ".github/workflows/in625-cumulative-certification.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38992878873"
+        "id": 38992878879,
+        "workflow": ".github/workflows/s19-plus-frontend-preflight.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38992878879",
+        "logs_reviewed": true,
+        "evidence_executed": true
       },
       {
         "id": 38992878912,
         "workflow": ".github/workflows/in625-syntax-native.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38992878912"
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38992878912",
+        "logs_reviewed": true,
+        "evidence_executed": true
       },
       {
-        "id": 38992878918,
-        "workflow": ".github/workflows/in625-sg28-backend-cancellation.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38992878918"
+        "id": 38992878873,
+        "workflow": ".github/workflows/in625-cumulative-certification.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38992878873",
+        "logs_reviewed": true,
+        "evidence_executed": true
       }
     ]
   },
@@ -408,6 +441,22 @@
         "mobile-chromium"
       ],
       "limitations": "MathLive assignment/input; not every key/OS/other engine or Reuse button; no calculation-only latency SLA"
+    },
+    "SY-X-07": {
+      "status": "PASS_SCOPED",
+      "original_source": "\\infty-\\infty",
+      "original_expected": "indeterminado: error claro",
+      "lite_native_run": 38992883919,
+      "plus_native_run": 38992878912,
+      "plus_raw_http_run": 38992878873,
+      "controls": [
+        "finite3-3=>0",
+        "finite3-2=>1",
+        "recovery2+3=>5",
+        "output reentry"
+      ],
+      "scope": "Literal infinite difference with balanced grouping only; native local rejection, raw HTTP/Worker separate",
+      "limitations": "MathLive assignment/input,3Chromium profiles; not every key/OS/other engine/Reuse button"
     }
   },
   "verification_proofs": {
@@ -433,8 +482,7 @@
     {
       "id": 38990822464,
       "repository": "c2melendez/precision-lab-plus",
-      "technical_sha": "db29648ac2ab2607021a32089c5555d3cbb9b2b0",
-      "status": "RUNNING_WITH_FRONTEND_SECURITY_FAILURE",
+      "status": "HISTORICAL_WITH_FAILURE_AND_CANCEL",
       "jobs": [
         {
           "id": 117272623017,
@@ -445,8 +493,8 @@
         {
           "id": 117272639562,
           "name": "mutation / lite-frontend-stryker",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "success"
         },
         {
           "id": 117272639603,
@@ -457,8 +505,8 @@
         {
           "id": 117272639609,
           "name": "mutation / plus-frontend-stryker",
-          "status": "in_progress",
-          "conclusion": null
+          "status": "completed",
+          "conclusion": "cancelled"
         },
         {
           "id": 117272639638,
@@ -473,7 +521,64 @@
           "conclusion": "success"
         }
       ],
-      "instruction": "Inspect existing frontend mutation jobs; no duplicate campaign. Backend mutation reviewed independently; S25frontend remains5high."
+      "instruction": "Do not repeat; pinnedLite10.32% historical, PlusfrontCANCELLED not PASS,frontendS25failed5high."
+    },
+    {
+      "id": 38992878940,
+      "repository": "c2melendez/precision-lab-plus",
+      "technical_sha": "cc89d7ccd36dfdfe15b14e72215920c62508ab00",
+      "status": "SCOPED_MUTATIONS_RUNNING",
+      "jobs": [
+        {
+          "id": 117278879510,
+          "name": "audit-request",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 117278908986,
+          "name": "mutation / validate-request",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 117278908997,
+          "name": "security / validate-request",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 117278929197,
+          "name": "security / backend-security",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 117278929669,
+          "name": "mutation / plus-backend-mutmut",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 117278929718,
+          "name": "mutation / plus-frontend-stryker",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 117278930410,
+          "name": "security / frontend-audit",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 117278931017,
+          "name": "mutation / lite-frontend-stryker",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ],
+      "instruction": "Inspect existing affected Plusmutationjobs, no newdispatch. BackendsecurityPASS; unrelated pin/npm SKIPPED not PASS."
     }
   ],
   "campaign_evidence_reviews": [
