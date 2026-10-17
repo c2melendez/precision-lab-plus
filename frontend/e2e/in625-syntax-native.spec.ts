@@ -645,3 +645,42 @@ test("SY-X-12 native non-elementary integral notice, finite integral recovery an
     contentType: "application/json",
   });
 });
+
+
+test("SY-X-20 native invalid Unicode source is rejected with finite HTTP recovery", async ({page}, testInfo) => {
+  const errors:string[]=[];
+  const requests:Array<{url:string;body:unknown}>=[];
+  page.on("pageerror",e=>errors.push(e.message));
+  page.on("request",request=>{
+    if(request.url().includes("/api/v1/") && request.method()==="POST")
+      requests.push({url:request.url(),body:request.postDataJSON()});
+  });
+  await page.goto("/");
+  const field=page.locator("math-field").first();
+  await expect(field).toBeVisible();
+  const source=fixture("SY-X-20");
+  expect(source).toBe("😀+1");
+  expect([...source].map(c=>c.codePointAt(0))).toEqual([0x1f600,43,49]);
+  await field.evaluate((node,value)=>{
+    (node as HTMLElement & {setValue(v:string):void}).setValue(value);
+    node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));
+  },source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  expect(serialized).toContain("😀");
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const alerts=page.getByRole("alert");
+  await expect(alerts.first()).toBeVisible();
+  const notice=(await alerts.allInnerTexts()).join(" ");
+  expect(notice).toMatch(/car[aá]cter|inv[aá]lid|permitid|reconocid|sintaxis/i);
+  await expect(page.locator(".a11y-scale-result-lg")).toHaveCount(0);
+  const invalidRequests=requests.length;
+  const recovered=await evaluate(page,field,"2+3",5);
+  const reentered=await evaluate(page,field,recovered.reentry,5);
+  expect(reentered.requestId).not.toBe(recovered.requestId);
+  expect(requests).toHaveLength(invalidRequests+2);
+  expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-20-native-unicode-evidence",{
+    body:JSON.stringify({source,serialized,notice,invalidRequests,requests,project:testInfo.project.name,recovered,reentered,errors},null,2),
+    contentType:"application/json"
+  });
+});
