@@ -806,6 +806,11 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
     `allow_equation=True` (lado derecho implícito `0` si no había `=`,
     sección 3: "sin `=` -> se asume `= 0`").
     """
+    # SY-X-20: supplementary-plane pictographs are not calculator tokens.
+    # Reject before SymPy's implicit multiplication can reinterpret the source.
+    # Keep Unicode mathematics from the BMP (π, √, ∞, etc.) on its existing path.
+    if any(0x1F000 <= ord(ch) <= 0x1FAFF for ch in text):
+        raise ParseSecurityError("Carácter no válido en la expresión matemática.")
     # Preserve source at API layer; decode bounded conjugate before G3 macro guard.
     text = normalize_unicode(text) if ("\\overline" in text or "\\lvert" in text) else text
     validate_g3_structure(text)
