@@ -117,6 +117,35 @@ test("SY-R-14 native original absolute value, signed controls and HTTP reentry",
   });
 });
 
+test("SY-X-05 native30 grouping levels, scalar controls and HTTP reentry", async ({ page }, testInfo) => {
+  const errors: string[] = [];
+  const sources: Array<{ source: string; requestId: string; reentry: string }> = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  await expect(field).toBeVisible();
+  const canonical = fixture("SY-X-05");
+  expect(canonical).toBe(String.raw`\underbrace{(\cdots((1))\cdots)}_{30\text{ niveles}}`);
+  for (const [inner, expected] of [["1", 1], ["7", 7], ["2+3", 5]] as const) {
+    const source = "(".repeat(30) + inner + ")".repeat(30);
+    expect(source.length).toBe(60 + inner.length);
+    expect(source.match(/\(/g)).toHaveLength(30);
+    expect(source.match(/\)/g)).toHaveLength(30);
+    // evaluate verifies exact ingestion AND the unflattened HTTP request.
+    const first = await evaluate(page, field, source, expected);
+    const second = await evaluate(page, field, first.reentry, expected);
+    expect(second.requestId).not.toBe(first.requestId);
+    sources.push({ source, ...first }, { source: first.reentry, ...second });
+  }
+  await evaluate(page, field, "2+3", 5);
+  expect(new Set(sources.map((item) => item.requestId)).size).toBe(6);
+  expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-05-native-http-evidence", {
+    body: JSON.stringify({ canonical, project: testInfo.project.name, sources, errors }, null, 2),
+    contentType: "application/json",
+  });
+});
+
 const rejectionMessages: Record<string, string> = {
   "SY-X-01": "La expresión no puede estar vacía.",
   "SY-X-02": "La expresión no puede estar vacía.",
