@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 5,
+  "revision": 6,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "6d594187e241d6a2491590e13582999ac0b9fd3c",
-  "baseline_case": "AUDIT-REMEDIATION",
-  "baseline_status": "VERIFIED_WITH_BLOCKERS",
+  "technical_baseline_sha": "f4f909ed373f10e631d2ccb575268017ba983b07",
+  "baseline_case": "SY-R-12",
+  "baseline_status": "WAIT_CI",
   "global_certification": "OPEN",
   "prose_only_paths": [
     "README.md",
@@ -78,7 +78,7 @@
       "inputs": [
         "*"
       ],
-      "acceptance_revision": "2026-10-16-native-X01-X03-v1"
+      "acceptance_revision": "2026-10-17-native-X01-X03-R12-v1"
     },
     "mutation_frontend_preflight": {
       "workflow": ".github/workflows/s19-plus-frontend-preflight.yml",
@@ -158,19 +158,9 @@
   },
   "next_action": {
     "id": "PLUS-NATIVE-SY-R-12",
-    "status": "READY",
+    "status": "WAIT",
     "repository": "c2melendez/precision-lab-plus",
-    "files": [
-      "frontend/e2e/in625-syntax-native.spec.ts",
-      "qa/certification/syntax309_cases.jsonl"
-    ],
-    "action": "Cover original SY-R-12 nonmathematical text through actual Plus MathLive/UI and recovery/reentry; inspect prior evidence first. Reuse unaffected evidence and do not repeat approved Lite suites or unchanged SG28/security blockers.",
-    "exit_criteria": [
-      "Original fixture and explicit readable rejection, no invented HTTP on local rejection",
-      "Real HTTP recovery and output reentry with fresh request IDs",
-      "Desktop focused diagnosis then remaining required profiles",
-      "Pertinent same-input evidence reviewed, ledger updated"
-    ]
+    "action": "Inspect existing runs for f4f909ed373f10e631d2ccb575268017ba983b07; do not redispatch. Verify native 12 cases/profiles, cumulative and H1d logs before closing."
   },
   "blockers": [
     {
@@ -216,37 +206,34 @@
     }
   ],
   "work_in_progress": {
-    "id": "AUDIT-REMEDIATION-20261016",
-    "status": "VERIFIED_WITH_BLOCKERS",
-    "technical_sha": "6d594187e241d6a2491590e13582999ac0b9fd3c",
+    "id": "PLUS-NATIVE-SY-R-12",
+    "status": "WAIT_CI",
+    "repository": "c2melendez/precision-lab-plus",
+    "technical_sha": "f4f909ed373f10e631d2ccb575268017ba983b07",
     "runs": [
       {
-        "id": 38983949600,
-        "workflow": ".github/workflows/in625-syntax-native.yml",
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949600"
+        "id": 38985749751,
+        "name": "IN625 Cumulative Certification Gate",
+        "path": ".github/workflows/in625-cumulative-certification.yml",
+        "sha": "f4f909ed373f10e631d2ccb575268017ba983b07",
+        "status": "queued",
+        "conclusion": null
       },
       {
-        "id": 38983949508,
-        "workflow": ".github/workflows/in625-h1d-reentry.yml",
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949508"
+        "id": 38985749703,
+        "name": "IN625 Plus Native Syntax and Recovery",
+        "path": ".github/workflows/in625-syntax-native.yml",
+        "sha": "f4f909ed373f10e631d2ccb575268017ba983b07",
+        "status": "in_progress",
+        "conclusion": null
       },
       {
-        "id": 38983949345,
-        "workflow": ".github/workflows/in625-cumulative-certification.yml",
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949345"
-      },
-      {
-        "id": 38983949570,
-        "workflow": ".github/workflows/s19-plus-frontend-preflight.yml",
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38983949570"
+        "id": 38985749714,
+        "name": "IN625 H1d Reentry Diagnostic",
+        "path": ".github/workflows/in625-h1d-reentry.yml",
+        "sha": "f4f909ed373f10e631d2ccb575268017ba983b07",
+        "status": "in_progress",
+        "conclusion": null
       }
     ]
   },
