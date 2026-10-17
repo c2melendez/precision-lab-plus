@@ -146,6 +146,39 @@ test("SY-X-05 native30 grouping levels, scalar controls and HTTP reentry", async
   });
 });
 
+test("SY-X-06 native10000-character source, readable HTTP length rejection and recovery", async ({ page }, testInfo) => {
+  testInfo.setTimeout(90000);
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  await expect(field).toBeVisible();
+  const canonical = fixture("SY-X-06");
+  expect(canonical).toBe(String.raw`\text{(entrada de 10 000 caracteres)}`);
+  const source = "1+".repeat(4999) + "11";
+  expect(source).toHaveLength(10000);
+  await enter(field, source);
+  const responsePromise = page.waitForResponse((response) => response.url().endsWith("/api/v1/evaluate") && response.request().method() === "POST");
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  const response = await responsePromise;
+  expect(response.request().postDataJSON().expression).toBe(source);
+  expect(response.status()).toBe(422);
+  const rejected = await response.json();
+  expect(rejected.success).toBe(false);
+  expect(rejected.error_code).toBe("VALIDATION_ERROR");
+  expect(rejected.result_latex).toBeNull();
+  await expect(page.getByRole("alert")).toContainText("Entrada demasiado larga: el máximo permitido es de 500 caracteres.");
+  const recovered = await evaluate(page, field, "2+3", 5);
+  const reentered = await evaluate(page, field, recovered.reentry, 5);
+  expect(new Set([rejected.request_id, recovered.requestId, reentered.requestId]).size).toBe(3);
+  expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-06-native-length-evidence", {
+    body: JSON.stringify({ canonical, project: testInfo.project.name, sourceLength: source.length,
+      source, rejected, recovered, reentered, errors }, null, 2),
+    contentType: "application/json",
+  });
+});
+
 const rejectionMessages: Record<string, string> = {
   "SY-X-01": "La expresión no puede estar vacía.",
   "SY-X-02": "La expresión no puede estar vacía.",
