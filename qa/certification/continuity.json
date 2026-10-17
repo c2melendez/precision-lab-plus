@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 39,
+  "revision": 40,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
   "baseline_case": "SY-X-17",
-  "baseline_status": "WAIT_CI",
+  "baseline_status": "VERIFIED_WITH_BLOCKERS",
   "global_certification": "OPEN",
   "prose_only_paths": [
     "README.md",
@@ -91,34 +91,34 @@
   },
   "evidence_by_channel": {
     "converter": {
-      "run_id": 39016375092,
-      "job_id": 117349222345,
-      "technical_sha": "7bca63077a2225103c515c53d94a6002293835d6",
+      "run_id": 39017316970,
+      "job_id": 117351992852,
+      "technical_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
       "status": "PASS_SCOPED",
       "counts": {
-        "pass": 1005,
+        "pass": 1006,
         "todo": 28
       },
       "logs_reviewed": true,
       "evidence_executed": true
     },
     "http": {
-      "run_id": 39016375092,
-      "job_id": 117349222025,
-      "technical_sha": "7bca63077a2225103c515c53d94a6002293835d6",
+      "run_id": 39017316970,
+      "job_id": 117351992989,
+      "technical_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
       "status": "PASS_SCOPED",
       "counts": {
-        "pass": 1482,
+        "pass": 1490,
         "xfail": 3
       },
       "logs_reviewed": true,
       "evidence_executed": true,
-      "coverage": 88.11
+      "coverage": 88.13
     },
     "native_ui": {
-      "run_id": 39016375110,
-      "job_id": 117349222242,
-      "technical_sha": "7bca63077a2225103c515c53d94a6002293835d6",
+      "run_id": 39017316988,
+      "job_id": 117351992906,
+      "technical_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
       "status": "PASS_SCOPED",
       "cases": [
         "SY-R-13",
@@ -138,10 +138,11 @@
         "SY-X-12",
         "SY-X-14",
         "SY-X-15",
-        "SY-X-16"
+        "SY-X-16",
+        "SY-X-17"
       ],
       "counts": {
-        "pass": 60,
+        "pass": 63,
         "skip": 0
       },
       "profiles": [
@@ -151,11 +152,12 @@
       ],
       "logs_reviewed": true,
       "evidence_executed": true,
-      "acceptance_revision": "2026-10-17-native-through-X16-file-command-v1",
+      "acceptance_revision": "2026-10-17-native-through-X17-shell-command-v1",
       "case_scopes": {
         "SY-X-14": "Readable AST-limit rejection and real recovery only; mathematical oracle remains BLOCKED",
         "SY-X-15": "Original script-in-text inert/error; zero recorded payload-script nodes/dialogs/pageerrors; actual recovery/reentry. Separate positive detector control in closed ShadowRoot, not a general XSS audit.",
-        "SY-X-16": "Original input command rejection and recovery; zero target requests/dialogs/downloads/filechooser/pageerrors. Target requests would be blocked and fail, not counted as absent. Separate synthetic sentinel control."
+        "SY-X-16": "Original input command rejection and recovery; zero target requests/dialogs/downloads/filechooser/pageerrors. Target requests would be blocked and fail, not counted as absent. Separate synthetic sentinel control.",
+        "SY-X-17": "Original shell escape rejected; no mathematical result; zero unexpected browser side effects and real recovery/reentry. Plus local guard blocks conversion and invalid HTTP POST; raw HTTP audit process guard proved separately. Not a universal OS execution audit."
       },
       "probe_controls_by_case": {
         "SY-X-15": {
@@ -170,43 +172,45 @@
       }
     },
     "frontend_unit": {
-      "run_id": 39016375092,
-      "job_id": 117349222345,
-      "technical_sha": "7bca63077a2225103c515c53d94a6002293835d6",
+      "run_id": 39017316970,
+      "job_id": 117351992852,
+      "technical_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
       "status": "PASS_SCOPED",
       "counts": {
-        "pass": 1005,
+        "pass": 1006,
         "todo": 28
       },
       "logs_reviewed": true,
       "evidence_executed": true
     },
     "backend_http": {
-      "run_id": 39016375092,
-      "job_id": 117349222025,
-      "technical_sha": "7bca63077a2225103c515c53d94a6002293835d6",
+      "run_id": 39017316970,
+      "job_id": 117351992989,
+      "technical_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
       "status": "PASS_SCOPED",
       "counts": {
-        "pass": 1482,
+        "pass": 1490,
         "xfail": 3
       },
       "logs_reviewed": true,
       "evidence_executed": true,
-      "coverage": 88.11
+      "coverage": 88.13
     },
     "mutation_frontend_initial_run": {
-      "run_id": 38992878879,
-      "job_id": 117278879294,
-      "technical_sha": "cc89d7ccd36dfdfe15b14e72215920c62508ab00",
+      "run_id": 39017316967,
+      "job_id": 117351992865,
+      "technical_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
       "status": "PASS_HARNESS_ONLY",
-      "initial_tests": 759,
+      "initial_tests": 760,
+      "instrumented_mutants": 2627,
       "mutations_tested": false,
-      "mutation_score": null
+      "mutation_score": null,
+      "logs_reviewed": true
     },
     "h1d": {
-      "run_id": 39016375096,
-      "job_id": 117349221975,
-      "technical_sha": "7bca63077a2225103c515c53d94a6002293835d6",
+      "run_id": 39017316999,
+      "job_id": 117351992972,
+      "technical_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
       "status": "PASS_SCOPED",
       "counts": {
         "pass": 38
@@ -226,22 +230,22 @@
       "evidence_executed": true
     },
     "campaign_routing": {
-      "run_id": 38991931463,
-      "job_id": 117275993798,
-      "technical_sha": "ff647a581a4a6d9b5423231ded44c3bc5fbb3088",
+      "run_id": 39017317053,
+      "job_id": 117351993121,
+      "technical_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
       "status": "PASS_ROUTING_HARNESS_ONLY",
       "mechanism_tests": 56,
-      "actual_campaign_jobs_executed": 0,
+      "logs_reviewed": true,
+      "mutations_executed": false,
+      "security_executed": false,
       "decisions": {
         "security_frontend": "NOT_SELECTED",
         "security_backend": "NOT_SELECTED",
-        "mutation_frontend": "NOT_SELECTED",
+        "mutation_frontend": "RUN",
         "mutation_backend": "NOT_SELECTED",
         "mutation_lite": "NOT_SELECTED"
       },
-      "logs_reviewed": true,
-      "mutations_executed": false,
-      "security_executed": false
+      "scope": "Frontend campaign job117352038619 still in progress at snapshot; no score or S19 closure inferred"
     },
     "sg28_isolation": {
       "run_id": 38992878918,
@@ -256,20 +260,20 @@
     }
   },
   "next_action": {
-    "id": "SY-X-17-BILATERAL",
-    "status": "WAIT_CI",
+    "id": "SY-X-18-BILATERAL",
+    "status": "READY",
     "repository": "c2melendez/precision-lab-plus",
     "paired_repository": "c2melendez/precision-lab-lite",
     "files": [
       "qa/certification/syntax309_cases.jsonl"
     ],
-    "action": "Inspect existing exact-SHA X17 runs and jobs/logs; do not dispatch duplicates or mark PASS before native/cumulative/H1d evidence completes.",
+    "action": "First reconcile existing Plus campaign39017317053/job117352038619 without duplicate dispatch. Then verify exact original __import__('os').system('ls') syntax-error fixture safely in independent bilateral case; inspect parsing/evaluation routes, detect and prevent would-be process launches with synthetic controls. Never invoke ls or evaluate untrusted Python code as a control. Confirm raw Worker/HTTP rejection and native MathLive source/recovery/reentry on3Chromium profiles. Preserve blockers.",
     "exit_criteria": [
-      "Pin exact original source and no-execution oracle unchanged",
-      "Detect would-be subprocess/shell launches with safe instrumentation; synthetic detector controls must not execute real commands",
-      "Clear ignored-command/rejection outcome without a false mathematical result and no unexpected native side effects",
-      "Actual tested parser/Worker/HTTP routes and MathLive desktop/tablet/mobile recovery/reentry, distinct IDs",
-      "Review exact-SHA jobs/logs; synchronize bilateral ledger, preserve existing blockers and avoid redundant Actions/campaigns"
+      "Original fixture and syntax-error/no-execution oracle unchanged",
+      "Safe detection with synthetic positive controls, zero product launch attempts; no actual command executed by tests",
+      "Applicable parser/Worker/HTTP and native3profile evidence, finite recovery/reentry and distinct IDs",
+      "Review exact-SHA required jobs/logs and synchronize bilateral state; record pending campaign status, no inferred mutation score",
+      "No unchanged-blocker retries or duplicate Actions; global certification remains OPEN until all contracts close"
     ]
   },
   "blockers": [
@@ -347,54 +351,36 @@
   ],
   "work_in_progress": {
     "id": "SY-X-17-BILATERAL",
-    "status": "WAIT_CI",
+    "status": "VERIFIED_SCOPED",
     "technical_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
     "paired_technical_sha": "82a83c430a779eaa344be5be7644c9a38bfedc26",
     "runs": [
       {
-        "id": 39017316970,
-        "workflow": ".github/workflows/in625-cumulative-certification.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39017316970",
-        "logs_reviewed": false,
-        "evidence_executed": false
-      },
-      {
         "id": 39017316999,
         "workflow": ".github/workflows/in625-h1d-reentry.yml",
-        "status": "in_progress",
-        "conclusion": null,
+        "status": "completed",
+        "conclusion": "success",
         "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39017316999",
-        "logs_reviewed": false,
-        "evidence_executed": false
+        "logs_reviewed": true,
+        "evidence_executed": true
       },
       {
         "id": 39017316988,
         "workflow": ".github/workflows/in625-syntax-native.yml",
-        "status": "in_progress",
-        "conclusion": null,
+        "status": "completed",
+        "conclusion": "success",
         "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39017316988",
-        "logs_reviewed": false,
-        "evidence_executed": false
+        "logs_reviewed": true,
+        "evidence_executed": true
       },
       {
-        "id": 39017316967,
-        "workflow": ".github/workflows/s19-plus-frontend-preflight.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39017316967",
-        "logs_reviewed": false,
-        "evidence_executed": false
-      },
-      {
-        "id": 39017317053,
-        "workflow": ".github/workflows/certification-dependency-gates.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39017317053",
-        "logs_reviewed": false,
-        "evidence_executed": false
+        "id": 39017316970,
+        "workflow": ".github/workflows/in625-cumulative-certification.yml",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39017316970",
+        "logs_reviewed": true,
+        "evidence_executed": true
       }
     ],
     "diagnosis": {
@@ -737,6 +723,58 @@
         "real_target_file_never_opened_by_test": true
       },
       "limitations": "Canonical fixture and tested paths only; browser target requests and Python open audit events, not all filesystem/kernel APIs or OS/engines/keys/Reuse button. Native local rejection does not claim an invalid HTTP/Worker call; raw handler/endpoint proved separately. Synthetic controls do not fetch/read actual target."
+    },
+    "SY-X-17": {
+      "status": "PASS_SCOPED",
+      "original_source": "\\write18{ls}",
+      "oracle": "ignorado o rechazado; sin ejecución",
+      "technical_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
+      "paired_technical_sha": "82a83c430a779eaa344be5be7644c9a38bfedc26",
+      "native_run": 39017316988,
+      "cumulative_run": 39017316970,
+      "h1d_run": 39017316999,
+      "profiles": [
+        "desktop-chromium",
+        "tablet-chromium",
+        "mobile-chromium"
+      ],
+      "local_evidence": "HTTP original rejects under process-launch audit guard; 7 synthetic detector controls without process execution. Frontend converter regression red before fix, green after.",
+      "native_assertions": {
+        "original_command_identifiable": true,
+        "clear_rejection_no_math_result": true,
+        "dialogs": 0,
+        "downloads": 0,
+        "filechoosers": 0,
+        "pageerrors": 0,
+        "recovery_distinct_success_ids": 2,
+        "invalid_http_posts": 0
+      },
+      "backend_assertions": {
+        "repository": "c2melendez/precision-lab-plus",
+        "job_id": 117351992989,
+        "process_launch_audit_attempts": 0,
+        "synthetic_controls": 7,
+        "real_command_never_executed_by_control": true,
+        "events": [
+          "subprocess.Popen",
+          "os.system",
+          "os.posix_spawn",
+          "os.exec",
+          "os.spawn",
+          "os.fork",
+          "pty.spawn"
+        ]
+      },
+      "diagnosis": {
+        "classification": "PRODUCT_CONVERSION",
+        "failed_run": 39017066935,
+        "failed_job": 117351282488,
+        "failed_sha": "67b9ca8eb32edf282608e73fcf225ebdd06fda4b",
+        "observed": "MathLive ASCII conversion erases TeX write macro, yields 18l s and false algebraic result; no command execution proven",
+        "correction_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
+        "regression": "Frontend converter rejects write command before ASCII conversion; new test reproduced red then passes. Native requires explicit local rejection and no invalid HTTP POST."
+      },
+      "limitations": "Canonical fixture and tested default routes only; Python launch audit events are not universal kernel/C-extension coverage. Browser probe measures side effects, not server processes. Isolation opt-in, all commands/OS/engines/keys/Reuse button not certified."
     }
   },
   "verification_proofs": {
@@ -801,6 +839,24 @@
       "technical_sha": "7bca63077a2225103c515c53d94a6002293835d6",
       "new_dependency_mutation_campaigns": 0,
       "product_engine_renderer_changes": 0
+    },
+    "x17_scope": {
+      "canonical_fixture_preserved": true,
+      "native_profiles": 3,
+      "backend_synthetic_launch_controls": 7,
+      "process_launch_attempts_zero": true,
+      "real_command_not_invoked": true,
+      "logs_reviewed": true,
+      "technical_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
+      "product_correction": "Reject TeX write before lossy MathLive ASCII conversion",
+      "initial_plus_native_failure": 39017066935,
+      "corrected_plus_native_success": 39017316988,
+      "scoped_gates": [
+        "cumulative",
+        "h1d",
+        "syntax_native"
+      ],
+      "pending_s19_campaign": 39017317053
     }
   },
   "historical_mutation_reference": {
@@ -1041,5 +1097,21 @@
     "verified_branch": "qa/syntax-audit-in625-a1",
     "evidence": "Current exact-SHA Actions head_branch plus mutually matching canonical_branch in paired ledgers",
     "fallback_documented": true
-  }
+  },
+  "pending_campaigns": [
+    {
+      "repository": "c2melendez/precision-lab-plus",
+      "run_id": 39017317053,
+      "job_id": 117352038619,
+      "technical_sha": "02a8f689aac5d4583a35edaa722851d344b27419",
+      "profile": "mutation_frontend",
+      "status": "in_progress",
+      "conclusion": null,
+      "input_fingerprint": "82373a097f9762093ad1fa9620f3b3c9695f55c361ab2156d134a518b5a78d73",
+      "observed_at": "2026-10-17T08:31:08.553Z",
+      "logs_reviewed": false,
+      "mutation_score": null,
+      "instruction": "Refresh existing run/jobs/logs before other work; WAIT while active, diagnose non-success, review actual final report if completed. Do not dispatch equivalent campaign. X17 scoped acceptance is separate from integral S19."
+    }
+  ]
 }
