@@ -1,5 +1,8 @@
 # Estado vigente de certificación — Precision Lab Lite / Plus
 
+## SY-X-22 execution
+Plus HTTP test commit 04da8cc6b55e9be0764bdf9a594c51b4008db07c. CI cumulative 39066547036 and H1d 39066547016 were IN_PROGRESS; not PASS. Next: review logs, then Lite Worker and native bilateral verification. Global OPEN.
+
 ## 2026-10-17: cierre SY-X-21 y apertura SY-X-22
 SY-X-21 PASS acotado bilateral por evidencia ejecutada: Lite native 39062504109 (453 PASS), cumulative 39062504182 SUCCESS; Plus native 39066027440 (25 desktop + 50 tablet/mobile PASS), cumulative 39066027444 SUCCESS (backend 1494 PASS/3 XFAIL, frontend 1006 PASS/28 TODO), H1d 39066027416 (38 PASS). SHA técnico Lite 526f1150173a166eb280b75f257bb0165015a8a1; Plus a81b2487e0e41fa1ec099bce26673aff1e7f9d0e.
 Objetivo siguiente SY-X-22-BILATERAL IN_PROGRESS: entero de 10000 dígitos + 1; suma exacta o aviso de tamaño, nunca valor flotante. Implementar y verificar parser/Worker/HTTP/nativo, recuperación y tres perfiles, registrar SHA y logs. Global OPEN; TODO/XFAIL y S19/S25/SG28/DIST siguen pendientes.
