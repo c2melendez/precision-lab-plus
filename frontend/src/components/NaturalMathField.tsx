@@ -566,6 +566,11 @@ function normalizeLocalizedLatexAliases(input: string): string {
 }
 
 export function latexToBackendSyntax(latex: string): string {
+  // Reject TeX output commands before the ASCII converter erases the macro
+  // and misrepresents its arguments as an ordinary mathematical product.
+  if (/\\write(?![A-Za-z])/.test(latex)) {
+    throw new Error("Comando TeX no permitido: write no es una operación matemática.");
+  }
   // SY-X-02: detect layout-only source before trimming its final escaped space.
   if (!latex.replace(/\\(?:[,;!: ]|qquad\b|quad\b)/g, "").trim()) return "";
   // SY-X-03: a bare row separator or incomplete command is not empty input.

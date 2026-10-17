@@ -381,12 +381,14 @@ test("SY-X-17 original shell escape command is rejected, then HTTP recovery",asy
   const source=fixture("SY-X-17");expect(source).toBe(String.raw`\write18{ls}`);
   await field.evaluate((node,value)=>{(node as HTMLElement & {setValue(v:string):void}).setValue(value);node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));},source);
   const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
-  expect(serialized).toContain("write");expect(serialized).toContain("ls");
+  expect(serialized).toContain("write");expect(serialized).toContain("18");expect(serialized).toContain("ls");
   const ingestion=probe.assertNoAccess();
   await page.getByRole("button",{name:"Evaluar",exact:true}).click();
   const alerts=page.getByRole("alert");await expect(alerts.first()).toBeVisible();
   const notice=(await alerts.allInnerTexts()).join(" ");expect(notice.trim()).not.toBe("");
   await expect(page.locator(".a11y-scale-result-lg")).toHaveCount(0);
+  expect(notice).toContain("Comando TeX no permitido");
+  expect(requests).toHaveLength(0); // local rejection must not fabricate invalid HTTP evidence
   const rejected=probe.assertNoAccess();const invalidRequests=requests.length;
   const recovered=await evaluate(page,field,"2+3",5);
   const reentered=await evaluate(page,field,recovered.reentry,5);
