@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "revision": 22,
+  "revision": 23,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "122711fc0161468d8cb619b6ad2aa9a88295b5eb",
+  "technical_baseline_sha": "948d6dbb501e79b9e4fca13548586ca7a88d9a80",
   "baseline_case": "SY-X-08",
   "baseline_status": "WAIT_CI",
   "global_certification": "OPEN",
@@ -298,46 +298,43 @@
   "work_in_progress": {
     "id": "SY-X-08-BILATERAL",
     "status": "WAIT_CI",
-    "technical_sha": "122711fc0161468d8cb619b6ad2aa9a88295b5eb",
+    "technical_sha": "948d6dbb501e79b9e4fca13548586ca7a88d9a80",
     "paired_technical_sha": "378510f0092d4c50c321fc59ce1abb87e732aa72",
     "runs": [
       {
-        "id": 38995800990,
-        "workflow": ".github/workflows/certification-dependency-gates.yml",
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38995800990",
-        "logs_reviewed": false,
-        "evidence_executed": false
-      },
-      {
-        "id": 38995800998,
-        "workflow": ".github/workflows/in625-cumulative-certification.yml",
-        "status": "queued",
-        "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38995800998",
-        "logs_reviewed": false,
-        "evidence_executed": false
-      },
-      {
-        "id": 38995800975,
+        "id": 38995949509,
         "workflow": ".github/workflows/in625-h1d-reentry.yml",
         "status": "in_progress",
         "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38995800975",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38995949509",
         "logs_reviewed": false,
         "evidence_executed": false
       },
       {
-        "id": 38995800956,
+        "id": 38995949507,
+        "workflow": ".github/workflows/in625-cumulative-certification.yml",
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38995949507",
+        "logs_reviewed": false,
+        "evidence_executed": false
+      },
+      {
+        "id": 38995949534,
         "workflow": ".github/workflows/in625-syntax-native.yml",
         "status": "in_progress",
         "conclusion": null,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38995800956",
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/38995949534",
         "logs_reviewed": false,
         "evidence_executed": false
       }
-    ]
+    ],
+    "harness_diagnosis": {
+      "run": 38995800956,
+      "status": "CORRECTED_ORACLE_PENDING_CI",
+      "detail": "i and actual output reentry passed; i^2 control returned exact -1 but KaTeX displayed U+2212. Normalize minus only in visible-number oracle; no product change.",
+      "corrected_sha": "948d6dbb501e79b9e4fca13548586ca7a88d9a80"
+    }
   },
   "cases": {
     "SY-X-03": {
@@ -607,6 +604,17 @@
       "source_sha": "6cbec7645b73ad18875d4472182c704eb35228b0",
       "score": 10.32,
       "scope": "Latest completed pinned reference; not current Lite HEAD, not full S19 closure"
+    },
+    {
+      "profile": "mutation_backend",
+      "run_id": 38992878940,
+      "job_id": 117278929669,
+      "input_fingerprint": "f61eccd70346ca5f49a6c16a84c91884ab8aa43a179824a4b00f7b645e38b267",
+      "logs_reviewed": true,
+      "mutations_executed": true,
+      "source_repository": "c2melendez/precision-lab-plus",
+      "source_sha": "cc89d7ccd36dfdfe15b14e72215920c62508ab00",
+      "scope": "Actual mutmut execution under existing job acceptance only; no global S19 score inferred"
     }
   ]
 }
