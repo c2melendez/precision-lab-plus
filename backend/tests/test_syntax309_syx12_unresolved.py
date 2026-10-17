@@ -8,7 +8,7 @@ from app.services import integral_service as svc
 def test_syx12_canonical_integral_unevaluated_is_flagged_not_invented():
     rows=(Path(__file__).resolve().parents[2]/"qa/certification/syntax309_cases.jsonl").read_text().splitlines()
     case=next(json.loads(line) for line in rows if json.loads(line)["id"]=="SY-X-12")
-    assert case["entrada"]==r"\\int\\sin\\left(x^{x}\\right)dx"
+    assert case["entrada"]==r"\int\sin\left(x^{x}\right)dx"
     assert case["esperado"]=="sin forma elemental: aviso claro; no una antiderivada inventada"
     x=sp.Symbol("x")
     integrand=sp.sin(x**x)
