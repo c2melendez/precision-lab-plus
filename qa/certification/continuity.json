@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 49,
+  "revision": 50,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "102c5beddefe61adb09e255cf647dc9dd4c9aec8",
@@ -264,17 +264,16 @@
     }
   },
   "next_action": {
-    "id": "SY-P-23-CONVENTION-DECISION",
-    "status": "BLOCKED_ON_CONTRACT",
-    "action": "Formalize a declared mathematical convention for bare a/bc or explicit user selection that preserves named bc in Plus and single-letter b*c in Lite. Prioritize another independent actionable certification objective without rerunning unchanged SY-P-23 evidence.",
+    "id": "ALGEBRA114-SOURCE-INVENTORY",
+    "status": "PREPARATORY",
     "files": [
-      "qa/certification/SY_P_23_CONVENTION.md",
-      "qa/certification/syntax309_cases.jsonl"
+      "qa/certification/ALGEBRA114_PREPARATION.md"
     ],
+    "action": "Find authoritative versioned Algebra114 case source, count oracle/IDs and map Lite/Plus coverage before running any tests. Retain SY-P-23 contract blocker.",
     "exit_criteria": [
-      "An accepted cross-product decision on ambiguity and compound identifiers",
-      "Exact-source UI/parser/Worker/HTTP regression evidence for that decision",
-      "Preserve existing strict XFAIL and global OPEN until these criteria are met"
+      "Verify 114-case provenance",
+      "Identify first testable requirement",
+      "Maintain global OPEN"
     ]
   },
   "blockers": [
