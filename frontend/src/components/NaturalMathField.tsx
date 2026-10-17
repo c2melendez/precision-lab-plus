@@ -22,6 +22,7 @@ import type { MathfieldElement, MathfieldElementAttributes } from "mathlive";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { validateExponentSource } from "./exponentSourceValidation";
 import { parseInlineBinding } from "./inlineBinding";
+import { isIndeterminateInfinityDifference } from "./infinityDifference";
 
 function normalizeExternalSyntaxF3c(input: string): string {
   let out = input.trim();
@@ -571,6 +572,9 @@ export function latexToBackendSyntax(latex: string): string {
   // MathLive's ASCII converter can otherwise erase it before validation.
   if (/^[\\\s]+$/.test(latex)) {
     throw new Error("Sintaxis incompleta: las barras invertidas necesitan un comando o una expresión.");
+  }
+  if (isIndeterminateInfinityDifference(latex)) {
+    throw new Error("Forma indeterminada: infinito menos infinito no está definido.");
   }
   // SY-R-12: prose is not a valid mathematical expression.
   if (latex.replace('\\text', '').replace('\\mathrm', '').replace('{', '').replace('}', '').trim().toLowerCase() === 'no existe') {

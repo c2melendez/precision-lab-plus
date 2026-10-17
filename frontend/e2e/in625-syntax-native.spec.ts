@@ -186,6 +186,7 @@ const rejectionMessages: Record<string, string> = {
   "SY-X-02": "La expresión no puede estar vacía.",
   "SY-X-03": "Sintaxis incompleta",
   "SY-R-12": "Entrada no matemática: escribe una expresión válida.",
+  "SY-X-07": "Forma indeterminada: infinito menos infinito no está definido.",
 };
 
 for (const id of Object.keys(rejectionMessages)) {
@@ -204,6 +205,7 @@ for (const id of Object.keys(rejectionMessages)) {
     const canonical = fixture(id);
     if (id === "SY-X-01") expect(canonical).toBe("*(vacía)*");
     if (id === "SY-R-12") expect(canonical).toBe(String.raw`\text{no existe}`);
+    if (id === "SY-X-07") expect(canonical).toBe(String.raw`\infty-\infty`);
     const source = id === "SY-X-01" ? "" : canonical;
     for (let cycle = 0; cycle < 2; cycle += 1) {
       const before = sent.length;
@@ -213,8 +215,9 @@ for (const id of Object.keys(rejectionMessages)) {
       await expect(alert).toContainText(rejectionMessages[id]);
       if (id === "SY-X-03" || id === "SY-R-12") await expect(alert).not.toContainText("vacía");
       expect(sent).toHaveLength(before); // local validation must not fabricate backend evidence
-      const expected = cycle === 0 ? 5 : 9;
-      const first = await evaluate(page, field, cycle === 0 ? "2+3" : "4+5", expected);
+      const expected = id === "SY-X-07" ? (cycle === 0 ? 0 : 5) : cycle === 0 ? 5 : 9;
+      const recovery = id === "SY-X-07" ? (cycle === 0 ? "3-3" : "2+3") : cycle === 0 ? "2+3" : "4+5";
+      const first = await evaluate(page, field, recovery, expected);
       const second = await evaluate(page, field, first.reentry, expected);
       expect(second.requestId).not.toBe(first.requestId);
       expect(sent).toHaveLength(before + 2);

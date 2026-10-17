@@ -149,6 +149,23 @@ def normalize_inline_substitution(
     return expression, substitutions
 
 
+def _is_literal_infinite_difference(source: str) -> bool:
+    normalized = re.sub(r"\\(?:left|right)(?=[()])", "", source)
+    normalized = re.sub(r"\\infty\b|∞|\bInfinity\b", "oo", normalized)
+    normalized = re.sub(r"\s", "", normalized)
+    depth = 0
+    for char in normalized:
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth < 0:
+                return False
+    if depth:
+        return False
+    return normalized.replace("(", "").replace(")", "") in {"oo-oo", "-oo--oo"}
+
+
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
@@ -168,6 +185,8 @@ def evaluate(
         expression = "sin(pi/6)"
 
     expression, substitutions = normalize_inline_substitution(expression, substitutions)
+    if _is_literal_infinite_difference(expression):
+        raise DomainErrorResult("Forma indeterminada: infinito menos infinito no está definido.")
 
     # SY-S-12: Spanish root-function alias. Keep the same safe parser and
     # domain rules as sqrt(); never evaluate arbitrary user code.
