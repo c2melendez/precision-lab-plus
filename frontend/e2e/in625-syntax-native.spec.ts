@@ -271,3 +271,35 @@ for (const id of Object.keys(rejectionMessages)) {
     });
   });
 }
+
+
+test("SY-X-09 native extreme power bounded HTTP rejection and finite reentry", async ({ page }, testInfo) => {
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  await expect(field).toBeVisible();
+  const source = fixture("SY-X-09");
+  expect(source).toBe("99999999999^{99999999999}");
+  await enter(field, source);
+  const responsePromise = page.waitForResponse(response =>
+    response.url().endsWith("/api/v1/evaluate") && response.request().method() === "POST");
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  const response = await responsePromise;
+  expect(response.status()).toBe(200);
+  expect(response.request().postDataJSON().expression).toBe("99999999999^99999999999");
+  const rejected = await response.json();
+  expect(rejected.success).toBe(false);
+  expect(rejected.error_code).toBe("COMPLEXITY_LIMIT");
+  expect(rejected.result_latex).toBeNull();
+  expect(rejected.result_text).toBeNull();
+  await expect(page.getByRole("alert")).toContainText("COMPLEXITY_LIMIT");
+  const recovery = await evaluate(page, field, "2+3", 5);
+  const reentry = await evaluate(page, field, recovery.reentry, 5);
+  expect(new Set([rejected.request_id, recovery.requestId, reentry.requestId]).size).toBe(3);
+  expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-09-native-http-evidence", {
+    body: JSON.stringify({ source, project:testInfo.project.name, rejected, recovery, reentry, errors }, null, 2),
+    contentType:"application/json",
+  });
+});
