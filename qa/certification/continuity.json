@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 35,
+  "revision": 36,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "298a3c48a9cc140142852242aa88a481d4dcc311",
-  "baseline_case": "SY-X-15",
-  "baseline_status": "VERIFIED_WITH_BLOCKERS",
+  "technical_baseline_sha": "7bca63077a2225103c515c53d94a6002293835d6",
+  "baseline_case": "SY-X-16",
+  "baseline_status": "WAIT_CI",
   "global_certification": "OPEN",
   "prose_only_paths": [
     "README.md",
@@ -249,13 +249,13 @@
   },
   "next_action": {
     "id": "SY-X-16-BILATERAL",
-    "status": "READY",
+    "status": "WAIT_CI",
     "repository": "c2melendez/precision-lab-plus",
     "paired_repository": "c2melendez/precision-lab-lite",
     "files": [
       "qa/certification/syntax309_cases.jsonl"
     ],
-    "action": "Verify original LaTeX input command targeting /etc/passwd is ignored/rejected without file reading. Inspect parser/render paths first; detect attempted access with safe instrumentation rather than reading the real host file. Confirm original MathLive ingestion, applicable Worker/HTTP behavior, finite recovery/reentry and3Chromium profiles. Inspect existing scoped runs and do not repeat blocked campaigns.",
+    "action": "Inspect existing exact-SHA X16 native/cumulative/H1d runs; no duplicate dispatch. Require original command rejection, zero observed target requests/file-open attempts and actual finite recovery. Synthetic positive controls must be distinguished from product behavior.",
     "exit_criteria": [
       "Pin exact original source and no-file-read oracle unchanged",
       "No host-file contents read or displayed; detect any attempted access using controlled spies/synthetic sentinels without exposing actual files",
@@ -338,37 +338,37 @@
     }
   ],
   "work_in_progress": {
-    "id": "SY-X-15-BILATERAL",
-    "status": "VERIFIED_SCOPED",
-    "technical_sha": "298a3c48a9cc140142852242aa88a481d4dcc311",
-    "paired_technical_sha": "102bc45292f449854dc30bbdedaaac88d1cb64cc",
+    "id": "SY-X-16-BILATERAL",
+    "status": "WAIT_CI",
+    "technical_sha": "7bca63077a2225103c515c53d94a6002293835d6",
+    "paired_technical_sha": "b12aecc02f06086f1d4d8da91a26bd7b3bc3ae4f",
     "runs": [
       {
-        "id": 39015624876,
-        "workflow": ".github/workflows/in625-h1d-reentry.yml",
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39015624876",
-        "logs_reviewed": true,
-        "evidence_executed": true
-      },
-      {
-        "id": 39015624925,
-        "workflow": ".github/workflows/in625-cumulative-certification.yml",
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39015624925",
-        "logs_reviewed": true,
-        "evidence_executed": true
-      },
-      {
-        "id": 39015624985,
+        "id": 39016375110,
         "workflow": ".github/workflows/in625-syntax-native.yml",
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39015624985",
-        "logs_reviewed": true,
-        "evidence_executed": true
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39016375110",
+        "logs_reviewed": false,
+        "evidence_executed": false
+      },
+      {
+        "id": 39016375096,
+        "workflow": ".github/workflows/in625-h1d-reentry.yml",
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39016375096",
+        "logs_reviewed": false,
+        "evidence_executed": false
+      },
+      {
+        "id": 39016375092,
+        "workflow": ".github/workflows/in625-cumulative-certification.yml",
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39016375092",
+        "logs_reviewed": false,
+        "evidence_executed": false
       }
     ]
   },
@@ -668,6 +668,13 @@
         "native_recovery_distinct_success_ids": 2
       },
       "limitations": "One canonical fixture and tested UI/error/result/recovery paths only; no universal XSS audit or all keys/OS/engines/Reuse-button claim. Raw HTTP/Worker rejection is separate from native local rejection; detector control is not payload execution in product."
+    },
+    "SY-X-16": {
+      "status": "WAIT_CI",
+      "original_source": "\\input{/etc/passwd}",
+      "oracle": "ignored or rejected; no file reading",
+      "local_evidence": "Lite parser and raw actual Worker handler reject; Plus HTTP rejects under Python open audit guard with zero target attempts and finite recovery",
+      "guard_scope": "Python open audit events and browser target requests. Native guard blocks any target request, records it and fails product test if observed; positive control uses only nonexistent synthetic path. No real target file is opened/read by tests."
     }
   },
   "verification_proofs": {
