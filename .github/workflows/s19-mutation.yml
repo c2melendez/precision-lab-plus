@@ -2,6 +2,19 @@ name: S19 Mutation Baseline
 
 on:
   workflow_call:
+    inputs:
+      run_frontend:
+        type: boolean
+        default: true
+      run_backend:
+        type: boolean
+        default: true
+      run_lite:
+        type: boolean
+        default: true
+      reason:
+        type: string
+        default: ''
   pull_request:
     paths:
       - "backend/**"
@@ -9,12 +22,34 @@ on:
       - "qa/s19/**"
       - ".github/workflows/s19-mutation.yml"
   workflow_dispatch:
+    inputs:
+      reason:
+        description: Reason for full mutation revalidation
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
+  validate-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate explicit revalidation reason
+        env:
+          EVENT: ${{ github.event_name }}
+          REASON: ${{ inputs.reason }}
+        run: |
+          python3 - <<'PYCODE'
+          import json, os
+          reason = os.environ.get("REASON", "")
+          if os.environ["EVENT"] == "workflow_dispatch" and not reason.strip():
+              raise SystemExit("Manual revalidation requires a nonempty reason")
+          print(json.dumps({"event": os.environ["EVENT"], "reason": reason}))
+          PYCODE
   plus-frontend-stryker:
+    needs: validate-request
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_frontend
     runs-on: ubuntu-latest
     timeout-minutes: 35
     defaults:
@@ -42,6 +77,8 @@ jobs:
           if-no-files-found: warn
 
   lite-frontend-stryker:
+    needs: validate-request
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_lite
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -76,6 +113,8 @@ jobs:
           if-no-files-found: warn
 
   plus-backend-mutmut:
+    needs: validate-request
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_backend
     runs-on: ubuntu-latest
     timeout-minutes: 40
     defaults:
