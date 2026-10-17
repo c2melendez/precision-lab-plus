@@ -419,6 +419,29 @@ test("SY-X-18 original Python-like command is rejected, then HTTP recovery",asyn
   const final=probe.assertNoAccess();
   await testInfo.attach("SY-X-18-native-python-command-evidence",{body:JSON.stringify({source,serialized,project:testInfo.project.name,notice,ingestion,rejected,final,requests,recovered,reentered},null,2),contentType:"application/json"});
 });
+test("SY-X-19 original file-read expression is rejected, then HTTP recovery",async({page},testInfo)=>{
+  const probe=await installFileProbe(page);
+  const requests:Array<{url:string;body:unknown}>=[];
+  page.on("request",request=>{if(request.url().includes("/api/v1/")&&request.method()==="POST")requests.push({url:request.url(),body:request.postDataJSON()});});
+  await page.goto("/");
+  const field=page.locator("math-field").first();await expect(field).toBeVisible();
+  const source=fixture("SY-X-19");expect(source).toBe(String.raw`open('/etc/passwd').read()`);
+  await field.evaluate((node,value)=>{(node as HTMLElement & {setValue(v:string):void}).setValue(value);node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));},source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  // Subscript/prime formatting may change, but every payload letter must survive in order.
+  expect(serialized.replace(/\\[A-Za-z]+/g,"").replace(/[^A-Za-z]/g,"")).toBe("openetcpasswdread");
+  const ingestion=probe.assertNoAccess();
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const alerts=page.getByRole("alert");await expect(alerts.first()).toBeVisible();
+  const notice=(await alerts.allInnerTexts()).join(" ");expect(notice.trim()).not.toBe("");
+  await expect(page.locator(".a11y-scale-result-lg")).toHaveCount(0);
+  const rejected=probe.assertNoAccess();const invalidRequests=requests.length;
+  const recovered=await evaluate(page,field,"2+3",5);
+  const reentered=await evaluate(page,field,recovered.reentry,5);
+  expect(recovered.requestId).not.toBe(reentered.requestId);expect(requests).toHaveLength(invalidRequests+2);
+  const final=probe.assertNoAccess();
+  await testInfo.attach("SY-X-19-native-file-read-evidence",{body:JSON.stringify({source,serialized,project:testInfo.project.name,notice,ingestion,rejected,final,requests,recovered,reentered},null,2),contentType:"application/json"});
+});
 
 const rejectionMessages: Record<string, string> = {
   "SY-X-01": "La expresión no puede estar vacía.",

@@ -2,28 +2,13 @@
 import os
 import sys
 import json
-from contextlib import contextmanager
 from pathlib import Path
 os.environ.setdefault("CORS_ORIGINS","http://localhost:5173")
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 
-@contextmanager
-def forbid_target_read():
-    attempts=[]
-    active=[True]
-    def audit(event,args):
-        if active[0] and event=="open" and args and isinstance(args[0],(str,bytes)):
-            path=os.path.normpath(os.fsdecode(args[0]))
-            if path=="/etc/passwd":
-                attempts.append(path)
-                raise PermissionError("SY-X-16 test guard: target access forbidden")
-    sys.addaudithook(audit)
-    try:
-        yield attempts
-    finally:
-        active[0]=False # audit hooks cannot be removed; inactive after this context
+from tests.file_access_probe import forbid_target_read
 
 def test_syx16_audit_guard_detects_synthetic_open_event_without_file_access():
     with forbid_target_read() as attempts:
