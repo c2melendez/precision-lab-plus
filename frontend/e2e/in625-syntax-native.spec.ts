@@ -40,7 +40,14 @@ async function evaluate(page: Page, field: Locator, source: string, expected: nu
   return {requestId: body.request_id as string, reentry: body.result_latex as string};
 }
 
-for (const id of ["SY-X-01", "SY-X-02", "SY-X-03"]) {
+const rejectionMessages: Record<string, string> = {
+  "SY-X-01": "La expresión no puede estar vacía.",
+  "SY-X-02": "La expresión no puede estar vacía.",
+  "SY-X-03": "Sintaxis incompleta",
+  "SY-R-12": "Entrada no matemática: escribe una expresión válida.",
+};
+
+for (const id of Object.keys(rejectionMessages)) {
   test(`${id} native source, readable local rejection and two real HTTP recoveries`, async ({ page }, testInfo) => {
     const pageErrors: string[] = [];
     const sent: Array<{ url: string; body: unknown }> = [];
@@ -55,14 +62,15 @@ for (const id of ["SY-X-01", "SY-X-02", "SY-X-03"]) {
     await expect(field).toBeVisible();
     const canonical = fixture(id);
     if (id === "SY-X-01") expect(canonical).toBe("*(vacía)*");
+    if (id === "SY-R-12") expect(canonical).toBe(String.raw`\text{no existe}`);
     const source = id === "SY-X-01" ? "" : canonical;
     for (let cycle = 0; cycle < 2; cycle += 1) {
       const before = sent.length;
       await enter(field, source);
       await page.getByRole("button", { name: "Evaluar", exact: true }).click();
       const alert = page.getByRole("alert");
-      await expect(alert).toContainText(id === "SY-X-03" ? "Sintaxis incompleta" : "La expresión no puede estar vacía.");
-      if (id === "SY-X-03") await expect(alert).not.toContainText("vacía");
+      await expect(alert).toContainText(rejectionMessages[id]);
+      if (id === "SY-X-03" || id === "SY-R-12") await expect(alert).not.toContainText("vacía");
       expect(sent).toHaveLength(before); // local validation must not fabricate backend evidence
       const expected = cycle === 0 ? 5 : 9;
       const first = await evaluate(page, field, cycle === 0 ? "2+3" : "4+5", expected);
