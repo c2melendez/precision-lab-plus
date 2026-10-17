@@ -2,27 +2,13 @@
 import os
 import sys
 import json
-from contextlib import contextmanager
 from pathlib import Path
 os.environ.setdefault("CORS_ORIGINS","http://localhost:5173")
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 
-LAUNCH_EVENTS=("subprocess.Popen","os.system","os.posix_spawn","os.exec","os.spawn","os.fork","pty.spawn")
-@contextmanager
-def forbid_process_launch():
-    attempts=[]
-    active=[True]
-    def audit(event,args):
-        if active[0] and event in LAUNCH_EVENTS:
-            attempts.append(event)
-            raise PermissionError("SY-X-17 test guard: process launch forbidden")
-    sys.addaudithook(audit)
-    try:
-        yield attempts
-    finally:
-        active[0]=False
+from tests.process_launch_probe import LAUNCH_EVENTS, forbid_process_launch
 
 @pytest.mark.parametrize("event",LAUNCH_EVENTS)
 def test_syx17_guard_detects_synthetic_launch_events_without_process(event):
