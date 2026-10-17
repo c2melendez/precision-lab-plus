@@ -303,3 +303,35 @@ test("SY-X-09 native extreme power bounded HTTP rejection and finite reentry", a
     contentType:"application/json",
   });
 });
+
+
+test("SY-X-10 native astronomical nested power rejects before expansion and recovers", async ({page}, testInfo) => {
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  await expect(field).toBeVisible();
+  const source = fixture("SY-X-10");
+  expect(source).toBe("10^{10^{10}}");
+  await enter(field, source);
+  const pending = page.waitForResponse(response =>
+    response.url().endsWith("/api/v1/evaluate") && response.request().method() === "POST");
+  await page.getByRole("button", {name:"Evaluar",exact:true}).click();
+  const response = await pending;
+  expect(response.status()).toBe(200);
+  expect(response.request().postDataJSON().expression.replace(/[()]/g,"")).toBe("10^10^10");
+  const rejected = await response.json();
+  expect(rejected.success).toBe(false);
+  expect(rejected.error_code).toBe("COMPLEXITY_LIMIT");
+  expect(rejected.result_text).toBeNull();
+  expect(rejected.result_latex).toBeNull();
+  await expect(page.getByRole("alert").filter({hasText:"COMPLEXITY_LIMIT"})).toContainText("COMPLEXITY_LIMIT");
+  const recovered = await evaluate(page,field,"2+3",5);
+  const reentered = await evaluate(page,field,recovered.reentry,5);
+  expect(new Set([rejected.request_id,recovered.requestId,reentered.requestId]).size).toBe(3);
+  expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-10-native-http-evidence",{
+    body:JSON.stringify({source,project:testInfo.project.name,rejected,recovered,reentered,errors},null,2),
+    contentType:"application/json"
+  });
+});
