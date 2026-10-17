@@ -118,6 +118,14 @@ async def integral(payload: IntegralRequest, request: Request) -> MathResponse:
     except integral_service.UnsupportedInfiniteBoundsError as exc:
         return _error(request, OperationType.INTEGRAL, ErrorCode.UNSUPPORTED_IN_PHASE_1, str(exc))
 
+    # SY-X-12: a formal Integral is not an antiderivative. Do not append
+    # '+ C' or present it as successful elementary integration.
+    if not result.is_definite and result.antiderivative.has(sympy.Integral):
+        return _error(
+            request, OperationType.INTEGRAL, ErrorCode.UNSUPPORTED_OPERATION,
+            "Sin forma elemental identificada; la integral permanece sin resolver.",
+        )
+
     warnings = list(result.warnings)
 
     if result.is_definite:
