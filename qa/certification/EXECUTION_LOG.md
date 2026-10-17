@@ -281,3 +281,7 @@ SY-X-20 preserva la fuente canónica `😀+1` (U+1F600,+,1) y el oráculo de err
 
 SY-X-21 es el siguiente objetivo en curso. La fuente oficial `1\u200b+\u200b2` contiene dos U+200B, y permite **3 o error claro**. Pruebas parser/HTTP publicadas con SHA Lite `c10082198564bbc393602a0cec9281a48c7f8fcd` y Plus `102c5beddefe61adb09e255cf647dc9dd4c9aec8`; acumulativos [Lite39060225578](https://github.com/c2melendez/precision-lab-lite/actions/runs/39060225578) y [Plus39060228785](https://github.com/c2melendez/precision-lab-plus/actions/runs/39060228785) SUCCESS, H1d correspondientes SUCCESS. **No está acreditado el caso bilateral completo**: falta prueba nativa deX21 en tres perfiles, revisión por canal Worker y recuperación de ese fixture. No repetir campañas ajenas ni contar evidencia reutilizada sin su SHA exacto. Global **OPEN**, % reconciliado ND; se conservan S19/S25, SG28/DIST, SY-X-04/14 Plus, SY-P-23 y demás gaps.
 
+
+
+## 2026-10-17 SY-P-23 E2E inventory
+The original `a/bc` has no universal convention in the fixture. Existing Lite and Plus H1d native tests already cover the ambiguity warning, exact MathLive preservation, explicit grouping, and compound context; Plus additionally covers no HTTP POST when bc is undefined and named-bc binding when defined, while Lite verifies local rejection and recovery. No redundant tests or CI triggered. Preserve Plus strict XFAIL for separate b/c interpretation, SY-P-23 OPEN, global OPEN. Next evidence task: inspect exact-SHA existing H1d native logs before adding any missing frontend-to-Worker guard coverage.
