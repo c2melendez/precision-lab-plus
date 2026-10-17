@@ -151,6 +151,10 @@ def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
 
     if isinstance(rule, mi.DontKnowRule):
         antiderivative = sympy.integrate(input_expr, var_symbol)
+        if antiderivative.has(sympy.Integral):
+            return antiderivative, [], False, [
+                "Sin forma elemental identificada; la integral permanece sin resolver."
+            ]
         return (
             antiderivative,
             [],
