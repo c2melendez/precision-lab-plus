@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
 // Native integration: real MathLive, React handlers, HTTP API and rendered result.
@@ -221,6 +222,57 @@ test("SY-X-08 native principal complex root, HTTP reentry and finite recovery", 
   expect(new Set(ids).size).toBe(5);
   expect(errors).toEqual([]);
   await testInfo.attach("SY-X-08-native-http-evidence", {body:JSON.stringify({domain:"existing principal complex branch", canonical, project:testInfo.project.name, evidence, ids, errors},null,2),contentType:"application/json"});
+});
+
+test("SY-X-13 original nested derivative, exact HTTP output reentry and recovery",async({page},testInfo)=>{
+  const errors:string[]=[];
+  const evidence:unknown[]=[];
+  const ids:string[]=[];
+  page.on("pageerror",error=>errors.push(error.message));
+  await page.goto("/");
+  const field=page.locator("math-field").first();
+  await expect(field).toBeVisible();
+  const original=fixture("SY-X-13");
+  expect(original).toBe(String.raw`\frac{d}{dx}x^{x^{x}}`);
+  const checkPython=String.raw`import json,sys,sympy as s
+b=json.load(sys.stdin); x=s.Symbol('x',positive=True)
+expected=x**(x**x)*(x**x*(s.log(x)+1)*s.log(x)+x**(x-1))
+actual=s.sympify(b['result_text'],locals={'x':x})
+assert not actual.has(s.Derivative)
+assert s.simplify(actual-expected)==0
+if 'input' in b:
+ assert s.simplify(s.sympify(b['input'].replace('^','**'),locals={'x':x})-x**(x**x))==0
+print('exact positive-real equivalence')`;
+  async function symbolic(source:string,path:string){
+    await field.evaluate((node,value)=>{
+      (node as HTMLElement & {setValue(v:string):void}).setValue(value);
+      node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));
+    },source);
+    const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+    expect(serialized).not.toBe("");
+    const pending=page.waitForResponse(r=>r.url().endsWith(path)&&r.request().method()==="POST");
+    await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+    const response=await pending;
+    expect(response.status()).toBe(200);
+    const payload=response.request().postDataJSON();
+    if(path.endsWith("/derivative")){expect(payload.variable).toBe("x");expect(payload.order).toBe(1);}
+    const body=await response.json();
+    expect(body.success).toBe(true);expect(body.error_code).toBeNull();
+    expect(body.result_latex).toBeTruthy();expect(body.request_id).toBeTruthy();
+    const checked={result_text:body.result_text,...(path.endsWith("/derivative")?{input:payload.expression}:{})};
+    expect(execFileSync("python",["-c",checkPython],{input:JSON.stringify(checked),timeout:10000,encoding:"utf8"}).trim()).toBe("exact positive-real equivalence");
+    const visible=page.locator('[aria-live="polite"] .a11y-scale-result-lg .katex-html').last();
+    await expect(visible).toBeVisible();await expect(visible).toContainText("x");
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    ids.push(body.request_id);evidence.push({source,serialized,payload,body});
+    return body.result_latex as string;
+  }
+  await symbolic(await symbolic(original,"/api/v1/derivative"),"/api/v1/evaluate");
+  const recovered=await evaluate(page,field,"2+3",5);
+  const reentered=await evaluate(page,field,recovered.reentry,5);
+  ids.push(recovered.requestId,reentered.requestId);
+  expect(new Set(ids).size).toBe(4);expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-13-native-http-evidence",{body:JSON.stringify({original,domain:"x>0; no complex branch claim",project:testInfo.project.name,evidence,ids,errors},null,2),contentType:"application/json"});
 });
 
 const rejectionMessages: Record<string, string> = {
