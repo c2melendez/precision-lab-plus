@@ -275,6 +275,38 @@ print('exact positive-real equivalence')`;
   await testInfo.attach("SY-X-13-native-http-evidence",{body:JSON.stringify({original,domain:"x>0; no complex branch claim",project:testInfo.project.name,evidence,ids,errors},null,2),contentType:"application/json"});
 });
 
+test("SY-X-14 original50 reciprocals show actual AST-depth limit and HTTP recovery",async({page},testInfo)=>{
+  const errors:string[]=[];
+  page.on("pageerror",e=>errors.push(e.message));
+  await page.goto("/");
+  const field=page.locator("math-field").first();await expect(field).toBeVisible();
+  const canonical=fixture("SY-X-14");
+  expect(canonical).toBe(String.raw`\underbrace{\frac{1}{\frac{1}{\cdots\frac{1}{x}}}}_{50\text{ niveles}}`);
+  let source="x";for(let i=0;i<50;i++)source=String.raw`\frac{1}{${source}}`;
+  expect(source.length).toBe(501);expect(source.match(/\\frac/g)).toHaveLength(50);
+  await field.evaluate((node,value)=>{(node as HTMLElement & {setValue(v:string):void}).setValue(value);node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));},source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  expect(serialized.match(/\\frac/g)).toHaveLength(50);
+  const pending=page.waitForResponse(r=>r.url().endsWith("/api/v1/evaluate")&&r.request().method()==="POST");
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const response=await pending;expect(response.status()).toBe(200);
+  const expression=response.request().postDataJSON().expression as string;
+  expect(expression.match(/\//g)).toHaveLength(50);expect(expression.match(/x/g)).toHaveLength(1);
+  expect(expression.length).toBeLessThanOrEqual(500);
+  const rejected=await response.json();
+  expect(rejected.success).toBe(false);expect(rejected.error_code).toBe("COMPLEXITY_LIMIT");
+  expect(rejected.error_message).toContain("profundidad máxima de 30");
+  expect(rejected.result_text).toBeNull();expect(rejected.result_latex).toBeNull();
+  const alert=page.getByRole("alert").filter({hasText:"COMPLEXITY_LIMIT"});
+  await expect(alert).toContainText("profundidad máxima de 30");
+  await expect(page.locator(".a11y-scale-result-lg")).toHaveCount(0);
+  const recovered=await evaluate(page,field,"2+3",5);
+  const reentered=await evaluate(page,field,recovered.reentry,5);
+  expect(new Set([rejected.request_id,recovered.requestId,reentered.requestId]).size).toBe(3);
+  expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-14-native-http-limit-evidence",{body:JSON.stringify({canonical,source,serialized,expression,project:testInfo.project.name,rejected,recovered,reentered,errors,scope:"Rejection/recovery PASS only;50-layer mathematical parity remains BLOCKED"},null,2),contentType:"application/json"});
+});
+
 const rejectionMessages: Record<string, string> = {
   "SY-X-01": "La expresión no puede estar vacía.",
   "SY-X-02": "La expresión no puede estar vacía.",
