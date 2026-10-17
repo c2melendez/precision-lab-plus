@@ -163,6 +163,12 @@ def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
 
     steps = _walk_rule(rule)
     antiderivative = mi.manualintegrate(input_expr, var_symbol)
+    # SY-X-12: a still-unevaluated Integral is not an elementary primitive.
+    # Mark it explicitly as unresolved instead of exposing invented steps.
+    if antiderivative.has(sympy.Integral):
+        return antiderivative, [], False, [
+            "Sin forma elemental identificada; la integral permanece sin resolver."
+        ]
 
     # Sección 8.4: cada paso verificado comparando la derivada del resultado
     # acumulado contra el integrando original.
