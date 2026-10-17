@@ -30,6 +30,10 @@ beforeEach(() => {
 it.each([
   [canonical, "/evaluate", "expression", "((x)**(1/(3))) con x=(27)"],
   [String.raw`\sqrt[3]{y}\ \text{con}\ y=64`, "/evaluate", "expression", "((y)**(1/(3))) con y=(64)"],
+  [String.raw`\left\lvert x\right\rvert\ \text{con}\ x=-4`, "/evaluate", "expression", "abs(-4)"],
+  [String.raw`\left\lvert y\right\rvert\ \text{con}\ y=-7`, "/evaluate", "expression", "abs(-7)"],
+  [String.raw`\left\lvert x\right\rvert+x\ \text{con}\ x=-4`, "/evaluate", "expression", "(abs(x)+x) con x=(-4)"],
+  [String.raw`\left\lvert x\right\rvert+x\ \text{con}\ x=4`, "/evaluate", "expression", "(abs(x)+x) con x=(4)"],
   ["x+1=4", "/solve", "equation", "x+1=4"],
   ["x<4", "/inequality", "inequality", "x<4"],
 ])("routes source %s without mistaking a binding for an equation", async (source, endpoint, key, converted) => {

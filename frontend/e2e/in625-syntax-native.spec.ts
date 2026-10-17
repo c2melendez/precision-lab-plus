@@ -77,6 +77,46 @@ test("SY-R-13 native original cube-root binding, controls and HTTP reentry", asy
   });
 });
 
+test("SY-R-14 native original absolute value, signed controls and HTTP reentry", async ({ page }, testInfo) => {
+  const pageErrors: string[] = [];
+  const requests: Array<{ url: string; body: unknown }> = [];
+  const evidence: Array<{ source: string; expected: number; requestId: string; reentry: string }> = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  page.on("request", (request) => {
+    if (request.url().includes("/api/v1/") && request.method() === "POST") {
+      requests.push({ url: request.url(), body: request.postDataJSON() });
+    }
+  });
+  await page.goto("/");
+  const field = page.locator("math-field").first();
+  await expect(field).toBeVisible();
+  const canonical = fixture("SY-R-14");
+  expect(canonical).toBe(String.raw`\left\lvert x\right\rvert\ \text{con}\ x=-4`);
+  const controls = [
+    // The existing typed-bars UI resolves the declared scalar, retaining abs
+    // for real backend evaluation. The input itself remains the full fixture.
+    { source: canonical, expected: 4, backend: "abs(-4)" },
+    { source: String.raw`\left\lvert x\right\rvert+x\ \text{con}\ x=-4`, expected: 0, backend: "(abs(x)+x) con x=(-4)" },
+    { source: String.raw`\left\lvert x\right\rvert+x\ \text{con}\ x=4`, expected: 8, backend: "(abs(x)+x) con x=(4)" },
+    { source: String.raw`\left\lvert y\right\rvert\ \text{con}\ y=-7`, expected: 7, backend: "abs(-7)" },
+  ];
+  for (const { source, expected, backend } of controls) {
+    const first = await evaluate(page, field, source, expected, backend);
+    const second = await evaluate(page, field, first.reentry, expected);
+    expect(second.requestId).not.toBe(first.requestId);
+    evidence.push({ source, expected, ...first }, { source: first.reentry, expected, ...second });
+  }
+  await evaluate(page, field, "2+3", 5);
+  expect(requests).toHaveLength(9);
+  expect(requests.every((request) => request.url.endsWith("/api/v1/evaluate"))).toBe(true);
+  expect(new Set(evidence.map((item) => item.requestId)).size).toBe(8);
+  expect(pageErrors).toEqual([]);
+  await testInfo.attach("SY-R-14-native-http-evidence", {
+    body: JSON.stringify({ canonical, project: testInfo.project.name, requests, evidence, pageErrors }, null, 2),
+    contentType: "application/json",
+  });
+});
+
 const rejectionMessages: Record<string, string> = {
   "SY-X-01": "La expresión no puede estar vacía.",
   "SY-X-02": "La expresión no puede estar vacía.",
