@@ -153,7 +153,7 @@ def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
         antiderivative = sympy.integrate(input_expr, var_symbol)
         if antiderivative.has(sympy.Integral):
             return antiderivative, [], False, [
-                "Se usó el resultado directo de SymPy; sin forma elemental identificada; la integral permanece sin resolver."
+                "Se usó el resultado directo de SymPy; Sin forma elemental identificada; la integral permanece sin resolver."
             ]
         return (
             antiderivative,
@@ -171,7 +171,7 @@ def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
     # Mark it explicitly as unresolved instead of exposing invented steps.
     if antiderivative.has(sympy.Integral):
         return antiderivative, [], False, [
-            "Se usó el resultado directo de SymPy; sin forma elemental identificada; la integral permanece sin resolver."
+            "Se usó el resultado directo de SymPy; Sin forma elemental identificada; la integral permanece sin resolver."
         ]
 
     # Sección 8.4: cada paso verificado comparando la derivada del resultado
