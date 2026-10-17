@@ -34,7 +34,8 @@ async function evaluate(page: Page, field: Locator, source: string, expected: nu
   expect(body.success).toBe(true);
   expect(body.result_approx).toBe(expected);
   expect(body.request_id).toBeTruthy();
-  await expect(page.locator('[aria-live="polite"] .a11y-scale-result-lg .katex-html').last()).toHaveText(String(expected));
+  // KaTeX renders the mathematical minus as U+2212; retain the exact value.
+  await expect.poll(async () => (await page.locator('[aria-live="polite"] .a11y-scale-result-lg .katex-html').last().textContent())?.replace(/−/g, "-")).toBe(String(expected));
   await expect(page.getByRole("alert")).toHaveCount(0);
   expect(body.result_latex).toBe(String(expected));
   return {requestId: body.request_id as string, reentry: body.result_latex as string};
