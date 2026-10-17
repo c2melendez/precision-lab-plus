@@ -1,5 +1,8 @@
 # Estado vigente de certificación — Precision Lab Lite / Plus
 
+## SY-X-22: coverage and CI checkpoint
+Plus HTTP regression SHA 04da8cc6, cumulative run 39066547036 PASS (1495 backend PASS/3 XFAIL, 1006 frontend PASS/28 TODO), H1d 39066547016 PASS. Lite parser regression SHA 60680a573db8164dc17fd275f01666b040dcd4c4; cumulative 39066850403, native 39066850464, H1d 39066850417 running at checkpoint, not yet PASS. Next: inspect Lite test logs and complete actual Worker and native UI case for both products, preserving exact 10000-digit oracle or clear size rejection. No repeated dispatch, global OPEN.
+
 ## SY-X-22 execution
 Plus HTTP test commit 04da8cc6b55e9be0764bdf9a594c51b4008db07c. CI cumulative 39066547036 and H1d 39066547016 were IN_PROGRESS; not PASS. Next: review logs, then Lite Worker and native bilateral verification. Global OPEN.
 
