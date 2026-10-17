@@ -55,6 +55,7 @@ import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex, splitFreeSystemLatex } from "./systemSplit";
 import { detectPiecewiseIntent } from "./piecewiseIntent";
 import { detectRelationIntent } from "./relationIntent";
+import { parseInlineBinding } from "./inlineBinding";
 import { detectConstrainedEquationIntent, satisfiesConstraint } from "./constrainedEquationIntent";
 import { detectMatrixIntent } from "./matrixIntent";
 
@@ -113,7 +114,8 @@ export function BasicMode() {
   // Un sistema de varias filas tiene prioridad sobre la clasificación
   // de una relación aislada: "cases" con varias incógnitas no es una gráfica.
   const candidateSystemRows = piecewiseIntent ? null : (splitSystemLatex(latex) ?? splitFreeSystemLatex(latex));
-  const relationIntent = piecewiseIntent || constrainedIntent || candidateSystemRows
+  const inlineBinding = parseInlineBinding(latex);
+  const relationIntent = piecewiseIntent || constrainedIntent || candidateSystemRows || inlineBinding
     ? null : detectRelationIntent(latex);
   const systemRows = piecewiseIntent || relationIntent || constrainedIntent ? null : candidateSystemRows;
 
@@ -589,8 +591,10 @@ export function BasicMode() {
     }
     setValidationError(null);
 
-    const isInequality = INEQUALITY_OPERATOR_PATTERN.test(trimmed);
-    const isEquation = !isInequality && trimmed.includes("=");
+    // The equals sign in "expression con x=value" binds a value; it does
+    // not turn the complete source into an equation or graphical relation.
+    const isInequality = !inlineBinding && INEQUALITY_OPERATOR_PATTERN.test(trimmed);
+    const isEquation = !inlineBinding && !isInequality && trimmed.includes("=");
 
     const substitutionsPayload =
       !isInequality && !isEquation && substitutions.length > 0

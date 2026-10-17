@@ -21,6 +21,7 @@ import { useCallback, useEffect, useId, useRef } from "react";
 import type { MathfieldElement, MathfieldElementAttributes } from "mathlive";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { validateExponentSource } from "./exponentSourceValidation";
+import { parseInlineBinding } from "./inlineBinding";
 
 function normalizeExternalSyntaxF3c(input: string): string {
   let out = input.trim();
@@ -579,7 +580,7 @@ export function latexToBackendSyntax(latex: string): string {
   // turn its prose into identifiers. Recursively convert only the two math
   // fragments; finite numeric validation remains in the backend parser.
   const normalizedInline = latex.replace(/\\(?:text|mathrm)\s*\{con\}/g, " con ").replace(/\\ /g, " ");
-  const inline = normalizedInline.match(/^\s*(.+?)\s+con\s+([A-Za-z])\s*=\s*(.+?)\s*$/s);
+  const inline = parseInlineBinding(latex);
   if (inline) {
     if ((normalizedInline.match(/\s+con\s+/g) ?? []).length !== 1) throw new Error("Solo se admite una sustitución inline.");
     const [, body, variable, value] = inline;
