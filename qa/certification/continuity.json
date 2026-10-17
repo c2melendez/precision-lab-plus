@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 29,
+  "revision": 30,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "948d6dbb501e79b9e4fca13548586ca7a88d9a80",
-  "baseline_case": "SY-X-08",
-  "baseline_status": "VERIFIED_WITH_BLOCKERS",
+  "technical_baseline_sha": "acd55e4b3cadf37b4c2e81dd044a5a95ad08d3c7",
+  "baseline_case": "SY-X-13",
+  "baseline_status": "WAIT_CI",
   "global_certification": "OPEN",
   "prose_only_paths": [
     "README.md",
@@ -18,7 +18,8 @@
     "qa/certification/CONTINUITY.md",
     "qa/certification/history/2026-10-16_concurrent_CURRENT_STATE.md",
     "qa/certification/history/2026-10-16_concurrent_EXECUTION_LOG.md",
-    "qa/certification/SECURITY_REMEDIATION.md"
+    "qa/certification/SECURITY_REMEDIATION.md",
+    "qa/certification/history/2026-10-17_pre_X13_CURRENT_STATE.md"
   ],
   "gates": {
     "cumulative": {
@@ -232,13 +233,13 @@
   },
   "next_action": {
     "id": "SY-X-13-BILATERAL",
-    "status": "READY",
+    "status": "WAIT_CI",
     "repository": "c2melendez/precision-lab-plus",
     "paired_repository": "c2melendez/precision-lab-lite",
     "files": [
       "qa/certification/syntax309_cases.jsonl"
     ],
-    "action": "Inspect exact original derivative of x^(x^x) and canonical oracle; verify precedence and variable-base-variable-exponent chain rules in Lite Algebrite Worker and Plus SymPy backend before adding native MathLive tests. Preserve mathematically equivalent forms, avoid false symbolic confidence, verify finite recovery.",
+    "action": "Inspect exact-SHA X13 native/cumulative/H1d runs in work_in_progress; no redispatch. Native output reentry uses actual result LaTeX ln, not SymPy result_text log. Close only after reviewed logs in three profiles.",
     "exit_criteria": [
       "Pin original source and expected derivative unchanged",
       "Compare symbolic derivative by mathematical equivalence and correct nesting, not fragile string equality",
@@ -306,12 +307,39 @@
     }
   ],
   "work_in_progress": {
-    "id": "SY-X-12-BILATERAL",
-    "status": "VERIFIED_SCOPED",
-    "technical_sha": "ea668c6a5aa1ddb9647201b518984dbddbe27211",
-    "native_run": 39008936707,
-    "cumulative_run": 39008936713,
-    "h1d_run": 39008936711
+    "id": "SY-X-13-BILATERAL",
+    "status": "WAIT_CI",
+    "technical_sha": "acd55e4b3cadf37b4c2e81dd044a5a95ad08d3c7",
+    "paired_technical_sha": "76edee1a40df93d3945acb1b426d0bc190a67e2c",
+    "runs": [
+      {
+        "id": 39013565024,
+        "workflow": ".github/workflows/in625-cumulative-certification.yml",
+        "status": "queued",
+        "conclusion": null,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39013565024",
+        "logs_reviewed": false,
+        "evidence_executed": false
+      },
+      {
+        "id": 39013565049,
+        "workflow": ".github/workflows/in625-syntax-native.yml",
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39013565049",
+        "logs_reviewed": false,
+        "evidence_executed": false
+      },
+      {
+        "id": 39013564974,
+        "workflow": ".github/workflows/in625-h1d-reentry.yml",
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39013564974",
+        "logs_reviewed": false,
+        "evidence_executed": false
+      }
+    ]
   },
   "cases": {
     "SY-X-03": {
