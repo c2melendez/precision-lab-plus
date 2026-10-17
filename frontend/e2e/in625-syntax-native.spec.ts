@@ -684,3 +684,40 @@ test("SY-X-20 native invalid Unicode source is rejected with finite HTTP recover
     contentType:"application/json"
   });
 });
+
+
+test("SY-X-21 native zero-width source has exact value or clear error and recovers",async({page},testInfo)=>{
+  const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
+  await page.goto("/");
+  const field=page.locator("math-field").first();await expect(field).toBeVisible();
+  const source=fixture("SY-X-21");
+  expect([...source].map(ch=>ch.codePointAt(0))).toEqual([49,0x200b,43,0x200b,50]);
+  await field.evaluate((node,value)=>{
+    (node as HTMLElement & {setValue(v:string):void}).setValue(value);
+    node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));
+  },source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const alert=page.getByRole("alert").first();
+  const result=page.locator(".a11y-scale-result-lg").first();
+  await expect.poll(async()=>{
+    if(await alert.isVisible().catch(()=>false))return "error";
+    if(await result.isVisible().catch(()=>false))return "value";
+    return "pending";
+  },{timeout:15000}).not.toBe("pending");
+  const isError=await alert.isVisible().catch(()=>false);
+  const notice=isError ? (await alert.innerText()).trim():"";
+  if(isError){
+    expect(notice).toMatch(/car[aá]cter|inv[aá]lid|permitid|reconocid|sintaxis|expresi[oó]n/i);
+    await expect(result).toHaveCount(0);
+  }else{
+    expect((await result.innerText()).trim()).toMatch(/^3(?:\.0+)?$/);
+  }
+  const first=await evaluate(page,field,"2+3",5);
+  const second=await evaluate(page,field,first.reentry,5);
+  expect(first.requestId).not.toBe(second.requestId);expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-21-native-evidence",{
+    body:JSON.stringify({source,serialized,isError,notice,project:testInfo.project.name,first,second,errors},null,2),
+    contentType:"application/json"
+  });
+});
