@@ -125,6 +125,19 @@ async def factor(payload: ExpressionRequest, request: Request) -> MathResponse:
     return _build_response(request, OperationType.FACTOR, payload, result)
 
 
+@router.post("/partial-fractions", response_model=MathResponse)
+async def partial_fractions(payload: ExpressionRequest, request: Request) -> MathResponse:
+    """Additive HTTP exposure for the certified algebra-service operation."""
+    log_request_event(request.state.request_id, "partial_fractions_request", input_text=payload.expression)
+    try:
+        result = algebra_service.partial_fraction_expression(payload.expression)
+    except parsing.ParseSecurityError as exc:
+        return _error(request, OperationType.PARTIAL_FRACTIONS, ErrorCode.PARSE_ERROR, str(exc))
+    except ComplexityLimitError as exc:
+        return _error(request, OperationType.PARTIAL_FRACTIONS, ErrorCode.COMPLEXITY_LIMIT, str(exc))
+    return _build_response(request, OperationType.PARTIAL_FRACTIONS, payload, result)
+
+
 @router.post("/solve", response_model=MathResponse)
 async def solve(payload: SolveRequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "solve_request", input_text=payload.equation)
