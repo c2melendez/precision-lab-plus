@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 86,
+  "revision": 87,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "102c5beddefe61adb09e255cf647dc9dd4c9aec8",
@@ -264,19 +264,19 @@
     }
   },
   "next_action": {
-    "id": "ALGEBRA114-AS-FAC-11-CI-REVIEW",
+    "id": "ALGEBRA114-AS-FAC-12-CI-REVIEW",
     "status": "PENDING_CI",
-    "technical_sha": "79a47ea9c177a1186244f2964b6bd259cd82a450",
-    "run_id": 39106162962,
+    "technical_sha": "441aea9daa36395212c64f8a2e1d2ad71c87605f",
+    "run_id": 39106335999,
     "files": [
       "qa/certification/algebra114_source.md",
-      "backend/tests/test_algebra114_as_fac11.py"
+      "backend/tests/test_algebra114_as_fac12.py"
     ],
-    "action": "Inspect exact SHA cumulative and companion gates for AS-FAC-11 grouping factorization; diagnose failure if any and continue AS-FAC-12 only with bilateral verified PASS.",
+    "action": "Review exact SHA AS-FAC-12 cumulative jobs/logs; confirm three-variable alternating polynomial factorization and sign. Diagnose any failure, then advance to the next contractual case only after bilateral PASS.",
     "exit_criteria": [
-      "AS-FAC-11 original regression actually executed and passed in both engines",
-      "Jobs/logs and exact technical SHAs recorded",
-      "Next AS-FAC-12 only after closure"
+      "AS-FAC-12 execution verified for Lite and Plus",
+      "Correct sign and structural factoring",
+      "Both CI results and any blockers persisted"
     ]
   },
   "blockers": [
