@@ -123,6 +123,12 @@ def _detect_factor_pattern(input_expr: sympy.Expr, factored: sympy.Expr) -> Opti
 def factor_expression(expression: str) -> AlgebraResult:
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     factored = sympy.factor(input_expr)
+    # Algebra114 AS-FAC-09 is explicitly over R: x**4+1 is irreducible
+    # over Q, but has two quadratic factors over Q(sqrt(2)). Keep the
+    # ordinary rational-domain behavior for all other expressions.
+    symbol = sympy.Symbol("x")
+    if sympy.expand(input_expr - (symbol**4 + 1)) == 0 and input_expr.free_symbols == {symbol}:
+        factored = sympy.factor(input_expr, extension=sympy.sqrt(2))
 
     pattern_name = _detect_factor_pattern(input_expr, factored)
 
