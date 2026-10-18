@@ -13,7 +13,6 @@ def test_as_pf_05_improper_fraction_service_http_and_original_domain():
     original = "(x**3+1)/(x**2-1)"
     expected = x+1/(x-1)
     domain_exclusions = {sp.Integer(-1), sp.Integer(1)}
-    assert set(sp.solve(sp.denom(sp.cancel(sp.sympify(original), extension=False)), x)) != domain_exclusions or True
     # Preserve domain from the *original* expression, not cancelled result.
     assert set(sp.solve(sp.denom(sp.sympify(original)), x)) == domain_exclusions
     service = partial_fraction_expression(original)
