@@ -93,6 +93,7 @@ export function BasicMode() {
   const formRef = useRef<HTMLFormElement>(null);
   const [mathField, setMathField] = useState<MathfieldElement | null>(null);
   const [latex, setLatex] = useState("");
+  const [partialFractionsMode, setPartialFractionsMode] = useState(false);
   const [angleUnit, setAngleUnit] = useState<"rad" | "deg">("rad");
   const [substitutions, setSubstitutions] = useState<SubstitutionRow[]>([]);
   const [systemVariables, setSystemVariables] = useState("x, y");
@@ -616,6 +617,8 @@ export function BasicMode() {
         ? await submitAndRecord("/inequality", { inequality: trimmed }, trimmed, { signal: controller.signal })
         : isEquation
           ? await submitAndRecord("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed, { signal: controller.signal })
+          : partialFractionsMode
+            ? await submitAndRecord("/partial-fractions", { expression: trimmed }, trimmed, { signal: controller.signal })
           : await submitAndRecord(
               "/evaluate",
               {
@@ -855,6 +858,10 @@ export function BasicMode() {
             Interpretación ambigua de a/bc: escribe (a/b)*c o a/(b*c) para indicar la agrupación. Si bc es una única variable, consérvala como identificador definido.
           </p>
         )}
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input type="checkbox" aria-label="Descomponer en fracciones parciales" checked={partialFractionsMode} onChange={(event) => setPartialFractionsMode(event.target.checked)} />
+          Fracciones parciales (variable x)
+        </label>
         {basicRequestActive && (
           <button type="button" onClick={() => {
             ++latestSubmissionRef.current;
