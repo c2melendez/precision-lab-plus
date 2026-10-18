@@ -161,3 +161,23 @@ def factor_expression(expression: str) -> AlgebraResult:
         domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
         pattern_name=pattern_name,
     )
+
+
+def partial_fraction_expression(expression: str, variable: str = "x") -> AlgebraResult:
+    """Decompose a rational expression over the specified symbol (AS-PF-01).
+
+    This service-level capability is not yet a public HTTP endpoint.
+    Preserve the original input for domain restrictions and ensure exactness.
+    """
+    input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
+    symbol = sympy.Symbol(variable)
+    decomposed = sympy.apart(input_expr, symbol)
+    if sympy.cancel(input_expr - decomposed) != 0:
+        raise ValueError("Partial-fraction decomposition failed equivalence")
+    return AlgebraResult(
+        input_expr,
+        decomposed,
+        [_summary_step(input_expr, decomposed, "Fracciones parciales")],
+        has_detailed_steps=False,
+        domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
+    )
