@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 93,
+  "revision": 94,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "102c5beddefe61adb09e255cf647dc9dd4c9aec8",
@@ -264,15 +264,19 @@
     }
   },
   "next_action": {
-    "id": "ALGEBRA114-AS-PF-01-LITE-UI-CI-REVIEW",
+    "id": "ALGEBRA114-AS-PF-02-CI-REVIEW",
     "status": "PENDING_CI",
-    "technical_sha": "49d059873dcc90ca7643066acb26d88341470492",
-    "run_id": 39148372442,
-    "action": "Review exact-SHA Lite scientific UI AS-PF-01 dispatch and cumulative/native logs; correct any compilation/behavior failure. Plus UI unit and HTTP coverage PASS; browser E2E not yet verified. Do not rerun unchanged gates.",
+    "technical_sha": "9a7341d1bff06c2e9aac61891414f4fdcc5e9467",
+    "run_id": 39152841394,
+    "files": [
+      "qa/certification/algebra114_source.md",
+      "backend/tests/test_algebra114_as_pf02.py"
+    ],
+    "action": "Inspect exact technical-SHA original AS-PF-02 repeated-pole gate and logs for Plus and Lite. Correct if failure; track Lite UI and general CAS separately; do not duplicate unchanged runs.",
     "exit_criteria": [
-      "Lite exact SHA UI path CI PASS",
-      "No regression of original engine oracle",
-      "Remaining generic capability/browser E2E gaps identified before moving AS-PF-02"
+      "Original repeated-pole decomposition executed correctly",
+      "Both exact-SHA cumulative statuses documented",
+      "UI and generic decomposition limitations preserved"
     ]
   },
   "blockers": [
