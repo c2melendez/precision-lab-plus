@@ -18,7 +18,7 @@ def test_as_sim_08_http_real_cube_radical_domain():
         assert sp.simplify(observed.subs(x,value) - value * sp.sqrt(value)) == 0
     conditions = payload.get("domain_conditions", [])
     assert conditions, payload
-    assert any(c.get("variable") == "x" and c.get("kind") in ("sqrt", "root", "radical", "domain")
+    assert any(c.get("variable") == "x" and c.get("kind") in ("even_root",)
                and sp.sympify(c["text"], locals={"x":x}).subs(x,-1) in (sp.false, False)
                and sp.sympify(c["text"], locals={"x":x}).subs(x,0) in (sp.true, True)
                for c in conditions), conditions
