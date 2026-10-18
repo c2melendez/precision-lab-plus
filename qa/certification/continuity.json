@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 95,
+  "revision": 96,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "102c5beddefe61adb09e255cf647dc9dd4c9aec8",
@@ -264,19 +264,15 @@
     }
   },
   "next_action": {
-    "id": "ALGEBRA114-AS-PF-03-CI-REVIEW",
+    "id": "ALGEBRA114-AS-PF-03-LITE-RETEST",
     "status": "PENDING_CI",
     "technical_sha": "dd63bdd211264864ab8af1b564f1954f053e6fed",
     "run_id": 39159648671,
-    "files": [
-      "qa/certification/algebra114_source.md",
-      "backend/tests/test_algebra114_as_pf03.py"
-    ],
-    "action": "Review exact-SHA automatic cumulative AS-PF-03 test/logs. Diagnose failure without weakening original two-term partial-fraction oracle. Advance AS-PF-04 only after scope-limited bilateral PASS.",
+    "action": "Check exact-SHA Lite cumulative AS-PF-03 after numeric oracle correction. Plus original service+HTTP PASS already verified. Proceed to AS-PF-04 only after Lite original decomposition test PASS. Avoid redundant Actions.",
     "exit_criteria": [
-      "Original AS-PF-03 executed with correct irreducible quadratic partial term",
-      "Both cumulative results and exact SHA recorded",
-      "UI and general CAS gaps separately maintained"
+      "Lite AS-PF-03 exact decomposition and numeric substitution PASS",
+      "Both exact SHA and CI logs documented",
+      "Uncertified generic CAS and UI gaps retained"
     ]
   },
   "blockers": [
