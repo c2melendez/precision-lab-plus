@@ -37,6 +37,7 @@ PATH_TO_OPERATION: Dict[str, OperationType] = {
     "/evaluate": OperationType.EVALUATE,
     "/simplify": OperationType.SIMPLIFY,
     "/factor": OperationType.FACTOR,
+    "/partial-fractions": OperationType.PARTIAL_FRACTIONS,
     "/expand": OperationType.EXPAND,
     "/solve": OperationType.SOLVE,
     "/derivative": OperationType.DERIVATIVE,
