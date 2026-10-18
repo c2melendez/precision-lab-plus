@@ -18,6 +18,7 @@ export const KNOWN_ENDPOINTS = [
   "/evaluate",
   "/simplify",
   "/factor",
+  "/partial-fractions",
   "/expand",
   "/solve",
   "/derivative",
