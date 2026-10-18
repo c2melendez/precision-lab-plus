@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 96,
+  "revision": 97,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "102c5beddefe61adb09e255cf647dc9dd4c9aec8",
@@ -264,15 +264,18 @@
     }
   },
   "next_action": {
-    "id": "ALGEBRA114-AS-PF-03-LITE-RETEST",
+    "id": "ALGEBRA114-AS-PF-04-CI-REVIEW",
     "status": "PENDING_CI",
-    "technical_sha": "dd63bdd211264864ab8af1b564f1954f053e6fed",
-    "run_id": 39159648671,
-    "action": "Check exact-SHA Lite cumulative AS-PF-03 after numeric oracle correction. Plus original service+HTTP PASS already verified. Proceed to AS-PF-04 only after Lite original decomposition test PASS. Avoid redundant Actions.",
+    "technical_sha": "1c295333f4db7a02a0ba9475c86c0c39cfa61fcd",
+    "run_id": 39163650520,
+    "files": [
+      "backend/tests/test_algebra114_as_pf04.py"
+    ],
+    "action": "Inspect AS-PF-04 exact-SHA automatic CI and actual original test. Diagnose any failure; move to AS-PF-05 only after bilateral original-case PASS. Do not rerun unchanged workflow.",
     "exit_criteria": [
-      "Lite AS-PF-03 exact decomposition and numeric substitution PASS",
-      "Both exact SHA and CI logs documented",
-      "Uncertified generic CAS and UI gaps retained"
+      "AS-PF-04 exact rational coefficients and numeric identity verified",
+      "Both technical SHA and logs documented",
+      "General CAS and Lite UI gaps preserved"
     ]
   },
   "blockers": [
