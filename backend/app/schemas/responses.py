@@ -19,6 +19,7 @@ class OperationType(str, Enum):
     EVALUATE = "evaluate"
     SIMPLIFY = "simplify"
     FACTOR = "factor"
+    PARTIAL_FRACTIONS = "partial_fractions"
     EXPAND = "expand"
     SOLVE = "solve"
     DERIVATIVE = "derivative"
