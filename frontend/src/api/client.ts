@@ -34,6 +34,7 @@ const ENDPOINT_TO_OPERATION: Record<KnownEndpoint, OperationType | null> = {
   "/evaluate": "evaluate",
   "/simplify": "simplify",
   "/factor": "factor",
+  "/partial-fractions": "partial_fractions",
   "/expand": "expand",
   "/solve": "solve",
   "/derivative": "derivative",
