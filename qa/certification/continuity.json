@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "revision": 145,
+  "revision": 146,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "9f17dc516af64cd276154dc11dfb4f66add79241",
+  "technical_baseline_sha": "5a84decd6b9e01b6cdf856aa4ab566911d3e5aee",
   "baseline_case": "AS-PAR-09",
   "baseline_status": "PENDING_EXACT_SHA_GATES",
   "global_certification": "OPEN",
@@ -268,7 +268,7 @@
     "status": "PENDING_EXACT_SHA_GATES",
     "technical_sha_by_repo": {
       "c2melendez/precision-lab-lite": "68f5c41774eb063d755081b914f417d78c9b7f81",
-      "c2melendez/precision-lab-plus": "9f17dc516af64cd276154dc11dfb4f66add79241"
+      "c2melendez/precision-lab-plus": "5a84decd6b9e01b6cdf856aa4ab566911d3e5aee"
     },
     "run_ids_by_repo": {
       "c2melendez/precision-lab-lite": [
@@ -277,16 +277,18 @@
         39274327855
       ],
       "c2melendez/precision-lab-plus": [
-        39274466829,
-        39274466897
+        39275113701,
+        39275114039,
+        39275113946,
+        39275113807
       ]
     },
-    "action": "AS-PAR-08 verified bilateral with original tests and all gates green. AS-PAR-09 implementation is committed; inspect exact-SHA cumulative/H1d and Lite native logs. Distinct centers must yield the midpoint; equal centers must classify as identity/all real x.",
+    "action": "AS-PAR-08 is verified bilateral. AS-PAR-09 Plus first attempt exposed SymPy's canonical Abs(a-x) orientation; the handler now supports slopes ±1. Inspect all exact-SHA reentry logs and original tests before closing.",
     "exit_criteria": [
       "Lite original AS-PAR-09 tests pass and cumulative/H1d/native gates SUCCESS on exact SHA with logs reviewed",
-      "Plus original AS-PAR-09 service/API tests pass and cumulative/H1d gates SUCCESS on exact SHA with logs reviewed",
-      "For a!=b verify x=(a+b)/2 by substitution; for a=b classify as identity/all real x",
-      "Do not count TODO, XFAIL, skips, previous-SHA gates or reused evidence as PASS",
+      "Plus original AS-PAR-09 service/API tests pass after supporting both Abs orientations; cumulative/H1d/syntax gates SUCCESS on exact SHA with logs reviewed",
+      "For a!=b verify midpoint x=(a+b)/2; for a=b classify identity/all real x",
+      "Do not count TODO, XFAIL, skips or previous-SHA gates as PASS",
       "Global certification remains OPEN; S19 score null; preserve SG28/DIST and unrelated blockers"
     ]
   },
@@ -2579,15 +2581,34 @@
           }
         },
         "c2melendez/precision-lab-plus": {
-          "technical_sha": "9f17dc516af64cd276154dc11dfb4f66add79241",
-          "cumulative": {
+          "technical_sha": "5a84decd6b9e01b6cdf856aa4ab566911d3e5aee",
+          "tests": "backend/tests/test_algebra114_as_par08.py (AS-PAR-09 cases)",
+          "prior_attempt": {
             "run_id": 39274466829,
-            "status": "QUEUED_OR_IN_PROGRESS",
+            "status": "FAILURE",
+            "logs_reviewed": true,
+            "failure": "SymPy canonicalized Abs(x-a) to Abs(a-x); handler accepted only slope +1."
+          },
+          "cumulative": {
+            "run_id": 39275113701,
+            "status": "IN_PROGRESS",
             "logs_reviewed": false,
             "evidence_executed": false
           },
           "h1d": {
-            "run_id": 39274466897,
+            "run_id": 39275114039,
+            "status": "IN_PROGRESS",
+            "logs_reviewed": false,
+            "evidence_executed": false
+          },
+          "syntax_recovery": {
+            "run_id": 39275113946,
+            "status": "IN_PROGRESS",
+            "logs_reviewed": false,
+            "evidence_executed": false
+          },
+          "dependency_gates": {
+            "run_id": 39275113807,
             "status": "QUEUED_OR_IN_PROGRESS",
             "logs_reviewed": false,
             "evidence_executed": false
