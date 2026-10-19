@@ -18,7 +18,7 @@ app/services/algebra_service.py — `/simplify`, `/factor`, `/expand`
 """
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import sympy
 
@@ -109,12 +109,71 @@ def _split_absolute_products(expr: sympy.Expr) -> sympy.Expr:
     )
 
 
+def _linear_rational(expr: sympy.Expr, symbol: sympy.Symbol) -> Optional[Tuple[sympy.Expr, sympy.Expr]]:
+    if not expr.is_polynomial(symbol):
+        return None
+    poly = sympy.Poly(sympy.expand(expr), symbol)
+    if poly.degree() > 1 or not all(c.is_Rational for c in poly.all_coeffs()):
+        return None
+    return poly.coeff_monomial(symbol), poly.coeff_monomial(1)
+
+
+def _real_absolute_piecewise(expr: sympy.Expr) -> Optional[sympy.Expr]:
+    """Algebra114 AS-AVS: rational-linear sums of |ax+b| by cases over R.
+
+    Left-closed partition (-oo,c1), [c1,c2), ..., [cn,oo); equal neighbours merge.
+    """
+    if len(expr.free_symbols) != 1 or not expr.has(sympy.Abs):
+        return None
+    (symbol,) = expr.free_symbols
+    if (expr / sympy.Abs(symbol)).is_Rational:
+        return None
+    nodes = expr.atoms(sympy.Abs)
+    points = set()
+    for node in nodes:
+        line = _linear_rational(node.args[0], symbol)
+        if line is None or line[0] == 0:
+            return None
+        points.add(-line[1] / line[0])
+    points = sorted(points)
+    midpoints = [(a + b) / 2 for a, b in zip(points, points[1:], strict=False)]
+    samples = [points[0] - 1, *midpoints, points[-1] + 1]
+    pieces = []
+    for sample in samples:
+        signs = {n: n.args[0] if n.args[0].subs(symbol, sample) >= 0 else -n.args[0] for n in nodes}
+        piece = expr.xreplace(signs)
+        line = _linear_rational(piece, symbol)
+        if line is None:
+            return None
+        pieces.append(line[0] * symbol + line[1])
+    bounds = []
+    for index, piece in enumerate(pieces):
+        if bounds and bounds[-1][0] == piece:
+            bounds[-1][2] = points[index] if index < len(points) else None
+        else:
+            lower = points[index - 1] if index else None
+            bounds.append([piece, lower, points[index] if index < len(points) else None])
+    if len(bounds) < 2:
+        return None
+    args = []
+    for piece, lower, upper in bounds:
+        if lower is None:
+            cond = sympy.StrictLessThan(symbol, upper)
+        elif upper is None:
+            cond = sympy.GreaterThan(symbol, lower)
+        else:
+            cond = sympy.And(sympy.GreaterThan(symbol, lower), sympy.StrictLessThan(symbol, upper))
+        args.append((piece, cond))
+    return sympy.Piecewise(*args, evaluate=False)
+
+
 def simplify_expression(expression: str) -> AlgebraResult:
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     result_expr = _rewrite_audited_real_absolute_square(
         input_expr,
         _split_absolute_products(_denest_constant_radicals(sympy.simplify(input_expr))),
     )
+    result_expr = _real_absolute_piecewise(result_expr) or result_expr
     step = _summary_step(input_expr, result_expr, "Simplificación")
     return AlgebraResult(
         input_expr,

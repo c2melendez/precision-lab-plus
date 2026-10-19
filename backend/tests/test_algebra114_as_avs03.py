@@ -30,12 +30,11 @@ def _assert_official_partition(piecewise):
 
 
 def test_as_avs_03_source_row():
-    source = (Path(__file__).resolve().parents[2] / "qa/certification/algebra114_source.md").read_text(
-        encoding="utf-8"
-    )
+    root = Path(__file__).resolve().parents[2]
+    source = (root / "qa/certification/algebra114_source.md").read_text(encoding="utf-8")
     assert (
-        "| AS-AVS-03 | N2 | \\(|x-1|+|x+1|\\) | \\(-2x\\) si \\(x<-1\\); \\(2\\) si \\(-1\\le x\\le1\\); "
-        "\\(2x\\) si \\(x>1\\) |"
+        "| AS-AVS-03 | N2 | \\(|x-1|+|x+1|\\) | \\(-2x\\) si \\(x<-1\\); "
+        "\\(2\\) si \\(-1\\le x\\le1\\); \\(2x\\) si \\(x>1\\) |"
     ) in source
 
 
@@ -56,11 +55,15 @@ def test_as_avs_03_piecewise_service_and_http():
     assert payload["success"] is True, payload
     assert "Abs" not in payload["result_text"]
     assert "\\begin{cases}" in payload["result_latex"]
-    observed = sp.sympify(payload["result_text"], locals={"x": x})
+    explicit = {"x": x, "Piecewise": lambda *args: sp.Piecewise(*args, evaluate=False)}
+    observed = sp.parse_expr(payload["result_text"], local_dict=explicit)
     assert observed == service.result_expr
     _assert_official_partition(observed)
 
 
-@pytest.mark.parametrize("expression", ["abs(x)", "3*abs(x)", "abs(x*y)", "abs(x**2-1)", "abs(x)+abs(y)", "sin(abs(x))"])
+SCOPED_OUT = ["abs(x)", "3*abs(x)", "abs(x*y)", "abs(x**2-1)", "abs(x)+abs(y)", "sin(abs(x))"]
+
+
+@pytest.mark.parametrize("expression", SCOPED_OUT)
 def test_as_avs_03_rewrite_stays_scoped(expression):
     assert not simplify_expression(expression).result_expr.has(sp.Piecewise)
