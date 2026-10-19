@@ -287,6 +287,113 @@ def _absolute_value_cases_result(
         return None
 
 
+def _real_radical_value(radicand: sympy.Expr, index: int) -> Optional[sympy.Expr]:
+    if index % 2 == 1:
+        return sympy.real_root(radicand, index)
+    if radicand.is_negative:
+        return None
+    return sympy.root(radicand, index)
+
+
+def _radical_cases_result(
+    eq: sympy.Eq, var: sympy.Symbol, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Algebra114 AS-RAD: real n-th root equations by elimination and verification.
+
+    Each radical u**(1/n) (u polynomial with rational coefficients) is replaced by a
+    symbol y with y**n = u and eliminated by resultants. Every real candidate is then
+    checked in the ORIGINAL equation with real semantics (principal root for even n,
+    real root for odd n); candidates that fail are reported as extraneous.
+    """
+    try:
+        difference = eq.lhs - eq.rhs
+        if difference.free_symbols != {var} or difference.has(sympy.Abs, sympy.Piecewise):
+            return None
+        radicals = []
+        for node in difference.atoms(sympy.Pow):
+            exponent = sympy.nsimplify(node.exp.doit())
+            if var not in node.base.free_symbols or not exponent.is_Rational:
+                continue
+            if exponent.is_Integer:
+                continue
+            if exponent.p != 1 or exponent.q > 4:
+                return None
+            base = sympy.expand(node.base.doit())
+            if not base.is_polynomial(var):
+                return None
+            if not all(c.is_Rational for c in sympy.Poly(base, var).all_coeffs()):
+                return None
+            radicals.append((node, base, int(exponent.q)))
+        if not radicals or len(radicals) > 3:
+            return None
+        ys = sympy.symbols(f"_rad0:{len(radicals)}")
+        substitution = {node: y for (node, _, _), y in zip(radicals, ys, strict=True)}
+        reduced = difference.xreplace(substitution)
+        numerator = sympy.fraction(sympy.together(sympy.expand(reduced.doit())))[0]
+        if not numerator.is_polynomial(var, *ys) or numerator.free_symbols - {var, *ys}:
+            return None
+        eliminated = sympy.expand(numerator)
+        for (_, base, index), y in zip(radicals, ys, strict=True):
+            eliminated = sympy.resultant(eliminated, y**index - base, y)
+        polynomial = sympy.Poly(sympy.expand(eliminated), var)
+        if polynomial.is_zero:
+            return None
+        found = sympy.roots(polynomial)
+        if sum(found.values()) != polynomial.degree():
+            return None
+        candidates = sorted((r for r in found if r.is_real), key=lambda r: float(r))
+        solutions: List[sympy.Expr] = []
+        notes: List[str] = []
+        for candidate in candidates:
+            values = {}
+            reason = None
+            for node, base, index in radicals:
+                value = _real_radical_value(sympy.simplify(base.subs(var, candidate)), index)
+                if value is None:
+                    reason = "radicando negativo en una raíz par"
+                    break
+                values[node] = value
+            if reason is None:
+                checked = difference.xreplace(values).xreplace({var: candidate})
+                residual = sympy.simplify(checked.doit())
+                if residual != 0:
+                    reason = "no satisface la ecuación original"
+            if reason is None:
+                solutions.append(candidate)
+                notes.append(f"Candidato {var} = {candidate}: verifica la ecuación original.")
+            else:
+                notes.append(
+                    f"Candidato {var} = {candidate}: {reason}; se descarta (raíz extraña)."
+                )
+        if not candidates:
+            notes.append("Al eliminar los radicales no aparece ningún candidato real.")
+        step = Step(
+            index=0,
+            title="Eliminación de radicales y verificación",
+            description=" ".join(notes),
+            rule="RadicalCandidates",
+            latex_before=sympy.latex(eq),
+            latex_after=(
+                r",\quad ".join(sympy.latex(sympy.Eq(var, s)) for s in solutions)
+                if solutions
+                else r"\varnothing"
+            ),
+        )
+        # Empty real solution sets keep the radical contract already certified by
+        # AS-PAR-06/07: equation_solutions with no roots.
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(s) for s in solutions],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def _linear_steps(eq: sympy.Eq, var: sympy.Symbol) -> Optional[Tuple[List[Step], List[sympy.Expr]]]:
     try:
         normalized = sympy.Eq(sympy.expand(eq.lhs - eq.rhs), 0)
@@ -538,6 +645,9 @@ def solve_equation(
         cases_result = _absolute_value_cases_result(eq, var, warnings)
         if cases_result is not None:
             return cases_result
+        radical_result = _radical_cases_result(eq, var, warnings)
+        if radical_result is not None:
+            return radical_result
     if steps_and_solutions is None:
         steps_and_solutions = _linear_steps(eq, var)
     if steps_and_solutions is None:
