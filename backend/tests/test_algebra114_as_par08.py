@@ -86,3 +86,44 @@ def test_as_par_08_original_absolute_value_equation_service_and_http():
         assert payload["success"] is True, payload
         assert payload["result_type"] == "equation_solutions"
         assert payload["result_data"] == []
+
+
+def test_as_par_09_original_equal_distance_absolute_value_service_and_http():
+    source = (
+        Path(__file__).resolve().parents[2] / "qa/certification/algebra114_source.md"
+    ).read_text()
+    assert "| AS-PAR-09 | N3 |" in source
+    assert r"\frac{a+b}{2}" in source
+
+    # Distinct centers: the midpoint is the unique real solution.
+    equation = "abs(x-2)=abs(x-6)"
+    result = solve_equation(equation, "x")
+    roots = _roots(result)
+    assert len(roots) == 1
+    assert sympy.simplify(roots[0] - 4) == 0
+    response = _solve_http(equation)
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["success"] is True, payload
+    assert payload["result_type"] == "equation_solutions"
+    assert len(_http_roots(payload)) == 1
+    assert sympy.simplify(_http_roots(payload)[0] - 4) == 0
+
+    # Equal centers: every real x is a solution (identity).
+    equal_equation = "abs(x-3)=abs(x-3)"
+    equal_result = solve_equation(equal_equation, "x")
+    assert equal_result.result_type == ResultType.IDENTITY
+    equal_response = _solve_http(equal_equation)
+    assert equal_response.status_code == 200, equal_response.text
+    equal_payload = equal_response.json()
+    assert equal_payload["success"] is True, equal_payload
+    assert equal_payload["result_type"] == "identity"
+
+    # Symbolic centers preserve the required conditional rather than claiming
+    # a complete singleton solution set when a == b.
+    symbolic = solve_equation("abs(x-a)=abs(x-b)", "x")
+    symbolic_roots = _roots(symbolic)
+    assert len(symbolic_roots) == 1
+    assert sympy.simplify(2 * symbolic_roots[0] - sympy.Symbol("a") - sympy.Symbol("b")) == 0
+    assert "a = b" in symbolic.steps[0].description
+    assert "a ≠ b" in symbolic.steps[0].description

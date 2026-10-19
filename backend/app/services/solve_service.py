@@ -73,6 +73,48 @@ def _to_equation_solution(value: sympy.Expr) -> EquationSolution:
     return EquationSolution(text=str(value), latex=sympy.latex(value), is_complex=bool(is_complex))
 
 
+def _absolute_value_equidistance_steps(
+    eq: sympy.Eq, var: sympy.Symbol
+) -> Optional[Tuple[List[Step], List[sympy.Expr]]]:
+    """Solve |x-a|=|x-b| on R with the distinct/equal-center cases."""
+    try:
+        if not isinstance(eq.lhs, sympy.Abs) or not isinstance(eq.rhs, sympy.Abs):
+            return None
+        left_arg, right_arg = eq.lhs.args[0], eq.rhs.args[0]
+        if var not in left_arg.free_symbols or var not in right_arg.free_symbols:
+            return None
+        if sympy.simplify(sympy.diff(left_arg, var) - 1) != 0:
+            return None
+        if sympy.simplify(sympy.diff(right_arg, var) - 1) != 0:
+            return None
+        left_center = sympy.simplify(var - left_arg)
+        right_center = sympy.simplify(var - right_arg)
+        if var in left_center.free_symbols or var in right_center.free_symbols:
+            return None
+        difference = sympy.simplify(left_center - right_center)
+        midpoint = sympy.simplify((left_center + right_center) / 2)
+        if difference == 0:
+            description = "Como a = b, ambos valores absolutos son idénticos; toda x real es solución."
+        elif difference.is_zero is False:
+            description = "Como a ≠ b, la única solución real es el punto medio x = (a+b)/2."
+        else:
+            description = (
+                "Si a ≠ b, la única solución real es x = (a+b)/2; "
+                "si a = b, toda x real es solución. La raíz mostrada es condicional a a ≠ b."
+            )
+        step = Step(
+            index=0,
+            title="Equidistancia en la recta real",
+            description=description,
+            rule="AbsoluteValueEquidistance",
+            latex_before=sympy.latex(eq),
+            latex_after=sympy.latex(sympy.Eq(var, midpoint)),
+        )
+        return [step], [midpoint]
+    except Exception:
+        return None
+
+
 def _absolute_value_steps(
     eq: sympy.Eq, var: sympy.Symbol
 ) -> Optional[Tuple[List[Step], List[sympy.Expr]]]:
@@ -296,7 +338,9 @@ def solve_equation(
 
     has_direct_trig = _equation_has_direct_trig_of_variable(eq, var)
 
-    steps_and_solutions = _absolute_value_steps(eq, var)
+    steps_and_solutions = _absolute_value_equidistance_steps(eq, var)
+    if steps_and_solutions is None:
+        steps_and_solutions = _absolute_value_steps(eq, var)
     if steps_and_solutions is None:
         steps_and_solutions = _linear_steps(eq, var)
     if steps_and_solutions is None:
