@@ -6,6 +6,7 @@ import sympy
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.schemas.responses import ResultType
 from app.services.solve_service import solve_equation
 
 client = TestClient(app)
