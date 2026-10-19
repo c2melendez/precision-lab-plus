@@ -566,7 +566,37 @@ def _rational_domain_result(
             f"Al llevar todo a un denominador común el numerador es la constante no nula {numerator}; no existe solución.",
         )
         return SolveResult(eq, var, ResultType.CONTRADICTION, [], [step], True, warnings)
-    return None
+    # Algebra114 AS-DOM-03: roots of the UNCANCELLED numerator that annul an
+    # original denominator are named and discarded.
+    try:
+        raw_numerator = sympy.fraction(sympy.together(eq.lhs - eq.rhs))[0]
+        if not raw_numerator.is_polynomial(var) or sympy.degree(raw_numerator, var) > 4:
+            return None
+        candidates = sympy.solveset(raw_numerator, var, domain=sympy.S.Reals)
+        if not isinstance(candidates, sympy.FiniteSet):
+            return None
+        excluded = [c for c in candidates if any(sympy.simplify(c - e) == 0 for e in exclusions)]
+        if not excluded:
+            return None
+        valid = sorted((c for c in candidates if c not in excluded), key=float)
+    except Exception:
+        return None
+    detail = " ".join(
+        f"{var} = {c} anula el numerador pero no pertenece al dominio; se descarta."
+        for c in excluded
+    )
+    step = _domain_step(eq, var, exclusions, detail)
+    if not valid:
+        return SolveResult(eq, var, ResultType.CONTRADICTION, [], [step], True, warnings)
+    return SolveResult(
+        eq,
+        var,
+        ResultType.EQUATION_SOLUTIONS,
+        [_to_equation_solution(c) for c in valid],
+        [step],
+        True,
+        warnings,
+    )
 
 
 def solve_equation(

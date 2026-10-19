@@ -167,6 +167,38 @@ def _real_absolute_piecewise(expr: sympy.Expr) -> Optional[sympy.Expr]:
     return sympy.Piecewise(*args, evaluate=False)
 
 
+def _real_root_of_square(expr: sympy.Expr) -> sympy.Expr:
+    """Algebra114 AS-DOM-04: over R, sqrt(u**2) = |u| for a univariate expression."""
+    if len(expr.free_symbols) != 1:
+        return expr
+    return expr.replace(
+        lambda e: e.is_Pow and e.exp == sympy.S.Half and e.base.is_Pow and e.base.exp == 2,
+        lambda e: sympy.Abs(e.base.base),
+    )
+
+
+def _absolute_ratio_sign_step(expr: sympy.Expr, index: int) -> Optional[Step]:
+    """|v|/v (or v/|v|) equals 1 where v>0 and -1 where v<0; v=0 is excluded."""
+    if len(expr.free_symbols) != 1:
+        return None
+    for node in expr.atoms(sympy.Abs):
+        inner = node.args[0]
+        if sympy.simplify(expr - node / inner) == 0 or sympy.simplify(expr - inner / node) == 0:
+            return Step(
+                index=index,
+                title="Signo del cociente con valor absoluto",
+                description=(
+                    f"Con {inner} ≠ 0: vale 1 si {inner} > 0 y -1 si {inner} < 0."
+                ),
+                rule="AbsoluteRatioSign",
+                latex_before=sympy.latex(expr),
+                latex_after=sympy.latex(
+                    sympy.Piecewise((1, inner > 0), (-1, inner < 0), evaluate=False)
+                ),
+            )
+    return None
+
+
 def simplify_expression(expression: str) -> AlgebraResult:
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     result_expr = _rewrite_audited_real_absolute_square(
@@ -174,11 +206,15 @@ def simplify_expression(expression: str) -> AlgebraResult:
         _split_absolute_products(_denest_constant_radicals(sympy.simplify(input_expr))),
     )
     result_expr = _real_absolute_piecewise(result_expr) or result_expr
-    step = _summary_step(input_expr, result_expr, "Simplificación")
+    result_expr = _real_root_of_square(result_expr)
+    steps = [_summary_step(input_expr, result_expr, "Simplificación")]
+    sign_step = _absolute_ratio_sign_step(result_expr, len(steps))
+    if sign_step is not None:
+        steps.append(sign_step)
     return AlgebraResult(
         input_expr,
         result_expr,
-        [step],
+        steps,
         has_detailed_steps=False,
         domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
     )
