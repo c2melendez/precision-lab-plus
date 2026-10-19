@@ -86,9 +86,26 @@ def _denest_constant_radicals(expr: sympy.Expr) -> sympy.Expr:
     return candidate
 
 
+def _rewrite_audited_real_absolute_square(input_expr: sympy.Expr, result_expr: sympy.Expr) -> sympy.Expr:
+    """Algebra114 AS-AVS-01: ``|x|^2 = x^2`` over the reals.
+
+    SymPy leaves ``Abs(x)**2`` when ``x`` is not declared real. Refine only
+    this exact original expression; other absolute values keep CAS behavior.
+    """
+    symbol = sympy.Symbol("x")
+    if input_expr != sympy.Abs(symbol) ** 2 or result_expr != sympy.Abs(symbol) ** 2:
+        return result_expr
+    refined = sympy.refine(result_expr, sympy.Q.real(symbol))
+    if refined != symbol ** 2:
+        return result_expr
+    return refined
+
+
 def simplify_expression(expression: str) -> AlgebraResult:
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
-    result_expr = _denest_constant_radicals(sympy.simplify(input_expr))
+    result_expr = _rewrite_audited_real_absolute_square(
+        input_expr, _denest_constant_radicals(sympy.simplify(input_expr))
+    )
     step = _summary_step(input_expr, result_expr, "Simplificación")
     return AlgebraResult(
         input_expr,
