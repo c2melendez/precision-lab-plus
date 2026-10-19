@@ -290,6 +290,84 @@ def _quadratic_steps(
         return None
 
 
+def _denominator_exclusions(eq: sympy.Eq, var: sympy.Symbol) -> List[sympy.Expr]:
+    """Points where an ORIGINAL denominator containing `var` vanishes.
+
+    The parser keeps the written structure (e.g. ``x/x`` is not folded to 1),
+    so the restriction can be read from the unevaluated equation. Complex-only
+    roots are ignored because the solver works on the real domain.
+    """
+    exclusions: List[sympy.Expr] = []
+    try:
+        for node in sympy.preorder_traversal(eq):
+            if not isinstance(node, sympy.Pow):
+                continue
+            if not (node.exp.is_number and node.exp.is_negative):
+                continue
+            if var not in node.base.free_symbols:
+                continue
+            for root in sympy.solve(node.base, var):
+                if root.is_real is False or var in root.free_symbols:
+                    continue
+                if root not in exclusions:
+                    exclusions.append(root)
+    except Exception:
+        return []
+    return exclusions
+
+
+def _domain_step(eq: sympy.Eq, var: sympy.Symbol, exclusions: List[sympy.Expr], description: str) -> Step:
+    plain = ", ".join(f"{var}≠{point}" for point in exclusions)
+    latex = ", ".join(f"{sympy.latex(var)} \\neq {sympy.latex(point)}" for point in exclusions)
+    return Step(
+        index=0,
+        title="Dominio de la ecuación",
+        description=f"Restricción de dominio original: {plain}. {description}",
+        rule="DomainRestriction",
+        latex_before=sympy.latex(eq),
+        latex_after=latex,
+    )
+
+
+def _rational_domain_result(
+    eq: sympy.Eq,
+    var: sympy.Symbol,
+    exclusions: List[sympy.Expr],
+    warnings: List[str],
+) -> Optional["SolveResult"]:
+    """Classify a rational equation while preserving its original domain.
+
+    * lhs-rhs == 0 identically  -> identity on the domain (x != excluded points).
+    * lhs-rhs == N/D, N a non-zero constant independent of `var`
+                                -> contradiction (no value can zero N).
+    Anything else is left to the general solver.
+    """
+    if not exclusions:
+        return None
+    try:
+        difference = sympy.cancel(sympy.together(eq.lhs - eq.rhs))
+        numerator, _denominator = sympy.fraction(difference)
+    except Exception:
+        return None
+    if numerator == 0:
+        step = _domain_step(
+            eq,
+            var,
+            exclusions,
+            "La ecuación se cumple para toda x del dominio; el punto excluido no pertenece al conjunto solución.",
+        )
+        return SolveResult(eq, var, ResultType.IDENTITY, [], [step], True, warnings)
+    if var not in numerator.free_symbols and numerator.is_zero is False:
+        step = _domain_step(
+            eq,
+            var,
+            exclusions,
+            f"Al llevar todo a un denominador común el numerador es la constante no nula {numerator}; no existe solución.",
+        )
+        return SolveResult(eq, var, ResultType.CONTRADICTION, [], [step], True, warnings)
+    return None
+
+
 def solve_equation(
     equation_text: str, variable_name: Optional[str], angle_unit: str = "rad"
 ) -> SolveResult:
@@ -317,6 +395,19 @@ def solve_equation(
     # equation can still syntactically contain x after a coefficient is zero.
     difference = sympy.simplify(eq.lhs - eq.rhs)
     if difference == 0:
+        # Algebra114 AS-PAR-10: an identity such as x/x=1 holds only on the
+        # original domain; keep the excluded denominator points visible.
+        domain_var = None
+        if variable_name:
+            domain_var = sympy.Symbol(variable_name)
+        elif len(free_symbols) == 1:
+            domain_var = free_symbols[0]
+        if domain_var is not None and domain_var in free_symbols:
+            domain_result = _rational_domain_result(
+                eq, domain_var, _denominator_exclusions(eq, domain_var), list(convention_warnings)
+            )
+            if domain_result is not None:
+                return domain_result
         return SolveResult(eq, None, ResultType.IDENTITY, [], [], False, convention_warnings)
     if not difference.free_symbols:
         return SolveResult(eq, None, ResultType.CONTRADICTION, [], [], False, convention_warnings)
@@ -339,6 +430,10 @@ def solve_equation(
     parameters = [str(symbol) for symbol in free_symbols if symbol != var]
     if var in free_symbols and parameters:
         warnings.append(f"Se despeja {var}; parámetros libres: {', '.join(parameters)}.")
+
+    rational_result = _rational_domain_result(eq, var, _denominator_exclusions(eq, var), warnings)
+    if rational_result is not None:
+        return rational_result
 
     has_direct_trig = _equation_has_direct_trig_of_variable(eq, var)
 

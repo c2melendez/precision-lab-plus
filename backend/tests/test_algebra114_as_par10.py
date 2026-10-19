@@ -37,7 +37,9 @@ def test_as_par_10_original_rational_equation_service_and_http():
     payload = response.json()
     assert payload["success"] is True, payload
     assert payload["result_type"] == "contradiction"
-    assert payload["result_data"] == []
+    # Public contract: contradiction/identity carry no solution list
+    # (result_data is null, same as AS-PAR-01/02 contradictions).
+    assert not payload["result_data"]
 
     # a = 0: the equation is an identity only on its original domain x != 0.
     equation = "x/x=1"
