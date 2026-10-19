@@ -9,7 +9,7 @@ from app.services.algebra_service import simplify_expression
 def test_as_rat_06_variable_radical_quotient_service_http():
     source = (Path(__file__).resolve().parents[2] / "qa/certification/algebra114_source.md").read_text()
     assert "| AS-RAT-06 | N2 |" in source
-    x, h = sp.symbols("x h", real=True)
+    x, h = sp.symbols("x h")
     original = "(sqrt(x+h)-sqrt(x))/h"
     expected = 1/(sp.sqrt(x+h)+sp.sqrt(x))
     service = simplify_expression(original)
