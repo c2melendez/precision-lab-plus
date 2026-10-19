@@ -191,13 +191,15 @@ def solve_equation(
             result_type = ResultType.IDENTITY if is_identity else ResultType.CONTRADICTION
         return SolveResult(eq, None, result_type, [], [], False, convention_warnings)
 
-    # IN625 E3d2: una ecuación puede ser una identidad aunque tenga
-    # símbolos libres (p. ej. sin(x)^2+cos(x)^2=1 o una identidad
-    # binomial). Clasificar esto ANTES de resolver evita devolver una
-    # lista de raíces arbitrarias para una proposición verdadera para
-    # todo valor del dominio.
-    if sympy.simplify(eq.lhs - eq.rhs) == 0:
+    # IN625 E3d2 / Algebra114 AS-PAR-01: classify the simplified
+    # equation difference before solving. This catches identities such as
+    # 0*x=0 and contradictions such as 0*x=5, where the original unevaluated
+    # equation can still syntactically contain x after a coefficient is zero.
+    difference = sympy.simplify(eq.lhs - eq.rhs)
+    if difference == 0:
         return SolveResult(eq, None, ResultType.IDENTITY, [], [], False, convention_warnings)
+    if not difference.free_symbols:
+        return SolveResult(eq, None, ResultType.CONTRADICTION, [], [], False, convention_warnings)
 
     warnings: List[str] = list(convention_warnings)
     if variable_name:

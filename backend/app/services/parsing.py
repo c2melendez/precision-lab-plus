@@ -880,7 +880,8 @@ def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.B
         return lhs_expr
 
     rhs_expr = _parse_side(rhs_text, local_dict)
-    return sympy.Eq(lhs_expr, rhs_expr)
+    # Preserve both sides so the solver can classify degenerate identities/contradictions after simplification.
+    return sympy.Eq(lhs_expr, rhs_expr, evaluate=False)
 
 
 _INEQUALITY_OPERATORS = ["<=", ">=", "<", ">"]  # orden importa: <= antes que <
