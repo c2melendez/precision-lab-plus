@@ -83,12 +83,16 @@ def _absolute_value_equidistance_steps(
         left_arg, right_arg = eq.lhs.args[0], eq.rhs.args[0]
         if var not in left_arg.free_symbols or var not in right_arg.free_symbols:
             return None
-        if sympy.simplify(sympy.diff(left_arg, var) - 1) != 0:
+        left_slope = sympy.simplify(sympy.diff(left_arg, var))
+        right_slope = sympy.simplify(sympy.diff(right_arg, var))
+        if left_slope not in (sympy.Integer(1), sympy.Integer(-1)):
             return None
-        if sympy.simplify(sympy.diff(right_arg, var) - 1) != 0:
+        if right_slope not in (sympy.Integer(1), sympy.Integer(-1)):
             return None
-        left_center = sympy.simplify(var - left_arg)
-        right_center = sympy.simplify(var - right_arg)
+        # SymPy canonicalizes Abs(x-a) to Abs(a-x) in some inputs; both
+        # orientations represent the same distance and must be supported.
+        left_center = sympy.simplify(var - left_arg if left_slope == 1 else var + left_arg)
+        right_center = sympy.simplify(var - right_arg if right_slope == 1 else var + right_arg)
         if var in left_center.free_symbols or var in right_center.free_symbols:
             return None
         difference = sympy.simplify(left_center - right_center)
