@@ -193,6 +193,100 @@ def _absolute_value_steps(
         return None
 
 
+def _linear_rational_part(
+    expr: sympy.Expr, var: sympy.Symbol
+) -> Optional[Tuple[sympy.Expr, sympy.Expr]]:
+    expanded = sympy.expand(expr)
+    if expanded.free_symbols - {var} or not expanded.is_polynomial(var):
+        return None
+    poly = sympy.Poly(expanded, var)
+    if poly.degree() > 1 or not all(c.is_Rational for c in poly.all_coeffs()):
+        return None
+    return poly.coeff_monomial(var), poly.coeff_monomial(1)
+
+
+def _absolute_value_cases_result(
+    eq: sympy.Eq, var: sympy.Symbol, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Algebra114 AS-AVS-07..09: solve rational-linear |ax+b| equations by cases on R.
+
+    Left-closed regions (-oo,c1), [c1,c2), ..., [cn,oo); a branch root is kept only
+    if it lies in its own region, so roots introduced by squaring are rejected.
+    Regions where the equation is an identity (interval solutions) are not handled.
+    """
+    try:
+        difference = eq.lhs - eq.rhs
+        if difference.free_symbols != {var} or not difference.has(sympy.Abs):
+            return None
+        nodes = difference.atoms(sympy.Abs)
+        points = set()
+        for node in nodes:
+            line = _linear_rational_part(node.args[0], var)
+            if line is None or line[0] == 0:
+                return None
+            points.add(-line[1] / line[0])
+        points = sorted(points)
+        midpoints = [(a + b) / 2 for a, b in zip(points, points[1:], strict=False)]
+        samples = [points[0] - 1, *midpoints, points[-1] + 1]
+        solutions: List[sympy.Expr] = []
+        notes: List[str] = []
+        for index, sample in enumerate(samples):
+            lower = points[index - 1] if index else None
+            upper = points[index] if index < len(points) else None
+            signs = {
+                n: n.args[0] if n.args[0].subs(var, sample) >= 0 else -n.args[0] for n in nodes
+            }
+            line = _linear_rational_part(difference.xreplace(signs), var)
+            if line is None:
+                return None
+            slope, intercept = line
+            if lower is None:
+                region = f"{var} < {upper}"
+            elif upper is None:
+                region = f"{var} ≥ {lower}"
+            else:
+                region = f"{lower} ≤ {var} < {upper}"
+            if slope == 0:
+                if intercept == 0:
+                    return None
+                notes.append(f"En {region} la ecuación queda {intercept} = 0: sin solución.")
+                continue
+            root = -intercept / slope
+            inside = (lower is None or root >= lower) and (upper is None or root < upper)
+            if inside:
+                solutions.append(root)
+                notes.append(f"En {region}: x = {root}, pertenece al tramo y se acepta.")
+            else:
+                notes.append(
+                    f"En {region}: x = {root} no pertenece al tramo; se descarta (raíz extraña)."
+                )
+        cases_step = Step(
+            index=0,
+            title="Análisis por casos del valor absoluto",
+            description=" ".join(notes),
+            rule="AbsoluteValueCases",
+            latex_before=sympy.latex(eq),
+            latex_after=(
+                r",\quad ".join(sympy.latex(sympy.Eq(var, s)) for s in solutions)
+                if solutions
+                else r"\varnothing"
+            ),
+        )
+        if not solutions:
+            return SolveResult(eq, var, ResultType.CONTRADICTION, [], [cases_step], True, warnings)
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(s) for s in solutions],
+            [cases_step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def _linear_steps(eq: sympy.Eq, var: sympy.Symbol) -> Optional[Tuple[List[Step], List[sympy.Expr]]]:
     try:
         normalized = sympy.Eq(sympy.expand(eq.lhs - eq.rhs), 0)
@@ -440,6 +534,10 @@ def solve_equation(
     steps_and_solutions = _absolute_value_equidistance_steps(eq, var)
     if steps_and_solutions is None:
         steps_and_solutions = _absolute_value_steps(eq, var)
+    if steps_and_solutions is None:
+        cases_result = _absolute_value_cases_result(eq, var, warnings)
+        if cases_result is not None:
+            return cases_result
     if steps_and_solutions is None:
         steps_and_solutions = _linear_steps(eq, var)
     if steps_and_solutions is None:
