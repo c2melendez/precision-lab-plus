@@ -73,6 +73,80 @@ def _to_equation_solution(value: sympy.Expr) -> EquationSolution:
     return EquationSolution(text=str(value), latex=sympy.latex(value), is_complex=bool(is_complex))
 
 
+def _absolute_value_steps(
+    eq: sympy.Eq, var: sympy.Symbol
+) -> Optional[Tuple[List[Step], List[sympy.Expr]]]:
+    """Solve the certified real-domain absolute-value form locally, without
+    changing global assumptions on symbols used by other solver paths."""
+    try:
+        if isinstance(eq.lhs, sympy.Abs):
+            absolute, radius = eq.lhs, eq.rhs
+        elif isinstance(eq.rhs, sympy.Abs):
+            absolute, radius = eq.rhs, eq.lhs
+        else:
+            return None
+
+        argument = absolute.args[0]
+        if var not in argument.free_symbols or var in radius.free_symbols:
+            return None
+        if sympy.simplify(sympy.diff(argument, var) - 1) != 0:
+            return None
+        center = sympy.simplify(var - argument)
+        if var in center.free_symbols:
+            return None
+
+        radius = sympy.simplify(radius)
+        if radius.is_real is False:
+            return None
+        if radius.is_number and radius.is_real is True:
+            if radius < 0:
+                return [
+                    Step(
+                        index=0,
+                        title="Dominio del valor absoluto",
+                        description="El valor absoluto siempre es no negativo; como b < 0, no existe solución real.",
+                        rule="AbsoluteValueDomain",
+                        latex_before=sympy.latex(eq),
+                        latex_after=r"\varnothing",
+                    )
+                ], []
+            if radius == 0:
+                solutions = [center]
+                description = "Si b = 0, |x-a| solo vale cero en x = a."
+            else:
+                solutions = [
+                    sympy.simplify(center + radius),
+                    sympy.simplify(center - radius),
+                ]
+                description = "Si b > 0, las dos ramas x = a + b y x = a - b dan las dos raíces reales."
+        else:
+            solutions = [
+                sympy.simplify(center + radius),
+                sympy.simplify(center - radius),
+            ]
+            description = (
+                "Para |x-a| = b: si b < 0 no hay solución; si b = 0, x = a; "
+                "si b > 0, x = a ± b. Las dos expresiones son condicionales a b > 0."
+            )
+
+        latex_solutions = r",\quad ".join(
+            sympy.latex(sympy.Eq(var, solution)) for solution in solutions
+        )
+        steps = [
+            Step(
+                index=0,
+                title="Dominio del valor absoluto",
+                description=description,
+                rule="AbsoluteValueDomain",
+                latex_before=sympy.latex(eq),
+                latex_after=latex_solutions,
+            )
+        ]
+        return steps, solutions
+    except Exception:
+        return None
+
+
 def _linear_steps(eq: sympy.Eq, var: sympy.Symbol) -> Optional[Tuple[List[Step], List[sympy.Expr]]]:
     try:
         normalized = sympy.Eq(sympy.expand(eq.lhs - eq.rhs), 0)
@@ -222,7 +296,9 @@ def solve_equation(
 
     has_direct_trig = _equation_has_direct_trig_of_variable(eq, var)
 
-    steps_and_solutions = _linear_steps(eq, var)
+    steps_and_solutions = _absolute_value_steps(eq, var)
+    if steps_and_solutions is None:
+        steps_and_solutions = _linear_steps(eq, var)
     if steps_and_solutions is None:
         steps_and_solutions = _quadratic_steps(eq, var)
 
