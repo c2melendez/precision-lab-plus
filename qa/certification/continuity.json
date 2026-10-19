@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 143,
+  "revision": 144,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "3fe7c03d56bb539019ea1d6ef95820287124fe60",
-  "baseline_case": "AS-PAR-07",
+  "technical_baseline_sha": "20f7cc8a9961113a3446c2299f053fb2e0179645",
+  "baseline_case": "AS-PAR-08",
   "baseline_status": "PENDING_EXACT_SHA_GATES",
   "global_certification": "OPEN",
   "prose_only_paths": [
@@ -264,30 +264,31 @@
     }
   },
   "next_action": {
-    "id": "ALGEBRA114-AS-PAR-07-EXACT-SHA-GATES",
+    "id": "ALGEBRA114-AS-PAR-08-EXACT-SHA-GATES",
     "status": "PENDING_EXACT_SHA_GATES",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-lite": "18a0bb717c4e9dcddb6e3bb92f338d7f4038531c",
-      "c2melendez/precision-lab-plus": "85e9c61562751eb05a2abda2c46757677b806388"
+      "c2melendez/precision-lab-lite": "25e78178ba859727f6268721c183b13191368245",
+      "c2melendez/precision-lab-plus": "20f7cc8a9961113a3446c2299f053fb2e0179645"
     },
     "run_ids_by_repo": {
       "c2melendez/precision-lab-lite": [
-        39233655616,
-        39233655445,
-        39233655466
+        39234352125,
+        39234351958,
+        39234351986
       ],
       "c2melendez/precision-lab-plus": [
-        39233661000,
-        39233660936
+        39235089515,
+        39235089451,
+        39235089439
       ]
     },
-    "action": "AS-PAR-07 cumulative and H1d gates pass on both exact SHAs; Plus service+HTTP test passed. Wait for Lite native run 39233655466/job 117997399569, review completed logs, then close the block. AS-PAR-08 is running as independent work; do not weaken its absolute-value oracle.",
+    "action": "AS-PAR-07 is VERIFIED_BILATERAL_SCOPED. For AS-PAR-08, Lite cumulative/H1d pass while native scientific remains in progress; Plus's SymPy Abs domain failure is corrected on the new SHA and cumulative/H1d/syntax retries are running. Review all exact-SHA logs and close only after all gates pass.",
     "exit_criteria": [
-      "Lite AS-PAR-07 original test passes; cumulative/H1d SUCCESS and native scientific E2E completes SUCCESS on exact SHA with logs reviewed",
-      "Plus AS-PAR-07 original service+HTTP test passes; cumulative/H1d success and logs reviewed",
-      "For b>=0 verify x=a+b^2 by substitution into sqrt(x-a)=b",
-      "For b<0 return no real solution and reject extraneous roots",
-      "Global certification remains OPEN; S19 score null; preserve SG28/DIST and unrelated blockers"
+      "Lite AS-PAR-08 original tests pass; cumulative/H1d/native scientific gates SUCCESS on exact SHA and logs reviewed",
+      "Plus AS-PAR-08 original backend service/API test passes after the localized real absolute-value handler; cumulative/H1d/syntax gates SUCCESS on exact fix SHA with logs reviewed",
+      "b<0 no real roots; b=0 one root x=a; b>0 two roots x=a±b verified by substitution",
+      "Do not count old-SHA gates, TODO, XFAIL, skips or reused evidence as PASS",
+      "Global certification remains OPEN; S19 score null; preserve SG28/DIST and independent blockers"
     ]
   },
   "blockers": [
@@ -2393,7 +2394,7 @@
       "no_global_inference": true
     },
     "algebra114_as_par_07": {
-      "status": "PENDING_EXACT_SHA_GATES",
+      "status": "VERIFIED_BILATERAL_SCOPED",
       "equation": "sqrt(x-a) = b over R",
       "contract": "qa/certification/algebra114_source.md",
       "oracle": [
@@ -2431,9 +2432,18 @@
           "scientific_native": {
             "run_id": 39233655466,
             "job_id": 117997399569,
-            "status": "IN_PROGRESS",
-            "logs_reviewed": false,
-            "evidence_executed": false
+            "status": "SUCCESS",
+            "logs_reviewed": true,
+            "evidence_executed": true,
+            "counts": {
+              "pass": 456,
+              "skip": 0
+            },
+            "profiles": [
+              "desktop-chromium",
+              "tablet-chromium",
+              "mobile-chromium"
+            ]
           }
         },
         "c2melendez/precision-lab-plus": {
@@ -2485,41 +2495,60 @@
           "test_file": "tests/algebra114AsPar08.audit.test.ts",
           "cumulative": {
             "run_id": 39234352125,
-            "status": "IN_PROGRESS",
             "job_id": 117999702787,
-            "logs_reviewed": false,
-            "evidence_executed": false
+            "status": "SUCCESS",
+            "logs_reviewed": true,
+            "evidence_executed": true,
+            "original_case_tests_passed": 7,
+            "suite_counts": {
+              "pass": 1750,
+              "todo": 30
+            }
           },
           "h1d": {
             "run_id": 39234351958,
-            "status": "IN_PROGRESS",
             "job_id": 117999701607,
-            "logs_reviewed": false,
-            "evidence_executed": false
+            "status": "SUCCESS",
+            "logs_reviewed": true,
+            "evidence_executed": true
           },
           "scientific_native": {
             "run_id": 39234351986,
-            "status": "IN_PROGRESS",
             "job_id": 117999701835,
+            "status": "IN_PROGRESS",
             "logs_reviewed": false,
             "evidence_executed": false
           }
         },
         "c2melendez/precision-lab-plus": {
-          "technical_sha": "3fe7c03d56bb539019ea1d6ef95820287124fe60",
+          "prior_attempt": {
+            "technical_sha": "3fe7c03d56bb539019ea1d6ef95820287124fe60",
+            "cumulative": {
+              "run_id": 39234359666,
+              "backend_job_id": 117999726515,
+              "status": "FAILURE",
+              "logs_reviewed": true,
+              "evidence_executed": true,
+              "failure_summary": "SymPy NotImplementedError while solving Abs(x) without real assumptions; first zero-radius case."
+            }
+          },
+          "technical_sha": "20f7cc8a9961113a3446c2299f053fb2e0179645",
           "test_file": "backend/tests/test_algebra114_as_par08.py",
           "cumulative": {
-            "run_id": 39234359666,
+            "run_id": 39235089515,
             "status": "IN_PROGRESS",
-            "backend_job_id": 117999726515,
-            "frontend_job_id": 117999727279,
             "logs_reviewed": false,
             "evidence_executed": false
           },
           "h1d": {
-            "run_id": 39234359644,
+            "run_id": 39235089451,
             "status": "IN_PROGRESS",
-            "job_id": 117999726577,
+            "logs_reviewed": false,
+            "evidence_executed": false
+          },
+          "syntax_recovery": {
+            "run_id": 39235089439,
+            "status": "IN_PROGRESS",
             "logs_reviewed": false,
             "evidence_executed": false
           }
