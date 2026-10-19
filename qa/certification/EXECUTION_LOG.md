@@ -1,5 +1,12 @@
 # Registro de ejecución — índice vigente
 
+## 2026-10-19 UTC — AS-PAR-08 cerrado; AS-PAR-09 en gates exact-SHA
+
+**AS-PAR-08 — VERIFIED_BILATERAL_SCOPED.** Contrato |x-a|=b sobre R: b<0 sin solución, b=0 x=a, b>0 x=a±b. Lite: [acumulativo 39234352125](https://github.com/c2melendez/precision-lab-lite/actions/runs/39234352125) SUCCESS (7 pruebas originales PASS; 1,750 PASS/30 TODO), [H1d 39234351958](https://github.com/c2melendez/precision-lab-lite/actions/runs/39234351958) SUCCESS y [E2E nativo 39234351986](https://github.com/c2melendez/precision-lab-lite/actions/runs/39234351986) SUCCESS con 456 PASS. Plus SHA 20f7cc8a9961113a3446c2299f053fb2e0179645: [acumulativo 39235089515](https://github.com/c2melendez/precision-lab-plus/actions/runs/39235089515) SUCCESS (test service+HTTP original PASS; backend 1,578 PASS/3 XFAIL), [H1d 39235089451](https://github.com/c2melendez/precision-lab-plus/actions/runs/39235089451) SUCCESS y [syntax/recovery 39235089439](https://github.com/c2melendez/precision-lab-plus/actions/runs/39235089439) SUCCESS. Logs revisados; corrección de SymPy sin debilitar el oráculo.
+
+**AS-PAR-09 — PENDING_EXACT_SHA_GATES.** Contrato |x-a|=|x-b|: a≠b da la única solución x=(a+b)/2; a=b es identidad (toda x real). Plus código/tests SHA 9f17dc516af64cd276154dc11dfb4f66add79241: [acumulativo 39274466829](https://github.com/c2melendez/precision-lab-plus/actions/runs/39274466829) y [H1d 39274466897](https://github.com/c2melendez/precision-lab-plus/actions/runs/39274466897) en cola/ejecución al registrar. Revisar gates y prueba original por SHA exacto; no cerrar hasta que todo termine SUCCESS. Global OPEN; S19 score null; SG28/DIST sin cambios.
+
+
 ## 2026-10-19 UTC — AS-PAR-07 cerrado; AS-PAR-08 continúa tras diagnóstico de Plus
 
 AS-PAR-07 quedó VERIFIED_BILATERAL_SCOPED: Lite [39233655616](https://github.com/c2melendez/precision-lab-lite/actions/runs/39233655616) SUCCESS, test original 7 PASS, suite 1743 PASS/30 TODO; [39233655445](https://github.com/c2melendez/precision-lab-lite/actions/runs/39233655445) SUCCESS, 22 PASS; el log de [39233655466](https://github.com/c2melendez/precision-lab-lite/actions/runs/39233655466) confirma 456 native PASS. Plus [39233661000](https://github.com/c2melendez/precision-lab-plus/actions/runs/39233661000) SUCCESS con test service+HTTP original PASS, backend 1577 PASS/3 XFAIL y frontend 1008 PASS/28 TODO; [39233660936](https://github.com/c2melendez/precision-lab-plus/actions/runs/39233660936) SUCCESS, 38 PASS. Evidencia exact-SHA y logs revisados.
