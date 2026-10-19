@@ -1,0 +1,14 @@
+{"id":"SY-R-13","entrada":"\\sqrt[3]{x}\\ \\text{con}\\ x=27"}
+{"id":"SY-R-14","entrada":"\\left\\lvert x\\right\\rvert\\ \\text{con}\\ x=-4"}
+{"id":"SY-X-05","entrada":"\\underbrace{(\\cdots((1))\\cdots)}_{30\\text{ niveles}}"}
+{"id":"SY-X-06","entrada":"\\text{(entrada de 10 000 caracteres)}"}
+{"id":"SY-X-08","entrada":"\\sqrt{-1}"}
+{"id":"SY-X-01","entrada":"*(vacía)*"}
+{"id":"SY-X-02","entrada":"*(vacía)*"}
+{"id":"SY-X-03","entrada":"\\text{(entrada incompleta)}"}
+{"id":"SY-R-12","entrada":"\\text{no existe}"}
+{"id":"SY-X-07","entrada":"\\infty-\\infty"}
+{"id":"SY-X-09","entrada":"99999999999^{99999999999}"}
+{"id":"SY-X-10","entrada":"10^{10^{10}}"}
+{"id":"SY-X-11","entrada":"9^{9^{9}}"}
+{"id":"SY-X-12","entrada":"\\int\\sin\\left(x^{x}\\right)dx"}
