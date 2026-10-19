@@ -15,11 +15,14 @@ def test_as_avs_02_absolute_product_service_and_http():
     assert "| AS-AVS-02 | N2 | \\(|xy|\\) | \\(|x||y|\\) |" in source
     original = "abs(x*y)"
     x, y = sp.symbols("x y")
+    expected = sp.Abs(x) * sp.Abs(y)
     samples = [(-3, 2), (-1, -4), (0, 5), (2, 7), (-2.5, -0.5)]
 
     service = simplify_expression(original)
+    assert service.result_expr == expected
     for xv, yv in samples:
-        assert sp.N(service.result_expr.subs({x: xv, y: yv})) == sp.Abs(xv) * sp.Abs(yv)
+        value = float(sp.N(service.result_expr.subs({x: xv, y: yv})))
+        assert abs(value - abs(xv) * abs(yv)) < 1e-12
 
     with TestClient(app) as client:
         response = client.post("/api/v1/simplify", json={"expression": original})
@@ -27,5 +30,7 @@ def test_as_avs_02_absolute_product_service_and_http():
     payload = response.json()
     assert payload["success"] is True, payload
     observed = sp.sympify(payload["result_text"])
+    assert observed == expected
     for xv, yv in samples:
-        assert sp.N(observed.subs({x: xv, y: yv})) == sp.Abs(xv) * sp.Abs(yv)
+        value = float(sp.N(observed.subs({x: xv, y: yv})))
+        assert abs(value - abs(xv) * abs(yv)) < 1e-12

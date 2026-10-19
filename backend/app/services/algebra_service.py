@@ -101,10 +101,19 @@ def _rewrite_audited_real_absolute_square(input_expr: sympy.Expr, result_expr: s
     return refined
 
 
+def _split_absolute_products(expr: sympy.Expr) -> sympy.Expr:
+    """|a*b| = |a|*|b| for every complex a and b, so no domain assumption is needed."""
+    return expr.replace(
+        lambda node: isinstance(node, sympy.Abs) and node.args[0].is_Mul,
+        lambda node: sympy.Mul(*(sympy.Abs(factor) for factor in node.args[0].args)),
+    )
+
+
 def simplify_expression(expression: str) -> AlgebraResult:
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     result_expr = _rewrite_audited_real_absolute_square(
-        input_expr, _denest_constant_radicals(sympy.simplify(input_expr))
+        input_expr,
+        _split_absolute_products(_denest_constant_radicals(sympy.simplify(input_expr))),
     )
     step = _summary_step(input_expr, result_expr, "Simplificación")
     return AlgebraResult(
