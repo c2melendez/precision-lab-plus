@@ -24,11 +24,53 @@ async function enter(field: Locator, source: string) {
 }
 
 async function evaluate(page: Page, field: Locator, source: string, expected: number, backendExpression = source) {
+  // Lightweight in-page instrumentation to surface whether the page issues network requests.
+  // Does not alter behavior except recording fetch/XHR URLs to window.__pl_requests for diagnostics.
+  await page.evaluate(() => {
+    try {
+      // @ts-ignore
+      if ((window as any).__pl_instrumented) return;
+      // @ts-ignore
+      (window as any).__pl_instrumented = true;
+      // @ts-ignore
+      (window as any).__pl_requests = [];
+      const origFetch = window.fetch;
+      // @ts-ignore
+      window.fetch = function(...args: any[]) {
+        try { (window as any).__pl_requests.push(String(args[0])); } catch (e) {}
+        // @ts-ignore
+        return origFetch.apply(this, args as any);
+      };
+      const origXOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function(method: string, url: string) {
+        try { (window as any).__pl_requests.push(String(url)); } catch (e) {}
+        // @ts-ignore
+        return origXOpen.apply(this, arguments as any);
+      };
+    } catch (e) {
+      // ignore instrumentation errors
+      // eslint-disable-next-line no-console
+      console.error('PLAYWRIGHT-INSTRUMENT-ERROR', String(e));
+    }
+  });
+
   await enter(field, source);
   const responsePromise = page.waitForResponse((response) =>
     response.url().endsWith("/api/v1/evaluate") && response.request().method() === "POST");
   await page.getByRole("button", { name: "Evaluar", exact: true }).click();
-  const response = await responsePromise;
+  let response;
+  try {
+    response = await responsePromise;
+  } catch (e) {
+    // On timeout, capture the in-page observed requests and emit to console for artifact logs.
+    const sent = await page.evaluate(() => {
+      // @ts-ignore
+      return (window as any).__pl_requests || [];
+    });
+    // eslint-disable-next-line no-console
+    console.error("PLAYWRIGHT-DEBUG-REQUESTS", JSON.stringify(sent));
+    throw e;
+  }
   expect(response.status()).toBe(200);
   expect(response.request().postDataJSON().expression).toBe(backendExpression);
   const body = await response.json();
@@ -79,4 +121,4 @@ test("SY-R-13 native original cube-root binding, controls and HTTP reentry", asy
   });
 });
 
-// ... rest of file unchanged ...
+// ... rest of file unchanged (omitted for brevity in commit)
