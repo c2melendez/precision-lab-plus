@@ -48,9 +48,47 @@ def _summary_step(input_expr: sympy.Expr, result_expr: sympy.Expr, title: str) -
     )
 
 
+def _is_radical(power: sympy.Expr) -> bool:
+    return isinstance(power, sympy.Pow) and power.exp.is_Rational and not power.exp.is_integer
+
+
+def _nested_radical_count(expr: sympy.Expr) -> int:
+    """Cuenta radicales cuyo radicando contiene otro radical, p. ej. sqrt(2+sqrt(3))."""
+    return sum(
+        1
+        for power in expr.atoms(sympy.Pow)
+        if _is_radical(power) and any(_is_radical(inner) for inner in power.base.atoms(sympy.Pow))
+    )
+
+
+def _numerically_equal(a: sympy.Expr, b: sympy.Expr) -> bool:
+    diff = sympy.Abs(sympy.N(a - b, 60))
+    return bool(diff.is_number) and float(diff) < 1e-30
+
+
+def _denest_constant_radicals(expr: sympy.Expr) -> sympy.Expr:
+    """Desanida radicales anidados sin variables cuando la forma exacta es equivalente.
+
+    Solo se acepta el resultado si elimina al menos un radical anidado y coincide
+    numéricamente con la expresión original. Las expresiones con variables no se
+    modifican.
+    """
+    if expr.free_symbols:
+        return expr
+    before = _nested_radical_count(expr)
+    if before == 0:
+        return expr
+    candidate = sympy.sqrtdenest(expr)
+    if _nested_radical_count(candidate) >= before:
+        return expr
+    if not _numerically_equal(expr, candidate):
+        return expr
+    return candidate
+
+
 def simplify_expression(expression: str) -> AlgebraResult:
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
-    result_expr = sympy.simplify(input_expr)
+    result_expr = _denest_constant_radicals(sympy.simplify(input_expr))
     step = _summary_step(input_expr, result_expr, "Simplificación")
     return AlgebraResult(
         input_expr,
