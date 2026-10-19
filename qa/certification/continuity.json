@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 112,
+  "revision": 113,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "102c5beddefe61adb09e255cf647dc9dd4c9aec8",
@@ -264,15 +264,15 @@
     }
   },
   "next_action": {
-    "id": "ALGEBRA114-AS-RAT-08-CI-REVIEW",
+    "id": "ALGEBRA114-AS-RAT-08-LITE-RETEST",
     "status": "PENDING_CI",
     "technical_sha": "4dcb55eabe87806a3dd123411827550f1bb6a260",
     "run_id": 39205346692,
-    "action": "Inspect automatic exact-SHA AS-RAT-08 nested radical original test and cumulative logs; correct demonstrated failures, only then advance AS-RAT-09. AS-RAT-06 and AS-RAT-07 are already PASS bilateral; do not reimplement or redispatch.",
+    "action": "Check Lite exact-SHA cumulative 39207865640 and AS-RAT-08 original denesting regression; Plus PASS 39205346692 confirmed. Advance AS-RAT-09 only after Lite exact original test PASS. Avoid unchanged CI redispatch.",
     "exit_criteria": [
-      "AS-RAT-08 expected radical denesting and numeric equality verified",
-      "Plus HTTP and Lite CAS specific tests executed PASS",
-      "Both cumulative technical SHA results documented"
+      "Lite returns sqrt(3)+sqrt(2) exact form",
+      "Original numeric equivalence PASS",
+      "Technical SHA and cumulative success confirmed"
     ]
   },
   "blockers": [
