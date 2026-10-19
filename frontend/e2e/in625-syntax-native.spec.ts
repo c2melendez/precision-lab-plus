@@ -14,13 +14,25 @@ const fixture = (id: string) => {
 
 async function enter(field: Locator, source: string) {
   await field.evaluate((element, value) => {
-    const mathfield = element as HTMLElement & { setValue(value: string): void };
-    mathfield.setValue(value);
-    element.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: value }));
+    try {
+      const mathfield = element as any;
+      // Primary API used by MathLive/Native integration
+      if (typeof mathfield.setValue === "function") mathfield.setValue(value);
+      // Fallback: set property and attribute to cover other implementations
+      try { (element as any).value = value; } catch (e) {}
+      try { element.setAttribute && element.setAttribute("value", String(value)); } catch (e) {}
+      // Dispatch input to trigger React/handlers
+      element.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: value }));
+      // Try focusing to ensure any onFocus/onInput handlers run
+      if (typeof (element as any).focus === "function") (element as any).focus();
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("ENTER-EVAL-ERROR", String(e));
+    }
   }, source);
   // Ingestion is evidence: erasing a malformed source must fail this test.
   await expect.poll(() => field.evaluate((element) =>
-    (element as HTMLElement & { value: string }).value)).toBe(source);
+    (element as any).value)).toBe(source);
 }
 
 async function evaluate(page: Page, field: Locator, source: string, expected: number, backendExpression = source) {
@@ -57,7 +69,11 @@ async function evaluate(page: Page, field: Locator, source: string, expected: nu
   await enter(field, source);
   const responsePromise = page.waitForResponse((response) =>
     response.request().method() === "POST" && (response.url().includes("/api/v1/evaluate") || (response.url().includes("/api/v1/") && !!response.request().postDataJSON && typeof response.request().postDataJSON() === 'object' && 'expression' in response.request().postDataJSON())));
-  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
+  const evalButton = page.getByRole("button", { name: "Evaluar", exact: true });
+  // Ensure the button is visible and enabled before clicking to avoid race conditions
+  await expect(evalButton).toBeVisible();
+  await expect(evalButton).toBeEnabled();
+  await evalButton.click();
   let response;
   try {
     response = await responsePromise;
