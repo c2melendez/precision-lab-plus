@@ -56,7 +56,7 @@ async function evaluate(page: Page, field: Locator, source: string, expected: nu
 
   await enter(field, source);
   const responsePromise = page.waitForResponse((response) =>
-    response.url().endsWith("/api/v1/evaluate") && response.request().method() === "POST");
+    response.request().method() === "POST" && (response.url().includes("/api/v1/evaluate") || (response.url().includes("/api/v1/") && !!response.request().postDataJSON && typeof response.request().postDataJSON() === 'object' && 'expression' in response.request().postDataJSON())));
   await page.getByRole("button", { name: "Evaluar", exact: true }).click();
   let response;
   try {
