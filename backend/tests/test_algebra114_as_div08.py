@@ -36,7 +36,8 @@ def test_as_div_08_original_symbolic_parameter_division_service_http():
             actual_value = service.result_expr.subs({a: av, b: bv, c: cv, x: xx})
             assert abs(float(sp.N(actual_value)) - float(sp.N(expected_value))) < 1e-9
             assert numerator_value - (xx - 1)*quotient_value == remainder_value
-        assert not sp.sympify((1 + av + bv + cv) / 0) if False else True
+        # x = 1 remains excluded because the original denominator is zero.
+        assert denominator.subs(x, 1) == 0
 
     with TestClient(app) as client:
         response = client.post(
