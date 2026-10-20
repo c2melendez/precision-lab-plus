@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 185,
+  "revision": 186,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "9c0126613aacb7b0cd8fca148a6cf7eb1785d14c",
@@ -42,10 +42,10 @@
   },
   "next_action": {
     "id": "ALGEBRA229-AS-B-20-TEST-FIRST",
-    "status": "READY",
+    "status": "BLOCKED_DECISION",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-lite": "bf11ee2af55879c10dbbb173420196cb2c47747b",
-      "c2melendez/precision-lab-plus": "80903249daf4e67a613aed17d9ef1d1ed5c39ae4"
+      "c2melendez/precision-lab-lite": "a9cb5a99246deeaba5fa428d5845ab2a52e1dae8",
+      "c2melendez/precision-lab-plus": "f8ec1733c356f48fce1f6f2a1719d8ab559d229c"
     },
     "run_ids_by_repo": {
       "c2melendez/precision-lab-lite": [
@@ -63,7 +63,7 @@
       "status": "PASS_SCOPED",
       "scope": "unit/HTTP expand/factor + source-row; not matrix-wide"
     },
-    "action": "AS-B-19 PASS_SCOPED bilateral (test-first sin cambios de producto; Plus gates SUCCESS on 8090324). Next AS-B-20 per frozen matriz Section B (N3, multivariable). Scope decision r183 (B-24/B-25 with explicit field suffix) still pending implementation. Global OPEN."
+    "action": "AS-B-20 BLOCKED_DECISION: Plus test-first pasa sin cambios de producto; Lite test-first falla (Algebrite sin factorizar, run 39475280948) y la prueba roja se retiró del branch. Decision pendiente: regla acotada verificada por CAS vs camino multivariable general. No avanzar a B-21 sin cerrar B-20. Global OPEN."
   },
   "blockers": [
     {
@@ -83,5 +83,5 @@
       "status": "BLOCKED"
     }
   ],
-  "ledger_note": "r185 2026-10-20: AS-B-19 PASS_SCOPED bilateral (test-first sin cambios de producto); next AS-B-20. Plus 39471803861 39471803916 SUCCESS."
+  "ledger_note": "r186 2026-10-20: AS-B-20 BLOCKED_DECISION (Lite Algebrite sin factorizar x^4+x^2y^2+y^4; Plus pasa). Next: decisión de alcance."
 }
