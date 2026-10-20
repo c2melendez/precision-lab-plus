@@ -177,6 +177,36 @@ def _real_root_of_square(expr: sympy.Expr) -> sympy.Expr:
     )
 
 
+def _real_odd_root_of_power(expr: sympy.Expr) -> sympy.Expr:
+    """Algebra114 AS-CONV-06: over R, (u**n)**(1/n) = u for odd integer n.
+
+    SymPy leaves `(x**3)**(1/3)` unsimplified because the principal complex
+    branch differs from `x` off the positive real axis. The contract form of
+    AS-CONV-06 (and the real-radical convention used throughout section L)
+    is the REAL odd root, which equals `u` for every real `u` with no
+    assumption — so the rewrite is total over R for odd n and must not emit
+    a convention warning (unlike even roots, see AS-CONV-05).
+    """
+    if len(expr.free_symbols) != 1:
+        return expr
+
+    def predicate(e: sympy.Expr) -> bool:
+        if not (e.is_Pow and e.base.is_Pow):
+            return False
+        exp = e.exp
+        base_exp = e.base.exp
+        # outer exponent must be exactly 1/n with n an odd integer >= 3,
+        # and the inner power must be u**n (e.g. (x**3)**(1/3) -> x).
+        if not (exp.is_Rational and base_exp.is_Integer):
+            return False
+        if exp.p != 1 or exp.q <= 1:
+            return False
+        n = int(exp.q)
+        return int(base_exp) == n and n % 2 == 1
+
+    return expr.replace(predicate, lambda e: e.base.base)
+
+
 def _absolute_ratio_sign_step(expr: sympy.Expr, index: int) -> Optional[Step]:
     """|v|/v (or v/|v|) equals 1 where v>0 and -1 where v<0; v=0 is excluded."""
     if len(expr.free_symbols) != 1:
@@ -207,6 +237,7 @@ def simplify_expression(expression: str) -> AlgebraResult:
     )
     result_expr = _real_absolute_piecewise(result_expr) or result_expr
     result_expr = _real_root_of_square(result_expr)
+    result_expr = _real_odd_root_of_power(result_expr)
     steps = [_summary_step(input_expr, result_expr, "Simplificación")]
     sign_step = _absolute_ratio_sign_step(result_expr, len(steps))
     if sign_step is not None:
