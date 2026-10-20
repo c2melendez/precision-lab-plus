@@ -1,3 +1,17 @@
+## 2026-10-20 UTC — AS-B-11 PASS_SCOPED bilateral (continuity r177)
+
+**ALGEBRA229-AS-B-11** — factorizar `ax+ay+bx+by` → `\left(a + b\right) \left(x + y\right)` (fila fuente N2 en la matriz congelada Section B; agrupación de términos).
+
+| Repo | Technical SHA | Gates (SUCCESS sobre el SHA exacto, evento push) |
+|------|---------------|--------------------------------------------------|
+| Plus | `cdc2bf73e143384834c0a726862ec70872e6c498` | cumulative [39450890699](https://github.com/c2melendez/precision-lab-plus/actions/runs/39450890699), h1d [39450890712](https://github.com/c2melendez/precision-lab-plus/actions/runs/39450890712) |
+
+Test-first sin cambios de producto: el motor ya devolvía una factorización equivalente al original en ambos repos, con la forma de producto de dos binomios. Evidencia: `tests/algebra229AsB11.audit.test.ts` (fila fuente, diferencia exacta cero y forma `(a+b)*(x+y)`) y `backend/tests/test_algebra229_as_b11.py` (`/api/v1/factor` por HTTP, producto de dos factores). Entrada probada con `*` explícito para evitar ambigüedad de multiplicación implícita. Global OPEN.
+
+**Siguiente único:** `ALGEBRA229-AS-B-12-TEST-FIRST` — `x^{5}-x` → `x \left(x - 1\right) \left(x + 1\right) \left(x^{2} + 1\right)` (fila N2).
+
+---
+
 ## 2026-10-20 UTC — AS-B-10 PASS_SCOPED bilateral (continuity r176)
 
 **ALGEBRA229-AS-B-10** — factorizar `x^{3}+3x^{2}+3x+1` → `\left(x + 1\right)^{3}` (fila fuente N2 en la matriz congelada Section B).
