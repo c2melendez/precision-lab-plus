@@ -1,10 +1,8 @@
 # Registro de ejecución — índice vigente
 
-## 2026-10-20 UTC — Algebra 229 AS-A-01..05 PASS_SCOPED; continuity.json reconciliado
+## 2026-10-20 UTC — Reconciliación cerrada (AS-A-01..05 + ledger AS-A-06)
 
-**Alcance:** unit/HTTP expand + fila en fuente congelada. **No** matriz 229 completa.
-
-Evidencia tabular: **[EXECUTION_LOG_AS229_SECTION_A.md](./EXECUTION_LOG_AS229_SECTION_A.md)**.
+Evidencia tabular: [EXECUTION_LOG_AS229_SECTION_A.md](./EXECUTION_LOG_AS229_SECTION_A.md).
 
 | Caso | Lite cumulative | Plus cumulative |
 |------|-----------------|-----------------|
@@ -14,12 +12,14 @@ Evidencia tabular: **[EXECUTION_LOG_AS229_SECTION_A.md](./EXECUTION_LOG_AS229_SE
 | AS-A-04 | [39396680764](https://github.com/c2melendez/precision-lab-lite/actions/runs/39396680764) | [39396699584](https://github.com/c2melendez/precision-lab-plus/actions/runs/39396699584) |
 | AS-A-05 | [39397703380](https://github.com/c2melendez/precision-lab-lite/actions/runs/39397703380) | [39397716265](https://github.com/c2melendez/precision-lab-plus/actions/runs/39397716265) |
 
-**Ledger:** `continuity.json` **next_action** = `ALGEBRA229-AS-A-06-TEST-FIRST` (r153). Ya no `FIXTURE-PROMOTE-VALIDATE`.
+**Ledger:** `continuity.json` r153 `next_action` = **AS-A-06**.
+
+**CI post-reconcile:** cumulative [39402444356](https://github.com/c2melendez/precision-lab-plus/actions/runs/39402444356) SUCCESS; H1d [39402444394](https://github.com/c2melendez/precision-lab-plus/actions/runs/39402444394) SUCCESS.
 
 Global **OPEN**. **Siguiente:** AS-A-06 expand `(x+y+z)^2`.
 
 ---
 
-## Histórico AS-PAR / Syntax / IN625
+## Histórico AS-PAR / Syntax
 
-Blob previo Plus: `c0f7925d01cce81f69e64c3dcb56f69982854076` / commit `4e0974d1ff98f0c5347607718c4cbe90d9336bee`.
+Blob previo Plus `c0f7925d01cce81f69e64c3dcb56f69982854076` / commit `4e0974d1…`.
