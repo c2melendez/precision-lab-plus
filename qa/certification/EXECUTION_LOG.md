@@ -29,3 +29,9 @@ Commit técnico Lite `373702e` / Plus `a82daab` (test-first fila AS-A-10 `(x^2+x
 ## Histórico AS-PAR / Syntax
 
 Blob previo Plus `c0f7925d01cce81f69e64c3dcb56f69982854076` / commit `4e0974d1…`.
+
+---
+
+## 2026-10-20 UTC — AS-A-11 PASS_SCOPED bilateral + triage preexistentes PLUS (continuity r159)
+
+Commit técnico Lite `4fab5b1` (test-first AS-A-11 `(a+b+c)^3`, vitest 2 passed) / Plus `82059fa` (pytest AS-A-11 HTTP 2 passed + fixes de triage: fallback 422 starlette-pin en exception_handlers, import pathlib en sg28 multi-process, CORS_ORIGINS pinned en s25). Runs sobre el SHA exacto — Lite: cumulative 39412487217, scientific-ui 39412487075, h1d 39412487020; Plus: backend 39412482980, h1d 39412482960, security/mutation 39412483056 (mutmut success), syntax-native/host_identity success. Los fallos preexistentes S17/S25/SG28 quedan cerrados con evidencia verde. AS-A-01…11 PASS_SCOPED. Global OPEN. Siguiente único: ALGEBRA229-AS-A-12-TEST-FIRST (matriz congelada Section A).
