@@ -234,7 +234,10 @@ test("SY-X-08 native principal complex root, HTTP reentry and finite recovery", 
   ids.push(recovery.requestId, again.requestId);
   expect(new Set(ids).size).toBe(5);
   expect(errors).toEqual([]);
-  await testInfo.attach("SY-X-08-native-http-evidence", {body:JSON.stringify({domain:"existing principal complex branch", canonical, project:testInfo.project.name, evidence, ids, errors},null,2),[...]}
+  await testInfo.attach("SY-X-08-native-http-evidence", {
+    body: JSON.stringify({ domain: "existing principal complex branch", canonical, project: testInfo.project.name, evidence, ids, errors }, null, 2),
+    contentType: "application/json",
+  });
 });
 
 const rejectionMessages: Record<string, string> = {
