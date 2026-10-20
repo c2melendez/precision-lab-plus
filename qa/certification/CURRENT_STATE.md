@@ -1,5 +1,19 @@
 > Decisiones de alcance, de producto y de proceso: ver `qa/certification/ALGEBRA229_DECISIONS.md`.
 
+## 2026-10-20 UTC — AS-B-20 PASS_SCOPED bilateral (continuity r187)
+
+**ALGEBRA229-AS-B-20** — factorizar `x^{4}+x^{2}y^{2}+y^{4}` → `\left(x^{2} - x y + y^{2}\right) \left(x^{2} + x y + y^{2}\right)` (fila fuente N3 en la matriz congelada Section B).
+
+| Repo | Technical SHA | Gates (SUCCESS sobre el SHA exacto, evento push) |
+|------|---------------|--------------------------------------------------|
+| Plus | `f8ec1733c356f48fce1f6f2a1719d8ab559d229c` | cumulative [39475284739](https://github.com/c2melendez/precision-lab-plus/actions/runs/39475284739), h1d [39475284787](https://github.com/c2melendez/precision-lab-plus/actions/runs/39475284787) |
+
+Test-first sin cambios de producto: SymPy en `/api/v1/factor` ya devolvía una factorización equivalente con dos factores cuadráticos. Evidencia: `backend/tests/test_algebra229_as_b20.py` (fila fuente N3, `/api/v1/factor` por HTTP, producto de dos factores). La regla acotada de D15 vive solo en Lite. Global OPEN.
+
+**Siguiente único:** `ALGEBRA229-AS-B-21-TEST-FIRST` — `\left(x^{2}+1\right)^{2}-4x^{2}` → `\left(x - 1\right)^{2} \left(x + 1\right)^{2}` (fila N3).
+
+---
+
 ## 2026-10-20 UTC — AS-B-20 BLOQUEADO en Lite, pendiente de decisión (continuity r186)
 
 **ALGEBRA229-AS-B-20** — factorizar `x^{4}+x^{2}y^{2}+y^{4}` → `\left(x^{2} - x y + y^{2}\right) \left(x^{2} + x y + y^{2}\right)` (fila fuente N3, factorización multivariable).
