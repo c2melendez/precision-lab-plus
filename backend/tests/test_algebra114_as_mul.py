@@ -1,9 +1,13 @@
 """Algebra114 AS-MUL-01..06: multivariable simplify/factor with domain and
 assumptions, checked via the public HTTP API.
 
-The contract for each row is verified against an independent SymPy oracle; for
-AS-MUL-02/03 the result must be a genuine factorization (Mul), not merely an
-equivalent expanded expression.
+The contract FORM of each row is the oracle; SymPy equivalence and numeric
+triples only prove that no wrong value is returned. AS-MUL-02/03 must be a
+genuine factorization (Mul) with the contract factors. AS-MUL-05 needs a
+user-supplied assumption (x+y+z=0) that no endpoint accepts, and AS-MUL-06
+needs a sum-of-squares rewrite that simplify() does not produce: both are
+capability gaps (MANUAL_CAPABILITY_GAPS.md, AS-MUL) and must not be counted
+as PASS by applying the assumption or the target form inside the test.
 """
 
 from pathlib import Path
@@ -38,12 +42,20 @@ def _factor(expression: str):
     return body
 
 
+def _expand(expression: str):
+    response = client.post("/api/v1/expand", json={"expression": expression})
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["success"] is True, body
+    return body
+
+
 def test_as_mul_01_expand_to_sum_of_squares():
     assert "| AS-MUL-01 |" in SOURCE
-    body = _simplify("(x+y)*(x-y)+z**2")
+    body = _expand("(x+y)*(x-y)+z**2")
     actual = sp.sympify(body["result_text"])
     expected = x ** 2 - y ** 2 + z ** 2
-    assert sp.expand(actual - expected) == 0
+    assert sp.srepr(actual) == sp.srepr(expected), actual
     for xv, yv, zv in TRIPLES:
         assert float(sp.N(actual.subs({x: xv, y: yv, z: zv}))) == pytest.approx(
             xv * xv - yv * yv + zv * zv, rel=1e-9
@@ -70,6 +82,10 @@ def test_as_mul_03_factor_symmetric_cubic_identity():
     expected = (x + y + z) * (x ** 2 + y ** 2 + z ** 2 - x * y - y * z - z * x)
     assert sp.expand(actual - expected) == 0
     assert actual.is_Mul, f"Factorization missing: {actual}"
+    assert {sp.expand(factor) for factor in sp.Mul.make_args(actual)} == {
+        sp.expand(x + y + z),
+        sp.expand(x ** 2 + y ** 2 + z ** 2 - x * y - y * z - z * x),
+    }
     for xv, yv, zv in TRIPLES:
         assert float(sp.N(actual.subs({x: xv, y: yv, z: zv}))) == pytest.approx(
             (xv + yv + zv)
@@ -93,22 +109,15 @@ def test_as_mul_04_simplify_with_domain_hole():
     ), conditions
 
 
-def test_as_mul_05_simplify_under_assumption():
+def test_as_mul_05_no_unconditional_3xyz_claim():
     assert "| AS-MUL-05 |" in SOURCE
     body = _simplify("x**3+y**3+z**3")
     actual = sp.sympify(body["result_text"])
-    # Under the assumption x+y+z=0 the identity collapses to 3xyz.
-    subs = {z: -x - y}
-    collapsed = sp.simplify(actual.subs(subs) - 3 * x * y * (-x - y))
-    assert collapsed == 0, (actual, collapsed)
-    for xv, yv, _ in TRIPLES:
-        zv = -(xv + yv)
-        assert float(sp.N(actual.subs({x: xv, y: yv, z: zv}))) == pytest.approx(
-            3 * xv * yv * zv, rel=1e-9
-        )
+    assert sp.expand(actual - (x ** 3 + y ** 3 + z ** 3)) == 0
+    assert sp.expand(actual - 3 * x * y * z) != 0
 
 
-def test_as_mul_06_half_squared_differences():
+def test_as_mul_06_simplify_returns_no_wrong_value():
     assert "| AS-MUL-06 |" in SOURCE
     body = _simplify("x**2+y**2+z**2-x*y-y*z-z*x")
     actual = sp.sympify(body["result_text"])
@@ -118,3 +127,12 @@ def test_as_mul_06_half_squared_differences():
         assert float(sp.N(actual.subs({x: xv, y: yv, z: zv}))) == pytest.approx(
             float(sp.N(expected.subs({x: xv, y: yv, z: zv}))), rel=1e-9
         )
+
+
+@pytest.mark.xfail(strict=True, reason="AS-MUL-06 GAP: simplify() has no sum-of-squared-differences rewrite")
+def test_as_mul_06_half_squared_differences_form():
+    body = _simplify("x**2+y**2+z**2-x*y-y*z-z*x")
+    actual = sp.sympify(body["result_text"])
+    squares = {sp.expand((x - y) ** 2), sp.expand((y - z) ** 2), sp.expand((z - x) ** 2)}
+    bases = {sp.expand(t.base ** 2) for t in sp.preorder_traversal(actual) if t.is_Pow and t.exp == 2 and t.base.is_Add}
+    assert squares <= bases, actual
