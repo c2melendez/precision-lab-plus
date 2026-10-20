@@ -24,7 +24,7 @@ Este archivo recoge las decisiones tomadas durante la certificación ALGEBRA229 
 
 ## Decisiones pendientes (no implementar sin nueva decisión)
 
-- **P1.** Enfoque para AS-B-19 a AS-B-21 (factor común, agrupación y diferencia de cuadrados multivariables). Primero se escriben las pruebas y se observa qué falla. No se añade un factorizador multivariable general.
+- **P1.** Enfoque para AS-B-19 a AS-B-21 (factor común, agrupación y diferencia de cuadrados multivariables). Primero se escriben las pruebas y se observa qué falla. No se añade un factorizador multivariable general. AS-B-19 pasó sin cambios; AS-B-20 se resolvió con la regla acotada D15.
 - **P2.** Familia de factorización de enteros (AS-B-26 a AS-B-29). Propuesta: familia propia, sin decidir todavía.
 - **P3.** Generalización de `a^n ± b^n` más allá de cubos. Sin decidir.
 
