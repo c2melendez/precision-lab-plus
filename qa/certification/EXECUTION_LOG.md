@@ -164,6 +164,12 @@ Commit técnico Plus `f1df620` (test-first AS-B-16 `factor a^3-b^3`). Runs sobre
 
 ---
 
+## 2026-10-20 UTC — AS-B-17 PASS_SCOPED bilateral (continuity r183)
+
+Commit técnico Plus `b1f3c81` (test-first AS-B-17 `factor a^3+b^3`, sin cambios de producto). Runs sobre el SHA exacto: cumulative [39461135107](https://github.com/c2melendez/precision-lab-plus/actions/runs/39461135107), h1d [39461135362](https://github.com/c2melendez/precision-lab-plus/actions/runs/39461135362). Todos SUCCESS (push). Decisión de alcance: B-24 y B-25 incluidas con sufijo «sobre ℝ» / «sobre ℂ»; implementación en orden de matriz. Global OPEN. Siguiente: AS-B-18.
+
+---
+
 ## Histórico AS-PAR / Syntax
 
 Blob previo Plus `c0f7925d01cce81f69e64c3dcb56f69982854076` / commit `4e0974d1…`.
