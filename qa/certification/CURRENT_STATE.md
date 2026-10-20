@@ -1,17 +1,14 @@
-## 2026-10-20 UTC — AS-A-11 PASS_SCOPED bilateral + Plus pre-existing triage closed
+## 2026-10-20 UTC — AS-A-12 PASS_SCOPED bilateral (continuity r160)
 
-**ALGEBRA229-AS-A-11** — expand `(a+b+c)^3` → `a^3+3a^2b+3a^2c+3ab^2+6abc+3ac^2+b^3+3b^2c+3bc^2+c^3` (fila fuente verificada N2).
+**ALGEBRA229-AS-A-12** — expand `(x^2-1)^2` → `x^4 - 2x^2 + 1` (fila fuente verificada N2 en la matriz congelada Section A).
 
-| Repo | Technical SHA | Gates (todos SUCCESS sobre el SHA exacto) | Conclusion |
-|------|---------------|-------------------------------------------|------------|
-| Lite | `4fab5b1a37bccf690a587248bf75573f24c7edda` | cumulative [39412487217](https://github.com/c2melendez/precision-lab-lite/actions/runs/39412487217), scientific-ui [39412487075](https://github.com/c2melendez/precision-lab-lite/actions/runs/39412487075), h1d [39412487020](https://github.com/c2melendez/precision-lab-lite/actions/runs/39412487020) | SUCCESS |
-| Plus | `82059fa1d177ce191f24cedbc3a84003f84cde7f` | backend [39412482980](https://github.com/c2melendez/precision-lab-plus/actions/runs/39412482980), h1d [39412482960](https://github.com/c2melendez/precision-lab-plus/actions/runs/39412482960), security/mutation [39412483056](https://github.com/c2melendez/precision-lab-plus/actions/runs/39412483056) (mutmut success; syntax-native, host_identity success) | SUCCESS |
+| Repo | Technical SHA | Gates (todos SUCCESS sobre el SHA exacto, evento push) | Conclusion |
+|------|---------------|--------------------------------------------------------|------------|
+| Lite | `aacb5c3bfc125b1f4a426c3732758d909e756e46` | cumulative [39414422310](https://github.com/c2melendez/precision-lab-lite/actions/runs/39414422310), scientific-ui [39414422330](https://github.com/c2melendez/precision-lab-lite/actions/runs/39414422330), h1d [39414422305](https://github.com/c2melendez/precision-lab-lite/actions/runs/39414422305) | SUCCESS |
+| Plus | `663c9f8e52b0d0a527b2b9f6b9bb5b445aa64f4b` | cumulative backend+frontend [39414425350](https://github.com/c2melendez/precision-lab-plus/actions/runs/39414425350), h1d [39414425369](https://github.com/c2melendez/precision-lab-plus/actions/runs/39414425369) | SUCCESS |
 
-**Triage de fallos preexistentes PLUS cerrado en `82059fa`:**
-- `core/exception_handlers.py` usaba `HTTP_422_UNPROCESSABLE_CONTENT` (solo starlette≥0.48); fallback a `HTTP_422_UNPROCESSABLE_ENTITY` bajo el pin desplegado (mismo 422). Capa producto-compatibilidad (S17/s25 validation path).
-- `test_sg28_sqlite_lease_reference.py`: NameError harness — faltaba `from pathlib import Path` para el child PYTHONPATH. Capa harness.
-- `test_s25_deployment_security.py`: aserción CORS round-trip dependía del entorno ambiente; se fija `CORS_ORIGINS` antes de importar la app (mismo patrón que suites SY*/SR*). Capa harness/env, sin cambio de comportamiento de producto.
+Evidencia ejecutada (no reutilizada): en cada job los pasos typecheck / `npm test` / build (Lite, frontend Plus) y `pytest` (backend Plus) figuran `success`, ninguno `skipped`; los gates corren el directorio completo de tests, que incluye `tests/algebra229AsA12.audit.test.ts` y `backend/tests/test_algebra229_as_a12.py`. Los logs crudos no fueron descargables desde el entorno (403 del proxy a `results-receiver`); la verificación se hizo por estado de jobs/pasos vía API y por el comando del workflow.
 
-Local: Plus pytest s25+sg28+a11 = 16 passed; Lite vitest AS-A-11 = 2 passed. AS-A-01…11 PASS_SCOPED. Global **OPEN**.
+Local previo al push: Lite vitest AS-A-12 = 2 passed; Plus pytest AS-A-12 = 2 passed. AS-A-01…12 PASS_SCOPED. Global **OPEN**. Bloqueos sin cambio: H2-SG28-DIST-01..08, SECURITY-S25, SY-P-23, SY-X-04-PLUS-HTTP.
 
-**Siguiente único:** `ALGEBRA229-AS-A-12-TEST-FIRST` según la matriz congelada Section A (`qa/certification/legacy_sources/matriz_algebra_simbolica.md.gz`).
+**Siguiente único:** `ALGEBRA229-AS-A-13-TEST-FIRST` — expand `(x+h)^3-x^3` → `h^3 + 3h^2x + 3hx^2` según la matriz congelada Section A (`qa/certification/legacy_sources/matriz_algebra_simbolica.md.gz`).
