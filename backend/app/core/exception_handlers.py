@@ -101,7 +101,11 @@ async def validation_exception_handler(
     return _error_response(
         request,
         ErrorCode.VALIDATION_ERROR,
-        status.HTTP_422_UNPROCESSABLE_CONTENT,
+        # HTTP_422_UNPROCESSABLE_CONTENT exists only on starlette>=0.48;
+        # the deployed pin resolves an older starlette where the canonical
+        # name is HTTP_422_UNPROCESSABLE_ENTITY (same numeric code 422).
+        getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", None)
+        or status.HTTP_422_UNPROCESSABLE_ENTITY,
         message,
     )
 

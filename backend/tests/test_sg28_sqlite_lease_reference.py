@@ -1,5 +1,6 @@
 """Disposable SQLite local reference tests; not multi-host DIST certification."""
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from threading import Barrier
 
 from app.services.sg28_sqlite_lease_reference import SqliteLeaseReference
@@ -137,10 +138,16 @@ def test_sqlite_generation_exhaustion_fails_closed(tmp_path):
 def test_sqlite_lease_persists_across_independent_local_processes(tmp_path):
     """Local multi-process proof only: not an independent-host DIST gate."""
     import json
+    import os
     import subprocess
     import sys
 
     path = tmp_path / "separate-processes.sqlite"
+    # Child `python -c` processes do not inherit pytest's `pythonpath` ini
+    # option (backend/pyproject.toml); pin the backend root explicitly so
+    # `import app...` resolves regardless of the invocation cwd.
+    backend_root = str(Path(__file__).resolve().parents[1])
+    child_env = {**os.environ, "PYTHONPATH": backend_root}
     script = (
         "import json,sys\n"
         "from app.services.sg28_sqlite_lease_reference import SqliteLeaseReference\n"
@@ -151,7 +158,7 @@ def test_sqlite_lease_persists_across_independent_local_processes(tmp_path):
     def acquire_in_process(owner, now):
         result = subprocess.run(
             [sys.executable, "-c", script, str(path), str(now), owner],
-            check=True, capture_output=True, text=True, timeout=10,
+            check=True, capture_output=True, text=True, timeout=10, env=child_env,
         )
         return json.loads(result.stdout.strip())
 
