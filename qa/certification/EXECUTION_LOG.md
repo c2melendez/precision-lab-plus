@@ -146,6 +146,12 @@ Commit técnico Plus `7ea3435` (test-first AS-B-13 `factor 2x^3-x^2-13x-6`, sin 
 
 ---
 
+## 2026-10-20 UTC — AS-B-14 PASS_SCOPED bilateral (continuity r180)
+
+Commit técnico Plus `ac65cc0` (test-first AS-B-14 `factor x^4+x^2+1`, sin cambios de producto). Runs sobre el SHA exacto: cumulative [39455234361](https://github.com/c2melendez/precision-lab-plus/actions/runs/39455234361), h1d [39455234162](https://github.com/c2melendez/precision-lab-plus/actions/runs/39455234162). Todos SUCCESS (push). Global OPEN. Siguiente: AS-B-15.
+
+---
+
 ## Histórico AS-PAR / Syntax
 
 Blob previo Plus `c0f7925d01cce81f69e64c3dcb56f69982854076` / commit `4e0974d1…`.
