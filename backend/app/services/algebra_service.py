@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
 import sympy
+from sympy import im as sp_im
 
 from app.schemas.responses import DomainCondition, Step
 from app.services import domain_analysis, parsing
@@ -36,6 +37,16 @@ class AlgebraResult:
     has_detailed_steps: bool
     domain_conditions: List[DomainCondition]
     pattern_name: Optional[str] = None
+    # Algebra114 sección L (AS-CONV): advertencias de convención matemática.
+    # El contrato prohíbe resolver ambigüedades ℝ/ℂ, 0^0 o raíces de orden
+    # par en silencio; la declaración viaja por el canal `warnings` de
+    # `MathResponse`. Default vacío: preserve semantics for every existing
+    # construction site (factor/expand/partial-fractions).
+    warnings: List[str] = None  # type: ignore[assignment]
+
+    def __post_init__(self) -> None:
+        if self.warnings is None:
+            self.warnings = []
 
 
 def _summary_step(input_expr: sympy.Expr, result_expr: sympy.Expr, title: str) -> Step:
@@ -229,8 +240,176 @@ def _absolute_ratio_sign_step(expr: sympy.Expr, index: int) -> Optional[Step]:
     return None
 
 
+_REAL_ODD_ROOT_NOTE = (
+    "Convención AS-CONV-01: raíz de índice impar sobre base negativa resuelta "
+    "en la rama REAL (raíz(-8,3) = -2). En ℂ la rama principal sería "
+    "compleja; el motor declara esta elección según la sección L."
+)
+_REAL_RATIONAL_POWER_NOTE = (
+    "Convención AS-CONV-02: potencia racional de exponente 1/n (n impar) con "
+    "base negativa resuelta en la convención REAL. La rama principal de ℂ "
+    "daría un valor complejo; se declara la elección."
+)
+_COMPLEX_DOMAIN_NOTE = (
+    "AS-CONV-04: la expresión no tiene solución en ℝ; el resultado usa la "
+    "rama principal de ℂ (convención compleja declarada)."
+)
+_ZERO_ZERO_NOTE = (
+    "AS-CONV-03: 0^0 es indeterminada como límite; el motor adopta la "
+    "convención algebraico-combinatoria 0^0 = 1 y lo declara explícitamente."
+)
+_EVEN_ROOT_ASSUMPTION_NOTE = (
+    "AS-CONV-05/07: raíz de orden par simplificada a |u| (valor absoluto) "
+    "asumiendo variable real; sin supuesto x ≥ 0 implícito — el resultado "
+    "válido en ℝ es la forma con valor absoluto."
+)
+
+
+def _is_negative_base_unit_fraction(e: sympy.Expr) -> Optional[Tuple[sympy.Expr, int]]:
+    """`(-a)**(1/n)` con a>0 y n impar >= 3 -> devuelve (a, n)."""
+    if not (e.is_Pow and e.exp.is_Rational):
+        return None
+    exp = e.exp
+    if exp.p != 1 or exp.q < 3 or exp.q % 2 == 0:
+        return None
+    base = e.base
+    if base.is_Number and base.is_negative:
+        return (-base, int(exp.q))
+    return None
+
+
+def _real_convention_rewrites(expr: sympy.Expr) -> Tuple[sympy.Expr, List[str]]:
+    """Algebra114 AS-CONV-01/02: raíces reales de orden impar sobre bases
+    negativas constantes.
+
+    SymPy representa `root(-8,3)` como `2*(-1)**(1/3)` y `(-8)**(2/3)` como
+    `4*(-1)**(2/3)` — la rama principal ℂ, numéricamente no real. El contrato
+    de la sección L exige que el motor NO resuelva en silencio: aquí se
+    reescribe a la raíz REAL (-2 y 4) y se DECLARA la convención usada, o —
+    si tras la reescritura queda un residuo `(-1)**(m/n)` con n impar — se
+    mantiene el valor de rama principal pero con declaración explícita.
+    """
+    notes: List[str] = []
+
+    def _odd_root_value(a: sympy.Expr, n: int) -> sympy.Expr:
+        exact = sympy.ntheory.factor_.integer_nthroot(int(a), n)
+        if isinstance(a, sympy.Integer) and a.is_integer and exact[1]:
+            return sympy.Integer(-exact[0])
+        return -sympy.Pow(a, sympy.Rational(1, n))
+
+    # Forma canónica: c * (-1)**(p/q), q impar > 1, c>0, base original negativa.
+    def predicate(e: sympy.Expr) -> bool:
+        if not e.is_Mul:
+            return False
+        pow_parts = [f for f in e.args if _is_negative_base_unit_fraction(f)]
+        return len(pow_parts) == 1 and any(
+            f.is_Pow and f.exp.is_Rational and f.base == sympy.S.NegativeOne
+            for f in e.args
+        )
+
+    def rewrite(e: sympy.Expr) -> sympy.Expr:
+        for f in e.args:
+            if f.is_Pow and f.exp.is_Rational and f.base == sympy.S.NegativeOne:
+                p, q = f.exp.p, int(f.exp.q)
+                if q % 2 == 1:
+                    # (-1)**(p/q) real = -1 si p impar, +1 si p par.
+                    sign = sympy.S.NegativeOne if p % 2 else sympy.S.One
+                    others = [g for g in e.args if g is not f]
+                    notes.append(_REAL_ODD_ROOT_NOTE if p == 1 else _REAL_RATIONAL_POWER_NOTE)
+                    return sympy.Mul(sign, *others)
+        return e
+
+    rewritten = expr.replace(predicate, rewrite)
+
+    # Detección de rama principal ℂ: un Pow cuyo resultado numérico NO es
+    # real (cubre `4*(-1)**(2/3)` y cualquier residuo equivalente).
+    residual_complex = False
+    for atom in rewritten.atoms(sympy.Pow):
+        if atom.base == sympy.S.NegativeOne and atom.exp.is_Rational:
+            residual_complex = True
+        elif atom.exp.is_Rational and not atom.exp.is_Integer:
+            try:
+                val = atom.evalf(20)
+                if abs(sp_im(val)) > 1e-12:
+                    residual_complex = True
+            except (TypeError, ValueError):
+                pass
+    if residual_complex:
+        notes.append(
+            "AS-CONV-02: el resultado conserva la rama principal de ℂ para una "
+            "potencia racional de base negativa; no es un número real."
+        )
+
+    # AS-CONV-04: resultado genuinamente imaginario a partir de entrada real
+    # (sqrt(-4) = 2*I): declarar dominio complejo. Se evalúa numéricamente
+    # porque `has(sympy.I)` no siempre detecta la forma ya plegada.
+    try:
+        value = rewritten.evalf(20)
+        if abs(sp_im(value)) > 1e-12 and not residual_complex:
+            notes.append(_COMPLEX_DOMAIN_NOTE)
+    except (TypeError, ValueError):
+        if rewritten.has(sympy.I) and not expr.has(sympy.I) and not residual_complex:
+            notes.append(_COMPLEX_DOMAIN_NOTE)
+    return rewritten, notes
+
+
+def _even_root_abs_rewrites(expr: sympy.Expr) -> Tuple[sympy.Expr, List[str]]:
+    """AS-CONV-05/07/08: raíces de orden PAR de cuadrados perfectos.
+
+    `(x**4)**(1/4)` -> `Abs(x**2)`; `sqrt(u**2)` -> `Abs(u)` cuando `u` es un
+    binomio lineal exacto detectado por factorización. Devuelve también la
+    declaración del supuesto (variable real, forma con valor absoluto).
+    """
+    notes: List[str] = []
+    symbol_count = len(expr.free_symbols)
+    if symbol_count != 1:
+        return expr, notes
+
+    def even_predicate(e: sympy.Expr) -> bool:
+        return (
+            e.is_Pow
+            and e.exp.is_Rational
+            and e.exp.p == 1
+            and e.exp.q % 2 == 0
+            and e.base.is_Pow
+            and e.base.exp.is_Integer
+            and int(e.base.exp) % int(e.exp.q) == 0
+        )
+
+    def even_rewrite(e: sympy.Expr) -> sympy.Expr:
+        inner_exp = int(e.base.exp) // int(e.exp.q)
+        notes.append(_EVEN_ROOT_ASSUMPTION_NOTE)
+        return sympy.Abs(e.base.base ** inner_exp)
+
+    rewritten = expr.replace(even_predicate, even_rewrite)
+
+    # sqrt(perfect-square polynomial) -> Abs(linear)**k
+    def sqrt_poly_predicate(e: sympy.Expr) -> bool:
+        if not (e.is_Pow and e.exp == sympy.S.Half):
+            return False
+        base = e.base
+        if not base.is_Add or len(base.free_symbols) != 1:
+            return False
+        factored = sympy.factor(base)
+        return factored.is_Pow and factored.exp.is_Integer and factored.exp % 2 == 0
+
+    def sqrt_poly_rewrite(e: sympy.Expr) -> sympy.Expr:
+        factored = sympy.factor(e.base)
+        k = int(factored.exp) // 2
+        notes.append(_EVEN_ROOT_ASSUMPTION_NOTE)
+        return sympy.Abs(factored.base) ** k
+
+    rewritten = rewritten.replace(sqrt_poly_predicate, sqrt_poly_rewrite)
+    return rewritten, notes
+
+
 def simplify_expression(expression: str) -> AlgebraResult:
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
+    convention_warnings: List[str] = []
+    # AS-CONV-03: `0**0` se evalúa a 1 al parsear; detectar desde la fuente
+    # normalizada antes de que el árbol lo oculte.
+    if expression.replace(" ", "") in ("0**0", "0^0"):
+        convention_warnings.append(_ZERO_ZERO_NOTE)
     result_expr = _rewrite_audited_real_absolute_square(
         input_expr,
         _split_absolute_products(_denest_constant_radicals(sympy.simplify(input_expr))),
@@ -238,6 +417,12 @@ def simplify_expression(expression: str) -> AlgebraResult:
     result_expr = _real_absolute_piecewise(result_expr) or result_expr
     result_expr = _real_root_of_square(result_expr)
     result_expr = _real_odd_root_of_power(result_expr)
+    # AS-CONV-01/02/04: raíces reales de orden impar / dominio ℂ declarado.
+    result_expr, odd_notes = _real_convention_rewrites(result_expr)
+    convention_warnings.extend(odd_notes)
+    # AS-CONV-05/07/08: raíces pares -> Abs con supuesto declarado.
+    result_expr, even_notes = _even_root_abs_rewrites(result_expr)
+    convention_warnings.extend(n for n in even_notes if n not in convention_warnings)
     steps = [_summary_step(input_expr, result_expr, "Simplificación")]
     sign_step = _absolute_ratio_sign_step(result_expr, len(steps))
     if sign_step is not None:
@@ -248,6 +433,7 @@ def simplify_expression(expression: str) -> AlgebraResult:
         steps,
         has_detailed_steps=False,
         domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
+        warnings=convention_warnings,
     )
 
 

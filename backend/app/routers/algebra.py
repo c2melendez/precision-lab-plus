@@ -61,6 +61,8 @@ def _build_response(
     result,
 ) -> MathResponse:
     warnings = []
+    # Algebra114 AS-CONV: advertencias de convención emitidas por el servicio.
+    warnings.extend(getattr(result, "warnings", []) or [])
     result_latex = _safe_latex(result.result_expr)
     if result_latex is None:
         warnings.append(

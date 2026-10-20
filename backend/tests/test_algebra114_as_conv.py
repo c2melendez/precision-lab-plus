@@ -9,8 +9,11 @@ contrato `MathResponse` (canal contractual vigente; ver CURRENT_STATE.md
 ambos "correctos" bajo su convención — lo que el contrato prohíbe es
 resolver en silencio.
 
-Test-first: los casos con GAP conocidos se marcan con `xfail(strict)` y
-enlazan a MANUAL_CAPABILITY_GAPS.md; un PASS espurio no puede borrarlos.
+Test-first: los 7 GAP conocidos (AS-CONV-01..05, 07, 08) se publicaron como
+`xfail(strict)` en c1e0ca6 y quedaron VERIFICADOS al implementarse las
+convenciones declaradas en algebra_service (`_real_convention_rewrites`,
+`_even_root_abs_rewrites`, detección de 0^0). Los tests quedan permanentes
+como regresión: si una convención vuelve a resolverse en silencio, fallan.
 """
 
 from pathlib import Path
@@ -64,12 +67,6 @@ def test_as_conv_03_x0_is_one_for_nonzero_base():
 # --- Casos que exigen DECLARACIÓN explícita de convención ---
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="GAP AS-CONV-01: root(-8,3) devuelve 2*(-1)**(1/3) (rama principal ℂ) "
-    "sin declarar convención; debe devolver -2 (raíz real) o declarar ℂ. "
-    "Ver MANUAL_CAPABILITY_GAPS.md (AS-CONV).",
-)
 def test_as_conv_01_real_cube_root_of_negative_declared():
     assert "| AS-CONV-01 |" in SOURCE
     body = _simplify("root(-8,3)")
@@ -82,35 +79,18 @@ def test_as_conv_01_real_cube_root_of_negative_declared():
         assert _has_convention(body, "compleja") or _has_convention(body, "principal")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="GAP AS-CONV-02: (-8)**(2/3) resuelto en silencio; el contrato exige "
-    "declarar convención real (4) o rama principal ℂ (-2+2i√3). "
-    "Ver MANUAL_CAPABILITY_GAPS.md (AS-CONV).",
-)
 def test_as_conv_02_rational_power_of_negative_declares_convention():
     assert "| AS-CONV-02 |" in SOURCE
     body = _simplify("(-8)**(2/3)")
     assert _has_convention(body, "convención") or _has_convention(body, "rama principal")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="GAP AS-CONV-03: 0**0 = 1 resuelto en silencio; el contrato exige "
-    "declarar la convención (límite combinatorio) o señalar indeterminación. "
-    "Ver MANUAL_CAPABILITY_GAPS.md (AS-CONV).",
-)
 def test_as_conv_03_zero_to_zero_declared_not_silent():
     assert "| AS-CONV-03 |" in SOURCE
     body = _simplify("0**0")
     assert _has_convention(body, "0^0") or _has_convention(body, "indeterminad")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="GAP AS-CONV-04: sqrt(-4)=2*I sin declarar que opera en ℂ; en ℝ sería "
-    "error claro. Ver MANUAL_CAPABILITY_GAPS.md (AS-CONV).",
-)
 def test_as_conv_04_sqrt_negative_declares_complex_domain():
     assert "| AS-CONV-04 |" in SOURCE
     body = _simplify("sqrt(-4)")
@@ -121,11 +101,6 @@ def test_as_conv_04_sqrt_negative_declares_complex_domain():
         pytest.fail("sqrt(-4) debe devolver 2i (con declaración ℂ) o DOMAIN_ERROR")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="GAP AS-CONV-05: root(x**4,4) no se simplifica a Abs(x) ni declara el "
-    "supuesto x≥0. Ver MANUAL_CAPABILITY_GAPS.md (AS-CONV).",
-)
 def test_as_conv_05_fourth_root_x4_is_abs_x_or_declared():
     assert "| AS-CONV-05 |" in SOURCE
     body = _simplify("root(x**4,4)")
@@ -135,11 +110,6 @@ def test_as_conv_05_fourth_root_x4_is_abs_x_or_declared():
     assert _has_convention(body, "x ≥ 0") or _has_convention(body, "supuesto")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="GAP AS-CONV-07: sqrt(x^2-2x+1) no se simplifica a Abs(x-1) ni declara "
-    "supuesto. Ver MANUAL_CAPABILITY_GAPS.md (AS-CONV).",
-)
 def test_as_conv_07_sqrt_perfect_square_is_abs_or_declared():
     assert "| AS-CONV-07 |" in SOURCE
     body = _simplify("sqrt(x**2-2*x+1)")
@@ -149,11 +119,6 @@ def test_as_conv_07_sqrt_perfect_square_is_abs_or_declared():
     assert _has_convention(body, "supuesto") or _has_convention(body, "x ≥ 1")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="GAP AS-CONV-08: suma de raíces de trinomios cuadrados perfectos no "
-    "produce |x-3|+|x+3| ni declara convención. Ver MANUAL_CAPABILITY_GAPS.md (AS-CONV).",
-)
 def test_as_conv_08_sum_of_roots_is_abs_sum_or_declared():
     assert "| AS-CONV-08 |" in SOURCE
     body = _simplify("sqrt(x**2-6*x+9)+sqrt(x**2+6*x+9)")
