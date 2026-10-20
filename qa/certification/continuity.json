@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 188,
+  "revision": 197,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "9c0126613aacb7b0cd8fca148a6cf7eb1785d14c",
@@ -41,29 +41,29 @@
     }
   },
   "next_action": {
-    "id": "ALGEBRA229-AS-B-22-TEST-FIRST",
-    "status": "READY",
+    "id": "ALGEBRA229-AS-B-23-TEST-FIRST",
+    "status": "ON_HOLD",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-lite": "4636c9924e7afe71f16ad275701cff33ebd7ce7c",
-      "c2melendez/precision-lab-plus": "f55e470a72b2d503981a4e583ac97838990e531c"
+      "c2melendez/precision-lab-lite": "67d8fd4639509d026b97ba43936b97ba6cafc5c0",
+      "c2melendez/precision-lab-plus": "1884ece3507c2a7abb17c0b30afb3424f6f9eeb8"
     },
     "run_ids_by_repo": {
       "c2melendez/precision-lab-lite": [
-        39479961317,
-        39479961560,
-        39479961091
+        39514134073,
+        39514138803,
+        39514141867
       ],
       "c2melendez/precision-lab-plus": [
-        39479963827,
-        39479963755
+        39514144381,
+        39514147092
       ]
     },
     "completed_scoped": {
-      "id": "ALGEBRA229-AS-A-01..17; ALGEBRA229-AS-B-01..21",
+      "id": "ALGEBRA229-AS-A-01..17; ALGEBRA229-AS-B-01..22 + D17/D18/D19 safeguard",
       "status": "PASS_SCOPED",
       "scope": "unit/HTTP expand/factor + source-row; not matrix-wide"
     },
-    "action": "AS-B-21 PASS sin cambio de producto bilateral. Regla de diferencia de cuadrados no implementada (no requerida). Next AS-B-22 (x^2+1 debe quedar igual) solo con instrucción del usuario. Global OPEN."
+    "action": "AS-B-22 PASS sin cambio de producto bilateral (r197). Siguiente AS-B-23 (x^2-2, irreducible sobre ℚ) en espera de instrucción del usuario. Global OPEN."
   },
   "blockers": [
     {
@@ -83,5 +83,5 @@
       "status": "BLOCKED"
     }
   ],
-  "ledger_note": "r188 2026-10-20: AS-B-21 PASS sin cambio de producto bilateral (Lite {LITE_SHA[:7]}, Plus {PLUS_SHA[:7]}). Regla de diferencia de cuadrados no implementada: no requerida. Next AS-B-22 (irreducible, debe quedar igual)."
+  "ledger_note": "r197 2026-10-20: AS-B-22 PASS sin cambio de producto bilateral (Plus 1884ece, Lite 67d8fd4), gates SUCCESS. AS-B-23 en ON_HOLD. Global OPEN."
 }

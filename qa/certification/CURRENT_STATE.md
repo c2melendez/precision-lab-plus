@@ -1,5 +1,21 @@
 > Decisiones de alcance, de producto y de proceso: ver `qa/certification/ALGEBRA229_DECISIONS.md`.
 
+## 2026-10-20 UTC — AS-B-22 PASS sin cambio de producto (continuity r197)
+
+**ALGEBRA229-AS-B-22** — factorizar `x^{2}+1` → `x^{2} + 1` (fila N1; irreducible sobre ℚ y ℝ, debe quedar igual).
+
+| Repo | Technical SHA | Gates (SUCCESS sobre el SHA exacto) |
+|------|---------------|--------------------------------------|
+| Plus | `1884ece` | cumulative [39514144381](https://github.com/c2melendez/precision-lab-plus/actions/runs/39514144381), h1d [39514147092](https://github.com/c2melendez/precision-lab-plus/actions/runs/39514147092) |
+
+Test-first sin cambios de producto. Evidencia: `backend/tests/test_algebra229_as_b22.py`. El test exige fila N1 en la matriz, resultado equivalente a `x^2+1`, sin producto, y tipo `sp.Add` por HTTP. Lite (`67d8fd4`) tiene la misma comprobación en `tests/algebra229AsB22.audit.test.ts` con gates success.
+
+Numeración: Plus estaba en r188 y se alinea con la numeración compartida de Lite (r197); los registros r189–r196 son de Lite.
+
+Estado: AS-B-23 (`x^2-2`) queda en `ON_HOLD`, pendiente de instrucción. Global OPEN.
+
+---
+
 ## 2026-10-20 UTC — AS-B-21 PASS sin cambio de producto (continuity r188)
 
 **ALGEBRA229-AS-B-21** — factorizar `\left(x^{2}+1\right)^{2}-4x^{2}` → `\left(x - 1\right)^{2} \left(x + 1\right)^{2}` (fila N3 en la matriz congelada Section B, diferencia de cuadrados).
