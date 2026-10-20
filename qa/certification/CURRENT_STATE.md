@@ -1,3 +1,17 @@
+## 2026-10-20 UTC — AS-B-18 PASS_SCOPED bilateral (continuity r184)
+
+**ALGEBRA229-AS-B-18** — factorizar `x^{8}-1` → `\left(x - 1\right) \left(x + 1\right) \left(x^{2} + 1\right) \left(x^{4} + 1\right)` (fila fuente N2 en la matriz congelada Section B).
+
+| Repo | Technical SHA | Gates (SUCCESS sobre el SHA exacto, evento push) |
+|------|---------------|--------------------------------------------------|
+| Plus | `7930c0ed2166ec17f75bd19924d4037c7373414b` | cumulative [39462384451](https://github.com/c2melendez/precision-lab-plus/actions/runs/39462384451), h1d [39462384532](https://github.com/c2melendez/precision-lab-plus/actions/runs/39462384532) |
+
+Test-first sin cambios de producto: el motor ya devolvía una factorización equivalente con cuatro factores. Evidencia: `backend/tests/test_algebra229_as_b18.py` (fila fuente N2, `/api/v1/factor` por HTTP, producto de cuatro factores). Global OPEN.
+
+**Siguiente único:** `ALGEBRA229-AS-B-19-TEST-FIRST` — `x^{2}y-xy^{2}` → `x y \left(x - y\right)` (fila N2 de la matriz congelada, factor común multivariable).
+
+---
+
 ## 2026-10-20 UTC — AS-B-17 PASS_SCOPED bilateral (continuity r183)
 
 **ALGEBRA229-AS-B-17** — factorizar `a^{3}+b^{3}` → `\left(a + b\right) \left(a^{2} - a b + b^{2}\right)` (fila fuente N2 en la matriz congelada Section B).
