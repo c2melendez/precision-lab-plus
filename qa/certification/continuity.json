@@ -50,7 +50,7 @@
       "status": "PASS_SCOPED",
       "scope": "unit/HTTP expand + source-row; not matrix-wide"
     },
-    "action": "AS-A-01..05 PASS_SCOPED bilateral. Next AS-A-06 expand (x+y+z)^2. Do not re-run fixture promote. Global OPEN. Full pre-r153 ledger blob ce5ef387… in git history."
+    "action": "AS-A-01..05 PASS_SCOPED bilateral. Next AS-A-06 expand (x+y+z)^2. Do not re-run fixture promote. Global OPEN."
   },
   "blockers": [
     {"id": "H2-SG28-DIST-01..08", "status": "BLOCKED"},
@@ -58,5 +58,5 @@
     {"id": "SY-P-23", "status": "OPEN"},
     {"id": "SY-X-04-PLUS-HTTP", "status": "BLOCKED"}
   ],
-  "ledger_note": "r153 reconciled 2026-10-20. Detailed evidence archived in git blob ce5ef387b0348350e1235efa5c9e4dafc4ae30f2. CONTINUITY_NEXT_ACTION.json mirrors next_action."
+  "ledger_note": "r153 reconciled 2026-10-20. next_action AS-A-06. Post-reconcile cumulative 39402444356 and H1d 39402444394 SUCCESS. Pre-r153 full ledger blob ce5ef387b0348350e1235efa5c9e4dafc4ae30f2 in git history."
 }
