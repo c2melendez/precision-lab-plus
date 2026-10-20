@@ -1,3 +1,17 @@
+## 2026-10-20 UTC — AS-B-16 PASS_SCOPED bilateral (continuity r182)
+
+**ALGEBRA229-AS-B-16** — factorizar `a^{3}-b^{3}` → `\left(a - b\right) \left(a^{2} + a b + b^{2}\right)` (fila fuente N2 en la matriz congelada Section B).
+
+| Repo | Technical SHA | Gates (SUCCESS sobre el SHA exacto, evento push) |
+|------|---------------|--------------------------------------------------|
+| Plus | `f1df6206b80281dfac98b698b6fabc62607e71a5` | cumulative [39457909892](https://github.com/c2melendez/precision-lab-plus/actions/runs/39457909892), h1d [39457909660](https://github.com/c2melendez/precision-lab-plus/actions/runs/39457909660) |
+
+Test-first sin cambios de producto: SymPy ya factorizaba `a^3-b^3` en Plus. Evidencia: `backend/tests/test_algebra229_as_b16.py` (fila fuente N2 en la matriz congelada, `/api/v1/factor` por HTTP, producto de dos factores). Global OPEN.
+
+**Siguiente único:** `ALGEBRA229-AS-B-17-TEST-FIRST` — `a^{3}+b^{3}` (fila N2 de la matriz congelada; ver fila completa en Section B).
+
+---
+
 ## 2026-10-20 UTC — AS-B-15 PASS_SCOPED bilateral (continuity r181)
 
 **ALGEBRA229-AS-B-15** — factorizar `x^{3}-x^{2}-x+1` → `\left(x - 1\right)^{2} \left(x + 1\right)` (fila fuente N2 en la matriz congelada Section B).
