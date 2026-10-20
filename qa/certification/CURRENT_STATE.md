@@ -1,5 +1,17 @@
 > Decisiones de alcance, de producto y de proceso: ver `qa/certification/ALGEBRA229_DECISIONS.md`.
 
+## 2026-10-20 UTC — AS-B-21 PASS sin cambio de producto (continuity r188)
+
+**ALGEBRA229-AS-B-21** — factorizar `\left(x^{2}+1\right)^{2}-4x^{2}` → `\left(x - 1\right)^{2} \left(x + 1\right)^{2}` (fila N3 en la matriz congelada Section B, diferencia de cuadrados).
+
+| Repo | Technical SHA | Gates (SUCCESS sobre el SHA exacto) |
+|------|---------------|--------------------------------------|
+| Plus | `f55e470a72b2d503981a4e583ac97838990e531c` | cumulative [39479963827](https://github.com/c2melendez/precision-lab-plus/actions/runs/39479963827), h1d [39479963755](https://github.com/c2melendez/precision-lab-plus/actions/runs/39479963755) |
+
+Test-first sin cambios de producto: SymPy ya devolvía la factorización. Evidencia: `backend/tests/test_algebra229_as_b21.py`. Regla de diferencia de cuadrados no implementada (no requerida en Plus). Global OPEN.
+
+---
+
 ## 2026-10-20 UTC — AS-B-20 PASS_SCOPED bilateral (continuity r187)
 
 **ALGEBRA229-AS-B-20** — factorizar `x^{4}+x^{2}y^{2}+y^{4}` → `\left(x^{2} - x y + y^{2}\right) \left(x^{2} + x y + y^{2}\right)` (fila fuente N3 en la matriz congelada Section B).
