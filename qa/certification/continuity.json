@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 182,
+  "revision": 183,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "9c0126613aacb7b0cd8fca148a6cf7eb1785d14c",
@@ -41,11 +41,11 @@
     }
   },
   "next_action": {
-    "id": "ALGEBRA229-AS-B-17-TEST-FIRST",
+    "id": "ALGEBRA229-AS-B-18-TEST-FIRST",
     "status": "READY",
     "technical_sha_by_repo": {
       "c2melendez/precision-lab-lite": "1d55948449316534410a2b8f13e4d5f1a4661333",
-      "c2melendez/precision-lab-plus": "f1df6206b80281dfac98b698b6fabc62607e71a5"
+      "c2melendez/precision-lab-plus": "b1f3c8163728aac39b1d08fef73a681d338315d3"
     },
     "run_ids_by_repo": {
       "c2melendez/precision-lab-lite": [
@@ -54,16 +54,16 @@
         39453853301
       ],
       "c2melendez/precision-lab-plus": [
-        39457909892,
-        39457909660
+        39461135107,
+        39461135362
       ]
     },
     "completed_scoped": {
-      "id": "ALGEBRA229-AS-A-01..17; ALGEBRA229-AS-B-01..16",
+      "id": "ALGEBRA229-AS-A-01..17; ALGEBRA229-AS-B-01..17",
       "status": "PASS_SCOPED",
       "scope": "unit/HTTP expand/factor + source-row; not matrix-wide"
     },
-    "action": "AS-B-16 PASS_SCOPED bilateral (Plus gates SUCCESS on f1df620). Next AS-B-17 per frozen matriz Section B. Global OPEN."
+    "action": "AS-B-17 PASS_SCOPED bilateral (test-first sin cambios de producto; Plus gates SUCCESS on b1f3c81). Scope decision: B-24/B-25 included with explicit «sobre ℝ»/«sobre ℂ» suffix, implemented in matrix order. Next AS-B-18. Global OPEN."
   },
   "blockers": [
     {
@@ -83,5 +83,5 @@
       "status": "BLOCKED"
     }
   ],
-  "ledger_note": "r182 2026-10-20: AS-B-16 PASS_SCOPED bilateral; next AS-B-17. Plus 39457909892/39457909660 SUCCESS."
+  "ledger_note": "r183 2026-10-20: AS-B-17 PASS_SCOPED bilateral (test-first sin cambios de producto); next AS-B-18. Scope: B-24/B-25 with explicit field suffix. Plus 39461135107/39461135362 SUCCESS."
 }
