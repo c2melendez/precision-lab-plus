@@ -1,5 +1,19 @@
 > Decisiones de alcance, de producto y de proceso: ver `qa/certification/ALGEBRA229_DECISIONS.md`.
 
+## 2026-10-20 UTC — AS-B-19 PASS_SCOPED bilateral (continuity r185)
+
+**ALGEBRA229-AS-B-19** — factorizar `x^{2}y-xy^{2}` → `x y \left(x - y\right)` (fila fuente N2 en la matriz congelada Section B, factor común multivariable).
+
+| Repo | Technical SHA | Gates (SUCCESS sobre el SHA exacto, evento push) |
+|------|---------------|--------------------------------------------------|
+| Plus | `80903249daf4e67a613aed17d9ef1d1ed5c39ae4` | cumulative [39471803861](https://github.com/c2melendez/precision-lab-plus/actions/runs/39471803861), h1d [39471803916](https://github.com/c2melendez/precision-lab-plus/actions/runs/39471803916) |
+
+Test-first sin cambios de producto: SymPy en `/api/v1/factor` ya devolvía una factorización equivalente con tres factores. Evidencia: `backend/tests/test_algebra229_as_b19.py` (fila fuente N2, `/api/v1/factor` por HTTP, producto de tres factores). Global OPEN.
+
+**Siguiente único:** `ALGEBRA229-AS-B-20-TEST-FIRST` — `x^{4}+x^{2}y^{2}+y^{4}` → `\left(x^{2} - x y + y^{2}\right) \left(x^{2} + x y + y^{2}\right)` (fila N3, primera fila multivariable con dos factores cuadráticos).
+
+---
+
 ## 2026-10-20 UTC — AS-B-18 PASS_SCOPED bilateral (continuity r184)
 
 **ALGEBRA229-AS-B-18** — factorizar `x^{8}-1` → `\left(x - 1\right) \left(x + 1\right) \left(x^{2} + 1\right) \left(x^{4} + 1\right)` (fila fuente N2 en la matriz congelada Section B).
