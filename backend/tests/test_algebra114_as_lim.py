@@ -1,7 +1,7 @@
 """Algebra114 AS-LIM-01..06 (sección M): robustez exacta y casos límite.
 
-Contrato (qa/certification/algebra114_source.md, sección M). Test-first sin
-cambios de producto. Oráculo = valor contractual + dominio cuando aplica.
+Contrato (qa/certification/algebra114_source.md, sección M).
+Oráculo = valor contractual + dominio cuando aplica.
 """
 
 from pathlib import Path
@@ -21,6 +21,14 @@ SOURCE = (Path(__file__).resolve().parents[2] / "qa/certification/algebra114_sou
 
 def _simplify(expression: str) -> dict:
     response = client.post("/api/v1/simplify", json={"expression": expression})
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["success"] is True, body
+    return body
+
+
+def _factor(expression: str) -> dict:
+    response = client.post("/api/v1/factor", json={"expression": expression})
     assert response.status_code == 200, response.text
     body = response.json()
     assert body["success"] is True, body
@@ -60,18 +68,21 @@ def test_as_lim_03_difference_of_powers_n3():
 def test_as_lim_04_exact_product_of_sqrts():
     body = _simplify("sqrt(2)*sqrt(8)")
     assert _value(body) == 4, body
-    # Must not be a float approximation left in result_text
     assert body["result_text"].strip() in ("4", "4.0") or sp.sympify(body["result_text"]) == 4
 
 
 def test_as_lim_05_factor_x6_minus_1():
-    body = _simplify("factor(x**6-1)")
+    """Full real factorization of x^6-1 via the factor endpoint (AS-FAC channel)."""
+    body = _factor("x**6-1")
     value = _value(body)
-    # Expanded agreement with x^6-1
     assert sp.expand(value) == x**6 - 1, body
-    # Prefer full real factorization when the engine provides it
-    factors = sp.factor(x**6 - 1)
-    assert sp.simplify(value - factors) == 0 or sp.expand(value) == x**6 - 1
+    # Contract factors over R: (x-1)(x+1)(x^2-x+1)(x^2+x+1)
+    expected = (x - 1) * (x + 1) * (x**2 - x + 1) * (x**2 + x + 1)
+    assert sp.simplify(value - expected) == 0, body
+    # Must not leave a spurious (x^2+1) factor
+    assert not any(
+        sp.simplify(f - (x**2 + 1)) == 0 for f, _ in sp.factor_list(value)[1]
+    ), body
 
 
 def test_as_lim_06_x100_stays_compact():
@@ -79,9 +90,7 @@ def test_as_lim_06_x100_stays_compact():
     text = body.get("result_text") or ""
     latex = body.get("result_latex") or ""
     combined = text + latex
-    # Must not expand into ~100 explicit power terms on screen
     power_hits = combined.count("x**") + combined.count("x^")
     assert power_hits < 20, (power_hits, combined[:300])
-    # Value must still be mathematically correct for a sample point
     val = _value(body)
     assert val.subs(x, 2) == sum(2**k for k in range(100))
