@@ -260,8 +260,8 @@ def test_cpu_budget_exhaustion_reaps_child_and_recovers(monkeypatch) -> None:
     monkeypatch.setenv("SG28_ISOLATED_CPU_SECONDS", "1")
     start = time.monotonic()
     with pytest.raises(ComputationTimedOut, match="CPU budget exceeded"):
-        run_bounded(_sg28_cpu_bound_loop, timeout_seconds=12)
-    assert time.monotonic() - start < 11.0, "CPU ceiling did not end child in time"
+        run_bounded(_sg28_cpu_bound_loop, timeout_seconds=10)
+    assert time.monotonic() - start < 9.5, "CPU ceiling did not end child in time"
     monkeypatch.delenv("SG28_ISOLATED_CPU_SECONDS")
     assert run_bounded(_add, 4, 5, timeout_seconds=5) == 9
 
