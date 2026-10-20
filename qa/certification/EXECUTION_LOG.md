@@ -134,6 +134,12 @@ Commit técnico Plus `cdc2bf7` (test-first AS-B-11 `factor ax+ay+bx+by`, sin cam
 
 ---
 
+## 2026-10-20 UTC — AS-B-12 PASS_SCOPED bilateral (continuity r178)
+
+Commit técnico Plus `ccbcdb5` (test-first AS-B-12 `factor x^5-x`, sin cambios de producto). Runs sobre el SHA exacto: cumulative [39452217842](https://github.com/c2melendez/precision-lab-plus/actions/runs/39452217842), h1d [39452217825](https://github.com/c2melendez/precision-lab-plus/actions/runs/39452217825). Todos SUCCESS (push). Global OPEN. Siguiente: AS-B-13.
+
+---
+
 ## Histórico AS-PAR / Syntax
 
 Blob previo Plus `c0f7925d01cce81f69e64c3dcb56f69982854076` / commit `4e0974d1…`.
