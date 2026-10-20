@@ -11,3 +11,15 @@
 | AS-A-05 | `f41649e1213dc9a22fb1e79520e8c436b832b96f` | [39397703380](https://github.com/c2melendez/precision-lab-lite/actions/runs/39397703380) SUCCESS | `496ed16ecbe71c35ac16ad5dc49e7c56e744c382` | [39397716265](https://github.com/c2melendez/precision-lab-plus/actions/runs/39397716265) SUCCESS |
 
 Global **OPEN**. Siguiente: **AS-A-06**.
+
+## Extensión AS-A-06..10 (2026-10-20)
+
+| Caso | Lite technical SHA | Lite cumulative | Plus technical SHA | Plus cumulative |
+|------|--------------------|-----------------|--------------------|-----------------|
+| AS-A-06 | `0c4f883` | (ver r152–r154 ledger) SUCCESS | `fe1cb3e` | (ver r153 ledger) SUCCESS |
+| AS-A-07 | `eae3f29` | SUCCESS | `636b978` | SUCCESS |
+| AS-A-08 | `80c6742` | SUCCESS | `4343ad6` | SUCCESS |
+| AS-A-09 | `0e9614d58424c4f10557bccfa2debe881e805215` | [39409011583](https://github.com/c2melendez/precision-lab-lite/actions/runs/39409011583) SUCCESS | `c52db6cfb461d6e9fa51d404e5e600eb13530928` | [39409024923](https://github.com/c2melendez/precision-lab-plus/actions/runs/39409024923) SUCCESS |
+| AS-A-10 | `373702e6df852a32ebccb79639c4271c556933cf` | [39410230278](https://github.com/c2melendez/precision-lab-lite/actions/runs/39410230278) SUCCESS + H1d 39410230284 | `a82daab7ad0d8eeca2b511cb07707ec1a3d5413a` | [39410227638](https://github.com/c2melendez/precision-lab-plus/actions/runs/39410227638) SUCCESS + H1d 39410227610 |
+
+AS-A-10: `(x^2+x+1)^3` → `x^6+3x^5+6x^4+7x^3+6x^2+3x+1`. Local Plus pytest 2 passed; Lite vitest 2 passed. CI bilateral verde sobre SHA técnico exacto. Global **OPEN**. Siguiente: **AS-A-11** `(a+b+c)^3`.
