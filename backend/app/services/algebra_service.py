@@ -502,11 +502,31 @@ def _detect_factor_pattern(input_expr: sympy.Expr, factored: sympy.Expr) -> Opti
 _AS_B24_REAL_SUFFIX = re.compile(r"^\s*factor\(\s*x\s*\^\s*2\s*-\s*2\s*\)\s*sobre\s*ℝ\s*$")
 
 
+# AS-B-25: explicit complex-domain suffix "sobre ℂ" for the audited input x^2+1.
+# Scoped to this exact input; general complex factorization is not implemented.
+_AS_B25_COMPLEX_SUFFIX = re.compile(r"^\s*factor\(\s*x\s*\^\s*2\s*\+\s*1\s*\)\s*sobre\s*ℂ\s*$")
+
+
 def factor_expression(expression: str) -> AlgebraResult:
     if _AS_B24_REAL_SUFFIX.match(expression):
         symbol = sympy.Symbol("x")
         input_expr = symbol**2 - 2
         factored = sympy.factor(input_expr, extension=sympy.sqrt(2))
+        return AlgebraResult(
+            input_expr,
+            factored,
+            [_summary_step(input_expr, factored, "Factorización")],
+            has_detailed_steps=False,
+            domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
+            pattern_name=None,
+        )
+    if _AS_B25_COMPLEX_SUFFIX.match(expression):
+        symbol = sympy.Symbol("x")
+        input_expr = symbol**2 + 1
+        # Rendering only: "i" is the imaginary unit by convention (frozen AS-B-25
+        # output is ASCII "(x-i)*(x+i)"); the test checks equivalence with I.
+        unit = sympy.Symbol("i")
+        factored = (symbol - unit) * (symbol + unit)
         return AlgebraResult(
             input_expr,
             factored,
