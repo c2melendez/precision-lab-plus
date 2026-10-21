@@ -215,6 +215,22 @@ Estado: AS-B-23 (`x^2-2`) queda en `ON_HOLD`, pendiente de instrucción. Global 
 
 ---
 
+## 2026-10-20 UTC — AS-B-23 PASS sin cambio de producto (continuity r198)
+
+**ALGEBRA229-AS-B-23** — factorizar `x^{2}-2` → `x^{2} - 2` (fila N2; irreducible sobre ℚ, debe quedar igual).
+
+| Repo | Technical SHA | Gates (SUCCESS sobre el SHA exacto) |
+|------|---------------|--------------------------------------|
+| Plus | `9e7d57b` | cumulative [39519184230](https://github.com/c2melendez/precision-lab-plus/actions/runs/39519184230), h1d [39519186881](https://github.com/c2melendez/precision-lab-plus/actions/runs/39519186881) |
+
+Test-first sin cambios de producto. Evidencia: `backend/tests/test_algebra229_as_b23.py`. Exige fila N2 en la matriz, resultado equivalente a `x^2-2` y suma (`sp.Add`) por HTTP. Lite (`628e686`) tiene la misma comprobación con gates success.
+
+Registro D20 pendiente: gates de `2a6e3ce` (docs r197) cumulative [39515148327](https://github.com/c2melendez/precision-lab-plus/actions/runs/39515148327) y h1d [39515150925](https://github.com/c2melendez/precision-lab-plus/actions/runs/39515150925), SUCCESS.
+
+Estado: AS-B-24 (`x^2-2` sobre ℝ) queda en `ON_HOLD`, pendiente de la sintaxis del sufijo y del resultado (D11). Global OPEN.
+
+---
+
 ## Histórico AS-PAR / Syntax
 
 Blob previo Plus `c0f7925d01cce81f69e64c3dcb56f69982854076` / commit `4e0974d1…`.
