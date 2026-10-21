@@ -7,7 +7,7 @@ Los seis gates D20 del commit documental r207 terminaron `completed/success`; se
 - Plus `h1d`: [39551275603](https://github.com/c2melendez/precision-lab-plus/actions/runs/39551275603) — SUCCESS; `head_sha=bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6` exacto.
 - Plus `native-syntax`: [39551277795](https://github.com/c2melendez/precision-lab-plus/actions/runs/39551277795) — SUCCESS; `head_sha=bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6` exacto.
 
-La expresión de EV-D-04 se normalizó en documentación a `\\csc(\\frac{\\pi}{6}) → 2`, corrigiendo el exceso de barras y las llaves duplicadas. Esto es una corrección documental únicamente; EV-D-04 permanece `READY`, no iniciado. Global `OPEN`.
+La expresión de EV-D-04 se normalizó en documentación a `\csc(\frac{\pi}{6}) → 2`, corrigiendo el exceso de barras y las llaves duplicadas. Esto es una corrección documental únicamente; EV-D-04 permanece `READY`, no iniciado. Global `OPEN`.
 
 ---
 
