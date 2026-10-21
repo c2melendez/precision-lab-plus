@@ -377,10 +377,10 @@ def normalize_unicode(text: str) -> str:
     # with numeric base and numeric argument; do not attempt to parse arbitrary
     # LaTeX or nested expressions through this shortcut.
     text = re.sub(
-        r"\\\\log_\\{\\s*([+-]?\\d+(?:\\.\\d+)?)\\s*\\}\\s*\\(\\s*([+-]?\\d+(?:\\.\\d+)?(?:/\\d+(?:\\.\\d+)?)?)\\s*\\)",
+        r"\\log_\{\s*([+-]?\d+(?:\.\d+)?)\s*\}\s*\(\s*([+-]?\d+(?:\.\d+)?(?:/\d+(?:\.\d+)?)?)\s*\)",
         lambda m: f"log({m.group(2)},{m.group(1)})", text,
     )
-    text = text.replace(r"\\cdot", "*")
+    text = text.replace(r"\cdot", "*")
     # U+00A0 is a nonbreaking space, not part of the mathematical token.
     text = text.replace("\u00a0", " ")
     # LaTeX spacing commands are whitespace, never identifiers or operations.
