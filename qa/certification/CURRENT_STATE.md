@@ -1,3 +1,20 @@
+## 2026-10-21 UTC — AUD-SING cierre r225 y EV-I grupo A en ejecución
+
+**AUD-SING — PASS_SCOPED (corrección de producto en Plus).** Gates SUCCESS sobre el SHA técnico `587aecc1f978e03bb976212f3c32fc632b76d0b0`:
+
+- cumulative: [39595617829](https://github.com/c2melendez/precision-lab-plus/actions/runs/39595617829) — SUCCESS; 1791 passed, 6 xfailed.
+- h1d: [39595617779](https://github.com/c2melendez/precision-lab-plus/actions/runs/39595617779) — SUCCESS; native syntax [39595617887](https://github.com/c2melendez/precision-lab-plus/actions/runs/39595617887) — SUCCESS; SG28 prototype [39595617826](https://github.com/c2melendez/precision-lab-plus/actions/runs/39595617826) — SUCCESS.
+- **Corrección de producto:** `asin(2)`/`acos(2)` se devolvían ecoados como resultado válido; ahora `evaluate_service` rechaza la forma numérica fuera de `[-1, 1]` con `DOMAIN_ERROR` (argumentos simbólicos intactos). `acot(0)=pi/2`, `sec(90)` en grados, `cot(45)`, `csc(30)` ya eran correctos y quedan cubiertos por pruebas.
+
+**EV-I grupo A en ejecución** — Plus `43738a0fd6387e99a71bdf0124e15fb5c698c877` / Lite `11d0192582c337e38ec3718940f5f620644e44f0`: EV-I-01..06, EV-I-08 (`acot(0)=π/2`) y EV-I-11 (`cos(atan 2)=√5/5`), con fila congelada verificada.
+
+**Pendientes EV-I (el defecto es de Lite, no de Plus):**
+- **EV-I-07** `arccot(-1)`: la matriz exige `3π/4`; ambos motores devuelven `-π/4` (convención SymPy `acot` y `arctan(1/x)`). Requiere decisión de contrato y corrección bilateral a rango principal (0, π).
+- **EV-I-09** `arcsin(sin 2)`: Plus devuelve `-2 + pi` (correcto, `π-2`); Lite devuelve `2`. Defecto de producto pendiente en Lite.
+- **EV-I-10** `sin(arccos(3/5))`: Plus devuelve `4/5` (correcto); Lite deja la expresión sin evaluar. Capacidad pendiente en Lite.
+
+---
+
 ## 2026-10-21 UTC — EV-D-12 cierre r224 y auditoría de singularidades evitables (AUD-SING)
 
 **EV-D-12 — `tan(π/2)` indefinida (error claro): PASS_SCOPED.** Fila congelada verificada; los dos gates Plus terminaron SUCCESS con `head_sha` exacto.

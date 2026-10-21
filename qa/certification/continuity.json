@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 224,
+  "revision": 225,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "4e625d1b667d426d6d93d52e9e0b5d4acc193293",
@@ -41,14 +41,14 @@
     }
   },
   "next_action": {
-    "id": "TRIG-AUD-SING-02",
+    "id": "TRIG-EV-I-GROUP-A",
     "status": "IN_PROGRESS",
-    "action": "EV-D-12 closed PASS_SCOPED (Plus 95601e5b already returned DOMAIN_ERROR for tan(pi/2)/log(0); coverage added). AUD-SING batch on Plus 587aecc1 / Lite 7d83a9ac: asin/acos out-of-domain DOMAIN_ERROR, bilateral degree-mode parity for sec/csc/cot, and documented alias-capability difference. Gates running; review logs, then close and start EV-I-01..06.",
+    "action": "AUD-SING closed PASS_SCOPED on Plus 587aecc1 (gates 39595617829/39595617779/39595617887/39595617826). EV-I group A tests (01..06, 08, 11) published on Plus 43738a0f / Lite 11d01925; gates running. Remaining EV-I: I-07 arccot(-1) branch conflict (matrix 3pi/4 vs engines -pi/4), I-09 and I-10 are Lite-only defects (Plus already returns -2+pi and 4/5).",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-lite": "7d83a9ac14c73dc70fb52d8902e01dc9313d1924",
-      "c2melendez/precision-lab-plus": "587aecc1f978e03bb976212f3c32fc632b76d0b0"
+      "c2melendez/precision-lab-lite": "11d0192582c337e38ec3718940f5f620644e44f0",
+      "c2melendez/precision-lab-plus": "43738a0fd6387e99a71bdf0124e15fb5c698c877"
     },
-    "product_changed": true
+    "product_changed": false
   },
   "blockers": [
     {
@@ -72,7 +72,7 @@
       "status": "ON_HOLD"
     }
   ],
-  "ledger_note": "r224: EV-D-12 tan(pi/2) PASS_SCOPED (Plus already DOMAIN_ERROR; coverage added). AUD-SING batch on Plus 587aecc1 (asin/acos domain) and Lite 7d83a9ac, gates running. Global certification OPEN.",
+  "ledger_note": "r225: AUD-SING closed PASS_SCOPED on Plus 587aecc1 (asin/acos domain + parity coverage). EV-I group A published (43738a0f/11d01925), gates running; EV-I-07/09/10 remain (Lite-only defects for 09/10). Global certification OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
@@ -531,6 +531,54 @@
     "diagnostic": "No Plus product change for EV-D-12: SymPy already returns zoo for tan(pi/2) and the service maps it to DOMAIN_ERROR. Lite needed the pole guard.",
     "global_certification": "OPEN",
     "next_objective": "TRIG-AUD-SING-02",
+    "next_status": "IN_PROGRESS"
+  },
+  "aud_sing_closure_r225": {
+    "status": "PASS_SCOPED",
+    "scope": "asin/acos out-of-domain DOMAIN_ERROR; degree-mode and alias parity evidenced",
+    "product_changed": true,
+    "product_fix": "app/services/evaluate_service.py rejects numeric asin/acos arguments outside [-1, 1] with DomainErrorResult; symbolic arguments untouched",
+    "runs": [
+      {
+        "gate": "cumulative",
+        "run_id": 39595617829,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39595617829",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "587aecc1f978e03bb976212f3c32fc632b76d0b0",
+        "head_sha_matches": true,
+        "tests": "1791 passed; 6 xfailed"
+      },
+      {
+        "gate": "h1d",
+        "run_id": 39595617779,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39595617779",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "587aecc1f978e03bb976212f3c32fc632b76d0b0",
+        "head_sha_matches": true
+      },
+      {
+        "gate": "native-syntax",
+        "run_id": 39595617887,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39595617887",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "587aecc1f978e03bb976212f3c32fc632b76d0b0",
+        "head_sha_matches": true
+      },
+      {
+        "gate": "sg28-prototype",
+        "run_id": 39595617826,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39595617826",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "587aecc1f978e03bb976212f3c32fc632b76d0b0",
+        "head_sha_matches": true
+      }
+    ],
+    "global_certification": "OPEN",
+    "next_objective": "TRIG-EV-I-GROUP-A",
     "next_status": "IN_PROGRESS"
   }
 }
