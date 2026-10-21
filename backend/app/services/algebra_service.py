@@ -44,6 +44,9 @@ class AlgebraResult:
     # `MathResponse`. Default vacío: preserve semantics for every existing
     # construction site (factor/expand/partial-fractions).
     warnings: List[str] = None  # type: ignore[assignment]
+    # AS-B-25: texto de salida fijado explícitamente (ASCII "i"). Si es None,
+    # el router usa str(result_expr). Default None preserva el resto de rutas.
+    display_text: Optional[str] = None
 
     def __post_init__(self) -> None:
         if self.warnings is None:
@@ -534,6 +537,7 @@ def factor_expression(expression: str) -> AlgebraResult:
             has_detailed_steps=False,
             domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
             pattern_name=None,
+            display_text="(x-i)*(x+i)",
         )
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     factored = sympy.factor(input_expr)
