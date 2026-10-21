@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 228,
+  "revision": 229,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "4e625d1b667d426d6d93d52e9e0b5d4acc193293",
-  "baseline_case": "TRIG-EV-D-01",
+  "technical_baseline_sha": "996ed03026c95ced15443a579c35115f25d5e3c3",
+  "baseline_case": "TRIG-EV-I-09-I-10",
   "baseline_status": "PASS_SCOPED_BILATERAL",
   "global_certification": "OPEN",
   "prose_only_paths": [
@@ -41,12 +41,12 @@
     }
   },
   "next_action": {
-    "id": "LOG-EV-L-REWRITE",
+    "id": "EXP-EV-E-EVALUATION",
     "status": "IN_PROGRESS",
-    "action": "EV-I-07 closed PASS_SCOPED_BILATERAL (Plus f8bdd40a, 1801 passed; Lite 76e89a9b, 2028 passed): acot now uses pi/2-atan(x). Next objective EV-L (logarithms): Plus already resolves log ratios, ln(10^50)=50*ln(10) and invalid bases; Lite needs log-ratio simplification, ln(a^n) reduction, an explicit invalid-base error, and a parser fix for \\log_{2}(3)\\cdot\\log_{3}(4) (raw '_' error). Add bilateral EV-L-01..14 coverage and keep EV-I-09/I-10 as documented Lite defects.",
+    "action": "EV-L-01..14 and EV-I-09/I-10 are closed PASS_SCOPED_BILATERAL on their exact technical SHAs (see ev_l_closure_r229 / ev_i09_i10_closure_r229). Next objective: EV-E-01..14 (exponentials) of matriz_log_exp_radicales. Verified probe on both engines: EV-E-01..09, EV-E-11 and EV-E-13 are already correct; EV-E-10 e^(ln 2+ln 3) returns 6 in Plus but stays symbolic exp(log(2)+log(3)) in Lite (Lite product defect: exact sum-of-logs simplification); EV-E-12 (1+1/1000)^1000 returns a ~3600-digit exact fraction as result_text in BOTH engines while result_approx is correct (bilateral presentation/complexity defect: prefer the documented approximation or a bounded exact form); EV-E-14 0^0 returns 1 in both engines, which the row admits only under a declared convention (declare it in MANUAL_CAPABILITY_GAPS). Add bilateral EV-E-01..14 tests, fix Lite EV-E-10, decide EV-E-12 presentation, then run the cumulative gates on the new technical SHA. Keep the independent blockers unchanged.",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-lite": "76e89a9b3546ad73b4be61fea4cd48de5905195f",
-      "c2melendez/precision-lab-plus": "f8bdd40a2bbd6016f412019a246e4dbce23835f1"
+      "c2melendez/precision-lab-lite": "bd9c207c1b091bfd017fb8f3ca7ff8f21e06415b",
+      "c2melendez/precision-lab-plus": "996ed03026c95ced15443a579c35115f25d5e3c3"
     },
     "product_changed": true
   },
@@ -680,5 +680,136 @@
     "global_certification": "OPEN",
     "next_objective": "LOG-EV-L-REWRITE",
     "next_status": "IN_PROGRESS"
+  },
+  "ev_l_closure_r229": {
+    "status": "PASS_SCOPED_BILATERAL",
+    "scope": "EV-L-01..14 logarithms (matriz_log_exp_radicales)",
+    "product_changed": true,
+    "product_fix": "Lite: exact log-ratio and perfect-power simplification (engine/logSimplify.ts), invalid-base guard and parser normalization of every \\log_{b}(arg) occurrence. Plus: invalid logarithm base validation and bounded LaTeX log normalization.",
+    "technical_sha_by_repo": {
+      "c2melendez/precision-lab-lite": "47988786a6340d434db67a7a627ff525ae697864",
+      "c2melendez/precision-lab-plus": "6edbb54d2b13e897e98c83f3a6872eefae869765"
+    },
+    "runs": [
+      {
+        "gate": "cumulative",
+        "run_id": 39661568080,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39661568080",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "6edbb54d2b13e897e98c83f3a6872eefae869765",
+        "head_sha_matches": true,
+        "tests": "1806 passed, 6 xfailed, coverage 88.08%; tests/test_log_matrix_ev_l01_l14.py 5/5 PASSED"
+      },
+      {
+        "gate": "h1d",
+        "run_id": 39661568110,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39661568110",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "6edbb54d2b13e897e98c83f3a6872eefae869765",
+        "head_sha_matches": true
+      },
+      {
+        "gate": "native-syntax",
+        "run_id": 39661568063,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39661568063",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "6edbb54d2b13e897e98c83f3a6872eefae869765",
+        "head_sha_matches": true
+      },
+      {
+        "gate": "sg28-prototype",
+        "run_id": 39661568064,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39661568064",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "6edbb54d2b13e897e98c83f3a6872eefae869765",
+        "head_sha_matches": true
+      }
+    ],
+    "scope_notes": "EV-L-01/02/03/04/06/07/10 exact; EV-L-05/08/11 exact form plus 9-decimal reference; EV-L-09 product of base-b logs in ASCII and LaTeX; EV-L-12 DOMAIN_ERROR; EV-L-13 i*pi (complex branch documented by the row); EV-L-14 invalid base with a clear error.",
+    "global_certification": "OPEN"
+  },
+  "ev_i09_i10_closure_r229": {
+    "status": "PASS_SCOPED_BILATERAL",
+    "scope": "EV-I-09 arcsin(sin 2)=pi-2 and EV-I-10 sin(arccos 3/5)=4/5",
+    "product_changed": true,
+    "product_fix": "Lite: engine/inverseTrigComposition.ts rewrites whole inverse/direct compositions with numeric arguments to the exact principal branch (integer multiples of pi) and the Pythagorean identities; parsing/normalize.ts now accepts and unescapes the contractual LaTeX macros (\\arcsin, \\arccos, \\arctan, \\arcsec, \\arccsc, \\arccot and the inverse hyperbolic ones) that G3 rejected as unknown commands. Plus: no product change (already returned -2+pi and 4/5).",
+    "technical_sha_by_repo": {
+      "c2melendez/precision-lab-lite": "bd9c207c1b091bfd017fb8f3ca7ff8f21e06415b",
+      "c2melendez/precision-lab-plus": "996ed03026c95ced15443a579c35115f25d5e3c3"
+    },
+    "runs": [
+      {
+        "gate": "cumulative",
+        "run_id": 39679906072,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39679906072",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "996ed03026c95ced15443a579c35115f25d5e3c3",
+        "head_sha_matches": true,
+        "tests": "1812 passed, 6 xfailed, coverage 88.08%; tests/test_trigonometry_ev_i09_i10.py 6/6 PASSED"
+      },
+      {
+        "gate": "h1d",
+        "run_id": 39679906136,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39679906136",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "996ed03026c95ced15443a579c35115f25d5e3c3",
+        "head_sha_matches": true
+      }
+    ],
+    "finding": "The official EV-I rows are written with \\arcsin/\\arccos/\\arctan; before this change Lite could only certify them through the ASCII channel because G3 aborted with 'Comando desconocido'.",
+    "global_certification": "OPEN"
+  },
+  "ev_e_diagnosis_r229": {
+    "status": "IN_PROGRESS",
+    "scope": "EV-E-01..14 exponentials (matriz_log_exp_radicales), local probe only",
+    "evidence_kind": "local_probe",
+    "correct_already": [
+      "EV-E-01",
+      "EV-E-02",
+      "EV-E-03",
+      "EV-E-04",
+      "EV-E-05",
+      "EV-E-06",
+      "EV-E-07",
+      "EV-E-08",
+      "EV-E-09",
+      "EV-E-11",
+      "EV-E-13"
+    ],
+    "defects": [
+      {
+        "case": "EV-E-10",
+        "layer": "product",
+        "repos": [
+          "lite"
+        ],
+        "detail": "Lite returns exp(log(2)+log(3)); Plus returns 6"
+      },
+      {
+        "case": "EV-E-12",
+        "layer": "presentation/complexity",
+        "repos": [
+          "lite",
+          "plus"
+        ],
+        "detail": "result_text is a ~3600-digit exact fraction in both engines; result_approx is 2.716923932"
+      },
+      {
+        "case": "EV-E-14",
+        "layer": "convention",
+        "repos": [
+          "lite",
+          "plus"
+        ],
+        "detail": "both return 1; the row admits 1 only under a declared convention"
+      }
+    ],
+    "global_certification": "OPEN"
   }
 }
