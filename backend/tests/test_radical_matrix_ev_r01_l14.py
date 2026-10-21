@@ -84,6 +84,22 @@ def test_ev_r_exact_radical_forms():
             assert sp.simplify(_value(payload) - expected) == 0, (expression, payload)
 
 
+def test_ev_r_oracles_anchored_to_frozen_rows():
+    frozen = [
+        ("EV-R-03", "-2"),
+        ("EV-R-05", "-2"),
+        ("EV-R-06", "2\\sqrt{3}"),
+        ("EV-R-07", "5\\sqrt{2}"),
+        ("EV-R-08", "\\sqrt{2}-1"),
+        ("EV-R-09", "`2`"),
+        ("EV-R-10", "`8`"),
+        ("EV-R-11", "1+\\sqrt{2}"),
+        ("EV-R-12", "\\sqrt{2}+\\sqrt{3}"),
+    ]
+    for case_id, reference in frozen:
+        assert reference in _row(case_id), case_id
+
+
 def test_ev_r13_declared_complex_branch():
     # The row admits "en C: 2i" only when the branch is declared; the
     # declaration is recorded in qa/certification/MANUAL_CAPABILITY_GAPS.md.

@@ -7,6 +7,7 @@ exact rows by symbolic equality, approximation rows by result_approx.
 """
 from pathlib import Path
 import gzip
+import re
 
 import sympy as sp
 from fastapi.testclient import TestClient
@@ -58,25 +59,38 @@ def test_ev_e_exact_values():
 
 
 def test_ev_e_approximations():
+    # (id, expresion, referencia congelada, valor): el oraculo del test debe
+    # aparecer literalmente en la fila congelada de la matriz.
     references = [
-        ("e^(-1)", 0.367879441),
-        ("2^(sqrt(2))", 2.665144143),
-        ("pi^E", 22.459157718),
-        ("e^pi-pi", 19.999099979),
-        ("(1+1/1000)^1000", 2.716923932),
+        ("EV-E-02", "e^(-1)", "0.367879441", 0.367879441),
+        ("EV-E-07", "2^(sqrt(2))", "2.665144143", 2.665144143),
+        ("EV-E-08", "pi^E", "22.459157718", 22.459157718),
+        ("EV-E-09", "e^pi-pi", "19.999099979", 19.999099979),
+        ("EV-E-12", "(1+1/1000)^1000", "2.716923932", 2.716923932),
     ]
+    plain_decimal = re.compile(r"-?\d+(\.\d+)?([eE][+-]?\d+)?")
     with TestClient(app) as client:
-        for expression, reference in references:
+        for case_id, expression, frozen, reference in references:
+            assert frozen in _row(case_id), case_id
             payload = _evaluate(client, expression)
+            # Protocolo, regla 2: una salida que solo imprima el decimal no
+            # certifica la fila; la forma exacta debe conservarse.
+            assert not plain_decimal.fullmatch(payload["result_text"].strip()), (
+                case_id,
+                payload,
+            )
             assert abs(payload["result_approx"] - reference) <= 5e-10, (expression, payload)
 
         # EV-E-11: the exact form exp(100) is kept; the reference is relative
         # and also rounded to nine decimals, hence the same 5e-10 tolerance.
+        assert "2.688117142" in _row("EV-E-11")
         payload = _evaluate(client, "e^100")
+        assert "exp(" in payload["result_text"], payload
         assert abs(payload["result_approx"] / 1e43 - 2.688117142) <= 5e-10, payload
 
 
 def test_ev_e10_sum_of_logs_is_exact_six():
+    assert "`6`" in _row("EV-E-10")
     with TestClient(app) as client:
         payload = _evaluate(client, "e^(ln(2)+ln(3))")
     assert payload["result_text"] == "6", payload
