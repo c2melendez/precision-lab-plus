@@ -82,7 +82,11 @@ def _build_response(
         input_text=payload.expression,
         input_latex=input_latex,
         result_latex=result_latex,
-        result_text=_safe_text(result.result_expr),
+        result_text=(
+            result.display_text
+            if getattr(result, "display_text", None) is not None
+            else _safe_text(result.result_expr)
+        ),
         steps=result.steps,
         has_detailed_steps=result.has_detailed_steps,
         warnings=warnings,
