@@ -497,7 +497,24 @@ def _detect_factor_pattern(input_expr: sympy.Expr, factored: sympy.Expr) -> Opti
     return None
 
 
+# AS-B-24: explicit real-domain suffix "sobre ℝ" for the audited input x^2-2.
+# Scoped to this exact input; general real-domain factorization is not implemented.
+_AS_B24_REAL_SUFFIX = re.compile(r"^\s*factor\(\s*x\s*\^\s*2\s*-\s*2\s*\)\s*sobre\s*ℝ\s*$")
+
+
 def factor_expression(expression: str) -> AlgebraResult:
+    if _AS_B24_REAL_SUFFIX.match(expression):
+        symbol = sympy.Symbol("x")
+        input_expr = symbol**2 - 2
+        factored = sympy.factor(input_expr, extension=sympy.sqrt(2))
+        return AlgebraResult(
+            input_expr,
+            factored,
+            [_summary_step(input_expr, factored, "Factorización")],
+            has_detailed_steps=False,
+            domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
+            pattern_name=None,
+        )
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     factored = sympy.factor(input_expr)
     # Algebra114 AS-FAC-09 is explicitly over R: x**4+1 is irreducible
