@@ -23,8 +23,8 @@ EXPECTED = sp.Integer(1)
 def test_ev_d06_source_row_present_and_frozen():
     text = gzip.decompress(SOURCE_GZ.read_bytes()).decode("utf-8")
     assert "| EV-D-06 |" in text
-    assert r"\\cot\\left(\\frac{\\pi}{4}\\right)" in text
-    assert re.search(r"\\|\\s*EV-D-06\\s*\\|[^\\n]*\\|\\s*`?1`?\\s*\\|", text)
+    assert r"\cot\left(\frac{\pi}{4}\right)" in text
+    assert re.search(r"\|\s*EV-D-06\s*\|[^\n]*\|\s*1\s*\|", text)
 
 
 def test_ev_d06_cot_pi_over_4_http_ascii():
