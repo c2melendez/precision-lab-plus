@@ -1,13 +1,15 @@
 > Decisiones de alcance, de producto y de proceso: ver `qa/certification/ALGEBRA229_DECISIONS.md`.
 
-## 2026-10-21 UTC — Gates D20 de r206 registrados (continuity r207)
+## 2026-10-21 UTC — Cierre documental r208: gates D20 de r207 verificados
 
-Gates documentales de r206 (`workflow_dispatch` sobre `dcd7e21`, `head_sha` exacto, todos SUCCESS):
-- Plus `dcd7e21`: cumulative [39549986462](https://github.com/c2melendez/precision-lab-plus/actions/runs/39549986462), h1d [39549989101](https://github.com/c2melendez/precision-lab-plus/actions/runs/39549989101), Native Syntax [39549991542](https://github.com/c2melendez/precision-lab-plus/actions/runs/39549991542).
+Los seis gates D20 del cierre documental r207 finalizaron en `completed/success`. Cada `head_sha` coincide exactamente con el commit documental r207 del repositorio correspondiente:
+- Plus `cumulative`: [39551273508](https://github.com/c2melendez/precision-lab-plus/actions/runs/39551273508) — SUCCESS; `head_sha=bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6` exacto.
+- Plus `h1d`: [39551275603](https://github.com/c2melendez/precision-lab-plus/actions/runs/39551275603) — SUCCESS; `head_sha=bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6` exacto.
+- Plus `native-syntax`: [39551277795](https://github.com/c2melendez/precision-lab-plus/actions/runs/39551277795) — SUCCESS; `head_sha=bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6` exacto.
 
-Gates documentales de r207 (commit de este cierre): se disparan con `workflow_dispatch` sobre el SHA documental (D20); sus resultados se registran en r208.
+**Escapado corregido:** la expresión oficial queda `\\csc(\\frac{\\pi}{6}) → 2` (un solo nivel de escapado LaTeX dentro del código Markdown; sin llaves duplicadas alrededor de `\\pi`).
 
-Siguiente sin cambios: EV-D-04 `\\csc(\\frac{{\\pi}}{{6}}) → 2`, `READY`; no iniciado. Global OPEN.
+**Siguiente acción sin cambios:** EV-D-04 (`TRIG-EV-D-04-TEST-FIRST`) permanece `READY`, **no iniciado**. No se ejecutaron pruebas de EV-D-04 ni se modificó producto. Global `OPEN`.
 
 ---
 
