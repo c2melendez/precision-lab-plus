@@ -1,3 +1,16 @@
+## 2026-10-21 UTC — EV-D-07 cierre r219: PASS_SCOPED_BILATERAL
+
+**EV-D-07 — `sin(5π/4) = -√2/2`: PASS_SCOPED_BILATERAL.** Se verificó la fila congelada `| EV-D-07 | \`\sin\left(\frac{5\pi}{4}\right)\` | \`-\frac{\sqrt{2}}{2}\` |`. Los dos gates requeridos terminaron SUCCESS con `head_sha` exacto; no se modificó código de producto.
+
+- cumulative: [39560042890](https://github.com/c2melendez/precision-lab-plus/actions/runs/39560042890) — SUCCESS; SHA técnico `1717a160a5219a06d6542f26e87c94fe7de59fd5` exacto.
+- h1d: [39560042860](https://github.com/c2melendez/precision-lab-plus/actions/runs/39560042860) — SUCCESS; mismo SHA.
+- Pruebas EV-D-07: `test_ev_d07_source_row_present_and_frozen` y `test_ev_d07_sin_5pi_over_4_http_ascii` PASSED; backend 1768 passed, 6 xfailed, cobertura 88.00%; frontend typecheck, regresión y production build SUCCESS.
+- El oráculo HTTP exige equivalencia simbólica con `-√2/2`, cercanía numérica y rechaza una salida decimal; no se modificó producto.
+- Certificación global continúa OPEN por bloqueos independientes; este cierre solo certifica EV-D-07.
+- Siguiente objetivo: TRIG-EV-D-08-TEST-FIRST (`sin(1) ≈ 0.841470985`). Antes de escribir pruebas, definir el oráculo contractual para filas con `\approx` (tolerancia y dígitos documentados) en ambos motores.
+
+---
+
 ## 2026-10-21 UTC — EV-D-06 cierre r218: PASS_SCOPED_BILATERAL
 
 **EV-D-06 — `cot(pi/4)=1`: PASS_SCOPED_BILATERAL.** Se verificó la fila de la matriz trigonométrica congelada. Todos los gates requeridos terminaron SUCCESS y sus `head_sha` coinciden con el SHA técnico indicado. No se modificó código de producto.
