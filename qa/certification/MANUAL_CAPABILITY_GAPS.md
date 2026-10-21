@@ -349,3 +349,7 @@ Soportado: una variable, radicandos polinómicos de coeficientes racionales, ín
 - **Lite (Algebrite 1.4):** `factor` no factoriza polinomios multivariables (AS-MUL-02 devuelve la forma expandida; AS-MUL-03 no termina en tiempo acotado) y `gcd` multivariable devuelve 1, por lo que `(x-y)/(x^2-y^2)` no se reduce a `1/(x+y)` (AS-MUL-04; el dominio `x^2-y^2≠0` sí se conserva). Registrados como `it.fails`/`it.todo`. Las reescrituras por cadena exacta introducidas en `a564285e`/`08b81dec` se revirtieron: no son capacidad.
 - **Ambos motores:** ninguna operación acepta supuestos del usuario (AS-MUL-05 `x+y+z=0 ⇒ 3xyz`); los tests solo comprueban que no se afirma `3xyz` incondicionalmente. No existe reescritura a `½((x−y)²+(y−z)²+(z−x)²)` (AS-MUL-06); Plus la registra como `xfail(strict)`.
 - Salida: capacidad general (no por entrada exacta) con test original verde y gates exact-SHA.
+
+## 2026-10-21 UTC — TRIG EV-D-11: identidad pitagórica en Plus (sin limitación)
+
+Plus devuelve `1` literal para `sin(pi/8)^2+cos(pi/8)^2`. La limitación de forma exacta no colapsada es exclusiva de Lite (`evaluate()` conserva `cos(1/8*pi)^2+sin(1/8*pi)^2`; `simplify(...)` sí da `1`), registrada en el ledger de Lite y certificada como PASS_SCOPED_EQUIVALENT.
