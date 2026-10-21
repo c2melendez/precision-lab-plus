@@ -20,7 +20,7 @@ Este archivo recoge las decisiones tomadas durante la certificación ALGEBRA229 
 - **D8. Alcance de la regla de cubos (Lite):** solo binomios `a^3 ± b^3` con variables de una sola letra, y solo si el resultado de Algebrite no contiene `(`, `)` ni `*`. No es un factorizador multivariable general. Esto no está generalizado a `a^n ± b^n`; esa generalización no está decidida.
 - **D9. Plus:** usa SymPy (`/api/v1/factor`) y no tiene Kronecker ni regla de cubos. Los casos se verifican contra la matriz, no contra el comportamiento de Lite. AS-B-16 y AS-B-17 pasaron sin cambios de producto en Plus.
 - **D10. Filas que deben quedar sin factorizar:** AS-B-22 (`x²+1`) y AS-B-23 (`x²-2`) sobre ℚ. Sirven como regresión: ninguna regla nueva puede factorizarlas falsamente.
-- **D11. Cuerpo explícito (AS-B-24, AS-B-25):** decidido en r183. Se incluyen las filas con sufijo explícito «sobre ℝ» o «sobre ℂ» en la entrada. Pendiente: la sintaxis exacta del sufijo y del resultado, que no está implementada. Se implementan en orden de matriz, después de B-23.
+- **D11. Cuerpo explícito (AS-B-24, AS-B-25):** decidido en r183. Se incluyen las filas con sufijo explícito «sobre ℝ» o «sobre ℂ» en la entrada. ℝ resuelto en D21 (AS-B-24). Pendiente: sintaxis de «sobre ℂ» y su resultado (AS-B-25). Se implementan en orden de matriz, después de B-23.
 
 - **D15. Regla acotada AS-B-20 (Lite):** `quarticBiquadraticCandidate` reconoce solo `a^4 + a^2 b^2 + b^4` (tres términos, dos variables distintas de una letra, coeficientes 1). Se acepta solo si el CAS confirma equivalencia y Algebrite devolvió el resultado sin factorizar. **No es un factorizador multivariable general** y no se generaliza a otras formas sin nueva decisión. Plus no tiene regla propia (SymPy).
 
@@ -29,6 +29,8 @@ Este archivo recoge las decisiones tomadas durante la certificación ALGEBRA229 
 - **D17. Salvaguarda de diferencia de cuadrados (Lite, decidida por el usuario):** regla acotada `differenceOfSquaresCandidate` para `(P)^2 - K·v^2` con K cuadrado perfecto. Solo reemplaza un resultado de Algebrite sin paréntesis y solo si el CAS confirma equivalencia. Regresiones: `x^2+1` y `x^2-2` no coinciden con la regla. No es un factorizador general. Plus no cambia (SymPy). Commits Lite `bda4c99` (regla) y `d7cf042` (pruebas).
 
 - **D18. Forma canónica de la salvaguarda de diferencia de cuadrados (Lite, decidida por el usuario):** la salida de `(P)² − K·v²` se factoriza con Kronecker sobre P−Q y P+Q, agrupa potencias y se verifica con CAS. Para AS-B-21 la salida es `(x-1)^2*(x+1)^2`. Si algún factor no es decidible, o si el CAS no confirma, se conserva la salida de dos cuadráticos. Multivariable no entra en la factorización. Plus no cambia. Commits Lite `e2c0e58` (código y pruebas) y `620cd49` (regresiones).
+
+- **D21. Sintaxis «sobre ℝ» de AS-B-24 (decidida por el usuario, 2026-10-21).** Entrada `factor(x^2-2) sobre ℝ`; salida exacta `(x-sqrt(2))*(x+sqrt(2))`, en ASCII y no con el símbolo √. Alcance: solo el input exacto `x^2-2`. Lite lo resuelve en `evaluate()` antes del CAS (`efa7ada`); Plus, en `factor_expression` con sympy y `extension=sqrt(2)` (`a88b201`, `0280d5f`). No es soporte general de cuerpos reales. Pruebas: `tests/algebra229AsB24.audit.test.ts` (Lite) y `backend/tests/test_algebra229_as_b24.py` (Plus). Pendiente: «sobre ℂ» (AS-B-25) sin decidir.
 
 ## Decisiones pendientes (no implementar sin nueva decisión)
 
