@@ -17,6 +17,7 @@ app/services/algebra_service.py — `/simplify`, `/factor`, `/expand`
   se degrada a paso resumen en vez de bloquear la respuesta.
 """
 
+import re
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
