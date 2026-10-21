@@ -350,6 +350,25 @@ def evaluate(
 
     # Sin variables libres sin sustituir -> numérico (sección 6).
 
+    # EV-I-12: el dominio real de asin/acos es [-1, 1]. SymPy devuelve un
+    # valor complejo y la API respondía ecoando "asin(2)" como si fuera un
+    # resultado válido. El contrato congelado exige error claro: se rechaza
+    # solo la forma numérica fuera de rango; los argumentos simbólicos y las
+    # composiciones (asin(sin(2))) siguen su curso normal.
+    for inverse in (sympy.asin, sympy.acos):
+        for node in sympy.preorder_traversal(expr):
+            if isinstance(node, inverse):
+                argument = node.args[0]
+                if argument.is_number and argument.is_real:
+                    try:
+                        value = float(argument.evalf())
+                    except (TypeError, ValueError):
+                        continue
+                    if abs(value) > 1 + 1e-12:
+                        raise DomainErrorResult(
+                            f"{inverse.__name__} no está definida fuera del dominio real [-1, 1]."
+                        )
+
     # Diagnose a zero denominator while the original power structure is
     # still available; evalf may collapse it to an uninformative zoo/nan.
     # The zero exponent is not negative: preserve the declared 0^0=1 convention.
