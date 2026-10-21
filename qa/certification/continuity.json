@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 216,
+  "revision": 217,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "4e625d1b667d426d6d93d52e9e0b5d4acc193293",
@@ -58,7 +58,7 @@
         39557484518
       ]
     },
-    "action": "Wait for Lite Scientific UI and Plus cumulative to complete, inspect logs, then close EV-D-06 bilaterally if every required gate succeeds."
+    "action": "Wait for Lite Scientific UI run 39557480008 to finish; inspect final logs and SHA. If SUCCESS, close EV-D-06 bilateral; otherwise diagnose only the demonstrated gate failure."
   },
   "blockers": [
     {
@@ -82,7 +82,7 @@
       "status": "ON_HOLD"
     }
   ],
-  "ledger_note": "r216: EV-D-06 cot(pi/4)=1. Lite cumulative+H1d PASS; Lite Scientific UI pending. Plus H1d PASS; Plus cumulative frontend PASS/backend pending. Product unchanged; global certification OPEN.",
+  "ledger_note": "r217: EV-D-06 cot(pi/4)=1. Lite cumulative+H1d PASS; Plus cumulative+H1d PASS with test logs verified. Lite Scientific UI is the only pending gate. Product unchanged; global OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
@@ -290,13 +290,40 @@
     "runs": [
       {
         "gate": "cumulative",
+        "run_id": 39557479991,
+        "url": "https://github.com/c2melendez/precision-lab-lite/actions/runs/39557479991",
+        "status": "completed",
+        "conclusion": "success",
+        "expected_head_sha": "00892789a8cd5c6e12ba43cb47fce4d97f7b1bc8",
+        "head_sha_matches": true,
+        "tests": "EV-D-06 3/3; 1975 passed, 8 xfailed expected, 34 TODO"
+      },
+      {
+        "gate": "h1d",
+        "run_id": 39557479974,
+        "url": "https://github.com/c2melendez/precision-lab-lite/actions/runs/39557479974",
+        "status": "completed",
+        "conclusion": "success",
+        "expected_head_sha": "00892789a8cd5c6e12ba43cb47fce4d97f7b1bc8",
+        "head_sha_matches": true
+      },
+      {
+        "gate": "scientific-ui",
+        "run_id": 39557480008,
+        "url": "https://github.com/c2melendez/precision-lab-lite/actions/runs/39557480008",
+        "status": "in_progress",
+        "expected_head_sha": "00892789a8cd5c6e12ba43cb47fce4d97f7b1bc8",
+        "head_sha_matches": true
+      },
+      {
+        "gate": "cumulative",
         "run_id": 39557484508,
         "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39557484508",
-        "status": "in_progress",
-        "frontend": "success",
-        "backend": "in_progress",
+        "status": "completed",
+        "conclusion": "success",
         "expected_head_sha": "6369a617e59f2f23fe73ac4e464683de310a688a",
-        "head_sha_matches": true
+        "head_sha_matches": true,
+        "tests": "1766 passed, 6 xfailed; coverage 88.05%; EV-D-06 source+HTTP tests passed"
       },
       {
         "gate": "h1d",
