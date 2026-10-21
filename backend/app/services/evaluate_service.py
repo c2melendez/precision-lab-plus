@@ -344,6 +344,16 @@ def evaluate(
     if substitution_map:
         expr = expr.subs(substitution_map)
 
+    # EV-I-07: rango principal de arccot, (0, pi). SymPy usa (-pi/2, pi/2]
+    # (acot(-1) = -pi/4), pero la matriz congelada exige 3*pi/4. Se reescribe
+    # solo si la expresión contiene acot, con la identidad exacta
+    # acot(x) = pi/2 - atan(x) (válida para todo x real, incluido 0).
+    if expr.has(sympy.acot):
+        expr = expr.replace(
+            lambda node: isinstance(node, sympy.acot),
+            lambda node: sympy.pi / 2 - sympy.atan(node.args[0]),
+        )
+
     if expr.free_symbols:
         # Variables libres sin sustituir -> resultado simbólico (sección 6).
         return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=False, sum_bound=sum_bound, binomial_variable=binomial_variable, permutation_alias=permutation_alias)
