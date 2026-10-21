@@ -1,3 +1,19 @@
+## 2026-10-21 UTC — EV-D-09 cierre r221 y EV-D-10 en ejecución
+
+**EV-D-09 — `cos(2) ≈ -0.416146837`: PASS_SCOPED_BILATERAL.** Fila congelada verificada; los dos gates Plus terminaron SUCCESS con `head_sha` exacto.
+
+- cumulative: [39562389148](https://github.com/c2melendez/precision-lab-plus/actions/runs/39562389148) — SUCCESS; SHA técnico `efeba0caecfae5ce824c481d02b3b7bb21d05d76` exacto.
+- h1d: [39562389051](https://github.com/c2melendez/precision-lab-plus/actions/runs/39562389051) — SUCCESS; mismo SHA.
+- Pruebas EV-D-09: 3/3 PASSED; backend 1774 passed, 6 xfailed, cobertura 88.00%; frontend typecheck, regresión y production build SUCCESS.
+
+**EV-D-10 — `cot(π/2) = 0`: cobertura publicada, sin cambio de producto (gate en ejecución).** SymPy ya devuelve `0` exacto para `cot(pi/2)`; el defecto equivalente de Lite (reescritura `1/tan`) no existe en este motor.
+
+- SHA de pruebas: Plus `b635db5fa6e00fab92a144d421398ff5d5df0763`; Lite `b5bd0fa3b06da410d10b9a0fe2503756d7f6570a` (con corrección de producto `cot` → `cos/sin`).
+- Gates EV-D-10 en ejecución; no se declara PASS hasta revisar conclusión y logs.
+- Certificación global continúa OPEN por bloqueos independientes.
+
+---
+
 ## 2026-10-21 UTC — EV-D-08 cierre r220: PASS_SCOPED_BILATERAL
 
 **EV-D-08 — `sin(1) ≈ 0.841470985`: PASS_SCOPED_BILATERAL.** Se verificó la fila congelada `| EV-D-08 | \`\sin(1)\` | \`\approx 0.841470985\` |` y se documentó la convención de oráculo para filas `\approx` en `EXECUTION_PROTOCOL.md`. No se modificó código de producto.
