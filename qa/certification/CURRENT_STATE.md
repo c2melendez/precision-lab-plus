@@ -1,10 +1,24 @@
+## 2026-10-21 UTC — EV-H cierre r227: PASS_SCOPED (canal numérico)
+
+**EV-H-01..12 — PASS_SCOPED.** Gates SUCCESS sobre el SHA técnico `e7107279a0309e9c31114b3b725b51103cffbef7`:
+
+- cumulative: [39596875855](https://github.com/c2melendez/precision-lab-plus/actions/runs/39596875855) — SUCCESS; 1798 passed, 6 xfailed.
+- h1d: [39596875727](https://github.com/c2melendez/precision-lab-plus/actions/runs/39596875727) — SUCCESS.
+- Alcance: EV-H-01..03 exactos; EV-H-04..09 verificados por `result_approx` contra las fracciones documentadas (`3/4`, `5/4`, `3/5`, `4/3`, `4/5`, `5/3`); EV-H-10/11 a 9 decimales; EV-H-12 identidad exacta `1`.
+- Limitación registrada: Plus no simplifica `sinh(ln 2)` a `3/4`; `result_text` queda simbólico y el valor exacto se expone en `result_approx`.
+- EV-I grupo A quedó cerrado bilateralmente (Lite cumulative/h1d/scientific-ui SUCCESS).
+- Certificación global continúa OPEN por bloqueos independientes.
+- Siguiente objetivo: EV-I-07 (rango principal de `arccot`) y los defectos Lite EV-I-09/I-10; después continuar con las matrices siguientes del protocolo (Log/Exp/Radicales).
+
+---
+
 ## 2026-10-21 UTC — EV-I grupo A cierre r226; EV-H en ejecución
 
 **EV-I-01..06, EV-I-08 y EV-I-11 — PASS_SCOPED_BILATERAL.** Gates Plus SUCCESS sobre `43738a0fd6387e99a71bdf0124e15fb5c698c877`:
 
 - cumulative: [39596384431](https://github.com/c2melendez/precision-lab-plus/actions/runs/39596384431) — SUCCESS; 1794 passed, 6 xfailed; EV-I 3/3 pruebas PASSED.
 - h1d: [39596384432](https://github.com/c2melendez/precision-lab-plus/actions/runs/39596384432) — SUCCESS.
-- Lite: cumulative [39596378248](https://github.com/c2melendez/precision-lab-lite/actions/runs/39596378248) (2016 passed) y h1d [39596378313](https://github.com/c2melendez/precision-lab-lite/actions/runs/39596378313) SUCCESS; su scientific-ui [39596378121](https://github.com/c2melendez/precision-lab-lite/actions/runs/39596378121) sigue en ejecución prolongada, por lo que el cierre bilateral espera ese gate.
+- Lite: cumulative [39596378248](https://github.com/c2melendez/precision-lab-lite/actions/runs/39596378248) (2016 passed), h1d [39596378313](https://github.com/c2melendez/precision-lab-lite/actions/runs/39596378313) y scientific-ui [39596378121](https://github.com/c2melendez/precision-lab-lite/actions/runs/39596378121) — los tres SUCCESS; cierre bilateral completo.
 
 **EV-H-01..12 (hiperbólicas) test-first publicado** — Plus `e7107279a0309e9c31114b3b725b51103cffbef7` / Lite `54f81f21806fbe02ebf4c40ed237ed244a667de4`; gates en ejecución.
 
