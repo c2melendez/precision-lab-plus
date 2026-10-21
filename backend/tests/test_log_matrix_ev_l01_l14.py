@@ -69,17 +69,26 @@ def test_ev_l_approximations():
 
 def test_ev_l_product_of_base_logs():
     with TestClient(app) as client:
-        payload = _evaluate(client, "log(3,2)*log(4,3)")
-    assert sp.simplify(_value(payload) - 2) == 0, payload
+        ascii_payload = _evaluate(client, "log(3,2)*log(4,3)")
+        latex_payload = _evaluate(client, r"\\log_{2}(3)\\cdot\\log_{3}(4)")
+    assert sp.simplify(_value(ascii_payload) - 2) == 0, ascii_payload
+    assert sp.simplify(_value(latex_payload) - 2) == 0, latex_payload
 
 
 def test_ev_l_undefined_complex_and_invalid_base():
     with TestClient(app) as client:
         zero = _evaluate(client, "ln(0)")
         negative = _evaluate(client, "ln(-1)")
-        bad_base = _evaluate(client, "log(5,1)")
+        bad_bases = [
+            _evaluate(client, "log(5,1)"),
+            _evaluate(client, "log(5,0)"),
+            _evaluate(client, "log(5,-2)"),
+        ]
     assert zero["success"] is False and zero["error_code"] == "DOMAIN_ERROR", zero
     assert negative["success"] is True, negative
     assert sp.simplify(_value(negative) - sp.I * sp.pi) == 0, negative
-    assert bad_base["success"] is False, bad_base
-    assert bad_base["error_code"] in {"PARSE_ERROR", "DOMAIN_ERROR"}, bad_base
+    for bad_base in bad_bases:
+        assert bad_base["success"] is False, bad_base
+        assert bad_base["error_code"] == "DOMAIN_ERROR", bad_base
+        diagnostic = str(bad_base).lower()
+        assert "base" in diagnostic or "logaritmo" in diagnostic, bad_base
