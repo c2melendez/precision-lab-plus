@@ -67,6 +67,12 @@ def test_ev_l_approximations():
     assert sp.simplify(_value(big) - 50 * sp.log(10)) == 0, big
 
 
+def test_ev_l_product_of_base_logs():
+    with TestClient(app) as client:
+        payload = _evaluate(client, "log(3,2)*log(4,3)")
+    assert sp.simplify(_value(payload) - 2) == 0, payload
+
+
 def test_ev_l_undefined_complex_and_invalid_base():
     with TestClient(app) as client:
         zero = _evaluate(client, "ln(0)")
