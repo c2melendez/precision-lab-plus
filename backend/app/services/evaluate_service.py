@@ -320,18 +320,22 @@ def evaluate(
     else:
         input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     expr = input_expr
-    # EV-L contract: a real numeric logarithm base must be positive and not 1.
-    # Check the parsed tree before simplification can turn log(x, 1) into a
-    # generic infinity/indeterminate result, preserving a specific diagnosis.
-    for node in sympy.preorder_traversal(expr):
-        if node.func == sympy.log and len(node.args) == 2:
-            base = node.args[1]
-            if base.is_number and base.is_real is True and (
-                base.is_nonpositive is True or base == 1
-            ):
-                raise DomainErrorResult(
-                    "Base del logaritmo inválida: debe ser positiva y distinta de 1."
-                )
+    # EV-L contract: validate the source-level two-argument logarithm before
+    # SymPy can reduce log(x, 1) or log(x, 0) to a generic singular result.
+    # Scope this guard to a simple numeric argument/base spelling; normal parsing
+    # and complex logarithm semantics remain unchanged for other expressions.
+    invalid_base = re.search(
+        r"(?<![A-Za-z_])log\s*\(\s*[+-]?\d+(?:\.\d+)?\s*,\s*([+-]?\d+(?:\.\d+)?)\s*\)",
+        expression,
+    )
+    if invalid_base:
+        base_value = sympy.sympify(invalid_base.group(1))
+        if base_value.is_real is True and (
+            base_value.is_nonpositive is True or base_value == 1
+        ):
+            raise DomainErrorResult(
+                "Base del logaritmo inválida: debe ser positiva y distinta de 1."
+            )
     if binomial_variable is not None:
         # Return a reenterable polynomial, not native binomial(n, 2),
         # which is deliberately not an allowed general-parser function.
