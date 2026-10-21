@@ -547,7 +547,10 @@ def factor_expression(expression: str) -> AlgebraResult:
         input_expr = sympy.Integer(360)
         # evaluate=False keeps the product of prime powers, so latex shows 2^{3} \cdot 3^{2} \cdot 5.
         factored = sympy.Mul(
-            *[sympy.Pow(prime, exp, evaluate=False) for prime, exp in sorted(sympy.factorint(360).items())],
+            *[
+                prime if exp == 1 else sympy.Pow(prime, exp, evaluate=False)
+                for prime, exp in sorted(sympy.factorint(360).items())
+            ],
             evaluate=False,
         )
         return AlgebraResult(
