@@ -70,7 +70,7 @@ def test_ev_l_approximations():
 def test_ev_l_product_of_base_logs():
     with TestClient(app) as client:
         ascii_payload = _evaluate(client, "log(3,2)*log(4,3)")
-        latex_payload = _evaluate(client, r"\\log_{2}(3)\\cdot\\log_{3}(4)")
+        latex_payload = _evaluate(client, r"\log_{2}(3)\cdot\log_{3}(4)")
     assert sp.simplify(_value(ascii_payload) - 2) == 0, ascii_payload
     assert sp.simplify(_value(latex_payload) - 2) == 0, latex_payload
 
