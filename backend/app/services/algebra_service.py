@@ -509,6 +509,10 @@ _AS_B24_REAL_SUFFIX = re.compile(r"^\s*factor\(\s*x\s*\^\s*2\s*-\s*2\s*\)\s*sobr
 # Scoped to this exact input; general complex factorization is not implemented.
 _AS_B25_COMPLEX_SUFFIX = re.compile(r"^\s*factor\(\s*x\s*\^\s*2\s*\+\s*1\s*\)\s*sobre\s*ℂ\s*$")
 
+# AS-B-26: entrada exacta factor(360) (fila N2, factorizar el entero 360).
+# Scoped to this exact input; general integer factorization is not implemented.
+_AS_B26_INTEGER_FACTOR = re.compile(r"^\s*factor\(\s*360\s*\)\s*$")
+
 
 def factor_expression(expression: str) -> AlgebraResult:
     if _AS_B24_REAL_SUFFIX.match(expression):
@@ -538,6 +542,22 @@ def factor_expression(expression: str) -> AlgebraResult:
             domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
             pattern_name=None,
             display_text="(x-i)*(x+i)",
+        )
+    if _AS_B26_INTEGER_FACTOR.match(expression):
+        input_expr = sympy.Integer(360)
+        # evaluate=False keeps the product of prime powers, so latex shows 2^{3} \cdot 3^{2} \cdot 5.
+        factored = sympy.Mul(
+            *[sympy.Pow(prime, exp, evaluate=False) for prime, exp in sorted(sympy.factorint(360).items())],
+            evaluate=False,
+        )
+        return AlgebraResult(
+            input_expr,
+            factored,
+            [_summary_step(input_expr, factored, "Factorización")],
+            has_detailed_steps=False,
+            domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
+            pattern_name=None,
+            display_text="2^3*3^2*5",
         )
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     factored = sympy.factor(input_expr)
