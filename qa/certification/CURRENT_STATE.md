@@ -13,6 +13,21 @@ Los seis gates D20 del cierre documental r207 finalizaron en `completed/success`
 
 ---
 
+## 2026-10-21 UTC — r209: EV-D-04 test-first iniciado; gates en ejecución
+
+Objetivo `TRIG-EV-D-04-TEST-FIRST`: `csc(pi/6)=2`. Se añadieron únicamente pruebas de aceptación, antes de modificar producto:
+- Lite: `tests/trigonometryEvD04.audit.test.ts`, commit `f6756dc37bdf193a01de05a4bb9208b65cf47867`.
+- Plus: `backend/tests/test_trigonometry_ev_d04.py`, commit `f6756dc37bdf193a01de05a4bb9208b65cf47867`.
+
+Estado de las corridas al registrar este checkpoint:
+- cumulative: [39552906521](https://github.com/c2melendez/precision-lab-plus/actions/runs/39552906521) — `in_progress`; esperado `head_sha=f6756dc37bdf193a01de05a4bb9208b65cf47867`.
+- h1d: [39552906515](https://github.com/c2melendez/precision-lab-plus/actions/runs/39552906515) — `in_progress`; esperado `head_sha=f6756dc37bdf193a01de05a4bb9208b65cf47867`.
+
+No se afirma PASS/FAIL todavía: las corridas siguen activas y el resultado de test-first está pendiente. No se cambió código de producto. Próxima acción: esperar conclusión de todos los gates, inspeccionar los resultados específicos de EV-D-04, corregir solo si las pruebas lo exigen y publicar el cierre final con SHA exactos. Global `OPEN`.
+
+---
+
+
 ## 2026-10-21 UTC — Trigonometría EV-D-03 PASS_SCOPED bilateral (continuity r206)
 
 **EV-D-03** — `\tan(\frac{\pi}{4}) → 1` (fila oficial de `ejercicios_trigonometria.md.gz`).
