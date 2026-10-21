@@ -7,7 +7,7 @@ Los seis gates D20 del cierre documental r207 finalizaron en `completed/success`
 - Plus `h1d`: [39551275603](https://github.com/c2melendez/precision-lab-plus/actions/runs/39551275603) — SUCCESS; `head_sha=bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6` exacto.
 - Plus `native-syntax`: [39551277795](https://github.com/c2melendez/precision-lab-plus/actions/runs/39551277795) — SUCCESS; `head_sha=bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6` exacto.
 
-**Escapado corregido:** la expresión oficial queda `\\csc(\\frac{\\pi}{6}) → 2` (un solo nivel de escapado LaTeX dentro del código Markdown; sin llaves duplicadas alrededor de `\\pi`).
+**Escapado corregido:** la expresión oficial queda `\csc(\frac{\pi}{6}) → 2` (un solo nivel de escapado LaTeX dentro del código Markdown; sin llaves duplicadas alrededor de `\pi`).
 
 **Siguiente acción sin cambios:** EV-D-04 (`TRIG-EV-D-04-TEST-FIRST`) permanece `READY`, **no iniciado**. No se ejecutaron pruebas de EV-D-04 ni se modificó producto. Global `OPEN`.
 
