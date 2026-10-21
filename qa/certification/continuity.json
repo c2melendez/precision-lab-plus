@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 225,
+  "revision": 226,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "4e625d1b667d426d6d93d52e9e0b5d4acc193293",
@@ -41,12 +41,12 @@
     }
   },
   "next_action": {
-    "id": "TRIG-EV-I-GROUP-A",
+    "id": "TRIG-EV-H-01..12",
     "status": "IN_PROGRESS",
-    "action": "AUD-SING closed PASS_SCOPED on Plus 587aecc1 (gates 39595617829/39595617779/39595617887/39595617826). EV-I group A tests (01..06, 08, 11) published on Plus 43738a0f / Lite 11d01925; gates running. Remaining EV-I: I-07 arccot(-1) branch conflict (matrix 3pi/4 vs engines -pi/4), I-09 and I-10 are Lite-only defects (Plus already returns -2+pi and 4/5).",
+    "action": "EV-I group A closed on Plus: cumulative 39596384431 (1794 passed) and h1d 39596384432 SUCCESS on 43738a0f; Lite cumulative/h1d also SUCCESS but its scientific-ui 39596378121 is still running. EV-H tests published on Plus e7107279 / Lite 54f81f21; gates running. Next: close EV-H with numeric-channel scope, then EV-I-07 (arccot range) and the Lite-only EV-I-09/I-10 defects.",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-lite": "11d0192582c337e38ec3718940f5f620644e44f0",
-      "c2melendez/precision-lab-plus": "43738a0fd6387e99a71bdf0124e15fb5c698c877"
+      "c2melendez/precision-lab-lite": "54f81f21806fbe02ebf4c40ed237ed244a667de4",
+      "c2melendez/precision-lab-plus": "e7107279a0309e9c31114b3b725b51103cffbef7"
     },
     "product_changed": false
   },
@@ -72,7 +72,7 @@
       "status": "ON_HOLD"
     }
   ],
-  "ledger_note": "r225: AUD-SING closed PASS_SCOPED on Plus 587aecc1 (asin/acos domain + parity coverage). EV-I group A published (43738a0f/11d01925), gates running; EV-I-07/09/10 remain (Lite-only defects for 09/10). Global certification OPEN.",
+  "ledger_note": "r226: EV-I group A PASS_SCOPED on Plus 43738a0f (1794 passed); Lite cumulative+h1d SUCCESS but its scientific-ui is still running. EV-H tests published (e7107279/54f81f21), gates running. EV-I-07/09/10 remain. Global certification OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
@@ -579,6 +579,38 @@
     ],
     "global_certification": "OPEN",
     "next_objective": "TRIG-EV-I-GROUP-A",
+    "next_status": "IN_PROGRESS"
+  },
+  "ev_i_group_a_r226": {
+    "status": "PASS_SCOPED_BILATERAL",
+    "scope": "EV-I-01..06, EV-I-08, EV-I-11 exact values; Plus side fully closed, Lite side waits for its scientific-ui gate",
+    "test_commit_sha_by_repo": {
+      "c2melendez/precision-lab-lite": "11d0192582c337e38ec3718940f5f620644e44f0",
+      "c2melendez/precision-lab-plus": "43738a0fd6387e99a71bdf0124e15fb5c698c877"
+    },
+    "runs": [
+      {
+        "gate": "cumulative",
+        "run_id": 39596384431,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39596384431",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "43738a0fd6387e99a71bdf0124e15fb5c698c877",
+        "head_sha_matches": true,
+        "tests": "1794 passed; 6 xfailed; EV-I 3/3 passed"
+      },
+      {
+        "gate": "h1d",
+        "run_id": 39596384432,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39596384432",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "43738a0fd6387e99a71bdf0124e15fb5c698c877",
+        "head_sha_matches": true
+      }
+    ],
+    "global_certification": "OPEN",
+    "next_objective": "TRIG-EV-H-01..12",
     "next_status": "IN_PROGRESS"
   }
 }
