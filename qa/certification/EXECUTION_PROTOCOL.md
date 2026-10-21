@@ -11,7 +11,10 @@ Certificar Lite y Plus con evidencia reproducible, acumulativa y comparable, sep
 - Toda corrección debe quedar cubierta por regresión permanente.
 - Comparar Lite y Plus; evitar divergir contratos salvo diferencia intencional documentada.
 - GitHub Actions es la evidencia principal de ejecución.
-- Casos dependientes de SO/hardware se registran como manual/capability.
+- No declarar certificación global por pruebas estructurales.
+- No bloquear IN625 por deuda independiente de S25/security/npm/mutation/CI salvo regresión causada por el cambio actual.
+- Si una matriz posterior descubre una fuga de sintaxis anterior, agregar caso permanente al contrato y recertificar el subbloque afectado.
+- Casos dependientes de SO/hardware se registran como manual/capability; no se simula soporte que Playwright no puede demostrar.
 - No usar chat, ZIP o handoff histórico como autoridad cuando `qa/certification/` contiene el estado aplicable.
 
 ## IN625 — orden
