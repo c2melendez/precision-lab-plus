@@ -43,6 +43,28 @@ def _render_evaluate_presentation(result, source_expression=None):
     except Exception:
         display_expr = result.expr
 
+    # EV-R-11/EV-R-12: SymPy keeps nested radicals such as sqrt(3+2*sqrt(2))
+    # unevaluated, while the frozen matrix requires the denested exact form
+    # (1+sqrt(2), sqrt(2)+sqrt(3)). Only a bare square root whose radicand
+    # already contains a square root is denested; any other result is left
+    # untouched, and a failed denest keeps the original expression.
+    try:
+        from sympy.simplify.sqrtdenest import sqrtdenest
+
+        if (
+            getattr(display_expr, "is_Pow", False)
+            and display_expr.exp == sympy.Rational(1, 2)
+            and any(
+                atom.exp == sympy.Rational(1, 2)
+                for atom in display_expr.base.atoms(sympy.Pow)
+            )
+        ):
+            denested = sqrtdenest(display_expr)
+            if denested is not None:
+                display_expr = denested
+    except Exception:
+        pass
+
     try:
         # Keep the displayed LaTeX consistent with the canonical scalar text.
         # Unevaluated reciprocal trig ASTs can format as csc(pi/6) even though

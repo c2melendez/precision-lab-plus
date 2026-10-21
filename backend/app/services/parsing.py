@@ -392,9 +392,19 @@ def normalize_unicode(text: str) -> str:
         r"\\frac\s*\{\s*([+-]?\d+)\s*\}\s*\{\s*([+-]?\d+)\s*\}",
         lambda m: f"(({m.group(1)})/({m.group(2)}))", text,
     )
+    # EV-R-03/EV-R-05: radical notation with an odd index is the real root, so a
+    # negative literal radicand must not fall into the principal complex branch
+    # that the engine deliberately uses for fractional powers (see cbrt note).
+    # Only this bounded literal form is rewritten; everything else keeps the
+    # exact power syntax below.
     text = re.sub(
         r"\\sqrt\s*\[\s*([1-9]\d?)\s*\]\s*\{\s*([A-Za-z]|[+-]?\d+(?:\.\d+)?)\s*\}",
-        lambda m: f"(({m.group(2)})^(1/({m.group(1)})))", text,
+        lambda m: (
+            f"(-(({-int(m.group(2))})^(1/({m.group(1)}))))"
+            if int(m.group(1)) % 2 == 1 and re.fullmatch(r"-\d+", m.group(2))
+            else f"(({m.group(2)})^(1/({m.group(1)})))"
+        ),
+        text,
     )
     # Fullwidth decimal digits and arithmetic operators have unambiguous ASCII equivalents.
     text = text.translate(str.maketrans("０１２３４５６７８９＋－", "0123456789+-"))
