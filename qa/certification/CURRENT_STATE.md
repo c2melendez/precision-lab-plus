@@ -1,3 +1,27 @@
+## 2026-10-21 UTC — EV-D-11 cierre r223: PASS_SCOPED_BILATERAL
+
+**EV-D-11 — `sin²(π/8) + cos²(π/8) = 1`: PASS_SCOPED_BILATERAL.** Fila congelada verificada; los dos gates Plus terminaron SUCCESS con `head_sha` exacto.
+
+- cumulative: [39583461368](https://github.com/c2melendez/precision-lab-plus/actions/runs/39583461368) — SUCCESS; SHA técnico `2f37ee2f10f8bac361eff592bbe3e0a5a3b654e9`; EV-D-11 2/2 PASSED; backend 1778 passed, 6 xfailed, cobertura 88.07%.
+- h1d: [39583461494](https://github.com/c2melendez/precision-lab-plus/actions/runs/39583461494) — SUCCESS; mismo SHA.
+- El canal HTTP devuelve `1` literal, sin necesidad de equivalencia adicional.
+- Certificación global continúa OPEN por bloqueos independientes.
+- Siguiente objetivo: TRIG-EV-D-12-TEST-FIRST (`tan(π/2)` indefinida: contrato de error claro). Verificar antes la fila fuente y el contrato de error vigente.
+
+---
+
+## 2026-10-21 UTC — EV-D-10 cierre r222: PASS_SCOPED_BILATERAL
+
+**EV-D-10 — `cot(π/2) = 0`: PASS_SCOPED_BILATERAL.** Fila congelada verificada; los dos gates Plus terminaron SUCCESS con `head_sha` exacto. Sin cambio de producto: SymPy ya devuelve `0` exacto.
+
+- cumulative: [39563436924](https://github.com/c2melendez/precision-lab-plus/actions/runs/39563436924) — SUCCESS; SHA técnico `b635db5fa6e00fab92a144d421398ff5d5df0763` exacto; EV-D-10 2/2 PASSED; backend 1776 passed, 6 xfailed, cobertura 88.00%.
+- h1d: [39563436972](https://github.com/c2melendez/precision-lab-plus/actions/runs/39563436972) — SUCCESS; mismo SHA.
+- El defecto equivalente de Lite (`cot` reescrito como `1/tan`) no existe en este motor; la corrección de producto es exclusiva de Lite (`4c92b797`).
+- Certificación global continúa OPEN por bloqueos independientes.
+- Siguiente objetivo en ejecución: TRIG-EV-D-11-TEST-FIRST (identidad pitagórica `sin²(π/8)+cos²(π/8)=1`), tests publicados en el SHA técnico `2f37ee2f10f8bac361eff592bbe3e0a5a3b654e9`.
+
+---
+
 ## 2026-10-21 UTC — EV-D-09 cierre r221 y EV-D-10 en ejecución
 
 **EV-D-09 — `cos(2) ≈ -0.416146837`: PASS_SCOPED_BILATERAL.** Fila congelada verificada; los dos gates Plus terminaron SUCCESS con `head_sha` exacto.

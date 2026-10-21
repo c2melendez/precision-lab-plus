@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 221,
+  "revision": 223,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "4e625d1b667d426d6d93d52e9e0b5d4acc193293",
@@ -41,14 +41,11 @@
     }
   },
   "next_action": {
-    "id": "TRIG-EV-D-10-TEST-FIRST",
-    "status": "IN_PROGRESS_PRODUCT_FIX",
-    "action": "EV-D-09 closed PASS_SCOPED_BILATERAL (runs 39562389148/39562389051 on efeba0ca). EV-D-10 cot(pi/2)=0 reproduced a product defect on Lite (cot rewritten as 1/tan); Lite fix rewrites cot as cos/sin on b5bd0fa3. Plus needs no product change (SymPy already returns 0). EV-D-10 gates are running; review jobs/logs and close or diagnose.",
-    "technical_sha_by_repo": {
-      "c2melendez/precision-lab-lite": "b5bd0fa3b06da410d10b9a0fe2503756d7f6570a",
-      "c2melendez/precision-lab-plus": "b635db5fa6e00fab92a144d421398ff5d5df0763"
-    },
-    "product_changed": true
+    "id": "TRIG-EV-D-12-TEST-FIRST",
+    "status": "READY_SOURCE_ROW_AND_ERROR_CONTRACT",
+    "action": "EV-D-11 closed PASS_SCOPED_BILATERAL (Plus 2f37ee2f returns literal 1; Lite 52f50ea4 certifies exact equivalence). Next: verify the exact EV-D-12 row (tan(pi/2) undefined, 'error claro') and the current error contract for undefined trig values before authoring bilateral tests; distinguish product error from numeric fallback.",
+    "technical_sha_by_repo": {},
+    "product_changed": false
   },
   "blockers": [
     {
@@ -72,7 +69,7 @@
       "status": "ON_HOLD"
     }
   ],
-  "ledger_note": "r221: EV-D-09 cos(2)~-0.416146837 PASS_SCOPED_BILATERAL (efeba0ca). EV-D-10 cot(pi/2)=0 exposed a Lite product defect (cot rewritten as 1/tan); fixed to cos/sin on b5bd0fa3; gates running. Global certification OPEN.",
+  "ledger_note": "r223: EV-D-11 sin^2+cos^2=1 PASS_SCOPED_BILATERAL on Plus 2f37ee2f (literal 1) and Lite 52f50ea4 (exact equivalence). Next: EV-D-12 tan(pi/2) undefined error contract. Global certification OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
@@ -430,5 +427,73 @@
     "global_certification": "OPEN",
     "next_objective": "TRIG-EV-D-10-TEST-FIRST",
     "next_status": "IN_PROGRESS_PRODUCT_FIX"
+  },
+  "ev_d_10_closure_r222": {
+    "status": "PASS_SCOPED_BILATERAL",
+    "scope": "cot(pi/2)=0; Plus HTTP ASCII returns exact 0; no product change needed",
+    "product_changed": false,
+    "test_commit_sha_by_repo": {
+      "c2melendez/precision-lab-lite": "4c92b797189cb41ffe70de93332938ba67d389b5",
+      "c2melendez/precision-lab-plus": "b635db5fa6e00fab92a144d421398ff5d5df0763"
+    },
+    "runs": [
+      {
+        "gate": "cumulative",
+        "run_id": 39563436924,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39563436924",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "b635db5fa6e00fab92a144d421398ff5d5df0763",
+        "head_sha_matches": true,
+        "tests": "1776 passed; 6 xfailed; coverage 88.00%; EV-D-10 2/2 PASSED"
+      },
+      {
+        "gate": "h1d",
+        "run_id": 39563436972,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39563436972",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "b635db5fa6e00fab92a144d421398ff5d5df0763",
+        "head_sha_matches": true
+      }
+    ],
+    "diagnostic": "No product defect on Plus: SymPy evaluates cot(pi/2) to exact 0. The Lite parser defect and its oracle update are recorded in the Lite ledger.",
+    "global_certification": "OPEN",
+    "next_objective": "TRIG-EV-D-11-TEST-FIRST",
+    "next_status": "IN_PROGRESS"
+  },
+  "ev_d_11_closure_r223": {
+    "status": "PASS_SCOPED_BILATERAL",
+    "scope": "sin^2(pi/8)+cos^2(pi/8)=1; Plus HTTP ASCII returns literal 1",
+    "product_changed": false,
+    "test_commit_sha_by_repo": {
+      "c2melendez/precision-lab-lite": "52f50ea44558343c88c2a926e438d61d0f03486d",
+      "c2melendez/precision-lab-plus": "2f37ee2f10f8bac361eff592bbe3e0a5a3b654e9"
+    },
+    "runs": [
+      {
+        "gate": "cumulative",
+        "run_id": 39583461368,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39583461368",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "2f37ee2f10f8bac361eff592bbe3e0a5a3b654e9",
+        "head_sha_matches": true,
+        "tests": "1778 passed; 6 xfailed; coverage 88.07%; EV-D-11 2/2 PASSED"
+      },
+      {
+        "gate": "h1d",
+        "run_id": 39583461494,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39583461494",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "2f37ee2f10f8bac361eff592bbe3e0a5a3b654e9",
+        "head_sha_matches": true
+      }
+    ],
+    "diagnostic": "No diagnostic needed: first pushed SHA passed both gates.",
+    "global_certification": "OPEN",
+    "next_objective": "TRIG-EV-D-12-TEST-FIRST",
+    "next_status": "READY_SOURCE_ROW_AND_ERROR_CONTRACT"
   }
 }
