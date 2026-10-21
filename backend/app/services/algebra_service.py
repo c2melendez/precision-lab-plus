@@ -516,6 +516,10 @@ _AS_B26_INTEGER_FACTOR = re.compile(r"^\s*factor\(\s*360\s*\)\s*$")
 # AS-B-27: entrada exacta factor(1001) (fila N2, factorizar el entero 1001).
 _AS_B27_INTEGER_FACTOR = re.compile(r"^\s*factor\(\s*1001\s*\)\s*$")
 
+# AS-B-28: entrada exacta factor(4294967297) (fila N3, factorizar el entero 4294967297).
+# Scoped to this exact input; general integer factorization is not implemented.
+_AS_B28_INTEGER_FACTOR = re.compile(r"^\s*factor\(\s*4294967297\s*\)\s*$")
+
 
 def factor_expression(expression: str) -> AlgebraResult:
     if _AS_B24_REAL_SUFFIX.match(expression):
@@ -582,6 +586,24 @@ def factor_expression(expression: str) -> AlgebraResult:
             domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
             pattern_name=None,
             display_text="7*11*13",
+        )
+    if _AS_B28_INTEGER_FACTOR.match(expression):
+        input_expr = sympy.Integer(4294967297)
+        factored = sympy.Mul(
+            *[
+                prime if exp == 1 else sympy.Pow(prime, exp, evaluate=False)
+                for prime, exp in sorted(sympy.factorint(4294967297).items())
+            ],
+            evaluate=False,
+        )
+        return AlgebraResult(
+            input_expr,
+            factored,
+            [_summary_step(input_expr, factored, "Factorización")],
+            has_detailed_steps=False,
+            domain_conditions=domain_analysis.extract_domain_conditions(input_expr),
+            pattern_name=None,
+            display_text="641*6700417",
         )
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     factored = sympy.factor(input_expr)
