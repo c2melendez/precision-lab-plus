@@ -1,3 +1,18 @@
+## 2026-10-21 UTC — EV-I-07 cierre r228 y arranque de EV-L (logarítmicas)
+
+**EV-I-07 — `arccot(-1) = 3π/4`: PASS_SCOPED_BILATERAL.** La matriz congelada exige el rango principal `(0, π)`; SymPy usaba `(-π/2, π/2]` (`acot(-1) = -π/4`).
+
+- Cambio de producto: en `evaluate_service`, si la expresión contiene `acot` se reescribe a `π/2 − atan(x)` antes de evaluar (identidad exacta para todo real, incluido 0).
+- Plus `f8bdd40a2bbd6016f412019a246e4dbce23835f1`: cumulative [39648580772](https://github.com/c2melendez/precision-lab-plus/actions/runs/39648580772) — SUCCESS, 1801 passed, 6 xfailed; h1d [39648579685](https://github.com/c2melendez/precision-lab-plus/actions/runs/39648579685) — SUCCESS.
+- Lite `76e89a9b3546ad73b4be61fea4cd48de5905195f`: cumulative [39648569475](https://github.com/c2melendez/precision-lab-lite/actions/runs/39648569475) (2028 passed), h1d [39648569239](https://github.com/c2melendez/precision-lab-lite/actions/runs/39648569239) y scientific-ui [39648569417](https://github.com/c2melendez/precision-lab-lite/actions/runs/39648569417) — SUCCESS. Cierre bilateral completo.
+- Resultado: `acot(-1)=3*pi/4`, `acot(0)=pi/2`, `acot(1)=pi/4`.
+
+**EV-L (logarítmicas) — estado inicial del sondeo:** Plus ya resuelve exactamente `log(8)/log(2)=3`, `log(8)/log(4)=3/2`, `log(2)/log(8)=1/3`, `log(1000)/log(10)=3`, `ln(10^50)=50*ln(10)`; `log_1(5)` devuelve `PARSE_ERROR` (base inválida). Lite no simplifica esos cocientes, deja `ln(10^50)` sin reducir y `\log_1(5)` como división entre cero; además `\log_{2}(3)\cdot\log_{3}(4)` falla con error de `_`. El siguiente objetivo es implementar esas simplificaciones/guardas en Lite y cubrir EV-L-01..14 bilateralmente.
+
+**Defectos EV-I abiertos (solo Lite):** `arcsin(sin 2)` devuelve `2` (correcto `π−2`); `sin(arccos(3/5))` queda sin evaluar (correcto `4/5`). Plus ya devuelve `-2 + pi` y `4/5`.
+
+---
+
 ## 2026-10-21 UTC — EV-H cierre r227: PASS_SCOPED (canal numérico)
 
 **EV-H-01..12 — PASS_SCOPED.** Gates SUCCESS sobre el SHA técnico `e7107279a0309e9c31114b3b725b51103cffbef7`:

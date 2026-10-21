@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 227,
+  "revision": 228,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "4e625d1b667d426d6d93d52e9e0b5d4acc193293",
@@ -41,14 +41,14 @@
     }
   },
   "next_action": {
-    "id": "TRIG-EV-I-07-BRANCH",
-    "status": "READY_DECISION",
-    "action": "EV-H-01..12 closed PASS_SCOPED on Plus e7107279 (39596875855/39596875727, 1798 passed) and Lite 54f81f21 (2025 passed); EV-I group A closed bilaterally. Next: resolve EV-I-07 arccot branch (matrix requires arccot(-1)=3pi/4, principal range (0,pi); both engines return -pi/4) by rewriting arccot(a)=pi/2-arctan(a) in both engines, updating oracles, and re-running gates. Then Lite-only EV-I-09 (arcsin(sin 2)=2 instead of pi-2) and EV-I-10 (sin(arccos(3/5)) unevaluated).",
+    "id": "LOG-EV-L-REWRITE",
+    "status": "IN_PROGRESS",
+    "action": "EV-I-07 closed PASS_SCOPED_BILATERAL (Plus f8bdd40a, 1801 passed; Lite 76e89a9b, 2028 passed): acot now uses pi/2-atan(x). Next objective EV-L (logarithms): Plus already resolves log ratios, ln(10^50)=50*ln(10) and invalid bases; Lite needs log-ratio simplification, ln(a^n) reduction, an explicit invalid-base error, and a parser fix for \\log_{2}(3)\\cdot\\log_{3}(4) (raw '_' error). Add bilateral EV-L-01..14 coverage and keep EV-I-09/I-10 as documented Lite defects.",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-lite": "54f81f21806fbe02ebf4c40ed237ed244a667de4",
-      "c2melendez/precision-lab-plus": "e7107279a0309e9c31114b3b725b51103cffbef7"
+      "c2melendez/precision-lab-lite": "76e89a9b3546ad73b4be61fea4cd48de5905195f",
+      "c2melendez/precision-lab-plus": "f8bdd40a2bbd6016f412019a246e4dbce23835f1"
     },
-    "product_changed": false
+    "product_changed": true
   },
   "blockers": [
     {
@@ -72,7 +72,7 @@
       "status": "ON_HOLD"
     }
   ],
-  "ledger_note": "r227: EV-H-01..12 PASS_SCOPED (numeric channel) on Plus e7107279 (1798 passed) and Lite 54f81f21 (2025 passed); EV-I group A closed bilaterally. Next: EV-I-07 arccot principal range, then Lite-only EV-I-09/I-10. Global certification OPEN.",
+  "ledger_note": "r228: EV-I-07 arccot principal range fixed bilaterally and closed (Plus f8bdd40a 1801 passed; Lite 76e89a9b 2028 passed). Next: EV-L logarithms; Plus already resolves ratios/ln(10^50)/invalid base, Lite needs those fixes. EV-I-09/I-10 remain Lite defects. Global certification OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
@@ -646,5 +646,39 @@
     "global_certification": "OPEN",
     "next_objective": "TRIG-EV-I-07-BRANCH",
     "next_status": "READY_DECISION"
+  },
+  "ev_i07_closure_r228": {
+    "status": "PASS_SCOPED_BILATERAL",
+    "scope": "acot principal range (0, pi): acot(-1)=3pi/4, acot(0)=pi/2, acot(1)=pi/4",
+    "product_changed": true,
+    "product_fix": "evaluate_service rewrites acot nodes as pi/2-atan(x) before evaluation; Lite parser does the same via arccot(a)=pi/2-arctan(a)",
+    "test_commit_sha_by_repo": {
+      "c2melendez/precision-lab-lite": "76e89a9b3546ad73b4be61fea4cd48de5905195f",
+      "c2melendez/precision-lab-plus": "f8bdd40a2bbd6016f412019a246e4dbce23835f1"
+    },
+    "runs": [
+      {
+        "gate": "cumulative",
+        "run_id": 39648580772,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39648580772",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "f8bdd40a2bbd6016f412019a246e4dbce23835f1",
+        "head_sha_matches": true,
+        "tests": "1801 passed; 6 xfailed; EV-I-07 3/3 passed"
+      },
+      {
+        "gate": "h1d",
+        "run_id": 39648579685,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39648579685",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "f8bdd40a2bbd6016f412019a246e4dbce23835f1",
+        "head_sha_matches": true
+      }
+    ],
+    "global_certification": "OPEN",
+    "next_objective": "LOG-EV-L-REWRITE",
+    "next_status": "IN_PROGRESS"
   }
 }
