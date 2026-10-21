@@ -1,5 +1,16 @@
 # Registro de ejecución — índice vigente
 
+## 2026-10-21 UTC — Cierre documental r208: gates D20 de r207 verificados
+
+Los seis gates D20 del commit documental r207 terminaron `completed/success`; se verificó la igualdad exacta entre el SHA de cada run y el SHA documental del repositorio:
+- Plus `cumulative`: [39551273508](https://github.com/c2melendez/precision-lab-plus/actions/runs/39551273508) — SUCCESS; `head_sha=bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6` exacto.
+- Plus `h1d`: [39551275603](https://github.com/c2melendez/precision-lab-plus/actions/runs/39551275603) — SUCCESS; `head_sha=bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6` exacto.
+- Plus `native-syntax`: [39551277795](https://github.com/c2melendez/precision-lab-plus/actions/runs/39551277795) — SUCCESS; `head_sha=bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6` exacto.
+
+La expresión de EV-D-04 se normalizó en documentación a `\\csc(\\frac{\\pi}{6}) → 2`, corrigiendo el exceso de barras y las llaves duplicadas. Esto es una corrección documental únicamente; EV-D-04 permanece `READY`, no iniciado. Global `OPEN`.
+
+---
+
 ## 2026-10-21 UTC — Gates D20 de r206 registrados (continuity r207)
 
 Gates documentales de r206 (`workflow_dispatch` sobre `dcd7e21`, `head_sha` exacto, todos SUCCESS):
