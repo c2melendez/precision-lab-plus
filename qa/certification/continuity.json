@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 223,
+  "revision": 224,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "4e625d1b667d426d6d93d52e9e0b5d4acc193293",
@@ -41,11 +41,14 @@
     }
   },
   "next_action": {
-    "id": "TRIG-EV-D-12-TEST-FIRST",
-    "status": "READY_SOURCE_ROW_AND_ERROR_CONTRACT",
-    "action": "EV-D-11 closed PASS_SCOPED_BILATERAL (Plus 2f37ee2f returns literal 1; Lite 52f50ea4 certifies exact equivalence). Next: verify the exact EV-D-12 row (tan(pi/2) undefined, 'error claro') and the current error contract for undefined trig values before authoring bilateral tests; distinguish product error from numeric fallback.",
-    "technical_sha_by_repo": {},
-    "product_changed": false
+    "id": "TRIG-AUD-SING-02",
+    "status": "IN_PROGRESS",
+    "action": "EV-D-12 closed PASS_SCOPED (Plus 95601e5b already returned DOMAIN_ERROR for tan(pi/2)/log(0); coverage added). AUD-SING batch on Plus 587aecc1 / Lite 7d83a9ac: asin/acos out-of-domain DOMAIN_ERROR, bilateral degree-mode parity for sec/csc/cot, and documented alias-capability difference. Gates running; review logs, then close and start EV-I-01..06.",
+    "technical_sha_by_repo": {
+      "c2melendez/precision-lab-lite": "7d83a9ac14c73dc70fb52d8902e01dc9313d1924",
+      "c2melendez/precision-lab-plus": "587aecc1f978e03bb976212f3c32fc632b76d0b0"
+    },
+    "product_changed": true
   },
   "blockers": [
     {
@@ -69,7 +72,7 @@
       "status": "ON_HOLD"
     }
   ],
-  "ledger_note": "r223: EV-D-11 sin^2+cos^2=1 PASS_SCOPED_BILATERAL on Plus 2f37ee2f (literal 1) and Lite 52f50ea4 (exact equivalence). Next: EV-D-12 tan(pi/2) undefined error contract. Global certification OPEN.",
+  "ledger_note": "r224: EV-D-12 tan(pi/2) PASS_SCOPED (Plus already DOMAIN_ERROR; coverage added). AUD-SING batch on Plus 587aecc1 (asin/acos domain) and Lite 7d83a9ac, gates running. Global certification OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
@@ -495,5 +498,39 @@
     "global_certification": "OPEN",
     "next_objective": "TRIG-EV-D-12-TEST-FIRST",
     "next_status": "READY_SOURCE_ROW_AND_ERROR_CONTRACT"
+  },
+  "ev_d_12_closure_r224": {
+    "status": "PASS_SCOPED",
+    "scope": "tan(pi/2) undefined raises DOMAIN_ERROR; log(0) DOMAIN_ERROR; acot(0)=pi/2",
+    "product_changed": false,
+    "test_commit_sha_by_repo": {
+      "c2melendez/precision-lab-lite": "7cc7bf8a458d37c182adbfd898a1626e665aba76",
+      "c2melendez/precision-lab-plus": "95601e5b13131af26f94b56028542b4feda56ec5"
+    },
+    "runs": [
+      {
+        "gate": "cumulative",
+        "run_id": 39593883422,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39593883422",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "95601e5b13131af26f94b56028542b4feda56ec5",
+        "head_sha_matches": true,
+        "tests": "1783 passed; 6 xfailed; coverage 88.05%; EV-D-12 5/5 passed"
+      },
+      {
+        "gate": "h1d",
+        "run_id": 39593883403,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/39593883403",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "95601e5b13131af26f94b56028542b4feda56ec5",
+        "head_sha_matches": true
+      }
+    ],
+    "diagnostic": "No Plus product change for EV-D-12: SymPy already returns zoo for tan(pi/2) and the service maps it to DOMAIN_ERROR. Lite needed the pole guard.",
+    "global_certification": "OPEN",
+    "next_objective": "TRIG-AUD-SING-02",
+    "next_status": "IN_PROGRESS"
   }
 }

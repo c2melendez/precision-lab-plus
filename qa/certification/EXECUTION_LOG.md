@@ -1,3 +1,20 @@
+## 2026-10-21 UTC — EV-D-12 cierre r224 y auditoría de singularidades evitables (AUD-SING)
+
+**EV-D-12 — `tan(π/2)` indefinida (error claro): PASS_SCOPED.** Fila congelada verificada; los dos gates Plus terminaron SUCCESS con `head_sha` exacto.
+
+- cumulative: [39593883422](https://github.com/c2melendez/precision-lab-plus/actions/runs/39593883422) — SUCCESS; SHA `95601e5b13131af26f94b56028542b4feda56ec5`; EV-D-12 5/5 PASSED; backend 1783 passed, 6 xfailed, cobertura 88.05%.
+- h1d: [39593883403](https://github.com/c2melendez/precision-lab-plus/actions/runs/39593883403) — SUCCESS; mismo SHA.
+- Plus ya devolvía `DOMAIN_ERROR` para `tan(pi/2)`, `log(0)` y `sec(pi/2)`; el lote añade la cobertura bilateral y el caso `acot(0)=pi/2`.
+
+**Auditoría AUD-SING en ejecución sobre Plus `587aecc1f978e03bb976212f3c32fc632b76d0b0`:**
+
+- **EV-I-12:** `asin(2)`/`acos(2)` se devolvían ecoados como resultado válido; ahora `evaluate_service` rechaza la forma numérica fuera de `[-1, 1]` con `DOMAIN_ERROR` (argumentos simbólicos intactos).
+- **Modo grados:** Plus ya convertía `sec/csc/cot` correctamente (`sec(90)`→`DOMAIN_ERROR`, `cot(45)`→1, `csc(30)`→2); se añade prueba de paridad bilateral.
+- **Alias hiperbólicos:** Plus rechaza `arcsinh/arccosh/arctanh` con `PARSE_ERROR` (error claro, nunca un valor erróneo); Lite ahora los resuelve como funciones reales. Diferencia de capacidad documentada, sin resultado silencioso incorrecto en ninguno de los dos.
+- Gates de este lote en ejecución; no se declara PASS hasta revisar conclusión y logs.
+
+---
+
 ## 2026-10-21 UTC — EV-D-11 cierre r223: PASS_SCOPED_BILATERAL
 
 **EV-D-11 — `sin²(π/8) + cos²(π/8) = 1`: PASS_SCOPED_BILATERAL.** Fila congelada verificada; los dos gates Plus terminaron SUCCESS con `head_sha` exacto.
