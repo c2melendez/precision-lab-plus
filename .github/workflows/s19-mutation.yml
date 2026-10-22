@@ -51,7 +51,12 @@ jobs:
     needs: validate-request
     if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_frontend
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    # Structural fix (r240): the Stryker baseline exhausted the previous
+    # 35-minute hard limit on three consecutive campaign runs
+    # (39732103637, 39754425516 and predecessors), cancelling the dependency
+    # and security gate. Keep every other step, tool pin and threshold intact;
+    # only raise the ceiling so fresh mutation evidence can complete.
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: frontend
