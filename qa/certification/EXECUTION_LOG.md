@@ -1,3 +1,12 @@
+## 2026-10-22 UTC — r243: handoff reconciliado para nueva sesión LLM
+
+- Se consultaron las ejecuciones Plus [39824318193](https://github.com/c2melendez/precision-lab-plus/actions/runs/39824318193) y [39824317892](https://github.com/c2melendez/precision-lab-plus/actions/runs/39824317892): ambas SUCCESS en SHA `d5911ff4be2b96d8ac789893541c873c03510187`. Alcance verificado: corrección Black/backend; no equivale a S25 completo porque el frontend audit se omitió.
+- Se registró la rama aislada de diagnóstico npm `qa/s25-npm-remediation-preview`, SHA `7b359fa379bb3bcd96b69afc27e2fb82ea7aab47`. Workflow [manual](https://github.com/c2melendez/precision-lab-plus/actions/workflows/s25-npm-remediation-preview.yml); no hay ejecución confirmada al corte y no hay artifact inspeccionado.
+- No se modificó el lockfile canónico ni se utilizó `npm audit fix --force`. S25 sigue BLOCKED. No se inició ninguna corrida como parte de esta actualización documental.
+- Próxima acción: correr el preview en la rama aislada; verificar artifacts y gates antes de promover cambios. Global OPEN; MV-D formal bilateral pendiente.
+
+---
+
 ## 2026-10-22 UTC — r241: evidencia posterior al timeout de 60 min
 
 - [Plus dependency/security 39802197250](https://github.com/c2melendez/precision-lab-plus/actions/runs/39802197250), SHA f3b3688544f1b6fd161f6cf763f68c5d0746e0c3: audit-request, validadores, backend-security, Lite Stryker y Plus backend-mutmut SUCCESS; security/frontend-audit FAILURE; mutation/plus-frontend-stryker CANCELLED.
