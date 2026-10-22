@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "revision": 241,
+  "revision": 242,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "7a9a92bd4a348a0be1dc436d565d138595e865c6",
+  "technical_baseline_sha": "bae07b39dfc71eb01c0921524b6bbf162369166d",
   "baseline_case": "MATRICES-MV-C-CLOSURE-R238",
   "baseline_status": "PASS_SCOPED_BILATERAL",
   "global_certification": "OPEN",
@@ -43,10 +43,10 @@
   "next_action": {
     "id": "EXP-MATRICES-VECTORES-EVALUATION",
     "status": "IN_PROGRESS",
-    "action": "Diagnose and resolve the Plus S25 campaign gate before formal MV-D closure. On SHA f3b3688544f1b6fd161f6cf763f68c5d0746e0c3, run 39802197250 showed security/frontend-audit FAILURE (10 npm vulnerabilities: 4 moderate, 6 high) and plus-frontend-stryker CANCELLED at the 60-minute ceiling after 2,627 mutants and a successful 698-test dry run. A harness-only follow-up raises timeout-minutes to 120 without changing mutation scope, pins or thresholds. Verify the new gate run on the resulting technical SHA; review the Stryker report and npm audit artifact. Do not use npm audit fix --force (log says it would install Tailwind CSS 4). Keep SECURITY-S25 BLOCKED until the frontend audit is remediated and Stryker finishes with a report. MV-D-01..17 product gates remain verified on Lite c28091c / Plus 91d7f7b (mv_d_gate_verification_r239); after campaign gate resolution, create formal bilateral MV-D closure and proceed to MV-E from the frozen source.",
+    "action": "r242 technical harness fix is now published on Plus SHA bae07b39dfc71eb01c0921524b6bbf162369166d: plus-frontend-stryker timeout raised 60→120 minutes only; mutation scope (8 files), pinned tools and thresholds unchanged. Fresh exact-SHA gates are queued: dependency/security 39814332343, cumulative 39814332246, H1d 39814332232. Verify all outcomes; the dependency/security gate must show frontend-audit SUCCESS and plus-frontend-stryker SUCCESS with a generated mutation report. The previous SHA f3b3688544f1b6fd161f6cf763f68c5d0746e0c3 failed npm audit (10 vulnerabilities, 6 high) and timed out at 60 min (2,627 mutants; dry run 698 tests/78 sec). Do not run npm audit fix --force; the log indicated a breaking Tailwind CSS 4 change. SECURITY-S25 stays BLOCKED until both issues are resolved. MV-D-01..17 product gates remain verified on Lite c28091c / Plus 91d7f7b (mv_d_gate_verification_r239); after the campaign gate passes, create formal bilateral MV-D closure and proceed to MV-E from the frozen source. Global certification remains OPEN.",
     "technical_sha_by_repo": {
       "c2melendez/precision-lab-lite": "c28091c0173f951a2571ffcbb6084f566ced0034",
-      "c2melendez/precision-lab-plus": "f3b3688544f1b6fd161f6cf763f68c5d0746e0c3"
+      "c2melendez/precision-lab-plus": "bae07b39dfc71eb01c0921524b6bbf162369166d"
     },
     "product_changed": false,
     "audit": "r241 exact log review: run 39802197250 failed frontend npm audit (10 vulnerabilities, 6 high) and cancelled Plus Stryker at 60 minutes. Stryker dry run succeeded (698 tests / 78 sec), instrumented 8 files / 2,627 mutants, but no mutation report was produced. r242 changes only the job timeout to 120 minutes; product scope and thresholds remain unchanged."
@@ -1964,5 +1964,13 @@
       "report_generated": false
     },
     "decision": "Increase only timeout-minutes from 60 to 120; retain scope, pins and thresholds; SECURITY-S25 remains BLOCKED."
+  },
+  "r242_pending_gates": {
+    "head_sha": "bae07b39dfc71eb01c0921524b6bbf162369166d",
+    "dependency_security_run": 39814332343,
+    "cumulative_run": 39814332246,
+    "h1d_run": 39814332232,
+    "status": "QUEUED_AT_DOCUMENTATION",
+    "acceptance": "security/frontend-audit SUCCESS; mutation/plus-frontend-stryker SUCCESS with mutation report reviewed"
   }
 }
