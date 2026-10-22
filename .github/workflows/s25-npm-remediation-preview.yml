@@ -1,0 +1,64 @@
+name: S25 npm remediation preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Reason for generating a non-forced npm remediation preview
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Validate request
+        env:
+          REASON: ${{ inputs.reason }}
+        run: |
+          test -n "$(printf '%s' "$REASON" | tr -d '[:space:]')"
+          printf 'Reason: %s\n' "$REASON"
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Capture baseline audit
+        run: npm audit --json > npm-audit-before.json || true
+      - name: Apply non-forced compatible audit fixes
+        run: npm audit fix --package-lock-only --ignore-scripts
+      - name: Capture proposed audit
+        run: npm audit --json > npm-audit-after.json || true
+      - name: Check package manifest remains unchanged
+        run: git diff --exit-code -- package.json
+      - name: Validate dependency tree and frontend
+        run: |
+          npm ci
+          npm audit --audit-level=high
+          npm run typecheck
+          npm test
+          npm run build
+      - name: Export proposed files and audit reports
+        if: always()
+        run: |
+          mkdir -p ../s25-preview
+          cp package.json package-lock.json npm-audit-before.json npm-audit-after.json ../s25-preview/ 2>/dev/null || true
+          git diff -- package.json package-lock.json > ../s25-preview/dependency-diff.patch
+          git rev-parse HEAD > ../s25-preview/base-commit.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s25-npm-remediation-preview
+          path: s25-preview/
+          if-no-files-found: warn
+          retention-days: 14
