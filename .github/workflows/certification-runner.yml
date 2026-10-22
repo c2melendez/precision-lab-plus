@@ -1,0 +1,43 @@
+name: Certification Runner
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pilot-l1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CORS_ORIGINS: https://certification.example
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-qa.txt
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt -r requirements-qa.txt
+      - name: Run canonical certification pilot
+        id: certification
+        continue-on-error: true
+        working-directory: backend
+        run: python qa/certification/run_pilot.py
+      - name: Upload certification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: certification-results-plus
+          path: backend/artifacts/certification-results-plus.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Preserve certification outcome
+        if: steps.certification.outcome == 'failure'
+        run: exit 1
