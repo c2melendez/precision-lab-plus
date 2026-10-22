@@ -1,3 +1,13 @@
+## 2026-10-22 UTC — r241: evidencia posterior al timeout de 60 min
+
+- [Plus dependency/security 39802197250](https://github.com/c2melendez/precision-lab-plus/actions/runs/39802197250), SHA f3b3688544f1b6fd161f6cf763f68c5d0746e0c3: audit-request, validadores, backend-security, Lite Stryker y Plus backend-mutmut SUCCESS; security/frontend-audit FAILURE; mutation/plus-frontend-stryker CANCELLED.
+- Log npm: 10 vulnerabilidades (4 moderate, 6 high), incluyendo advisories altos para Vite 7.0.0–7.3.6; se guardó artifact s25-plus-npm-audit (artifact 12435827934). El workflow recomienda npm audit fix para algunas incidencias y --force implicaría Tailwind CSS 4; no se ejecuta actualización automática destructiva.
+- Log Stryker: 8 archivos instrumentados, 2.627 mutantes; dry run 698 tests en 78 s; proceso cancelado a las 16:10:31Z al alcanzar el límite de 60 min, sin reporte de mutación. Diagnóstico: timeout de harness confirmado, no score de mutación.
+- Decisión: ampliar solo el techo del job Plus Stryker de 60 a 120 min (r242); mantener intactos scope, pins y thresholds. SECURITY-S25 sigue BLOCKED hasta que ambos subgates queden resueltos con evidencia.
+- Producto MV-D: evidencia por SHA exacto ya registrada en mv_d_gate_verification_r239; no se confunde con el gate de seguridad. Cierre formal MV-D queda pendiente según protocolo hasta resolver la condición de salida de campaña. Global OPEN.
+
+---
+
 ## 2026-10-22 UTC — r240: remediación estructural del gate de seguridad/mutación (timeout de plus-frontend-stryker)
 
 **Diagnóstico confirmado con logs por job**: `Certification dependency and security gates` quedó `cancelled` en tres corridas consecutivas del push sobre `qa/syntax-audit-in625-a1` (incluidas [39732103637](https://github.com/c2melendez/precision-lab-plus/actions/runs/39732103637) en `9083811b` y [39754425516](https://github.com/c2melendez/precision-lab-plus/actions/runs/39754425516) en `91d7f7b`). En todas, `audit-request`, `security/validate-request`, `mutation/validate-request`, `security/backend-security` y `mutation/plus-backend-mutmut` terminaron SUCCESS, mientras `mutation/plus-frontend-stryker` fue cancelado exactamente a los ~35 minutos de ejecución, coincidiendo con su `timeout-minutes: 35`. Clasificación: límite de harness/infraestructura, no fallo de producto ni de matemática.

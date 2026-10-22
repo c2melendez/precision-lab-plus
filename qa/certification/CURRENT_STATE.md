@@ -1,3 +1,15 @@
+## 2026-10-22 UTC — r241: diagnóstico reproducible de Stryker y auditoría npm (Plus)
+
+**Evidencia nueva:** en [39802197250](https://github.com/c2melendez/precision-lab-plus/actions/runs/39802197250), el job security/frontend-audit falla con **10 vulnerabilidades (4 moderadas, 6 altas)**; Vite 7.0.0–7.3.6 aparece en el reporte con advisories de severidad alta. No aplicar npm audit fix --force: el log indica que propondría Tailwind CSS 4, cambio mayor.
+
+El job mutation/plus-frontend-stryker ejecutó el dry run correctamente (**698 tests en 1 min 18 s**), instrumentó **8 archivos / 2.627 mutantes**, pero no generó reporte y fue cancelado al alcanzar el límite de **60 min**. El aumento anterior 35→60 no bastó; esto no se clasifica como fallo de producto ni como evidencia de mutación aprobada.
+
+**Remediación de harness aplicada a continuación (r242):** elevar solo timeout-minutes a 120; no cambiar alcance de mutación, pins ni umbrales. Mantener SECURITY-S25 **BLOCKED** hasta que tanto la auditoría npm como Stryker terminen con evidencia revisada. MV-D producto sigue verde en los SHAs r239; cierre documental formal MV-D se pospone hasta resolver este gate de campaña, según continuidad.
+
+**Global:** OPEN. Bloqueos independientes: H2-SG28-DIST-01..08, SECURITY-S25, SY-P-23, SY-X-04-PLUS-HTTP, ALGEBRA229-AS-B-29.
+
+---
+
 ## 2026-10-22 UTC — r240: timeout estructural de plus-frontend-stryker corregido (técnico `7a9a92bd`)
 
 **Gate abierto y corregido**: `Certification dependency and security gates` quedó `cancelled` en tres corridas consecutivas (incl. [39732103637] en `9083811b` y [39754425516] en `91d7f7b`). Evidencia por job: todos los demás jobs SUCCESS; `mutation/plus-frontend-stryker` cancelado exactamente al cumplir su `timeout-minutes: 35`. Capa: harness/infraestructura, no producto.
