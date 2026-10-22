@@ -19,6 +19,9 @@ type Operation =
   | "transpose"
   | "determinant"
   | "inverse"
+  | "adjugate"
+  | "cofactor"
+  | "solveEquation"
   | "power"
   | "eigen"
   | "ref"
@@ -36,6 +39,9 @@ const OPERATION_LABELS: Record<Operation, string> = {
   kronecker: "Kronecker (A ⊗ B)",
   transpose: "Transposición (Aᵀ)",
   determinant: "Determinante (|A|)",
+  adjugate: "Adjunta (adj A)",
+  cofactor: "Matriz de cofactores (cof A)",
+  solveEquation: "Ecuación matricial (X·A=B / A·X=B)",
   inverse: "Inversa (A⁻¹)",
   power: "Potencia (Aⁿ)",
   eigen: "Eigenvalores y eigenvectores",
@@ -50,7 +56,7 @@ const OPERATION_LABELS: Record<Operation, string> = {
   rank: "Rango (rango A)",
 };
 
-const NEEDS_MATRIX_B: ReadonlySet<Operation> = new Set(["add", "subtract", "multiply", "kronecker", "dot", "cross"]);
+const NEEDS_MATRIX_B: ReadonlySet<Operation> = new Set(["add", "subtract", "multiply", "kronecker", "dot", "cross", "solveEquation"]);
 const NEEDS_EXPONENT: ReadonlySet<Operation> = new Set(["power"]);
 
 function emptyMatrix(rows: number, cols: number): string[][] {
@@ -143,6 +149,7 @@ export function MatrixMode() {
   const [colsB, setColsB] = useState(2);
   const [matrixB, setMatrixB] = useState<string[][]>(emptyMatrix(2, 2));
   const [exponent, setExponent] = useState("2");
+  const [xSide, setXSide] = useState<"left" | "right">("left");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<MathResponse | null>(null);
 
@@ -208,6 +215,16 @@ export function MatrixMode() {
         result = await submitAndRecord("/matrix/determinant", { matrix: matrixA }, label);
       } else if (operation === "inverse") {
         result = await submitAndRecord("/matrix/inverse", { matrix: matrixA }, label);
+      } else if (operation === "adjugate") {
+        result = await submitAndRecord("/matrix/adjugate", { matrix: matrixA }, label);
+      } else if (operation === "cofactor") {
+        result = await submitAndRecord("/matrix/cofactor", { matrix: matrixA }, label);
+      } else if (operation === "solveEquation") {
+        result = await submitAndRecord(
+          "/matrix/solve-equation",
+          { matrix_a: matrixA, matrix_b: matrixB, x_side: xSide },
+          `${label} (${xSide === "left" ? "X·A=B" : "A·X=B"})`,
+        );
       } else if (operation === "ref") {
         result = await submitAndRecord("/matrix/ref", { matrix: matrixA }, label);
       } else if (operation === "rref") {
@@ -290,6 +307,23 @@ export function MatrixMode() {
               onChange={(e) => setExponent(e.target.value)}
               className="w-24 rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
             />
+          </div>
+        )}
+
+        {operation === "solveEquation" && (
+          <div className="space-y-1">
+            <label htmlFor="matrix-x-side" className="block text-sm text-muted">
+              Incógnita X
+            </label>
+            <select
+              id="matrix-x-side"
+              value={xSide}
+              onChange={(e) => setXSide(e.target.value as "left" | "right")}
+              className="rounded border border-paper-line bg-paper-soft px-2 py-1 text-sm"
+            >
+              <option value="left">X·A = B (X = B·A⁻¹)</option>
+              <option value="right">A·X = B (X = A⁻¹·B)</option>
+            </select>
           </div>
         )}
 

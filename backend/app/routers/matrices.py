@@ -11,6 +11,7 @@ from fastapi import APIRouter, Request
 from app.core.logging import log_request_event
 from app.schemas.requests import (
     MatrixEigenRequest,
+    MatrixEquationRequest,
     MatrixOperationRequest,
     MatrixPowerRequest,
     MatrixSingleRequest,
@@ -192,7 +193,10 @@ async def matrix_inverse(payload: MatrixSingleRequest, request: Request) -> Math
     log_request_event(request.state.request_id, "matrix_inverse_request")
 
     try:
-        matrix = matrix_service.parse_matrix(payload.matrix)
+        # MV-C-10/11: la inversa s�� admite variables y trigonom��tricas
+        # elementales. Es la segunda operaci��n simb��lica acotada, junto con
+        # el determinante; el resto de /matrix/* sigue siendo num��rico.
+        matrix = matrix_service.parse_matrix(payload.matrix, allow_symbolic=True)
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.MATRIX_INVERSE, ErrorCode.PARSE_ERROR, str(exc))
     except ComplexityLimitError as exc:
@@ -204,10 +208,107 @@ async def matrix_inverse(payload: MatrixSingleRequest, request: Request) -> Math
         return _error(request, OperationType.MATRIX_INVERSE, ErrorCode.DIMENSION_MISMATCH, str(exc))
     except matrix_service.SingularMatrixError as exc:
         return _error(request, OperationType.MATRIX_INVERSE, ErrorCode.SINGULAR_MATRIX, str(exc))
+    except matrix_service.UnsupportedOperationError as exc:
+        return _error(
+            request, OperationType.MATRIX_INVERSE, ErrorCode.UNSUPPORTED_OPERATION, str(exc)
+        )
 
     return MathResponse(
         success=True,
         operation=OperationType.MATRIX_INVERSE,
+        request_id=request.state.request_id,
+        result_type=ResultType.MATRIX,
+        result_data=matrix_service.matrix_to_result_data(result.result_matrix),
+        steps=result.steps,
+        has_detailed_steps=result.has_detailed_steps,
+        warnings=result.warnings,
+        duration_ms=_duration_ms(request),
+    )
+
+
+@router.post("/matrix/adjugate", response_model=MathResponse)
+async def matrix_adjugate(payload: MatrixSingleRequest, request: Request) -> MathResponse:
+    """MV-C-14/15: adjunta de una matriz cuadrada."""
+    log_request_event(request.state.request_id, "matrix_adjugate_request")
+
+    try:
+        matrix = matrix_service.parse_matrix(payload.matrix)
+    except parsing.ParseSecurityError as exc:
+        return _error(request, OperationType.MATRIX_ADJUGATE, ErrorCode.PARSE_ERROR, str(exc))
+    except ComplexityLimitError as exc:
+        return _error(request, OperationType.MATRIX_ADJUGATE, ErrorCode.COMPLEXITY_LIMIT, str(exc))
+
+    try:
+        result = matrix_service.adjugate(matrix)
+    except matrix_service.DimensionMismatchError as exc:
+        return _error(request, OperationType.MATRIX_ADJUGATE, ErrorCode.DIMENSION_MISMATCH, str(exc))
+
+    return MathResponse(
+        success=True,
+        operation=OperationType.MATRIX_ADJUGATE,
+        request_id=request.state.request_id,
+        result_type=ResultType.MATRIX,
+        result_data=matrix_service.matrix_to_result_data(result.result_matrix),
+        steps=result.steps,
+        has_detailed_steps=result.has_detailed_steps,
+        warnings=result.warnings,
+        duration_ms=_duration_ms(request),
+    )
+
+
+@router.post("/matrix/cofactor", response_model=MathResponse)
+async def matrix_cofactor(payload: MatrixSingleRequest, request: Request) -> MathResponse:
+    """MV-C-16: matriz de cofactores."""
+    log_request_event(request.state.request_id, "matrix_cofactor_request")
+
+    try:
+        matrix = matrix_service.parse_matrix(payload.matrix)
+    except parsing.ParseSecurityError as exc:
+        return _error(request, OperationType.MATRIX_COFACTOR, ErrorCode.PARSE_ERROR, str(exc))
+    except ComplexityLimitError as exc:
+        return _error(request, OperationType.MATRIX_COFACTOR, ErrorCode.COMPLEXITY_LIMIT, str(exc))
+
+    try:
+        result = matrix_service.cofactor_matrix(matrix)
+    except matrix_service.DimensionMismatchError as exc:
+        return _error(request, OperationType.MATRIX_COFACTOR, ErrorCode.DIMENSION_MISMATCH, str(exc))
+
+    return MathResponse(
+        success=True,
+        operation=OperationType.MATRIX_COFACTOR,
+        request_id=request.state.request_id,
+        result_type=ResultType.MATRIX,
+        result_data=matrix_service.matrix_to_result_data(result.result_matrix),
+        steps=result.steps,
+        has_detailed_steps=result.has_detailed_steps,
+        warnings=result.warnings,
+        duration_ms=_duration_ms(request),
+    )
+
+
+@router.post("/matrix/solve-equation", response_model=MathResponse)
+async def matrix_solve_equation(payload: MatrixEquationRequest, request: Request) -> MathResponse:
+    """MV-C-18/19: X��A = B (x_side="left") o A��X = B (x_side="right")."""
+    log_request_event(request.state.request_id, "matrix_solve_equation_request")
+
+    try:
+        matrix_a = matrix_service.parse_matrix(payload.matrix_a)
+        matrix_b = matrix_service.parse_matrix(payload.matrix_b)
+    except parsing.ParseSecurityError as exc:
+        return _error(request, OperationType.MATRIX_SOLVE_EQUATION, ErrorCode.PARSE_ERROR, str(exc))
+    except ComplexityLimitError as exc:
+        return _error(request, OperationType.MATRIX_SOLVE_EQUATION, ErrorCode.COMPLEXITY_LIMIT, str(exc))
+
+    try:
+        result = matrix_service.solve_matrix_equation(matrix_a, matrix_b, payload.x_side)
+    except matrix_service.DimensionMismatchError as exc:
+        return _error(request, OperationType.MATRIX_SOLVE_EQUATION, ErrorCode.DIMENSION_MISMATCH, str(exc))
+    except matrix_service.SingularMatrixError as exc:
+        return _error(request, OperationType.MATRIX_SOLVE_EQUATION, ErrorCode.SINGULAR_MATRIX, str(exc))
+
+    return MathResponse(
+        success=True,
+        operation=OperationType.MATRIX_SOLVE_EQUATION,
         request_id=request.state.request_id,
         result_type=ResultType.MATRIX,
         result_data=matrix_service.matrix_to_result_data(result.result_matrix),

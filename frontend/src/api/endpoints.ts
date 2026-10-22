@@ -26,6 +26,9 @@ export const KNOWN_ENDPOINTS = [
   "/matrix/operations",
   "/matrix/determinant",
   "/matrix/inverse",
+  "/matrix/adjugate",
+  "/matrix/cofactor",
+  "/matrix/solve-equation",
   "/matrix/transpose",
   "/matrix/power",
   // --- Fase C (spec UX estilo ClassCalc §4) ---

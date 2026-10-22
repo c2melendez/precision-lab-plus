@@ -63,6 +63,13 @@ class SingularMatrixError(ValueError):
     """Inversa de matriz singular -> `ErrorCode.SINGULAR_MATRIX`."""
 
 
+class UnsupportedOperationError(ValueError):
+    """Operación fuera de los límites acotados -> `ErrorCode.UNSUPPORTED_OPERATION`."""
+
+
+SYMBOLIC_MATRIX_LIMIT = 4
+
+
 @dataclass
 class ScalarStepResult:
     value: sympy.Expr
@@ -546,7 +553,22 @@ def inverse(matrix: sympy.Matrix) -> MatrixStepResult:
     if determinant_value == 0:
         raise SingularMatrixError("La matriz es singular (determinante 0); no tiene inversa.")
 
+    symbolic = any(expr.free_symbols or expr.has(sympy.I) for expr in matrix)
+    if symbolic and max(matrix.rows, matrix.cols) > SYMBOLIC_MATRIX_LIMIT:
+        raise UnsupportedOperationError(
+            "La inversa simbólica está limitada a 4×4."
+        )
+
     reference = matrix.inv()
+
+    # MV-C-08/10/11: celdas complejas o simb��licas. La eliminaci��n por
+    # filas con pivotes simb��licos no es v��lida sin supuestos (un pivote
+    # podr��a anularse para ciertos valores); se devuelve la verdad directa
+    # de SymPy, simplificada con trigsimp. Sin pasos detallados, mismo
+    # criterio que el determinante simb��lico.
+    if symbolic:
+        simplified = reference.applyfunc(lambda e: sympy.simplify(sympy.trigsimp(e)))
+        return MatrixStepResult(simplified, [], False, [])
 
     if max(matrix.rows, matrix.cols) > MAX_STEP_MATRIX_SIZE:
         return MatrixStepResult(reference, [], False, [])
@@ -570,6 +592,67 @@ def inverse(matrix: sympy.Matrix) -> MatrixStepResult:
     for index, step in enumerate(steps):
         step.index = index
     return MatrixStepResult(computed_inverse, steps, True, [])
+
+
+def _symbolic_simplify_matrix(matrix: sympy.Matrix) -> sympy.Matrix:
+    return matrix.applyfunc(lambda expr: sympy.simplify(sympy.trigsimp(expr)))
+
+
+def adjugate(matrix: sympy.Matrix) -> MatrixStepResult:
+    """MV-C-14/15: adjunta = transpuesta de la matriz de cofactores."""
+    if matrix.rows != matrix.cols:
+        raise DimensionMismatchError(
+            f"La adjunta requiere una matriz cuadrada; recibida {matrix.shape}."
+        )
+    return MatrixStepResult(_symbolic_simplify_matrix(matrix.adjugate()), [], False, [])
+
+
+def cofactor_matrix(matrix: sympy.Matrix) -> MatrixStepResult:
+    """MV-C-16: matriz de cofactores (la adjunta es su transpuesta)."""
+    if matrix.rows != matrix.cols:
+        raise DimensionMismatchError(
+            f"La matriz de cofactores requiere una matriz cuadrada; recibida {matrix.shape}."
+        )
+    return MatrixStepResult(_symbolic_simplify_matrix(matrix.adjugate().T), [], False, [])
+
+
+def solve_matrix_equation(
+    matrix_a: sympy.Matrix, matrix_b: sympy.Matrix, x_side: str
+) -> MatrixOperationResult:
+    """MV-C-18/19: resuelve X��A = B o A��X = B.
+
+    ``x_side="left"`` significa que X aparece a la izquierda (X��A = B),
+    por lo que X = B��A^{-1}. ``x_side="right"`` significa A��X = B, por lo
+    que X = A^{-1}��B. El orden se conserva deliberadamente: la inversa no
+    conmuta.
+    """
+    if matrix_a.rows != matrix_a.cols:
+        raise DimensionMismatchError(
+            f"La ecuaci��n matricial requiere una matriz A cuadrada; recibida {matrix_a.shape}."
+        )
+    if sympy.simplify(matrix_a.det()) == 0:
+        raise SingularMatrixError(
+            "La matriz A es singular (determinante 0); la ecuaci��n no tiene soluci��n ��nica."
+        )
+
+    if x_side == "left":
+        if matrix_b.cols != matrix_a.rows:
+            raise DimensionMismatchError(
+                f"X��A = B requiere columnas(B) == filas(A): A es {matrix_a.shape}, "
+                f"B es {matrix_b.shape}."
+            )
+        result = matrix_b * matrix_a.inv()
+    elif x_side == "right":
+        if matrix_b.rows != matrix_a.rows:
+            raise DimensionMismatchError(
+                f"A��X = B requiere filas(B) == filas(A): A es {matrix_a.shape}, "
+                f"B es {matrix_b.shape}."
+            )
+        result = matrix_a.inv() * matrix_b
+    else:
+        raise DimensionMismatchError("x_side debe ser 'left' o 'right'.")
+
+    return MatrixOperationResult(_symbolic_simplify_matrix(result), [], False, [])
 
 
 # ---------------------------------------------------------------------------

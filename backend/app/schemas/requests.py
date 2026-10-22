@@ -67,6 +67,13 @@ class MatrixSingleRequest(BaseModel):
     # /determinant y /inverse: validar cuadrada -> si no, DIMENSION_MISMATCH.
 
 
+class MatrixEquationRequest(BaseModel):
+    matrix_a: List[List[str]] = Field(..., min_length=1, max_length=6)
+    matrix_b: List[List[str]] = Field(..., min_length=1, max_length=6)
+    # "left": X��A = B (X = B��A^-1); "right": A��X = B (X = A^-1��B).
+    x_side: Literal["left", "right"]
+
+
 class MatrixPowerRequest(BaseModel):
     matrix: List[List[str]] = Field(..., min_length=1, max_length=6)
     exponent: int = Field(..., ge=-10, le=10)

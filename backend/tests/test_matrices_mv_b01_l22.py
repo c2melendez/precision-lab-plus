@@ -185,7 +185,7 @@ def test_mv_b_keeps_exact_numeric_and_simplifies_symbolic_rows():
         assert symbolic["result_approx"] is None, symbolic
 
 
-def test_mv_b_symbolic_support_is_scoped_to_determinant():
+def test_mv_b_symbolic_support_is_scoped_to_determinant_and_inverse():
     with TestClient(app) as client:
         # El resto de operaciones conserva el contrato numérico estricto.
         add_body = _response(
@@ -200,11 +200,12 @@ def test_mv_b_symbolic_support_is_scoped_to_determinant():
         assert add_body["success"] is False, add_body
         assert add_body["error_code"] == "PARSE_ERROR", add_body
 
+        # MV-C-10/11 ampl��a el contrato simb��lico a la inversa; MV-B solo
+        # fijaba que las dem��s operaciones siguieran siendo num��ricas.
         inverse_body = _response(
             client, "/api/v1/matrix/inverse", {"matrix": [["a", "0"], ["0", "1"]]}
         )
-        assert inverse_body["success"] is False, inverse_body
-        assert inverse_body["error_code"] == "PARSE_ERROR", inverse_body
+        assert inverse_body["success"] is True, inverse_body
 
         # Determinante: variables y trigonométricas elementales sí; el resto
         # de funciones del parser general sigue bloqueado en la celda.
