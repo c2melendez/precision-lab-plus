@@ -48,6 +48,8 @@ PATH_TO_OPERATION: Dict[str, OperationType] = {
     "/matrix/adjugate": OperationType.MATRIX_ADJUGATE,
     "/matrix/cofactor": OperationType.MATRIX_COFACTOR,
     "/matrix/solve-equation": OperationType.MATRIX_SOLVE_EQUATION,
+    "/matrix/lu": OperationType.MATRIX_LU,
+    "/matrix/gram-schmidt": OperationType.MATRIX_GRAM_SCHMIDT,
     "/graph/2d": OperationType.GRAPH_2D,
     "/solve/system": OperationType.SOLVE_SYSTEM,
     "/inequality": OperationType.INEQUALITY,

@@ -47,6 +47,9 @@ class OperationType(str, Enum):
     # que ya traía la spec v9 original.
     MATRIX_REF = "matrix_ref"
     MATRIX_RREF = "matrix_rref"
+    # MV-D-16/17: descomposición LU sin pivoteo y Gram-Schmidt sin normalizar.
+    MATRIX_LU = "matrix_lu"
+    MATRIX_GRAM_SCHMIDT = "matrix_gram_schmidt"
     # P5 (spec v2 §6): dot/cross usan MATRIX_OPERATION (van por
     # /matrix/operations, igual que kronecker). norm es de una sola
     # matriz, necesita su propio valor de operación (igual que
@@ -273,6 +276,10 @@ class MathResponse(BaseModel):
     result_text: Optional[str] = None
     result_approx: Optional[float] = None
     result_data: Optional[Union[List[EquationSolution], List[List[str]]]] = None
+    # Ampliación aditiva MV-D-16: operaciones que producen más de una matriz
+    # (LU devuelve L y U). No reemplaza result_data; las rutas existentes
+    # siguen usándolo sin cambios.
+    result_matrices: Optional[Dict[str, List[List[str]]]] = None
     steps: List[Step] = []
     has_detailed_steps: bool
     graph_data: Optional[GraphData] = None

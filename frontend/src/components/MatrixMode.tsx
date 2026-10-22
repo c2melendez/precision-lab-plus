@@ -26,6 +26,8 @@ type Operation =
   | "eigen"
   | "ref"
   | "rref"
+  | "lu"
+  | "gramSchmidt"
   | "dot"
   | "cross"
   | "norm"
@@ -47,6 +49,8 @@ const OPERATION_LABELS: Record<Operation, string> = {
   eigen: "Eigenvalores y eigenvectores",
   ref: "Forma escalonada (ref)",
   rref: "Forma escalonada reducida (rref)",
+  lu: "Descomposición LU (sin pivoteo)",
+  gramSchmidt: "Gram-Schmidt (filas, sin normalizar)",
   // P5 (spec v2 §6): A y B son vectores (matriz 1xn o nx1) en estas 3.
   dot: "Producto punto (A · B)",
   cross: "Producto cruz (A ⨯ B)",
@@ -229,6 +233,10 @@ export function MatrixMode() {
         result = await submitAndRecord("/matrix/ref", { matrix: matrixA }, label);
       } else if (operation === "rref") {
         result = await submitAndRecord("/matrix/rref", { matrix: matrixA }, label);
+      } else if (operation === "lu") {
+        result = await submitAndRecord("/matrix/lu", { matrix: matrixA }, label);
+      } else if (operation === "gramSchmidt") {
+        result = await submitAndRecord("/matrix/gram-schmidt", { matrix: matrixA }, label);
       } else if (operation === "norm") {
         result = await submitAndRecord("/matrix/norm", { matrix: matrixA }, label);
       } else if (operation === "trace") {

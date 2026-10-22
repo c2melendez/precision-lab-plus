@@ -232,4 +232,56 @@ describe("MatrixMode", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("número entero");
     expect(mockedCallApi).not.toHaveBeenCalled();
   });
+
+  it("LU: llama a /matrix/lu con la matriz A (MV-D-16)", async () => {
+    render(<MatrixMode />);
+    fireEvent.change(screen.getByLabelText("Operación"), { target: { value: "lu" } });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 1 columna 1"), {
+      target: { value: "2" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 1 columna 2"), {
+      target: { value: "1" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 2 columna 1"), {
+      target: { value: "4" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 2 columna 2"), {
+      target: { value: "3" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Calcular" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
+    expect(mockedCallApi).toHaveBeenCalledWith("/matrix/lu", {
+      matrix: [
+        ["2", "1"],
+        ["4", "3"],
+      ],
+    });
+  });
+
+  it("Gram-Schmidt: llama a /matrix/gram-schmidt con las filas de A (MV-D-17)", async () => {
+    render(<MatrixMode />);
+    fireEvent.change(screen.getByLabelText("Operación"), { target: { value: "gramSchmidt" } });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 1 columna 1"), {
+      target: { value: "1" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 1 columna 2"), {
+      target: { value: "0" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 2 columna 1"), {
+      target: { value: "0" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 2 columna 2"), {
+      target: { value: "1" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Calcular" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
+    expect(mockedCallApi).toHaveBeenCalledWith("/matrix/gram-schmidt", {
+      matrix: [
+        ["1", "0"],
+        ["0", "1"],
+      ],
+    });
+  });
 });

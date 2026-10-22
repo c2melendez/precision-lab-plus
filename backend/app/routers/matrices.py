@@ -153,6 +153,89 @@ async def matrix_rref(payload: MatrixSingleRequest, request: Request) -> MathRes
     )
 
 
+@router.post("/matrix/lu", response_model=MathResponse)
+async def matrix_lu(payload: MatrixSingleRequest, request: Request) -> MathResponse:
+    """MV-D-16: factorización LU de Doolittle sin pivoteo."""
+    log_request_event(request.state.request_id, "matrix_lu_request")
+
+    try:
+        matrix = matrix_service.parse_matrix(payload.matrix)
+    except parsing.ParseSecurityError as exc:
+        return _error(request, OperationType.MATRIX_LU, ErrorCode.PARSE_ERROR, str(exc))
+    except ComplexityLimitError as exc:
+        return _error(request, OperationType.MATRIX_LU, ErrorCode.COMPLEXITY_LIMIT, str(exc))
+
+    try:
+        result = matrix_service.lu_decomposition(matrix)
+    except matrix_service.DimensionMismatchError as exc:
+        return _error(request, OperationType.MATRIX_LU, ErrorCode.DIMENSION_MISMATCH, str(exc))
+    except matrix_service.UnsupportedOperationError as exc:
+        return _error(request, OperationType.MATRIX_LU, ErrorCode.UNSUPPORTED_OPERATION, str(exc))
+
+    return MathResponse(
+        success=True,
+        operation=OperationType.MATRIX_LU,
+        request_id=request.state.request_id,
+        result_type=ResultType.MATRIX,
+        result_latex=(
+            f"L = {sympy.latex(result.lower)},\\quad U = {sympy.latex(result.upper)}"
+        ),
+        result_matrices={
+            "L": matrix_service.matrix_to_result_data(result.lower),
+            "U": matrix_service.matrix_to_result_data(result.upper),
+        },
+        steps=result.steps,
+        has_detailed_steps=result.has_detailed_steps,
+        warnings=result.warnings,
+        duration_ms=_duration_ms(request),
+    )
+
+
+@router.post("/matrix/gram-schmidt", response_model=MathResponse)
+async def matrix_gram_schmidt(payload: MatrixSingleRequest, request: Request) -> MathResponse:
+    """MV-D-17: Gram-Schmidt sin normalizar; cada fila es un vector."""
+    log_request_event(request.state.request_id, "matrix_gram_schmidt_request")
+
+    try:
+        matrix = matrix_service.parse_matrix(payload.matrix)
+    except parsing.ParseSecurityError as exc:
+        return _error(request, OperationType.MATRIX_GRAM_SCHMIDT, ErrorCode.PARSE_ERROR, str(exc))
+    except ComplexityLimitError as exc:
+        return _error(
+            request,
+            OperationType.MATRIX_GRAM_SCHMIDT,
+            ErrorCode.COMPLEXITY_LIMIT,
+            str(exc),
+        )
+
+    try:
+        result = matrix_service.gram_schmidt(matrix)
+    except matrix_service.DimensionMismatchError as exc:
+        return _error(
+            request, OperationType.MATRIX_GRAM_SCHMIDT, ErrorCode.DIMENSION_MISMATCH, str(exc)
+        )
+    except matrix_service.UnsupportedOperationError as exc:
+        return _error(
+            request,
+            OperationType.MATRIX_GRAM_SCHMIDT,
+            ErrorCode.UNSUPPORTED_OPERATION,
+            str(exc),
+        )
+
+    return MathResponse(
+        success=True,
+        operation=OperationType.MATRIX_GRAM_SCHMIDT,
+        request_id=request.state.request_id,
+        result_type=ResultType.MATRIX,
+        result_data=matrix_service.matrix_to_result_data(result.result_matrix),
+        result_latex=sympy.latex(result.result_matrix),
+        steps=result.steps,
+        has_detailed_steps=result.has_detailed_steps,
+        warnings=result.warnings,
+        duration_ms=_duration_ms(request),
+    )
+
+
 @router.post("/matrix/determinant", response_model=MathResponse)
 async def matrix_determinant(payload: MatrixSingleRequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "matrix_determinant_request")

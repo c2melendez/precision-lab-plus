@@ -94,6 +94,15 @@ class MatrixOperationResult:
     warnings: List[str]
 
 
+@dataclass
+class LUDecompositionResult:
+    lower: sympy.Matrix
+    upper: sympy.Matrix
+    steps: List[Step]
+    has_detailed_steps: bool
+    warnings: List[str]
+
+
 def _floats_to_rational(expr: sympy.Expr) -> sympy.Expr:
     """`sympy.Rational` siempre (sección 8.6) — cualquier `Float` que haya
     sobrevivido al parseo (ej. `0.75`, válido por la etapa 4 del parser
@@ -819,6 +828,86 @@ def rref(matrix: sympy.Matrix) -> MatrixStepResult:
     for index, step in enumerate(steps):
         step.index = index
     return MatrixStepResult(working, steps, True, [])
+
+
+def lu_decomposition(matrix: sympy.Matrix) -> LUDecompositionResult:
+    """Descomposición A = L·U por eliminación de Doolittle SIN pivoteo.
+
+    No se simula pivoteo: si aparece un pivote nulo se devuelve un error
+    explícito. La factorización se verifica exactamente antes de publicarse.
+    """
+    rows, cols = matrix.rows, matrix.cols
+    lower = sympy.eye(rows)
+    upper = sympy.zeros(rows, cols)
+    working = matrix.copy()
+    limit = min(rows, cols)
+
+    for pivot_index in range(limit):
+        pivot = working[pivot_index, pivot_index]
+        if pivot == 0:
+            raise UnsupportedOperationError(
+                "LU sin pivoteo no es posible: el pivote en la posición "
+                f"({pivot_index + 1},{pivot_index + 1}) es 0. Se requiere "
+                "intercambio de filas (pivoteo), que esta operación no realiza."
+            )
+        for col in range(pivot_index, cols):
+            upper[pivot_index, col] = working[pivot_index, col]
+        for row in range(pivot_index + 1, rows):
+            factor = sympy.simplify(working[row, pivot_index] / pivot)
+            lower[row, pivot_index] = factor
+            if factor == 0:
+                continue
+            for col in range(pivot_index, cols):
+                working[row, col] = sympy.simplify(
+                    working[row, col] - factor * working[pivot_index, col]
+                )
+
+    if lower * upper != matrix:
+        raise UnsupportedOperationError(
+            "No se pudo verificar la descomposición LU de esta matriz."
+        )
+
+    return LUDecompositionResult(lower, upper, [], False, [])
+
+
+def gram_schmidt(matrix: sympy.Matrix) -> MatrixOperationResult:
+    """Gram-Schmidt SIN normalizar, tomando cada FILA como vector de entrada.
+
+    Devuelve una matriz cuyas filas son los vectores ortogonales en el mismo
+    orden. No se divide por la norma: solo se restan proyecciones.
+    """
+    vectors = [list(matrix.row(index)) for index in range(matrix.rows)]
+    if not vectors or not vectors[0]:
+        raise DimensionMismatchError("Se requiere al menos un vector no vacío.")
+
+    orthogonal: List[List[sympy.Expr]] = []
+    for original in vectors:
+        current = [sympy.simplify(value) for value in original]
+        for basis in orthogonal:
+            denominator = sympy.simplify(sum(value * value for value in basis))
+            if denominator == 0:
+                continue
+            numerator = sympy.simplify(
+                sum(value * basis_value for value, basis_value in zip(original, basis))
+            )
+            factor = sympy.simplify(numerator / denominator)
+            if factor == 0:
+                continue
+            current = [
+                sympy.simplify(value - factor * basis_value)
+                for value, basis_value in zip(current, basis)
+            ]
+        orthogonal.append(current)
+
+    # Verificación exacta de ortogonalidad mutua.
+    for index, first in enumerate(orthogonal):
+        for second in orthogonal[index + 1 :]:
+            if sympy.simplify(sum(a * b for a, b in zip(first, second))) != 0:
+                raise UnsupportedOperationError(
+                    "No se pudo verificar la ortogonalidad del resultado de Gram-Schmidt."
+                )
+
+    return MatrixOperationResult(sympy.Matrix(orthogonal), [], False, [])
 
 
 def kronecker(matrix_a: sympy.Matrix, matrix_b: sympy.Matrix) -> MatrixOperationResult:
