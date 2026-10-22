@@ -42,6 +42,18 @@ _DISALLOWED_CELL_FUNCTION_CLASSES = tuple(
     if isinstance(parsing.ALLOWED_FUNCTIONS[name], type)
 )
 
+# `/matrix/determinant` es la única operación que admite entradas simbólicas
+# (MV-B-16..20): variables libres y trigonométricas elementales. El resto de
+# `/matrix/*` conserva el contrato numérico estricto de la sección 3. La
+# lista es deliberadamente mínima: no se abre el catálogo completo del parser
+# general dentro de una celda.
+_SYMBOLIC_CELL_ALLOWED_FUNCTION_NAMES = {"sqrt", "abs", "sin", "cos", "tan"}
+_SYMBOLIC_CELL_ALLOWED_FUNCTION_CLASSES = tuple(
+    parsing.ALLOWED_FUNCTIONS[name]
+    for name in _SYMBOLIC_CELL_ALLOWED_FUNCTION_NAMES
+    if isinstance(parsing.ALLOWED_FUNCTIONS[name], type)
+)
+
 
 class DimensionMismatchError(ValueError):
     """Dimensiones incompatibles (sección 5) -> `ErrorCode.DIMENSION_MISMATCH`."""
@@ -86,25 +98,30 @@ def _floats_to_rational(expr: sympy.Expr) -> sympy.Expr:
     return expr.xreplace(replacements)
 
 
-def _parse_matrix_cell(text: str) -> sympy.Expr:
+def _parse_matrix_cell(text: str, *, allow_symbolic: bool = False) -> sympy.Expr:
     """Parser restringido de celda (sección 3). Reutiliza el parser general
     (mismas garantías de seguridad) y añade las restricciones propias de
-    una celda: sin variables libres, sin funciones fuera de `sqrt`/`abs`.
+    una celda. Con `allow_symbolic=True` (solo determinante) se admiten
+    variables libres y trigonométricas elementales, necesarias para
+    determinantes simbólicos; el resto de funciones sigue rechazado.
     """
     expr = parsing.parse_expression_tree(text, allow_equation=False)
 
-    if expr.free_symbols:
+    if not allow_symbolic and expr.free_symbols:
         free_names = sorted(s.name for s in expr.free_symbols)
         raise parsing.ParseSecurityError(
             f"Celda de matriz inválida: no se permiten variables libres ({free_names})."
         )
 
     for node in sympy.preorder_traversal(expr):
-        if isinstance(node, _DISALLOWED_CELL_FUNCTION_CLASSES):
-            raise parsing.ParseSecurityError(
-                f"Celda de matriz inválida: función no permitida '{type(node).__name__}' "
-                "(solo se permiten sqrt/abs sobre argumentos numéricos puros)."
-            )
+        if not isinstance(node, _DISALLOWED_CELL_FUNCTION_CLASSES):
+            continue
+        if allow_symbolic and isinstance(node, _SYMBOLIC_CELL_ALLOWED_FUNCTION_CLASSES):
+            continue
+        raise parsing.ParseSecurityError(
+            f"Celda de matriz inválida: función no permitida '{type(node).__name__}' "
+            "(solo se permiten sqrt/abs sobre argumentos numéricos puros)."
+        )
 
     # El parser general usa evaluate=False deliberadamente (preserva la
     # estructura de la expresión para otros endpoints) — para una celda de
@@ -116,12 +133,15 @@ def _parse_matrix_cell(text: str) -> sympy.Expr:
     return _floats_to_rational(expr)
 
 
-def parse_matrix(cells: List[List[str]]) -> sympy.Matrix:
+def parse_matrix(cells: List[List[str]], *, allow_symbolic: bool = False) -> sympy.Matrix:
     if not cells or all(not row for row in cells):
         raise parsing.ParseSecurityError("La matriz no puede estar vacía.")
     if not cells[0] or any(len(row) != len(cells[0]) for row in cells):
         raise parsing.ParseSecurityError("Todas las filas de la matriz deben tener la misma longitud y al menos una celda.")
-    rows = [[_parse_matrix_cell(cell) for cell in row] for row in cells]
+    rows = [
+        [_parse_matrix_cell(cell, allow_symbolic=allow_symbolic) for cell in row]
+        for row in cells
+    ]
     return sympy.Matrix(rows)
 
 
@@ -403,6 +423,18 @@ def determinant(matrix: sympy.Matrix) -> ScalarStepResult:
         )
 
     reference = sympy.simplify(matrix.det())
+
+    # MV-B-16..20: entradas simbólicas. La eliminación por filas con pivotes
+    # simbólicos no es válida sin supuestos (un pivote podría anularse para
+    # ciertos valores del parámetro), así que se devuelve la verdad directa
+    # de SymPy sin narrativa de pasos — mismo patrón que las matrices >4×4.
+    # `trigsimp` colapsa sin²+cos²; `factor` presenta la forma factorizada
+    # cuando el resultado es polinómico (Vandermonde, autovalores).
+    if any(expr.free_symbols for expr in matrix):
+        value = sympy.simplify(sympy.trigsimp(reference))
+        if value.is_polynomial():
+            value = sympy.factor(value)
+        return ScalarStepResult(value, [], False, [])
 
     if max(matrix.rows, matrix.cols) > MAX_STEP_MATRIX_SIZE:
         return ScalarStepResult(reference, [], False, [])

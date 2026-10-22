@@ -157,7 +157,7 @@ async def matrix_determinant(payload: MatrixSingleRequest, request: Request) -> 
     log_request_event(request.state.request_id, "matrix_determinant_request")
 
     try:
-        matrix = matrix_service.parse_matrix(payload.matrix)
+        matrix = matrix_service.parse_matrix(payload.matrix, allow_symbolic=True)
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.MATRIX_DETERMINANT, ErrorCode.PARSE_ERROR, str(exc))
     except ComplexityLimitError as exc:
