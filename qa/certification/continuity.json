@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "revision": 242,
+  "revision": 243,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "bae07b39dfc71eb01c0921524b6bbf162369166d",
+  "technical_baseline_sha": "d5911ff4be2b96d8ac789893541c873c03510187",
   "baseline_case": "MATRICES-MV-C-CLOSURE-R238",
   "baseline_status": "PASS_SCOPED_BILATERAL",
   "global_certification": "OPEN",
@@ -41,15 +41,15 @@
     }
   },
   "next_action": {
-    "id": "EXP-MATRICES-VECTORES-EVALUATION",
-    "status": "IN_PROGRESS",
-    "action": "r242 technical harness fix is now published on Plus SHA bae07b39dfc71eb01c0921524b6bbf162369166d: plus-frontend-stryker timeout raised 60→120 minutes only; mutation scope (8 files), pinned tools and thresholds unchanged. Fresh exact-SHA gates are queued: dependency/security 39814332343, cumulative 39814332246, H1d 39814332232. Verify all outcomes; the dependency/security gate must show frontend-audit SUCCESS and plus-frontend-stryker SUCCESS with a generated mutation report. The previous SHA f3b3688544f1b6fd161f6cf763f68c5d0746e0c3 failed npm audit (10 vulnerabilities, 6 high) and timed out at 60 min (2,627 mutants; dry run 698 tests/78 sec). Do not run npm audit fix --force; the log indicated a breaking Tailwind CSS 4 change. SECURITY-S25 stays BLOCKED until both issues are resolved. MV-D-01..17 product gates remain verified on Lite c28091c / Plus 91d7f7b (mv_d_gate_verification_r239); after the campaign gate passes, create formal bilateral MV-D closure and proceed to MV-E from the frozen source. Global certification remains OPEN.",
+    "id": "S25-NPM-REMEDIATION-PREVIEW",
+    "status": "BLOCKED",
+    "action": "Plus backend security fix Black 26.10.1 passed in runs 39824318193 and 39824317892 on SHA d5911ff4be2b96d8ac789893541c873c03510187, but frontend audit was skipped so S25 is not closed. Isolated preview workflow exists on branch qa/s25-npm-remediation-preview at SHA 7b359fa379bb3bcd96b69afc27e2fb82ea7aab47; no run/artifact verified as of 2026-10-22 UTC. Run that workflow manually or via an authorized dispatch mechanism, inspect before/after npm audit reports and lockfile diff, npm ci, audit --audit-level=high, typecheck, tests and build. Never use npm audit fix --force because the prior report indicated a breaking Tailwind CSS 4 upgrade. Only promote validated lockfile changes to qa/syntax-audit-in625-a1. Then re-run the relevant S25 gate once and review evidence; only after S25 clears may formal bilateral MV-D closure and MV-E proceed. No Actions run was started by this documentation update.",
     "technical_sha_by_repo": {
       "c2melendez/precision-lab-lite": "c28091c0173f951a2571ffcbb6084f566ced0034",
-      "c2melendez/precision-lab-plus": "bae07b39dfc71eb01c0921524b6bbf162369166d"
+      "c2melendez/precision-lab-plus": "d5911ff4be2b96d8ac789893541c873c03510187"
     },
     "product_changed": false,
-    "audit": "r241 exact log review: run 39802197250 failed frontend npm audit (10 vulnerabilities, 6 high) and cancelled Plus Stryker at 60 minutes. Stryker dry run succeeded (698 tests / 78 sec), instrumented 8 files / 2,627 mutants, but no mutation report was produced. r242 changes only the job timeout to 120 minutes; product scope and thresholds remain unchanged."
+    "audit": "r243 handoff reconciliation: Plus backend security fix verified SUCCESS; frontend npm audit remains unverified because skipped in those runs. Isolated npm preview workflow exists but has no verified run/artifact. Lite existing product evidence unchanged. Global OPEN."
   },
   "blockers": [
     {
