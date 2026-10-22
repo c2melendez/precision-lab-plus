@@ -1,0 +1,59 @@
+name: S25 lockfile heal
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Reason for regenerating package-lock with security overrides
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: s25-lockfile-heal
+  cancel-in-progress: false
+
+jobs:
+  heal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: qa/syntax-audit-in625-a1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Validate reason
+        env:
+          REASON: ${{ inputs.reason }}
+        run: |
+          test -n "$(printf '%s' "$REASON" | tr -d '[:space:]')"
+          printf 'Reason: %s\n' "$REASON"
+
+      - name: Regenerate lockfile with overrides
+        working-directory: frontend
+        run: |
+          # package.json already has braces fork + postcss-selector-parser overrides
+          npm install --package-lock-only --ignore-scripts
+          npm audit --audit-level=high
+          npm audit
+
+      - name: Commit and push lockfile if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/package-lock.json
+          if git diff --cached --quiet; then
+            echo "No lockfile changes"
+            exit 0
+          fi
+          git commit -m "fix(security): regenerate package-lock with braces fork + postcss-selector-parser (0 high)"
+          git push origin HEAD:qa/syntax-audit-in625-a1
