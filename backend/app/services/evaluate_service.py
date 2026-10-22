@@ -166,6 +166,84 @@ def _is_literal_infinite_difference(source: str) -> bool:
     return normalized.replace("(", "").replace(")", "") in {"oo-oo", "-oo--oo"}
 
 
+def _read_one_variable_definition_call(source: str):
+    """EV-M-04: local one-variable definition followed by its call.
+
+    Accepts ``\\left``/``\\right`` delimiters and balanced parentheses in the
+    argument (``f(sqrt(e-1))`` or ``f\\left(\\sqrt{e-1}\\right)``). Returns
+    ``(variable, body, argument)`` or ``None``. There is no persistent
+    function registry: the substitution is ephemeral to this request.
+    """
+    normalized = re.sub(r"\\left\s*", "", source)
+    normalized = re.sub(r"\\right\s*", "", normalized)
+    head = re.match(
+        r"\s*([A-Za-z])\(([A-Za-z])\)\s*=\s*([\s\S]+?);\s*(?:\\\s*)?\1\s*\(",
+        normalized,
+    )
+    if not head:
+        return None
+    variable = head.group(2)
+    body = head.group(3).strip()
+    start = head.end()
+    depth = 1
+    index = start
+    while index < len(normalized):
+        char = normalized[index]
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth == 0:
+                break
+        index += 1
+    if depth != 0 or normalized[index + 1:].strip():
+        return None
+    return variable, body, normalized[start:index].strip()
+
+
+def _rewrite_natural_logs(text: str) -> str:
+    """Preserve natural-log semantics across the SymPy string round-trip.
+
+    SymPy prints the natural logarithm as ``log(...)``, but this endpoint
+    reserves ``log`` for base 10 (calculator semantics). Re-emit every
+    single-argument logarithm as ``ln(...)`` before re-parsing; two-argument
+    logarithms keep their explicit base. A base-10 source such as ``log(x)``
+    becomes ``log(x)/log(10)`` in SymPy, so rewriting both factors to
+    ``ln(x)/ln(10)`` preserves its meaning.
+    """
+    result = []
+    index = 0
+    while index < len(text):
+        starts_log = text.startswith("log(", index) and (
+            index == 0 or not (text[index - 1].isalnum() or text[index - 1] == "_")
+        )
+        if starts_log:
+            start = index + 4
+            depth = 1
+            cursor = start
+            has_comma = False
+            while cursor < len(text) and depth:
+                char = text[cursor]
+                if char == "(":
+                    depth += 1
+                elif char == ")":
+                    depth -= 1
+                elif char == "," and depth == 1:
+                    has_comma = True
+                cursor += 1
+            if depth == 0:
+                inner = text[start:cursor - 1]
+                if has_comma:
+                    result.append(text[index:cursor])
+                else:
+                    result.append("ln(" + _rewrite_natural_logs(inner) + ")")
+                index = cursor
+                continue
+        result.append(text[index])
+        index += 1
+    return "".join(result)
+
+
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
@@ -239,16 +317,16 @@ def evaluate(
 
     # Syntax309 SY-V-04: a one-variable function definition followed by
     # its call is evaluated in one request. No persistent function registry.
-    definition_call = re.fullmatch(
-        r"\s*([A-Za-z])\(([A-Za-z])\)\s*=\s*([^;]+);\s*(?:\\\s*)?\1\(([^()]*)\)\s*",
-        expression,
-    )
+    # EV-M-04: accepts \left/\right delimiters and balanced parentheses in
+    # the argument, and preserves the natural-log base of the body.
+    definition_call = _read_one_variable_definition_call(expression)
     if definition_call:
-        _, variable, body, argument = definition_call.groups()
+        variable, body, argument = definition_call
         body = re.sub(r"\^\{([0-9]+)\}", r"^\1", body)
         body_expr = parsing.parse_expression_tree(body, allow_equation=False)
         argument_expr = parsing.parse_expression_tree(argument, allow_equation=False)
-        expression = str(body_expr.subs(sympy.Symbol(variable), argument_expr))
+        substituted = body_expr.subs(sympy.Symbol(variable), argument_expr)
+        expression = _rewrite_natural_logs(str(substituted))
 
     # Syntax309 SY-V-07: first-order Leibniz notation from the keyboard.
     # Accept only a single variable and a bounded monomial body; parse the

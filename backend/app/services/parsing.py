@@ -259,7 +259,10 @@ BLOCKED_IDENTIFIERS = (
 )
 
 _IDENTIFIER_PATTERN = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
-_SCIENTIFIC_NOTATION_PATTERN = re.compile(r"[eE][+-]?\d+")
+# Scientific notation is a numeric literal: `1e5`, `2.5E-3`. The constant
+# `e` followed by an arithmetic sign (`e-1`, as in the frozen EV-M-04 row)
+# is not scientific notation and must not be rejected.
+_SCIENTIFIC_NOTATION_PATTERN = re.compile(r"(?<=\d)[eE][+-]?\d+")
 _CALL_ARITY_PATTERN = re.compile(r"\b(log|ln)\s*\(")
 
 
