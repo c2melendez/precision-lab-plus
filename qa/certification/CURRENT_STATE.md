@@ -1,3 +1,17 @@
+## 2026-10-22 UTC — r240: timeout estructural de plus-frontend-stryker corregido (técnico `7a9a92bd`)
+
+**Gate abierto y corregido**: `Certification dependency and security gates` quedó `cancelled` en tres corridas consecutivas (incl. [39732103637] en `9083811b` y [39754425516] en `91d7f7b`). Evidencia por job: todos los demás jobs SUCCESS; `mutation/plus-frontend-stryker` cancelado exactamente al cumplir su `timeout-minutes: 35`. Capa: harness/infraestructura, no producto.
+
+**Cambio técnico único**: `7a9a92bd4a348a0be1dc436d565d138595e865c6` sube ese techo a 60 minutos sin tocar pasos, pins, umbrales ni enrutamiento. La huella de contrato de `campaign_scope.py` cambia ⇒ el gate ejecuta evidencia fresca (no REUSE/WAIT/DIAGNOSE del mismo fallo).
+
+**Corridas del push sobre `7a9a92bd`** (en curso): gates [39778899477], cumulative [39778899210], h1d [39778899234]. Condición de salida: `plus-frontend-stryker` SUCCESS < 60 min con mutaciones ejecutadas y log revisado; si reincide, diagnosticar scope de `frontend/stryker.config.json`.
+
+**Estado MV-D sin cambios**: filas 01..17 verificadas en Lite `c28091c` / Plus `91d7f7b` con gates SUCCESS (r239). Blockers independientes intactos: H2-SG28-DIST-01..08, SECURITY-S25, SY-P-23, SY-X-04-PLUS-HTTP, ALGEBRA229-AS-B-29. Certificación global `OPEN`.
+
+**Siguiente paso ejecutable**: consultar por `head_sha=7a9a92bd` la conclusión de [39778899477]; con Stryker verde, registrar revisión de evidencia y transitar al cierre formal MV-D / siguiente sección de la matriz según hoja de ruta.
+
+---
+
 ## 2026-10-22 UTC — r239: reconciliación del índice con los HEADs técnicos MV-D (documental, 0 runs esperados)
 
 **Estado técnico vigente (sin cambios esta revisión):** Lite `c28091c0173f951a2571ffcbb6084f566ced0034` y Plus `91d7f7b499e1effaeef7c4a3bd9e04c0b3b6d6f5` (MV-D: sistemas lineales únicos/paramétricos/incompatibles con parámetro `a`, rref, LU y Gram-Schmidt sin normalizar). Gates consultados por `head_sha` exacto: Lite cumulative [39754424771], h1d [39754424829], scientific-ui [39754424596] — SUCCESS. Plus cumulative [39754425445], backend-isolation [39754425427], h1d [39754425636], native-syntax [39754425572], SG28 UI [39754425501] — SUCCESS. Dependency/security [39754425516] cancelled por el timeout estructural conocido de plus-frontend-mutmut (no relanzado; precedente mv_c_closure_r238); no es evidencia de producto.

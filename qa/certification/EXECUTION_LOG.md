@@ -1,3 +1,13 @@
+## 2026-10-22 UTC — r240: remediación estructural del gate de seguridad/mutación (timeout de plus-frontend-stryker)
+
+**Diagnóstico confirmado con logs por job**: `Certification dependency and security gates` quedó `cancelled` en tres corridas consecutivas del push sobre `qa/syntax-audit-in625-a1` (incluidas [39732103637](https://github.com/c2melendez/precision-lab-plus/actions/runs/39732103637) en `9083811b` y [39754425516](https://github.com/c2melendez/precision-lab-plus/actions/runs/39754425516) en `91d7f7b`). En todas, `audit-request`, `security/validate-request`, `mutation/validate-request`, `security/backend-security` y `mutation/plus-backend-mutmut` terminaron SUCCESS, mientras `mutation/plus-frontend-stryker` fue cancelado exactamente a los ~35 minutos de ejecución, coincidiendo con su `timeout-minutes: 35`. Clasificación: límite de harness/infraestructura, no fallo de producto ni de matemática.
+
+**Decisión de protocolo**: repetir el mismo insumo contra el mismo techo es DIAGNOSE sin cambio; se modificó la precondición. Commit técnico `7a9a92bd` (`fix(ci): raise plus-frontend-stryker timeout to 60 minutes (r240)`): único cambio `timeout-minutes` 35→60 en ese job; pasos, pins de herramientas, umbrales Stryker y enrutamiento intactos. La huella del contrato de `campaign_scope.py` cambia, así que el gate ejecuta evidencia fresca en lugar de reutilizar.
+
+**Corridas automáticas del push sobre `7a9a92bd`** (en curso al publicar esta nota): gates [39778899477](https://github.com/c2melendez/precision-lab-plus/actions/runs/39778899477), cumulative [39778899210](https://github.com/c2melendez/precision-lab-plus/actions/runs/39778899210), h1d [39778899234](https://github.com/c2melendez/precision-lab-plus/actions/runs/39778899234). Condición de salida: `plus-frontend-stryker` SUCCESS < 60 min con mutaciones realmente ejecutadas; si reincide, diagnosticar el scope de `stryker.config.json` (concurrency/mutate). Los gates MV-D de producto siguen verificados en Lite `c28091c` / Plus `91d7f7b` (r239). Bloqueos independientes sin cambios: H2-SG28-DIST-01..08, SECURITY-S25, SY-P-23, SY-X-04-PLUS-HTTP, ALGEBRA229-AS-B-29. Global OPEN.
+
+---
+
 ## 2026-10-22 UTC — r239: verificación de gates MV-D y reconciliación del índice (técnico vs. documental)
 
 **Objetivo:** cerrar la brecha entre los HEADs técnicos publicados y el índice de continuidad, sin relanzar CI con cambios solo documentales.
