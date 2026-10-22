@@ -509,6 +509,27 @@ def evaluate(
         ):
             raise DomainErrorResult("El resultado no está definido en este dominio.")
 
+    # EV-T-11: un logaritmo cuyo argumento simplifica a cero es indefinido.
+    # evalf() puede ocultarlo tras un artefacto finito: log(1-1) devuelve un
+    # float espurio (-288.34...) y log(cos(pi/2)) un complejo espurio, sin
+    # disparar el chequeo zoo de más abajo. Se resuelve la singularidad
+    # simbólicamente. El simplify caro se acota a logaritmos cuyo argumento
+    # no está ya demostrado distinto de cero.
+    log_arguments = [
+        node.args[0]
+        for node in sympy.preorder_traversal(expr)
+        if isinstance(node, sympy.log)
+    ]
+    if any(argument.is_zero is not False for argument in log_arguments):
+        try:
+            simplified_log = sympy.simplify(expr)
+        except (AttributeError, ZeroDivisionError, ValueError, OverflowError):
+            simplified_log = None
+        if simplified_log is not None and simplified_log.has(
+            sympy.zoo, sympy.oo, -sympy.oo, sympy.nan
+        ):
+            raise DomainErrorResult("El resultado no está definido en este dominio.")
+
     try:
         numeric_value = expr.evalf()
     except (AttributeError, ZeroDivisionError, ValueError, OverflowError) as exc:
