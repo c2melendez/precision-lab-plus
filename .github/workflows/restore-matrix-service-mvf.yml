@@ -1,11 +1,11 @@
 name: Restore matrix_service MV-F
 on:
+  workflow_dispatch:
   push:
     paths:
-      - scripts/restore_matrix_service_mvf.py
+      - .github/workflows/restore-matrix-service-mvf.yml
     branches:
       - qa/syntax-audit-in625-a1
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,9 +17,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: qa/syntax-audit-in625-a1
+          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Restore matrix_service.py
-        run: python3 scripts/restore_matrix_service_mvf.py
+      - name: Restore from known-good commit and raise power limit
+        run: |
+          git show 1ad124fe174b0cef6f220f69578dace1c478c483:backend/app/services/matrix_service.py \
+            > backend/app/services/matrix_service.py
+          sed -i 's/MAX_MATRIX_POWER_EXPONENT = 10/MAX_MATRIX_POWER_EXPONENT = 32/' backend/app/services/matrix_service.py
+          grep -q 'MAX_MATRIX_POWER_EXPONENT = 32' backend/app/services/matrix_service.py
+          grep -q 'def determinant' backend/app/services/matrix_service.py
+          wc -c backend/app/services/matrix_service.py
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
