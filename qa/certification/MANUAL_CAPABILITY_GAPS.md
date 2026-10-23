@@ -638,3 +638,43 @@ Ninguna de estas filas se cuenta como PASS.
   es natural. La fila X-10 usa `ln`, igual que la fuente; con `log(2)` el
   módulo sería `2**(1/ln(10))`, no `2`.
 - Lite: sin motor de variable compleja equivalente; NO_EJECUTADO.
+
+## 2026-10-23 — EDCX B2: operaciones con números complejos (r261)
+
+- Estado: **20 PASS exactos + 13 PASS_SCOPED / 8 BLOCKED en Plus** (41 filas).
+  Acumulado EDCX: 300/638 filas, 171 PASS / 129 BLOCKED.
+- **Forma binómica literal:** `(2+3i)(1-i)=5+i` y `3i` son sintaxis válida; la
+  multiplicación implícita no necesita traducción. Las nueve entradas
+  `r_{theta}` de las filas P siguen devolviendo `PARSE_ERROR`, igual que en B1.
+- **Trampa de notación:** `cos3theta` se interpreta como un símbolo libre
+  (resultado `cos3theta`), no como `cos(3*theta)`. Las filas T-06/T-07 usan la
+  traducción documentada `cos3θ -> cos(3*theta)`; aun así el motor no expande.
+- **`P-01..P-09` PASS_SCOPED:** la aritmética polar es exacta
+  (`6i`, `4i`, `8i`, `-4`, `1/4-sqrt(3)i/4`, `3_{-pi/5}`, `-6i`, `1`, `256`),
+  pero el producto no acepta `r_theta` ni lo emite; el resultado llega en forma
+  binómica o de raíz.
+- **`T-05` PASS_SCOPED:** el producto de dos formas trigonométricas devuelve
+  `exp(I*(alpha+beta))`, equivalente exacto por Euler de la suma pedida.
+- **`X-04` PASS_SCOPED:** `(2e^{i*pi/6})^5` devuelve la potencia principal
+  `32*(-1)**(5/6)`, exactamente `-16*sqrt(3)+16i`, en forma de raíz.
+- **`X-08` PASS_SCOPED:** `conj(3*exp(i*theta))` devuelve
+  `3*exp(-I*conjugate(theta))`; con `theta` real (y `r` real en la segunda
+  expresión) es exactamente `3e^{-i theta}`. El motor no aplica el supuesto de
+  realidad de los parámetros.
+- **`X-09` PASS_SCOPED:** `abs(exp(a+b*i))` devuelve `exp(re(a)-im(b))`; con
+  `a,b` reales, tal como declara la fila, es exactamente `exp(a)`.
+- **`T-04/X-10` BLOCKED:** `(cos(theta)+i*sin(theta))^n` y
+  `(exp(i*theta))^n` devuelven `exp(I*theta)**n` sin combinar el exponente; no
+  producen `exp(I*n*theta)` ni `cos(n*theta)+i*sin(n*theta)`.
+- **`T-06/T-07/T-08` BLOCKED:** no hay expansión de ángulo múltiple ni
+  linealización; `cos(3*theta)`, `sin(3*theta)` y `cos(theta)^4` se devuelven sin
+  cambiar, aunque el oráculo sympy verifica `4cos^3-3cos`, `3sin-4sin^3` y
+  `(3+4cos2theta+cos4theta)/8`.
+- **`T-09` BLOCKED:** no existe nodo de sumatoria; `sum(...)` y `Sum(...)`
+  devuelven `PARSE_ERROR`, pese a que la forma cerrada de la fuente es correcta.
+- **`X-11/X-12` BLOCKED:** no hay reescritura de serie geométrica ni de media
+  ángulo; `1/(1-exp(I*theta))` y `Abs(exp(I*theta)+1)` se devuelven sin reducir
+  (la fila pide `1/2 + i/2 cot(theta/2)` y `2|cos(theta/2)|`).
+- Las identidades de las filas BLOCKED y de las traducciones se comprueban con
+  oráculos sympy independientes; nunca se atribuyen al producto.
+- Lite: sin motor de variable compleja equivalente; NO_EJECUTADO.

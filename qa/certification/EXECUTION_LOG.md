@@ -1,3 +1,26 @@
+## 2026-10-23 UTC — r261: EDCX B2 (Plus scoped)
+
+- Plus `7c87b95f` (B2): cumulative [39943293295] SUCCESS — 2323 passed, 1 skipped,
+  6 xfailed, cobertura 87.96%; H1d [39943293116] SUCCESS. Harness B2 38/38.
+- B2: 41 filas -> 20 PASS exactos + 13 PASS_SCOPED + 8 BLOCKED. Forma binómica
+  literal, incluida la multiplicación implícita (`(2+3i)(1-i)=5+i`); las nueve
+  entradas `r_{theta}` siguen dando `PARSE_ERROR`.
+- PASS_SCOPED: `P-01..P-09` exigen la traducción documentada y emiten forma
+  binómica/raíz; `T-05` devuelve `exp(I*(alpha+beta))` (Euler exacto); `X-04`
+  devuelve la potencia principal `32*(-1)**(5/6) = -16*sqrt(3)+16i`; `X-08`
+  conserva `conjugate(theta)` (exacto con `theta,r` reales); `X-09` devuelve
+  `exp(re(a)-im(b))` (exacto con `a,b` reales).
+- BLOCKED: `T-04/X-10` devuelven `exp(I*theta)**n` sin combinar; `T-06/T-07/T-08`
+  no expanden ángulo múltiple ni linealizan; `T-09` no tiene nodo de sumatoria
+  (`sum`/`Sum` -> `PARSE_ERROR`); `X-11/X-12` no reescriben media ángulo ni serie
+  geométrica.
+- Hallazgo: `cos3theta` se interpreta como símbolo libre, no como `cos(3*theta)`.
+- Acumulado EDCX (A + B1 + B2): 300 / 638 filas, 171 PASS / 129 BLOCKED.
+- Lite: EDCX sin ejecutar (`NO_EJECUTADO`); sin PASS/FAIL bilateral.
+- Siguiente: EDCX Parte B, bloque B3 (potencias y raíces, 19 filas, `VC-PR-01..19`).
+
+---
+
 ## 2026-10-23 UTC — r260: EDCX B1 (Plus scoped)
 
 - Plus `a53449db` (B1): cumulative [39940618566] SUCCESS — 2285 passed, 1 skipped,

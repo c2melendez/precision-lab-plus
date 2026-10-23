@@ -1,3 +1,62 @@
+## 2026-10-23 UTC — r261: EDCX B2 — 20 PASS exactos + 13 PASS_SCOPED / 8 BLOCKED (Plus)
+
+**EDCX Parte B, bloque B2 (41 filas, operaciones con números complejos): 20 PASS exactos + 13 PASS_SCOPED + 8 BLOCKED en Plus.**
+No es cierre bilateral: Lite no ejecuta EDCX (gap de alcance de motor);
+la certificación global sigue `OPEN`.
+
+| Bloque | Filas | PASS exacto | PASS_SCOPED | BLOCKED |
+|--------|-------|-------------|-------------|---------|
+| B2 operaciones en C | 41 | 20 | 13 | 8 |
+
+- **Canal:** la forma binómica se evalúa de forma literal, incluida la
+  multiplicación implícita (`(2+3i)(1-i) = 5+i`). Sigue sin existir notación
+  polar de entrada: las nueve formas `r_{theta}` devuelven `PARSE_ERROR`.
+  `cos3theta` se lee como un símbolo libre, no como `cos(3*theta)`.
+- **PASS exacto (20):** `B-01..B-11` (suma, resta, producto, cociente,
+  potencia, conjugado, módulo, parte real e imaginaria), `T-01..T-03`
+  (potencias y cociente en forma trigonométrica con ángulos exactos) y
+  `X-01..X-03`, `X-05..X-07` (producto, cociente, potencia y suma/resta de
+  exponenciales, incluida `e^{i*pi}+1=0`).
+- **PASS_SCOPED (13):**
+  - `P-01..P-09`: la entrada `r_theta` se traduce a
+    `r*(cos(theta)+i*sin(theta))`; el resultado es exacto, pero se emite en
+    forma binómica o de raíz, nunca como `r_theta`.
+  - `T-05`: devuelve `exp(I*(alpha+beta))`, equivalente exacto por Euler de
+    `cos(alpha+beta)+i*sin(alpha+beta)`.
+  - `X-04`: devuelve la potencia principal `32*(-1)**(5/6)`, exactamente
+    `-16*sqrt(3)+16i`, en forma de raíz.
+  - `X-08`: devuelve `3*exp(-I*conjugate(theta))` y
+    `exp(-I*conjugate(theta))*conjugate(r)`; exacto para `theta` y `r` reales.
+  - `X-09`: `abs(exp(a+b*i))` devuelve `exp(re(a)-im(b))`; con `a,b` reales
+    (`re(a)=a`, `im(b)=0`) es exactamente `exp(a)`.
+- **BLOCKED (8):**
+  - `T-04/X-10`: la potencia se devuelve como `exp(I*theta)**n` sin combinar;
+    no produce `exp(I*n*theta)` ni `cos(n*theta)+i*sin(n*theta)`.
+  - `T-06/T-07/T-08`: no hay expansión de ángulo múltiple ni linealización;
+    `cos(3*theta)`, `sin(3*theta)` y `cos(theta)^4` se devuelven sin cambiar.
+  - `T-09`: no existe nodo de sumatoria; `sum(...)` y `Sum(...)` dan
+    `PARSE_ERROR`, aunque la forma cerrada de la fuente es correcta.
+  - `X-11/X-12`: no hay reescritura de media ángulo ni de serie geométrica;
+    `1/(1-exp(I*theta))` y `Abs(exp(I*theta)+1)` se devuelven sin reducir.
+- **Hallazgo:** el motor reconoce la forma exponencial y la trigonométrica,
+  pero no aplica De Moivre ni las identidades de ángulo múltiple; tampoco
+  distingue `cos3theta` (símbolo) de `cos(3*theta)` (expresión).
+
+Acumulado EDCX (Parte A + B1 + B2): **300 / 638 filas, 171 PASS / 129 BLOCKED** en Plus.
+
+### Evidencia CI Plus
+
+| HEAD | Cumulative | H1d |
+|------|------------|-----|
+| `7c87b95f` (B2) | [39943293295](https://github.com/c2melendez/precision-lab-plus/actions/runs/39943293295) **SUCCESS** | [39943293116](https://github.com/c2melendez/precision-lab-plus/actions/runs/39943293116) **SUCCESS** |
+
+Backend cumulative: **2323 passed, 1 skipped, 6 xfailed**, cobertura **87.96%**.
+Harness B2: 38/38.
+
+**Siguiente acción única:** EDCX Parte B, bloque B3 (potencias y raíces, 19 filas, `VC-PR-01..19`).
+
+---
+
 ## 2026-10-23 UTC — r260: EDCX B1 — 45 PASS_SCOPED / 4 BLOCKED (Plus)
 
 **EDCX Parte B, bloque B1 (49 filas, conversión entre representaciones): 45 PASS_SCOPED + 4 BLOCKED en Plus.**

@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 260,
+  "revision": 261,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "a53449db2e4104f32e84bd6090a61acd0e90cb47",
-  "baseline_case": "EDCX-B1-FORMS-R260",
+  "technical_baseline_sha": "7c87b95f00edfb3e983f270286ace6172d791d2c",
+  "baseline_case": "EDCX-B2-OPERATIONS-R261",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "prose_only_paths": [
@@ -41,14 +41,14 @@
     }
   },
   "next_action": {
-    "id": "EDCX-B2-OPERATIONS",
+    "id": "EDCX-B3-POWERS-ROOTS",
     "status": "READY",
-    "action": "Continuar EDCX Parte B con el bloque B2 (41 filas: 11/9/9/12) en Plus. Medir primero que operaciones de variable compleja existen realmente (suma, resta, producto, cociente, conjugado, modulo, argumento, potencia y raiz) y con que notacion de entrada; clasificar PASS/PASS_SCOPED/BLOCKED con oraculo sympy independiente. No reutilizar los runs de B1 como evidencia. Lite sigue sin motor complejo equivalente; no declarar paridad sin ejecucion.",
+    "action": "Continuar EDCX Parte B con el bloque B3 (19 filas, potencias y raices de complejos, VC-PR-01..19) en Plus. Medir primero que potencia y que raiz existen realmente (potencia entera, raiz n-esima, rama principal, forma trigonometrica y exponencial) y con que notacion de entrada; clasificar PASS/PASS_SCOPED/BLOCKED con oraculo sympy independiente. No reutilizar los runs de B2 como evidencia. Lite sigue sin motor complejo equivalente; no declarar paridad sin ejecucion.",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-plus": "a53449db2e4104f32e84bd6090a61acd0e90cb47"
+      "c2melendez/precision-lab-plus": "7c87b95f00edfb3e983f270286ace6172d791d2c"
     },
     "product_changed": false,
-    "audit": "r260: B1 se midio con harness propio y gates verdes en el SHA exacto (a53449db: cumulative 39940618566, H1d 39940618559). 45 PASS_SCOPED / 4 BLOCKED. No hay notacion polar de entrada ni salida; la conversion se certifica con abs+arg y oraculo. Global OPEN."
+    "audit": "r261: B2 se midio con harness propio y gates verdes en el SHA exacto (7c87b95f: cumulative 39943293295, H1d 39943293116). 20 PASS exactos + 13 PASS_SCOPED / 8 BLOCKED. La forma binomica se evalua literalmente, incl. multiplicacion implicita; no hay notacion polar de entrada y el motor no aplica De Moivre, angulo multiple, sumatoria ni media angulo. Global OPEN."
   },
   "blockers": [
     {
@@ -2671,6 +2671,102 @@
     "lite": {
       "status": "NO_EJECUTADO",
       "reason": "Sin motor de variable compleja equivalente: la conversion B/P/T/X no esta implementada y no se declara paridad sin ejecucion"
+    },
+    "global_certification": "OPEN"
+  },
+  "edcx_b2_closure_r261": {
+    "status": "PASS_SCOPED",
+    "scope": "EDCX Parte B B2 (41 filas, operaciones con numeros complejos B/P/T/X) en Plus",
+    "rows_total": 41,
+    "rows_pass": 33,
+    "rows_pass_exact": 20,
+    "rows_pass_scoped": 13,
+    "rows_blocked": 8,
+    "classification": {
+      "pass_exact": [
+        "VC-OP-B-01..11",
+        "VC-OP-T-01..03",
+        "VC-OP-X-01..03",
+        "VC-OP-X-05..07"
+      ],
+      "pass_scoped": {
+        "VC-OP-P-01..09": "la entrada polar r_theta no es sintaxis valida; se traduce a r*(cos(theta)+i*sin(theta)) y el resultado exacto se emite en forma binomica o de raiz",
+        "VC-OP-T-05": "devuelve exp(I*(alpha+beta)), equivalente exacto por Euler de cos(alpha+beta)+i*sin(alpha+beta)",
+        "VC-OP-X-04": "devuelve la potencia principal 32*(-1)**(5/6) = -16*sqrt(3)+16i, en forma de raiz",
+        "VC-OP-X-08": "devuelve 3*exp(-I*conjugate(theta)) y exp(-I*conjugate(theta))*conjugate(r); exacto con theta y r reales",
+        "VC-OP-X-09": "abs(exp(a+b*i)) devuelve exp(re(a)-im(b)); con a,b reales es exactamente exp(a)"
+      },
+      "blocked": {
+        "VC-OP-T-04": "devuelve exp(I*theta)**n sin combinar; no produce exp(I*n*theta) ni cos(n*theta)+i*sin(n*theta)",
+        "VC-OP-T-06": "devuelve cos(3*theta) sin expandir; no produce 4cos^3(theta)-3cos(theta)",
+        "VC-OP-T-07": "devuelve sin(3*theta) sin expandir; no produce 3sin(theta)-4sin^3(theta)",
+        "VC-OP-T-08": "devuelve cos(theta)**4 sin linealizar; no produce (3+4cos(2theta)+cos(4theta))/8",
+        "VC-OP-T-09": "sum(...) y Sum(...) devuelven PARSE_ERROR; no hay nodo de sumatoria",
+        "VC-OP-X-10": "devuelve exp(I*theta)**n sin combinar en exp(I*n*theta)",
+        "VC-OP-X-11": "devuelve 1/(1-exp(I*theta)) sin reescribir; no produce 1/2+i/2*cot(theta/2)",
+        "VC-OP-X-12": "devuelve Abs(exp(I*theta)+1) sin reducir; no produce 2*Abs(cos(theta/2))"
+      }
+    },
+    "channel": "Forma binomica literal, incluida la multiplicacion implicita: (2+3i)(1-i)=5+i. Las nueve entradas r_{theta} devuelven PARSE_ERROR. cos3theta se interpreta como simbolo libre, no como cos(3*theta).",
+    "certification_route": "Evaluacion directa por /api/v1/evaluate y oraculo sympy independiente: valor congelado por fila, aritmetica polar r*exp(I*theta), identidades de De Moivre, angulo triple, linealizacion, suma cos(k*theta), Euler, conjugado real, |exp(a+bi)| y media angulo.",
+    "product_changed": false,
+    "harness": "backend/tests/test_edcx_ed_b2_01_l41.py (38 passed local y CI)",
+    "channels": [
+      "/api/v1/evaluate (i, re, im, conj, abs, exp, cos, sin, sqrt)"
+    ],
+    "oracle": "sympy independiente: valores exactos B/P/T/X; (cos t+i sin t)^n = cos(nt)+i sin(nt) para n=2,3,4,5,7; suma cos(k t) para n=0..6; 4cos^3-3cos, 3sin-4sin^3, (3+4cos2t+cos4t)/8; 1/(1-e^{it}) = 1/2+i/2 cot(t/2); |1+e^{it}|^2 = 4cos^2(t/2)",
+    "findings": [
+      "El motor reconoce la forma exponencial y la trigonometrica, pero no aplica De Moivre: (cos(theta)+i*sin(theta))^n y (exp(i*theta))^n se devuelven como exp(I*theta)**n.",
+      "cos3theta es un simbolo libre; la forma de papel debe traducirse a cos(3*theta), que el motor devuelve sin expandir.",
+      "No existe nodo de sumatoria: sum y Sum devuelven PARSE_ERROR.",
+      "No hay reescritura de media angulo ni de serie geometrica: X-11 y X-12 se devuelven sin reducir.",
+      "PASS_SCOPED en X-08/X-09 porque el motor no aplica el supuesto de realidad de los parametros (conjugate(theta), re(a), im(b))."
+    ],
+    "runs": [
+      {
+        "gate": "cumulative",
+        "sha": "7c87b95f00edfb3e983f270286ace6172d791d2c",
+        "run_id": 39943293295,
+        "conclusion": "SUCCESS",
+        "tests": "2323 passed, 1 skipped, 6 xfailed; coverage 87.96%"
+      },
+      {
+        "gate": "h1d",
+        "sha": "7c87b95f00edfb3e983f270286ace6172d791d2c",
+        "run_id": 39943293116,
+        "conclusion": "SUCCESS"
+      }
+    ],
+    "parte_b_cumulative": {
+      "rows": 90,
+      "pass": 78,
+      "blocked": 12,
+      "source_rows": 638
+    },
+    "edcx_cumulative": {
+      "rows": 300,
+      "pass": 171,
+      "blocked": 129,
+      "source_rows": 638
+    },
+    "parts": {
+      "A": {
+        "rows": 210,
+        "measured": true
+      },
+      "B": {
+        "rows": 428,
+        "measured": false,
+        "measured_blocks": [
+          "B1",
+          "B2"
+        ],
+        "rows_measured": 90
+      }
+    },
+    "lite": {
+      "status": "NO_EJECUTADO",
+      "reason": "Sin motor de variable compleja equivalente: las operaciones B/P/T/X no estan implementadas y no se declara paridad sin ejecucion"
     },
     "global_certification": "OPEN"
   }
