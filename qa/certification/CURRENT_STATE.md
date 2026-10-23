@@ -4,6 +4,14 @@ Antes de cualquier dispatch, reconciliar HEAD y Actions (push y pull_request) en
 
 ---
 
+## 2026-10-23 UTC — r269: borrador de contrato por fila EDCX-B6
+
+- Creado [EDCX_B6_ROW_CONTRACT_DRAFT.md](EDCX_B6_ROW_CONTRACT_DRAFT.md) con las 53 expresiones y expectativas transcritas de la matriz y una clasificación preliminar para preparar la revisión técnica.
+- Es un borrador, no evidencia de soporte ni aceptación de endpoint. Todos los casos siguen REVIEW hasta validar payload real, alias, rama/corte, oráculo independiente y tolerancia/criterio de aceptación.
+- No se modificó producto ni JSONL. No se ejecutaron pruebas ni se despachó CI. Lite NO_EJECUTADO; B5 BLOCKED; global OPEN.
+
+---
+
 ## 2026-10-23 UTC — r268: corrección de semántica del campo canal en EDCX-B6
 
 - Revisión del JSONL completo: 638 filas; 589 tienen `canal` vacío y 49 tienen valor. Ejemplos como `B → P, T, X` describen transformaciones entre representaciones matemáticas, no endpoints HTTP.
