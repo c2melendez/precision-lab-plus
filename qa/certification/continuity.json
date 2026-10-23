@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 243,
+  "revision": 254,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "d5911ff4be2b96d8ac789893541c873c03510187",
-  "baseline_case": "MATRICES-MV-C-CLOSURE-R238",
-  "baseline_status": "PASS_SCOPED_BILATERAL",
+  "technical_baseline_sha": "fdcf2d635517e97c20910b0f92d6eb9d3c245404",
+  "baseline_case": "EDCX-A1-A2-CLOSURE-R254",
+  "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "prose_only_paths": [
     "README.md",
@@ -41,15 +41,14 @@
     }
   },
   "next_action": {
-    "id": "S25-NPM-REMEDIATION-PREVIEW",
-    "status": "BLOCKED",
-    "action": "Plus backend security fix Black 26.10.1 passed in runs 39824318193 and 39824317892 on SHA d5911ff4be2b96d8ac789893541c873c03510187, but frontend audit was skipped so S25 is not closed. Isolated preview workflow exists on branch qa/s25-npm-remediation-preview at SHA 7b359fa379bb3bcd96b69afc27e2fb82ea7aab47; no run/artifact verified as of 2026-10-22 UTC. Run that workflow manually or via an authorized dispatch mechanism, inspect before/after npm audit reports and lockfile diff, npm ci, audit --audit-level=high, typecheck, tests and build. Never use npm audit fix --force because the prior report indicated a breaking Tailwind CSS 4 upgrade. Only promote validated lockfile changes to qa/syntax-audit-in625-a1. Then re-run the relevant S25 gate once and review evidence; only after S25 clears may formal bilateral MV-D closure and MV-E proceed. No Actions run was started by this documentation update.",
+    "id": "EDCX-A3-SYSTEMS-MATRIX-EXPONENTIAL",
+    "status": "READY",
+    "action": "Certificar EDCX Parte A bloque A3 (16 filas: sistemas lineales y exponencial matricial) contra los canales reales de Plus. Empezar midiendo cada fila con plazo acotado, separar las ejecutables (dsolve de sistemas / matrix exponential si existe) de los gaps de canal (sistemas como texto multilinea, clasificacion cualitativa, Lotka-Volterra) y registrar PASS/BLOCKED con oraculo independiente. No usar los runs fallidos 86241e40 como evidencia: el SHA valido es 5a76477a (fix mp.pool) y fdcf2d63 (A2). Lite sigue sin motor EDO equivalente; no declarar paridad sin ejecucion.",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-lite": "c28091c0173f951a2571ffcbb6084f566ced0034",
-      "c2melendez/precision-lab-plus": "d5911ff4be2b96d8ac789893541c873c03510187"
+      "c2melendez/precision-lab-plus": "fdcf2d635517e97c20910b0f92d6eb9d3c245404"
     },
     "product_changed": false,
-    "audit": "r243 handoff reconciliation: Plus backend security fix verified SUCCESS; frontend npm audit remains unverified because skipped in those runs. Isolated npm preview workflow exists but has no verified run/artifact. Lite existing product evidence unchanged. Global OPEN."
+    "audit": "r254 reconciliation: continuity.json estaba en revision 243 (MV-C) mientras CURRENT_STATE/EXECUTION_LOG llegaban a r253 (MV-J). Se reconcilia a 254 con EDCX A1+A2 (75 PASS / 28 BLOCKED, Plus) y se conservan los blockers independientes. Global OPEN."
   },
   "blockers": [
     {
@@ -73,7 +72,7 @@
       "status": "ON_HOLD"
     }
   ],
-  "ledger_note": "r238: MV-C-01..19 (inversa, adjunta, cofactores y ecuaciones matriciales de matriz_matrices_vectores) cerrado PASS_SCOPED_BILATERAL. Lite 3aec2c25: matrixOps incorpora inversa/adjunta/cofactores exactos y solveMatrixEquation con orden izquierdo/derecho; symbolicMatrix.ts anade inversa/adjunta/cofactores simbolicos y complejos acotados a 4x4 con Algebrite; compute.worker.ts usa Fraction y cae al simbolico solo con celdas no racionales; MatrixMode expone las tres operaciones. Plus 9083811b: /matrix/inverse acepta variables libres y trigonometricas elementales con SYMBOLIC_MATRIX_LIMIT=4 y UNSUPPORTED_OPERATION fuera del limite; /matrix/adjugate y /matrix/cofactor conservan contrato numerico estricto; nueva /matrix/solve-equation con x_side=left|right; la UI expone adjunta, cofactores y lado de la ecuacion. Gates de producto por head_sha exacto, attempt=1: Lite cumulative 39732103530 (354 files, 2152 passed, MV-C 24/24), h1d 39732103564 (22), scientific 39732103583 (456); Plus cumulative 39732103487 (backend 1915 passed, 6 xfailed, cobertura 88.08%, MV-C 25/25; frontend 149 files/1010 passed, MatrixMode 7/7), h1d 39732103479 (38), native-syntax 39732103484 (26+52), SG28 backend 39732103482 (69), SG28 UI 39732103492 (21). Guards skip=false. Las 19 filas coinciden con el oraculo congelado; 08/10/11 por equivalencia algebraica exacta. El gate security/dependency 39732103637 quedo cancelled: backend-security y plus-backend-mutmut pasaron, pero plus-frontend-stryker agoto el timeout duro de 35 min y no se relanzo el mismo input; no es evidencia de MV-C y SECURITY-S25 sigue como blocker independiente. Fallos locales de factorizacion/SG28/S25/SY-X-16 son preexistentes de entorno; CI acumulativo verde. Blockers independientes sin cambios; certificacion global OPEN. Siguiente objetivo: MV-D-01..17 (sistemas, rref, LU y Gram-Schmidt).",
+  "ledger_note": "r254: EDCX Parte A A1 (53 filas) + A2 (50 filas) en Plus: 76 PASS y 27 BLOCKED medidos. A1: 47 familias verificadas por sustitucion en /api/v1/ode (8 filas F4 documentadas) y 6 limites acotados (ED-L-12 canal x(y); ED-X-02/X-03, ED-B-09, ED-C-02, ED-C-05 con TIMEOUT/UNSUPPORTED_OPERATION). A2: 25 EDO por sustitucion, 3 Wronskianos (ED-E-10/E-12/E-14) por /matrix/determinant con oraculo de derivadas, ED-A-05 por renombrado T(t)->y(x); 21 bloqueadas por alcance medido (orden>2 en 6, dos condiciones iniciales en 12, Wronskianos con exp/log en 2, yy''=y'^2 en 1). Defecto candidato registrado: la segunda condicion inicial separada por ';' que documenta _parse_initial_condition es inalcanzable porque _split_equation_and_condition parte por coma; no se corrigio en r254. Regresion real: 86241e40 anoto mp.pool.Pool sin importar el submodulo y rompio H1d/security/native (39921705215, 39921705206, 39921705116); 5a76477a lo corrige y los tres workflows quedan verdes. Gates de producto por head_sha exacto: fdcf2d63 cumulative 39924322798 (backend 2113 passed, 1 skipped, 6 xfailed, cobertura 87.92%) y H1d 39924322809 SUCCESS; 5a76477a cumulative 39922491068, H1d 39922491020 y native 39922491000 SUCCESS. Lite: A1/A2 NO_EJECUTADO (stepEngine/ode.ts solo y'=f(x) y 2.o orden constante); no se declara PASS ni FAIL bilateral. Blockers independientes sin cambios (S25, H2/SG28, SY-P-23, SY-X-04-PLUS-HTTP, ALGEBRA229-AS-B-29). Global OPEN. Siguiente: EDCX A3 (16 filas).",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
@@ -1972,5 +1971,161 @@
     "h1d_run": 39814332232,
     "status": "QUEUED_AT_DOCUMENTATION",
     "acceptance": "security/frontend-audit SUCCESS; mutation/plus-frontend-stryker SUCCESS with mutation report reviewed"
+  },
+  "edcx_a1_a2_closure_r254": {
+    "status": "PASS_SCOPED",
+    "scope": "EDCX Parte A A1 (53 filas, primer orden) + A2 (50 filas, segundo orden y superior) en Plus",
+    "rows_total": 103,
+    "rows_pass": 76,
+    "rows_blocked": 27,
+    "blocks": {
+      "A1": {
+        "rows": 53,
+        "pass": 47,
+        "blocked": 6,
+        "f4_incomplete": [
+          "ED-S-04",
+          "ED-S-08",
+          "ED-S-13",
+          "ED-S-14",
+          "ED-B-01",
+          "ED-C-01",
+          "ED-C-03",
+          "ED-C-04"
+        ],
+        "blocked_ids": [
+          "ED-L-12",
+          "ED-X-02",
+          "ED-X-03",
+          "ED-B-09",
+          "ED-C-02",
+          "ED-C-05"
+        ],
+        "channel": "/api/v1/ode (notacion prima)",
+        "oracle": "sustitucion numerica en la EDO + condicion inicial; rama real para y^(1/3)"
+      },
+      "A2": {
+        "rows": 50,
+        "pass": 29,
+        "blocked": 21,
+        "pass_breakdown": {
+          "ode_substitution": 25,
+          "wronskian_determinant": [
+            "ED-E-10",
+            "ED-E-12",
+            "ED-E-14"
+          ],
+          "renamed_variable": [
+            "ED-A-05"
+          ]
+        },
+        "blocked_breakdown": {
+          "order_gt_2": [
+            "ED-K-06",
+            "ED-K-07",
+            "ED-K-08",
+            "ED-K-09",
+            "ED-K-10",
+            "ED-N-15"
+          ],
+          "two_initial_conditions": [
+            "ED-K-11",
+            "ED-K-12",
+            "ED-K-13",
+            "ED-K-14",
+            "ED-K-15",
+            "ED-K-16",
+            "ED-N-13",
+            "ED-N-14",
+            "ED-A-01",
+            "ED-A-02",
+            "ED-A-03",
+            "ED-A-04"
+          ],
+          "wronskian_cell_parser": [
+            "ED-E-11",
+            "ED-E-13"
+          ],
+          "dsolve_unsupported": [
+            "ED-E-06"
+          ]
+        },
+        "channels": [
+          "/api/v1/ode",
+          "/api/v1/matrix/determinant"
+        ],
+        "oracle": "sustitucion con derivadas hasta el orden; wronskiano recalculado derivando las funciones"
+      }
+    },
+    "product_changed": true,
+    "product_changes": [
+      "backend/app/services/ode_service.py: resolucion acotada en pool spawn con ODE_SOLVE_TIMEOUT_SECONDS (default 8) y ODETimeoutError",
+      "backend/app/routers/ode.py: run_in_threadpool y mapeo de timeout a ErrorCode.TIMEOUT",
+      "fix 5a76477a: from multiprocessing import pool as mp_pool (la anotacion mp.pool.Pool rompia la importacion)"
+    ],
+    "harness": [
+      "backend/tests/test_edcx_ed_a1_01_l53.py (54 passed, 1 skipped local)",
+      "backend/tests/test_edcx_ed_a2_01_l50.py (51 passed local)",
+      "qa/certification/derive_edcx_ejecutables.py + qa/certification/edcx_ejecutables.jsonl (638 filas derivadas)"
+    ],
+    "runs": [
+      {
+        "gate": "cumulative",
+        "sha": "fdcf2d635517e97c20910b0f92d6eb9d3c245404",
+        "run_id": 39924322798,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "gate": "h1d",
+        "sha": "fdcf2d635517e97c20910b0f92d6eb9d3c245404",
+        "run_id": 39924322809,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "gate": "cumulative",
+        "sha": "5a76477a7fc420638b0bf75d62c81dd5c7e8943b",
+        "run_id": 39922491068,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "gate": "h1d",
+        "sha": "5a76477a7fc420638b0bf75d62c81dd5c7e8943b",
+        "run_id": 39922491020,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "gate": "native",
+        "sha": "5a76477a7fc420638b0bf75d62c81dd5c7e8943b",
+        "run_id": 39922491000,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "gate": "h1d",
+        "sha": "86241e40a7699e00fa695e14665d7f988ff6ee17",
+        "run_id": 39921705215,
+        "conclusion": "FAILURE",
+        "classification": "product_regression_mp_pool"
+      },
+      {
+        "gate": "security",
+        "sha": "86241e40a7699e00fa695e14665d7f988ff6ee17",
+        "run_id": 39921705206,
+        "conclusion": "FAILURE",
+        "classification": "same_regression"
+      },
+      {
+        "gate": "native",
+        "sha": "86241e40a7699e00fa695e14665d7f988ff6ee17",
+        "run_id": 39921705116,
+        "conclusion": "FAILURE",
+        "classification": "same_regression"
+      }
+    ],
+    "lite": {
+      "status": "NO_EJECUTADO",
+      "reason": "src/engine/stepEngine/ode.ts solo cubre y'=f(x) y 2.o orden con coeficientes constantes; A1/A2 requieren separables, lineales, Bernoulli, Riccati, Clairaut, Wronskianos y condiciones multiples"
+    },
+    "known_defect_candidate": "La segunda condicion inicial separada por ';' documentada en _parse_initial_condition es inalcanzable: _split_equation_and_condition parte por coma. No corregido en r254.",
+    "global_certification": "OPEN"
   }
 }

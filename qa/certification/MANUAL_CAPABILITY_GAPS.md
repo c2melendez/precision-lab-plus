@@ -439,3 +439,51 @@ Plus devuelve `1` literal para `sin(pi/8)^2+cos(pi/8)^2`. La limitación de form
 - **Traducciones de harness.** Lite convierte `\frac{a}{b}` → `a/b` para la grilla ASCII. Plus convierte `\cos\theta` → `cos(theta)` y `a^{2}` → `a^2`; el API no consume LaTeX crudo. Las filas simbólicas se aceptan por equivalencia algebraica exacta; 08/10/11 se contrastaron contra matrices SymPy explícitas. Las ecuaciones usan el contrato `x_side`/`xOnLeft` del producto.
 - **Evidencia bilateral.** Lite `tests/matricesMvC01to19.audit.test.ts` 24/24 y `tests/matrixModeParity.test.ts` 2/2; Plus `tests/test_matrices_mv_c01_l19.py` 25/25 PASSED y `src/__tests__/MatrixMode.test.tsx` 7/7. Ambos anclan la fila congelada de `legacy_sources/matriz_matrices_vectores.md.gz` y el JSONL derivado (153 filas).
 - **Gate de seguridad (independiente).** El push técnico disparó `39732103637`; `security/backend-security` y `mutation/plus-backend-mutmut` pasaron, pero `mutation/plus-frontend-stryker` agotó el timeout duro de 35 min y el run terminó `cancelled` sin informe. No se usó como evidencia de MV-C y no se relanzó el mismo input. **SECURITY-S25** sigue como blocker independiente; la certificación global permanece `OPEN`.
+
+## 2026-10-23 UTC — EDCX A1+A2 (r254): límites de producto medidos
+
+Estos límites están medidos contra el producto real (Plus `fdcf2d63`), no inferidos.
+Ninguna de estas filas se cuenta como PASS.
+
+### Lite — capacidad no ejecutada (gap de alcance)
+
+- **A1 (53 filas) y A2 (50 filas): 0 ejecutadas.** `src/engine/stepEngine/ode.ts`
+  solo resuelve `y'=f(x)` y EDO lineales de 2.º orden con coeficientes constantes;
+  no hay separables, lineales de primer orden con factor integrante, Bernoulli,
+  Riccati, Clairaut/Lagrange ni Wronskianos. No se declara PASS ni FAIL de Lite:
+  el bloque queda **NO_EJECUTADO** hasta que el motor amplíe alcance.
+
+### Plus — A1 (6 filas bloqueadas, plazo 8 s)
+
+- **ED-L-12** — el ejercicio pide `x(y)`; el canal y el motor son `y(x)`.
+  `CHANNEL_UNSUPPORTED` (capability gap de canal, no de motor).
+- **ED-X-02 / ED-X-03** — `dsolve` no termina: medido >90 s; con el plazo acotado
+  devuelve `TIMEOUT` en ~3 s (prueba `test_edcx...timeout...`). No es PASS.
+- **ED-B-09** — Riccati `y'=y^2-x` (Airy): `UNSUPPORTED_OPERATION`.
+- **ED-C-02 / ED-C-05** — Lagrange: >20-30 s y `UNSUPPORTED_OPERATION`; acotado.
+- **F4 (correcto pero incompleto, sí PASS):** ED-S-04, ED-S-08, ED-S-13, ED-S-14,
+  ED-B-01, ED-C-01, ED-C-03, ED-C-04. La familia devuelta satisface la EDO, pero
+  `dsolve` no enumera las soluciones singulares que documenta la fuente.
+
+### Plus — A2 (21 filas bloqueadas)
+
+- **Orden > 2 (6):** ED-K-06..K-10, ED-N-15. `MAX_ODE_ORDER = 2`; error explícito
+  `UNSUPPORTED_OPERATION` ("Orden de EDO no soportado").
+- **Dos condiciones iniciales (12):** ED-K-11..K-16, ED-N-13, ED-N-14, ED-A-01..A-04.
+  El campo único solo transporta **una** condición: `_split_equation_and_condition`
+  parte por coma y la segunda produce `PARSE_ERROR`. Además K-14/K-15 son PVI/PVF
+  incompatibles o con infinitas soluciones, K-16 es un problema de autovalores y
+  N-13 usa `t` como variable. **Defecto candidato:** el docstring de
+  `_parse_initial_condition` documenta una segunda condición separada por `;`, pero
+  esa vía es inalcanzable con el split actual; no se corrigió en r254.
+- **Wronskianos (5):** no existe operación `W`. ED-E-10/E-12/E-14 sí se certifican
+  por el canal real `/matrix/determinant` (el wronskiano es el determinante de la
+  matriz fundamental) con oráculo de derivadas. ED-E-11 (`e^{3x}`) y ED-E-13
+  (`x`) quedan bloqueados porque el parser de celdas simbólicas solo admite
+  `sqrt/abs/sin/cos/tan`: rechaza `exp` y `log` con `PARSE_ERROR`.
+- **ED-E-06** — `yy''=(y')^2`: `dsolve` devuelve `UNSUPPORTED_OPERATION`; la
+  solución `y=C2 e^{C1 x}` no se obtiene por el producto.
+- **ED-A-05** — `T'=-k(T-Ta), T(0)=T0`: el motor solo acepta `y(x)`. Se certifica
+  con el renombrado documentado `T→y`, `t→x`, `Ta→A`, `T0→B`; la solución se
+  verifica contra la EDO y la condición inicial (misma ecuación, no otro problema).
+
