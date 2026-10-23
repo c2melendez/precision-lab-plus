@@ -2,8 +2,9 @@ import { defineConfig } from "vitest/config";
 
 /**
  * Vitest surface used only by Stryker (S19).
- * Restricts to pure-logic unit tests so coverageAnalysis "all" stays tractable
- * and every mutant is exercised by asserts that can actually kill it.
+ * Restricted to pure-logic unit tests matching the current mutate list
+ * (fractionDisplay + unitConversion). systemSplit stays out of mutate until
+ * its kill rate is raised; calculusIntent likewise deferred.
  */
 export default defineConfig({
   test: {
@@ -11,7 +12,6 @@ export default defineConfig({
     environment: "node",
     include: [
       "src/__tests__/fractionDisplay.test.ts",
-      "src/__tests__/systemSplit.test.ts",
       "src/__tests__/unitConversion.mutation.test.ts",
       "src/exhaustive-module08-units.test.ts",
     ],
