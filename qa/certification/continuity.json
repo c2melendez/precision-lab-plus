@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 272,
+  "revision": 273,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -48,12 +48,12 @@
   "next_action": {
     "id": "EDCX-B6",
     "status": "REVIEW",
-    "action": "Reconciliar las 53 filas VC-FE-01..53 del borrador B6 contra el harness y los contratos/oráculos. El test dirigido test_edcx_b6_contract.py pasó dentro de la regresión backend; la suite backend completa reportó 2383 passed, 1 skipped y 10 xfailed. Eso verifica solo los 5 checks del harness y la regresión de ese SHA; no cierra B6 ni cubre la matriz completa ni la salida multivaluada VC-FE-11. Siguiente: construir un mapa fila→prueba existente/nueva→oráculo→estado, sin dispatch adicional hasta determinar huecos precisos. Mantener Lite NO_EJECUTADO y bloqueos vigentes.",
+    "action": "Diseñar y añadir el primer grupo de pruebas de aceptación fila-a-fila para los casos escalares complejos VC-FE-01..03 y VC-FE-06..10, solo tras fijar un adaptador explícito desde la notación fuente a la sintaxis admitida por el parser y un oráculo independiente. La matriz EDCX_B6_TEST_TRACEABILITY.md demuestra que el harness actual no acepta matemáticamente ninguna fila completa; VC-FE-05 y VC-FE-14 solo tienen cobertura parcial, VC-FE-11 requiere contrato multivaluado. No ejecutar workflow nuevo hasta tener pruebas concretas listas y verificar si el test dirigido puede correr sin gates globales.",
     "technical_sha_by_repo": {
       "c2melendez/precision-lab-plus": "bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69"
     },
     "product_changed": false,
-    "audit": "r272: workflow backend/frontend 40026869114 SUCCESS. Backend 2383 passed, 1 skipped, 10 xfailed, coverage 87.97%; frontend SUCCESS. Los 5 checks test_edcx_b6_contract.py PASSED en SHA bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69. H1d run 40026869004 SUCCESS también. Resultado no certifica las 53 filas B6 ni multivalued VC-FE-11. Sin nuevo dispatch."
+    "audit": "r273: creado EDCX_B6_TEST_TRACEABILITY.md para las 53 filas. Cinco checks pasaron en CI, pero 0/53 filas tiene aceptación matemática completa probada por este harness; VC-FE-05 y VC-FE-14 son parciales; VC-FE-11 bloqueada por contrato multivaluado. No dispatch adicional."
   },
   "blockers": [
     {
@@ -83,7 +83,7 @@
       "detail": "Lugares geométricos VC-LG-01..25: canal vacío y sin endpoint de producto."
     }
   ],
-  "ledger_note": "r272: evidencia CI confirmada en SHA técnico bd25d58. No equiparar suite general verde con certificación B6; siguiente acción documental/técnica es matriz de trazabilidad fila→test→oráculo→estado y revisar huecos. Lite NO_EJECUTADO; global OPEN.",
+  "ledger_note": "r273: trazabilidad fila→test publicada. La suite verde no implica certificación de B6. Próxima acción: especificar adaptador y oráculo para primer grupo escalar, sin CI hasta determinar conjunto mínimo y evitar gates redundantes.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
