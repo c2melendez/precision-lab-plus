@@ -32,6 +32,6 @@
   "timeoutMS": 15000,
   "timeoutFactor": 2,
   "concurrency": 4,
-  "ignoreStatic": true,
+  "ignoreStatic": false,
   "disableTypeChecks": "{test,src}/**/*.{js,ts,jsx,tsx}"
 }
