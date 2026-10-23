@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 266,
+  "revision": 268,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -16,7 +16,8 @@
     "qa/certification/EXECUTION_LOG_AS229_SECTION_A.md",
     "qa/certification/ALGEBRA229_PREPARATION.md",
     "qa/certification/ROADMAP_CONTINUITY.md",
-    "qa/certification/CONTINUATION_PROMPT.md"
+    "qa/certification/CONTINUATION_PROMPT.md",
+    "qa/certification/EDCX_B6_CHANNEL_AUDIT.md"
   ],
   "gates": {
     "cumulative": {
@@ -45,12 +46,12 @@
   "next_action": {
     "id": "EDCX-B6",
     "status": "REVIEW",
-    "action": "EDCX-B5 registrado como brecha de capacidad (r266): lugares geométricos sin canal definido y sin endpoint en el producto. Siguiente bloque en orden: B6 (53 filas, prefijo VC-FE). Su campo canal está vacío en las 53 filas; decidir el canal antes de medir y no reutilizar evidencia de B4.",
+    "action": "EDCX-B6 (53 filas VC-FE): REVIEW, sin medición. Las 53 filas tienen canal vacío, pero el inventario completo tiene 589/638 filas vacías y los valores no vacíos describen transformaciones de representación, no rutas HTTP. No inferir endpoint ni rellenar canal. Definir contrato por fila (notación Log/log/ln, rama/signo, endpoint/payload, oráculo independiente, tolerancia y aceptación) antes del harness. Plus candidato /api/v1/evaluate solo para escalares compatibles; Lite NO_EJECUTADO por falta de motor equivalente.",
     "technical_sha_by_repo": {
       "c2melendez/precision-lab-plus": "7e501f5bffdf7a1242f396f8a2c96ca3267b635f"
     },
     "product_changed": false,
-    "audit": "r266: B5 BLOCKED por capacidad en Plus; Lite NO_EJECUTADO. Global OPEN."
+    "audit": "r268: corrección semántica del campo canal; 589/638 vacíos en JSONL, 49 poblados son rutas de representación. B6 REVIEW sin medición; B5 BLOCKED en Plus y NO_EJECUTADO en Lite; global OPEN."
   },
   "blockers": [
     {
@@ -80,7 +81,7 @@
       "detail": "Lugares geométricos VC-LG-01..25: canal vacío y sin endpoint de producto."
     }
   ],
-  "ledger_note": "r266: EDCX-B5 registrado como brecha de capacidad; siguiente EDCX-B6 en REVIEW por canal vacío; global OPEN.",
+  "ledger_note": "r268: EDCX-B6 en REVIEW. El campo canal es semántico/de representación y está vacío en 589/638 filas; no equivale a endpoint HTTP. No medir hasta contrato por fila. B5 continúa BLOCKED en Plus; Lite NO_EJECUTADO; global OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
