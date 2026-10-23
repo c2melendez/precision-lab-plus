@@ -1,3 +1,14 @@
+## 2026-10-23 UTC — r263: EDCX B4 (Plus scoped)
+
+- Plus `7e501f5` (test-first): cumulative [40014004350] SUCCESS; H1d [40014004348] SUCCESS. Harness local 33 passed, 4 xfailed.
+- B4: 34 filas -> 14 PASS / 14 PASS_SCOPED / 4 FAIL / 2 BLOCKED, medidas con oraculo sympy independiente sobre `/api/v1/solve` y `/api/v1/solve/system`.
+- FAIL (xfail estricto, sin cambio de producto): VC-EC-16, 17, 18, 19 (raices faltantes, o vacio con solucion existente).
+- BLOCKED: VC-EC-20, 21 (`abs(z)` no soportado).
+- Lite: B4 sin ejecutar (`NO_EJECUTADO`).
+- Siguiente: EDCX-B5 (25 filas, prefijo VC-LG), READY, no iniciado.
+
+---
+
 ## 2026-10-23 UTC — r262: EDCX B3 (Plus scoped)
 
 - Plus `ab220425` (B3): cumulative [39945613218] SUCCESS — 2345 passed, 1 skipped,

@@ -711,3 +711,20 @@ Ninguna de estas filas se cuenta como PASS.
 - Las identidades y los conjuntos de raíces se comprueban con oráculos sympy
   independientes; nunca se atribuyen al producto.
 - Lite: sin motor de variable compleja equivalente; NO_EJECUTADO.
+
+## 2026-10-23 — EDCX B4: ecuaciones en C (r263)
+
+- **Canal:** `/api/v1/solve` devuelve las raíces en `result_data` (`{text, latex, is_complex}`); `result_text` no sirve para raíces. `/api/v1/solve/system` resuelve VC-EC-22.
+- **Notación:** la matriz usa `Log`; el producto usa `ln`. `ln(z)=1+i*pi/2` devuelve `i*e` (VC-EC-34, PASS_SCOPED). `log(z)` con el mismo enunciado devuelve vacío sin error.
+- **FAIL VC-EC-16..19 (completitud):** las raíces devueltas son válidas (residuo cero); faltan otras.
+  - 16 (`z^2+conj(z)=0`): devuelve `{-1,0}`; faltan `1/2±√3/2 i`.
+  - 17 (`z^2=conj(z)`): devuelve `{0,1}`; faltan `-1/2±√3/2 i`.
+  - 18 (`z^3=conj(z)`): devuelve `{-1,0,1}`; faltan `±i`.
+  - 19 (`z*conj(z)+2z=3+2i`): devuelve vacío; faltan `-1±√3+i`.
+  Se registran como `xfail` estricto; no se corrige producto en este bloque.
+- **BLOCKED VC-EC-20..21:** `abs(z)` produce `UNSUPPORTED_OPERATION`.
+- **PASS_SCOPED VC-EC-03:** la raíz doble se devuelve una sola vez, sin multiplicidad.
+- **PASS_SCOPED VC-EC-10:** seis raíces exactas en forma cartesiana, no `2e^(iπk/3)`.
+- **PASS_SCOPED VC-EC-23..30, 32, 33:** solo la raíz principal de familias periódicas o hiperbólicas; `asin`/`acos` sin simplificar en 28–29.
+- **PASS_SCOPED VC-EC-31:** `tan(z)=i` devuelve vacío, correcto en C. El mismo vacío aparece en VC-EC-19, que sí tiene soluciones; por eso cada caso se valida por separado.
+- Lite: sin motor complejo equivalente; `NO_EJECUTADO`.

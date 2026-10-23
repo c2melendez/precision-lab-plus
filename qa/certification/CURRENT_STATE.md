@@ -1,3 +1,23 @@
+## 2026-10-23 UTC — r263: EDCX B4 — 14 PASS + 14 PASS_SCOPED / 4 FAIL / 2 BLOCKED (Plus)
+
+**EDCX Parte B, bloque B4 (34 filas, ecuaciones en C, VC-EC-01..34): medido en Plus.**
+No es cierre bilateral: Lite no ejecuta EDCX; la certificación global sigue `OPEN`.
+
+| Bloque | Filas | PASS | PASS_SCOPED | FAIL | BLOCKED |
+|---|---|---|---|---|---|
+| B4 ecuaciones en C | 34 | 14 | 14 | 4 | 2 |
+
+- **Canal:** `/api/v1/solve` devuelve las raíces en `result_data`; `/api/v1/solve/system` resuelve VC-EC-22 (`z1=1, z2=I`). La matriz usa `Log`, pero el producto usa `ln`; `log(z)` devuelve vacío sin error.
+- **PASS (14):** VC-EC-01, 02, 04–09, 11–15, 22. Conjuntos finitos exactos y completos, verificados con oráculo sympy.
+- **PASS_SCOPED (14):** VC-EC-03 (multiplicidad no reportada), 10 (forma cartesiana), 23–30, 32, 33 (solo raíz principal de familias infinitas), 31 (vacío correcto), 34 (notación `ln`).
+- **FAIL (4):** VC-EC-16 (faltan `1/2±√3/2 i`), 17 (faltan `-1/2±√3/2 i`), 18 (faltan `±i`), 19 (devuelve vacío; faltan `-1±√3+i`). Son defectos de completitud, no de validez: las raíces devueltas satisfacen la ecuación. Se registran como `xfail` estricto; no se cambió producto.
+- **BLOCKED (2):** VC-EC-20, 21 (`abs(z)` devuelve `UNSUPPORTED_OPERATION`).
+- **Producto:** sin cambios. Test-first Plus `7e501f5`; gates cumulative `40014004350` y H1d `40014004348` en success con `head_sha` exacto.
+- **Harness:** `backend/tests/test_edcx_ed_b4_01_l34.py` (33 passed, 4 xfailed en local).
+- **Siguiente:** EDCX-B5 (25 filas, prefijo VC-LG), READY, no iniciado.
+
+---
+
 ## 2026-10-23 UTC — r262: EDCX B3 — 7 PASS exactos + 10 PASS_SCOPED / 2 BLOCKED (Plus)
 
 **EDCX Parte B, bloque B3 (19 filas, potencias y raíces): 7 PASS exactos + 10 PASS_SCOPED + 2 BLOCKED en Plus.**
