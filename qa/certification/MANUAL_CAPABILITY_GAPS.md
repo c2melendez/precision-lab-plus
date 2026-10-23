@@ -558,3 +558,25 @@ Ninguna de estas filas se cuenta como PASS.
 - Lite: sin motor de EDP; NO_EJECUTADO.
 
 
+
+
+## 2026-10-23 — EDCX A7: cualitativo, numérico y retardo (r258)
+
+- Estado: **4/25 en Plus** (2 PASS exactos + 2 PASS_SCOPED); 21 BLOCKED.
+- **PASS exacto (`ED-Q-23/24`):** `y=Si(x)` y `y=sqrt(pi)/2 erf(x)`; residuo
+  simbólico nulo y condición inicial verificados.
+- **PASS_SCOPED (`ED-Q-05/06`):** `1/(1-x)` y `tan x` exactas, pero el intervalo
+  máximo no se emite (`domain_conditions` vacío); se deriva con oráculo sympy.
+- **BLOCKED:** no existe canal de análisis cualitativo (equilibrios, estabilidad,
+  bifurcaciones), trayectorias ortogonales, iteración de Picard, métodos
+  numéricos (Euler/Heun/RK4), recurrencias ni ecuaciones con retardo.
+  Medido: las cualitativas devuelven solución general; `ED-Q-07` solo una rama
+  (`x^3/27`); Picard `steps=[]`; los métodos numéricos rechazan `h` como segunda
+  condición con `PARSE_ERROR`; las recurrencias fallan con `AMBIGUOUS_VARIABLE`;
+  el retardo devuelve una expresión que no resuelve `y'(t)=y(t-1)`; `ED-Q-25`
+  (Riccati) devuelve `UNSUPPORTED_OPERATION`. El inventario de rutas no contiene
+  `equilib`, `stabil`, `bifurc`, `orthogonal`, `picard`, `euler`, `rk4`,
+  `recurrence` ni `delay`.
+- Las respuestas de la fuente se comprueban con oráculos sympy independientes,
+  pero nunca se atribuyen al producto.
+- Lite: sin motor cualitativo/numérico/retardo; NO_EJECUTADO.

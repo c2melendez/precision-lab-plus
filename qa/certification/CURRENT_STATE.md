@@ -1,3 +1,43 @@
+## 2026-10-23 UTC — r258: EDCX A7 — PASS_SCOPED (Plus), 4 PASS / 21 BLOCKED
+
+**EDCX Parte A, bloque A7 (25 filas, cualitativo/numérico/retardo): 2 PASS exactos + 2 PASS_SCOPED + 21 BLOCKED en Plus.**
+No es cierre bilateral: Lite no ejecuta este bloque (gap de alcance de motor);
+la certificación global sigue `OPEN`.
+
+| Bloque | Filas | PASS exacto | PASS_SCOPED | BLOCKED |
+|--------|-------|-------------|-------------|---------|
+| A7 cualitativo/numérico/retardo | 25 | 2 | 2 | 21 |
+
+- PASS exacto (`ED-Q-23/24`): `y=Si(x)` y `y=sqrt(pi)/2 erf(x)`. El motor
+  devuelve exactamente la forma cerrada de la fuente; se verifica residuo nulo
+  y condición inicial con sympy.
+- PASS_SCOPED (`ED-Q-05/06`): `y=1/(1-x)` y `y=tan x`. La solución es exacta,
+  pero el intervalo máximo no viaja en la respuesta (`domain_conditions` vacío);
+  se deriva con un oráculo sympy independiente y se documenta como alcance.
+- BLOCKED (21): cualitativas `ED-Q-01..04` (sin canal de equilibrios,
+  estabilidad ni bifurcaciones; solo solución general); `ED-Q-07` devuelve una
+  sola rama (`x^3/27`) sin veredicto de unicidad; ortogonales `ED-Q-08..10`
+  sin canal; Picard `ED-Q-11/12` con `steps=[]`; métodos numéricos
+  `ED-Q-13..16` rechazan `h` como segunda condición (`PARSE_ERROR`);
+  recurrencias `ED-Q-17..21` fallan con `AMBIGUOUS_VARIABLE`; retardo `ED-Q-22`
+  devuelve una expresión que no es la solución por tramos; `ED-Q-25` (Riccati)
+  devuelve `UNSUPPORTED_OPERATION`.
+
+Acumulado EDCX A1–A7: **204 / 638 filas, 93 PASS / 111 BLOCKED** en Plus.
+
+### Evidencia CI Plus
+
+| HEAD | Cumulative | H1d |
+|------|------------|-----|
+| `795a97ef` (A7) | [39934588535](https://github.com/c2melendez/precision-lab-plus/actions/runs/39934588535) **SUCCESS** | [39934588487](https://github.com/c2melendez/precision-lab-plus/actions/runs/39934588487) **SUCCESS** |
+
+Backend cumulative: **2217 passed, 1 skipped, 6 xfailed**, cobertura **87.90%**.
+Harness A7: 19/19.
+
+**Siguiente acción única:** EDCX A8 (casos límite, 6 filas).
+
+---
+
 ## 2026-10-23 UTC — r257: EDCX A6 — PASS_SCOPED (Plus), 1 PASS_SCOPED / 25 BLOCKED
 
 **EDCX Parte A, bloque A6 (26 filas, EDP): 1 PASS_SCOPED + 25 BLOCKED en Plus.**

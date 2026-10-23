@@ -1,3 +1,17 @@
+## 2026-10-23 UTC — r258: EDCX A7 (Plus scoped)
+
+- Plus `795a97ef` (A7): cumulative [39934588535] SUCCESS — 2217 passed, 1 skipped,
+  6 xfailed, cobertura 87.90%; H1d [39934588487] SUCCESS. Harness A7 19/19.
+- A7: 25 filas -> 2 PASS exactos (`ED-Q-23/24`: Si y erf; residuo + condición
+  inicial) + 2 PASS_SCOPED (`ED-Q-05/06`: solución exacta, intervalo máximo solo
+  derivado con oráculo) + 21 BLOCKED (cualitativas, no unicidad, ortogonales,
+  Picard, Euler/Heun/RK4, recurrencias, retardo y Riccati sin canal).
+- Acumulado EDCX A1–A7: 204 filas, 93 PASS / 111 BLOCKED.
+- Lite: A7 sin ejecutar (`NO_EJECUTADO`); sin PASS/FAIL bilateral.
+- Siguiente: EDCX A8 (casos límite, 6 filas).
+
+---
+
 ## 2026-10-23 UTC — r257: EDCX A6 (Plus scoped)
 
 - Plus `9a828f3c` (A6): cumulative [39932526897] SUCCESS — 2198 passed, 1 skipped,

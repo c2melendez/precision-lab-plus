@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 257,
+  "revision": 258,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "9a828f3c2f9d9483528eb94a51aed0f65a59ba88",
-  "baseline_case": "EDCX-A6-CLOSURE-R257",
+  "technical_baseline_sha": "795a97ef060ec5768618a5e91ce960be1656bea8",
+  "baseline_case": "EDCX-A7-CLOSURE-R258",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "prose_only_paths": [
@@ -41,14 +41,14 @@
     }
   },
   "next_action": {
-    "id": "EDCX-A7-QUALITATIVE",
+    "id": "EDCX-A8-LIMITS",
     "status": "READY",
-    "action": "Certificar EDCX Parte A bloque A7 (25 filas, cualitativo/numerico/retardo) en Plus. Medir primero que filas son expresables con los canales actuales: equilibrios y estabilidad, trayectorias ortogonales, iteracion de Picard, Euler/Heun/RK4, recurrencias y ecuacion con retardo. Registrar PASS/BLOCKED con oraculo independiente y no reutilizar los runs de A6 como evidencia. Lite sigue sin motor EDO/EDP equivalente; no declarar paridad sin ejecucion.",
+    "action": "Certificar EDCX Parte A bloque A8 (6 filas, casos limite) en Plus y cerrar la Parte A. Medir primero el canal real: no unicidad, ramas multiples, intervalo maximo no aplicado antes de evaluar, rama singular, fronteras incompatibles y clasificacion. Registrar PASS/BLOCKED con oraculo independiente y no reutilizar los runs de A7 como evidencia. Lite sigue sin motor EDO equivalente; no declarar paridad sin ejecucion.",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-plus": "9a828f3c2f9d9483528eb94a51aed0f65a59ba88"
+      "c2melendez/precision-lab-plus": "795a97ef060ec5768618a5e91ce960be1656bea8"
     },
     "product_changed": false,
-    "audit": "r257: A6 se midio con harness propio y gates verdes en el SHA exacto (9a828f3c: cumulative 39932526897, H1d 39932526943). El bloque A6 no cambio producto. Global OPEN."
+    "audit": "r258: A7 se midio con harness propio y gates verdes en el SHA exacto (795a97ef: cumulative 39934588535, H1d 39934588487). El bloque A7 no cambio producto. Global OPEN."
   },
   "blockers": [
     {
@@ -2431,6 +2431,96 @@
     "lite": {
       "status": "NO_EJECUTADO",
       "reason": "src/engine/stepEngine/ode.ts solo cubre y'=f(x) y segundo orden con coeficientes constantes; no hay EDP, clasificacion, caracteristicas, Fourier ni nucleo del calor"
+    },
+    "global_certification": "OPEN"
+  },
+  "edcx_a7_closure_r258": {
+    "status": "PASS_SCOPED",
+    "scope": "EDCX Parte A A7 (25 filas, cualitativo/numerico/retardo) en Plus",
+    "rows_total": 25,
+    "rows_pass": 4,
+    "rows_blocked": 21,
+    "pass_exact": [
+      "ED-Q-23",
+      "ED-Q-24"
+    ],
+    "pass_scoped": [
+      "ED-Q-05",
+      "ED-Q-06"
+    ],
+    "blocked_breakdown": {
+      "qualitative": [
+        "ED-Q-01",
+        "ED-Q-02",
+        "ED-Q-03",
+        "ED-Q-04"
+      ],
+      "one_branch_no_uniqueness_verdict": [
+        "ED-Q-07"
+      ],
+      "orthogonal_trajectories": [
+        "ED-Q-08",
+        "ED-Q-09",
+        "ED-Q-10"
+      ],
+      "picard_iteration": [
+        "ED-Q-11",
+        "ED-Q-12"
+      ],
+      "numerical_methods": [
+        "ED-Q-13",
+        "ED-Q-14",
+        "ED-Q-15",
+        "ED-Q-16"
+      ],
+      "recurrences": [
+        "ED-Q-17",
+        "ED-Q-18",
+        "ED-Q-19",
+        "ED-Q-20",
+        "ED-Q-21"
+      ],
+      "delay": [
+        "ED-Q-22"
+      ],
+      "riccati_unsupported": [
+        "ED-Q-25"
+      ]
+    },
+    "pass_exact_note": "ED-Q-23 devuelve y=Si(x) y ED-Q-24 y=sqrt(pi)/2*erf(x); residuo simbolico nulo y condicion inicial en ambos.",
+    "pass_scope_note": "ED-Q-05 (1/(1-x)) y ED-Q-06 (tan x) son exactas, pero la respuesta no incluye el intervalo maximo (domain_conditions vacio); el intervalo se deriva con un oraculo sympy independiente y no se atribuye al producto.",
+    "blocked_reason": "No hay canal de equilibrios/estabilidad/bifurcaciones, trayectorias ortogonales, iteracion de Picard, Euler/Heun/RK4, recurrencias ni retardo. Medido: las cualitativas devuelven una solucion general; ED-Q-07 devuelve solo x^3/27 sin veredicto de unicidad; Picard devuelve steps=[]; los metodos numericos rechazan h como segunda condicion con PARSE_ERROR; las recurrencias fallan con AMBIGUOUS_VARIABLE; el retardo devuelve una expresion que no resuelve y'(t)=y(t-1); ED-Q-25 devuelve UNSUPPORTED_OPERATION. El inventario de rutas no contiene equilib, stabil, bifurc, orthogonal, picard, euler, rk4, recurrence ni delay.",
+    "cumulative_a1_a7": {
+      "rows": 204,
+      "pass": 93,
+      "blocked": 111
+    },
+    "product_changed": false,
+    "harness": "backend/tests/test_edcx_ed_a7_01_l25.py (19 passed local y CI)",
+    "channels": [
+      "/api/v1/ode",
+      "/api/v1/evaluate",
+      "/api/v1/solve"
+    ],
+    "oracle": "residuo simbolico + condicion inicial para los PASS; intervalos maximos y valores por tramos derivados con sympy independiente; las respuestas bloqueadas se comprueban con oraculos pero no se atribuyen al producto",
+    "runs": [
+      {
+        "gate": "cumulative",
+        "sha": "795a97ef060ec5768618a5e91ce960be1656bea8",
+        "run_id": 39934588535,
+        "conclusion": "SUCCESS",
+        "tests": "2217 passed, 1 skipped, 6 xfailed; coverage 87.90%"
+      },
+      {
+        "gate": "h1d",
+        "sha": "795a97ef060ec5768618a5e91ce960be1656bea8",
+        "run_id": 39934588487,
+        "conclusion": "SUCCESS"
+      }
+    ],
+    "lite": {
+      "status": "NO_EJECUTADO",
+      "reason": "src/engine/stepEngine/ode.ts solo cubre y'=f(x) y segundo orden con coeficientes constantes; no hay analisis cualitativo, metodos numericos, recurrencias ni retardo"
     },
     "global_certification": "OPEN"
   }
