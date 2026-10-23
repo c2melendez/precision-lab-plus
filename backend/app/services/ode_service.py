@@ -35,6 +35,7 @@ import re
 import threading
 import atexit
 from multiprocessing import TimeoutError as MultiprocessingTimeout
+from multiprocessing import pool as mp_pool
 from tokenize import TokenError
 
 import sympy
@@ -305,12 +306,12 @@ def _solve_worker(text: str) -> Tuple[str, object]:
     )
 
 
-_pool: Optional[mp.pool.Pool] = None
+_pool: Optional[mp_pool.Pool] = None
 _pool_lock = threading.Lock()
 atexit.register(lambda: _discard_pool())
 
 
-def _get_pool() -> "mp.pool.Pool":
+def _get_pool() -> "mp_pool.Pool":
     global _pool
     if _pool is None:
         # `spawn` en todas las plataformas: el hijo importa solo
