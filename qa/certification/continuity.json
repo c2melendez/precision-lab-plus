@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 271,
+  "revision": 272,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -48,12 +48,12 @@
   "next_action": {
     "id": "EDCX-B6",
     "status": "REVIEW",
-    "action": "Ejecutar únicamente el test dirigido backend/tests/test_edcx_b6_contract.py y revisar resultados. El archivo de contrato test-first fue añadido en Plus pero aún NO se ha ejecutado; si el entorno local no está disponible, preparar un workflow dirigido con evidencia exacta antes de dispatch. No ejecutar gates globales. No declarar B6 cerrado: los 4 tests cubren semántica de Log/log/ln y respuesta compleja, no las 53 filas ni la salida multivaluada VC-FE-11. Lite NO_EJECUTADO.",
+    "action": "Reconciliar las 53 filas VC-FE-01..53 del borrador B6 contra el harness y los contratos/oráculos. El test dirigido test_edcx_b6_contract.py pasó dentro de la regresión backend; la suite backend completa reportó 2383 passed, 1 skipped y 10 xfailed. Eso verifica solo los 5 checks del harness y la regresión de ese SHA; no cierra B6 ni cubre la matriz completa ni la salida multivaluada VC-FE-11. Siguiente: construir un mapa fila→prueba existente/nueva→oráculo→estado, sin dispatch adicional hasta determinar huecos precisos. Mantener Lite NO_EJECUTADO y bloqueos vigentes.",
     "technical_sha_by_repo": {
       "c2melendez/precision-lab-plus": "bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69"
     },
     "product_changed": false,
-    "audit": "r271: añadido test-first backend/tests/test_edcx_b6_contract.py con 5 checks (tres notaciones de logaritmo, resultado complejo Log(-1), dominio Log(0)). No ejecutado; ningún Actions dispatch. B6 permanece REVIEW; B5 BLOCKED Plus, Lite NO_EJECUTADO, global OPEN."
+    "audit": "r272: workflow backend/frontend 40026869114 SUCCESS. Backend 2383 passed, 1 skipped, 10 xfailed, coverage 87.97%; frontend SUCCESS. Los 5 checks test_edcx_b6_contract.py PASSED en SHA bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69. H1d run 40026869004 SUCCESS también. Resultado no certifica las 53 filas B6 ni multivalued VC-FE-11. Sin nuevo dispatch."
   },
   "blockers": [
     {
@@ -83,7 +83,7 @@
       "detail": "Lugares geométricos VC-LG-01..25: canal vacío y sin endpoint de producto."
     }
   ],
-  "ledger_note": "r271: harness mínimo B6 creado en Plus, todavía no ejecutado. No usar como evidencia de PASS ni como cierre de las 53 filas. Siguiente paso único: ejecutar solo backend/tests/test_edcx_b6_contract.py y diagnosticar cualquier divergencia. Sin CI nueva.",
+  "ledger_note": "r272: evidencia CI confirmada en SHA técnico bd25d58. No equiparar suite general verde con certificación B6; siguiente acción documental/técnica es matriz de trazabilidad fila→test→oráculo→estado y revisar huecos. Lite NO_EJECUTADO; global OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
