@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 273,
+  "revision": 274,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -19,7 +19,8 @@
     "qa/certification/CONTINUATION_PROMPT.md",
     "qa/certification/EDCX_B6_CHANNEL_AUDIT.md",
     "qa/certification/EDCX_B6_ROW_CONTRACT_DRAFT.md",
-    "qa/certification/EDCX_B6_HTTP_CONTRACT_FINDINGS.md"
+    "qa/certification/EDCX_B6_HTTP_CONTRACT_FINDINGS.md",
+    "qa/certification/EDCX_B6_ADAPTER_ORACLE_PLAN.md"
   ],
   "gates": {
     "cumulative": {
@@ -48,12 +49,12 @@
   "next_action": {
     "id": "EDCX-B6",
     "status": "REVIEW",
-    "action": "Diseñar y añadir el primer grupo de pruebas de aceptación fila-a-fila para los casos escalares complejos VC-FE-01..03 y VC-FE-06..10, solo tras fijar un adaptador explícito desde la notación fuente a la sintaxis admitida por el parser y un oráculo independiente. La matriz EDCX_B6_TEST_TRACEABILITY.md demuestra que el harness actual no acepta matemáticamente ninguna fila completa; VC-FE-05 y VC-FE-14 solo tienen cobertura parcial, VC-FE-11 requiere contrato multivaluado. No ejecutar workflow nuevo hasta tener pruebas concretas listas y verificar si el test dirigido puede correr sin gates globales.",
+    "action": "Validar en una prueba dirigida de servicio el adaptador de salida para VC-FE-01..03 y VC-FE-06..10 usando como oráculo math/cmath independiente. El plan EDCX_B6_ADAPTER_ORACLE_PLAN.md es diseño estático: no afirmar aceptación hasta confirmar salida real, decodificación segura y comparación de parte real/imaginaria. Después preparar tests mínimos; antes de CI reconciliar push y pull_request por SHA. No despachar gates globales redundantes.",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-plus": "bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69"
+      "c2melendez/precision-lab-plus": "ec1697d421d3170163e805ecf8b98b78328cbc58"
     },
     "product_changed": false,
-    "audit": "r273: creado EDCX_B6_TEST_TRACEABILITY.md para las 53 filas. Cinco checks pasaron en CI, pero 0/53 filas tiene aceptación matemática completa probada por este harness; VC-FE-05 y VC-FE-14 son parciales; VC-FE-11 bloqueada por contrato multivaluado. No dispatch adicional."
+    "audit": "r274: plan de adaptador/oráculo publicado tras inspección estática del parser y schema. No se ejecutaron pruebas nuevas ni Actions. B6 sigue REVIEW; 0/53 filas con aceptación matemática completa demostrada; Lite NO_EJECUTADO."
   },
   "blockers": [
     {
@@ -83,7 +84,7 @@
       "detail": "Lugares geométricos VC-LG-01..25: canal vacío y sin endpoint de producto."
     }
   ],
-  "ledger_note": "r273: trazabilidad fila→test publicada. La suite verde no implica certificación de B6. Próxima acción: especificar adaptador y oráculo para primer grupo escalar, sin CI hasta determinar conjunto mínimo y evitar gates redundantes.",
+  "ledger_note": "r274: adaptador candidato y oráculo math/cmath documentados; siguiente paso es validar la decodificación contra salidas reales en prueba dirigida, sin dispatch hasta confirmar test mínimo y eventos push/pull_request.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
