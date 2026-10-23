@@ -532,3 +532,29 @@ Ninguna de estas filas se cuenta como PASS.
   distingue regular de irregular. No hay operación de clasificación ODE.
 - Lite: sin motor de series/Frobenius; NO_EJECUTADO.
 
+
+## 2026-10-23 — EDCX A6: ecuaciones en derivadas parciales (r257)
+
+- Estado: **1/26 PASS_SCOPED** en Plus; 25 BLOCKED. No hay motor de EDP.
+- Único canal multivariable: `/api/v1/derivative/partial` (una variable, orden
+  1..3). No existe endpoint de laplaciano, resolución de EDP, clasificación,
+  características, separación de variables, Fourier ni núcleo del calor.
+- **PASS_SCOPED (`ED-P-25`):** el laplaciano de `e^x sin y` se compone como
+  `u_xx + u_yy` con dos llamadas reales a `/api/v1/derivative/partial`; los
+  resultados exactos `exp(x)*sin(y)` y `-exp(x)*sin(y)` se suman por
+  `/api/v1/evaluate` y dan exactamente `0`. Es composición de un canal real, no
+  un botón «laplaciano»; el alcance queda documentado.
+- **BLOCKED (`ED-P-01..24`, `ED-P-26`):** EDP de primer orden y características,
+  clasificación elíptica/parabólica/hiperbólica, d'Alembert, cuerda, calor
+  (Dirichlet y Neumann), Laplace/Poisson en rectángulo y disco, autovalores con
+  dos condiciones de frontera y núcleo del calor. `/api/v1/evaluate` rechaza
+  ecuaciones (`No se esperaba '=' ...`); `/api/v1/ode` rechaza más de una
+  condición inicial (medido en `ED-P-23/24`). Una ecuación con parámetro
+  (`y''+lambda*y=0`) sin condición agota el timeout del solver (~3 s), por lo
+  que la evidencia usa el rechazo determinista, no el timeout.
+- Las respuestas de la fuente se comprueban con oráculos sympy independientes
+  (regla de la cadena, onda, calor y armonicidad), pero nunca se atribuyen al
+  producto.
+- Lite: sin motor de EDP; NO_EJECUTADO.
+
+

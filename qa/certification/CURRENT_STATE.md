@@ -1,3 +1,41 @@
+## 2026-10-23 UTC — r257: EDCX A6 — PASS_SCOPED (Plus), 1 PASS_SCOPED / 25 BLOCKED
+
+**EDCX Parte A, bloque A6 (26 filas, EDP): 1 PASS_SCOPED + 25 BLOCKED en Plus.**
+No es cierre bilateral: Lite no ejecuta EDP; la certificación global sigue `OPEN`.
+
+| Bloque | Filas | PASS exacto | PASS_SCOPED | BLOCKED |
+|--------|-------|-------------|-------------|---------|
+| A6 EDP | 26 | 0 | 1 | 25 |
+
+- PASS_SCOPED (`ED-P-25`): `Δ(e^x sin y)`. No existe endpoint «laplaciano»; el
+  arnés compone la definición `Δu = u_xx + u_yy` con dos llamadas reales a
+  `/api/v1/derivative/partial` (orden 2), que devuelven exactamente
+  `exp(x)*sin(y)` y `-exp(x)*sin(y)`, y suma ambos resultados por
+  `/api/v1/evaluate`, que devuelve exactamente `0`. El alcance (composición,
+  no botón dedicado) queda documentado.
+- BLOCKED (`ED-P-01..24`, `ED-P-26`): no hay motor de EDP — ni resolución,
+  clasificación, características, separación de variables, Fourier ni núcleo
+  del calor. Medido: `/api/v1/evaluate` rechaza ecuaciones
+  (`No se esperaba '=' ...`) y `/api/v1/ode` rechaza más de una condición
+  inicial en `ED-P-23/24` (`No se esperaba más de una condición inicial`);
+  el inventario de rutas no contiene `pde`, `classif`, `characteristic`,
+  `heat`, `wave`, `fourier` ni `laplac`.
+
+Acumulado EDCX A1–A6: **179 / 638 filas, 89 PASS / 90 BLOCKED** en Plus.
+
+### Evidencia CI Plus
+
+| HEAD | Cumulative | H1d |
+|------|------------|-----|
+| `9a828f3c` (A6) | [39932526897](https://github.com/c2melendez/precision-lab-plus/actions/runs/39932526897) **SUCCESS** | [39932526943](https://github.com/c2melendez/precision-lab-plus/actions/runs/39932526943) **SUCCESS** |
+
+Backend cumulative: **2198 passed, 1 skipped, 6 xfailed**, cobertura **87.90%**.
+Harness A6: 30/30.
+
+**Siguiente acción única:** EDCX A7 (cualitativo/numérico/retardo, 25 filas).
+
+---
+
 ## 2026-10-23 UTC — r256: EDCX A5 — PASS_SCOPED (Plus), 8 PASS / 2 BLOCKED
 
 **EDCX Parte A, bloque A5 (10 filas, series y Frobenius): 8 PASS + 2 BLOCKED en Plus.**

@@ -1,3 +1,20 @@
+## 2026-10-23 UTC — r257: EDCX A6 (Plus scoped)
+
+- Plus `9a828f3c` (A6): cumulative [39932526897] SUCCESS — 2198 passed, 1 skipped,
+  6 xfailed, cobertura 87.90%; H1d [39932526943] SUCCESS. Harness A6 30/30.
+- A6: 26 filas -> 1 PASS_SCOPED (`ED-P-25`, laplaciano de `e^x sin y` compuesto
+  con dos derivadas parciales reales de orden 2 y suma exacta 0) + 25 BLOCKED
+  (EDP, clasificación, características, valores iniciales/frontera, Fourier y
+  núcleo del calor; sin motor de EDP). `ED-P-23/24` se bloquean por el rechazo
+  determinista de dos condiciones iniciales.
+- Acumulado EDCX A1–A6: 179 filas, 89 PASS / 90 BLOCKED.
+- Lite: A6 sin ejecutar (`NO_EJECUTADO`); sin PASS/FAIL bilateral.
+- Local: 92 pruebas HTTP/seguridad sin servidor vivo fallan (0 fallos EDCX);
+  el gate cumulative de CI está verde.
+- Siguiente: EDCX A7 (cualitativo/numérico/retardo, 25 filas).
+
+---
+
 ## 2026-10-23 UTC — r256: EDCX A5 (Plus scoped)
 
 - Plus `50d9ca03` (A5): cumulative [39929466812] SUCCESS — 2168 passed, 1 skipped,
