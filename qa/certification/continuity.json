@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 258,
+  "revision": 259,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "795a97ef060ec5768618a5e91ce960be1656bea8",
-  "baseline_case": "EDCX-A7-CLOSURE-R258",
+  "technical_baseline_sha": "c3d389721a6ad5503508f5168f653105ee976fe4",
+  "baseline_case": "EDCX-A8-CLOSURE-R259",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "prose_only_paths": [
@@ -41,14 +41,14 @@
     }
   },
   "next_action": {
-    "id": "EDCX-A8-LIMITS",
+    "id": "EDCX-B1-FORMS",
     "status": "READY",
-    "action": "Certificar EDCX Parte A bloque A8 (6 filas, casos limite) en Plus y cerrar la Parte A. Medir primero el canal real: no unicidad, ramas multiples, intervalo maximo no aplicado antes de evaluar, rama singular, fronteras incompatibles y clasificacion. Registrar PASS/BLOCKED con oraculo independiente y no reutilizar los runs de A7 como evidencia. Lite sigue sin motor EDO equivalente; no declarar paridad sin ejecucion.",
+    "action": "Iniciar EDCX Parte B con el bloque B1 (49 filas, conversion de formas) en Plus. Medir primero que operaciones de variable compleja existen realmente: forma binomica/polar/exponencial, modulo/argumento, conjugado, conversion inversa y normalizacion de cuadrantes. Registrar PASS/BLOCKED con oraculo independiente y no reutilizar los runs de A8 como evidencia. Lite sigue sin motor complejo equivalente; no declarar paridad sin ejecucion.",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-plus": "795a97ef060ec5768618a5e91ce960be1656bea8"
+      "c2melendez/precision-lab-plus": "c3d389721a6ad5503508f5168f653105ee976fe4"
     },
     "product_changed": false,
-    "audit": "r258: A7 se midio con harness propio y gates verdes en el SHA exacto (795a97ef: cumulative 39934588535, H1d 39934588487). El bloque A7 no cambio producto. Global OPEN."
+    "audit": "r259: A8 se midio con harness propio y gates verdes en el SHA exacto (c3d38972: cumulative 39935820474, H1d 39935820754). El bloque A8 no cambio producto; la Parte A queda completa. Global OPEN."
   },
   "blockers": [
     {
@@ -2521,6 +2521,75 @@
     "lite": {
       "status": "NO_EJECUTADO",
       "reason": "src/engine/stepEngine/ode.ts solo cubre y'=f(x) y segundo orden con coeficientes constantes; no hay analisis cualitativo, metodos numericos, recurrencias ni retardo"
+    },
+    "global_certification": "OPEN"
+  },
+  "edcx_a8_closure_r259": {
+    "status": "BLOCKED",
+    "scope": "EDCX Parte A A8 (6 filas, casos limite) en Plus; cierre de la Parte A (210/638)",
+    "rows_total": 6,
+    "rows_pass": 0,
+    "rows_blocked": 6,
+    "blocked_breakdown": {
+      "no_solution_vs_infinite_not_distinguished": [
+        "CL-01",
+        "CL-02"
+      ],
+      "implicit_integral_not_branches": [
+        "CL-03"
+      ],
+      "maximal_interval_not_enforced_before_evaluating": [
+        "CL-04"
+      ],
+      "single_singular_branch": [
+        "CL-05"
+      ],
+      "boundary_incompatibility_rejected_by_ic_limit": [
+        "CL-06"
+      ]
+    },
+    "blocked_reason": "CL-01 y CL-02 (y'=y/x con y(0)=1 y y(0)=0) devuelven el mismo UNSUPPORTED_OPERATION: el canal no distingue sin solucion de infinitas soluciones. CL-03 devuelve una integral implicita sin evaluar, no las ramas y=0 e y=x|x|/4. CL-04 devuelve 1/(1-x) y al evaluar x=2 responde -1 con success=true, solo anota x != 1, sin error fuera del intervalo maximo (-infinito,1). CL-05 devuelve una sola rama -sqrt(x^2)=-|x|, no y=+-x. CL-06 se rechaza con PARSE_ERROR por el limite de una condicion inicial, no por la incompatibilidad de frontera (0=1).",
+    "product_changed": false,
+    "harness": "backend/tests/test_edcx_ed_a8_01_l6.py (7 passed local y CI)",
+    "channels": [
+      "/api/v1/ode",
+      "/api/v1/evaluate"
+    ],
+    "oracle": "familia y=Cx y ausencia de solucion para y(0)=1; ramas y=0 e y=x|x|/4; polo en x=1 y limite divergente; ramas y=+-x y coincidencia solo en x=0; y=C1 cos x + C2 sin x con 0=1",
+    "runs": [
+      {
+        "gate": "cumulative",
+        "sha": "c3d389721a6ad5503508f5168f653105ee976fe4",
+        "run_id": 39935820474,
+        "conclusion": "SUCCESS",
+        "tests": "2224 passed, 1 skipped, 6 xfailed; coverage 87.94%"
+      },
+      {
+        "gate": "h1d",
+        "sha": "c3d389721a6ad5503508f5168f653105ee976fe4",
+        "run_id": 39935820754,
+        "conclusion": "SUCCESS"
+      }
+    ],
+    "parte_a_cumulative": {
+      "rows": 210,
+      "pass": 93,
+      "blocked": 117,
+      "source_rows": 638
+    },
+    "parts": {
+      "A": {
+        "rows": 210,
+        "measured": true
+      },
+      "B": {
+        "rows": 428,
+        "measured": false
+      }
+    },
+    "lite": {
+      "status": "NO_EJECUTADO",
+      "reason": "src/engine/stepEngine/ode.ts solo cubre y'=f(x) y segundo orden con coeficientes constantes; no hay analisis de existencia/unicidad, ramas multiples, intervalo maximo ni fronteras"
     },
     "global_certification": "OPEN"
   }

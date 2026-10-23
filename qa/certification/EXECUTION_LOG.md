@@ -1,3 +1,19 @@
+## 2026-10-23 UTC — r259: EDCX A8 y cierre de la Parte A (Plus)
+
+- Plus `c3d38972` (A8): cumulative [39935820474] SUCCESS — 2224 passed, 1 skipped,
+  6 xfailed, cobertura 87.94%; H1d [39935820754] SUCCESS. Harness A8 7/7.
+- A8: 6 filas -> 0 PASS / 6 BLOCKED. `CL-01/CL-02` comparten el mismo
+  `UNSUPPORTED_OPERATION` (el canal no distingue sin solución de infinitas);
+  `CL-03` devuelve una integral implícita sin ramas; `CL-04` evalúa `1/(1-x)` en
+  `x=2` como `-1` sin error de intervalo; `CL-05` devuelve solo `-|x|`;
+  `CL-06` se rechaza por el límite de una condición inicial, no por
+  incompatibilidad de frontera.
+- Parte A completa (A1–A8): 210 / 638 filas, 93 PASS / 117 BLOCKED.
+- Lite: EDCX sin ejecutar (`NO_EJECUTADO`); sin PASS/FAIL bilateral.
+- Siguiente: EDCX Parte B, bloque B1 (conversión de formas, 49 filas).
+
+---
+
 ## 2026-10-23 UTC — r258: EDCX A7 (Plus scoped)
 
 - Plus `795a97ef` (A7): cumulative [39934588535] SUCCESS — 2217 passed, 1 skipped,

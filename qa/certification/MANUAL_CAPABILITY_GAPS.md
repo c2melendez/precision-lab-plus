@@ -580,3 +580,26 @@ Ninguna de estas filas se cuenta como PASS.
 - Las respuestas de la fuente se comprueban con oráculos sympy independientes,
   pero nunca se atribuyen al producto.
 - Lite: sin motor cualitativo/numérico/retardo; NO_EJECUTADO.
+
+
+## 2026-10-23 — EDCX A8: casos límite y cierre de la Parte A (r259)
+
+- Estado: **0/6 en Plus**; los seis casos quedan BLOCKED. Parte A completa:
+  210/638 filas, 93 PASS / 117 BLOCKED.
+- **No unicidad (`CL-01/CL-02`):** `y'=y/x` con `y(0)=1` y con `y(0)=0` produce
+  el mismo `UNSUPPORTED_OPERATION` y el mismo mensaje. El canal no distingue
+  «sin solución» de «infinitas soluciones»; el oráculo confirma que `y=Cx` cumple
+  `y(0)=0` para todo `C` y que `y(0)=1` no tiene solución.
+- **Ramas múltiples (`CL-03`):** `y'=sqrt(abs(y)), y(0)=0` devuelve una integral
+  implícita sin evaluar; no emite `y=0` ni `y=x|x|/4`, ambas soluciones válidas.
+- **Intervalo máximo (`CL-04`):** `y'=y^2, y(0)=1` devuelve `1/(1-x)`; la
+  evaluación en `x=2` responde `-1` con `success=true` y solo anota `x != 1`.
+  No hay error claro al salir del intervalo máximo `(-infinito, 1)`.
+- **Rama singular (`CL-05`):** `y'=x/y, y(0)=0` devuelve solo `-sqrt(x^2)`;
+  la fila exige `y=±x` y el canal no completa la segunda rama.
+- **Frontera incompatible (`CL-06`):** `y''+y=0, y(0)=0, y(pi)=1` se rechaza con
+  `PARSE_ERROR` por el límite de una condición inicial, no por el veredicto
+  `0=1` que exige la fila.
+- Las respuestas de la fuente se comprueban con oráculos sympy independientes,
+  pero nunca se atribuyen al producto.
+- Lite: sin motor EDO equivalente; NO_EJECUTADO.

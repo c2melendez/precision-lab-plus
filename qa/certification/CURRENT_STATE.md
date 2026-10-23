@@ -1,3 +1,43 @@
+## 2026-10-23 UTC — r259: EDCX A8 + cierre Parte A — 0 PASS / 6 BLOCKED (Plus)
+
+**EDCX Parte A, bloque A8 (6 filas, casos límite): 0 PASS / 6 BLOCKED en Plus. Parte A completa: 210 / 638 filas, 93 PASS / 117 BLOCKED.**
+No es cierre bilateral: Lite no ejecuta EDCX (gap de alcance de motor);
+la certificación global sigue `OPEN`.
+
+| Bloque | Filas | PASS | PASS_SCOPED | BLOCKED |
+|--------|-------|------|-------------|---------|
+| A8 casos límite | 6 | 0 | 0 | 6 |
+
+- `CL-01/CL-02` (`y'=y/x` con `y(0)=1` y `y(0)=0`): el canal devuelve
+  exactamente el mismo `UNSUPPORTED_OPERATION`; no distingue «sin solución» de
+  «infinitas soluciones». Oráculo: la familia `y=Cx` cumple `y(0)=0` para todo
+  `C`, y `y(0)=1` no tiene solución.
+- `CL-03` (`y'=sqrt(abs(y)), y(0)=0`): devuelve una integral implícita sin
+  evaluar, no las dos ramas `y=0` e `y=x|x|/4`.
+- `CL-04` (`y'=y^2, y(0)=1`): devuelve `1/(1-x)`; al evaluar en `x=2` responde
+  `-1` con `success=true` y solo anota `x != 1`, sin error claro fuera del
+  intervalo máximo `(-infinito, 1)`.
+- `CL-05` (`y'=x/y, y(0)=0`): devuelve una sola rama `-sqrt(x^2) = -|x|`, no
+  `y=±x`.
+- `CL-06` (`y''+y=0, y(0)=0, y(pi)=1`): se rechaza con `PARSE_ERROR` por el
+  límite de una condición inicial, no por la incompatibilidad de frontera
+  (`0=1`).
+
+Acumulado EDCX Parte A (A1–A8): **210 / 638 filas, 93 PASS / 117 BLOCKED** en Plus.
+
+### Evidencia CI Plus
+
+| HEAD | Cumulative | H1d |
+|------|------------|-----|
+| `c3d38972` (A8) | [39935820474](https://github.com/c2melendez/precision-lab-plus/actions/runs/39935820474) **SUCCESS** | [39935820754](https://github.com/c2melendez/precision-lab-plus/actions/runs/39935820754) **SUCCESS** |
+
+Backend cumulative: **2224 passed, 1 skipped, 6 xfailed**, cobertura **87.94%**.
+Harness A8: 7/7.
+
+**Siguiente acción única:** EDCX Parte B, bloque B1 (conversión de formas, 49 filas).
+
+---
+
 ## 2026-10-23 UTC — r258: EDCX A7 — PASS_SCOPED (Plus), 4 PASS / 21 BLOCKED
 
 **EDCX Parte A, bloque A7 (25 filas, cualitativo/numérico/retardo): 2 PASS exactos + 2 PASS_SCOPED + 21 BLOCKED en Plus.**
