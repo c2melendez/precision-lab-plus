@@ -1,0 +1,33 @@
+name: Restore matrix_service MV-F
+on:
+  push:
+    paths:
+      - scripts/restore_matrix_service_mvf.py
+    branches:
+      - qa/syntax-audit-in625-a1
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: qa/syntax-audit-in625-a1
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore matrix_service.py
+        run: python3 scripts/restore_matrix_service_mvf.py
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/app/services/matrix_service.py
+          if git diff --cached --quiet; then
+            echo "no change"
+            exit 0
+          fi
+          git commit -m "fix(matrices): restore matrix_service.py MAX_MATRIX_POWER_EXPONENT=32"
+          git push origin HEAD:qa/syntax-audit-in625-a1
