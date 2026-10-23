@@ -1,3 +1,12 @@
+## 2026-10-23 UTC — r274: plan de adaptador/oráculo EDCX-B6
+
+- Publicado [EDCX_B6_ADAPTER_ORACLE_PLAN.md](EDCX_B6_ADAPTER_ORACLE_PLAN.md): entradas candidatas para VC-FE-01..03 y VC-FE-06..10, oráculo Python math/cmath, decodificación de salida pendiente de validar y tolerancia propuesta explícitamente provisional.
+- Inspección estática confirma que result_approx solo sirve para resultados reales; no es criterio de aceptación para estas filas complejas.
+- No se añadieron tests ni se ejecutaron Actions. Siguiente paso único: validar adaptador de salida con una prueba dirigida del servicio; después preparar tests mínimos y reconciliar push/pull_request por SHA antes de decidir CI.
+- B6 REVIEW; 0/53 filas con aceptación matemática completa demostrada por el harness actual; B5 BLOCKED; Lite NO_EJECUTADO; global OPEN. SG28/DIST y S25 permanecen bloqueados.
+
+---
+
 ## 2026-10-23 UTC — r273: trazabilidad fila-a-fila de EDCX-B6
 
 - Publicada [EDCX_B6_TEST_TRACEABILITY.md](EDCX_B6_TEST_TRACEABILITY.md), que cruza las 53 filas fuente con el harness y la evidencia CI.
