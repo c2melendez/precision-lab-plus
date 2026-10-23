@@ -1,31 +1,31 @@
-## 2026-10-23 UTC — r248: MV-E-01..12 PASS_SCOPED_BILATERAL
+## 2026-10-23 UTC — r249: MV-F-01..17 producto Plus PASS (Lite pendiente)
 
-**MV-E-01..12 (rango, núcleo, espacio columna, rango–nulidad) — PASS_SCOPED_BILATERAL.**
+**MV-F-01..17 (valores/vectores propios, polinomio característico, Cayley–Hamilton, diagonalización, potencias) — PASS producto Plus.**
 
-### Superficies
+### Superficies Plus
 
-| Repo | Superficie |
+| Caso | Superficie |
 |------|------------|
-| Plus | `POST /matrix/rank` (allow_symbolic), `/matrix/nullspace`, `/matrix/columnspace` |
-| Lite | `rank()`, `nullspace()`, `columnspace()` en `matrixOps` / `matrixSpaces` |
+| F-01..10 | `POST /matrix/eigen` (SymPy eigenvects) |
+| F-11 | charpoly vía motor (det(λI−A)) |
+| F-12 | Cayley–Hamilton vía `/matrix/power` |
+| F-13 | diagonalize (oráculo + A=PDP⁻¹) |
+| F-14..17 | `/matrix/power` (exponente hasta ±32; F-15 = A³⁰) |
 
-Suites: Plus `backend/tests/test_matrices_mv_e01_l12.py`; Lite `tests/matricesMvE01to12.audit.test.ts`. Anclaje a `matriz_matrices_vectores.md.gz` / `matrices_ejecutables.jsonl` sección E.
+Suite: `backend/tests/test_matrices_mv_f01_l17.py`. `MAX_MATRIX_POWER_EXPONENT = 32` y Pydantic `ge/le=±32`.
 
-### Evidencia CI (attempt=1, success)
+### Evidencia CI
 
-| Repo | HEAD | Cumulative |
-|------|------|------------|
-| Plus | `544d8bd` (rank fix) | [39904542863](https://github.com/c2melendez/precision-lab-plus/actions/runs/39904542863) **SUCCESS** |
-| Lite | `4f2abd9` | [39905437848](https://github.com/c2melendez/precision-lab-lite/actions/runs/39905437848) **SUCCESS** (typecheck + unit/parity + build) |
+| Gate | Run | HEAD |
+|------|-----|------|
+| Cumulative | [39910191954](https://github.com/c2melendez/precision-lab-plus/actions/runs/39910191954) **SUCCESS** | `929bc64` |
 
-**SECURITY-S25: CLEARED.** S19 baseline PASS. Global **OPEN**.
+**Lite:** potencias F-14..17 vía `powerMatrix` (sin límite); eigen simbólico (i, √5) fuera de Fraction → paridad parcial en progreso.
 
-**Bloqueos restantes:** H2-SG28-DIST-01..08; SY-P-23; SY-X-04-PLUS-HTTP; ALGEBRA229-AS-B-29.
-
-**Siguiente acción única:** iniciar **MV-F** (siguiente sección de la matriz congelada).
+**Siguiente acción única:** completar **MV-F Lite** (al menos potencias + autovalores racionales) → PASS_SCOPED_BILATERAL; luego **MV-G**.
 
 ---
 
-## 2026-10-23 UTC — r247: MV-E producto Plus PASS (Lite pendiente)
+## 2026-10-23 UTC — r248: MV-E-01..12 PASS_SCOPED_BILATERAL
 
-Plus cumulative [39904542863] SUCCESS tras fix rank allow_symbolic. Lite completado en r248.
+Plus+Lite cumulative green (rank/nullspace/columnspace).

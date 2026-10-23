@@ -1,13 +1,12 @@
-## 2026-10-23 UTC — r248: MV-E-01..12 PASS_SCOPED_BILATERAL
+## 2026-10-23 UTC — r249: MV-F Plus product PASS
 
-- Lite: `src/engine/matrixSpaces.ts` (nullspace/columnspace) + `tests/matricesMvE01to12.audit.test.ts`.
-- Lite cumulative [39905437848](https://github.com/c2melendez/precision-lab-lite/actions/runs/39905437848) **SUCCESS** @ `4f2abd9`.
-- Plus ya verde @ `544d8bd` / [39904542863](https://github.com/c2melendez/precision-lab-plus/actions/runs/39904542863).
-- Siguiente: MV-F.
+- Power limit ±32 (schema + service); suite `test_matrices_mv_f01_l17.py`.
+- Cumulative [39910191954](https://github.com/c2melendez/precision-lab-plus/actions/runs/39910191954) **SUCCESS** @ `929bc64`.
+- matrix_service restaurado tras incidente PLACEHOLDER (git show 1ad124fe + sed).
+- Lite MV-F pendiente.
 
 ---
 
-## 2026-10-23 UTC — r247: MV-E Plus product PASS; rank allow_symbolic
+## 2026-10-23 UTC — r248: MV-E-01..12 PASS_SCOPED_BILATERAL
 
-- [544d8bd](https://github.com/c2melendez/precision-lab-plus/commit/544d8bdf2d7219c8b1ad186ad666d46267a91942): `/matrix/rank` con `allow_symbolic=True` (E-08).
-- Cumulative [39904542863](https://github.com/c2melendez/precision-lab-plus/actions/runs/39904542863) **SUCCESS**.
+- Lite `4f2abd9` / Plus `544d8bd` cumulative SUCCESS.
