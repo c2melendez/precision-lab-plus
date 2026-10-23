@@ -516,3 +516,19 @@ Ninguna de estas filas se cuenta como PASS.
   `y''-y=exp(x), y(0)=0; y'(0)=0`. No se contabiliza como PASS.
 - Lite: sin motor de Laplace/integrales; NO_EJECUTADO.
 
+
+## 2026-10-23 — EDCX A5: series y Frobenius (r256)
+
+- Estado: **8/10 PASS** en Plus (5 exactos + 3 PASS_SCOPED); 2 BLOCKED.
+- El motor resuelve en forma cerrada las ecuaciones de Airy y Bessel y devuelve
+  series truncadas (`O(x**6)`) para Legendre/Hermite/Chebyshev. No existe una
+  operación separada de «desarrollar en serie»; la serie se certifica comparando
+  coeficientes con la forma cerrada de la fuente.
+- Las soluciones polinomiales de Hermite/Chebyshev se obtienen fijando las
+  constantes de la familia general (elección documentada, no texto literal).
+- **BLOCKED:** `ED-F-09` y `ED-F-10` piden clasificar `x=0` como punto singular
+  regular/irregular. El producto resuelve la EDO, pero no clasifica; el endpoint
+  `/api/v1/complex/singularities` solo devuelve localizaciones (`{0}`) y no
+  distingue regular de irregular. No hay operación de clasificación ODE.
+- Lite: sin motor de series/Frobenius; NO_EJECUTADO.
+

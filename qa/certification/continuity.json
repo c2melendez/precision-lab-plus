@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 255,
+  "revision": 256,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "02e198ac2435e99fcd47ad6392660a88e490a87f",
-  "baseline_case": "EDCX-A3-A4-CLOSURE-R255",
+  "technical_baseline_sha": "50d9ca03393c71bcc8c07cce8c6186f7dd1abb4a",
+  "baseline_case": "EDCX-A5-CLOSURE-R256",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "prose_only_paths": [
@@ -41,14 +41,14 @@
     }
   },
   "next_action": {
-    "id": "EDCX-A5-SERIES-FROBENIUS",
+    "id": "EDCX-A6-PDE",
     "status": "READY",
-    "action": "Certificar EDCX Parte A bloque A5 (10 filas: soluciones por series y Frobenius) contra el canal real de Plus. Medir primero si /api/v1/ode resuelve ecuaciones con coeficientes variables y puntos singulares; separar las ejecutables de los gaps de canal y registrar PASS/BLOCKED con oraculo independiente (residuo simbolico en el dominio de la serie). No reutilizar los runs de A3/A4 como evidencia. Lite sigue sin motor EDO equivalente; no declarar paridad sin ejecucion.",
+    "action": "Certificar EDCX Parte A bloque A6 (26 filas, EDP) en Plus. Medir primero si alguna fila es expresable con los canales actuales, empezando por ED-P-25 (Laplaciano de e^x*sin(y)); separar las ejecutables de los gaps de motor (transporte, Burgers, d'Alembert, calor, Laplace, autovalores, delta) y registrar PASS/BLOCKED con oraculo independiente. No reutilizar los runs de A5 como evidencia. Lite sigue sin motor EDO/EDP equivalente; no declarar paridad sin ejecucion.",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-plus": "02e198ac2435e99fcd47ad6392660a88e490a87f"
+      "c2melendez/precision-lab-plus": "50d9ca03393c71bcc8c07cce8c6186f7dd1abb4a"
     },
     "product_changed": false,
-    "audit": "r255: A3 y A4 se midieron con harness propios y gates verdes en el SHA exacto (6aef2571: cumulative 39926515965, H1d 39926515979; 02e198ac: cumulative 39927284848, H1d 39927284862). Los docs r254 de MATRIX_SOURCE_INVENTORY decian 75 PASS / 28 BLOCKED para A1+A2; el conteo correcto es 76/27 y se corrige en r255. Global OPEN."
+    "audit": "r256: A5 se midio con harness propio y gates verdes en el SHA exacto (50d9ca03: cumulative 39929466812, H1d 39929467052). El bloque A5 no cambio producto. Global OPEN."
   },
   "blockers": [
     {
@@ -72,7 +72,7 @@
       "status": "ON_HOLD"
     }
   ],
-  "ledger_note": "r255: EDCX Parte A A3 (16 filas) + A4 (24 filas) en Plus: 4 PASS y 36 BLOCKED medidos. A3: ED-M-11..13 PASS_SCOPED por autovalores exactos con /api/v1/matrix/eigen; 13 bloqueadas (ED-M-01..07 sistemas en canal escalar, ED-M-08..10 sin exponencial matricial, ED-M-14..16 no lineales/Lyapunov). A4: ED-T-17 PASS con renombrado t->x y oraculo de residuo + condicion inicial; 23 bloqueadas (laplace/ilaplace inexistentes, convolucion sin canal, dos condiciones iniciales, dirac/heaviside no permitidos, ecuaciones integrales y sistema). Acumulado EDCX A1-A4: 143 filas, 80 PASS / 63 BLOCKED. Defecto confirmado y no corregido: la segunda condicion inicial con ';' documentada en _parse_initial_condition no esta implementada. Lite NO_EJECUTADO. Global OPEN.",
+  "ledger_note": "r256: EDCX Parte A A5 (10 filas, series y Frobenius) en Plus: 8 PASS y 2 BLOCKED medidos. ED-F-01..05 PASS exactos (trigonometrica/Airy/Bessel; residuo, wronskiano y forma cerrada de la fuente). ED-F-06..08 PASS_SCOPED (serie truncada O(x^6) de Legendre y polinomios de Hermite/Chebyshev por eleccion de constantes). ED-F-09/10 BLOCKED: piden clasificar el punto singular regular/irregular; el producto resuelve la EDO pero no clasifica y /api/v1/complex/singularities solo devuelve {0}. Acumulado EDCX A1-A5: 153 filas, 88 PASS / 65 BLOCKED. Lite NO_EJECUTADO. Global OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
@@ -2263,6 +2263,62 @@
     "lite": {
       "status": "NO_EJECUTADO",
       "reason": "src/engine/stepEngine/ode.ts solo cubre y'=f(x) y segundo orden con coeficientes constantes; no hay sistemas, exponencial matricial, Laplace ni ecuaciones integrales"
+    },
+    "global_certification": "OPEN"
+  },
+  "edcx_a5_closure_r256": {
+    "status": "PASS_SCOPED",
+    "scope": "EDCX Parte A A5 (10 filas, soluciones por series y Frobenius) en Plus",
+    "rows_total": 10,
+    "rows_pass": 8,
+    "rows_blocked": 2,
+    "pass_exact": [
+      "ED-F-01",
+      "ED-F-02",
+      "ED-F-03",
+      "ED-F-04",
+      "ED-F-05"
+    ],
+    "pass_scoped": [
+      "ED-F-06",
+      "ED-F-07",
+      "ED-F-08"
+    ],
+    "blocked_ids": [
+      "ED-F-09",
+      "ED-F-10"
+    ],
+    "blocked_reason": "Las filas piden clasificar x=0 como punto singular regular/irregular. El producto resuelve la EDO (Bessel) pero no emite clasificacion; /api/v1/complex/singularities solo devuelve el conjunto de localizaciones ({0}) y no distingue regular de irregular. No existe operacion de clasificacion ODE.",
+    "cumulative_a1_a5": {
+      "rows": 153,
+      "pass": 88,
+      "blocked": 65
+    },
+    "product_changed": false,
+    "harness": "backend/tests/test_edcx_ed_a5_01_l10.py (11 passed local y CI)",
+    "channels": [
+      "/api/v1/ode",
+      "/api/v1/complex/singularities (solo localizaciones; no clasifica)"
+    ],
+    "oracle": "residuo simbolico + wronskiano no nulo + la forma cerrada de la fuente tambien satisface la EDO; para series, comparacion de coeficientes con el desarrollo de la forma cerrada; para polinomios, eleccion documentada de constantes",
+    "runs": [
+      {
+        "gate": "cumulative",
+        "sha": "50d9ca03393c71bcc8c07cce8c6186f7dd1abb4a",
+        "run_id": 39929466812,
+        "conclusion": "SUCCESS",
+        "tests": "2168 passed, 1 skipped, 6 xfailed; coverage 87.85%"
+      },
+      {
+        "gate": "h1d",
+        "sha": "50d9ca03393c71bcc8c07cce8c6186f7dd1abb4a",
+        "run_id": 39929467052,
+        "conclusion": "SUCCESS"
+      }
+    ],
+    "lite": {
+      "status": "NO_EJECUTADO",
+      "reason": "src/engine/stepEngine/ode.ts solo cubre y'=f(x) y segundo orden con coeficientes constantes; no hay series, Frobenius ni clasificacion de puntos singulares"
     },
     "global_certification": "OPEN"
   }

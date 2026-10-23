@@ -1,3 +1,43 @@
+## 2026-10-23 UTC — r256: EDCX A5 — PASS_SCOPED (Plus), 8 PASS / 2 BLOCKED
+
+**EDCX Parte A, bloque A5 (10 filas, series y Frobenius): 8 PASS + 2 BLOCKED en Plus.**
+No es cierre bilateral: Lite no ejecuta este bloque (gap de alcance de motor);
+la certificación global sigue `OPEN`.
+
+| Bloque | Filas | PASS exacto | PASS_SCOPED | BLOCKED |
+|--------|-------|-------------|-------------|---------|
+| A5 series / Frobenius | 10 | 5 | 3 | 2 |
+
+- PASS exacto (`ED-F-01..05`): el motor devuelve la solución general en forma
+  cerrada (trigonométrica, Airy y Bessel). Se verifica residuo simbólico nulo,
+  wronskiano no nulo y que la forma cerrada de la fuente también satisfaga la
+  EDO.
+- PASS_SCOPED (`ED-F-06..08`): F-06 devuelve la serie truncada `O(x^6)` y sus
+  coeficientes coinciden con el desarrollo de la forma cerrada de Legendre;
+  F-07/F-08 devuelven la familia general y la solución polinomial de la fuente
+  se obtiene fijando las constantes (`C2=-1/2`, `C2=-1`, respectivamente).
+  El renombrado/elección queda documentado, no se compara texto.
+- BLOCKED (`ED-F-09..10`): la fila pide **clasificar** `x=0` (regular /
+  irregular). El producto resuelve la EDO (Bessel) pero no emite clasificación;
+  el único canal con «singularities» (`/api/v1/complex/singularities`) devuelve
+  solo el conjunto de puntos (`{0}`), sin tipo ODE, y no existe operación de
+  clasificación regular/irregular.
+
+Acumulado EDCX A1–A5: **153 / 638 filas, 88 PASS / 65 BLOCKED** en Plus.
+
+### Evidencia CI Plus
+
+| HEAD | Cumulative | H1d |
+|------|------------|-----|
+| `50d9ca03` (A5) | [39929466812](https://github.com/c2melendez/precision-lab-plus/actions/runs/39929466812) **SUCCESS** | [39929467052](https://github.com/c2melendez/precision-lab-plus/actions/runs/39929467052) **SUCCESS** |
+
+Backend cumulative: **2168 passed, 1 skipped, 6 xfailed**, cobertura **87.85%**.
+Harness A5: 11/11.
+
+**Siguiente acción única:** EDCX A6 (EDP, 26 filas).
+
+---
+
 ## 2026-10-23 UTC — r255: EDCX A3+A4 — PASS_SCOPED (Plus), 4 PASS / 36 BLOCKED
 
 **EDCX Parte A, bloques A3 (16 filas) y A4 (24 filas): 4 PASS + 36 BLOCKED en Plus.**

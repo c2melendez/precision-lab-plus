@@ -1,3 +1,18 @@
+## 2026-10-23 UTC — r256: EDCX A5 (Plus scoped)
+
+- Plus `50d9ca03` (A5): cumulative [39929466812] SUCCESS — 2168 passed, 1 skipped,
+  6 xfailed, cobertura 87.85%; H1d [39929467052] SUCCESS. Harness A5 11/11.
+- A5: 10 filas -> 5 PASS exactos (`ED-F-01..05`: trigonométrica, Airy, Bessel;
+  residuo + wronskiano + forma cerrada de la fuente) + 3 PASS_SCOPED
+  (`ED-F-06..08`: serie truncada de Legendre y polinomios de Hermite/Chebyshev
+  por elección de constantes) + 2 BLOCKED (`ED-F-09..10`: clasificación de
+  punto singular regular/irregular sin canal).
+- Acumulado EDCX A1–A5: 153 filas, 88 PASS / 65 BLOCKED.
+- Lite: A5 sin ejecutar (`NO_EJECUTADO`); sin PASS/FAIL bilateral.
+- Siguiente: EDCX A6 (EDP, 26 filas).
+
+---
+
 ## 2026-10-23 UTC — r255: EDCX A3+A4 (Plus scoped)
 
 - Plus `6aef2571` (A3): cumulative [39926515965] SUCCESS — 2130 passed, 1 skipped,
