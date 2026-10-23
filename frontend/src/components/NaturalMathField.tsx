@@ -39,6 +39,17 @@ declare global {
  * `matrix_service`/`parsing.py`) — se reescribe como `(x)**(1/(n))`, que
  * SÍ entiende (`convert_xor`/`**` ambos soportados).
  */
+function rewriteAbsoluteBars(ascii: string): string {
+  let result = ascii;
+  const innermost = /\|([^|]+)\|/g;
+  for (let i = 0; i < 12; i++) {
+    const next = result.replace(innermost, "abs($1)");
+    if (next === result) break;
+    result = next;
+  }
+  return result;
+}
+
 function rewriteNthRoot(ascii: string): string {
   const pattern = /root\s*\(\s*([^()]+?)\s*\)\s*\(\s*([^()]+?)\s*\)/g;
   let result = ascii;
@@ -92,6 +103,10 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "variancepop",
   "sign",
   "root",
+  "cbrt",
+  "ceil",
+  "floor",
+  "doublefactorial",
   "log",
   "Log",
   "acsch",
@@ -191,6 +206,99 @@ function rewriteLogSubscriptBase(ascii: string): string {
   return result;
 }
 
+
+function normalizeS26A2Delimiters(input: string): string {
+  const bs = String.fromCharCode(92);
+  let out = input.split(bs + "mleft").join(bs + "left").split(bs + "mright").join(bs + "right");
+
+  const leftBrace = bs + "left" + bs + "{";
+  const rightBrace = bs + "right" + bs + "}";
+  while (out.includes(leftBrace) && out.includes(rightBrace)) {
+    const start = out.indexOf(leftBrace);
+    const finish = out.indexOf(rightBrace, start + leftBrace.length);
+    if (finish === -1) break;
+    const inner = out.slice(start + leftBrace.length, finish);
+    out = out.slice(0, start) + bs + "left(" + inner + bs + "right)" + out.slice(finish + rightBrace.length);
+  }
+
+  while (out.includes(bs + "left[") && out.includes(bs + "right]")) {
+    const start = out.indexOf(bs + "left[");
+    const finish = out.indexOf(bs + "right]", start + 6);
+    if (finish === -1) break;
+    const inner = out.slice(start + 6, finish);
+    out = out.slice(0, start) + bs + "left(" + inner + bs + "right)" + out.slice(finish + 7);
+  }
+
+  while (out.includes(bs + "lfloor") && out.includes(bs + "rfloor")) {
+    const start = out.indexOf(bs + "lfloor");
+    const finish = out.indexOf(bs + "rfloor", start + 7);
+    if (finish === -1) break;
+    const inner = out.slice(start + 7, finish).trim();
+    out = out.slice(0, start) + bs + "mathrm{floor}(" + inner + ")" + out.slice(finish + 7);
+  }
+
+  const bar = bs + "|";
+  for (let guard = 0; guard < 8; guard++) {
+    const positions: number[] = [];
+    let from = 0;
+    while (true) {
+      const p = out.indexOf(bar, from);
+      if (p === -1) break;
+      positions.push(p);
+      from = p + bar.length;
+    }
+    if (positions.length < 2 || positions.length % 2 !== 0) break;
+    const leftIndex = positions.length / 2 - 1;
+    const start = positions[leftIndex];
+    const finish = positions[leftIndex + 1];
+    const inner = out.slice(start + bar.length, finish);
+    out = out.slice(0, start) + bs + "left|" + inner + bs + "right|" + out.slice(finish + bar.length);
+  }
+
+  return out;
+}
+
+function rewriteS26SyntaxAliases(latex: string): string {
+  let result = normalizeS26A2Delimiters(latex)
+    .replace(
+      /\\operatorname\{choose\}\s*\\left\(([^,()]+?),([^\\(),]+?)\\right\)/g,
+      (_match, n: string, r: string) => `\\mathrm{nCr}\\left(${n},${r}\\right)`,
+    )
+    .replace(
+      /\\operatorname\{choose\}\s*\(([^,()]+),([^()]+)\)/g,
+      (_match, n: string, r: string) => `\\mathrm{nCr}(${n},${r})`,
+    )
+    .replace(/\\(?:dfrac|tfrac)/g, "\\frac")
+    .replace(/\\mleft/g, "\\left")
+    .replace(/\\mright/g, "\\right")
+    .replace(/\\left\[([^\[\]]*?)\\right\]/g, "\\left($1\\right)")
+    .replace(/\\lfloor\s*([^{}]+?)\s*\\rfloor/g, "\\mathrm{floor}($1)")
+    .replace(/\\left\\\|\s*(.*?)\s*\\right\\\|/g, "\\left|$1\\right|")
+    .replace(/\\\\\|\s*(.*?)\s*\\\\\|/g, "\\left|$1\\right|")
+    .replace(/\\times/g, "\\cdot")
+    .replace(/\\ast/g, "\\cdot")
+    .replace(/\\div/g, "/")
+    .replace(/\\(?:leq|le)/g, "\\le")
+    .replace(/\\(?:geq|ge)/g, "\\ge")
+    .replace(/\\(?:neq|ne)/g, "\\ne")
+    .replace(/\\lt/g, "<")
+    .replace(/\\gt/g, ">")
+    .replace(/\\sqrt\[3\]\{([^{}]+)\}/g, "\\mathrm{cbrt}($1)")
+    .replace(/\\sqrt\[3\]([A-Za-z0-9.+-]+)/g, "\\mathrm{cbrt}($1)");
+
+  result = result.replace(
+    /\\binom\{([^{}]+)\}\{([^{}]+)\}/g,
+    (_match, n: string, r: string) => `\\mathrm{nCr}(${n},${r})`,
+  );
+
+  result = result
+    .replace(/(-?\d+(?:\.\d+)?)\\bmod(-?\d+(?:\.\d+)?)/g, "\\mathrm{mod}($1,$2)")
+    .replace(/\\lceil\s*([^{}]+?)\s*\\rceil/g, "\\mathrm{ceil}($1)");
+
+  result = result.replace(/(\d+)!!/g, "\\mathrm{doublefactorial}($1)");
+  return result;
+}
+
 function rewritePostfixPercent(ascii: string): string {
   let result = ascii;
   const pattern = /(\([^()]+\)|(?:\d+(?:\.\d+)?)|(?:[A-Za-z][A-Za-z0-9_]*))%/g;
@@ -242,6 +350,20 @@ function rewriteFiniteAggregateAscii(ascii: string): string | null {
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
 
+  const trimmed = latex.trim();
+  if (
+    (trimmed.includes("\\left(") && trimmed.includes("\\right]")) ||
+    (trimmed.startsWith("[") && trimmed.endsWith(")") && trimmed.includes(","))
+  ) {
+    return "unsupported_interval()";
+  }
+  if (trimmed.includes("\\vec") && trimmed.includes("\\times")) {
+    return "unsupported_cross_product()";
+  }
+  if (trimmed.includes("\\lVert") && trimmed.includes("pmatrix")) {
+    return "unsupported_vector_norm()";
+  }
+
   // S16 REG-009: la tecla |a| inserta \\left|#0\\right|. MathLive no
   // garantiza una forma ASCII que el parser Python interprete como valor
   // absoluto, mientras que el backend sí expone abs(...). Normalizamos
@@ -249,6 +371,7 @@ export function latexToBackendSyntax(latex: string): string {
   const absoluteTrimmed = latex.trim();
   const absoluteMatch =
     absoluteTrimmed.match(/^\\left\|(.*)\\right\|$/s) ??
+    absoluteTrimmed.match(/^\\lvert\s*(.*)\s*\\rvert$/s) ??
     absoluteTrimmed.match(/^\|(.*)\|$/s);
   if (absoluteMatch) return `abs(${latexToBackendSyntax(absoluteMatch[1])})`;
 
@@ -257,12 +380,17 @@ export function latexToBackendSyntax(latex: string): string {
   // MathLive may serialize ± as either \\pm or +-. Preserve its calculator
   // semantics as two branches instead of letting the parser reduce it to -x.
   const pmTrimmed = latex.trim();
+  const binaryPmMatch = pmTrimmed.match(/^(.*?)\\pm\s*(.*?)$/s);
+  if (binaryPmMatch && binaryPmMatch[1].trim() && binaryPmMatch[2].trim()) {
+    return `pm_pair(${latexToBackendSyntax(binaryPmMatch[1])},${latexToBackendSyntax(binaryPmMatch[2])})`;
+  }
   const pmMatch = pmTrimmed.match(/^\\pm\\left\((.*)\\right\)$/s) ?? pmTrimmed.match(/^\\pm\((.*)\)$/s);
   if (pmMatch) return `pm(${latexToBackendSyntax(pmMatch[1])})`;
   // MathLive elimina un signo % literal durante la conversión ASCII.
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
-  const latexWithPercent = latex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
+  const syntaxNormalizedLatex = rewriteS26SyntaxAliases(latex);
+  const latexWithPercent = syntaxNormalizedLatex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
   // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
   // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
   // conocido antes de delegar al conversor, y luego collapseKnownFunctionNames
@@ -275,8 +403,14 @@ export function latexToBackendSyntax(latex: string): string {
   const asciiAggregate = rewriteFiniteAggregateAscii(ascii);
   if (asciiAggregate) return asciiAggregate;
 
-  const collapsed = collapseKnownFunctionNames(ascii);
-  const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
+  const collapsed = collapseKnownFunctionNames(ascii)
+    .replace(/\bchoose\s*\(/g, "nCr(")
+    // MathLive serializa \\binom{n}{r} como "((n) nCr(r))".
+    // Recuperamos la llamada binomial sin introducir reglas por caso.
+    .replace(/\(\s*\(?\s*([^()]+?)\s*\)?\s+nCr\s*\(\s*([^()]+?)\s*\)\s*\)/g, "nCr($1,$2)")
+    .replace(/[∗×]/g, "*")
+    .replace(/[÷]/g, "/");
+  const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(rewriteAbsoluteBars(collapsed)));
   return rewritePostfixPercent(applyDegreeNotation(
     rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii)),
   )).trim();

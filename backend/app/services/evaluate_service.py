@@ -100,6 +100,18 @@ def _apply_degree_conversion(expr: sympy.Expr) -> sympy.Expr:
     return expr.replace(_is_direct_trig, _convert)
 
 
+def _split_top_level_pair(text: str) -> tuple[str, str]:
+    depth = 0
+    for index, char in enumerate(text):
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+        elif char == "," and depth == 0:
+            return text[:index], text[index + 1 :]
+    raise parsing.ParseSecurityError("pm_pair espera exactamente dos argumentos.")
+
+
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
@@ -107,7 +119,32 @@ def evaluate(
 ) -> EvaluateResult:
     substitution_map = _validate_and_parse_substitutions(substitutions)
 
-    input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
+    if expression == "unsupported_cross_product()":
+        raise parsing.ParseSecurityError(
+            "Producto cruz vectorial reconocido, pero todavía no soportado por este evaluador."
+        )
+
+    if expression.startswith("pm_pair(") and expression.endswith(")"):
+        left_text, right_text = _split_top_level_pair(expression[len("pm_pair("):-1])
+        left = parsing.parse_expression_tree(left_text, allow_equation=False)
+        right = parsing.parse_expression_tree(right_text, allow_equation=False)
+        if left.free_symbols or right.free_symbols:
+            raise parsing.ParseSecurityError("± binario requiere argumentos numéricos en evaluación básica.")
+        plus_value = sympy.simplify(left + right)
+        minus_value = sympy.simplify(left - right)
+        return EvaluateResult(
+            expr=sympy.Tuple(plus_value, minus_value),
+            input_expr=sympy.Tuple(left, right),
+            is_numeric=True,
+            approx_value=None,
+        )
+
+    normalized_expression = parsing.normalize_unicode(expression)
+    relation_tokens = ("!=", "<=", ">=", "<", ">")
+    if any(token in normalized_expression for token in relation_tokens):
+        input_expr = parsing.parse_inequality_tree(normalized_expression)
+    else:
+        input_expr = parsing.parse_expression_tree(normalized_expression, allow_equation=False)
     expr = input_expr
 
     if angle_unit == "deg":
@@ -169,6 +206,12 @@ def evaluate(
             raise DomainErrorResult("El resultado no está definido en este dominio.")
     if numeric_value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
         raise DomainErrorResult("El resultado no está definido en este dominio.")
+
+    if numeric_value.is_real is False:
+        try:
+            expr = sympy.simplify(expr)
+        except (AttributeError, ValueError, TypeError):
+            pass
 
     approx = float(numeric_value) if numeric_value.is_real else None
 

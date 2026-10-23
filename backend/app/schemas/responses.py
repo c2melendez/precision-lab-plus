@@ -125,6 +125,43 @@ class ResultType(str, Enum):
     COMPLEX_SINGULARITIES = "complex_singularities"
 
 
+class Step(BaseModel):
+    index: int
+    title: str
+    description: str
+    rule: Optional[str] = None
+    latex_before: str
+    latex_after: str
+
+
+class ResultKind(str, Enum):
+    NUMERIC = "numeric"
+    ALGEBRAIC = "algebraic"
+    RATIONAL = "rational"
+    RADICAL = "radical"
+    LOGARITHMIC = "logarithmic"
+    EXPONENTIAL = "exponential"
+    TRIGONOMETRIC = "trigonometric"
+    COMPLEX = "complex"
+    EQUATION = "equation"
+    INEQUALITY = "inequality"
+    CALCULUS = "calculus"
+    MATRIX = "matrix"
+    GRAPH = "graph"
+    OTHER = "other"
+
+
+class ResultView(BaseModel):
+    key: str
+    label: str
+    latex: str
+    kind: ResultKind
+    # Plus puede asociar el procedimiento a la representación concreta,
+    # no solo a la respuesta global.
+    steps: List[Step] = []
+    has_detailed_steps: bool = False
+
+
 class ErrorCode(str, Enum):
     """Enum central — el backend NUNCA usa un string de error fuera de esta lista.
 
@@ -179,15 +216,6 @@ ERROR_CODE_HTTP_STATUS: Dict[ErrorCode, int] = {
     ErrorCode.UNSUPPORTED_OPERATION: 200,
     ErrorCode.INTERNAL_ERROR: 500,
 }
-
-
-class Step(BaseModel):
-    index: int
-    title: str
-    description: str
-    rule: Optional[str] = None
-    latex_before: str
-    latex_after: str
 
 
 class EquationSolution(BaseModel):
@@ -262,6 +290,10 @@ class MathResponse(BaseModel):
     success: bool
     operation: OperationType
     request_id: str
+    # Contrato S26: clasificación y vistas contextuales declaradas por el
+    # motor. Son aditivas y retrocompatibles mientras migra la UI.
+    result_kind: Optional[ResultKind] = None
+    result_views: List[ResultView] = []
     result_type: Optional[ResultType] = None
     input_text: Optional[str] = None
     input_latex: Optional[str] = None

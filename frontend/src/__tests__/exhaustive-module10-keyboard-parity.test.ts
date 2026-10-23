@@ -82,10 +82,8 @@ describe("Suite exhaustiva original — Módulo 10: teclado ↔ motor (Plus fron
     expect(latexToBackendSyntax(latex)).toBe(expected);
   });
 
-  it("raíz n-ésima algebraica usa una potencia equivalente", () => {
-    const normalized = latexToBackendSyntax("\\sqrt[3]{27}");
-    expect(normalized).toMatch(/27/);
-    expect(normalized).toMatch(/1\/\(3\)/);
+  it("raíz cúbica usa cbrt para conservar la convención real", () => {
+    expect(latexToBackendSyntax("\\sqrt[3]{27}")).toBe("cbrt(27)");
   });
 
   it.each([

@@ -15,12 +15,12 @@ describe("latexToBackendSyntax", () => {
     expect(latexToBackendSyntax("\\sqrt{9}")).toBe("sqrt(9)");
   });
 
-  it("reescribe la raíz n-ésima a potencia fraccionaria (el backend no tiene root())", () => {
-    expect(latexToBackendSyntax("\\sqrt[3]{8}")).toBe("(8)**(1/(3))");
+  it("reescribe la raíz cúbica a cbrt para conservar la raíz real", () => {
+    expect(latexToBackendSyntax("\\sqrt[3]{8}")).toBe("cbrt(8)");
   });
 
-  it("reescribe una raíz n-ésima anidada dentro de otra expresión", () => {
-    expect(latexToBackendSyntax("1+\\sqrt[3]{8}")).toBe("1+(8)**(1/(3))");
+  it("reescribe una raíz cúbica anidada sin perder su semántica real", () => {
+    expect(latexToBackendSyntax("1+\\sqrt[3]{8}")).toBe("1+cbrt(8)");
   });
 
   it("convierte funciones trigonométricas e implícitas", () => {
@@ -84,5 +84,27 @@ describe("latexToBackendSyntax — Fase 10 (funciones de estadística)", () => {
 
   it("no colapsa multiplicación implícita legítima entre variables de una letra", () => {
     expect(latexToBackendSyntax("xyz")).toBe("x y z");
+  });
+});
+
+
+describe("latexToBackendSyntax — S26 Sintaxis 625", () => {
+  it("cubre aliases S26 de sintaxis", () => {
+    expect(latexToBackendSyntax("\\dfrac{1}{2}")).toBe("(1)/(2)");
+    expect(latexToBackendSyntax("\\tfrac{1}{2}")).toBe("(1)/(2)");
+    expect(latexToBackendSyntax("\\binom{5}{2}")).toBe("nCr(5,2)");
+    expect(latexToBackendSyntax("17\\bmod5")).toBe("mod(17,5)");
+    expect(latexToBackendSyntax("\\lceil 2.1\\rceil")).toBe("ceil(2.1)");
+    expect(latexToBackendSyntax("5!!")).toBe("doublefactorial(5)");
+    expect(latexToBackendSyntax("\\sqrt[3]{-8}")).toBe("cbrt(-8)");
+    expect(latexToBackendSyntax("\\sqrt[3]4")).toBe("cbrt(4)");
+  });
+});
+
+
+describe("latexToBackendSyntax — S26 delimitadores y alias MathLive", () => {
+  it("normaliza lvert y choose", () => {
+    expect(latexToBackendSyntax("\\lvert x-1\\rvert")).toBe("abs(x-1)");
+    expect(latexToBackendSyntax("\\operatorname{choose}\\left(5,2\\right)")).toBe("nCr(5,2)");
   });
 });
