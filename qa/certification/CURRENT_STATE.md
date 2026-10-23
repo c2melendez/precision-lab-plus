@@ -1,3 +1,13 @@
+## 2026-10-23 UTC — r272: resultado del harness EDCX-B6 y regresión general
+
+- La corrida [40026869114](https://github.com/c2melendez/precision-lab-plus/actions/runs/40026869114) terminó `SUCCESS` en SHA técnico `bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69`; backend y frontend finalizaron correctamente.
+- El backend reportó `2383 passed, 1 skipped, 10 xfailed`, cobertura total `87.97%`. Los cinco checks de `backend/tests/test_edcx_b6_contract.py` aparecen como `PASSED`: `log(100)`, `ln(e)`, `Log(100)`, respuesta compleja de `Log(-1)` y dominio de `Log(0)`.
+- La corrida H1d [40026869004](https://github.com/c2melendez/precision-lab-plus/actions/runs/40026869004) también terminó `SUCCESS` en el mismo SHA.
+- **Alcance limitado:** esto no certifica las 53 filas VC-FE-01..53 ni la salida multivaluada de VC-FE-11. B6 sigue `REVIEW`; B5 `BLOCKED`; Lite `NO_EJECUTADO`; global `OPEN`. Sin nuevo dispatch.
+- Siguiente acción única: elaborar matriz fila→test→oráculo→estado para las 53 filas B6 y señalar huecos exactos antes de añadir tests o lanzar otra corrida.
+
+---
+
 ## 2026-10-23 UTC — r271: harness mínimo de contrato EDCX-B6 creado (sin ejecutar)
 
 - Añadido `backend/tests/test_edcx_b6_contract.py` en Plus, commit `bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69`. Incluye checks de `log(100)` base 10, `ln(e)`, `Log(100)` principal complejo, respuesta compleja de `Log(-1)` y dominio `Log(0)`.
