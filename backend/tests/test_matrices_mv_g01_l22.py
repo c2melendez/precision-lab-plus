@@ -229,12 +229,13 @@ def test_mv_g_16_zero_vector_norm():
 
 
 def test_mv_g_17_plane_through_three_points():
-    plane = sympy.Plane(
-        sympy.Point3D(1, 0, 0), sympy.Point3D(0, 1, 0), sympy.Point3D(0, 0, 1)
-    )
-    x, y, z = sympy.symbols("x y z")
-    eq = sympy.expand(plane.equation())
-    assert sympy.expand(eq - (x + y + z - 1)) == 0
+    pts = [sympy.Point3D(1, 0, 0), sympy.Point3D(0, 1, 0), sympy.Point3D(0, 0, 1)]
+    plane = sympy.Plane(*pts)
+    # Oracle x+y+z=1: the three points lie on the plane and the normal ∥ (1,1,1).
+    assert all(plane.distance(p) == 0 for p in pts)
+    n = sympy.Matrix(plane.normal_vector)
+    assert n.cross(sympy.Matrix([1, 1, 1])).norm() == 0
+    assert plane.distance(sympy.Point3D(0, 0, 0)) == sympy.sqrt(sympy.Rational(1, 3))
 
 
 def test_mv_g_18_distance_point_to_plane():
