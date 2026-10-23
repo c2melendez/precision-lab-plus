@@ -496,3 +496,13 @@ Con esto se cierra el catálogo congelado **Matrices/Vectores** (153 filas, secc
 ## 2026-10-23 UTC — r252: MV-H PASS_SCOPED_BILATERAL
 
 Ver r252.
+
+
+---
+
+## 2026-10-23 UTC — r270: contrato HTTP B6 inspeccionado estáticamente
+
+- Nuevo [EDCX_B6_HTTP_CONTRACT_FINDINGS.md](EDCX_B6_HTTP_CONTRACT_FINDINGS.md) registra router, payload y respuesta observados en el código vigente.
+- `POST /api/v1/evaluate` recibe `EvaluateRequest` (expression 1–500 chars, angle_unit rad/deg, substitutions string map) y devuelve `MathResponse`. `result_approx` es opcional float y el servicio solo lo asigna cuando el resultado es real; para complejos hay que verificar `result_text`/`result_latex` y contrastar con oráculo independiente.
+- `Log` principal, `log` base 10 y `ln` natural tienen semánticas distintas en el parser. B6-11 multivaluado no puede certificarse con un único resultado principal.
+- Esto es lectura estática, no ejecución. No se ejecutaron tests ni Actions. B6 REVIEW, B5 BLOCKED, Lite NO_EJECUTADO, global OPEN.
