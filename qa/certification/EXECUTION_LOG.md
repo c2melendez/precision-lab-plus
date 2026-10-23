@@ -1,3 +1,11 @@
+## 2026-10-23 UTC — r264: registro gates r263 — Plus success
+
+- r264: gates r263 Plus en success: cumulative 40014981162, H1d 40014985059, Native Syntax 40014988262 sobre 177955dc.
+- Plus/Lite B4 mantienen la clasificación de r263; no se toca producto.
+- Siguiente: EDCX-B5 READY, no iniciado.
+
+---
+
 ## 2026-10-23 UTC — r263: EDCX B4 (Plus scoped)
 
 - Plus `7e501f5` (test-first): cumulative [40014004350] SUCCESS; H1d [40014004348] SUCCESS. Harness local 33 passed, 4 xfailed.

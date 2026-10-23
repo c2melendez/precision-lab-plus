@@ -1,3 +1,10 @@
+## 2026-10-23 UTC — r264: registro gates r263 — Plus success
+
+- r264: gates r263 Plus en success: cumulative 40014981162, H1d 40014985059, Native Syntax 40014988262 sobre 177955dc.
+- Siguiente: EDCX-B5 (25 filas, prefijo VC-LG), READY, no iniciado.
+
+---
+
 ## 2026-10-23 UTC — r263: EDCX B4 — 14 PASS + 14 PASS_SCOPED / 4 FAIL / 2 BLOCKED (Plus)
 
 **EDCX Parte B, bloque B4 (34 filas, ecuaciones en C, VC-EC-01..34): medido en Plus.**
