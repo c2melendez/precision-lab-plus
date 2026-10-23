@@ -1,3 +1,13 @@
+## 2026-10-23 UTC — r273: trazabilidad fila-a-fila de EDCX-B6
+
+- Publicada [EDCX_B6_TEST_TRACEABILITY.md](EDCX_B6_TEST_TRACEABILITY.md), que cruza las 53 filas fuente con el harness y la evidencia CI.
+- Resultado preciso: **0/53 filas tiene aceptación matemática completa demostrada por el harness actual**. `VC-FE-05` solo verifica que la salida compleja tenga texto/LaTeX y `result_approx=null`; no compara con `iπ`. `VC-FE-14` verifica `DOMAIN_ERROR`. `VC-FE-11` sigue bloqueada por requerir conjunto multivaluado.
+- La corrida 40026869114 terminó `SUCCESS`; backend `2383 passed, 1 skipped, 10 xfailed`, cobertura 87.97%; los cinco checks del harness pasaron. Esto no cierra B6.
+- Siguiente acción única: especificar adaptador de entrada y oráculo independiente para el primer grupo escalar `VC-FE-01..03` y `VC-FE-06..10`; después preparar pruebas concretas y evitar un nuevo dispatch hasta confirmar el conjunto mínimo de gates.
+- B6 `REVIEW`; B5 `BLOCKED`; Lite `NO_EJECUTADO`; global `OPEN`. Sin nueva corrida.
+
+---
+
 ## 2026-10-23 UTC — r272: resultado del harness EDCX-B6 y regresión general
 
 - La corrida [40026869114](https://github.com/c2melendez/precision-lab-plus/actions/runs/40026869114) terminó `SUCCESS` en SHA técnico `bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69`; backend y frontend finalizaron correctamente.
