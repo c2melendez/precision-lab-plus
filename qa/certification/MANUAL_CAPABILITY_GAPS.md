@@ -603,3 +603,38 @@ Ninguna de estas filas se cuenta como PASS.
 - Las respuestas de la fuente se comprueban con oráculos sympy independientes,
   pero nunca se atribuyen al producto.
 - Lite: sin motor EDO equivalente; NO_EJECUTADO.
+
+
+## 2026-10-23 — EDCX B1: conversión entre representaciones (r260)
+
+- Estado: **45 PASS_SCOPED / 4 BLOCKED en Plus** (49 filas). Acumulado EDCX:
+  259/638 filas, 138 PASS / 121 BLOCKED.
+- **Sin notación polar de entrada:** `2_{pi/3}` devuelve `PARSE_ERROR`;
+  `2 angle pi/3` se acepta silenciosamente como `2*pi*angle/3`, es decir,
+  `angle` es un símbolo libre y no un operador. La forma trigonométrica
+  `r*(cos(theta)+i*sin(theta))` sí es sintaxis válida, y por eso las 10 filas P
+  se traducen a esa forma antes de ejecutar.
+- **Sin emisor polar:** `topolar(z)` no devuelve `r_theta`; colapsa a binómica
+  (`topolar(3)=3`, `topolar(-2)=-2`) o a una raíz
+  (`topolar(1+i)=(-1)**(1/4)*sqrt(2)`). El único endpoint con «polar» en el
+  nombre es `/api/v1/graph/polar`, que grafica `r=f(theta)` y no convierte un
+  complejo.
+- **Ruta certificada:** `abs(z)` y `arg(z)` entregan `(r, theta)` exactos; el
+  oráculo sympy verifica `r*exp(i*theta)=z`, `r*cos(theta)+i*r*sin(theta)=z` y
+  `re(z)+i*im(z)=z`. Es una composición de operaciones reales, no una forma que
+  el producto emita; de ahí PASS_SCOPED y no PASS exacto.
+- **`B-17` (`z=0`) BLOCKED:** `abs(0)=0` es correcto, pero `arg(0)` devuelve
+  `0` sin aviso, mientras que `topolar(0)` sí devuelve `DOMAIN_ERROR`. La fila
+  exige argumento indefinido con aviso claro; el canal de argumento contradice
+  al de conversión.
+- **`T-09/T-10/X-12` BLOCKED:** con `theta` simbólico el canal devuelve
+  `Abs(exp(I*theta)+1)`, `Abs(1-exp(-I*theta))`, `exp(im(theta))` y `arg(...)`
+  sin reducir. No entrega `(2cos(theta/2))_{theta/2}`,
+  `2sin(theta/2)_{(pi-theta)/2}` ni `1_{-theta}`.
+- **Hallazgo de rama:** `arg(exp(i*pi))` y `arg(exp(1+i*pi))` devuelven
+  `result_text=pi` pero `result_approx=-3.141592653589793`. La fila X-01 exige
+  explícitamente `pi`, no `-pi`; el valor exacto cumple, el aproximado no.
+- **Convención de logaritmos:** `log` es base 10 (`log(2)=ln(2)/ln(10)`) y `ln`
+  es natural. La fila X-10 usa `ln`, igual que la fuente; con `log(2)` el
+  módulo sería `2**(1/ln(10))`, no `2`.
+- Lite: sin motor de variable compleja equivalente; NO_EJECUTADO.

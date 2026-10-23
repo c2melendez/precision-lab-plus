@@ -1,3 +1,51 @@
+## 2026-10-23 UTC — r260: EDCX B1 — 45 PASS_SCOPED / 4 BLOCKED (Plus)
+
+**EDCX Parte B, bloque B1 (49 filas, conversión entre representaciones): 45 PASS_SCOPED + 4 BLOCKED en Plus.**
+No es cierre bilateral: Lite no ejecuta EDCX (gap de alcance de motor);
+la certificación global sigue `OPEN`.
+
+| Bloque | Filas | PASS exacto | PASS_SCOPED | BLOCKED |
+|--------|-------|-------------|-------------|---------|
+| B1 conversión B/P/T/X | 49 | 0 | 45 | 4 |
+
+- **Canal:** la forma binómica (`1+i`), la trigonométrica
+  (`r*(cos(t)+i*sin(t))`) y la exponencial (`exp(i*t)`) se evalúan. No hay
+  notación polar de entrada: `2_{pi/3}` devuelve `PARSE_ERROR` y
+  `2 angle pi/3` se interpreta como `2*pi*angle/3`. Tampoco hay emisor polar:
+  `topolar(3)=3`, `topolar(-2)=-2`, `topolar(1+i)=(-1)**(1/4)*sqrt(2)`.
+- **PASS_SCOPED (45):** `abs` y `arg` devuelven `(r, theta)` exactos y el
+  oráculo sympy verifica `r*exp(i*theta)=z` (X), `r*cos(theta)+i*r*sin(theta)=z`
+  (T) y `re(z)+i*im(z)=z` (B). Las 10 filas P exigen la traducción documentada
+  `r_theta -> r*(cos(theta)+i*sin(theta))`; no se atribuye al producto una
+  notación que no emite.
+- **BLOCKED (4):**
+  - `B-17` (`z=0`): el módulo `0` es correcto, pero `arg(0)=0` sin aviso
+    mientras `topolar(0)` sí devuelve `DOMAIN_ERROR`; la fila exige argumento
+    indefinido con aviso claro.
+  - `T-09/T-10/X-12` (`theta` simbólico): el canal devuelve `Abs(...)` y
+    `arg(...)` sin reducir; no entrega las formas semángulo
+    `2cos(theta/2)_{theta/2}`, `2sin(theta/2)_{(pi-theta)/2}` ni `1_{-theta}`.
+- **Hallazgo:** `arg(exp(i*pi))` y `arg(exp(1+i*pi))` devuelven `result_text=pi`
+  pero `result_approx=-3.141592653589793`; el canal exacto y el aproximado
+  discrepan en el corte de rama.
+- **Convención:** `log` es base 10 y `ln` es natural. `X-10` usa `ln` (igual
+  que la fuente); con `log(2)` el módulo sería `2**(1/ln(10))`, no `2`.
+
+Acumulado EDCX (Parte A + B1): **259 / 638 filas, 138 PASS / 121 BLOCKED** en Plus.
+
+### Evidencia CI Plus
+
+| HEAD | Cumulative | H1d |
+|------|------------|-----|
+| `a53449db` (B1) | [39940618566](https://github.com/c2melendez/precision-lab-plus/actions/runs/39940618566) **SUCCESS** | [39940618559](https://github.com/c2melendez/precision-lab-plus/actions/runs/39940618559) **SUCCESS** |
+
+Backend cumulative: **2285 passed, 1 skipped, 6 xfailed**, cobertura **87.94%**.
+Harness B1: 61/61.
+
+**Siguiente acción única:** EDCX Parte B, bloque B2 (operaciones, 41 filas: 11/9/9/12).
+
+---
+
 ## 2026-10-23 UTC — r259: EDCX A8 + cierre Parte A — 0 PASS / 6 BLOCKED (Plus)
 
 **EDCX Parte A, bloque A8 (6 filas, casos límite): 0 PASS / 6 BLOCKED en Plus. Parte A completa: 210 / 638 filas, 93 PASS / 117 BLOCKED.**

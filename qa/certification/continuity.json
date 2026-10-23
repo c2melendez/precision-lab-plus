@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 259,
+  "revision": 260,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "c3d389721a6ad5503508f5168f653105ee976fe4",
-  "baseline_case": "EDCX-A8-CLOSURE-R259",
+  "technical_baseline_sha": "a53449db2e4104f32e84bd6090a61acd0e90cb47",
+  "baseline_case": "EDCX-B1-FORMS-R260",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "prose_only_paths": [
@@ -41,14 +41,14 @@
     }
   },
   "next_action": {
-    "id": "EDCX-B1-FORMS",
+    "id": "EDCX-B2-OPERATIONS",
     "status": "READY",
-    "action": "Iniciar EDCX Parte B con el bloque B1 (49 filas, conversion de formas) en Plus. Medir primero que operaciones de variable compleja existen realmente: forma binomica/polar/exponencial, modulo/argumento, conjugado, conversion inversa y normalizacion de cuadrantes. Registrar PASS/BLOCKED con oraculo independiente y no reutilizar los runs de A8 como evidencia. Lite sigue sin motor complejo equivalente; no declarar paridad sin ejecucion.",
+    "action": "Continuar EDCX Parte B con el bloque B2 (41 filas: 11/9/9/12) en Plus. Medir primero que operaciones de variable compleja existen realmente (suma, resta, producto, cociente, conjugado, modulo, argumento, potencia y raiz) y con que notacion de entrada; clasificar PASS/PASS_SCOPED/BLOCKED con oraculo sympy independiente. No reutilizar los runs de B1 como evidencia. Lite sigue sin motor complejo equivalente; no declarar paridad sin ejecucion.",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-plus": "c3d389721a6ad5503508f5168f653105ee976fe4"
+      "c2melendez/precision-lab-plus": "a53449db2e4104f32e84bd6090a61acd0e90cb47"
     },
     "product_changed": false,
-    "audit": "r259: A8 se midio con harness propio y gates verdes en el SHA exacto (c3d38972: cumulative 39935820474, H1d 39935820754). El bloque A8 no cambio producto; la Parte A queda completa. Global OPEN."
+    "audit": "r260: B1 se midio con harness propio y gates verdes en el SHA exacto (a53449db: cumulative 39940618566, H1d 39940618559). 45 PASS_SCOPED / 4 BLOCKED. No hay notacion polar de entrada ni salida; la conversion se certifica con abs+arg y oraculo. Global OPEN."
   },
   "blockers": [
     {
@@ -2590,6 +2590,87 @@
     "lite": {
       "status": "NO_EJECUTADO",
       "reason": "src/engine/stepEngine/ode.ts solo cubre y'=f(x) y segundo orden con coeficientes constantes; no hay analisis de existencia/unicidad, ramas multiples, intervalo maximo ni fronteras"
+    },
+    "global_certification": "OPEN"
+  },
+  "edcx_b1_closure_r260": {
+    "status": "PASS_SCOPED",
+    "scope": "EDCX Parte B B1 (49 filas, conversion entre representaciones B/P/T/X) en Plus",
+    "rows_total": 49,
+    "rows_pass": 45,
+    "rows_pass_scoped": 45,
+    "rows_blocked": 4,
+    "classification": {
+      "pass_scoped": [
+        "VC-CV-B-01..16",
+        "VC-CV-P-01..10",
+        "VC-CV-T-01..08",
+        "VC-CV-X-01..11"
+      ],
+      "blocked": {
+        "VC-CV-B-17": "arg(0)=0 sin aviso; topolar(0) si devuelve DOMAIN_ERROR (contradiccion interna); la fila exige argumento indefinido con aviso claro",
+        "VC-CV-T-09": "abs/arg devuelven Abs(exp(I*theta)+1) y arg(exp(I*theta)+1) sin reducir; no entrega (2cos(theta/2))_{theta/2} ni la forma exponencial semiangulo",
+        "VC-CV-T-10": "abs/arg devuelven Abs(1-exp(-I*theta)) y arg(1-exp(-I*theta)) sin reducir; no entrega 2sin(theta/2)_{(pi-theta)/2}",
+        "VC-CV-X-12": "abs/arg devuelven exp(im(theta)) y arg(exp(-I*theta)) sin reducir; no entrega 1_{-theta} ni cos(theta)-i sin(theta)"
+      }
+    },
+    "channel": "Forma binomica, trigonometrica y exponencial aceptadas en sintaxis ASCII. No existe notacion polar de entrada: 2_{pi/3} devuelve PARSE_ERROR y '2 angle pi/3' se interpreta como 2*pi*angle/3. No existe emisor polar: topolar(3)=3, topolar(-2)=-2, topolar(1+i)=(-1)**(1/4)*sqrt(2).",
+    "certification_route": "abs(z) y arg(z) entregan (r, theta) exactos; el oraculo sympy verifica r*exp(I*theta)=z (X), r*cos(theta)+I*r*sin(theta)=z (T) y re(z)+I*im(z)=z (B). Las 10 filas P requieren la traduccion documentada r_theta -> r*(cos(theta)+i*sin(theta)).",
+    "product_changed": false,
+    "harness": "backend/tests/test_edcx_ed_b1_01_l49.py (61 passed local y CI)",
+    "channels": [
+      "/api/v1/evaluate (abs, arg, re, im, topolar)"
+    ],
+    "oracle": "sympy independiente: par (z, r, theta) por fila; identidades r*exp(I*theta)=z, r*cos(theta)+I*r*sin(theta)=z, re+I*im=z; factorizacion 1+exp(I*theta)=2cos(theta/2)exp(I*theta/2) y 1-exp(-I*theta)=2i sin(theta/2)exp(-I*theta/2)",
+    "findings": [
+      "arg(exp(i*pi)) y arg(exp(1+i*pi)) devuelven result_text='pi' pero result_approx=-3.141592653589793; el canal exacto y el aproximado discrepan en el corte de rama.",
+      "log es base 10 y ln es natural; la fila X-10 usa ln (coincide con la fuente). Con log(2) el resultado seria 2^(1/ln 10), no 2.",
+      "topolar colapsa a binomica o a forma de raiz; no emite r_theta."
+    ],
+    "runs": [
+      {
+        "gate": "cumulative",
+        "sha": "a53449db2e4104f32e84bd6090a61acd0e90cb47",
+        "run_id": 39940618566,
+        "conclusion": "SUCCESS",
+        "tests": "2285 passed, 1 skipped, 6 xfailed; coverage 87.94%"
+      },
+      {
+        "gate": "h1d",
+        "sha": "a53449db2e4104f32e84bd6090a61acd0e90cb47",
+        "run_id": 39940618559,
+        "conclusion": "SUCCESS"
+      }
+    ],
+    "parte_b_cumulative": {
+      "rows": 49,
+      "pass": 45,
+      "blocked": 4,
+      "source_rows": 638
+    },
+    "edcx_cumulative": {
+      "rows": 259,
+      "pass": 138,
+      "blocked": 121,
+      "source_rows": 638
+    },
+    "parts": {
+      "A": {
+        "rows": 210,
+        "measured": true
+      },
+      "B": {
+        "rows": 428,
+        "measured": false,
+        "measured_blocks": [
+          "B1"
+        ],
+        "rows_measured": 49
+      }
+    },
+    "lite": {
+      "status": "NO_EJECUTADO",
+      "reason": "Sin motor de variable compleja equivalente: la conversion B/P/T/X no esta implementada y no se declara paridad sin ejecucion"
     },
     "global_certification": "OPEN"
   }

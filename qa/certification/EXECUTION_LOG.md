@@ -1,3 +1,23 @@
+## 2026-10-23 UTC — r260: EDCX B1 (Plus scoped)
+
+- Plus `a53449db` (B1): cumulative [39940618566] SUCCESS — 2285 passed, 1 skipped,
+  6 xfailed, cobertura 87.94%; H1d [39940618559] SUCCESS. Harness B1 61/61.
+- B1: 49 filas -> 45 PASS_SCOPED + 4 BLOCKED. No hay notación polar de entrada
+  (`2_{pi/3}` -> `PARSE_ERROR`; `2 angle pi/3` -> `2*pi*angle/3`) ni de salida
+  (`topolar(3)=3`, `topolar(-2)=-2`, `topolar(1+i)=(-1)**(1/4)*sqrt(2)`).
+  La conversión se certifica con `abs`+`arg` y oráculo sympy que reconstruye
+  `r*exp(i*theta)=z`, `r*cos(theta)+i*r*sin(theta)=z` y `re+i*im=z`; las 10
+  filas P usan la traducción documentada `r_theta -> r*(cos+i*sin)`.
+- BLOCKED: `B-17` (`arg(0)=0` sin aviso frente a `topolar(0)=DOMAIN_ERROR`) y
+  `T-09/T-10/X-12` (formas semángulo simbólicas sin reducir).
+- Hallazgo: `arg(exp(i*pi))` exacto `pi` y aproximado `-3.14159`; `log` base 10
+  frente a `ln` natural (`X-10` usa `ln`, como la fuente).
+- Acumulado EDCX (A + B1): 259 / 638 filas, 138 PASS / 121 BLOCKED.
+- Lite: EDCX sin ejecutar (`NO_EJECUTADO`); sin PASS/FAIL bilateral.
+- Siguiente: EDCX Parte B, bloque B2 (operaciones, 41 filas).
+
+---
+
 ## 2026-10-23 UTC — r259: EDCX A8 y cierre de la Parte A (Plus)
 
 - Plus `c3d38972` (A8): cumulative [39935820474] SUCCESS — 2224 passed, 1 skipped,
