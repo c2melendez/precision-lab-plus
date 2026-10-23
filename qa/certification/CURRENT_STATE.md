@@ -1,27 +1,29 @@
-## 2026-10-23 UTC — r250: MV-F-01..17 PASS_SCOPED_BILATERAL
+## 2026-10-23 UTC — r251: MV-G-01..22 PASS_SCOPED_BILATERAL
 
-**MV-F — PASS_SCOPED_BILATERAL** (alcance por motor).
+**MV-G (operaciones vectoriales + geometría 3D) — PASS_SCOPED_BILATERAL.**
 
-### Alcance por repo
+### Superficies
 
-| Repo | Cobertura |
-|------|-----------|
-| **Plus** | F-01..17 completos: eigen, charpoly, Cayley–Hamilton, diagonalize, potencias (A³⁰) |
-| **Lite** | F-14..17 potencias exactas (Fraction); F-12 Cayley–Hamilton; ancla JSONL/fuente; eigen i/√5 en Plus |
+| Operación | Plus | Lite |
+|-----------|------|------|
+| Suma / dot / cross | `/matrix/operations` | `addMatrices` / `dotProduct` / `crossProduct` |
+| Norma | `/matrix/norm` | `vectorNorm` |
+| Errores dim / 2D cross | `DIMENSION_MISMATCH` | throw |
+| Proyección, ángulo, triple, plano, distancias, intersecciones | oráculo SymPy en suite | fórmulas exactas en suite |
 
 ### Evidencia CI
 
 | Repo | HEAD | Cumulative |
 |------|------|------------|
-| Plus | `929bc64` | [39910191954](https://github.com/c2melendez/precision-lab-plus/actions/runs/39910191954) **SUCCESS** |
-| Lite | `5ed9af0` | [39910910006](https://github.com/c2melendez/precision-lab-lite/actions/runs/39910910006) **SUCCESS** |
+| Plus | `981924c` | [39912625355](https://github.com/c2melendez/precision-lab-plus/actions/runs/39912625355) **SUCCESS** |
+| Lite | `0aba84c` | [39912143550](https://github.com/c2melendez/precision-lab-lite/actions/runs/39912143550) **SUCCESS** |
 
-Suites: Plus `test_matrices_mv_f01_l17.py`; Lite `tests/matricesMvF01to17.audit.test.ts`.
+Suites: Plus `test_matrices_mv_g01_l22.py`; Lite `tests/matricesMvG01to22.audit.test.ts`.
 
-**Siguiente acción única:** **MV-G** (siguiente sección de la matriz congelada).
+**Siguiente acción única:** **MV-H** (siguiente sección de la matriz congelada).
 
 ---
 
-## 2026-10-23 UTC — r249: MV-F Plus product PASS
+## 2026-10-23 UTC — r250: MV-F PASS_SCOPED_BILATERAL
 
-Power ±32; cumulative SUCCESS. Lite completado en r250.
+Plus full F-01..17; Lite powers + CH. Ver r249–r250.

@@ -1,11 +1,11 @@
-## 2026-10-23 UTC — r250: MV-F PASS_SCOPED_BILATERAL
+## 2026-10-23 UTC — r251: MV-G-01..22 PASS_SCOPED_BILATERAL
 
-- Plus full F-01..17 [39910191954] SUCCESS.
-- Lite powers F-14..17 + CH [39910910006] SUCCESS @ `5ed9af0`.
-- Siguiente: MV-G.
+- Plus suite vector + geometry [39912625355] SUCCESS @ `981924c`.
+- Lite [39912143550] SUCCESS @ `0aba84c`.
+- Siguiente: MV-H.
 
 ---
 
-## 2026-10-23 UTC — r249: MV-F Plus product PASS
+## 2026-10-23 UTC — r250: MV-F PASS_SCOPED_BILATERAL
 
-- Cumulative [39910191954] SUCCESS @ `929bc64`.
+- Plus [39910191954] / Lite [39910910006] SUCCESS.
