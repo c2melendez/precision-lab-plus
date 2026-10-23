@@ -2933,7 +2933,6 @@
   "latest_reconciliation": {
     "checked_at": "2026-10-23",
     "branch": "qa/syntax-audit-in625-a1",
-    "branch_head_sha": "d854f379583b5479abe4fe6e43fa545a81ff8b6b",
     "latest_visible_push_run_sha": "bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69",
     "latest_visible_push_run_ids": [
       40026869114,
@@ -2942,6 +2941,8 @@
     "latest_visible_pull_request_run_sha": "e5a86514d289fb5224eaf43e57e76722808cbdc0",
     "latest_visible_pull_request_date": "2026-10-08",
     "finding": "PR #29 visible page includes S25 Security Gate FAILURE and S21 Cross-browser Compatibility FAILURE; latest visible PR event is older than current HEAD.",
-    "coverage_limit": "Actions API listing was inspected with bounded first-page queries (15 latest branch runs and 10 pull_request runs); not a complete historical audit. No workflow was dispatched by this reconciliation."
+    "coverage_limit": "Actions API listing was inspected with bounded first-page queries (15 latest branch runs and 10 pull_request runs); not a complete historical audit. No workflow was dispatched by this reconciliation.",
+    "branch_head_sha_at_reconciliation": "d854f379583b5479abe4fe6e43fa545a81ff8b6b",
+    "note": "Snapshot taken before r275 documentation commits; those documentation commits advanced the branch HEAD and did not alter product code or execute workflows."
   }
 }
