@@ -8,6 +8,7 @@
     "configFile": "stryker.vitest.config.ts"
   },
   "mutate": [
+    "src/components/systemSplit.ts",
     "src/components/fractionDisplay.ts",
     "src/utils/unitConversion.ts"
   ],
