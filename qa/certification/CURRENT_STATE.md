@@ -1,30 +1,33 @@
-## 2026-10-23 UTC — r252: MV-H-01..12 PASS_SCOPED_BILATERAL
+## 2026-10-23 UTC — r253: MV-J-01..07 PASS_SCOPED_BILATERAL — CATÁLOGO MV COMPLETO
 
-**MV-H (productos mixtos, 1×1, hermítica, estructuras 10×10, Hilbert, límites) — PASS_SCOPED_BILATERAL.**
+**MV-J (transformaciones geométricas) — PASS_SCOPED_BILATERAL.**
 
-### Cobertura
+Con esto se cierra el catálogo congelado **Matrices/Vectores** (153 filas, secciones A–H + J):
 
-| Caso | Plus | Lite |
-|------|------|------|
-| H-01..05, H-12 | API multiply/inverse/power + PARSE | engine multiply/invert/power |
-| H-06 hermítica | SymPy `Matrix.H` | — (complejos) |
-| H-07 rank a_ij=i+j | SymPy 10×10 = 2 | proxy 6×6 rank 2 |
-| H-08 tridiagonal det | SymPy 10×10 = 11 | 6×6 det = 7 (n+1) |
-| H-09 det simbólico 4×4 | 24 términos Leibniz | — |
-| H-10 Hilbert | 8×8 entero + 4×4 API | 4×4 inverse entero |
-| H-11 oversize | 422 sin hang (max 6) | — |
+| Sección | Tema | Estado |
+|---------|------|--------|
+| A–D | Aritmética, sistemas, det/inv, Gram-Schmidt | PASS formal bilateral (r≤249) |
+| E | Espacios (null/col/rank simbólico) | PASS_SCOPED_BILATERAL |
+| F | Potencias + eigen | PASS_SCOPED_BILATERAL |
+| G | Vectores + geometría 3D | PASS_SCOPED_BILATERAL |
+| H | Productos mixtos, Hilbert, límites | PASS_SCOPED_BILATERAL |
+| **J** | Rotación / reflexión / shear / composición | **PASS_SCOPED_BILATERAL** |
 
-### Evidencia CI
+### Evidencia CI MV-J
 
 | Repo | HEAD | Cumulative |
 |------|------|------------|
-| Plus | `a6a28e4` | [39913600442](https://github.com/c2melendez/precision-lab-plus/actions/runs/39913600442) **SUCCESS** |
-| Lite | `1ecfbb0` | [39913642080](https://github.com/c2melendez/precision-lab-lite/actions/runs/39913642080) **SUCCESS** |
+| Plus | `2fcd869` | [39914423538](https://github.com/c2melendez/precision-lab-plus/actions/runs/39914423538) **SUCCESS** |
+| Lite | `40b000b` | [39914455096](https://github.com/c2melendez/precision-lab-lite/actions/runs/39914455096) **SUCCESS** |
 
-**Siguiente acción única:** **MV-J** (última sección de la matriz; no hay I en el JSONL).
+### Notas
+- J-01..05, J-07: API multiply / det / power.
+- J-06 composición simbólica: oráculo SymPy (`R(θ)R(φ)=R(θ+φ)`); Lite proxy numérico R90²=R180.
+
+**Siguiente acción única (fuera de MV):** retomar gates transversales del protocolo de continuidad (p. ej. ampliación Stryker / resto de dominios según CURRENT_STATE previo a la serie MV-E..J), o formalizar cierre del dominio Matrices/Vectores en el registro de certificación.
 
 ---
 
-## 2026-10-23 UTC — r251: MV-G PASS_SCOPED_BILATERAL
+## 2026-10-23 UTC — r252: MV-H PASS_SCOPED_BILATERAL
 
-Vectores + geometría 3D. Ver r251.
+Ver r252.
