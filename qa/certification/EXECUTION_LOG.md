@@ -1,15 +1,13 @@
-## 2026-10-23 UTC — r247: MV-E Plus product PASS; rank allow_symbolic
+## 2026-10-23 UTC — r248: MV-E-01..12 PASS_SCOPED_BILATERAL
 
-- [544d8bd](https://github.com/c2melendez/precision-lab-plus/commit/544d8bdf2d7219c8b1ad186ad666d46267a91942): `/matrix/rank` con `allow_symbolic=True` (E-08).
-- Cumulative [39904542863](https://github.com/c2melendez/precision-lab-plus/actions/runs/39904542863) **SUCCESS** (backend+frontend regression).
-- Superficies: rank, nullspace, columnspace; suite `test_matrices_mv_e01_l12.py`.
-- Lite MV-E aún pendiente (sin nullspace/columnspace ni audit test).
-- Siguiente: paridad Lite → PASS_SCOPED_BILATERAL; luego MV-F.
+- Lite: `src/engine/matrixSpaces.ts` (nullspace/columnspace) + `tests/matricesMvE01to12.audit.test.ts`.
+- Lite cumulative [39905437848](https://github.com/c2melendez/precision-lab-lite/actions/runs/39905437848) **SUCCESS** @ `4f2abd9`.
+- Plus ya verde @ `544d8bd` / [39904542863](https://github.com/c2melendez/precision-lab-plus/actions/runs/39904542863).
+- Siguiente: MV-F.
 
 ---
 
-## 2026-10-23 UTC — r246: cierre formal MV-D-01..17 PASS_SCOPED_BILATERAL
+## 2026-10-23 UTC — r247: MV-E Plus product PASS; rank allow_symbolic
 
-- Condición de campaña S25/S19 cumplida (39890525978, 39899659414 SUCCESS; score 21.10 %).
-- Producto MV-D ya verde en Lite `c28091c` y Plus `91d7f7b`.
-- Siguiente objetivo era MV-E (ahora r247).
+- [544d8bd](https://github.com/c2melendez/precision-lab-plus/commit/544d8bdf2d7219c8b1ad186ad666d46267a91942): `/matrix/rank` con `allow_symbolic=True` (E-08).
+- Cumulative [39904542863](https://github.com/c2melendez/precision-lab-plus/actions/runs/39904542863) **SUCCESS**.
