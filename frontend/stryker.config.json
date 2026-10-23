@@ -4,12 +4,15 @@
   "plugins": [
     "@stryker-mutator/vitest-runner"
   ],
+  "vitest": {
+    "configFile": "stryker.vitest.config.ts"
+  },
   "mutate": [
-    "src/components/calculusIntent.ts",
     "src/components/systemSplit.ts",
     "src/components/fractionDisplay.ts",
     "src/utils/unitConversion.ts"
   ],
+  "coverageAnalysis": "all",
   "reporters": [
     "clear-text",
     "json",
