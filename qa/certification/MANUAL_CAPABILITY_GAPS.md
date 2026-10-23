@@ -487,3 +487,32 @@ Ninguna de estas filas se cuenta como PASS.
   con el renombrado documentado `T→y`, `t→x`, `Ta→A`, `T0→B`; la solución se
   verifica contra la EDO y la condición inicial (misma ecuación, no otro problema).
 
+
+## 2026-10-23 — EDCX A3: sistemas y exponencial matricial (r255)
+
+- Estado: **BLOCKED_SCOPE** para 13/16 filas en Plus; 3 PASS_SCOPED.
+- El canal `/api/v1/ode` es escalar (`y(x)`): no representa sistemas
+  `x'=..., y'=...` (ED-M-01..07 y ED-M-14..16).
+- No existe operación de exponencial matricial: el enum de
+  `/matrix/operations` rechaza `expm` con 422 (ED-M-08..10).
+- La etiqueta cualitativa (silla / foco estable / centro) no la emite el
+  producto; se deduce de los autovalores y se certifica como PASS_SCOPED
+  (ED-M-11..13).
+- Lite: sin motor de sistemas; NO_EJECUTADO.
+
+
+## 2026-10-23 — EDCX A4: Laplace y ecuaciones integrales (r255)
+
+- Estado: **23/24 BLOCKED** en Plus; 1 PASS con renombrado `t -> x` (ED-T-17).
+- `laplace` e `ilaplace` no son funciones reconocidas por `/api/v1/evaluate`.
+- `integrate` no existe; la convolución `t * e^t` no se puede expresar y el
+  producto literal `t*exp(t)` se devuelve tal cual (sin semántica de convolución).
+- El canal acepta una sola condición inicial; además `dirac` y `heaviside` no
+  están permitidos, y no hay operación para sistemas.
+- **DEFECTO CONFIRMADO (no corregido):** `_parse_initial_condition` documenta una
+  segunda condición inicial separada por `;`, pero `_split_equation_and_condition`
+  solo parte por coma y el parser de valores recibe `0; y'(0)=0`, fallando con
+  `PARSE_ERROR: No se pudo interpretar la condición inicial.` Reproducción:
+  `y''-y=exp(x), y(0)=0; y'(0)=0`. No se contabiliza como PASS.
+- Lite: sin motor de Laplace/integrales; NO_EJECUTADO.
+

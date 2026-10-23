@@ -1,3 +1,53 @@
+## 2026-10-23 UTC — r255: EDCX A3+A4 — PASS_SCOPED (Plus), 4 PASS / 36 BLOCKED
+
+**EDCX Parte A, bloques A3 (16 filas) y A4 (24 filas): 4 PASS + 36 BLOCKED en Plus.**
+No es cierre bilateral: Lite no ejecuta estos bloques (gap de alcance de motor, ver
+`MANUAL_CAPABILITY_GAPS.md`); la certificación global sigue `OPEN`.
+
+| Bloque | Filas | PASS | BLOCKED | Canal |
+|--------|-------|------|---------|-------|
+| A3 sistemas / expm | 16 | 3 | 13 | `/api/v1/matrix/eigen` |
+| A4 Laplace / integrales | 24 | 1 | 23 | `/api/v1/ode` |
+
+- A3: `ED-M-11..13` PASS_SCOPED por autovalores exactos con `/matrix/eigen`; la
+  etiqueta cualitativa (silla / foco estable / centro) la deduce el usuario a
+  partir de ellos y así se documenta. Bloqueados: `ED-M-01..07` (sistemas; el
+  canal EDO es escalar `y(x)`), `ED-M-08..10` (no existe exponencial matricial:
+  el enum de `/matrix/operations` rechaza `expm` con 422) y `ED-M-14..16`
+  (sistemas no lineales / Lyapunov).
+- A4: `ED-T-17` PASS con renombrado documentado `t -> x`
+  (`y'+2y=e^{-x}, y(0)=1` -> `y=e^{-x}`), verificado por residuo simbólico y
+  condición inicial. Bloqueados: `ED-T-01..09` (`laplace` no existe),
+  `ED-T-10..15` (`ilaplace` no existe), `ED-T-16` (convolución: `integrate` no
+  existe y `t*exp(t)` se devuelve literal, sin semántica de convolución),
+  `ED-T-18..21` (dos condiciones iniciales; además `dirac` / `heaviside` no están
+  permitidos), `ED-T-22..23` (ecuaciones integrales) y `ED-T-24` (sistema).
+
+Acumulado EDCX A1–A4: **143 / 638 filas, 80 PASS / 63 BLOCKED** en Plus.
+
+### Evidencia CI Plus
+
+| HEAD | Cumulative | H1d |
+|------|------------|-----|
+| `02e198ac` (A4) | [39927284848](https://github.com/c2melendez/precision-lab-plus/actions/runs/39927284848) **SUCCESS** | [39927284862](https://github.com/c2melendez/precision-lab-plus/actions/runs/39927284862) **SUCCESS** |
+| `6aef2571` (A3) | [39926515965](https://github.com/c2melendez/precision-lab-plus/actions/runs/39926515965) **SUCCESS** | [39926515979](https://github.com/c2melendez/precision-lab-plus/actions/runs/39926515979) **SUCCESS** |
+
+Backend cumulative: **2157 passed, 1 skipped, 6 xfailed**, cobertura **87.85%**
+(A3: 2130 passed, 87.92%). Harness nuevos: A3 17/17, A4 27/27.
+
+### Defecto de producto confirmado (no corregido en r255)
+
+`_parse_initial_condition` documenta una segunda condición inicial separada por
+`;`, pero no la implementa: `_split_equation_and_condition` solo parte por coma y
+el valor `0; y'(0)=0` llega completo al parser de expresiones, que falla con
+`PARSE_ERROR: No se pudo interpretar la condición inicial.` Medido en
+`y''-y=exp(x), y(0)=0; y'(0)=0`. No se usa como PASS; queda registrado para
+decisión de producto.
+
+**Siguiente acción única:** EDCX A5 (series / Frobenius, 10 filas).
+
+---
+
 ## 2026-10-23 UTC — r254: EDCX A1+A2 — PASS_SCOPED (Plus), capacidad Lite no ejecutada
 
 **EDCX Parte A, bloques A1 (53 filas) y A2 (50 filas): 76 PASS + 27 BLOCKED en Plus.**

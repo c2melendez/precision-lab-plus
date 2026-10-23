@@ -1,3 +1,23 @@
+## 2026-10-23 UTC — r255: EDCX A3+A4 (Plus scoped)
+
+- Plus `6aef2571` (A3): cumulative [39926515965] SUCCESS — 2130 passed, 1 skipped,
+  6 xfailed, cobertura 87.92%; H1d [39926515979] SUCCESS. Harness A3 17/17.
+- Plus `02e198ac` (A4): cumulative [39927284848] SUCCESS — 2157 passed, 1 skipped,
+  6 xfailed, cobertura 87.85%; H1d [39927284862] SUCCESS. Harness A4 27/27.
+- A3: 16 filas -> 3 PASS_SCOPED (`ED-M-11..13`, autovalores exactos por
+  `/matrix/eigen`) + 13 BLOCKED (sistemas, `expm`, no lineales/Lyapunov).
+- A4: 24 filas -> 1 PASS (`ED-T-17` con `t -> x`, residuo + IC) + 23 BLOCKED
+  (`laplace`/`ilaplace`, convolución, dos condiciones iniciales, integrales,
+  sistema).
+- Acumulado EDCX A1–A4: 143 filas, 80 PASS / 63 BLOCKED.
+- Defecto confirmado: la segunda condición inicial con `;` documentada en
+  `_parse_initial_condition` no está implementada; el valor `0; y'(0)=0` falla con
+  `PARSE_ERROR: No se pudo interpretar la condición inicial.` No se corrige en r255.
+- Lite: A3/A4 sin ejecutar (`NO_EJECUTADO`); sin PASS/FAIL bilateral.
+- Siguiente: EDCX A5 (series / Frobenius, 10 filas).
+
+---
+
 ## 2026-10-23 UTC — r254: EDCX A1+A2 PASS_SCOPED (Plus)
 
 - Plus `fdcf2d63` (A2): cumulative [39924322798] SUCCESS — backend 2113 passed,

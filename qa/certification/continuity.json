@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 254,
+  "revision": 255,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "fdcf2d635517e97c20910b0f92d6eb9d3c245404",
-  "baseline_case": "EDCX-A1-A2-CLOSURE-R254",
+  "technical_baseline_sha": "02e198ac2435e99fcd47ad6392660a88e490a87f",
+  "baseline_case": "EDCX-A3-A4-CLOSURE-R255",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "prose_only_paths": [
@@ -41,14 +41,14 @@
     }
   },
   "next_action": {
-    "id": "EDCX-A3-SYSTEMS-MATRIX-EXPONENTIAL",
+    "id": "EDCX-A5-SERIES-FROBENIUS",
     "status": "READY",
-    "action": "Certificar EDCX Parte A bloque A3 (16 filas: sistemas lineales y exponencial matricial) contra los canales reales de Plus. Empezar midiendo cada fila con plazo acotado, separar las ejecutables (dsolve de sistemas / matrix exponential si existe) de los gaps de canal (sistemas como texto multilinea, clasificacion cualitativa, Lotka-Volterra) y registrar PASS/BLOCKED con oraculo independiente. No usar los runs fallidos 86241e40 como evidencia: el SHA valido es 5a76477a (fix mp.pool) y fdcf2d63 (A2). Lite sigue sin motor EDO equivalente; no declarar paridad sin ejecucion.",
+    "action": "Certificar EDCX Parte A bloque A5 (10 filas: soluciones por series y Frobenius) contra el canal real de Plus. Medir primero si /api/v1/ode resuelve ecuaciones con coeficientes variables y puntos singulares; separar las ejecutables de los gaps de canal y registrar PASS/BLOCKED con oraculo independiente (residuo simbolico en el dominio de la serie). No reutilizar los runs de A3/A4 como evidencia. Lite sigue sin motor EDO equivalente; no declarar paridad sin ejecucion.",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-plus": "fdcf2d635517e97c20910b0f92d6eb9d3c245404"
+      "c2melendez/precision-lab-plus": "02e198ac2435e99fcd47ad6392660a88e490a87f"
     },
     "product_changed": false,
-    "audit": "r254 reconciliation: continuity.json estaba en revision 243 (MV-C) mientras CURRENT_STATE/EXECUTION_LOG llegaban a r253 (MV-J). Se reconcilia a 254 con EDCX A1+A2 (75 PASS / 28 BLOCKED, Plus) y se conservan los blockers independientes. Global OPEN."
+    "audit": "r255: A3 y A4 se midieron con harness propios y gates verdes en el SHA exacto (6aef2571: cumulative 39926515965, H1d 39926515979; 02e198ac: cumulative 39927284848, H1d 39927284862). Los docs r254 de MATRIX_SOURCE_INVENTORY decian 75 PASS / 28 BLOCKED para A1+A2; el conteo correcto es 76/27 y se corrige en r255. Global OPEN."
   },
   "blockers": [
     {
@@ -72,7 +72,7 @@
       "status": "ON_HOLD"
     }
   ],
-  "ledger_note": "r254: EDCX Parte A A1 (53 filas) + A2 (50 filas) en Plus: 76 PASS y 27 BLOCKED medidos. A1: 47 familias verificadas por sustitucion en /api/v1/ode (8 filas F4 documentadas) y 6 limites acotados (ED-L-12 canal x(y); ED-X-02/X-03, ED-B-09, ED-C-02, ED-C-05 con TIMEOUT/UNSUPPORTED_OPERATION). A2: 25 EDO por sustitucion, 3 Wronskianos (ED-E-10/E-12/E-14) por /matrix/determinant con oraculo de derivadas, ED-A-05 por renombrado T(t)->y(x); 21 bloqueadas por alcance medido (orden>2 en 6, dos condiciones iniciales en 12, Wronskianos con exp/log en 2, yy''=y'^2 en 1). Defecto candidato registrado: la segunda condicion inicial separada por ';' que documenta _parse_initial_condition es inalcanzable porque _split_equation_and_condition parte por coma; no se corrigio en r254. Regresion real: 86241e40 anoto mp.pool.Pool sin importar el submodulo y rompio H1d/security/native (39921705215, 39921705206, 39921705116); 5a76477a lo corrige y los tres workflows quedan verdes. Gates de producto por head_sha exacto: fdcf2d63 cumulative 39924322798 (backend 2113 passed, 1 skipped, 6 xfailed, cobertura 87.92%) y H1d 39924322809 SUCCESS; 5a76477a cumulative 39922491068, H1d 39922491020 y native 39922491000 SUCCESS. Lite: A1/A2 NO_EJECUTADO (stepEngine/ode.ts solo y'=f(x) y 2.o orden constante); no se declara PASS ni FAIL bilateral. Blockers independientes sin cambios (S25, H2/SG28, SY-P-23, SY-X-04-PLUS-HTTP, ALGEBRA229-AS-B-29). Global OPEN. Siguiente: EDCX A3 (16 filas).",
+  "ledger_note": "r255: EDCX Parte A A3 (16 filas) + A4 (24 filas) en Plus: 4 PASS y 36 BLOCKED medidos. A3: ED-M-11..13 PASS_SCOPED por autovalores exactos con /api/v1/matrix/eigen; 13 bloqueadas (ED-M-01..07 sistemas en canal escalar, ED-M-08..10 sin exponencial matricial, ED-M-14..16 no lineales/Lyapunov). A4: ED-T-17 PASS con renombrado t->x y oraculo de residuo + condicion inicial; 23 bloqueadas (laplace/ilaplace inexistentes, convolucion sin canal, dos condiciones iniciales, dirac/heaviside no permitidos, ecuaciones integrales y sistema). Acumulado EDCX A1-A4: 143 filas, 80 PASS / 63 BLOCKED. Defecto confirmado y no corregido: la segunda condicion inicial con ';' documentada en _parse_initial_condition no esta implementada. Lite NO_EJECUTADO. Global OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
@@ -2126,6 +2126,144 @@
       "reason": "src/engine/stepEngine/ode.ts solo cubre y'=f(x) y 2.o orden con coeficientes constantes; A1/A2 requieren separables, lineales, Bernoulli, Riccati, Clairaut, Wronskianos y condiciones multiples"
     },
     "known_defect_candidate": "La segunda condicion inicial separada por ';' documentada en _parse_initial_condition es inalcanzable: _split_equation_and_condition parte por coma. No corregido en r254.",
+    "global_certification": "OPEN"
+  },
+  "edcx_a3_a4_closure_r255": {
+    "status": "PASS_SCOPED",
+    "scope": "EDCX Parte A A3 (16 filas, sistemas y exponencial matricial) + A4 (24 filas, transformada de Laplace y ecuaciones integrales) en Plus",
+    "rows_total": 40,
+    "rows_pass": 4,
+    "rows_blocked": 36,
+    "blocks": {
+      "A3": {
+        "rows": 16,
+        "pass": 3,
+        "blocked": 13,
+        "pass_scoped": [
+          "ED-M-11",
+          "ED-M-12",
+          "ED-M-13"
+        ],
+        "blocked_breakdown": {
+          "systems_scalar_channel": [
+            "ED-M-01",
+            "ED-M-02",
+            "ED-M-03",
+            "ED-M-04",
+            "ED-M-05",
+            "ED-M-06",
+            "ED-M-07"
+          ],
+          "no_matrix_exponential": [
+            "ED-M-08",
+            "ED-M-09",
+            "ED-M-10"
+          ],
+          "nonlinear_lyapunov": [
+            "ED-M-14",
+            "ED-M-15",
+            "ED-M-16"
+          ]
+        },
+        "channel": "/api/v1/matrix/eigen",
+        "oracle": "autovalores exactos recalculados con SymPy sobre la misma matriz; la etiqueta cualitativa (silla/foco/centro) la deduce el usuario"
+      },
+      "A4": {
+        "rows": 24,
+        "pass": 1,
+        "blocked": 23,
+        "pass_renamed": [
+          "ED-T-17"
+        ],
+        "blocked_breakdown": {
+          "laplace_missing": [
+            "ED-T-01",
+            "ED-T-02",
+            "ED-T-03",
+            "ED-T-04",
+            "ED-T-05",
+            "ED-T-06",
+            "ED-T-07",
+            "ED-T-08",
+            "ED-T-09"
+          ],
+          "ilaplace_missing": [
+            "ED-T-10",
+            "ED-T-11",
+            "ED-T-12",
+            "ED-T-13",
+            "ED-T-14",
+            "ED-T-15"
+          ],
+          "convolution_no_channel": [
+            "ED-T-16"
+          ],
+          "two_initial_conditions": [
+            "ED-T-18",
+            "ED-T-19",
+            "ED-T-20",
+            "ED-T-21"
+          ],
+          "forbidden_forcing": [
+            "ED-T-20",
+            "ED-T-21"
+          ],
+          "integral_equation": [
+            "ED-T-22",
+            "ED-T-23"
+          ],
+          "system": [
+            "ED-T-24"
+          ]
+        },
+        "channel": "/api/v1/ode",
+        "oracle": "residuo simbolico + condicion inicial para ED-T-17; los bloqueos se fijan por codigo de error y fragmento del mensaje medido",
+        "breakdown_note": "ED-T-20 y ED-T-21 aparecen en dos categorias (dos condiciones iniciales y forzamiento no permitido); el total unico de filas bloqueadas es 23."
+      }
+    },
+    "cumulative_a1_a4": {
+      "rows": 143,
+      "pass": 80,
+      "blocked": 63
+    },
+    "product_changed": false,
+    "harness": [
+      "backend/tests/test_edcx_ed_a3_01_l16.py (17 passed local y CI)",
+      "backend/tests/test_edcx_ed_a4_01_l24.py (27 passed local y CI)"
+    ],
+    "runs": [
+      {
+        "gate": "cumulative",
+        "sha": "6aef25713a618798a06a96ad41dc50f6ac4f7163",
+        "run_id": 39926515965,
+        "conclusion": "SUCCESS",
+        "tests": "2130 passed, 1 skipped, 6 xfailed; coverage 87.92%"
+      },
+      {
+        "gate": "h1d",
+        "sha": "6aef25713a618798a06a96ad41dc50f6ac4f7163",
+        "run_id": 39926515979,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "gate": "cumulative",
+        "sha": "02e198ac2435e99fcd47ad6392660a88e490a87f",
+        "run_id": 39927284848,
+        "conclusion": "SUCCESS",
+        "tests": "2157 passed, 1 skipped, 6 xfailed; coverage 87.85%"
+      },
+      {
+        "gate": "h1d",
+        "sha": "02e198ac2435e99fcd47ad6392660a88e490a87f",
+        "run_id": 39927284862,
+        "conclusion": "SUCCESS"
+      }
+    ],
+    "known_defect_confirmed": "La segunda condicion inicial separada por ';' documentada en _parse_initial_condition no esta implementada: _split_equation_and_condition parte por coma y el valor '0; y'(0)=0' llega completo al parser de expresiones, que falla con PARSE_ERROR 'No se pudo interpretar la condicion inicial.' Reproduccion: y''-y=exp(x), y(0)=0; y'(0)=0. No corregido en r255.",
+    "lite": {
+      "status": "NO_EJECUTADO",
+      "reason": "src/engine/stepEngine/ode.ts solo cubre y'=f(x) y segundo orden con coeficientes constantes; no hay sistemas, exponencial matricial, Laplace ni ecuaciones integrales"
+    },
     "global_certification": "OPEN"
   }
 }
