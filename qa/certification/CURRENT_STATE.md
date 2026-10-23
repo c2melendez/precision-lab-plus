@@ -4,6 +4,16 @@ Antes de cualquier dispatch, reconciliar HEAD y Actions (push y pull_request) en
 
 ---
 
+## 2026-10-23 UTC — r268: corrección de semántica del campo canal en EDCX-B6
+
+- Revisión del JSONL completo: 638 filas; 589 tienen `canal` vacío y 49 tienen valor. Ejemplos como `B → P, T, X` describen transformaciones entre representaciones matemáticas, no endpoints HTTP.
+- Por ello, el vacío de `canal` no prueba por sí solo una brecha de endpoint. No rellenar el campo con `/api/v1/evaluate` ni tratarlo como canal de API.
+- B6 sigue REVIEW y sin medición. Antes de harness, definir contrato por cada `VC-FE-01..53`: notación `Log/log/ln`, rama/signo, endpoint/payload, oráculo independiente, tolerancia y aceptación. `/api/v1/evaluate` es solo candidato para casos escalares compatibles.
+- Lite permanece NO_EJECUTADO por falta de motor complejo equivalente; B5 sigue BLOCKED en Plus. Certificación global OPEN. No se despachó CI.
+- Auditoría: [EDCX_B6_CHANNEL_AUDIT.md](EDCX_B6_CHANNEL_AUDIT.md).
+
+---
+
 ## 2026-10-23 UTC — r266: EDCX-B5 registrado como brecha de capacidad (Plus)
 
 - **Medición:** no ejecutada. Las 25 filas `VC-LG-01..25` describen lugares geométricos (circunferencias, semiplanos, cónicas, curvas paramétricas) y su campo `canal` está vacío.
