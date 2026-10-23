@@ -1,3 +1,12 @@
+## 2026-10-23 UTC — r271: harness mínimo de contrato EDCX-B6 creado (sin ejecutar)
+
+- Añadido `backend/tests/test_edcx_b6_contract.py` en Plus, commit `bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69`. Incluye checks de `log(100)` base 10, `ln(e)`, `Log(100)` principal complejo, respuesta compleja de `Log(-1)` y dominio `Log(0)`.
+- **Estado: test-first, NO EJECUTADO.** No se afirma que pase; no se ejecutaron pruebas ni Actions. Estos checks no certifican las 53 filas B6 ni la salida multivaluada VC-FE-11.
+- Siguiente acción única: ejecutar solo `backend/tests/test_edcx_b6_contract.py`, resolver divergencias con evidencia y mantener gates globales sin dispatch.
+- B6 `REVIEW`; B5 `BLOCKED`; Lite `NO_EJECUTADO`; certificación global `OPEN`.
+
+---
+
 ## Continuidad operativa obligatoria — r265
 
 Antes de cualquier dispatch, reconciliar HEAD y Actions (push y pull_request) en Lite y Plus según [ROADMAP_CONTINUITY.md](ROADMAP_CONTINUITY.md). No cambiar la tarea viva aquí: la única siguiente acción es la definida por `continuity.json`; en este corte es **EDCX-B6 (VC-FE, 53 filas; REVIEW por canal vacío)**. Mantener SG28/DIST y S25 bloqueados, y SY-P-23, SY-X-04-PLUS-HTTP y ALGEBRA229-AS-B-29 en sus estados vigentes hasta verificar sus condiciones de salida. Aplicar RUN/WAIT/REUSE/DIAGNOSE/REVIEW y no repetir gates verdes vigentes.
