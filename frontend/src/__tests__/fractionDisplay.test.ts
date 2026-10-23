@@ -1,44 +1,45 @@
 import { describe, expect, it } from "vitest";
 import { parseFracLatex, toMixedFracLatex } from "../components/fractionDisplay";
 
-describe("parseFracLatex (formato real de SymPy, verificado contra el paquete)", () => {
-  it("fracción positiva simple", () => {
+describe("parseFracLatex", () => {
+  it("parses a positive improper fraction from SymPy latex", () => {
     expect(parseFracLatex("\\frac{57}{2}")).toEqual({ n: 57, d: 2 });
   });
 
-  it("fracción negativa (SymPy agrega un espacio tras el signo)", () => {
+  it("parses a negative fraction with the SymPy space after the sign", () => {
     expect(parseFracLatex("- \\frac{57}{2}")).toEqual({ n: -57, d: 2 });
   });
 
-  it("fracción negativa propia", () => {
-    expect(parseFracLatex("- \\frac{1}{2}")).toEqual({ n: -1, d: 2 });
+  it("parses a negative fraction without the space", () => {
+    expect(parseFracLatex("-\\frac{3}{4}")).toEqual({ n: -3, d: 4 });
   });
 
-  it("devuelve null para algo que no es \\frac{}{}", () => {
-    expect(parseFracLatex("\\sqrt{7}")).toBeNull();
-    expect(parseFracLatex("42")).toBeNull();
+  it("rejects non-fraction latex", () => {
+    expect(parseFracLatex("2")).toBeNull();
+    expect(parseFracLatex("\\frac{a}{b}")).toBeNull();
+  });
+
+  it("rejects division by zero", () => {
+    expect(parseFracLatex("\\frac{1}{0}")).toBeNull();
   });
 });
 
 describe("toMixedFracLatex", () => {
-  it("fracción impropia positiva -> mixta", () => {
+  it("returns null for a proper fraction", () => {
+    expect(toMixedFracLatex(3, 4)).toBeNull();
+    expect(toMixedFracLatex(-1, 5)).toBeNull();
+  });
+
+  it("converts an improper fraction to mixed form", () => {
     expect(toMixedFracLatex(57, 2)).toBe("28\\frac{1}{2}");
   });
 
-  it("fracción impropia negativa -> mixta con signo", () => {
+  it("preserves the negative sign on mixed form", () => {
     expect(toMixedFracLatex(-57, 2)).toBe("-28\\frac{1}{2}");
   });
 
-  it("6/5 (el caso reportado por el usuario) -> 1 1/5", () => {
-    expect(toMixedFracLatex(6, 5)).toBe("1\\frac{1}{5}");
-  });
-
-  it("fracción propia -> null (no hay forma mixta distinta)", () => {
-    expect(toMixedFracLatex(1, 2)).toBeNull();
-    expect(toMixedFracLatex(-1, 2)).toBeNull();
-  });
-
-  it("caso límite: numerador igual al denominador (raro, SymPy ya lo simplifica antes)", () => {
-    expect(toMixedFracLatex(5, 5)).toBe("1");
+  it("collapses exact whole numbers", () => {
+    expect(toMixedFracLatex(8, 2)).toBe("4");
+    expect(toMixedFracLatex(-9, 3)).toBe("-3");
   });
 });

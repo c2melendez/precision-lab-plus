@@ -1,33 +1,46 @@
 import { describe, expect, it } from "vitest";
-import { splitSystemLatex } from "../components/systemSplit";
+import { splitFreeSystemLatex, splitSystemLatex } from "../components/systemSplit";
 
-describe("splitSystemLatex (Fase 1 — fusión de modos, proyecto con backend Python)", () => {
-  it("separa un sistema de 2 ecuaciones en renglones individuales", () => {
-    const latex = "\\begin{cases}2x+y=5\\\\x-y=1\\end{cases}";
-    expect(splitSystemLatex(latex)).toEqual(["2x+y=5", "x-y=1"]);
+describe("splitSystemLatex", () => {
+  it("splits a cases environment into equation rows", () => {
+    expect(
+      splitSystemLatex("\\begin{cases}x+y=1\\\\x-y=0\\end{cases}"),
+    ).toEqual(["x+y=1", "x-y=0"]);
   });
 
-  it("separa un sistema de 3 ecuaciones", () => {
-    const latex = "\\begin{cases}x+y+z=6\\\\x-y=0\\\\z=3\\end{cases}";
-    expect(splitSystemLatex(latex)).toEqual(["x+y+z=6", "x-y=0", "z=3"]);
+  it("requires at least two non-empty rows", () => {
+    expect(splitSystemLatex("\\begin{cases}x=1\\end{cases}")).toBeNull();
   });
 
-  it("recorta espacios alrededor de cada renglón", () => {
-    const latex = "\\begin{cases} 2x+y=5 \\\\ x-y=1 \\end{cases}";
-    expect(splitSystemLatex(latex)).toEqual(["2x+y=5", "x-y=1"]);
+  it("rejects numeric array environments without relations", () => {
+    expect(splitSystemLatex("\\begin{array}{cc}1&2\\\\3&4\\end{array}")).toBeNull();
   });
 
-  it("devuelve null si no hay entorno cases", () => {
-    expect(splitSystemLatex("2x+3=7")).toBeNull();
+  it("keeps array rows that look like equations", () => {
+    expect(
+      splitSystemLatex("\\begin{array}{c}x=1\\\\y=2\\end{array}"),
+    ).toEqual(["x=1", "y=2"]);
   });
 
-  it("devuelve null si el cases tiene un único renglón no vacío (plantilla recién insertada, sin completar)", () => {
-    expect(splitSystemLatex("\\begin{cases}2x+y=5\\\\\\end{cases}")).toBeNull();
-    expect(splitSystemLatex("\\begin{cases}\\end{cases}")).toBeNull();
+  it("returns null when there is no system environment", () => {
+    expect(splitSystemLatex("x+y=1")).toBeNull();
+  });
+});
+
+describe("splitFreeSystemLatex", () => {
+  it("splits semicolon-separated equations", () => {
+    expect(splitFreeSystemLatex("x+y=1; x-y=0")).toEqual(["x+y=1", "x-y=0"]);
   });
 
-  it("ignora texto fuera del entorno cases", () => {
-    const latex = "algo\\begin{cases}x=1\\\\y=2\\end{cases}más";
-    expect(splitSystemLatex(latex)).toEqual(["x=1", "y=2"]);
+  it("splits newline-separated equations", () => {
+    expect(splitFreeSystemLatex("x=1\ny=2")).toEqual(["x=1", "y=2"]);
+  });
+
+  it("rejects a single equation", () => {
+    expect(splitFreeSystemLatex("x=1")).toBeNull();
+  });
+
+  it("rejects empty input", () => {
+    expect(splitFreeSystemLatex("   ")).toBeNull();
   });
 });

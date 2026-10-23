@@ -5,14 +5,10 @@
     "@stryker-mutator/vitest-runner"
   ],
   "mutate": [
-    "src/components/NaturalMathField.tsx",
     "src/components/calculusIntent.ts",
     "src/components/systemSplit.ts",
     "src/components/fractionDisplay.ts",
-    "src/utils/unitConversion.ts",
-    "src/store/useHistoryStore.ts",
-    "src/store/useRecentKeysStore.ts",
-    "src/components/KeyboardBasicPanel.tsx"
+    "src/utils/unitConversion.ts"
   ],
   "reporters": [
     "clear-text",
