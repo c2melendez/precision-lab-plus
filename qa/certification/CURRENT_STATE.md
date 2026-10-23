@@ -1,6 +1,17 @@
 ## Continuidad operativa obligatoria — r265
 
-Antes de cualquier dispatch, reconciliar HEAD y Actions (push y pull_request) en Lite y Plus según [ROADMAP_CONTINUITY.md](ROADMAP_CONTINUITY.md). No cambiar la tarea viva aquí: la única siguiente acción es la definida por `continuity.json`; en este corte es **EDCX-B5 (VC-LG, 25 filas, Plus)**. Mantener SG28/DIST y S25 bloqueados, y SY-P-23, SY-X-04-PLUS-HTTP y ALGEBRA229-AS-B-29 en sus estados vigentes hasta verificar sus condiciones de salida. Aplicar RUN/WAIT/REUSE/DIAGNOSE/REVIEW y no repetir gates verdes vigentes.
+Antes de cualquier dispatch, reconciliar HEAD y Actions (push y pull_request) en Lite y Plus según [ROADMAP_CONTINUITY.md](ROADMAP_CONTINUITY.md). No cambiar la tarea viva aquí: la única siguiente acción es la definida por `continuity.json`; en este corte es **EDCX-B6 (VC-FE, 53 filas; REVIEW por canal vacío)**. Mantener SG28/DIST y S25 bloqueados, y SY-P-23, SY-X-04-PLUS-HTTP y ALGEBRA229-AS-B-29 en sus estados vigentes hasta verificar sus condiciones de salida. Aplicar RUN/WAIT/REUSE/DIAGNOSE/REVIEW y no repetir gates verdes vigentes.
+
+---
+
+## 2026-10-23 UTC — r266: EDCX-B5 registrado como brecha de capacidad (Plus)
+
+- **Medición:** no ejecutada. Las 25 filas `VC-LG-01..25` describen lugares geométricos (circunferencias, semiplanos, cónicas, curvas paramétricas) y su campo `canal` está vacío.
+- **Producto (técnico 7e501f5; HEAD documental anterior 4e812bd):** la revisión del código no encontró ninguna ruta que devuelva un lugar geométrico. Rutas revisadas: `/evaluate`, `/solve`, `/complex/residue`, `/complex/singularities`, `/graph/2d`, `/graph/complex_point`.
+- **Decisión:** las 25 filas quedan BLOCKED por capacidad, sin PASS ni FAIL. No se inventó canal ni oráculo; el denominador de EDCX no cambia.
+- **Lite:** NO_EJECUTADO.
+- **Gates:** sin CI nueva. Cambio exclusivamente documental: `continuity.json`, `CURRENT_STATE.md`, `EXECUTION_LOG.md` y `MANUAL_CAPABILITY_GAPS.md`.
+- **Siguiente:** EDCX-B6 (53 filas, prefijo VC-FE), REVIEW. Su campo `canal` también está vacío en las 53 filas; antes de medir hay que decidir el canal, como con B5.
 
 ---
 

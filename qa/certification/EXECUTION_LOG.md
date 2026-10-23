@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-10-23 UTC — r266: EDCX-B5 brecha de capacidad (Plus)
+
+- Filas VC-LG-01..25 (lugares geométricos) con `canal` vacío. Ninguna ruta de Plus devuelve un lugar geométrico (revisión de `/evaluate`, `/solve`, `/complex/*`, `/graph/*`).
+- Resultado: 25 BLOCKED por capacidad; sin PASS/FAIL; sin cambio de producto ni de oráculo. Lite NO_EJECUTADO.
+- Gates: sin CI (solo documentación). Global OPEN.
+- Siguiente: EDCX-B6 (53 filas, VC-FE), REVIEW por canal vacío.
+
+
 ## 2026-10-23 UTC — r263: EDCX B4 (Plus scoped)
 
 - Plus `7e501f5` (test-first): cumulative [40014004350] SUCCESS; H1d [40014004348] SUCCESS. Harness local 33 passed, 4 xfailed.

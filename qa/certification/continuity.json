@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 265,
+  "revision": 266,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -43,14 +43,14 @@
     }
   },
   "next_action": {
-    "id": "EDCX-B5",
-    "status": "READY",
-    "action": "Continuar EDCX Parte B con el bloque B5 (25 filas, prefijo VC-LG) en Plus. Medir primero con /api/v1/solve y evaluate, clasificar con oraculo sympy independiente y no reutilizar evidencia de B4. Lite sigue NO_EJECUTADO.",
+    "id": "EDCX-B6",
+    "status": "REVIEW",
+    "action": "EDCX-B5 registrado como brecha de capacidad (r266): lugares geométricos sin canal definido y sin endpoint en el producto. Siguiente bloque en orden: B6 (53 filas, prefijo VC-FE). Su campo canal está vacío en las 53 filas; decidir el canal antes de medir y no reutilizar evidencia de B4.",
     "technical_sha_by_repo": {
       "c2melendez/precision-lab-plus": "7e501f5bffdf7a1242f396f8a2c96ca3267b635f"
     },
     "product_changed": false,
-    "audit": "r263: B4 medido: 14 PASS + 14 PASS_SCOPED + 4 FAIL (xfail estricto, sin cambio de producto) + 2 BLOCKED. Global OPEN."
+    "audit": "r266: B5 BLOCKED por capacidad en Plus; Lite NO_EJECUTADO. Global OPEN."
   },
   "blockers": [
     {
@@ -72,9 +72,15 @@
     {
       "id": "ALGEBRA229-AS-B-29",
       "status": "ON_HOLD"
+    },
+    {
+      "id": "EDCX-B5",
+      "status": "BLOCKED",
+      "kind": "capability",
+      "detail": "Lugares geométricos VC-LG-01..25: canal vacío y sin endpoint de producto."
     }
   ],
-  "ledger_note": "r265: hoja de ruta de continuidad integrada; gates y criterios de aceptación sin cambios; siguiente acción canónica preservada (EDCX-B5); global OPEN.",
+  "ledger_note": "r266: EDCX-B5 registrado como brecha de capacidad; siguiente EDCX-B6 en REVIEW por canal vacío; global OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",

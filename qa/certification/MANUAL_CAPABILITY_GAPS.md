@@ -728,3 +728,9 @@ Ninguna de estas filas se cuenta como PASS.
 - **PASS_SCOPED VC-EC-23..30, 32, 33:** solo la raíz principal de familias periódicas o hiperbólicas; `asin`/`acos` sin simplificar en 28–29.
 - **PASS_SCOPED VC-EC-31:** `tan(z)=i` devuelve vacío, correcto en C. El mismo vacío aparece en VC-EC-19, que sí tiene soluciones; por eso cada caso se valida por separado.
 - Lite: sin motor complejo equivalente; `NO_EJECUTADO`.
+
+## EDCX-B5 — lugares geométricos (VC-LG-01..25): brecha de capacidad (r266)
+
+- Estado: BLOCKED por capacidad en Plus; NO_EJECUTADO en Lite.
+- Causa: el producto no expone un canal para describir lugares geométricos, y el campo `canal` de las 25 filas está vacío.
+- Reabrir solo cuando se defina canal y oráculo, o cuando la capacidad exista en ambos productos.
