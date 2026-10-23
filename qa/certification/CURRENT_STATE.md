@@ -1,31 +1,27 @@
-## 2026-10-23 UTC — r249: MV-F-01..17 producto Plus PASS (Lite pendiente)
+## 2026-10-23 UTC — r250: MV-F-01..17 PASS_SCOPED_BILATERAL
 
-**MV-F-01..17 (valores/vectores propios, polinomio característico, Cayley–Hamilton, diagonalización, potencias) — PASS producto Plus.**
+**MV-F — PASS_SCOPED_BILATERAL** (alcance por motor).
 
-### Superficies Plus
+### Alcance por repo
 
-| Caso | Superficie |
-|------|------------|
-| F-01..10 | `POST /matrix/eigen` (SymPy eigenvects) |
-| F-11 | charpoly vía motor (det(λI−A)) |
-| F-12 | Cayley–Hamilton vía `/matrix/power` |
-| F-13 | diagonalize (oráculo + A=PDP⁻¹) |
-| F-14..17 | `/matrix/power` (exponente hasta ±32; F-15 = A³⁰) |
-
-Suite: `backend/tests/test_matrices_mv_f01_l17.py`. `MAX_MATRIX_POWER_EXPONENT = 32` y Pydantic `ge/le=±32`.
+| Repo | Cobertura |
+|------|-----------|
+| **Plus** | F-01..17 completos: eigen, charpoly, Cayley–Hamilton, diagonalize, potencias (A³⁰) |
+| **Lite** | F-14..17 potencias exactas (Fraction); F-12 Cayley–Hamilton; ancla JSONL/fuente; eigen i/√5 en Plus |
 
 ### Evidencia CI
 
-| Gate | Run | HEAD |
-|------|-----|------|
-| Cumulative | [39910191954](https://github.com/c2melendez/precision-lab-plus/actions/runs/39910191954) **SUCCESS** | `929bc64` |
+| Repo | HEAD | Cumulative |
+|------|------|------------|
+| Plus | `929bc64` | [39910191954](https://github.com/c2melendez/precision-lab-plus/actions/runs/39910191954) **SUCCESS** |
+| Lite | `5ed9af0` | [39910910006](https://github.com/c2melendez/precision-lab-lite/actions/runs/39910910006) **SUCCESS** |
 
-**Lite:** potencias F-14..17 vía `powerMatrix` (sin límite); eigen simbólico (i, √5) fuera de Fraction → paridad parcial en progreso.
+Suites: Plus `test_matrices_mv_f01_l17.py`; Lite `tests/matricesMvF01to17.audit.test.ts`.
 
-**Siguiente acción única:** completar **MV-F Lite** (al menos potencias + autovalores racionales) → PASS_SCOPED_BILATERAL; luego **MV-G**.
+**Siguiente acción única:** **MV-G** (siguiente sección de la matriz congelada).
 
 ---
 
-## 2026-10-23 UTC — r248: MV-E-01..12 PASS_SCOPED_BILATERAL
+## 2026-10-23 UTC — r249: MV-F Plus product PASS
 
-Plus+Lite cumulative green (rank/nullspace/columnspace).
+Power ±32; cumulative SUCCESS. Lite completado en r250.
