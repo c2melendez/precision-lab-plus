@@ -1,3 +1,51 @@
+## 2026-10-23 UTC — r262: EDCX B3 — 7 PASS exactos + 10 PASS_SCOPED / 2 BLOCKED (Plus)
+
+**EDCX Parte B, bloque B3 (19 filas, potencias y raíces): 7 PASS exactos + 10 PASS_SCOPED + 2 BLOCKED en Plus.**
+No es cierre bilateral: Lite no ejecuta EDCX (gap de alcance de motor);
+la certificación global sigue `OPEN`.
+
+| Bloque | Filas | PASS exacto | PASS_SCOPED | BLOCKED |
+|--------|-------|-------------|-------------|---------|
+| B3 potencias y raíces | 19 | 7 | 10 | 2 |
+
+- **Canal:** `/api/v1/evaluate` resuelve potencias enteras y negativas de forma
+  exacta. `sqrt(z)` y `root(z, n)` devuelven solo la raíz principal:
+  `sqrt(-3+4i)=1+2i`, `8^(1/3)=2`, `1^(1/4)=1`. No hay endpoint de raíces
+  n-ésimas ni operador que enumere todas las raíces.
+- **Enumeración completa:** `/api/v1/solve` sobre `z^n=w` devuelve todas las
+  raíces exactas en `result_data` (por ejemplo `z^4=-4` -> `±1±i`). Es una ruta
+  alternativa documentada, no una operación de raíz n-ésima.
+- **PASS exacto (7):** `PR-01..PR-06` (potencias exactas: `-512`, `-64`, `1`,
+  `-1024`, `-1/4`, `1`) y `PR-19` (`cos(2*pi/5)=(sqrt(5)-1)/4`).
+- **PASS_SCOPED (10):** `PR-07..PR-16`. El conjunto de raíces es exacto, pero
+  se obtiene resolviendo `z^n=w` y/o se emite en forma cartesiana de radicales
+  en lugar de la forma polar/exponencial pedida. `PR-07` devuelve `±sqrt(I)`,
+  equivalente exacto de `±(1+i)/sqrt(2)`; `PR-16` devuelve la raíz principal
+  `2^(1/6)e^(i*pi/12)` como radicales cartesianos.
+- **BLOCKED (2):**
+  - `PR-17`: no existe nodo de sumatoria; `sum(...)` y `Sum(...)` devuelven
+    `PARSE_ERROR`, aunque la suma geométrica vale `0` para `n >= 2`.
+  - `PR-18`: no existe operación de producto de raíces; `/solve` enumera las
+    raíces cuartas de la unidad, pero el producto `(-1)^(n+1)` no se produce.
+- **Hallazgo:** `(-8)^(1/3)` y `root(-8,3)` devuelven `2*(-1)**(1/3)`, la raíz
+  compleja principal, no `-2`; es la convención de rama principal ya declarada
+  en el producto. `sqrt(i)` se devuelve sin simplificar como `sqrt(I)`.
+
+Acumulado EDCX (Parte A + B1 + B2 + B3): **319 / 638 filas, 188 PASS / 131 BLOCKED** en Plus.
+
+### Evidencia CI Plus
+
+| HEAD | Cumulative | H1d |
+|------|------------|-----|
+| `ab220425` (B3) | [39945613218](https://github.com/c2melendez/precision-lab-plus/actions/runs/39945613218) **SUCCESS** | [39945613228](https://github.com/c2melendez/precision-lab-plus/actions/runs/39945613228) **SUCCESS** |
+
+Backend cumulative: **2345 passed, 1 skipped, 6 xfailed**, cobertura **87.92%**.
+Harness B3: 22/22.
+
+**Siguiente acción única:** EDCX Parte B, bloque B4 (ecuaciones en C, 34 filas, `VC-EC-01..34`).
+
+---
+
 ## 2026-10-23 UTC — r261: EDCX B2 — 20 PASS exactos + 13 PASS_SCOPED / 8 BLOCKED (Plus)
 
 **EDCX Parte B, bloque B2 (41 filas, operaciones con números complejos): 20 PASS exactos + 13 PASS_SCOPED + 8 BLOCKED en Plus.**

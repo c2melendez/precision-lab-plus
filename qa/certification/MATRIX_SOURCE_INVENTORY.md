@@ -35,7 +35,7 @@ El estado de **ejecución** se anota aparte y procede del ledger (`continuity.js
 | TR324 | `ejercicios_trigonometria.md.gz` | 324 | `PARCIAL`: solo sección 1 Evaluación (33/48 con cierre); secciones 2–9 pendientes |
 | LER | `matriz_log_exp_radicales.md.gz` | 540 | `PARCIAL`: sección 1 Evaluación `CERRADA` (67/67); secciones 2–9 pendientes |
 | MV153 | `matriz_matrices_vectores.md.gz` | 153 | `CERRADO` (r236–r253): catálogo A–H+J `PASS_SCOPED_BILATERAL` |
-| EDCX | `matriz_edo_variable_compleja.md.gz` | 638 | `PARCIAL`: Parte A A1-A8 y Parte B B1-B2 (300/638) `PASS_SCOPED` en Plus (171 PASS / 129 BLOCKED); B3-B15 pendientes; Lite sin motor equivalente |
+| EDCX | `matriz_edo_variable_compleja.md.gz` | 638 | `PARCIAL`: Parte A A1-A8 y Parte B B1-B3 (319/638) `PASS_SCOPED` en Plus (188 PASS / 131 BLOCKED); B4-B15 pendientes; Lite sin motor equivalente |
 | GR519 | `matriz_graficacion.md.gz` | 522 | `NO_EJECUTADO` |
 
 **Total de filas de las 9 fuentes: 3.454.**
@@ -111,7 +111,7 @@ El estado de **ejecución** se anota aparte y procede del ledger (`continuity.js
 
 - Parte A (ED, 210): A1 Primer orden (S/L/H/X/B/C) · A2 Segundo orden y superior (K/N/E/A) · A3 Sistemas y exponencial matricial · A4 Laplace · A5 Series/Frobenius · A6 EDP · A7 Cualitativo/numérico/retardo · A8 Casos límite.
 - Parte B (VC, 428): B1 Conversión de formas (17/10/10/12) · B2 Operaciones (11/9/9/12) · B3 Potencias y raíces · B4 Ecuaciones en ℂ · B5 Lugares geométricos · B6 Funciones multivaluadas · B7 Límites/series · B8 Cauchy–Riemann · B9 Contorno/residuos · B10 Taylor/Laurent · B11 Integrales reales · B12 Transformaciones conformes · B13 Teoremas globales · B14 EDO/Laplace/Fourier · B15 Robustez.
-- Estado: `PARCIAL`. A1 (53) + A2 (50) + A3 (16) + A4 (24) + A5 (10) + A6 (26) + A7 (25) + A8 (6) cerradas en Plus como `PASS_SCOPED` (93 PASS / 117 BLOCKED medidos, r259); B1 (49) medida en r260 (45 PASS_SCOPED / 4 BLOCKED); B2 (41) medida en r261 (20 PASS exactos + 13 PASS_SCOPED / 8 BLOCKED). Acumulado 300/638, 171 PASS / 129 BLOCKED; B3-B15 pendientes. Lite: `NO_EJECUTADO` (motor `stepEngine/ode.ts` limitado a `y'=f(x)` y 2.º orden constante; sin motor de variable compleja).
+- Estado: `PARCIAL`. A1 (53) + A2 (50) + A3 (16) + A4 (24) + A5 (10) + A6 (26) + A7 (25) + A8 (6) cerradas en Plus como `PASS_SCOPED` (93 PASS / 117 BLOCKED medidos, r259); B1 (49) medida en r260 (45 PASS_SCOPED / 4 BLOCKED); B2 (41) medida en r261 (20 PASS exactos + 13 PASS_SCOPED / 8 BLOCKED); B3 (19) medida en r262 (7 PASS exactos + 10 PASS_SCOPED / 2 BLOCKED). Acumulado 319/638, 188 PASS / 131 BLOCKED; B4-B15 pendientes. Lite: `NO_EJECUTADO` (motor `stepEngine/ode.ts` limitado a `y'=f(x)` y 2.º orden constante; sin motor de variable compleja).
 
 ### GR519 — Graficación (522)
 
@@ -121,6 +121,7 @@ El estado de **ejecución** se anota aparte y procede del ledger (`continuity.js
 
 ## Historial de este documento
 
+- **2026-10-23 (r262)** - EDCX Parte B B3 medida en Plus (319/638; 188 PASS / 131 BLOCKED). 7 PASS exactos + 10 PASS_SCOPED / 2 BLOCKED: `evaluate` resuelve potencias exactas y `sqrt`/`root` solo la raiz principal; la enumeracion completa usa `/api/v1/solve` sobre `z^n=w` (ruta alternativa, de ahi PASS_SCOPED en `PR-07..PR-16`). BLOCKED: `PR-17` (sin sumatoria) y `PR-18` (sin producto de raices). Proximo bloque EDCX B4 (ecuaciones en C, 34 filas).
 - **2026-10-23 (r261)** - EDCX Parte B B2 medida en Plus (300/638; 171 PASS / 129 BLOCKED). 20 PASS exactos + 13 PASS_SCOPED / 8 BLOCKED: la forma binomica se evalua literalmente (incluida la multiplicacion implicita), pero no hay notacion polar de entrada; `P-01..P-09` requieren traduccion, `T-05/X-04/X-08/X-09` devuelven equivalentes exactos en otra forma. BLOCKED: `T-04/X-10` (potencia sin combinar), `T-06/T-07/T-08` (sin expansion de angulo multiple), `T-09` (sin sumatoria) y `X-11/X-12` (sin reescritura de media angulo/serie geometrica). Proximo bloque EDCX B3 (potencias y raices, 19 filas).
 - **2026-10-23 (r260)** - EDCX Parte B B1 medida en Plus (259/638; 138 PASS / 121 BLOCKED). 45 PASS_SCOPED / 4 BLOCKED: no hay notacion polar de entrada ni emisor polar; la conversion se certifica con `abs`+`arg` y oraculo sympy. BLOCKED: `B-17` (`arg(0)=0` sin aviso) y `T-09/T-10/X-12` (formas semiangulo simbolicas sin reducir). Proximo bloque EDCX B2 (operaciones).
 - **2026-10-23 (r259)** - EDCX Parte A cerrada en Plus (210/638; 93 PASS / 117 BLOCKED). A8 (6 filas) queda 0 PASS / 6 BLOCKED: no unicidad indistinguible, integral implicita sin ramas, intervalo maximo no aplicado antes de evaluar, rama singular unica y frontera incompatible rechazada por el limite de una condicion inicial. Proximo bloque EDCX B1 (conversion de formas).

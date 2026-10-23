@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 261,
+  "revision": 262,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "7c87b95f00edfb3e983f270286ace6172d791d2c",
-  "baseline_case": "EDCX-B2-OPERATIONS-R261",
+  "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
+  "baseline_case": "EDCX-B3-POWERS-ROOTS-R262",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "prose_only_paths": [
@@ -41,14 +41,14 @@
     }
   },
   "next_action": {
-    "id": "EDCX-B3-POWERS-ROOTS",
+    "id": "EDCX-B4-COMPLEX-EQUATIONS",
     "status": "READY",
-    "action": "Continuar EDCX Parte B con el bloque B3 (19 filas, potencias y raices de complejos, VC-PR-01..19) en Plus. Medir primero que potencia y que raiz existen realmente (potencia entera, raiz n-esima, rama principal, forma trigonometrica y exponencial) y con que notacion de entrada; clasificar PASS/PASS_SCOPED/BLOCKED con oraculo sympy independiente. No reutilizar los runs de B2 como evidencia. Lite sigue sin motor complejo equivalente; no declarar paridad sin ejecucion.",
+    "action": "Continuar EDCX Parte B con el bloque B4 (34 filas, ecuaciones en C, VC-EC-01..34) en Plus. Medir primero que resuelve realmente /api/v1/solve para ecuaciones polinomicas complejas (raices exactas, multiplicidad, coeficientes complejos, ecuaciones de grado superior) y con que notacion de entrada; clasificar PASS/PASS_SCOPED/BLOCKED con oraculo sympy independiente. No reutilizar los runs de B3 como evidencia. Lite sigue sin motor complejo equivalente; no declarar paridad sin ejecucion.",
     "technical_sha_by_repo": {
-      "c2melendez/precision-lab-plus": "7c87b95f00edfb3e983f270286ace6172d791d2c"
+      "c2melendez/precision-lab-plus": "ab2204258d21bddb9a5baf7664f62c7f96245182"
     },
     "product_changed": false,
-    "audit": "r261: B2 se midio con harness propio y gates verdes en el SHA exacto (7c87b95f: cumulative 39943293295, H1d 39943293116). 20 PASS exactos + 13 PASS_SCOPED / 8 BLOCKED. La forma binomica se evalua literalmente, incl. multiplicacion implicita; no hay notacion polar de entrada y el motor no aplica De Moivre, angulo multiple, sumatoria ni media angulo. Global OPEN."
+    "audit": "r262: B3 se midio con harness propio y gates verdes en el SHA exacto (ab220425: cumulative 39945613218, H1d 39945613228). 7 PASS exactos + 10 PASS_SCOPED / 2 BLOCKED. evaluate resuelve potencias exactas; sqrt/root solo la raiz principal y la enumeracion completa usa /solve sobre z^n=w. Sin nodo de sumatoria ni de producto de raices. Global OPEN."
   },
   "blockers": [
     {
@@ -2767,6 +2767,100 @@
     "lite": {
       "status": "NO_EJECUTADO",
       "reason": "Sin motor de variable compleja equivalente: las operaciones B/P/T/X no estan implementadas y no se declara paridad sin ejecucion"
+    },
+    "global_certification": "OPEN"
+  },
+  "edcx_b3_closure_r262": {
+    "status": "PASS_SCOPED",
+    "scope": "EDCX Parte B B3 (19 filas, potencias y raices de complejos, VC-PR-01..19) en Plus",
+    "rows_total": 19,
+    "rows_pass": 17,
+    "rows_pass_exact": 7,
+    "rows_pass_scoped": 10,
+    "rows_blocked": 2,
+    "classification": {
+      "pass_exact": [
+        "VC-PR-01..06",
+        "VC-PR-19"
+      ],
+      "pass_scoped": {
+        "VC-PR-07": "sqrt(i) devuelve sqrt(I) (raiz principal sin simplificar); /solve z^2=i devuelve ±sqrt(I), equivalente exacto de ±(1+i)/sqrt(2)",
+        "VC-PR-08": "sqrt devuelve solo 1+2i; /solve z^2=-3+4i devuelve ±(1+2i)",
+        "VC-PR-09": "sqrt devuelve solo 3-2i; /solve z^2=5-12i devuelve ±(3-2i)",
+        "VC-PR-10": "/solve z^3=8 devuelve 2, -1±i*sqrt(3) exactos; no hay operacion de raiz n-esima",
+        "VC-PR-11": "/solve z^3=-8 devuelve -2, 1±i*sqrt(3) exactos",
+        "VC-PR-12": "/solve z^3=i devuelve -i, ±sqrt(3)/2+i/2 exactos",
+        "VC-PR-13": "/solve z^4=-4 devuelve ±1±i exactos",
+        "VC-PR-14": "/solve z^4=1 devuelve 1, i, -1, -i exactos",
+        "VC-PR-15": "/solve z^6=1 devuelve seis raices como radicales cartesianos, no como e^(i*pi*k/3)",
+        "VC-PR-16": "/solve z^3=1+i devuelve la raiz principal 2^(1/6)e^(i*pi/12) como radicales cartesianos"
+      },
+      "blocked": {
+        "VC-PR-17": "sum(...) y Sum(...) devuelven PARSE_ERROR; no hay nodo de sumatoria",
+        "VC-PR-18": "no hay operacion de producto de raices; /solve enumera las raices cuartas pero no produce (-1)^(n+1)"
+      }
+    },
+    "channel": "evaluate resuelve potencias enteras y negativas exactas. sqrt(z) y root(z,n) devuelven solo la raiz principal (sqrt(-3+4i)=1+2i, 8^(1/3)=2, 1^(1/4)=1). No hay endpoint de raices n-esimas; /solve sobre z^n=w enumera todas las raices exactas en result_data.",
+    "certification_route": "Potencias y valor trigonometrico por /api/v1/evaluate; conjuntos completos de raices por /api/v1/solve sobre z^n=w; oraculo sympy independiente para cada valor y conjunto.",
+    "product_changed": false,
+    "harness": "backend/tests/test_edcx_ed_b3_01_l19.py (22 passed local y CI)",
+    "channels": [
+      "/api/v1/evaluate",
+      "/api/v1/solve"
+    ],
+    "oracle": "sympy independiente: potencias (1+i*sqrt(3))^9=-512, (sqrt(3)-i)^6=-64, (1+i)^20=-1024, (1+i)^(-4)=-1/4; conjuntos de raices de z^n=w; suma geometrica 0 para n=2..8; producto de raices (-1)^(n+1) para n=2..6; cos(2*pi/5)=(sqrt(5)-1)/4",
+    "findings": [
+      "sqrt(i) se devuelve sin simplificar como sqrt(I).",
+      "(-8)^(1/3) y root(-8,3) devuelven 2*(-1)**(1/3), la raiz compleja principal, no -2.",
+      "No existe operacion de raiz n-esima que enumere todas las raices; /solve es una ruta alternativa.",
+      "No existe nodo de sumatoria ni de producto de raices."
+    ],
+    "runs": [
+      {
+        "gate": "cumulative",
+        "sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
+        "run_id": 39945613218,
+        "conclusion": "SUCCESS",
+        "tests": "2345 passed, 1 skipped, 6 xfailed; coverage 87.92%"
+      },
+      {
+        "gate": "h1d",
+        "sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
+        "run_id": 39945613228,
+        "conclusion": "SUCCESS"
+      }
+    ],
+    "parte_b_cumulative": {
+      "rows": 109,
+      "pass": 95,
+      "blocked": 14,
+      "source_rows": 638
+    },
+    "edcx_cumulative": {
+      "rows": 319,
+      "pass": 188,
+      "blocked": 131,
+      "source_rows": 638
+    },
+    "parts": {
+      "A": {
+        "rows": 210,
+        "measured": true
+      },
+      "B": {
+        "rows": 428,
+        "measured": false,
+        "measured_blocks": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "rows_measured": 109
+      }
+    },
+    "lite": {
+      "status": "NO_EJECUTADO",
+      "reason": "Sin motor de variable compleja equivalente: potencias y raices B3 no estan implementadas y no se declara paridad sin ejecucion"
     },
     "global_certification": "OPEN"
   }

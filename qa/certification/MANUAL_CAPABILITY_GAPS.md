@@ -678,3 +678,36 @@ Ninguna de estas filas se cuenta como PASS.
 - Las identidades de las filas BLOCKED y de las traducciones se comprueban con
   oráculos sympy independientes; nunca se atribuyen al producto.
 - Lite: sin motor de variable compleja equivalente; NO_EJECUTADO.
+
+## 2026-10-23 — EDCX B3: potencias y raíces (r262)
+
+- Estado: **7 PASS exactos + 10 PASS_SCOPED / 2 BLOCKED en Plus** (19 filas).
+  Acumulado EDCX: 319/638 filas, 188 PASS / 131 BLOCKED.
+- **Canal de potencias:** `/api/v1/evaluate` resuelve potencias enteras y
+  negativas de forma exacta: `(1+i*sqrt(3))^9=-512`, `(sqrt(3)-i)^6=-64`,
+  `((1+i)/sqrt(2))^8=1`, `(1+i)^(-4)=-1/4`.
+- **Raíz principal:** `sqrt(z)` y `root(z,n)` devuelven solo la raíz principal.
+  `sqrt(-3+4i)=1+2i`, `sqrt(5-12i)=3-2i`, `8^(1/3)=2`, `1^(1/4)=1`; no hay
+  endpoint ni operador que enumere todas las raíces n-ésimas.
+- **Ruta de enumeración:** `/api/v1/solve` sobre `z^n=w` devuelve todas las
+  raíces exactas en `result_data` (`z^2=i` -> `±sqrt(I)`, `z^3=-8` ->
+  `-2, 1±i*sqrt(3)`, `z^4=-4` -> `±1±i`, `z^6=1` -> seis raíces). Es una ruta
+  alternativa, no una operación de raíz n-ésima; de ahí PASS_SCOPED en
+  `PR-07..PR-16`.
+- **Formas emitidas:** `PR-07` devuelve `±sqrt(I)` (equivalente exacto de
+  `±(1+i)/sqrt(2)`); `PR-15` emite las seis raíces sextas como radicales
+  cartesianos en lugar de `e^(i*pi*k/3)`; `PR-16` emite la raíz principal
+  `2^(1/6)e^(i*pi/12)` como radicales cartesianos.
+- **`PR-19` PASS exacto:** `cos(2*pi/5)=-1/4+sqrt(5)/4=(sqrt(5)-1)/4`. Se
+  certifica el valor; la derivación pedagógica desde `z^5=1` no se ejecuta.
+- **`PR-17` BLOCKED:** no existe nodo de sumatoria; `sum(...)` y `Sum(...)`
+  devuelven `PARSE_ERROR`, aunque `sum_{k=0}^{n-1} e^(2*pi*i*k/n)=0` para
+  `n>=2`.
+- **`PR-18` BLOCKED:** no existe operación de producto de raíces; `/solve`
+  enumera las raíces cuartas de la unidad, pero el producto `(-1)^(n+1)` no se
+  produce.
+- **Convención de rama:** `(-8)^(1/3)` y `root(-8,3)` devuelven
+  `2*(-1)**(1/3)`, la raíz compleja principal, no `-2`.
+- Las identidades y los conjuntos de raíces se comprueban con oráculos sympy
+  independientes; nunca se atribuyen al producto.
+- Lite: sin motor de variable compleja equivalente; NO_EJECUTADO.

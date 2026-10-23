@@ -1,3 +1,23 @@
+## 2026-10-23 UTC — r262: EDCX B3 (Plus scoped)
+
+- Plus `ab220425` (B3): cumulative [39945613218] SUCCESS — 2345 passed, 1 skipped,
+  6 xfailed, cobertura 87.92%; H1d [39945613228] SUCCESS. Harness B3 22/22.
+- B3: 19 filas -> 7 PASS exactos + 10 PASS_SCOPED / 2 BLOCKED. `evaluate`
+  resuelve potencias exactas; `sqrt`/`root` devuelven solo la raíz principal
+  (`sqrt(-3+4i)=1+2i`, `8^(1/3)=2`, `1^(1/4)=1`).
+- PASS_SCOPED: `PR-07..PR-16`; la enumeración completa se certifica con
+  `/api/v1/solve` sobre `z^n=w`, que devuelve todas las raíces exactas. `PR-07`
+  devuelve `±sqrt(I)` (equivalente a `±(1+i)/sqrt(2)`); `PR-15/PR-16` emiten
+  radicales cartesianos en lugar de la forma exponencial.
+- BLOCKED: `PR-17` (sin nodo de sumatoria; `sum`/`Sum` -> `PARSE_ERROR`) y
+  `PR-18` (sin operación de producto de raíces).
+- Hallazgo: `(-8)^(1/3)=2*(-1)**(1/3)` es la rama principal compleja, no `-2`.
+- Acumulado EDCX (A + B1 + B2 + B3): 319 / 638 filas, 188 PASS / 131 BLOCKED.
+- Lite: EDCX sin ejecutar (`NO_EJECUTADO`); sin PASS/FAIL bilateral.
+- Siguiente: EDCX Parte B, bloque B4 (ecuaciones en C, 34 filas, `VC-EC-01..34`).
+
+---
+
 ## 2026-10-23 UTC — r261: EDCX B2 (Plus scoped)
 
 - Plus `7c87b95f` (B2): cumulative [39943293295] SUCCESS — 2323 passed, 1 skipped,
