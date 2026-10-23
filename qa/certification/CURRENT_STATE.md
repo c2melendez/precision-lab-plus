@@ -1,3 +1,13 @@
+## 2026-10-23 UTC — r275: reconciliación acotada de HEAD y Actions
+
+- HEAD actual de la rama: `d854f379583b5479abe4fe6e43fa545a81ff8b6b`. Últimos runs `push` visibles consultados usan SHA `bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69`, por lo que **no prueban el HEAD actual**.
+- Último grupo `pull_request` visible en la primera página: fecha 2026-10-08, SHA de ejecución `e5a86514d289fb5224eaf43e57e76722808cbdc0`. PR #29 visible page includes S25 Security Gate FAILURE and S21 Cross-browser Compatibility FAILURE; latest visible PR event is older than current HEAD.
+- La consulta fue acotada a primeras páginas de API; no se afirma que sea el historial exhaustivo. No se despachó ningún workflow en esta revisión.
+- Siguiente acción única: validar el adaptador B6 con prueba dirigida y, antes de cualquier CI nuevo, comprobar los checks `pull_request` que correspondan al HEAD actual. No repetir gates globales verdes ni interpretar los antiguos como evidencia de HEAD actual.
+- B6 REVIEW; B5 BLOCKED en Plus; Lite NO_EJECUTADO; certificación global OPEN. SG28/DIST y S25 conservan sus bloqueos.
+
+---
+
 ## 2026-10-23 UTC — r274: plan de adaptador/oráculo EDCX-B6
 
 - Publicado [EDCX_B6_ADAPTER_ORACLE_PLAN.md](EDCX_B6_ADAPTER_ORACLE_PLAN.md): entradas candidatas para VC-FE-01..03 y VC-FE-06..10, oráculo Python math/cmath, decodificación de salida pendiente de validar y tolerancia propuesta explícitamente provisional.
