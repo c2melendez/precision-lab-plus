@@ -47,9 +47,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-REVIEW-SG28-LEASE-FENCING-R287",
-    "status": "REVIEW",
-    "action": "Revisar SG28_LOGICAL_REQUEST_LEASE_CONTRACT_PROPOSAL_v1.md contra SG28_INTEGRATION_EXIT_CRITERIA.md. Resolver las decisiones del contrato con revisión técnica antes de cablear el endpoint. No activar el flag experimental ni afirmar DIST PASS. S18 40069907881 fue CANCELLED por apagado del runner; esperar que terminen los gates de Lite en SHA 14153e8bfd4f8557c24c7d195915b0a0907baa00 y luego reintentar solo el job cancelado si hay runner disponible, verificando la instantánea Lite exacta."
+    "id": "PLUS-SG28-TECHNICAL-REVIEW-R287",
+    "status": "REVIEW_REQUIRED",
+    "action": "Revisar qa/certification/SG28_CONTRACT_REVIEW_R287.md junto con SG28_LOGICAL_REQUEST_LEASE_CONTRACT_PROPOSAL_v1.md y SG28_INTEGRATION_EXIT_CRITERIA.md. Resolver explícitamente presupuesto total, protocolo grant/renew/release con ACK perdido, autoridad de reloj/reinicio, fencing del proceso hijo y regla de concesión sucesora, tabla HTTP/MathResponse y topología DIST. No cablear endpoint, no activar flags ni declarar DIST PASS hasta que backend/infraestructura aprueben el contrato. S18 run 40069907881 sigue CANCELLED por apagado del runner; no repetirlo mientras Lite y el runner no estén listos."
   },
   "blockers": [
     {
@@ -79,7 +79,7 @@
       "detail": "Lugares geométricos VC-LG-01..25: canal vacío y sin endpoint de producto."
     }
   ],
-  "ledger_note": "r287: Plus CI 40069907974, cumulative 40069907843, Playwright 40069907922 y H1a/H1b/H1c/H1d/S17/S20/S21/S23/S25/Syntax diagnostic SUCCESS en SHA PR 6e6a59e. S19 40069907892 SUCCESS con tres jobs de mutación y reportes subidos; revisar artefactos para puntuación/aceptación. S18 40069907881 CANCELLED por apagado del runner durante el gate, no fallo de producto. Contrato lease/fencing publicado PROPOSED/REVIEW_REQUIRED. Global OPEN; DIST y S25 global siguen bloqueados.",
+  "ledger_note": "r287: Plus CI 40069907974, cumulative 40069907843, Playwright 40069907922 y H1a/H1b/H1c/H1d/S17/S20/S21/S23/S25/Syntax diagnostic SUCCESS en SHA técnico registrado; S19 40069907892 SUCCESS con reportes de mutación que requieren criterio/umbral; S18 40069907881 CANCELLED por shutdown, no PASS. SG28 contrato propuesto y revisión de brechas publicada en SG28_CONTRACT_REVIEW_R287.md; no producto ni Actions nuevas. H2-SG28-DIST-01..08 y SY-X-04-PLUS-HTTP BLOCKED; SECURITY-S25 global BLOCKED; global OPEN; PR #29 no mergeado.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
