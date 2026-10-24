@@ -20,7 +20,7 @@ permissions:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -47,7 +47,26 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run E2E tests
         working-directory: frontend
-        run: npx playwright test
+        env:
+          # Phase 2 only. Phase 1 strips these so the rest of the suite stays on
+          # the default evaluate path. Matches in625-sg28-plus-ui-cancel.yml.
+          SG28_EVALUATE_ISOLATION: "1"
+          SG28_CI_OBSERVE: "1"
+          SG28_CI_SLOW: "1"
+          SG28_CI_EVENT_FILE: /tmp/sg28-plus-e2e-events.jsonl
+        run: |
+          set +e
+          env -u SG28_EVALUATE_ISOLATION -u SG28_CI_OBSERVE -u SG28_CI_SLOW -u SG28_CI_EVENT_FILE \
+            npx playwright test --grep-invert "EN-SG-28"
+          general=$?
+          sleep 3
+          rm -f "$SG28_CI_EVENT_FILE"
+          npx playwright test e2e/in625-h2-sg28-cancel.spec.ts --workers=1
+          sg28=$?
+          echo "general_exit=${general} sg28_exit=${sg28}"
+          if [ "$general" -ne 0 ] || [ "$sg28" -ne 0 ]; then
+            exit 1
+          fi
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
