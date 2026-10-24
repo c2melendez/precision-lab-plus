@@ -16,6 +16,10 @@ Global OPEN · H2-SG28-DIST-01..08 BLOCKED · SECURITY-S25 global BLOCKED · SY-
 
 **Siguiente acción única — REVIEW:** revisión técnica del contrato propuesto contra `SG28_INTEGRATION_EXIT_CRITERIA.md`. No cablear la ruta HTTP ni activar aislamiento en producción. Tras completar los gates de Lite en el SHA técnico actual, reintentar solo el job S18 cancelado si el runner está disponible y verificar qué snapshot de Lite se compara.
 
+### Addendum r287 — revisión técnica SG28 completada, contrato aún no aprobado
+
+Se añadió [SG28_CONTRACT_REVIEW_R287.md](SG28_CONTRACT_REVIEW_R287.md), contraste de los seis puntos de `SG28_INTEGRATION_EXIT_CRITERIA.md`. Resultado: el contrato propuesto los menciona, pero aún no los resuelve como decisiones implementables. Los puntos críticos son ACK perdido/renovación, reloj y recuperación, fencing de ejecución efectiva y condición para conceder una generación sucesora. No cablear HTTP ni activar flags; H2-SG28-DIST-01..08 y SY-X-04-PLUS-HTTP continúan BLOCKED. Cambio documental únicamente; no se ejecutaron Actions.
+
 ---
 
 ## 2026-10-24 UTC — r286: brecha MathResponse corregida; gates de cierre en WAIT
