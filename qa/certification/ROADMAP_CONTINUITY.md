@@ -125,3 +125,15 @@ Después de un avance técnico:
 ## 10. Regla de autonomía
 
 Resolver automáticamente lecturas, comparaciones, diagnósticos, documentación y ejecuciones autorizadas. Solicitar intervención humana únicamente cuando falten permisos/secretos, una aprobación sea obligatoria, el entorno externo indispensable no esté disponible o dos fuentes autoritativas sigan siendo incompatibles después de inspeccionarlas. En esos casos, continuar con trabajo independiente seguro y dejar el bloqueo preciso, no detener toda la certificación.
+
+
+## Continuidad operativa r292 — 2026-10-24
+
+**HEAD técnico verificado:** `561547252456b30124f4f7a1db06347ee0731079`. La documentación de continuidad se actualiza después en commits separados; no confundir esos commits documentales con el SHA sobre el que corrieron los gates.
+
+- CI [40098526446](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526446), cumulative [40098526501](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526501), Playwright [40098526513](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526513) y S19 focalizado [40098526609](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526609) concluyeron SUCCESS sobre ese SHA.
+- S19 focalizado: 1,666 mutantes, 801 killed, 863 survived, 2 timeout. El workflow está verde, pero la aceptación S19 continúa BLOCKED; no ejecutar la campaña completa ni interpretar estos números como comparables directamente con el baseline histórico.
+- S18 [40098526464](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526464) fue cancelado por shutdown signal del runner durante `qa/s18/run_differential.py`. Es un bloqueo de infraestructura, no un fallo funcional demostrado.
+- PR #29 sigue OPEN/DRAFT; certificación global OPEN. SECURITY-S25 global BLOCKED, AS-B-29 ON_HOLD y H2-SG28-DIST-01..08 BLOCKED.
+
+**Siguiente acción única:** diagnosticar/restablecer infraestructura S18 y ejecutar solo S18 una vez; no repetir los gates verdes anteriores. Después actualizar continuidad con evidencia exacta y revisar sobrevivientes S19 usando artefactos ya generados.
