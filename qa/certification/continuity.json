@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 287,
+  "revision": 288,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -20,7 +20,8 @@
     "qa/certification/EDCX_B6_CHANNEL_AUDIT.md",
     "qa/certification/EDCX_B6_ROW_CONTRACT_DRAFT.md",
     "qa/certification/EDCX_B6_HTTP_CONTRACT_FINDINGS.md",
-    "qa/certification/EDCX_B6_ADAPTER_ORACLE_PLAN.md"
+    "qa/certification/EDCX_B6_ADAPTER_ORACLE_PLAN.md",
+    "qa/certification/S19_BACKEND_MUTATION_REVIEW_R288.md"
   ],
   "gates": {
     "cumulative": {
@@ -47,9 +48,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-SG28-TECHNICAL-REVIEW-R287",
-    "status": "REVIEW_REQUIRED",
-    "action": "Revisar qa/certification/SG28_CONTRACT_REVIEW_R287.md junto con SG28_LOGICAL_REQUEST_LEASE_CONTRACT_PROPOSAL_v1.md y SG28_INTEGRATION_EXIT_CRITERIA.md. Resolver explícitamente presupuesto total, protocolo grant/renew/release con ACK perdido, autoridad de reloj/reinicio, fencing del proceso hijo y regla de concesión sucesora, tabla HTTP/MathResponse y topología DIST. No cablear endpoint, no activar flags ni declarar DIST PASS hasta que backend/infraestructura aprueben el contrato. S18 run 40069907881 sigue CANCELLED por apagado del runner; no repetirlo mientras Lite y el runner no estén listos."
+    "id": "PLUS-S19-BACKEND-MUTATION-ACCEPTANCE-R288",
+    "status": "BLOCKED",
+    "action": "Aprobar y versionar criterios de aceptación de S19 backend mutmut antes de repetir la ejecución: fórmula/denominador del score, umbral mínimo, tratamiento de no tests y timeout, política de mutantes equivalentes/exclusiones y evidencia obligatoria. El artefacto del run 40069907892 en SHA 6e6a59ee556cf6bba60a40010ec707f05a01ca52 registra 0 killed, 2136 survived, 159 no tests y 14 timeout; exit code 0 no es PASS. No repetir S19 completo ni declarar aceptación. Mantener SG28 REVIEW_REQUIRED, S18 CANCELLED y certificación global OPEN."
   },
   "blockers": [
     {
@@ -77,9 +78,15 @@
       "status": "BLOCKED",
       "kind": "capability",
       "detail": "Lugares geométricos VC-LG-01..25: canal vacío y sin endpoint de producto."
+    },
+    {
+      "id": "S19-BACKEND-MUTATION",
+      "status": "BLOCKED",
+      "kind": "acceptance",
+      "detail": "Artefacto mutmut: 0 killed, 2136 survived, 159 no tests, 14 timeout; criterio/umbral de aceptación no aprobado."
     }
   ],
-  "ledger_note": "r287: Plus CI 40069907974, cumulative 40069907843, Playwright 40069907922 y H1a/H1b/H1c/H1d/S17/S20/S21/S23/S25/Syntax diagnostic SUCCESS en SHA técnico registrado; S19 40069907892 SUCCESS con reportes de mutación que requieren criterio/umbral; S18 40069907881 CANCELLED por shutdown, no PASS. SG28 contrato propuesto y revisión de brechas publicada en SG28_CONTRACT_REVIEW_R287.md; no producto ni Actions nuevas. H2-SG28-DIST-01..08 y SY-X-04-PLUS-HTTP BLOCKED; SECURITY-S25 global BLOCKED; global OPEN; PR #29 no mergeado.",
+  "ledger_note": "r287: Plus CI 40069907974, cumulative 40069907843, Playwright 40069907922 y H1a/H1b/H1c/H1d/S17/S20/S21/S23/S25/Syntax diagnostic SUCCESS en SHA técnico registrado; S19 40069907892 SUCCESS con reportes de mutación que requieren criterio/umbral; S18 40069907881 CANCELLED por shutdown, no PASS. SG28 contrato propuesto y revisión de brechas publicada en SG28_CONTRACT_REVIEW_R287.md; no producto ni Actions nuevas. H2-SG28-DIST-01..08 y SY-X-04-PLUS-HTTP BLOCKED; SECURITY-S25 global BLOCKED; global OPEN; PR #29 no mergeado. r288: reviewed S19 backend mutmut artifact 12551670346 from run 40069907892 @ 6e6a59ee; counts 0 killed, 2136 survived, 159 no tests, 14 timeout; exit 0 is not acceptance. Added S19_BACKEND_MUTATION_REVIEW_R288.md. S19 backend acceptance BLOCKED; no new Actions; global OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
