@@ -13,21 +13,24 @@ Recuento directo de las líneas de estado del informe:
 
 | Estado de mutante | Cantidad |
 |---|---:|
-| killed | 0 |
 | survived | 2,136 |
 | no tests | 159 |
 | timeout | 14 |
-| **Total registrado** | **2,309** |
+| **Entradas listadas** | **2,309** |
 
-La revisión del archivo muestra cero mutantes killed. El reporte previo de continuidad indicaba 13 timeouts; el artefacto descargado contiene **14**. Para futuras referencias prevalece el artefacto del run, y se corrige la cifra documental.
+**Limitación de interpretación:** el listado `mutmut results` representa estados no-killed/no resueltos y no incluye necesariamente los mutantes `killed`. Por tanto, las 2,309 líneas no son el total de mutantes de la campaña ni prueban cero killed; el artefacto por sí solo no permite calcular el score actual. El reporte previo de continuidad indicaba 13 timeouts; el artefacto descargado contiene **14**.
 
 ## Interpretación y límites
 
-- No existe en el artefacto una puntuación de mutación positiva que permita afirmar que el backend satisface un umbral.
+- El artefacto no publica un resumen completo con el total de mutantes y el recuento `killed`; no permite calcular el score actual ni afirmar que satisface un umbral.
 - no tests no equivale a mutantes muertos ni debe contarse como éxito.
 - timeout no equivale a mutante muerto; debe reportarse por separado y revisarse como ejecución no concluyente.
-- Aunque el job de Actions figure SUCCESS y el archivo de salida diga 0, **S19 backend no queda aceptado** con estos datos.
-- No se infiere que todos los mutantes sobrevividos representen defectos de producto: algunos pueden requerir análisis de equivalencia, observabilidad o alcance de pruebas. La cifra sí prueba que la ejecución actual no aporta kills registrados.
+- Aunque el job de Actions figure SUCCESS y el código de salida diga 0, **S19 backend no queda aceptado** con estos datos.
+- No se infiere que todos los mutantes listados representen defectos de producto: algunos pueden requerir análisis de equivalencia, observabilidad o alcance de pruebas. El reporte actual no basta para afirmar el número de kills.
+
+## Comparación con el artefacto baseline
+
+Se recuperó el artefacto baseline ID `10740671311` del run `35838270384`. Su archivo `mutmut-results.txt` tiene 438 entradas: 371 survived, 58 no tests y 9 timeout; el documento normativo registra además 590 killed, para un inventario total de 1,028 y score killed 57.39%. La omisión de killed en el listado explica por qué sumar solo sus líneas no reconstruye el total. El artefacto actual tiene 2,309 entradas listadas (2,136 survived, 159 no tests, 14 timeout), pero carece de recuento completo de killed/total comparable. Debe investigarse la diferencia de estados no-killed antes de evaluar tendencia.
 
 ## Decisión
 
