@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import math
+import multiprocessing
 import os
 import random
 import subprocess
@@ -61,11 +62,66 @@ def sympify_user(expr: str) -> sp.Expr:
     return sp.sympify(expr.replace("^", "**"), locals={"ln": sp.log})
 
 
+def _plus_eval_child(expression: str, connection) -> None:
+    """Run one Plus request in a killable child so a hung parser cannot stall S18."""
+    try:
+        response = client.post(
+            "/api/v1/evaluate",
+            json={"expression": expression, "angle_unit": "rad"},
+        )
+        connection.send({
+            "status_code": response.status_code,
+            "body": response.json(),
+            "text": response.text,
+        })
+    except BaseException as exc:
+        connection.send({"exception": f"{type(exc).__name__}: {exc}"})
+    finally:
+        connection.close()
+
+
 def plus_eval(expr: str) -> float:
-    response = client.post("/api/v1/evaluate", json={"expression": expr, "angle_unit": "rad"})
-    if response.status_code != 200:
-        fail("plus-evaluate-http", {"expression": expr}, f"status={response.status_code}: {response.text}")
-    body = response.json()
+    # The historical gate could occupy the hosted runner until shutdown when a
+    # single generated input stalled inside the synchronous evaluator. Isolate
+    # each request so S18 reports the exact counterexample and exits promptly.
+    context = multiprocessing.get_context("fork")
+    parent_connection, child_connection = context.Pipe(duplex=False)
+    process = context.Process(
+        target=_plus_eval_child,
+        args=(expr, child_connection),
+        daemon=True,
+    )
+    process.start()
+    child_connection.close()
+    process.join(timeout=8.0)
+    if process.is_alive():
+        process.terminate()
+        process.join(timeout=2.0)
+        parent_connection.close()
+        fail(
+            "plus-evaluate-timeout",
+            {"expression": expr, "timeout_seconds": 8},
+            "La evaluación de Plus no respondió dentro del límite por caso; "
+            "el proceso aislado fue terminado.",
+        )
+    if not parent_connection.poll():
+        parent_connection.close()
+        fail(
+            "plus-evaluate-worker-exit",
+            {"expression": expr, "exit_code": process.exitcode},
+            "El proceso aislado terminó sin devolver una respuesta.",
+        )
+    response = parent_connection.recv()
+    parent_connection.close()
+    if "exception" in response:
+        fail("plus-evaluate-worker-exception", {"expression": expr}, response["exception"])
+    if response["status_code"] != 200:
+        fail(
+            "plus-evaluate-http",
+            {"expression": expr},
+            f"status={response['status_code']}: {response['text']}",
+        )
+    body = response["body"]
     if not body.get("success"):
         fail("plus-evaluate-error", {"expression": expr}, json.dumps(body, ensure_ascii=False))
     value = body.get("result_approx")
@@ -78,7 +134,6 @@ def plus_eval(expr: str) -> float:
     if not math.isfinite(value):
         fail("plus-evaluate-nonfinite", {"expression": expr}, repr(body))
     return value
-
 
 def lite_batch(requests: list[dict]) -> list[dict]:
     command = ["npx", "-y", "tsx@4.20.6", str(ROOT / "qa/s18/lite_oracle.ts")]
