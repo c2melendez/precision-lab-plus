@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 278,
+  "revision": 283,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -47,15 +47,9 @@
     }
   },
   "next_action": {
-    "id": "EDCX-B6",
-    "status": "REVIEW",
-    "action": "Completar reconciliación de checks para las cabezas actuales de PR #29/#48. Las corridas aportadas fueron SUCCESS, pero pertenecen a SHA anteriores a las cabezas actuales. Se inspeccionaron los workflows y hay filtros paths que excluyen documentación general; falta verificar por qué no aparecen runs pull_request para las cabezas actuales y cuáles checks exige la protección de rama. No despachar gates globales ni mergear. Después continuar la prueba dirigida del adaptador/oráculo B6.",
-    "technical_sha_by_repo": {
-      "c2melendez/precision-lab-plus": "2d57dcb6e025db3219b0cf423ec05ebff309a8e1",
-      "c2melendez/precision-lab-lite": "496b1ec10c210b0bdb7f27c8e8734b334b5759c9"
-    },
-    "product_changed": false,
-    "audit": "r278 (2026-10-23): Plus run 40026869114 SUCCESS sobre bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69; Lite run 40016849405 SUCCESS sobre 912e3f8afd1c3a54b1c665c8a91c76490ea4f912. Las cabezas actuales de PR #29/#48 son 2d57dcb6e025db3219b0cf423ec05ebff309a8e1 y 496b1ec10c210b0bdb7f27c8e8734b334b5759c9, respectivamente. Logs confirman Lite: 456/456 tests passed; Plus: backend/frontend success y harness B6 aprobado dentro de regresión. Ninguno valida la cabeza actual. Los workflows contienen filtros paths y eventos push/pull_request; todavía no se ha probado que sean la única causa de ausencia de checks actuales. PRs abiertas y mergeable=false; global OPEN; bloqueos conservados."
+    "id": "PLUS-E2E-SG28-CONFIG",
+    "status": "OPEN",
+    "action": "Corregir el fallo del job e2e de Playwright E2E (run 40045973784, HEAD a174806836): 12 fallos SG28 porque playwright.config.ts NO define SG28_CI_EVENT_FILE mientras in625-sg28-plus-ui-cancel.yml si lo hace; ademas 2 timeouts 'Detener calculo'. El gate H2-SG28-DIST sigue BLOCKED con causa concreta: alinear la configuracion e2e (env file o skip condicionado). Tambien confirmar S18 differential (40045973724) y no mergear PR #29 hasta checks verdes."
   },
   "blockers": [
     {
@@ -2932,26 +2926,20 @@
     }
   },
   "latest_reconciliation": {
-    "checked_at": "2026-10-23",
+    "checked_at": "2026-10-24",
     "branch": "qa/syntax-audit-in625-a1",
-    "current_head_sha": "63d830ae8e2998993dfaa14e53ebe2ad3113d5c9",
+    "current_head_sha": "a174806836cf1e28666e004be36b76f49c43e0b9",
     "open_pull_request": 29,
-    "pull_request_head_sha": "63d830ae8e2998993dfaa14e53ebe2ad3113d5c9",
-    "pull_request_base_sha": "992d7b1bb18d9fa0c84be88d4d648ebfd7f8def1",
-    "pull_request_mergeable": false,
-    "pull_request_reported_commit_count": 3554,
-    "pull_request_reported_changed_files": 651,
-    "exact_head_pull_request_workflow_runs": [],
-    "latest_visible_push_run_sha": "bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69",
-    "latest_visible_push_run_ids": [
-      40026869114,
-      40026869004
-    ],
-    "conclusion": "No PR-triggered workflow run was returned for the exact current HEAD by fetch_commit_workflow_runs. Latest visible push runs are on older SHAs. PR remains open and mergeable=false; do not merge or use old green runs as current-head evidence.",
-    "coverage_limit": "Exact-SHA PR workflow query and bounded first-page event queries only; not an exhaustive history. No workflow dispatched.",
-    "exact_head_check_runs_count": 0,
-    "exact_head_commit_statuses_count": 0,
-    "exact_head_combined_status": "pending",
-    "exact_head_check": "GET /commits/{HEAD}/check-runs and /commits/{HEAD}/status both returned zero entries; do not interpret this as passing."
+    "pull_request_head_sha": "a174806836cf1e28666e004be36b76f49c43e0b9",
+    "pull_request_base_sha": "7aa493e64167886a424dce21f183e90345d5b272",
+    "pull_request_mergeable": true,
+    "pull_request_mergeable_state": "unstable",
+    "conclusion": "Merge r281 push completado; dirty RESUELTO. Gate acumulativo SUCCESS exacto-en-HEAD (run 40045973765); CI success (40045973713); S25 PLUS SUCCESS (40045973931); syntax-native, H1a-d, S17/S19/S20/S21/S23, backend/frontend success. Fallo activo: Playwright E2E job e2e (40045973784) - 12 fallos SG28 por SG28_CI_EVENT_FILE no configurado en playwright.config.ts (contradiccion con workflow dedicado que si lo exporta) + 2 timeouts Detener-calculo. S18 differential in_progress al momento de la revision.",
+    "valid_evidence_gained": [
+      "cumulative gate success on exact HEAD a1748068",
+      "CI full suite success",
+      "S25 plus security success",
+      "backend+frontend continuity guards success"
+    ]
   }
 }

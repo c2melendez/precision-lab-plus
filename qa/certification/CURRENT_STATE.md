@@ -1,3 +1,27 @@
+## 2026-10-24 UTC — r283: reconciliación exacta-en-HEAD tras push del merge (verificada vía API con auth)
+
+**HEAD verificado**: `a174806836cf1e28666e004be36b76f49c43e0b9` (PR #29, base `7aa493e6...`, mergeable=True, mergeable_state=`unstable`). El estado `dirty` de r280 queda RESUELTO por el merge r281.
+
+### Evidencia válida nueva (pull_request, exacta en HEAD)
+- **IN625 Cumulative Certification Gate: SUCCESS** (run 40045973765); pasos "Certification continuity and CI guard regressions" verdes en backend y frontend.
+- **CI completo: SUCCESS** (run 40045973713). **S25 Security Gate PLUS: SUCCESS** (run 40045973931) — primera vez verde para un HEAD de la rama QA; el fallo del 22-10 (39820758573) no aplica a esta cabeza.
+- SUCCESS además: Syntax diagnostic A1..G1a (40045973720), syntax-native+recovery (40045973762), H1a/H1b/H1c/H1d reentry, S17 fuzzing, S19 mutation, S20 performance, S21 cross-browser, S23 accessibility, api-timeout-recovery, source-fixture integrity, frontend-audit.
+- S18 Differential (40045973724): in_progress al momento de esta revisión.
+
+### Fallo activo exacta-en-HEAD (causa raíz identificada con logs)
+**Playwright E2E job e2e** (run 40045973784): 12 fallos, todos en `in625-h2-sg28-cancel.spec.ts`:
+1. 10× `SG28_CI_EVENT_FILE must be configured in CI` — la spec exige la variable cuando `process.env.CI`, pero `.github/workflows/playwright.yml` no la exporta, mientras que el workflow dedicado `in625-sg28-plus-ui-cancel.yml` sí define `SG28_CI_EVENT_FILE=/tmp/sg28-plus-e2e-events.jsonl`. Inconsistencia de configuración entre pipelines.
+2. 2× timeout `locator.click` sobre botón "Detener cálculo" (35 s) en mobile/tablet.
+Consecuencia: **H2-SG28-DIST permanece BLOCKED**, ahora con causa concreta y accionable (no falta de ejecución). El gate SG28 propio pasó como success en su workflow dedicado; el rojo proviene del pipeline general playwright.yml.
+
+### Estados de certificación
+Global OPEN · B6 REVIEW (harness mínimo ya validado; faltan 53 aceptaciones matemáticas completas) · B5 BLOCKED · SG28-DIST BLOCKED (causa: config e2e + timeouts) · SECURITY-S25: en Plus hay evidencia SUCCESS exacta-en-HEAD (run 40045973931); en Lite sigue BLOCKED (vite high) → se mantiene BLOCKED global hasta ambos verdes · SY-P-23 OPEN · SY-X-04-PLUS-HTTP BLOCKED · ALGEBRA229-AS-B-29 ON_HOLD.
+
+### Siguiente paso único y concreto
+Alinear `playwright.yml` con el contrato SG28 (exportar `SG28_CI_EVENT_FILE` o scoping de la spec fuera del pipeline general) y reproducir los 2 timeouts "Detener cálculo". Confirmar S18 (40045973724). No mergear PR #29 hasta checks verdes o excepciones documentadas.
+
+---
+
 ## 2026-10-24 UTC — r282: merge ejecutado, push completado, workflows verificados exitosos
 
 **Acción autorizada**: `git merge origin/main` + resolución de conflictos + push a rama QA (r281).
