@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 292,
+  "revision": 293,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -50,9 +50,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-S18-INFRA-DIAGNOSIS-R292",
-    "status": "BLOCKED_INFRASTRUCTURE",
-    "action": "Diagnosticar el shutdown del runner en S18 run 40098526464 (step Run S18 differential/property gate cancelado mientras ejecutaba qa/s18/run_differential.py). Corregir o esperar disponibilidad de infraestructura y ejecutar S18 una sola vez. No repetir CI/cumulative/Playwright/S19 focalizado que ya están verdes en SHA 561547252456b30124f4f7a1db06347ee0731079. Mantener S19 acceptance BLOCKED (801/1666 killed, 863 survived, 2 timeout); revisar sobrevivientes usando artefactos existentes, sin campaña completa. Global OPEN."
+    "id": "PLUS-S18-ISOLATE-EVALUATION-HANG-R293",
+    "status": "BLOCKED_REPRODUCIBLE_EVALUATION_TIMEOUT",
+    "action": "Aislar por fase el contraejemplo S18 `exp(-1.3983707058413914)+(-1)*sin(-1.3983707058413914)` (seed 180018), emitido por run 40103093212 con timeout por petición de 8 s. Determinar si la demora ocurre en parsing/evaluate_service o _render_evaluate_presentation; corregir con regresión acotada y ejecutar S18 una sola vez después del fix. No repetir S18 completo antes del fix ni repetir CI/cumulative/Playwright ya verdes sin cambio relevante. Mantener S19 acceptance BLOCKED (801/1666 killed, 863 survived, 2 timeout); global OPEN."
   },
   "blockers": [
     {
@@ -86,9 +86,15 @@
       "status": "BLOCKED",
       "kind": "targeted_coverage_and_acceptance",
       "detail": "S19 focalizado run 40098526609: 1,666 mutantes, 801 killed, 863 survived, 2 timeout. La campaña dirigida no reemplaza el baseline histórico ni satisface aceptación global; revisar sobrevivientes con el artefacto existente, sin repetir S19 completo."
+    },
+    {
+      "id": "S18-PLUS-EVALUATE-HANG-R293",
+      "status": "BLOCKED_REPRODUCIBLE_EVALUATION_TIMEOUT",
+      "kind": "reproducible_behavior",
+      "detail": "S18 run 40103093212 isolated a non-returning Plus request for exp(-1.3983707058413914)+(-1)*sin(-1.3983707058413914), seed 180018, 8-second per-request timeout. Internal phase not yet isolated."
     }
   ],
-  "ledger_note": "r287: Plus CI 40069907974, cumulative 40069907843, Playwright 40069907922 y H1a/H1b/H1c/H1d/S17/S20/S21/S23/S25/Syntax diagnostic SUCCESS en SHA técnico registrado; S19 40069907892 SUCCESS con reportes de mutación que requieren criterio/umbral; S18 40069907881 CANCELLED por shutdown, no PASS. SG28 contrato propuesto y revisión de brechas publicada en SG28_CONTRACT_REVIEW_R287.md; no producto ni Actions nuevas. H2-SG28-DIST-01..08 y SY-X-04-PLUS-HTTP BLOCKED; SECURITY-S25 global BLOCKED; global OPEN; PR #29 no mergeado. r288: reviewed S19 backend mutmut artifact 12551670346 from run 40069907892 @ 6e6a59ee; initially misread the 2,309 lines of mutmut-results.txt as a complete total and zero killed. This was corrected after reading the final job log: 971 killed, 2,136 survived, 159 no tests, 14 timeout; total 3,280. Exit 0 is not acceptance. r289 initial scope note: baseline qa/s19/BASELINE_MUTATION.md = 1,028 backend mutants (590 killed, 371 survived, 58 no tests, 9 timeout); current artifact lists 2,309 non-killed states (2,136 survived, 159 no tests, 14 timeout). The initial claim of 0 killed/2,309 total was corrected after log review; current total is 3,280 with 971 killed. r289 correction: recovered baseline artifact 10740671311 from run 35838270384 (ZIP sha256 9a2b4c6790603454d965f35be8c27edc47dc3c802fb5eb1edbb15dcc21d17e44). Baseline results list 438 non-killed entries (371 survived, 58 no tests, 9 timeout) plus 590 killed in normative baseline. Current artifact lists 2,309 non-killed/unresolved entries (2,136 survived, 159 no tests, 14 timeout); mutmut results does not necessarily list killed, so previous inference of zero killed was incorrect and is explicitly corrected in S19_BACKEND_MUTATION_REVIEW_R288.md and S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md. Current score/total not available from this artifact; acceptance remains blocked. r289 score correction: fetched complete job logs for current run 40069907892/job 120801558924 and baseline run 35838270384/job 107106893639. Current final summary 3280/3280: 971 killed, 159 no tests, 14 timeout, 2136 survived; score 29.60% under historical denominator. Baseline summary 1028/1028: 590 killed, 58 no tests, 9 timeout, 371 survived; score 57.39%. Current inventory grew +2252; next step is source diff and per-module mutation inventory analysis, no full rerun. r289 module analysis: baseline vs current source sizes/functions: solve_service 239→788 lines, 6→16 functions; parsing 715→982, 19→24; evaluate 100→249, 3→7; ast_validator 130→147, 3→3. Mutation inventory growth: solve_service +1071, parsing +717, evaluate +437, ast_validator +27. Score fell per module; next action targeted test review prioritizing solve_service and evaluate. No new Actions. r290: created S19_BACKEND_TARGETED_TEST_PLAN_R290.md (commit d526cd099a8e5fae3b46a72e812f611e4200ab2a). Prioritized test gaps from job logs; no product changes or Actions. Next action is review/approve P0 cases against G3 and Algebra 229 contracts; SG28 dependent tests remain blocked. r291: automatic PR-triggered revalidation on 91ab2cf after documentation commits. S19 run 40086398270 success, backend summary unchanged at 971 killed/3280 = 29.60%, 2136 survived, 159 no tests, 14 timeout. CI 40086398092 success; S18 40086398104 cancelled. Plan r290 tests have not been implemented/executed; S19 acceptance BLOCKED, PR #29 open draft, global OPEN.\nr292: pushed workflow-only fix 561547252456b30124f4f7a1db06347ee0731079 to match mutmut qualified names; CI 40098526446 SUCCESS, cumulative 40098526501 SUCCESS, Playwright 40098526513 SUCCESS, S19 focused 40098526609 SUCCESS with 1666 targeted mutants (801 killed, 863 survived, 2 timeout). This is not global mutation acceptance. S18 40098526464 failed because runner received shutdown signal during qa/s18/run_differential.py; step cancelled, classify infrastructure, not product. PR #29 remains open draft; global OPEN; S25 global BLOCKED; AS-B-29 ON_HOLD; SG28 distributed H2 blocked. Next action: diagnose/restore S18 runner and execute S18 once; do not repeat green gates.",
+  "ledger_note": "r287: Plus CI 40069907974, cumulative 40069907843, Playwright 40069907922 y H1a/H1b/H1c/H1d/S17/S20/S21/S23/S25/Syntax diagnostic SUCCESS en SHA técnico registrado; S19 40069907892 SUCCESS con reportes de mutación que requieren criterio/umbral; S18 40069907881 CANCELLED por shutdown, no PASS. SG28 contrato propuesto y revisión de brechas publicada en SG28_CONTRACT_REVIEW_R287.md; no producto ni Actions nuevas. H2-SG28-DIST-01..08 y SY-X-04-PLUS-HTTP BLOCKED; SECURITY-S25 global BLOCKED; global OPEN; PR #29 no mergeado. r288: reviewed S19 backend mutmut artifact 12551670346 from run 40069907892 @ 6e6a59ee; initially misread the 2,309 lines of mutmut-results.txt as a complete total and zero killed. This was corrected after reading the final job log: 971 killed, 2,136 survived, 159 no tests, 14 timeout; total 3,280. Exit 0 is not acceptance. r289 initial scope note: baseline qa/s19/BASELINE_MUTATION.md = 1,028 backend mutants (590 killed, 371 survived, 58 no tests, 9 timeout); current artifact lists 2,309 non-killed states (2,136 survived, 159 no tests, 14 timeout). The initial claim of 0 killed/2,309 total was corrected after log review; current total is 3,280 with 971 killed. r289 correction: recovered baseline artifact 10740671311 from run 35838270384 (ZIP sha256 9a2b4c6790603454d965f35be8c27edc47dc3c802fb5eb1edbb15dcc21d17e44). Baseline results list 438 non-killed entries (371 survived, 58 no tests, 9 timeout) plus 590 killed in normative baseline. Current artifact lists 2,309 non-killed/unresolved entries (2,136 survived, 159 no tests, 14 timeout); mutmut results does not necessarily list killed, so previous inference of zero killed was incorrect and is explicitly corrected in S19_BACKEND_MUTATION_REVIEW_R288.md and S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md. Current score/total not available from this artifact; acceptance remains blocked. r289 score correction: fetched complete job logs for current run 40069907892/job 120801558924 and baseline run 35838270384/job 107106893639. Current final summary 3280/3280: 971 killed, 159 no tests, 14 timeout, 2136 survived; score 29.60% under historical denominator. Baseline summary 1028/1028: 590 killed, 58 no tests, 9 timeout, 371 survived; score 57.39%. Current inventory grew +2252; next step is source diff and per-module mutation inventory analysis, no full rerun. r289 module analysis: baseline vs current source sizes/functions: solve_service 239→788 lines, 6→16 functions; parsing 715→982, 19→24; evaluate 100→249, 3→7; ast_validator 130→147, 3→3. Mutation inventory growth: solve_service +1071, parsing +717, evaluate +437, ast_validator +27. Score fell per module; next action targeted test review prioritizing solve_service and evaluate. No new Actions. r290: created S19_BACKEND_TARGETED_TEST_PLAN_R290.md (commit d526cd099a8e5fae3b46a72e812f611e4200ab2a). Prioritized test gaps from job logs; no product changes or Actions. Next action is review/approve P0 cases against G3 and Algebra 229 contracts; SG28 dependent tests remain blocked. r291: automatic PR-triggered revalidation on 91ab2cf after documentation commits. S19 run 40086398270 success, backend summary unchanged at 971 killed/3280 = 29.60%, 2136 survived, 159 no tests, 14 timeout. CI 40086398092 success; S18 40086398104 cancelled. Plan r290 tests have not been implemented/executed; S19 acceptance BLOCKED, PR #29 open draft, global OPEN.\nr292: pushed workflow-only fix 561547252456b30124f4f7a1db06347ee0731079 to match mutmut qualified names; CI 40098526446 SUCCESS, cumulative 40098526501 SUCCESS, Playwright 40098526513 SUCCESS, S19 focused 40098526609 SUCCESS with 1666 targeted mutants (801 killed, 863 survived, 2 timeout). This is not global mutation acceptance. S18 40098526464 failed because runner received shutdown signal during qa/s18/run_differential.py; step cancelled, classify infrastructure, not product. PR #29 remains open draft; global OPEN; S25 global BLOCKED; AS-B-29 ON_HOLD; SG28 distributed H2 blocked. Next action: diagnose/restore S18 runner and execute S18 once; do not repeat green gates.## 2026-10-24 UTC — r293: S18 timeout aislado a una expresión reproducible\n\n- Los logs de S18 en SHA `32f8ab617b8222c529de387da8ade9afc0a5eb08` (runs `40099750218` y `40099786410`) muestran la misma última petición iniciada sin respuesta. La señal de shutdown era consecuencia compatible con una operación bloqueada; no prueba por sí sola un problema de infraestructura.\n- Se actualizó `qa/s18/run_differential.py` en commit `3dac60a2b4c3467e1ecf719a2c8d02eee36f5889` para aislar cada llamada a Plus en un proceso terminable con límite de 8 s. Run `40103093212` falló en ~41 s y emitió el contraejemplo exacto: `exp(-1.3983707058413914)+(-1)*sin(-1.3983707058413914)` (seed 180018, timeout 8 s). El mismo hash de entrada aparece en los logs anteriores como última petición iniciada sin respuesta.\n- Reclasificación: S18 queda `BLOCKED_REPRODUCIBLE_EVALUATION_TIMEOUT`, no `BLOCKED_INFRASTRUCTURE`. La fase interna exacta (parseo, evaluación o presentación) aún no está aislada; no atribuir la causa a un subsistema específico sin instrumentación.\n- Siguiente paso: aislar por fase `POST /api/v1/evaluate` con este único contraejemplo, corregir el bloqueo y añadir regresión acotada. No repetir S18 completo hasta disponer de esa corrección; no repetir CI/cumulative/Playwright ni lanzar S19 completo. S19 sigue BLOCKED (801/1666 killed, 863 survived, 2 timeout); seguridad global BLOCKED; Algebra 229 AS-B-29 ON_HOLD; SG28 H2 BLOCKED; PR #29 abierto/draft; certificación global OPEN.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
@@ -2937,55 +2943,23 @@
   "latest_reconciliation": {
     "checked_at": "2026-10-24",
     "branch": "qa/syntax-audit-in625-a1",
-    "current_head_sha": "561547252456b30124f4f7a1db06347ee0731079",
+    "current_head_sha": "3dac60a2b4c3467e1ecf719a2c8d02eee36f5889",
     "open_pull_request": 29,
-    "pull_request_head_sha": "561547252456b30124f4f7a1db06347ee0731079",
+    "pull_request_head_sha": "3dac60a2b4c3467e1ecf719a2c8d02eee36f5889",
     "pull_request_state": "open",
     "pull_request_draft": true,
     "runs": [
       {
-        "gate": "ci",
-        "run_id": 40098526446,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526446",
-        "conclusion": "success",
-        "head_sha": "561547252456b30124f4f7a1db06347ee0731079"
-      },
-      {
-        "gate": "cumulative",
-        "run_id": 40098526501,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526501",
-        "conclusion": "success",
-        "head_sha": "561547252456b30124f4f7a1db06347ee0731079"
-      },
-      {
-        "gate": "s19-focused-mutmut",
-        "run_id": 40098526609,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526609",
-        "conclusion": "success",
-        "head_sha": "561547252456b30124f4f7a1db06347ee0731079",
-        "mutants": 1666,
-        "killed": 801,
-        "survived": 863,
-        "timeout": 2,
-        "acceptance": "BLOCKED"
-      },
-      {
-        "gate": "playwright",
-        "run_id": 40098526513,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526513",
-        "conclusion": "success",
-        "head_sha": "561547252456b30124f4f7a1db06347ee0731079"
-      },
-      {
-        "gate": "s18-differential",
-        "run_id": 40098526464,
-        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526464",
+        "gate": "S18 differential bounded reproduction",
+        "run_id": 40103093212,
+        "url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/40103093212",
         "conclusion": "failure",
-        "cause": "runner shutdown signal during python qa/s18/run_differential.py; step cancelled, not product failure"
+        "head_sha": "3dac60a2b4c3467e1ecf719a2c8d02eee36f5889",
+        "result": "plus-evaluate-timeout; expression exp(-1.3983707058413914)+(-1)*sin(-1.3983707058413914); 8-second per-request timeout; failed fast after ~41 seconds"
       }
     ],
-    "conclusion": "CI, cumulative, Playwright and focused S19 workflow succeeded on current HEAD. S19 remains BLOCKED: targeted mutation result 801/1666 killed, 863 survived, 2 timeouts; not global campaign acceptance. S18 remains BLOCKED/CANCELLED due runner shutdown, not a product failure. Security global gate remains BLOCKED; Algebra229 AS-B-29 ON_HOLD; SG28 distributed H2 blockers remain BLOCKED; global certification OPEN.",
-    "next_action": "Diagnose S18 runner shutdown/infrastructure and rerun S18 differential once infrastructure is available, without repeating green CI/cumulative/Playwright/S19 gates. Then update continuity with the exact S18 result; keep S19 acceptance blocked and plan a mutation-survivor review using existing report, no full S19 campaign."
+    "conclusion": "S18 is blocked by a reproducible non-returning Plus evaluation input, not currently classifiable as runner-only infrastructure. The precise internal phase is unisolated. S19 acceptance remains BLOCKED; global certification OPEN.",
+    "next_action": "Isolate the exact S18 input across evaluate_service and presentation, fix and add bounded regression, then run S18 once."
   },
   "sg28_e2e_harness_closure_r285": {
     "status": "PASS_SCOPED_HARNESS",
