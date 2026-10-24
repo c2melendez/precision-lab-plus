@@ -1,3 +1,23 @@
+## 2026-10-24 UTC — r287: gates reconciliados y contrato SG28 propuesto
+
+**HEAD de partida:** `6e6a59ee556cf6bba60a40010ec707f05a01ca52`; rama `qa/syntax-audit-in625-a1`; PR #29 abierto, sin merge.
+
+### Evidencia exacta en SHA `6e6a59ee556cf6bba60a40010ec707f05a01ca52`
+- CI [40069907974](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069907974), acumulativo [40069907843](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069907843) y Playwright [40069907922](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069907922): SUCCESS.
+- H1a/H1b/H1c/H1d, S17, S20, S21, S23, S25 y Syntax Diagnostic: SUCCESS exacto en ese SHA.
+- S19 [40069907892](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069907892): SUCCESS; los jobs de mutación backend Plus, frontend Lite y frontend Plus finalizaron y subieron informes. Revisar artefactos contra los umbrales de aceptación antes de dar por cerrada la puntuación.
+- S18 [40069907881](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069907881): CANCELLED por señal de apagado del runner durante el paso diferencial; el run anterior [40069346239](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069346239) terminó de forma similar. Es infraestructura, no una aserción fallida; tampoco es PASS.
+
+### Contrato SG28
+Se añadió `SG28_LOGICAL_REQUEST_LEASE_CONTRACT_PROPOSAL_v1.md` como `PROPOSED / REVIEW_REQUIRED`. Cubre presupuesto lógico, lease/renovación, reloj, fail-closed, fencing efectivo, HTTP/MathResponse y topología. No autoriza activar el flag ni afirma K=1 distribuido.
+
+### Bloqueos y siguiente acción
+Global OPEN · H2-SG28-DIST-01..08 BLOCKED · SECURITY-S25 global BLOCKED · SY-P-23 OPEN · SY-X-04-PLUS-HTTP BLOCKED · ALGEBRA229-AS-B-29 ON_HOLD · EDCX-B5 BLOCKED por canal/capacidad. No mergear PR #29.
+
+**Siguiente acción única — REVIEW:** revisión técnica del contrato propuesto contra `SG28_INTEGRATION_EXIT_CRITERIA.md`. No cablear la ruta HTTP ni activar aislamiento en producción. Tras completar los gates de Lite en el SHA técnico actual, reintentar solo el job S18 cancelado si el runner está disponible y verificar qué snapshot de Lite se compara.
+
+---
+
 ## 2026-10-24 UTC — r286: brecha MathResponse corregida; gates de cierre en WAIT
 
 **HEAD técnico verificado:** `c6df370fd3c5779a56bc29317968b26ea046d4bf` en `qa/syntax-audit-in625-a1`. PR #29 sigue abierto; no se ha mergeado.

@@ -1,3 +1,11 @@
+## 2026-10-24 UTC — r287: SG28 lease/fencing contract proposed; S18 classified as infrastructure cancellation
+
+- Reconciled Plus PR-head evidence at `6e6a59ee556cf6bba60a40010ec707f05a01ca52`: CI 40069907974, cumulative 40069907843, Playwright 40069907922 and H1a/H1b/H1c/H1d/S17/S20/S21/S23/S25/Syntax diagnostic SUCCESS.
+- S19 40069907892 SUCCESS. Backend Plus, frontend Lite and frontend Plus mutation jobs completed SUCCESS and uploaded reports; score/acceptance still requires reviewing the artifacts against thresholds.
+- S18 40069907881 was cancelled when the runner received a shutdown signal during the differential/property step; 40069346239 was cancelled similarly. Classify as infrastructure/cancelled, not product failure and not PASS.
+- Added `SG28_LOGICAL_REQUEST_LEASE_CONTRACT_PROPOSAL_v1.md`, explicitly `PROPOSED / REVIEW_REQUIRED`, covering total logical-request budget, lease renewal, authoritative clock, fail-closed behavior, execution fencing, HTTP/MathResponse and distributed topology criteria.
+- No production flag activated, no HTTP integration wired, no PR merged. DIST remains BLOCKED pending review and independent-host evidence.
+
 ## 2026-10-24 UTC — r286: contrato MathResponse off/on corregido; sg28-prototype PASS, cierre global pendiente
 
 - HEAD técnico `c6df370fd3c5779a56bc29317968b26ea046d4bf`; rama `qa/syntax-audit-in625-a1`; PR #29 continúa abierto y no se mergea.

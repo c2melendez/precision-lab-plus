@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 286,
+  "revision": 287,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -47,9 +47,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-WAIT-SG28-MATHRESPONSE-R286",
-    "status": "WAIT",
-    "action": "Esperar e inspeccionar los resultados exactos en SHA c6df370fd3c5779a56bc29317968b26ea046d4bf: cumulative run 40069346201, CI run 40069346209 y H1d run 40069346229. El gate específico sg28-prototype 40069343572 ya pasó con 70 pruebas; S25 40069346241 también pasó, pero no cerrar SG28/DIST ni SECURITY-S25 global. No relanzar ni cambiar código mientras estas corridas equivalentes estén activas. Tras reconciliarlas, preparar contrato versionado de vigencia de solicitud lógica/lease/fencing según SG28_INTEGRATION_EXIT_CRITERIA.md; marcarlo PROPOSED/REVIEW_REQUIRED, no aprobado, hasta revisión. No mergear PR #29."
+    "id": "PLUS-REVIEW-SG28-LEASE-FENCING-R287",
+    "status": "REVIEW",
+    "action": "Revisar SG28_LOGICAL_REQUEST_LEASE_CONTRACT_PROPOSAL_v1.md contra SG28_INTEGRATION_EXIT_CRITERIA.md. Resolver las decisiones del contrato con revisión técnica antes de cablear el endpoint. No activar el flag experimental ni afirmar DIST PASS. S18 40069907881 fue CANCELLED por apagado del runner; esperar que terminen los gates de Lite en SHA 14153e8bfd4f8557c24c7d195915b0a0907baa00 y luego reintentar solo el job cancelado si hay runner disponible, verificando la instantánea Lite exacta."
   },
   "blockers": [
     {
@@ -79,7 +79,7 @@
       "detail": "Lugares geométricos VC-LG-01..25: canal vacío y sin endpoint de producto."
     }
   ],
-  "ledger_note": "r286: brecha MathResponse implementada en c6df370. Test-first run 40069155348 falló con diferencia real en prefijo ParseSecurityError y comparación de duration_ms; se corrigió normalizando el mensaje público y excluyendo solo request_id/duration_ms en snapshots estables. SG28 prototype 40069343572 SUCCESS: 70 passed; S25 40069346241 SUCCESS. Cumulative 40069346201, CI 40069346209 y H1d 40069346229 siguen IN_PROGRESS en el SHA exacto. Global OPEN; H2-SG28-DIST y SECURITY-S25 no se cierran. PR #29 no mergeado.",
+  "ledger_note": "r287: Plus CI 40069907974, cumulative 40069907843, Playwright 40069907922 y H1a/H1b/H1c/H1d/S17/S20/S21/S23/S25/Syntax diagnostic SUCCESS en SHA PR 6e6a59e. S19 40069907892 SUCCESS con tres jobs de mutación y reportes subidos; revisar artefactos para puntuación/aceptación. S18 40069907881 CANCELLED por apagado del runner durante el gate, no fallo de producto. Contrato lease/fencing publicado PROPOSED/REVIEW_REQUIRED. Global OPEN; DIST y S25 global siguen bloqueados.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
