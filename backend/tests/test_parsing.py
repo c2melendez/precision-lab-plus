@@ -265,3 +265,168 @@ def test_symbolic_binomial_helper_is_limited_to_single_symbol_choose_two():
 def test_symbolic_sum_helper_requires_distinct_symbolic_upper_bound():
     assert parsing.symbolic_identity_sum_bound("sum(i,i,1,n)") == "n"
     assert parsing.symbolic_identity_sum_bound("sum(x,x,1,x)") is None
+
+
+# ---------------------------------------------------------------------------
+# S19 targeted coverage r298 - deterministic G3 messages and command allowlist
+# ---------------------------------------------------------------------------
+
+LAYOUT_ONLY_MESSAGE = "Escriba una expresión antes de calcular."
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        (r"\,", LAYOUT_ONLY_MESSAGE),
+        (r"\quad", LAYOUT_ONLY_MESSAGE),
+        (r"\qquad", LAYOUT_ONLY_MESSAGE),
+        (r"\placeholder", "Entrada incompleta: complete el marcador pendiente."),
+        (r"\PLACEHOLDER{}", "Entrada incompleta: complete el marcador pendiente."),
+        (r"\foo{x}", r"Comando desconocido: \foo."),
+        (r"\FOO{}", r"Comando desconocido: \FOO."),
+        (
+            r"\text{hola}",
+            "Texto no matemático: escriba una expresión matemática.",
+        ),
+        (
+            "=3",
+            'Ecuación incompleta: debe haber una expresión a ambos lados de "=".',
+        ),
+        (
+            "x=",
+            'Ecuación incompleta: debe haber una expresión a ambos lados de "=".',
+        ),
+        ("^2", "Exponente sin base."),
+        ("x^{}", "Exponente vacío."),
+        (r"\frac{}{x}", "Fracción incompleta: el numerador está vacío."),
+        (r"\frac{x}", "Fracción incompleta: falta el denominador."),
+        (r"\sqrt{}", "Raíz incompleta: el radicando está vacío."),
+        ("sin", "Falta el argumento de la función."),
+        ("cos", "Falta el argumento de la función."),
+        ("tan", "Falta el argumento de la función."),
+        ("csc", "Falta el argumento de la función."),
+        ("sec", "Falta el argumento de la función."),
+        ("cot", "Falta el argumento de la función."),
+        ("ln", "Falta el argumento de la función."),
+        ("log", "Falta el argumento de la función."),
+        ("exp", "Falta el argumento de la función."),
+        (r"\sin()", "Falta el argumento de la función."),
+        ("x+()", "Paréntesis vacíos: falta una expresión."),
+        (r"\left(x", r"Delimitador incompleto: falta \right."),
+        (r"\right)x", r"Delimitador inválido: aparece \right sin \left."),
+        ("x+1)", "Paréntesis de cierre sobrante."),
+        ("(x+1", "Paréntesis sin cerrar."),
+        ("x+1}", "Llave de cierre sobrante."),
+        ("{x+1", "Llave sin cerrar."),
+        ("*x", "Operador sin primer operando."),
+        ("/x", "Operador sin primer operando."),
+        ("x+", "Operador sin segundo operando."),
+        ("x*", "Operador sin segundo operando."),
+        ("x/", "Operador sin segundo operando."),
+        ("x++1", "Secuencia de operadores inválida."),
+        ("x*/1", "Secuencia de operadores inválida."),
+        ("x/*1", "Secuencia de operadores inválida."),
+    ],
+)
+def test_g3_structure_emits_deterministic_message(text, expected):
+    with pytest.raises(parsing.ParseSecurityError) as excinfo:
+        parsing.validate_g3_structure(text)
+    assert str(excinfo.value) == expected
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        r"\sqrt{x}",
+        r"\frac{1}{2}",
+        r"\dfrac{1}{2}",
+        r"\tfrac{1}{2}",
+        r"\cfrac{1}{2}",
+        r"\sin(x)",
+        r"\cos(x)",
+        r"\tan(x)",
+        r"\csc(x)",
+        r"\sec(x)",
+        r"\cot(x)",
+        r"\ln(x)",
+        r"\log(x)",
+        r"\exp(x)",
+        r"\left(x+1\right)",
+        r"\pi{x}",
+        r"\infty{x}",
+        r"\theta{x}",
+        r"\alpha{x}",
+        r"\beta{x}",
+        r"\gamma{x}",
+        r"\lambda{x}",
+        r"\zeta{x}",
+        r"\Delta{x}",
+        r"\Lambda{x}",
+        r"\Phi{x}",
+        r"\gcd(2,4)",
+        r"\min(1,2)",
+        r"\max(1,2)",
+        r"\pm 1",
+        r"x\leq 1",
+        r"x\geq 1",
+        r"x\neq 1",
+        r"x\ne 1",
+        r"x\lt 1",
+        r"x\gt 1",
+        r"\operatorname{abs}(x)",
+        r"\mathrm{x}",
+        r"\text{x}+1",
+        r"\lim",
+        r"\int",
+        r"\partial",
+        r"\displaystyle x",
+    ],
+)
+def test_g3_structure_accepts_every_allowlisted_command(text):
+    parsing.validate_g3_structure(text)
+
+
+def test_inequality_tree_reports_missing_operator_with_exact_message():
+    with pytest.raises(parsing.ParseSecurityError) as excinfo:
+        parsing.parse_inequality_tree("x+1")
+    assert str(excinfo.value) == (
+        "Se esperaba un operador de desigualdad (<, >, <=, >=) en la expresión."
+    )
+
+
+@pytest.mark.parametrize(
+    "text,operator",
+    [("x<3<5", "<"), ("x<=3<=5", "<="), ("x>3>5", ">"), ("x>=3>=5", ">=")],
+)
+def test_inequality_tree_reports_repeated_operator_with_exact_message(
+    text, operator
+):
+    with pytest.raises(parsing.ParseSecurityError) as excinfo:
+        parsing.parse_inequality_tree(text)
+    assert str(excinfo.value) == (
+        f"Se permite un único operador de desigualdad ('{operator}')."
+    )
+
+
+def test_inequality_tree_keeps_both_free_symbols():
+    relation = parsing.parse_inequality_tree("x<y")
+    assert relation.free_symbols == {sympy.Symbol("x"), sympy.Symbol("y")}
+
+
+@pytest.mark.parametrize(
+    "text,middle",
+    [("1 < x <= 3", "x"), ("1<X<3", "X"), ("-2<=t<4", "t")],
+)
+def test_chained_inequalities_accept_spaces_and_uppercase_middle(text, middle):
+    relations = parsing.parse_chained_inequalities(text)
+    assert relations is not None
+    assert len(relations) == 2
+    assert relations[0].rel_op in {"<", "<="}
+    assert relations[1].rel_op in {"<", "<="}
+    assert relations[0].rhs == sympy.Symbol(middle)
+    assert relations[1].lhs == sympy.Symbol(middle)
+
+
+@pytest.mark.parametrize("text", ["1<x<", "<x<3", "x<3", "1<x"])
+def test_chained_inequalities_reject_incomplete_or_simple_inputs(text):
+    assert parsing.parse_chained_inequalities(text) is None

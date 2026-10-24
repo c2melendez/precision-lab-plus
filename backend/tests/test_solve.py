@@ -197,3 +197,164 @@ def test_rational_domain_solver_discards_root_excluded_by_original_denominator()
     assert result.result_type == solve_service.ResultType.CONTRADICTION
     assert result.solutions == []
     assert "no pertenece al dominio" in result.steps[0].description
+
+
+# S19 targeted coverage r298 - scaled breakpoints, region text and step contracts
+def test_absolute_value_case_solver_handles_non_unit_slope_breakpoint():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "abs(2*x-4)=2", allow_equation=True
+    )
+    result = solve_service._absolute_value_cases_result(equation, x, [])
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.EQUATION_SOLUTIONS
+    assert {sympy.sympify(solution.text) for solution in result.solutions} == {
+        sympy.Integer(1),
+        sympy.Integer(3),
+    }
+
+
+def test_absolute_value_case_solver_names_each_region_in_steps():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x - 1), sympy.Integer(2), evaluate=False)
+    result = solve_service._absolute_value_cases_result(equation, x, [])
+    assert result is not None
+    description = result.steps[0].description
+    assert "x < 1" in description
+    assert "x \u2265 1" in description
+
+
+def test_absolute_value_steps_zero_radius_returns_the_center_once():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x - 1), sympy.Integer(0), evaluate=False)
+    result = solve_service._absolute_value_steps(equation, x)
+    assert result is not None
+    steps, solutions = result
+    assert solutions == [sympy.Integer(1)]
+    assert len(steps) == 1
+    assert steps[0].index == 0
+    assert steps[0].title == "Dominio del valor absoluto"
+
+
+def test_absolute_value_steps_negative_radius_reports_empty_domain_step():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x - 1), sympy.Integer(-2), evaluate=False)
+    result = solve_service._absolute_value_steps(equation, x)
+    assert result is not None
+    steps, solutions = result
+    assert solutions == []
+    step = steps[0]
+    assert step.index == 0
+    assert step.title == "Dominio del valor absoluto"
+    assert step.description == (
+        "El valor absoluto siempre es no negativo; como b < 0, "
+        "no existe solución real."
+    )
+    assert step.latex_after == r"\varnothing"
+
+
+def test_absolute_value_steps_rejects_radius_that_contains_the_variable():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x), x, evaluate=False)
+    assert solve_service._absolute_value_steps(equation, x) is None
+
+
+def test_absolute_value_equidistance_rejects_one_sided_absolute_value():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(x, sympy.Abs(x - 1), evaluate=False)
+    assert solve_service._absolute_value_equidistance_steps(equation, x) is None
+
+
+def test_absolute_value_equidistance_rejects_constant_right_argument():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x), sympy.Abs(3), evaluate=False)
+    assert solve_service._absolute_value_equidistance_steps(equation, x) is None
+
+
+def test_absolute_value_equidistance_reports_identity_when_centers_match():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(1 - x), sympy.Abs(x - 1), evaluate=False)
+    result = solve_service._absolute_value_equidistance_steps(equation, x)
+    assert result is not None
+    steps, solutions = result
+    assert solutions == [sympy.Integer(1)]
+    assert steps[0].description == (
+        "Como a = b, ambos valores absolutos son idénticos; "
+        "toda x real es solución."
+    )
+
+
+def test_radical_case_solver_accepts_a_fourth_root_candidate():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(x ** sympy.Rational(1, 4), sympy.Integer(2), evaluate=False)
+    result = solve_service._radical_cases_result(equation, x, [])
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.EQUATION_SOLUTIONS
+    assert {sympy.sympify(solution.text) for solution in result.solutions} == {
+        sympy.Integer(16)
+    }
+
+
+def test_radical_case_solver_rejects_non_unit_numerator_exponent():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(x ** sympy.Rational(3, 2), sympy.Integer(8), evaluate=False)
+    assert solve_service._radical_cases_result(equation, x, []) is None
+
+
+def test_domain_step_keeps_index_title_and_every_exclusion():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "1/x+1/(x-1)=0", allow_equation=True
+    )
+    step = solve_service._domain_step(
+        equation, x, [sympy.Integer(0), sympy.Integer(1)], "descripción de prueba"
+    )
+    assert step.index == 0
+    assert step.title == "Dominio de la ecuación"
+    assert step.description == (
+        "Restricción de dominio original: x\u22600, x\u22601. descripción de prueba"
+    )
+    assert step.latex_before == sympy.latex(equation)
+    assert step.latex_after == r"x \neq 0, x \neq 1"
+
+
+def test_rational_domain_identity_preserves_equation_and_step_contract():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree("x/x=1", allow_equation=True)
+    result = solve_service._rational_domain_result(equation, x, [sympy.Integer(0)], [])
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.IDENTITY
+    assert result.input_eq == equation
+    assert result.variable == x
+    assert result.solutions == []
+    assert result.has_detailed_steps is True
+    assert result.warnings == []
+    assert result.steps[0].description.startswith(
+        "Restricción de dominio original: x\u22600. "
+        "La ecuación se cumple para toda x del dominio"
+    )
+
+
+def test_rational_domain_contradiction_reports_constant_numerator():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree("1/x=0", allow_equation=True)
+    result = solve_service._rational_domain_result(equation, x, [sympy.Integer(0)], [])
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.CONTRADICTION
+    assert result.input_eq == equation
+    assert result.variable == x
+    assert result.solutions == []
+    assert result.has_detailed_steps is True
+    assert result.warnings == []
+    assert "constante no nula 1" in result.steps[0].description
+
+
+def test_rational_domain_keeps_valid_root_when_numerator_has_variable():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "((x-1)**2*(x-2))/(x-1)=0", allow_equation=True
+    )
+    result = solve_service._rational_domain_result(equation, x, [sympy.Integer(1)], [])
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.EQUATION_SOLUTIONS
+    assert [solution.text for solution in result.solutions] == ["2"]
