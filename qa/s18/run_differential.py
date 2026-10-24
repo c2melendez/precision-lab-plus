@@ -80,6 +80,57 @@ def _plus_eval_child(expression: str, connection) -> None:
         connection.close()
 
 
+def _plus_diagnostic_child(expression: str, connection) -> None:
+    """Report the last completed Plus evaluation phase for one S18 input."""
+    try:
+        from app.routers.evaluate import _render_evaluate_presentation
+        from app.services import evaluate_service, parsing
+
+        connection.send("parse_started")
+        parsing.parse_expression_tree(expression, allow_equation=False)
+        connection.send("parse_completed")
+        connection.send("evaluate_service_started")
+        result = evaluate_service.evaluate(expression, "rad", None)
+        connection.send("evaluate_service_completed")
+        connection.send("presentation_started")
+        _render_evaluate_presentation(result, expression)
+        connection.send("presentation_completed")
+    except BaseException as exc:
+        try:
+            connection.send(f"exception:{type(exc).__name__}:{exc}")
+        except (BrokenPipeError, EOFError, OSError):
+            pass
+    finally:
+        connection.close()
+
+
+def _diagnose_plus_expression(expression: str, timeout_seconds: float = 8.0) -> dict:
+    context = multiprocessing.get_context("fork")
+    parent_connection, child_connection = context.Pipe(duplex=False)
+    process = context.Process(
+        target=_plus_diagnostic_child,
+        args=(expression, child_connection),
+        daemon=True,
+    )
+    process.start()
+    child_connection.close()
+    process.join(timeout=timeout_seconds)
+    timed_out = process.is_alive()
+    if timed_out:
+        process.terminate()
+        process.join(timeout=2.0)
+    stages = []
+    while parent_connection.poll():
+        stages.append(parent_connection.recv())
+    parent_connection.close()
+    return {
+        "last_stage": stages[-1] if stages else "no-stage-reported",
+        "stages": stages,
+        "timed_out": timed_out,
+        "exit_code": process.exitcode,
+    }
+
+
 def plus_eval(expr: str) -> float:
     # The historical gate could occupy the hosted runner until shutdown when a
     # single generated input stalled inside the synchronous evaluator. Isolate
@@ -98,11 +149,18 @@ def plus_eval(expr: str) -> float:
         process.terminate()
         process.join(timeout=2.0)
         parent_connection.close()
+        diagnostic = _diagnose_plus_expression(expr)
         fail(
             "plus-evaluate-timeout",
-            {"expression": expr, "timeout_seconds": 8},
+            {
+                "expression": expr,
+                "timeout_seconds": 8,
+                "diagnostic": diagnostic,
+            },
             "La evaluación de Plus no respondió dentro del límite por caso; "
-            "el proceso aislado fue terminado.",
+            "el proceso aislado fue terminado. "
+            f"Última fase diagnóstica: {diagnostic['last_stage']}; "
+            f"diagnóstico agotó tiempo={diagnostic['timed_out']}.",
         )
     if not parent_connection.poll():
         parent_connection.close()
