@@ -1,3 +1,14 @@
+## 2026-10-24 UTC — r284: alineación de harness SG28 en Playwright (sin cierre)
+
+- Evidencia previa exacta en `0325fa77`: Playwright [40047564113](https://github.com/c2melendez/precision-lab-plus/actions/runs/40047564113) FAILURE, 11+1 en `in625-h2-sg28-cancel.spec.ts` por `SG28_CI_EVENT_FILE` ausente y timeouts de «Detener cálculo» con aislamiento off. Clasificación harness.
+- S18 [40047563967](https://github.com/c2melendez/precision-lab-plus/actions/runs/40047563967) FAILURE por shutdown del runner, no por diff matemático. [40045973724](https://github.com/c2melendez/precision-lab-plus/actions/runs/40045973724) cancelled. Infraestructura; sin relanzamiento manual.
+- S25 [40047564057](https://github.com/c2melendez/precision-lab-plus/actions/runs/40047564057) SUCCESS en ese HEAD. SECURITY-S25 permanece BLOCKED.
+- Cambio: `.github/workflows/playwright.yml` en `83b18dab5a176087d9f228725a2140c535d07a2f`. Fase general sin flags SG28; fase SG28 con el env del workflow dedicado y `workers=1`.
+- Run automático en curso, no es PASS: [40065789096](https://github.com/c2melendez/precision-lab-plus/actions/runs/40065789096). Decisión WAIT.
+- H2-SG28-DIST BLOCKED. Global OPEN. No merge de PR #29.
+
+---
+
 ## 2026-10-23 UTC — r264: registro gates r263 — Plus success
 
 - r264: gates r263 Plus en success: cumulative 40014981162, H1d 40014985059, Native Syntax 40014988262 sobre 177955dc.

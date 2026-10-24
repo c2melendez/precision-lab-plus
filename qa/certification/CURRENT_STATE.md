@@ -1,3 +1,27 @@
+## 2026-10-24 UTC — r284: harness Playwright SG28 alineado; corrida en curso (no PASS)
+
+**HEAD del fix:** `83b18dab5a176087d9f228725a2140c535d07a2f` (padre documental `0325fa773ad69cd0310b36f6fd09c0d1ad8e0305`).
+
+### Diagnóstico exacto en el HEAD anterior (pull_request, `0325fa77`)
+- Playwright E2E [40047564113](https://github.com/c2melendez/precision-lab-plus/actions/runs/40047564113): **FAILURE**. 11 failed + 1 flaky, todos en `frontend/e2e/in625-h2-sg28-cancel.spec.ts`; 636 passed. Diez fallos son `SG28_CI_EVENT_FILE must be configured in CI`: `playwright.yml` no exportaba el entorno que sí define `in625-sg28-plus-ui-cancel.yml`. Los timeouts de «Detener cálculo» ocurren con aislamiento apagado (`2+3` termina antes de que el botón exista). Clasificación: **harness**, no producto.
+- S18 [40047563967](https://github.com/c2melendez/precision-lab-plus/actions/runs/40047563967): **FAILURE** por apagado del runner (`The runner has received a shutdown signal`) ~14 min después de arrancar el diferencial; no hay aserción matemática roja en el log. La corrida citada en r283, [40045973724](https://github.com/c2melendez/precision-lab-plus/actions/runs/40045973724), quedó `cancelled`. Clasificación: **infraestructura**. No se relanza a propósito.
+- S21 [40047563960](https://github.com/c2melendez/precision-lab-plus/actions/runs/40047563960): `cancelled`. REVIEW.
+- S25 [40047564057](https://github.com/c2melendez/precision-lab-plus/actions/runs/40047564057): **SUCCESS** en este HEAD. No cierra SECURITY-S25: el bloqueo es bilateral y S25 no admite reutilización ni cierre sin las condiciones de salida. En Lite el gate S25 de este corte también está verde, pero el hard gate de CI sigue rojo por vulnerabilidades moderate/low.
+
+### Cambio publicado
+Solo `.github/workflows/playwright.yml`. La suite general corre con `--grep-invert EN-SG-28` y sin flags SG28. Después, solo `in625-h2-sg28-cancel.spec.ts` con `workers=1` y el mismo entorno que el workflow dedicado: `SG28_EVALUATE_ISOLATION=1`, `SG28_CI_OBSERVE=1`, `SG28_CI_SLOW=1`, `SG28_CI_EVENT_FILE=/tmp/sg28-plus-e2e-events.jsonl`. Timeout del job 25 → 40 min para no cortar las dos fases. **H2-SG28-DIST sigue BLOCKED.** No se activó aislamiento en producción.
+
+### Corrida a inspeccionar (WAIT, no PASS)
+Playwright E2E pull_request [40065789096](https://github.com/c2melendez/precision-lab-plus/actions/runs/40065789096), SHA `83b18dab5a176087d9f228725a2140c535d07a2f`, `in_progress` al registrar este corte. No despachar otra corrida equivalente.
+
+### Estados
+Global OPEN · B6 REVIEW · B5 BLOCKED · SG28-DIST BLOCKED · SECURITY-S25 BLOCKED · SY-P-23 OPEN · SY-X-04-PLUS-HTTP BLOCKED · ALGEBRA229-AS-B-29 ON_HOLD. No mergear PR #29.
+
+### Siguiente paso único
+Leer el job e2e de [40065789096](https://github.com/c2melendez/precision-lab-plus/actions/runs/40065789096) y separar `general_exit` de `sg28_exit`. Si SG28 sigue rojo con el entorno ya presente, diagnosticar esa salida; no repetir la misma corrida.
+
+---
+
 ## 2026-10-24 UTC — r283: reconciliación exacta-en-HEAD tras push del merge (verificada vía API con auth)
 
 **HEAD verificado**: `a174806836cf1e28666e004be36b76f49c43e0b9` (PR #29, base `7aa493e6...`, mergeable=True, mergeable_state=`unstable`). El estado `dirty` de r280 queda RESUELTO por el merge r281.

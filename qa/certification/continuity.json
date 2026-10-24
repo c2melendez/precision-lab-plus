@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 283,
+  "revision": 284,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -48,8 +48,8 @@
   },
   "next_action": {
     "id": "PLUS-E2E-SG28-CONFIG",
-    "status": "OPEN",
-    "action": "Corregir el fallo del job e2e de Playwright E2E (run 40045973784, HEAD a174806836): 12 fallos SG28 porque playwright.config.ts NO define SG28_CI_EVENT_FILE mientras in625-sg28-plus-ui-cancel.yml si lo hace; ademas 2 timeouts 'Detener calculo'. El gate H2-SG28-DIST sigue BLOCKED con causa concreta: alinear la configuracion e2e (env file o skip condicionado). Tambien confirmar S18 differential (40045973724) y no mergear PR #29 hasta checks verdes."
+    "status": "WAIT",
+    "action": "Inspeccionar Playwright E2E pull_request run 40065789096 en SHA 83b18dab5a176087d9f228725a2140c535d07a2f (fix de harness: fase general sin SG28 y fase EN-SG-28 con SG28_EVALUATE_ISOLATION/OBSERVE/SLOW/EVENT_FILE y workers=1). Separar general_exit de sg28_exit. No declarar PASS ni cerrar H2-SG28-DIST. No despachar otra corrida equivalente mientras esta siga activa. S18 40047563967 fue shutdown de runner, no fallo matemático."
   },
   "blockers": [
     {
@@ -79,7 +79,7 @@
       "detail": "Lugares geométricos VC-LG-01..25: canal vacío y sin endpoint de producto."
     }
   ],
-  "ledger_note": "r277: prioridad = diagnosticar ausencia de checks en el HEAD exacto de ambas PR; no confundir cero checks con green. Mantener gates y bloqueos.",
+  "ledger_note": "r284: Playwright SG28 harness alineado en 83b18dab; WAIT run 40065789096. SG28/DIST y S25 siguen BLOCKED.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
