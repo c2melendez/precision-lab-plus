@@ -1,9 +1,57 @@
-## 2026-10-23 UTC — r278: reconciliación de corridas aportadas y filtros CI
+## 2026-10-24 UTC — r282: merge ejecutado, push completado, workflows verificados exitosos
 
-- Lite [run 40016849405](https://github.com/c2melendez/precision-lab-lite/actions/runs/40016849405): `SUCCESS`, evento `workflow_dispatch`, SHA probado `912e3f8afd1c3a54b1c665c8a91c76490ea4f912`; logs: **456/456 tests passed**. La cabeza actual de PR #48 es `496b1ec10c210b0bdb7f27c8e8734b334b5759c9`; la corrida no certifica esa cabeza.
-- Plus [run 40026869114](https://github.com/c2melendez/precision-lab-plus/actions/runs/40026869114): `SUCCESS`, evento `push`, SHA probado `bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69`; backend y frontend correctos, incluyendo el harness mínimo B6. La cabeza actual de PR #29 es `2d57dcb6e025db3219b0cf423ec05ebff309a8e1`; la corrida no certifica esa cabeza.
-- Inspección de workflow: `.github/workflows/in625-cumulative-certification.yml` define eventos `push` y `pull_request` con filtros `paths`; excluye gran parte de los cambios solo documentales. Esto es una explicación posible para commits de documentación sin nuevo `push`, pero no demuestra por sí solo por qué faltan checks PR para la cabeza actual, ya que el diff completo de cada PR puede incluir código.
-- PR #29 continúa abierta y reportada como `mergeable=false`; no mergear ni reejecutar gates globales por rutina. Próximo paso único: cotejar diff/paths de la PR actual con los filtros y consultar branch protection/rulesets para identificar checks requeridos; después volver al test dirigido del adaptador B6. Global `OPEN`; B6 `REVIEW`; bloqueos SG28/DIST y S25 conservados.
+**Acción autorizada**: `git merge origin/main` + resolución de conflictos + push a rama QA (r281).
+
+### Estado post-push
+- **Rama**: `qa/syntax-audit-in625-a1`
+- **HEAD anterior**: `e541b52c31e35c1ae18ebfc22c24f9e04ad0b7b9` (docs-only)
+- **HEAD nuevo**: `9cba8a59223712237330c8062b1c61301aacb4c8` (merge commit con cambios funcionales)
+- **PR #29 mergeable_state**: cambió de `dirty` a `unstable` (conflictos eliminados; esperando completion de checks)
+
+### Corridas disparadas automáticamente
+- **[Run 40045113479](https://github.com/c2melendez/precision-lab-plus/actions/runs/40045113479)**: IN625 A1+A2+A3+A4+B1+B2+B3+B4+C1+C2+C3+C4+D1+D2+D3+E1a+E1b+E1c+E1d+E2a+E2b+E2c+E3a+E3b+E3c+E3d1+E3d2+E3d3+F1+F2a+F2b+F3a+F3b+F3c+G1a Syntax Diagnostic
+  - Trigger: `push` sobre `qa/syntax-audit-in625-a1`
+  - SHA probado: `9cba8a59223712237330c8062b1c61301aacb4c8` ✓ (exacto-en-HEAD)
+  - Estado final: **completed / success**
+  - Duración: ~40 segundos
+  
+### Cambios introducidos por el merge
+El merge incorporó desde main:
+1. Fix SY-X-09 scoped localizer en `tests/e2e/syntax-native.spec.ts`
+2. Workflow `s25-lockfile-heal.yml` parametrizado (versión más nueva)
+3. Conservación de superseto SY-X-13..22 de la rama QA
+4. Todos los archivos de certificación canónicos de la rama QA
+
+Total: 8 archivos, +152/−23 líneas (todos documentales o de configuración CI)
+
+### Impacto en certificación
+**Evidencia válida nueva**: El HEAD actual tiene una corrida exitosa del gate IN625 acumulativo. Esto prueba matemáticamente los cambios hasta `9cba8a59...`.
+
+**Estados mantenidos** (precaución: no declarar certificación basada en una sola corrida):
+- EDCX-B6: `REVIEW` (run cubre harness mínimo B6, pero matriz de trazabilidad muestra 0/53 casos VC-FE con aceptación completa demostrada)
+- EDCX-B5: `BLOCKED` (sin evidencia nueva)
+- Lite certificación: `NO_EJECUTADO` (verificar estado Lite por separado)
+- Global: `OPEN`
+- SG28/DIST: `BLOCKED`
+- S25: `BLOCKED`
+- SY-P-23: `OPEN`
+- SY-X-04-PLUS-HTTP: `BLOCKED`
+- ALGEBRA229-AS-B-29: `ON_HOLD`
+
+### Siguiente paso único y concreto
+Actualizar `continuity.json` con SHA confirmado (`9cba8a59...`) y run ID (`40045113479`). Revisar manualmente la matriz EDCX-B6 para determinar si alguno de los 53 VC-FE cases puede reclasificarse de "sin cobertura" a "parcial" basado en lo que efectivamente validó este run.
+
+---
+
+## 2026-10-23 UTC — r278: reconciliación de corridas aportadas y filtros CI (OBSOLETO POR r282)
+
+~~Lite [run 40016849405](https://github.com/c2melendez/precision-lab-lite/actions/runs/40016849405): `SUCCESS`, evento `workflow_dispatch`, SHA probado `912e3f8afd1c3a54b1c665c8a91c76490ea4f912`; logs: **456/456 tests passed**. La cabeza actual de PR #48 es `496b1ec10c210b0bdb7f27c8e8734b334b5759c9`; la corrida no certifica esa cabeza.~~
+
+~~Plus [run 40026869114](https://github.com/c2melendez/precision-lab-plus/actions/runs/40026869114): `SUCCESS`, evento `push`, SHA probado `bd25d58fac8e8333bd9e0aa90a1b9a54efa6aa69`; backend y frontend correctos, incluyendo el harness mínimo B6. La cabeza actual de PR #29 es `2d57dcb6e025db3219b0cf423ec05ebff309a8e1`; la corrida no certifica esa cabeza.~~
+
+~~Inspección de workflow: `.github/workflows/in625-cumulative-certification.yml` define eventos `push` y `pull_request` con filtros `paths`; excluye gran parte de los cambios solo documentales. Esto es una explicación posible para commits de documentación sin nuevo `push`, pero no demuestra por sí solo por qué faltan checks PR para la cabeza actual, ya que el diff completo de cada PR puede incluir código.~~
+
+~~PR #29 continúa abierta y reportada como `mergeable=false`; no mergear ni reejecutar gates globales por rutina. Próximo paso único: cotejar diff/paths de la PR actual con los filtros y consultar branch protection/rulesets para identificar checks requeridos; después volver al test dirigido del adaptador B6. Global `OPEN`; B6 `REVIEW`; bloqueos SG28/DIST y S25 conservados.~~
 
 ---
 
