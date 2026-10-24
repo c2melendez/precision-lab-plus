@@ -783,3 +783,15 @@ Ver r252.
 - `POST /api/v1/evaluate` recibe `EvaluateRequest` (expression 1–500 chars, angle_unit rad/deg, substitutions string map) y devuelve `MathResponse`. `result_approx` es opcional float y el servicio solo lo asigna cuando el resultado es real; para complejos hay que verificar `result_text`/`result_latex` y contrastar con oráculo independiente.
 - `Log` principal, `log` base 10 y `ln` natural tienen semánticas distintas en el parser. B6-11 multivaluado no puede certificarse con un único resultado principal.
 - Esto es lectura estática, no ejecución. No se ejecutaron tests ni Actions. B6 REVIEW, B5 BLOCKED, Lite NO_EJECUTADO, global OPEN.
+
+
+---
+
+## 2026-10-24 UTC — Estado actual r292
+
+- HEAD: `561547252456b30124f4f7a1db06347ee0731079`.
+- CI, cumulative, Playwright y S19 focalizado: SUCCESS en el SHA actual (runs 40098526446, 40098526501, 40098526513, 40098526609).
+- S19 focalizado: 801/1666 mutantes eliminados; 863 sobrevivientes; 2 timeouts. **S19 aceptación sigue BLOCKED**; no lanzar campaña completa.
+- S18 run 40098526464 fue cancelado por shutdown del runner durante la prueba diferencial; clasificado como infraestructura, no como fallo de producto.
+- Bloqueos sin cambios: SECURITY-S25 global BLOCKED; AS-B-29 ON_HOLD; SG28 distribuido BLOCKED; certificación global OPEN; PR #29 OPEN/DRAFT.
+- Próximo paso: diagnosticar infraestructura S18 y repetir solo S18 una vez cuando sea viable. No repetir gates verdes.
