@@ -228,7 +228,7 @@ async def _evaluate_impl(payload: EvaluateRequest, request: Request, *, admissio
     try:
         presentation = (await run_for_request(request, _render_evaluate_presentation, result, payload.expression, timeout_seconds=4, admission_reserved=admission_reserved)
                         if os.getenv("SG28_EVALUATE_ISOLATION", "0") == "1"
-                        else _render_evaluate_presentation(result))
+                        else _render_evaluate_presentation(result, payload.expression))
     except IsolationCapacityExceeded:
         error = _error(request, ErrorCode.INTERNAL_ERROR, "Capacidad de cálculo temporalmente agotada.")
         return JSONResponse(status_code=503, content=error.model_dump(mode="json"))
