@@ -1,3 +1,12 @@
+## 2026-10-24 UTC — r287 addendum: revisión de contrato SG28
+
+- Añadido `SG28_CONTRACT_REVIEW_R287.md` (commit `7c6392336039f8e654acb94dc0f75cc6f0818412`).
+- Contraste con `SG28_INTEGRATION_EXIT_CRITERIA.md`: el borrador menciona los seis requisitos, pero no define decisiones implementables para presupuesto total, ACK perdido/renewal, reloj/reinicio, fencing del hijo, tabla HTTP/MathResponse ni topología de aceptación.
+- Decisión: no cablear endpoint, no activar flags y no repetir suites por documentación. H2-SG28-DIST-01..08 y SY-X-04-PLUS-HTTP continúan BLOCKED; global OPEN; PR #29 abierto.
+- Siguiente acción: revisión explícita del responsable backend/infraestructura sobre la matriz de brechas antes de versionar contrato aprobado.
+
+---
+
 ## 2026-10-24 UTC — r287: SG28 lease/fencing contract proposed; S18 classified as infrastructure cancellation
 
 - Reconciled Plus PR-head evidence at `6e6a59ee556cf6bba60a40010ec707f05a01ca52`: CI 40069907974, cumulative 40069907843, Playwright 40069907922 and H1a/H1b/H1c/H1d/S17/S20/S21/S23/S25/Syntax diagnostic SUCCESS.
