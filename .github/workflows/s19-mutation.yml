@@ -94,6 +94,9 @@ jobs:
 
           if [[ "$focused" == true && "$has_targeted_test" == true ]]; then
             scope=focused
+          elif [[ "$focused" == true && "${#changed_paths[@]}" -eq 1 && "${changed_paths[0]}" == ".github/workflows/s19-mutation.yml" ]]; then
+            # Workflow-only scope-filter fixes still run the focused validation job.
+            scope=focused
           else
             docs_only=true
             for path in "${changed_paths[@]}"; do
@@ -210,21 +213,21 @@ jobs:
           if [ "$SCOPE" = "focused" ]; then
             # Keep this test-only commit targeted; SG28 runtime stays outside this scope.
             mutmut run \
-              "app.services.solve_service._absolute_value_cases_result*" \
-              "app.services.solve_service._radical_cases_result*" \
-              "app.services.solve_service._rational_domain_result*" \
-              "app.services.solve_service._absolute_value_steps*" \
-              "app.services.solve_service._absolute_value_equidistance_steps*" \
-              "app.services.solve_service._domain_step*" \
-              "app.services.solve_service._real_radical_value*" \
-              "app.services.parsing.validate_g3_structure*" \
-              "app.services.parsing.parse_inequality_tree*" \
-              "app.services.parsing.parse_chained_inequalities*" \
-              "app.services.parsing.permutation_alias_args*" \
-              "app.services.parsing.symbolic_pair_binomial_variable*" \
-              "app.services.parsing.symbolic_identity_sum_bound*" \
-              "app.routers.evaluate._evaluate_impl*" \
-              "app.routers.evaluate._render_evaluate_presentation*"
+              "app.services.solve_service.x__absolute_value_cases_result__mutmut_*" \
+              "app.services.solve_service.x__radical_cases_result__mutmut_*" \
+              "app.services.solve_service.x__rational_domain_result__mutmut_*" \
+              "app.services.solve_service.x__absolute_value_steps__mutmut_*" \
+              "app.services.solve_service.x__absolute_value_equidistance_steps__mutmut_*" \
+              "app.services.solve_service.x__domain_step__mutmut_*" \
+              "app.services.solve_service.x__real_radical_value__mutmut_*" \
+              "app.services.parsing.x_validate_g3_structure__mutmut_*" \
+              "app.services.parsing.x_parse_inequality_tree__mutmut_*" \
+              "app.services.parsing.x_parse_chained_inequalities__mutmut_*" \
+              "app.services.parsing.x_permutation_alias_args__mutmut_*" \
+              "app.services.parsing.x_symbolic_pair_binomial_variable__mutmut_*" \
+              "app.services.parsing.x_symbolic_identity_sum_bound__mutmut_*" \
+              "app.routers.evaluate.x__evaluate_impl__mutmut_*" \
+              "app.routers.evaluate.x__render_evaluate_presentation__mutmut_*"
           else
             mutmut run \
               "app.services.parsing*" \
