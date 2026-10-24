@@ -48,7 +48,7 @@ def _render_evaluate_presentation(result, source_expression=None):
         decimal_exponential = (
             not result.expr.free_symbols
             and source_expression is not None
-            and re.search(r"(?<![A-Za-z0-9_.])\\d+\\.\\d+(?![A-Za-z0-9_])", source_expression)
+            and re.search(r"(?<![A-Za-z0-9_.])\d+\.\d+(?![A-Za-z0-9_])", source_expression)
             and result.expr.has(sympy.exp)
             and result.approx_value is not None
         )
