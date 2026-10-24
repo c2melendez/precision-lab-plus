@@ -1,3 +1,12 @@
+## 2026-10-24 UTC — r288: revisión del artefacto S19 backend mutmut
+
+- Revisado artefacto `s19-plus-backend-mutmut` ID `12551670346` del run [40069907892](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069907892), SHA `6e6a59ee556cf6bba60a40010ec707f05a01ca52`.
+- `mutmut-results.txt`: 0 killed, 2,136 survived, 159 no tests, 14 timeout (2,309 estados). `mutmut-exit-code.txt` = 0; esto no equivale a aceptación. El addendum previo decía 13 timeout; el artefacto fuente confirma 14.
+- Nuevo informe `S19_BACKEND_MUTATION_REVIEW_R288.md`: S19 backend acceptance BLOCKED porque no hay kills ni criterio/umbral aprobado. No repetir la corrida hasta versionar el contrato de score/denominador, timeout/no-tests, equivalentes y exclusiones.
+- Sin cambios de producto ni Actions nuevas. SG28 REVIEW_REQUIRED, S18 CANCELLED por infraestructura, global OPEN; PR #29 abierto.
+
+---
+
 ## 2026-10-24 UTC — r287: gates reconciliados y contrato SG28 propuesto
 
 **HEAD de partida:** `6e6a59ee556cf6bba60a40010ec707f05a01ca52`; rama `qa/syntax-audit-in625-a1`; PR #29 abierto, sin merge.
