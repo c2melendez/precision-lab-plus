@@ -9,28 +9,44 @@
 
 El ZIP contiene mutmut-exit-code.txt y mutmut-results.txt. El código de salida registrado es 0, pero esto solo indica que el comando terminó sin error de herramienta; no representa un score aprobado.
 
-Recuento directo de las líneas de estado del informe:
+Resumen de cierre extraído de los logs del job `plus-backend-mutmut` (línea final `3280/3280`), que sí registra todos los estados:
 
 | Estado de mutante | Cantidad |
 |---|---:|
+| killed | 971 |
 | survived | 2,136 |
 | no tests | 159 |
 | timeout | 14 |
-| **Entradas listadas** | **2,309** |
+| **Total** | **3,280** |
+| **Score killed (mismo denominador histórico)** | **29.60%** |
 
-**Limitación de interpretación:** el listado `mutmut results` representa estados no-killed/no resueltos y no incluye necesariamente los mutantes `killed`. Por tanto, las 2,309 líneas no son el total de mutantes de la campaña ni prueban cero killed; el artefacto por sí solo no permite calcular el score actual. El reporte previo de continuidad indicaba 13 timeouts; el artefacto descargado contiene **14**.
+El artefacto `mutmut-results.txt` lista los estados no-killed, mientras que el log del job conserva el resumen total. El resumen final informa 971 killed, 2,136 survived, 159 no tests y 14 timeout (3,280 en total). El reporte previo de continuidad indicaba 13 timeouts; el artefacto/log fuente confirma **14**.
 
 ## Interpretación y límites
 
-- El artefacto no publica un resumen completo con el total de mutantes y el recuento `killed`; no permite calcular el score actual ni afirmar que satisface un umbral.
+- El ZIP no contiene el total/killed, pero el log del job sí: score killed 971/3,280 = 29.60% usando la misma convención de denominador que el baseline. El score está calculado, pero su comparación requiere considerar la expansión del inventario.
 - no tests no equivale a mutantes muertos ni debe contarse como éxito.
 - timeout no equivale a mutante muerto; debe reportarse por separado y revisarse como ejecución no concluyente.
-- Aunque el job de Actions figure SUCCESS y el código de salida diga 0, **S19 backend no queda aceptado** con estos datos.
+- Aunque el job de Actions figure SUCCESS y el código de salida diga 0, **S19 backend no queda aceptado automáticamente**: el score es 29.60%, frente a 57.39% en el baseline operativo, y el inventario creció de 1,028 a 3,280 mutantes.
 - No se infiere que todos los mutantes listados representen defectos de producto: algunos pueden requerir análisis de equivalencia, observabilidad o alcance de pruebas. El reporte actual no basta para afirmar el número de kills.
 
 ## Comparación con el artefacto baseline
 
-Se recuperó el artefacto baseline ID `10740671311` del run `35838270384`. Su archivo `mutmut-results.txt` tiene 438 entradas: 371 survived, 58 no tests y 9 timeout; el documento normativo registra además 590 killed, para un inventario total de 1,028 y score killed 57.39%. La omisión de killed en el listado explica por qué sumar solo sus líneas no reconstruye el total. El artefacto actual tiene 2,309 entradas listadas (2,136 survived, 159 no tests, 14 timeout), pero carece de recuento completo de killed/total comparable. Debe investigarse la diferencia de estados no-killed antes de evaluar tendencia.
+Se recuperó el artefacto baseline ID `10740671311` del run `35838270384`. Su archivo `mutmut-results.txt` tiene 438 entradas: 371 survived, 58 no tests y 9 timeout; el documento normativo registra además 590 killed, para un inventario total de 1,028 y score killed 57.39%. La omisión de killed en el listado explica por qué sumar solo sus líneas no reconstruye el total. El log actual sí informa 971 killed y 3,280 total; score 29.60% frente a 57.39% en baseline. La diferencia de 2,252 mutantes adicionales requiere análisis por módulo y cambios de código antes de atribuir la caída a degradación de pruebas.
+
+## Evidencia de resumen de ejecución
+
+Los logs finales muestran `3280/3280 🎉 971 🫥 159 ⏰ 14 🙁 2136`. Distribución por módulos según las líneas finales por mutante:
+
+| Módulo | Killed | Survived | No tests | Timeout | Total |
+|---|---:|---:|---:|---:|---:|
+| `app.routers.evaluate` | 89 | 347 | 18 | 3 | 457 |
+| `app.services.ast_validator` | 28 | 45 | 0 | 0 | 73 |
+| `app.services.parsing` | 538 | 653 | 82 | 8 | 1,281 |
+| `app.services.solve_service` | 316 | 1,091 | 59 | 3 | 1,469 |
+| **Total** | **971** | **2,136** | **159** | **14** | **3,280** |
+
+El baseline usó Python 3.12.14; la ejecución actual, Python 3.12.15. Ambas muestran mutmut 3.8.0 fijado en el workflow y las mismas cinco superficies objetivo a nivel de configuración, aunque los archivos han evolucionado. No se debe comparar el porcentaje como regresión pura sin revisar el crecimiento de inventario y la incorporación de funciones (por ejemplo, rutas SG28 y parseo de desigualdades).
 
 ## Decisión
 
