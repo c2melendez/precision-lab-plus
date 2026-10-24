@@ -9,6 +9,17 @@
 
 ---
 
+## 2026-10-24 UTC — r285: run SG28 en 83b18dab verificado (harness PASS_SCOPED; DIST sigue BLOCKED)
+
+- Plus Playwright E2E [40065789096] SUCCESS @ `83b18dab`, job 120788643371, intento 1.
+- General sin SG28: 627 passed. EN-SG-28 con SG28 aislado: 21 passed (7 x desktop/tablet/movil). `general_exit=0 sg28_exit=0`.
+- Fallo previo 40047564113 clasificado como harness; corregido en 83b18dab.
+- No cierra H2-SG28-DIST-01..08 ni S25. Lite sin cambios en este commit.
+- Hallazgo: `playwright.yml` no dispara push en la rama canonica (pendiente cambio tecnico).
+- Siguiente: brecha 4 del contrato SG28 (MathResponse y status HTTP).
+
+---
+
 ## 2026-10-23 UTC — r264: registro gates r263 — Plus success
 
 - r264: gates r263 Plus en success: cumulative 40014981162, H1d 40014985059, Native Syntax 40014988262 sobre 177955dc.

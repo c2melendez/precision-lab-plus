@@ -1,3 +1,29 @@
+## 2026-10-24 UTC — r285: run SG28 en 83b18dab verificado (harness PASS_SCOPED; DIST sigue BLOCKED)
+
+**HEAD verificado antes de publicar:** `c28ea34721cb596a83f530f157e89ccd2b29a48e` (docs r284). Commit exclusivamente documental: toca solo `.md` y `qa/certification/continuity.json`, rutas excluidas por `paths-ignore` de `playwright.yml`; no lanza E2E.
+
+### Evidencia (pull_request, SHA 83b18dab)
+- Playwright E2E [40065789096](https://github.com/c2melendez/precision-lab-plus/actions/runs/40065789096): **SUCCESS**, job `e2e` 120788643371, intento 1.
+- Fase general sin SG28: 627 passed (8.5 min, 2 workers).
+- Fase EN-SG-28 (`SG28_EVALUATE_ISOLATION=1`, `SG28_CI_OBSERVE=1`, `SG28_CI_SLOW=1`, `SG28_CI_EVENT_FILE`, workers=1): 21 passed = 7 casos x desktop, tablet y movil (Chromium), contra backend aislado real.
+- Log del paso: `general_exit=0 sg28_exit=0`.
+
+### Clasificacion
+- Fallo previo 40047564113 = **harness**: `SG28_CI_EVENT_FILE` no estaba exportado en `playwright.yml`. Corregido en 83b18dab y verificado en este run.
+- Esto valida el harness E2E. **No cierra H2-SG28-DIST-01..08**: faltan contrato MathResponse completo, cancelacion por HTTP con servidor real, cuotas/concurrencia y operaciones costosas en proceso principal (puntos 4-6 del contrato).
+- S18 40047563967 (apagado de runner) sigue siendo infraestructura; no se relanza.
+
+### Hallazgo de CI (pendiente, no resuelto aqui)
+- `playwright.yml` dispara `push` solo en `main`, `master` y `qa/exhaustive-suite-module-01`. La rama canonica `qa/syntax-audit-in625-a1` no tiene push automatico. Requiere cambio tecnico del YAML.
+
+### Estados
+Global OPEN · SG28-DIST BLOCKED · SECURITY-S25 BLOCKED · SY-P-23 OPEN · SY-X-04-PLUS-HTTP BLOCKED · ALGEBRA229-AS-B-29 ON_HOLD · EDCX-B5 BLOCKED (capability).
+
+### Siguiente paso único
+Cerrar la brecha 4 del contrato SG28: comparar respuestas MathResponse completas y status HTTP de exito/error contra `/api/v1/evaluate` con `SG28_EVALUATE_ISOLATION=1`, con test-first en backend. Despues ejecutar gate `sg28-prototype` y H1d en el SHA tecnico. No repetir el run 40065789096 ni declarar DIST PASS.
+
+---
+
 ## 2026-10-24 UTC — r284: harness Playwright SG28 alineado; corrida en curso (no PASS)
 
 **HEAD del fix:** `83b18dab5a176087d9f228725a2140c535d07a2f` (padre documental `0325fa773ad69cd0310b36f6fd09c0d1ad8e0305`).

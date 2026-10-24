@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 284,
+  "revision": 285,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -47,9 +47,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-E2E-SG28-CONFIG",
-    "status": "WAIT",
-    "action": "Inspeccionar Playwright E2E pull_request run 40065789096 en SHA 83b18dab5a176087d9f228725a2140c535d07a2f (fix de harness: fase general sin SG28 y fase EN-SG-28 con SG28_EVALUATE_ISOLATION/OBSERVE/SLOW/EVENT_FILE y workers=1). Separar general_exit de sg28_exit. No declarar PASS ni cerrar H2-SG28-DIST. No despachar otra corrida equivalente mientras esta siga activa. S18 40047563967 fue shutdown de runner, no fallo matemático."
+    "id": "PLUS-SG28-CONTRACT-MATHRESPONSE-R285",
+    "status": "READY",
+    "action": "Cerrar la brecha 4 del contrato SG28: comparar respuestas MathResponse completas y status HTTP de exito/error contra /api/v1/evaluate con SG28_EVALUATE_ISOLATION=1, test-first en backend. Despues ejecutar gate sg28-prototype y H1d en el SHA tecnico. No repetir el run 40065789096 y no declarar H2-SG28-DIST PASS."
   },
   "blockers": [
     {
@@ -79,7 +79,7 @@
       "detail": "Lugares geométricos VC-LG-01..25: canal vacío y sin endpoint de producto."
     }
   ],
-  "ledger_note": "r284: Playwright SG28 harness alineado en 83b18dab; WAIT run 40065789096. SG28/DIST y S25 siguen BLOCKED.",
+  "ledger_note": "r285: run Playwright 40065789096 @83b18dab verificado en log: general 627 passed y SG28 21 passed (desktop/tablet/movil); general_exit=0 sg28_exit=0. Harness validado (PASS_SCOPED de harness). SG28/DIST y S25 siguen BLOCKED. Siguiente: brecha de contrato MathResponse.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
@@ -2941,5 +2941,42 @@
       "S25 plus security success",
       "backend+frontend continuity guards success"
     ]
+  },
+  "sg28_e2e_harness_closure_r285": {
+    "status": "PASS_SCOPED_HARNESS",
+    "classification": "harness",
+    "product_changed": false,
+    "repo": "c2melendez/precision-lab-plus",
+    "event": "pull_request",
+    "head_sha": "83b18dab5a176087d9f228725a2140c535d07a2f",
+    "run_id": 40065789096,
+    "job_id": 120788643371,
+    "run_attempt": 1,
+    "conclusion": "success",
+    "general": {
+      "exit": 0,
+      "tests": "627 passed",
+      "grep": "EN-SG-28 excluded"
+    },
+    "sg28": {
+      "exit": 0,
+      "tests": "21 passed (7 cases x desktop/tablet/mobile chromium)",
+      "env": [
+        "SG28_EVALUATE_ISOLATION=1",
+        "SG28_CI_OBSERVE=1",
+        "SG28_CI_SLOW=1",
+        "SG28_CI_EVENT_FILE"
+      ],
+      "workers": 1
+    },
+    "previous_failure": {
+      "run_id": 40047564113,
+      "cause": "harness: SG28_CI_EVENT_FILE not exported in playwright.yml"
+    },
+    "not_closed": [
+      "H2-SG28-DIST-01..08 remains BLOCKED",
+      "contract items 4-6: MathResponse comparison, server disconnect with real HTTP server, quotas/concurrency and heavy ops in main process"
+    ],
+    "infra_note": "S18 40047563967 runner shutdown: infrastructure, not relaunched"
   }
 }
