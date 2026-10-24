@@ -11,6 +11,15 @@ from app.services.interruptible import ComputationCancelled
 from app.services.request_cancellation import run_for_request
 
 
+_MATHRESPONSE_PUBLIC_FIELDS = {
+    "success", "operation", "request_id", "result_type", "input_text",
+    "input_latex", "result_latex", "result_text", "result_approx",
+    "result_data", "result_matrices", "steps", "has_detailed_steps",
+    "graph_data", "warnings", "domain_conditions", "error_code",
+    "error_message", "duration_ms",
+}
+
+
 def _bounded_work() -> str:
     time.sleep(2)
     return "done"
@@ -160,6 +169,7 @@ def test_public_evaluate_exhausted_capacity_returns_structured_503(monkeypatch):
         response = client.post("/api/v1/evaluate", json={"expression": "2+3"})
     assert response.status_code == 503
     body = response.json()
+    assert set(body) == _MATHRESPONSE_PUBLIC_FIELDS
     assert body["success"] is False
     assert body["operation"] == "evaluate"
     assert body["request_id"]
@@ -188,40 +198,73 @@ def test_public_evaluate_default_mode_does_not_use_isolation_capacity(monkeypatc
 
 
 
-def test_public_evaluate_isolation_matches_default_mathresponse(monkeypatch):
-    """SG28-E2E-06/09: compare real public MathResponse on both API paths.
-
-    Compare stable public fields, not request IDs or wall-clock duration.
-    This checks ordinary, symbolic and invalid input without mocking SymPy.
-    """
+def test_public_evaluate_isolation_matches_complete_mathresponse_and_http_status(monkeypatch):
+    """Compare every public MathResponse field and the HTTP status on both paths."""
     from fastapi.testclient import TestClient
     from app.main import app
 
-    expressions = ("2+3", "x+x", "x+(")
+    cases = [
+        ("numeric success", {"expression": "2+3"}, True),
+        ("symbolic success", {"expression": "x+x"}, True),
+        ("parse error", {"expression": "x+("}, False),
+        (
+            "substitution validation error",
+            {"expression": "x", "substitutions": {"x": "y+1"}},
+            False,
+        ),
+    ]
     with TestClient(app) as client:
-        for expression in expressions:
-            responses = []
+        for label, payload, expected_success in cases:
+            snapshots = []
             for enabled in ("0", "1"):
                 monkeypatch.setenv("SG28_EVALUATE_ISOLATION", enabled)
-                response = client.post(
-                    "/api/v1/evaluate", json={"expression": expression}
+                response = client.post("/api/v1/evaluate", json=payload)
+                assert response.status_code == 200, (
+                    f"{label}, SG28_EVALUATE_ISOLATION={enabled}: "
+                    f"unexpected HTTP {response.status_code}: {response.text}"
                 )
-                assert response.status_code == 200
                 body = response.json()
-                assert body["request_id"]
-                assert body["operation"] == "evaluate"
-                responses.append(body)
-
-            original, isolated = responses
-            for field in (
-                "success", "operation", "result_type", "result_text",
-                "result_latex", "result_approx", "error_code",
-                "has_detailed_steps",
-            ):
-                assert isolated.get(field) == original.get(field), (
-                    f"{expression!r}: public MathResponse field {field} differs: "
-                    f"{original.get(field)!r} vs {isolated.get(field)!r}"
+                assert set(body) == _MATHRESPONSE_PUBLIC_FIELDS, (
+                    f"{label}, missing/extra MathResponse fields: "
+                    f"expected {_MATHRESPONSE_PUBLIC_FIELDS}, got {set(body)}"
                 )
+                assert body["request_id"]
+                assert isinstance(body["duration_ms"], (int, float))
+                assert body["operation"] == "evaluate"
+                assert body["success"] is expected_success
+
+                # Request IDs and timings are intentionally non-deterministic.
+                stable_body = {
+                    key: value for key, value in body.items()
+                    if key not in {"request_id", "duration_ms"}
+                }
+                snapshots.append((response.status_code, stable_body))
+
+            assert snapshots[0] == snapshots[1], (
+                f"{label}: complete public response/status differs between "
+                f"default and isolated evaluate paths"
+            )
+
+
+def test_public_evaluate_request_validation_remains_http_422_with_or_without_isolation(monkeypatch):
+    """Malformed request bodies are rejected by the same HTTP validation layer."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    responses = []
+    with TestClient(app) as client:
+        for enabled in ("0", "1"):
+            monkeypatch.setenv("SG28_EVALUATE_ISOLATION", enabled)
+            response = client.post("/api/v1/evaluate", json={"substitutions": {}})
+            assert response.status_code == 422, (
+                f"SG28_EVALUATE_ISOLATION={enabled}: expected HTTP 422, "
+                f"got {response.status_code}: {response.text}"
+            )
+            responses.append(response.json())
+
+    assert responses[0] == responses[1], (
+        "Malformed request HTTP errors must not depend on the isolation flag"
+    )
 
 
 
