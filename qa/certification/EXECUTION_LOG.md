@@ -290,3 +290,16 @@
 ## 2026-10-23 UTC — r252: MV-H PASS_SCOPED_BILATERAL
 
 - Plus [39913600442] / Lite [39913642080] SUCCESS.
+
+
+---
+
+## 2026-10-24 UTC — r292: S19 focalizado y conciliación de gates
+
+- HEAD canónico: `561547252456b30124f4f7a1db06347ee0731079` (`fix(qa): match mutmut's qualified mutant names`).
+- Se corrigieron filtros de mutmut para usar nombres cualificados reales; el workflow-only change se conserva en alcance focalizado.
+- CI [40098526446](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526446), cumulative [40098526501](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526501), Playwright [40098526513](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526513) y S19 focalizado [40098526609](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526609): SUCCESS en el mismo SHA.
+- S19 focalizado: 1,666 mutantes del alcance dirigido; 801 killed, 863 survived, 2 timeout. No sustituye la campaña histórica/global ni cierra el bloqueo de aceptación S19.
+- S18 [40098526464](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526464): no PASS. El log registra shutdown signal del runner durante `python qa/s18/run_differential.py`; el paso se canceló por infraestructura, sin evidencia de fallo funcional.
+- PR #29 continúa OPEN/DRAFT. Certificación global OPEN; SECURITY-S25 global BLOCKED, AS-B-29 ON_HOLD y H2-SG28-DIST-01..08 BLOCKED.
+- Siguiente acción única: diagnosticar/restablecer infraestructura de S18 y ejecutar ese gate una sola vez. No repetir los gates verdes ni lanzar S19 completo. Después, revisar sobrevivientes de S19 desde el artefacto existente.
