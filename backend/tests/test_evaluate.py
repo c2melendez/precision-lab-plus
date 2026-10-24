@@ -83,6 +83,20 @@ def test_valid_decimal_point():
     assert body["result_approx"] == pytest.approx(3.14)
 
 
+def test_decimal_exponential_trig_presentation_is_bounded():
+    expression = "exp(-1.3983707058413914)+(-1)*sin(-1.3983707058413914)"
+    x = -1.3983707058413914
+    expected = math.exp(x) - math.sin(x)
+
+    response = _evaluate(expression=expression)
+    body = response.json()
+
+    assert response.status_code == 200
+    assert body["success"] is True
+    assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-9)
+    assert float(body["result_text"]) == pytest.approx(expected, rel=1e-9, abs=1e-9)
+
+
 @pytest.mark.parametrize("expression", ["1e5", "foo.bar", "5.__class__"])
 def test_invalid_decimal_or_scientific_notation(expression):
     response = _evaluate(expression=expression)

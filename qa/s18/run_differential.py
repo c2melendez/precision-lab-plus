@@ -121,7 +121,10 @@ def _diagnose_plus_expression(expression: str, timeout_seconds: float = 8.0) -> 
         process.join(timeout=2.0)
     stages = []
     while parent_connection.poll():
-        stages.append(parent_connection.recv())
+        try:
+            stages.append(parent_connection.recv())
+        except EOFError:
+            break
     parent_connection.close()
     return {
         "last_stage": stages[-1] if stages else "no-stage-reported",

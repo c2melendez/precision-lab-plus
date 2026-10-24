@@ -39,7 +39,24 @@ def _render_evaluate_presentation(result, source_expression=None):
     # pública, en cambio, debe ser canónica y reingresable sin acumular
     # factores ni cambiar de significado.
     try:
-        display_expr = sympy.simplify(result.expr)
+        # S18 r293 exposed an unbounded SymPy simplify() case: rationalized
+        # decimal input exp(-1.398...)+(-1)*sin(-1.398...) can exhaust memory
+        # while simplifying a fully numeric transcendental expression. For
+        # numeric expressions with a decimal source and exp(), the evaluator
+        # already computed a bounded numeric approximation; use it directly
+        # for presentation instead of asking simplify() to prove an exact form.
+        decimal_exponential = (
+            not result.expr.free_symbols
+            and source_expression is not None
+            and re.search(r"(?<![A-Za-z0-9_.])\\d+\\.\\d+(?![A-Za-z0-9_])", source_expression)
+            and result.expr.has(sympy.exp)
+            and result.approx_value is not None
+        )
+        display_expr = (
+            sympy.Float(result.approx_value)
+            if decimal_exponential
+            else sympy.simplify(result.expr)
+        )
     except Exception:
         display_expr = result.expr
 
