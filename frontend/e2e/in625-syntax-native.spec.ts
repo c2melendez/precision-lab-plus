@@ -513,7 +513,8 @@ test("SY-X-09 native extreme power bounded HTTP rejection and finite reentry", a
   expect(rejected.error_code).toBe("COMPLEXITY_LIMIT");
   expect(rejected.result_latex).toBeNull();
   expect(rejected.result_text).toBeNull();
-  await expect(page.getByRole("alert").filter({ hasText: "COMPLEXITY_LIMIT" })).toContainText("COMPLEXITY_LIMIT");
+  const resultAlert = page.locator('form[aria-labelledby="basic-mode-heading"]').getByRole("alert").filter({ hasText: "COMPLEXITY_LIMIT" });
+  await expect(resultAlert).toContainText("COMPLEXITY_LIMIT");
   const recovery = await evaluate(page, field, "2+3", 5);
   const reentry = await evaluate(page, field, recovery.reentry, 5);
   expect(new Set([rejected.request_id, recovery.requestId, reentry.requestId]).size).toBe(3);

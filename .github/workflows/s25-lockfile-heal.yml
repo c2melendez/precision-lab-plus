@@ -7,12 +7,17 @@ on:
         description: Reason for regenerating package-lock with security overrides
         required: true
         type: string
+      target_branch:
+        description: Branch to heal
+        required: true
+        type: string
+        default: qa/syntax-audit-in625-a1
 
 permissions:
   contents: write
 
 concurrency:
-  group: s25-lockfile-heal
+  group: s25-lockfile-heal-${{ inputs.target_branch }}
   cancel-in-progress: false
 
 jobs:
@@ -22,31 +27,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: qa/syntax-audit-in625-a1
+          ref: ${{ inputs.target_branch }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
-      - name: Validate reason
+      - name: Validate inputs
         env:
           REASON: ${{ inputs.reason }}
+          TARGET: ${{ inputs.target_branch }}
         run: |
           test -n "$(printf '%s' "$REASON" | tr -d '[:space:]')"
-          printf 'Reason: %s\n' "$REASON"
+          test -n "$(printf '%s' "$TARGET" | tr -d '[:space:]')"
+          printf 'Reason: %s\nTarget: %s\n' "$REASON" "$TARGET"
 
       - name: Regenerate lockfile with overrides
         working-directory: frontend
         run: |
-          # package.json already has braces fork + postcss-selector-parser overrides
+          # Drop broken stub so npm can rebuild from package.json overrides
+          rm -f package-lock.json
           npm install --package-lock-only --ignore-scripts
-          npm audit --audit-level=high
+          echo '--- npm audit ---'
           npm audit
+          npm audit --audit-level=high
 
-      - name: Commit and push lockfile if changed
+      - name: Commit and push lockfile
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -56,4 +63,4 @@ jobs:
             exit 0
           fi
           git commit -m "fix(security): regenerate package-lock with braces fork + postcss-selector-parser (0 high)"
-          git push origin HEAD:qa/syntax-audit-in625-a1
+          git push origin HEAD:${{ inputs.target_branch }}
