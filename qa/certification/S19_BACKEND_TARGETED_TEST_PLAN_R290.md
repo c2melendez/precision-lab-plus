@@ -42,7 +42,9 @@ El workflow ejecuta `tests/test_parsing.py`, `tests/test_evaluate.py`, `tests/te
 1. `parse_chained_inequalities`: cadena válida creciente/decreciente, desigualdades estrictas/no estrictas y rechazos de cadenas incompletas o con operadores incompatibles.
 2. `parse_inequality_tree`: comparación simple y compuesta, operandos inválidos, límites de complejidad y rechazo de sintaxis mal formada.
 3. `validate_g3_structure`: parametrizar las clases de estructura raw de G3 cubiertas por el contrato, incluidos delimitadores incompletos, tokens desconocidos y casos válidos de referencia. Los tests deben derivarse del contrato G3 versionado, no de los IDs de mutante solamente.
-4. `permutation_alias_args`, `symbolic_pair_binomial_variable` y `symbolic_identity_sum_bound`: probar entradas válidas, aliases/argumentos fuera de orden y rechazo de entradas inválidas según el contrato Algebra 229.
+4. Añadir regresiones de parser para `permutation_alias_args`, `symbolic_pair_binomial_variable` y `symbolic_identity_sum_bound`: casos válidos, argumentos fuera de rango y rechazos de entradas inválidas.
+
+**Corrección de trazabilidad (r292):** estas tres funciones son helpers del parser/calculadora y no corresponden a filas de la matriz normativa Algebra 229. La matriz congelada se comprueba mediante `qa/certification/check_algebra229_source.py`; las filas AS-B-26..28 documentan factorización de enteros (la AS-B-28 prueba `factor(4294967297)`), mientras que AS-B-29 permanece `ON_HOLD`. Estas regresiones cuentan solo como cobertura de parser; no cierran ni sustituyen ALGEBRA229-AS-B-29. La afirmación anterior de que debían derivarse del contrato Algebra 229 era incorrecta.
 
 ### P0/P1 — `tests/test_evaluate.py`
 

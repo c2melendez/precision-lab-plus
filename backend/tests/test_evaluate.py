@@ -313,3 +313,55 @@ def test_stdev_with_single_value_is_parse_error():
     body = response.json()
     assert body["success"] is False
     assert body["error_code"] == "PARSE_ERROR"
+
+# S19 targeted coverage r292
+def test_render_evaluate_presentation_reports_bounded_symbolic_helper_warnings():
+    from app.routers.evaluate import _render_evaluate_presentation
+
+    x = sympy.Symbol("x")
+    result = evaluate_service.EvaluateResult(
+        expr=x,
+        input_expr=x,
+        is_numeric=False,
+        sum_bound="n",
+        binomial_variable="k",
+        permutation_alias=True,
+    )
+    presentation = _render_evaluate_presentation(result, source_expression="x")
+    assert "n debe ser un entero no negativo para esta suma simbólica." in presentation["warnings"]
+    assert "k debe ser un entero no negativo para combinaciones." in presentation["warnings"]
+    assert any("P(n,r) se interpreta como permutaciones" in w for w in presentation["warnings"])
+
+
+def test_evaluate_endpoint_maps_domain_errors_to_public_response(monkeypatch):
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "0")
+
+    def _raise_domain_error(*args, **kwargs):
+        raise evaluate_service.DomainErrorResult("controlled domain-error fixture")
+
+    monkeypatch.setattr(evaluate_service, "evaluate", _raise_domain_error)
+    response = _evaluate(expression="1")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is False
+    assert body["operation"] == "evaluate"
+    assert body["error_code"] == "DOMAIN_ERROR"
+    assert body["request_id"]
+
+
+def test_evaluate_endpoint_maps_controlled_timeout_without_claiming_sg28(monkeypatch):
+    from app.services.interruptible import ComputationTimedOut
+
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "0")
+
+    def _raise_controlled_timeout(*args, **kwargs):
+        raise ComputationTimedOut("controlled timeout-mapping fixture")
+
+    monkeypatch.setattr(evaluate_service, "evaluate", _raise_controlled_timeout)
+    response = _evaluate(expression="1")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is False
+    assert body["operation"] == "evaluate"
+    assert body["error_code"] == "TIMEOUT"
+    assert body["request_id"]
