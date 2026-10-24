@@ -1,3 +1,12 @@
+## 2026-10-24 UTC — r289: discrepancia de alcance S19 backend
+
+- El baseline normativo `qa/s19/BASELINE_MUTATION.md` fija como operativo 1,028 mutantes (590 killed, 371 survived, 58 no tests, 9 timeout; score killed 57.39%). El artefacto actual de run 40069907892 contiene 2,309 estados (0 killed, 2,136 survived, 159 no tests, 14 timeout).
+- La diferencia de inventario impide comparar scores o proponer un umbral nuevo sin reconciliar alcance/configuración. Se documentó en `S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md` (commit `412e8c89177cd7b38c0f60b69ca33bb93f627b22`).
+- Siguiente paso: recuperar y comparar el artefacto baseline histórico 10740671311/run 35838270384 contra el artefacto actual; verificar versión/harness, inventario de mutantes, configuración efectiva y estados. No repetir S19 completo ni cambiar producto.
+- S19 backend sigue BLOCKED; SG28 REVIEW_REQUIRED, S18 CANCELLED por infraestructura, PR #29 abierto, certificación global OPEN. Sin nuevas Actions.
+
+---
+
 ## 2026-10-24 UTC — r288: revisión del artefacto S19 backend mutmut
 
 - Revisado artefacto `s19-plus-backend-mutmut` ID `12551670346` del run [40069907892](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069907892), SHA `6e6a59ee556cf6bba60a40010ec707f05a01ca52`.
