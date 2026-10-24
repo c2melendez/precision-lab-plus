@@ -238,6 +238,13 @@ jobs:
           fi
           rc=$?
           mutmut results > ../reports/s19/mutmut-results.txt 2>&1
+          for status in survived timeout; do
+            report="../reports/s19/mutmut-${status}.txt"
+            : > "$report"
+            while read -r mutant; do
+              mutmut show "$mutant" >> "$report" 2>&1 || true
+            done < <(mutmut results | awk -v wanted="$status" '$2 == wanted { sub(/:$/, "", $1); print $1 }')
+          done
           echo "$rc" > ../reports/s19/mutmut-exit-code.txt
           echo "S19 mutation scope: $SCOPE"
           exit "$rc"
