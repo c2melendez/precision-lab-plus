@@ -66,3 +66,11 @@ El workflow ejecuta `tests/test_parsing.py`, `tests/test_evaluate.py`, `tests/te
 - SG28 sigue REVIEW_REQUIRED; las pruebas de integración distribuida que dependan de su contrato no deben adelantarse.
 - No se lanzaron Actions ni se modificó código de producto en la elaboración de este plan.
 - Certificación global permanece OPEN; PR #29 permanece abierto.
+
+
+## Actualización de ejecución r292 (2026-10-24)
+
+- El filtro mutmut fue corregido en `561547252456b30124f4f7a1db06347ee0731079` y la campaña focalizada sí terminó: [S19 run 40098526609](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526609), 1,666 mutantes, 801 killed, 863 survived, 2 timeout.
+- El resultado confirma ejecución del alcance focalizado, pero no aceptación: sobrevivientes siguen siendo significativos y el denominador no es comparable directamente con el baseline histórico de 1,028. S19 permanece BLOCKED; no lanzar la campaña completa.
+- CI 40098526446, cumulative 40098526501 y Playwright 40098526513 SUCCESS en el mismo SHA.
+- S18 40098526464 fue cancelado por shutdown del runner durante `qa/s18/run_differential.py`; tratar como infraestructura. Próxima acción es diagnosticar/restablecer S18 y repetir solo ese gate una vez.
