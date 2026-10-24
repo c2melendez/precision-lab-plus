@@ -101,7 +101,7 @@ jobs:
             docs_only=true
             for path in "${changed_paths[@]}"; do
               case "$path" in
-                README.md|qa/certification/README.md|qa/certification/CURRENT_STATE.md|qa/certification/EXECUTION_LOG.md|qa/certification/CONTINUITY_NEXT_ACTION.json|qa/certification/EXECUTION_LOG_AS229_SECTION_A.md|qa/certification/ALGEBRA229_PREPARATION.md|qa/certification/ROADMAP_CONTINUITY.md|qa/certification/CONTINUATION_PROMPT.md|qa/certification/EDCX_B6_CHANNEL_AUDIT.md|qa/certification/EDCX_B6_ROW_CONTRACT_DRAFT.md|qa/certification/EDCX_B6_HTTP_CONTRACT_FINDINGS.md|qa/certification/EDCX_B6_ADAPTER_ORACLE_PLAN.md|qa/certification/S19_BACKEND_MUTATION_REVIEW_R288.md|qa/certification/S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md|qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md)
+                README.md|qa/certification/README.md|qa/certification/continuity.json|qa/certification/CURRENT_STATE.md|qa/certification/EXECUTION_LOG.md|qa/certification/CONTINUITY_NEXT_ACTION.json|qa/certification/EXECUTION_LOG_AS229_SECTION_A.md|qa/certification/ALGEBRA229_PREPARATION.md|qa/certification/ROADMAP_CONTINUITY.md|qa/certification/CONTINUATION_PROMPT.md|qa/certification/EDCX_B6_CHANNEL_AUDIT.md|qa/certification/EDCX_B6_ROW_CONTRACT_DRAFT.md|qa/certification/EDCX_B6_HTTP_CONTRACT_FINDINGS.md|qa/certification/EDCX_B6_ADAPTER_ORACLE_PLAN.md|qa/certification/S19_BACKEND_MUTATION_REVIEW_R288.md|qa/certification/S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md|qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md)
                   ;;
                 *)
                   docs_only=false
