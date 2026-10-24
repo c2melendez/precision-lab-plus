@@ -1,3 +1,28 @@
+## 2026-10-24 UTC — r286: brecha MathResponse corregida; gates de cierre en WAIT
+
+**HEAD técnico verificado:** `c6df370fd3c5779a56bc29317968b26ea046d4bf` en `qa/syntax-audit-in625-a1`. PR #29 sigue abierto; no se ha mergeado.
+
+### Brecha 4 SG28 — cambio y evidencia
+- El test-first en SHA `492e3ed3` encontró una diferencia real: `x+(` devolvía `PARSE_ERROR` con mensaje limpio en la ruta normal y con prefijo `ParseSecurityError:` en aislamiento.
+- También descubrió que el test HTTP 422 comparaba `duration_ms`, que varía naturalmente. No se ignoró la diferencia semántica: se corrigió el mensaje público y se excluyeron de los snapshots solo `request_id` y `duration_ms`.
+- En `backend/app/routers/evaluate.py`, `_computation_failure_message` elimina solo el prefijo del tipo interno de excepción cuando está presente, manteniendo el texto matemático original. Las pruebas comparan todos los campos de `MathResponse`, HTTP 200 para éxito/error de parser/dominio/sustitución y HTTP 422 para payload malformado, en aislamiento OFF/ON.
+- Gate dedicado [40069343572](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069343572): **SUCCESS**, 70 passed, 1 warning, job ejecutado en este SHA.
+- S25 [40069346241](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069346241): **SUCCESS** exacto-en-HEAD. No cierra el bloqueo bilateral SECURITY-S25 por sí solo.
+
+### Gates equivalentes que siguen activos
+- Acumulativo [40069346201](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069346201): IN_PROGRESS (backend regresión en curso; frontend build completó SUCCESS).
+- CI [40069346209](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069346209): IN_PROGRESS.
+- H1d [40069346229](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069346229): IN_PROGRESS.
+- No volver a ejecutar esos gates mientras estén activos ni usar los resultados del SHA previo `492e3ed3` como evidencia del HEAD actual.
+
+### Estados y límites
+Global OPEN · H2-SG28-DIST-01..08 BLOCKED · SECURITY-S25 global BLOCKED · SY-P-23 OPEN · SY-X-04-PLUS-HTTP BLOCKED · ALGEBRA229-AS-B-29 ON_HOLD · EDCX-B5 BLOCKED por falta de capacidad/canal. El prototipo SG28 y sus pruebas son de un host/loopback; no demuestran K=1 global ni aceptación multinodo. No activar aislamiento en producción ni desplegar/provisionar coordinador automáticamente. No mergear PR #29.
+
+### Siguiente acción única
+**WAIT:** revisar en sus SHA exactos la conclusión/log de los runs acumulativo `40069346201`, CI `40069346209` y H1d `40069346229`. Una vez reconciliados, preparar el contrato versionado de vigencia de la solicitud lógica, lease/renovación, reloj autoritativo, fail-closed y fencing de ejecución definido por `SG28_INTEGRATION_EXIT_CRITERIA.md`. El documento debe quedar `PROPOSED / REVIEW_REQUIRED`, no aprobado sin revisión. Mantener DIST BLOCKED; no repetir SG28 prototype ni mergear PR #29.
+
+---
+
 ## 2026-10-24 UTC — r285: run SG28 en 83b18dab verificado (harness PASS_SCOPED; DIST sigue BLOCKED)
 
 **HEAD verificado antes de publicar:** `c28ea34721cb596a83f530f157e89ccd2b29a48e` (docs r284). Commit exclusivamente documental: toca solo `.md` y `qa/certification/continuity.json`, rutas excluidas por `paths-ignore` de `playwright.yml`; no lanza E2E.

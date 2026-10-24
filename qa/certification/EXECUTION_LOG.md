@@ -1,3 +1,15 @@
+## 2026-10-24 UTC — r286: contrato MathResponse off/on corregido; sg28-prototype PASS, cierre global pendiente
+
+- HEAD técnico `c6df370fd3c5779a56bc29317968b26ea046d4bf`; rama `qa/syntax-audit-in625-a1`; PR #29 continúa abierto y no se mergea.
+- El test-first en `492e3ed3`, run [40069155348](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069155348), falló en dos comparaciones y permitió aislar la causa: el modo aislado añadía `ParseSecurityError:` al mensaje `PARSE_ERROR`, y el snapshot de HTTP 422 incluía un `duration_ms` no determinista.
+- Corregido en `backend/app/routers/evaluate.py` y `backend/tests/test_in625_sg28_loopback_http.py` en `c6df370fd3c5779a56bc29317968b26ea046d4bf`. Se compara el esquema público completo de MathResponse, igualdad semántica off/on para resultados numéricos/simbólicos y errores de parse/dominio/sustitución, y el cuerpo estable de HTTP 422 (se excluyen solo request_id y duration_ms).
+- SG28 prototype [40069343572](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069343572) SUCCESS exacto-en-HEAD: 70 passed, 1 warning. S25 [40069346241](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069346241) SUCCESS exacto-en-HEAD.
+- Acumulativo [40069346201](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069346201), CI [40069346209](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069346209) y H1d [40069346229](https://github.com/c2melendez/precision-lab-plus/actions/runs/40069346229) seguían IN_PROGRESS al reconciliar; no se duplican.
+- Tras esos gates, siguiente paso documentado: contrato versionado para vigencia de solicitud lógica, presupuesto total, lease/renewal, comportamiento fail-closed, autoridad de reloj, recuperación, fencing aplicado al worker efectivo y mapeo de error HTTP/MathResponse, según `SG28_INTEGRATION_EXIT_CRITERIA.md`. Prepararlo como PROPOSED/REVIEW_REQUIRED, sin afirmar aprobación.
+- Global OPEN. H2-SG28-DIST-01..08 y SECURITY-S25 siguen BLOCKED; loopback de un host no constituye evidencia distribuida. No activar en producción ni mergear PR #29.
+
+---
+
 ## 2026-10-24 UTC — r284: alineación de harness SG28 en Playwright (sin cierre)
 
 - Evidencia previa exacta en `0325fa77`: Playwright [40047564113](https://github.com/c2melendez/precision-lab-plus/actions/runs/40047564113) FAILURE, 11+1 en `in625-h2-sg28-cancel.spec.ts` por `SG28_CI_EVENT_FILE` ausente y timeouts de «Detener cálculo» con aislamiento off. Clasificación harness.

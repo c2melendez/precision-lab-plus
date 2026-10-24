@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 285,
+  "revision": 286,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -47,9 +47,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-SG28-CONTRACT-MATHRESPONSE-R285",
-    "status": "READY",
-    "action": "Cerrar la brecha 4 del contrato SG28: comparar respuestas MathResponse completas y status HTTP de exito/error contra /api/v1/evaluate con SG28_EVALUATE_ISOLATION=1, test-first en backend. Despues ejecutar gate sg28-prototype y H1d en el SHA tecnico. No repetir el run 40065789096 y no declarar H2-SG28-DIST PASS."
+    "id": "PLUS-WAIT-SG28-MATHRESPONSE-R286",
+    "status": "WAIT",
+    "action": "Esperar e inspeccionar los resultados exactos en SHA c6df370fd3c5779a56bc29317968b26ea046d4bf: cumulative run 40069346201, CI run 40069346209 y H1d run 40069346229. El gate específico sg28-prototype 40069343572 ya pasó con 70 pruebas; S25 40069346241 también pasó, pero no cerrar SG28/DIST ni SECURITY-S25 global. No relanzar ni cambiar código mientras estas corridas equivalentes estén activas. Tras reconciliarlas, preparar contrato versionado de vigencia de solicitud lógica/lease/fencing según SG28_INTEGRATION_EXIT_CRITERIA.md; marcarlo PROPOSED/REVIEW_REQUIRED, no aprobado, hasta revisión. No mergear PR #29."
   },
   "blockers": [
     {
@@ -79,7 +79,7 @@
       "detail": "Lugares geométricos VC-LG-01..25: canal vacío y sin endpoint de producto."
     }
   ],
-  "ledger_note": "r285: run Playwright 40065789096 @83b18dab verificado en log: general 627 passed y SG28 21 passed (desktop/tablet/movil); general_exit=0 sg28_exit=0. Harness validado (PASS_SCOPED de harness). SG28/DIST y S25 siguen BLOCKED. Siguiente: brecha de contrato MathResponse.",
+  "ledger_note": "r286: brecha MathResponse implementada en c6df370. Test-first run 40069155348 falló con diferencia real en prefijo ParseSecurityError y comparación de duration_ms; se corrigió normalizando el mensaje público y excluyendo solo request_id/duration_ms en snapshots estables. SG28 prototype 40069343572 SUCCESS: 70 passed; S25 40069346241 SUCCESS. Cumulative 40069346201, CI 40069346209 y H1d 40069346229 siguen IN_PROGRESS en el SHA exacto. Global OPEN; H2-SG28-DIST y SECURITY-S25 no se cierran. PR #29 no mergeado.",
   "documentary_closure_r207": {
     "status": "VERIFIED",
     "repository_head_sha": "bcfe2314ede6fc80b6ba78cd3c2b9c07e9715dd6",
@@ -2928,18 +2928,26 @@
   "latest_reconciliation": {
     "checked_at": "2026-10-24",
     "branch": "qa/syntax-audit-in625-a1",
-    "current_head_sha": "a174806836cf1e28666e004be36b76f49c43e0b9",
+    "current_head_sha": "c6df370fd3c5779a56bc29317968b26ea046d4bf",
     "open_pull_request": 29,
-    "pull_request_head_sha": "a174806836cf1e28666e004be36b76f49c43e0b9",
+    "pull_request_head_sha": "c6df370fd3c5779a56bc29317968b26ea046d4bf",
     "pull_request_base_sha": "7aa493e64167886a424dce21f183e90345d5b272",
     "pull_request_mergeable": true,
     "pull_request_mergeable_state": "unstable",
-    "conclusion": "Merge r281 push completado; dirty RESUELTO. Gate acumulativo SUCCESS exacto-en-HEAD (run 40045973765); CI success (40045973713); S25 PLUS SUCCESS (40045973931); syntax-native, H1a-d, S17/S19/S20/S21/S23, backend/frontend success. Fallo activo: Playwright E2E job e2e (40045973784) - 12 fallos SG28 por SG28_CI_EVENT_FILE no configurado en playwright.config.ts (contradiccion con workflow dedicado que si lo exporta) + 2 timeouts Detener-calculo. S18 differential in_progress al momento de la revision.",
+    "exact_head_pull_request_workflow_runs": [
+      40069343572,
+      40069346201,
+      40069346209,
+      40069346229,
+      40069346241
+    ],
+    "conclusion": "La brecha 4 de MathResponse se implementó tras el fallo test-first 40069155348; el fallo mostró diferencia real en mensaje PARSE_ERROR y una aserción 422 que incluía duration_ms. La corrección en c6df370 normaliza el mensaje público de ComputationFailed y compara la respuesta 422 estable. SG28 prototype 40069343572 SUCCESS (70 passed) y S25 40069346241 SUCCESS. Cumulative 40069346201, CI 40069346209 y H1d 40069346229 siguen IN_PROGRESS exactos-en-HEAD. No hay evidencia de cierre de DIST multinodo ni del bloqueo global S25.",
     "valid_evidence_gained": [
-      "cumulative gate success on exact HEAD a1748068",
-      "CI full suite success",
-      "S25 plus security success",
-      "backend+frontend continuity guards success"
+      "Targeted SG28 backend contract on exact current HEAD: 70 passed",
+      "Public MathResponse schema fields checked",
+      "HTTP 200 parity for success/domain/parse/substitution cases checked",
+      "HTTP 422 stable response body checked under isolation off/on",
+      "S25 exact current HEAD success; global S25 still blocked"
     ]
   },
   "sg28_e2e_harness_closure_r285": {
@@ -2978,5 +2986,66 @@
       "contract items 4-6: MathResponse comparison, server disconnect with real HTTP server, quotas/concurrency and heavy ops in main process"
     ],
     "infra_note": "S18 40047563967 runner shutdown: infrastructure, not relaunched"
+  },
+  "sg28_mathresponse_r286": {
+    "status": "IMPLEMENTED_TARGETED_GATE_PASS_CUMULATIVE_CI_H1D_WAIT",
+    "technical_sha": "c6df370fd3c5779a56bc29317968b26ea046d4bf",
+    "test_first_failure": {
+      "sha": "492e3ed3b01d63424c0a7a8d1c3a86d1823f15e6",
+      "run_id": 40069155348,
+      "conclusion": "failure",
+      "findings": [
+        "PARSE_ERROR devolvía el mensaje interno con prefijo ParseSecurityError en aislamiento y sin ese prefijo en modo normal.",
+        "La comparación de respuesta HTTP 422 comparaba duration_ms no determinista."
+      ]
+    },
+    "fix": {
+      "sha": "c6df370fd3c5779a56bc29317968b26ea046d4bf",
+      "files": [
+        "backend/app/routers/evaluate.py",
+        "backend/tests/test_in625_sg28_loopback_http.py"
+      ],
+      "details": [
+        "Los errores ComputationFailed se traducen a mensajes públicos sin el prefijo interno de tipo de excepción, para mantener paridad off/on.",
+        "La prueba HTTP 422 compara cuerpo completo estable, excluyendo solo request_id y duration_ms.",
+        "Se incorporó caso de error de dominio 1/0; la capacidad y el contrato de todos los campos de MathResponse se comprueban."
+      ]
+    },
+    "runs": [
+      {
+        "gate": "sg28-prototype",
+        "run_id": 40069343572,
+        "conclusion": "success",
+        "head_sha": "c6df370fd3c5779a56bc29317968b26ea046d4bf",
+        "tests": "70 passed, 1 warning"
+      },
+      {
+        "gate": "security-s25",
+        "run_id": 40069346241,
+        "conclusion": "success",
+        "head_sha": "c6df370fd3c5779a56bc29317968b26ea046d4bf"
+      },
+      {
+        "gate": "cumulative",
+        "run_id": 40069346201,
+        "status": "in_progress",
+        "head_sha": "c6df370fd3c5779a56bc29317968b26ea046d4bf"
+      },
+      {
+        "gate": "ci",
+        "run_id": 40069346209,
+        "status": "in_progress",
+        "head_sha": "c6df370fd3c5779a56bc29317968b26ea046d4bf"
+      },
+      {
+        "gate": "h1d",
+        "run_id": 40069346229,
+        "status": "in_progress",
+        "head_sha": "c6df370fd3c5779a56bc29317968b26ea046d4bf"
+      }
+    ],
+    "follow_on_after_wait": "DRAFT-SG28-REQUEST-LIFETIME-CONTRACT",
+    "global_certification": "OPEN",
+    "distributed_acceptance": "H2-SG28-DIST-01..08 BLOCKED; this evidence is single-host/loopback and does not qualify as multinode acceptance."
   }
 }
