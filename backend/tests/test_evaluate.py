@@ -778,3 +778,37 @@ def test_render_reports_missing_input_latex_when_source_cannot_be_reparsed():
     presentation = _render_fixture(sympy.Integer(5), source=".__bad__")
     assert presentation["input_latex"] is None
     assert presentation["result_text"] == "5"
+
+
+# S19 targeted coverage r300 - remaining reciprocal-trig and request logging
+@pytest.mark.parametrize(
+    "expr,expected",
+    [
+        (sympy.sec(sympy.pi / 3), "2"),
+        (sympy.cot(sympy.pi / 4), "1"),
+    ],
+)
+def test_render_simplifies_each_reciprocal_trigger(expr, expected):
+    presentation = _render_fixture(expr)
+    assert presentation["result_text"] == expected
+    assert presentation["result_latex"] == expected
+
+
+def test_evaluate_impl_logs_request_id_and_input_text(monkeypatch):
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "0")
+    calls = []
+
+    def _record(*args, **kwargs):
+        calls.append((args, kwargs))
+
+    monkeypatch.setattr(evaluate_router, "log_request_event", _record)
+    monkeypatch.setattr(
+        evaluate_service, "evaluate", lambda *args, **kwargs: _fixture_result()
+    )
+
+    response = _run_impl(EvaluateRequest(expression="7+11"))
+
+    assert response.success is True
+    assert calls == [
+        (("s19-evaluate-impl", "evaluate_request"), {"input_text": "7+11"})
+    ]

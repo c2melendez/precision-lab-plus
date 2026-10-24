@@ -616,3 +616,184 @@ def test_permutation_alias_accepts_explicit_positive_signs():
 def test_inequality_tree_resolves_euler_constant_on_each_side():
     assert solve_service.parsing.parse_inequality_tree("e<x").lhs == sympy.E
     assert solve_service.parsing.parse_inequality_tree("x<e").rhs == sympy.E
+
+
+# S19 targeted coverage r300 - exact step contract of real-domain helpers
+def test_absolute_value_steps_zero_radius_is_a_single_root_step():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x - 1), 0, evaluate=False)
+    steps, solutions = solve_service._absolute_value_steps(equation, x)
+    assert solutions == [sympy.Integer(1)]
+    assert steps[0].index == 0
+    assert steps[0].latex_before == sympy.latex(equation)
+    assert steps[0].latex_after == sympy.latex(sympy.Eq(x, sympy.Integer(1)))
+    assert steps[0].description == "Si b = 0, |x-a| solo vale cero en x = a."
+
+
+def test_absolute_value_steps_positive_radius_orders_and_formats_both_roots():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x - 1), 2, evaluate=False)
+    steps, solutions = solve_service._absolute_value_steps(equation, x)
+    assert solutions == [sympy.Integer(3), sympy.Integer(-1)]
+    assert steps[0].index == 0
+    assert steps[0].latex_before == sympy.latex(equation)
+    assert steps[0].latex_after == r"x = 3,\quad x = -1"
+
+
+def test_absolute_value_steps_negative_radius_reports_the_exact_reason():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x - 1), -2, evaluate=False)
+    steps, solutions = solve_service._absolute_value_steps(equation, x)
+    assert solutions == []
+    assert steps[0].description == (
+        "El valor absoluto siempre es no negativo; como b < 0, "
+        "no existe solución real."
+    )
+
+
+def test_absolute_value_equidistance_distinct_centers_preserve_step_contract():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x - 1), sympy.Abs(x - 5), evaluate=False)
+    steps, solutions = solve_service._absolute_value_equidistance_steps(equation, x)
+    assert solutions == [sympy.Integer(3)]
+    assert steps[0].index == 0
+    assert steps[0].latex_before == sympy.latex(equation)
+    assert steps[0].latex_after == sympy.latex(sympy.Eq(x, sympy.Integer(3)))
+
+
+def test_absolute_value_case_solver_preserves_full_three_region_contract():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(
+        sympy.Abs(x) + sympy.Abs(x - 2) + sympy.Abs(x - 4), 6, evaluate=False
+    )
+    result = solve_service._absolute_value_cases_result(equation, x, [])
+    assert result is not None
+    assert [solution.text for solution in result.solutions] == ["0", "4"]
+    assert result.steps[0].index == 0
+    assert result.steps[0].latex_before == sympy.latex(equation)
+    assert result.steps[0].latex_after == r"x = 0,\quad x = 4"
+    assert result.steps[0].description == (
+        "En x < 0: x = 0 no pertenece al tramo; se descarta (raíz extraña). "
+        "En 0 ≤ x < 2: x = 0, pertenece al tramo y se acepta. "
+        "En 2 ≤ x < 4: x = 4 no pertenece al tramo; se descarta (raíz extraña). "
+        "En x ≥ 4: x = 4, pertenece al tramo y se acepta."
+    )
+
+
+def test_absolute_value_case_solver_contradiction_preserves_full_contract():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x) + sympy.Abs(x - 2), 1, evaluate=False)
+    result = solve_service._absolute_value_cases_result(equation, x, [])
+    assert result is not None
+    assert result.steps[0].index == 0
+    assert result.steps[0].latex_before == sympy.latex(equation)
+    assert result.steps[0].description == (
+        "En x < 0: x = 1/2 no pertenece al tramo; se descarta (raíz extraña). "
+        "En 0 ≤ x < 2 la ecuación queda 1 = 0: sin solución. "
+        "En x ≥ 2: x = 3/2 no pertenece al tramo; se descarta (raíz extraña)."
+    )
+
+
+def test_rational_domain_identity_preserves_full_step_contract():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree("x/x=1", allow_equation=True)
+    result = solve_service._rational_domain_result(equation, x, [sympy.Integer(0)], [])
+    assert result is not None
+    assert result.steps[0].index == 0
+    assert result.steps[0].latex_before == sympy.latex(equation)
+    assert result.steps[0].latex_after == r"x \neq 0"
+    assert result.steps[0].description == (
+        "Restricción de dominio original: x≠0. La ecuación se cumple para toda x "
+        "del dominio; el punto excluido no pertenece al conjunto solución."
+    )
+
+
+def test_rational_domain_constant_numerator_preserves_full_step_contract():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree("1/x=0", allow_equation=True)
+    result = solve_service._rational_domain_result(equation, x, [sympy.Integer(0)], [])
+    assert result is not None
+    assert result.steps[0].index == 0
+    assert result.steps[0].latex_before == sympy.latex(equation)
+    assert result.steps[0].latex_after == r"x \neq 0"
+    assert result.steps[0].description == (
+        "Restricción de dominio original: x≠0. Al llevar todo a un denominador común "
+        "el numerador es la constante no nula 1; no existe solución."
+    )
+
+
+def test_rational_domain_discarded_root_reports_exact_step():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "((x-1)**2*(x-2))/(x-1)=0", allow_equation=True
+    )
+    result = solve_service._rational_domain_result(equation, x, [sympy.Integer(1)], [])
+    assert result is not None
+    assert result.steps[0].description == (
+        "Restricción de dominio original: x≠1. x = 1 anula el numerador pero "
+        "no pertenece al dominio; se descarta."
+    )
+    assert result.steps[0].latex_after == r"x \neq 1"
+
+
+def test_rational_domain_all_roots_excluded_is_a_contradiction_step():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(x ** 2 - 1, sympy.Integer(0), evaluate=False)
+    result = solve_service._rational_domain_result(
+        equation, x, [sympy.Integer(1), sympy.Integer(-1)], []
+    )
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.CONTRADICTION
+    assert result.solutions == []
+    assert result.steps[0].description == (
+        "Restricción de dominio original: x≠1, x≠-1. x = -1 anula el numerador "
+        "pero no pertenece al dominio; se descarta. x = 1 anula el numerador "
+        "pero no pertenece al dominio; se descarta."
+    )
+    assert result.steps[0].latex_after == r"x \neq 1, x \neq -1"
+
+
+def test_radical_case_solver_no_candidate_preserves_full_step_contract():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.sqrt(x ** 2 + 1), 0, evaluate=False)
+    result = solve_service._radical_cases_result(equation, x, [])
+    assert result is not None
+    assert result.steps[0].index == 0
+    assert result.steps[0].latex_before == sympy.latex(equation)
+    assert result.steps[0].latex_after == r"\varnothing"
+
+
+def test_radical_case_solver_extraneous_root_preserves_full_step_contract():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.sqrt(x), x - 2, evaluate=False)
+    result = solve_service._radical_cases_result(equation, x, [])
+    assert result is not None
+    assert [solution.text for solution in result.solutions] == ["4"]
+    assert result.steps[0].index == 0
+    assert result.steps[0].latex_before == sympy.latex(equation)
+    assert result.steps[0].latex_after == r"x = 4"
+    assert result.steps[0].description == (
+        "Candidato x = 1: no satisface la ecuación original; se descarta "
+        "(raíz extraña). Candidato x = 4: verifica la ecuación original."
+    )
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("P(0,0)", (0, 0)),
+        ("P(1,1)", (1, 1)),
+        ("P(170,170)", (170, 170)),
+        ("P(170,0)", (170, 0)),
+    ],
+)
+def test_permutation_alias_accepts_inclusive_boundaries(text, expected):
+    assert solve_service.parsing.permutation_alias_args(text) == expected
+
+
+@pytest.mark.parametrize(
+    "text", ["P(1,2)", "P(0,1)", "P(171,171)", "P(171,0)", "P(-1,0)"]
+)
+def test_permutation_alias_rejects_out_of_range_boundaries(text):
+    with pytest.raises(solve_service.parsing.ParseSecurityError):
+        solve_service.parsing.permutation_alias_args(text)
