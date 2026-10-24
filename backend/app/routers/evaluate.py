@@ -133,6 +133,13 @@ def _duration_ms(request: Request) -> float:
     return (time.perf_counter() - request.state.start_time) * 1000
 
 
+def _computation_failure_message(exc: ComputationFailed) -> str:
+    """Return child error text without type prefix to preserve public API parity."""
+    message = str(exc)
+    prefix = f"{exc.error_type}: " if exc.error_type else ""
+    return message[len(prefix):] if prefix and message.startswith(prefix) else message
+
+
 def _error(request: Request, error_code: ErrorCode, message: str) -> MathResponse:
     return MathResponse(
         success=False,
@@ -177,7 +184,7 @@ async def _evaluate_impl(payload: EvaluateRequest, request: Request, *, admissio
             "OverflowError": ErrorCode.DOMAIN_ERROR,
         }
         code = child_error_codes.get(exc.error_type, ErrorCode.INTERNAL_ERROR)
-        return _error(request, code, str(exc))
+        return _error(request, code, _computation_failure_message(exc))
     except ComputationTimedOut:
         return _error(request, ErrorCode.TIMEOUT, "El cálculo excedió el tiempo permitido.")
     except ComputationCancelled:
@@ -212,7 +219,7 @@ async def _evaluate_impl(payload: EvaluateRequest, request: Request, *, admissio
     except ComputationCancelled:
         return _error(request, ErrorCode.TIMEOUT, "La presentación fue interrumpida.")
     except ComputationFailed as exc:
-        return _error(request, ErrorCode.COMPLEXITY_LIMIT if exc.error_type == "MemoryError" else ErrorCode.INTERNAL_ERROR, str(exc))
+        return _error(request, ErrorCode.COMPLEXITY_LIMIT if exc.error_type == "MemoryError" else ErrorCode.INTERNAL_ERROR, _computation_failure_message(exc))
 
     return MathResponse(
         success=True,

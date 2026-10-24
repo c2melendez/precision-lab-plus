@@ -207,6 +207,7 @@ def test_public_evaluate_isolation_matches_complete_mathresponse_and_http_status
         ("numeric success", {"expression": "2+3"}, True),
         ("symbolic success", {"expression": "x+x"}, True),
         ("parse error", {"expression": "x+("}, False),
+        ("domain error", {"expression": "1/0"}, False),
         (
             "substitution validation error",
             {"expression": "x", "substitutions": {"x": "y+1"}},
@@ -260,10 +261,17 @@ def test_public_evaluate_request_validation_remains_http_422_with_or_without_iso
                 f"SG28_EVALUATE_ISOLATION={enabled}: expected HTTP 422, "
                 f"got {response.status_code}: {response.text}"
             )
-            responses.append(response.json())
+            body = response.json()
+            assert set(body) == _MATHRESPONSE_PUBLIC_FIELDS, (
+                f"Malformed request returned an incomplete MathResponse: {set(body)}"
+            )
+            responses.append({
+                key: value for key, value in body.items()
+                if key not in {"request_id", "duration_ms"}
+            })
 
     assert responses[0] == responses[1], (
-        "Malformed request HTTP errors must not depend on the isolation flag"
+        "Malformed request HTTP error bodies must not depend on the isolation flag"
     )
 
 
