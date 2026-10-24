@@ -14,6 +14,7 @@ import type { MathfieldElement } from "mathlive";
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
 import { useUIStore } from "../store/useUIStore";
+import { validateExponentSource } from "./exponentSourceValidation";
 import { latexToBackendSyntax, NaturalMathField } from "./NaturalMathField";
 import { SimpleKeyboard } from "./SimpleKeyboard";
 import { ResultPanel } from "./ResultPanel";
@@ -31,6 +32,12 @@ export function SimpleBasicMode() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    try {
+      validateExponentSource(latex);
+    } catch (error) {
+      setValidationError(error instanceof Error ? error.message : "Exponente inválido.");
+      return;
+    }
     const trimmed = latexToBackendSyntax(latex);
     if (!trimmed) {
       setValidationError("La expresión no puede estar vacía.");

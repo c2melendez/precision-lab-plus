@@ -85,14 +85,28 @@ def _error_response(
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError
 ) -> JSONResponse:
+    errors = exc.errors()
+    # Validation details can include the full rejected payload. Keep logs
+    # bounded and respect the existing no-cleartext-input logging contract.
     get_logger().warning(
-        f"request_id={_request_id(request)} event=validation_error errors={exc.errors()}"
+        f"request_id={_request_id(request)} event=validation_error "
+        f"error_types={[error.get('type') for error in errors]}"
     )
+    message = "El payload enviado no cumple el schema esperado."
+    for error in errors:
+        limit = error.get("ctx", {}).get("max_length")
+        if error.get("type") == "string_too_long" and isinstance(limit, int):
+            message = f"Entrada demasiado larga: el máximo permitido es de {limit} caracteres."
+            break
     return _error_response(
         request,
         ErrorCode.VALIDATION_ERROR,
-        status.HTTP_422_UNPROCESSABLE_CONTENT,
-        "El payload enviado no cumple el schema esperado.",
+        # HTTP_422_UNPROCESSABLE_CONTENT exists only on starlette>=0.48;
+        # the deployed pin resolves an older starlette where the canonical
+        # name is HTTP_422_UNPROCESSABLE_ENTITY (same numeric code 422).
+        getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", None)
+        or status.HTTP_422_UNPROCESSABLE_ENTITY,
+        message,
     )
 
 

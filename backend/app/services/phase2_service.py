@@ -12,7 +12,7 @@ módulo) — responden `UNSUPPORTED_IN_PHASE_1` directamente desde el router
 """
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
 
 import sympy
 
@@ -118,11 +118,125 @@ def _format_solution_tuple(
     return EquationSolution(text=assignments_text, latex=assignments_latex, is_complex=is_complex)
 
 
+def _linear_rows(
+    parsed_equations: List[sympy.Eq], var_symbols: List[sympy.Symbol]
+) -> List[Tuple[List[sympy.Expr], sympy.Expr]]:
+    """Devuelve (coeficientes, término independiente) de cada ecuación lineal."""
+    rows: List[Tuple[List[sympy.Expr], sympy.Expr]] = []
+    for equation in parsed_equations:
+        expression = sympy.expand(equation.lhs - equation.rhs)
+        poly = sympy.Poly(expression, *var_symbols)
+        coefficients = [poly.coeff_monomial(variable) for variable in var_symbols]
+        constant = expression.subs({variable: 0 for variable in var_symbols})
+        rows.append((coefficients, sympy.simplify(constant)))
+    return rows
+
+
+def _solve_linear_parameter_2x2(
+    parsed_equations: List[sympy.Eq],
+    var_symbols: List[sympy.Symbol],
+    parameter: sympy.Symbol,
+) -> SolveSystemResult:
+    """Análisis por casos para un sistema 2×2 con UN parámetro externo.
+
+    El caso genérico se resuelve por Cramer y cada raíz del determinante se
+    sustituye para resolver el sistema numérico resultante. Es el alcance
+    mínimo necesario para MV-D-13; no se simula un análisis por casos para
+    cualquier tamaño.
+    """
+    rows = _linear_rows(parsed_equations, var_symbols)
+    a00, a01 = rows[0][0]
+    a10, a11 = rows[1][0]
+    b0 = sympy.simplify(-rows[0][1])
+    b1 = sympy.simplify(-rows[1][1])
+    determinant = sympy.factor(sympy.simplify(a00 * a11 - a01 * a10))
+    if determinant == 0:
+        raise InconsistentVariablesError(
+            "El determinante es idénticamente nulo; no hay un caso genérico que separar."
+        )
+
+    roots = [
+        sympy.simplify(root)
+        for root in sympy.solve(sympy.Eq(determinant, 0), parameter)
+    ]
+
+    solutions: List[EquationSolution] = []
+    if roots:
+        generic_condition_text = " y ".join(f"{parameter}!={root}" for root in roots)
+        generic_condition_latex = r" \wedge ".join(
+            f"{sympy.latex(parameter)} \\neq {sympy.latex(root)}" for root in roots
+        )
+    else:
+        generic_condition_text = ""
+        generic_condition_latex = ""
+
+    generic_x = sympy.simplify((b0 * a11 - a01 * b1) / determinant)
+    generic_y = sympy.simplify((a00 * b1 - b0 * a10) / determinant)
+    generic = _format_solution_tuple(var_symbols, (generic_x, generic_y))
+    generic_text = (
+        f"{generic_condition_text}: {generic.text}"
+        if generic_condition_text
+        else generic.text
+    )
+    generic_latex = (
+        f"{generic_condition_latex}:\\ {generic.latex}"
+        if generic_condition_latex
+        else generic.latex
+    )
+    solutions.append(
+        EquationSolution(text=generic_text, latex=generic_latex, is_complex=generic.is_complex)
+    )
+
+    for root in roots:
+        branch_equations = [
+            equation.subs({parameter: root}) for equation in parsed_equations
+        ]
+        branch_set = sympy.solve(branch_equations, var_symbols, dict=True)
+        condition_text = f"{parameter}={root}"
+        condition_latex = f"{sympy.latex(parameter)} = {sympy.latex(root)}"
+        if not branch_set:
+            solutions.append(
+                EquationSolution(
+                    text=f"{condition_text}: sin solución (sistema incompatible)",
+                    latex=f"{condition_latex}:\\ \\text{{sin solución (sistema incompatible)}}",
+                )
+            )
+            continue
+        for solution in branch_set[:MAX_SYSTEM_SOLUTIONS]:
+            values = tuple(solution.get(variable, variable) for variable in var_symbols)
+            formatted = _format_solution_tuple(var_symbols, values)
+            is_infinite = any(value.free_symbols for value in values)
+            suffix_text = " (infinitas soluciones)" if is_infinite else ""
+            suffix_latex = r"\ \text{(infinitas soluciones)}" if is_infinite else ""
+            solutions.append(
+                EquationSolution(
+                    text=f"{condition_text}: {formatted.text}{suffix_text}",
+                    latex=f"{condition_latex}:\\ {formatted.latex}{suffix_latex}",
+                    is_complex=formatted.is_complex,
+                )
+            )
+
+    return SolveSystemResult(solutions, True, [])
+
+
 @dataclass
 class InequalityResult:
     solution_set: sympy.Set
     warnings: List[str]
 
+
+
+def compute_chained_inequality(
+    inequalities: List[sympy.core.relational.Relational], variable: str
+) -> InequalityResult:
+    """Intersección de dos comparaciones encadenadas, p. ej. 3<x<7."""
+    var_symbol = _validate_variable(variable)
+    reduced = sympy.reduce_inequalities(inequalities, var_symbol)
+    if isinstance(reduced, sympy.logic.boolalg.BooleanFalse):
+        return InequalityResult(sympy.S.EmptySet, [])
+    if isinstance(reduced, sympy.logic.boolalg.BooleanTrue):
+        return InequalityResult(sympy.S.Reals, [])
+    return InequalityResult(reduced.as_set(), [])
 
 def compute_inequality(inequality: sympy.core.relational.Relational, variable: str) -> InequalityResult:
     """`/inequality` (spec, `InequalityRequest`). Usa
@@ -263,11 +377,6 @@ def compute_solve_system(equations: List[str], variables: List[str]) -> SolveSys
     infinitas soluciones paramétricas). Cualquier ecuación no lineal en las
     variables pedidas -> `sympy.solve` (puede devolver 0, 1 o varias
     tuplas solución)."""
-    if len(equations) != len(variables):
-        raise InconsistentVariablesError(
-            "El sistema necesita el mismo número de ecuaciones que de variables a resolver."
-        )
-
     var_symbols = [_validate_variable(v) for v in variables]
     parsed_equations = [
         parsing.parse_expression_tree(eq, allow_equation=True) for eq in equations
@@ -281,17 +390,40 @@ def compute_solve_system(equations: List[str], variables: List[str]) -> SolveSys
         return poly is not None and poly.total_degree() <= 1
 
     is_linear = all(_is_linear(eq) for eq in parsed_equations)
+    external_symbols = set().union(*(eq.free_symbols for eq in parsed_equations)) - set(
+        var_symbols
+    )
+
+    if is_linear and external_symbols:
+        if (
+            len(external_symbols) == 1
+            and len(var_symbols) == 2
+            and len(parsed_equations) == 2
+        ):
+            return _solve_linear_parameter_2x2(
+                parsed_equations, var_symbols, next(iter(external_symbols))
+            )
+        names = ", ".join(sorted(str(symbol) for symbol in external_symbols))
+        raise InconsistentVariablesError(
+            "Los sistemas con parámetros solo están soportados en forma 2×2 con "
+            f"un parámetro; se encontraron: {names}."
+        )
 
     if is_linear:
-        solution_set = sympy.linsolve(parsed_equations, var_symbols)
-        if not solution_set:
+        # `sympy.solve` es el camino robusto para sistemas lineales exactos:
+        # además de única/paramétrica/incompatible, evita un fallo conocido de
+        # `linsolve` con coeficientes racionales (MV-D-12). Devuelve un dict
+        # por solución; las variables libres ausentes se reinsertan como
+        # ellas mismas para conservar la parametrización explícita.
+        raw_linear = sympy.solve(parsed_equations, var_symbols, dict=True)
+        if not raw_linear:
             return SolveSystemResult([], False, ["El sistema no tiene solución (inconsistente)."])
         solutions = [
-            _format_solution_tuple(var_symbols, tuple(values))
-            for values in list(solution_set)[:MAX_SYSTEM_SOLUTIONS]
+            _format_solution_tuple(
+                var_symbols, tuple(solution.get(variable, variable) for variable in var_symbols)
+            )
+            for solution in raw_linear[:MAX_SYSTEM_SOLUTIONS]
         ]
-        # linsolve deja cualquier parámetro libre (tau_i) visible directamente
-        # en el texto/latex de la solución cuando el sistema es indeterminado.
         return SolveSystemResult(solutions, True, [])
 
     raw_solutions = sympy.solve(parsed_equations, var_symbols, dict=True)

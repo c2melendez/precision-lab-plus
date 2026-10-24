@@ -19,6 +19,7 @@ class OperationType(str, Enum):
     EVALUATE = "evaluate"
     SIMPLIFY = "simplify"
     FACTOR = "factor"
+    PARTIAL_FRACTIONS = "partial_fractions"
     EXPAND = "expand"
     SOLVE = "solve"
     DERIVATIVE = "derivative"
@@ -26,6 +27,9 @@ class OperationType(str, Enum):
     MATRIX_OPERATION = "matrix_operation"
     MATRIX_DETERMINANT = "matrix_determinant"
     MATRIX_INVERSE = "matrix_inverse"
+    MATRIX_ADJUGATE = "matrix_adjugate"
+    MATRIX_COFACTOR = "matrix_cofactor"
+    MATRIX_SOLVE_EQUATION = "matrix_solve_equation"
     GRAPH_2D = "graph_2d"
     SOLVE_SYSTEM = "solve_system"
     INEQUALITY = "inequality"
@@ -39,48 +43,26 @@ class OperationType(str, Enum):
     DERIVATIVE_IMPLICIT = "derivative_implicit"
     MATRIX_TRANSPOSE = "matrix_transpose"
     MATRIX_POWER = "matrix_power"
-    # Fase C (spec UX estilo ClassCalc, sección 4) — agregadas sobre las
-    # que ya traía la spec v9 original.
     MATRIX_REF = "matrix_ref"
     MATRIX_RREF = "matrix_rref"
-    # P5 (spec v2 §6): dot/cross usan MATRIX_OPERATION (van por
-    # /matrix/operations, igual que kronecker). norm es de una sola
-    # matriz, necesita su propio valor de operación (igual que
-    # transpose/power).
+    MATRIX_LU = "matrix_lu"
+    MATRIX_GRAM_SCHMIDT = "matrix_gram_schmidt"
     MATRIX_NORM = "matrix_norm"
-    # Módulo L0 (spec_graficacion_matrices_estadistica_unidades.md, sección
-    # 5): trace es escalar de una sola matriz (mismo patrón que norm);
-    # rank también es escalar de una sola matriz, reutiliza el cálculo ya
-    # interno de Matrix.rank() pero como operación visible propia.
     MATRIX_TRACE = "matrix_trace"
     MATRIX_RANK = "matrix_rank"
-    # Módulo M1 (spec_graficacion_matrices_estadistica_unidades.md, sección 6.2).
+    MATRIX_NULLSPACE = "matrix_nullspace"
+    MATRIX_COLUMNSPACE = "matrix_columnspace"
     STATISTICS_CORRELATION = "statistics_correlation"
-    # P6 (spec v2 §7)
     STATISTICS_DESCRIPTIVE = "statistics_descriptive"
     STATISTICS_COMBINATORICS = "statistics_combinatorics"
     STATISTICS_BINOMIAL = "statistics_binomial"
     STATISTICS_NORMAL = "statistics_normal"
-    # Módulo N0 (spec_graficacion_matrices_estadistica_unidades.md, sección 7).
     STATISTICS_POISSON = "statistics_poisson"
     STATISTICS_UNIFORM = "statistics_uniform"
     STATISTICS_EXPONENTIAL = "statistics_exponential"
-    # Pendiente #5 (revisión post-Módulo D del track de motor matemático,
-    # pedido por el usuario): sistema de inecuaciones lineales,
-    # equivalente Full/SymPy del ya construido en Lite.
     INEQUALITY_SYSTEM = "inequality_system"
-    # Módulo I0 (Fase I, spec_graficacion_matrices_estadistica_unidades.md):
-    # gráfica polar r=f(θ) — reutiliza ResultType.GRAPH y GraphData, mismo
-    # patrón que GRAPH_PARAMETRIC (convierte a x,y antes de graficar, sin
-    # tipo de Trace nuevo).
     GRAPH_POLAR = "graph_polar"
-    # Fase E (spec_edo_complejos_tooltips.md §2, §6): ecuaciones
-    # diferenciales ordinarias — nuevo endpoint dedicado /ode, extensión
-    # aditiva y retrocompatible (regla de proyecto, cabecera de este
-    # archivo).
     ODE = "ode"
-    # Fase F (spec_edo_complejos_tooltips.md §3.2, Módulo F1): variable
-    # compleja -- residuos y singularidades. Aditivo, mismo criterio que ODE.
     COMPLEX_RESIDUE = "complex_residue"
     COMPLEX_SINGULARITIES = "complex_singularities"
 
@@ -89,14 +71,7 @@ class MatrixOpKind(str, Enum):
     ADD = "add"
     SUBTRACT = "subtract"
     MULTIPLY = "multiply"
-    # Fase C: producto de Kronecker, va en /matrix/operations junto con
-    # add/subtract/multiply porque también necesita dos matrices.
     KRONECKER = "kronecker"
-    # P5 (spec v2 §6): dot/cross también necesitan dos matrices (vectores,
-    # en realidad — 1xn o nx1), van en /matrix/operations por el mismo
-    # motivo que KRONECKER. `norm` NO va aquí: es de una sola matriz,
-    # sigue el patrón de transpose/determinant (su propio endpoint
-    # dedicado /matrix/norm, ver routers/matrices.py).
     DOT = "dot"
     CROSS = "cross"
 
@@ -109,40 +84,13 @@ class ResultType(str, Enum):
     GRAPH = "graph"
     IDENTITY = "identity"
     CONTRADICTION = "contradiction"
-    # Pendiente #5: el resultado NO es un valor escalar — es "bounded" /
-    # "unbounded" / "empty" (en result_text) + vértices del polígono
-    # factible (en result_data, como List[List[str]] — reutiliza el tipo
-    # ya existente en MathResponse.result_data en vez de ampliar el
-    # Union, cada vértice es ["x", "y"] como strings).
     INEQUALITY_REGION = "inequality_region"
-    # Fase E: solución de una EDO, "y(x) = ..." — se le da un ResultType
-    # propio (en vez de reusar SCALAR/EQUATION_SOLUTIONS) porque
-    # semánticamente no es ninguno de los dos: no es un escalar y no es
-    # una lista de raíces, es una función. Cambio aditivo.
     ODE_SOLUTION = "ode_solution"
-    # Fase F: residuo (escalar/complejo) y lista de singularidades.
     COMPLEX_RESIDUE = "complex_residue"
     COMPLEX_SINGULARITIES = "complex_singularities"
 
 
 class ErrorCode(str, Enum):
-    """Enum central — el backend NUNCA usa un string de error fuera de esta lista.
-
-    Mapeo error_code -> status HTTP -> disparador (spec, sección 4):
-      PARSE_ERROR            200  entrada no parseable / insegura
-      VALIDATION_ERROR       422  payload Pydantic inválido
-      TIMEOUT                200  operación (o verificación de pasos) excede su presupuesto
-      COMPLEXITY_LIMIT       200  nodos/profundidad/dígitos/exponente/términos excedidos
-      SINGULAR_MATRIX        200  inversa de matriz singular
-      DIMENSION_MISMATCH     200  matriz no cuadrada/rectangular/incompatible
-      DOMAIN_ERROR           200  operación matemáticamente indefinida
-      AMBIGUOUS_VARIABLE     200  solve con >1 símbolo libre sin variable especificada
-      INVALID_VARIABLE       200  variable de gráfica no coincide con la expresión
-      UNSUPPORTED_IN_PHASE_1 200  feature de Fase 2 sin passthrough trivial
-      UNSUPPORTED_OPERATION  200  operación bien formada pero fuera del alcance real del motor (spec_edo_complejos_tooltips.md §2, distinto de UNSUPPORTED_IN_PHASE_1: esto no es "todavía no implementado", es "este caso específico el motor no lo resuelve")
-      INTERNAL_ERROR         500  excepción no esperada / error de red en el cliente
-    """
-
     PARSE_ERROR = "PARSE_ERROR"
     VALIDATION_ERROR = "VALIDATION_ERROR"
     TIMEOUT = "TIMEOUT"
@@ -153,18 +101,10 @@ class ErrorCode(str, Enum):
     AMBIGUOUS_VARIABLE = "AMBIGUOUS_VARIABLE"
     INVALID_VARIABLE = "INVALID_VARIABLE"
     UNSUPPORTED_IN_PHASE_1 = "UNSUPPORTED_IN_PHASE_1"
-    # Fase E (spec_edo_complejos_tooltips.md §2.1: "cualquier EDO fuera de
-    # los tipos cubiertos... devuelve UNSUPPORTED_OPERATION con mensaje
-    # claro"). No existía en este enum -- Lite (types.ts) ya lo tenía.
-    # Adición aditiva y retrocompatible (regla de proyecto, cabecera).
     UNSUPPORTED_OPERATION = "UNSUPPORTED_OPERATION"
     INTERNAL_ERROR = "INTERNAL_ERROR"
 
 
-# error_code -> status HTTP, para uso de exception_handlers.py y de los
-# routers al construir la respuesta. Vive aquí porque es parte del contrato
-# (una sola fuente de verdad para el mapeo), no una decisión de un módulo
-# posterior.
 ERROR_CODE_HTTP_STATUS: Dict[ErrorCode, int] = {
     ErrorCode.PARSE_ERROR: 200,
     ErrorCode.VALIDATION_ERROR: 422,
@@ -197,14 +137,6 @@ class EquationSolution(BaseModel):
 
 
 class DomainCondition(BaseModel):
-    """Restricción matemática que pertenece al dominio de la expresión
-    ORIGINAL, antes de simplificar/factorizar/expandir.
-
-    Es un contrato aditivo: permite que la UI y futuras rutas de
-    graficación conserven huecos y exclusiones aunque la forma resultante
-    ya no los haga visibles (ej. (x**2-1)/(x-1) -> x+1, con x != 1).
-    """
-
     text: str
     latex: str
     variable: Optional[str] = None
@@ -217,22 +149,11 @@ class Trace(BaseModel):
     x: List[float]
     y: List[Optional[float]]
     z: Optional[List[List[float]]] = None
-    # Contrato S26: discontinuidades removibles detectadas desde la
-    # expresión ORIGINAL. Se representan separadas de los samples para
-    # que el hueco sea visible aunque la malla no contenga exactamente
-    # ese valor de x.
     hole_x: List[float] = []
     hole_y: List[float] = []
 
 
 class GraphAnalysis(BaseModel):
-    """Análisis simbólico best-effort de una expresión graficada (dominio,
-    rango, interceptos, extremos locales, inflexión). Cada campo puede
-    quedar en `None`/`[]` si SymPy no pudo resolverlo dentro del
-    presupuesto de tiempo (ver `graph_service._run_with_timeout`) o si no
-    hay un método simbólico aplicable — nunca bloquea la graficación
-    numérica en sí, que sigue funcionando igual sin importar esto."""
-
     domain_text: Optional[str] = None
     domain_latex: Optional[str] = None
     range_text: Optional[str] = None
@@ -250,10 +171,6 @@ class GraphData(BaseModel):
     y_range: Optional[List[float]] = None
     points_truncated: bool = False
     analysis: Optional[List[GraphAnalysis]] = None
-    # Fase F (spec_edo_complejos_tooltips.md §3.4, Módulo F3): "Re"/"Im"
-    # en modo Argand en vez de "x"/"y". Aditivo — None (el default) deja
-    # el comportamiento existente exactamente igual (GraphViewer.tsx
-    # debe tratar None como "x"/"y", nunca como ausencia de etiqueta).
     x_axis_label: Optional[str] = None
     y_axis_label: Optional[str] = None
 
@@ -269,12 +186,11 @@ class MathResponse(BaseModel):
     result_text: Optional[str] = None
     result_approx: Optional[float] = None
     result_data: Optional[Union[List[EquationSolution], List[List[str]]]] = None
+    result_matrices: Optional[Dict[str, List[List[str]]]] = None
     steps: List[Step] = []
     has_detailed_steps: bool
     graph_data: Optional[GraphData] = None
     warnings: List[str] = []
-    # Contrato S26 de resultados contextuales: restricciones heredadas de
-    # la estructura de entrada, no de la forma ya simplificada.
     domain_conditions: List[DomainCondition] = []
     error_code: Optional[ErrorCode] = None
     error_message: Optional[str] = None

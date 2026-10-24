@@ -1097,6 +1097,8 @@ export interface components {
             result_approx?: number | null;
             /** Result Data */
             result_data?: components["schemas"]["EquationSolution"][] | string[][] | null;
+            /** Result Matrices */
+            result_matrices?: { [key: string]: string[][] } | null;
             /**
              * Steps
              * @default []
@@ -1188,7 +1190,7 @@ export interface components {
          * OperationType
          * @enum {string}
          */
-        OperationType: "evaluate" | "simplify" | "factor" | "expand" | "solve" | "derivative" | "integral" | "matrix_operation" | "matrix_determinant" | "matrix_inverse" | "graph_2d" | "solve_system" | "inequality" | "limit" | "series" | "matrix_eigen" | "integral_improper" | "graph_3d" | "graph_parametric" | "derivative_partial" | "derivative_implicit" | "matrix_transpose" | "matrix_power" | "matrix_ref" | "matrix_rref" | "matrix_norm" | "matrix_trace" | "matrix_rank" | "statistics_correlation" | "statistics_descriptive" | "statistics_combinatorics" | "statistics_binomial" | "statistics_normal" | "statistics_poisson" | "statistics_uniform" | "statistics_exponential" | "inequality_system" | "graph_polar" | "ode" | "complex_residue" | "complex_singularities";
+        OperationType: "evaluate" | "simplify" | "factor" | "partial_fractions" | "expand" | "solve" | "derivative" | "integral" | "matrix_operation" | "matrix_determinant" | "matrix_inverse" | "matrix_adjugate" | "matrix_cofactor" | "matrix_solve_equation" | "graph_2d" | "solve_system" | "inequality" | "limit" | "series" | "matrix_eigen" | "integral_improper" | "graph_3d" | "graph_parametric" | "derivative_partial" | "derivative_implicit" | "matrix_transpose" | "matrix_power" | "matrix_ref" | "matrix_rref" | "matrix_lu" | "matrix_gram_schmidt" | "matrix_norm" | "matrix_trace" | "matrix_rank" | "statistics_correlation" | "statistics_descriptive" | "statistics_combinatorics" | "statistics_binomial" | "statistics_normal" | "statistics_poisson" | "statistics_uniform" | "statistics_exponential" | "inequality_system" | "graph_polar" | "ode" | "complex_residue" | "complex_singularities";
         /** PartialDerivativeRequest */
         PartialDerivativeRequest: {
             /** Expression */

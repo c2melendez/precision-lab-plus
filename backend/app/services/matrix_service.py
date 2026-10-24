@@ -42,6 +42,18 @@ _DISALLOWED_CELL_FUNCTION_CLASSES = tuple(
     if isinstance(parsing.ALLOWED_FUNCTIONS[name], type)
 )
 
+# `/matrix/determinant` es la única operación que admite entradas simbólicas
+# (MV-B-16..20): variables libres y trigonométricas elementales. El resto de
+# `/matrix/*` conserva el contrato numérico estricto de la sección 3. La
+# lista es deliberadamente mínima: no se abre el catálogo completo del parser
+# general dentro de una celda.
+_SYMBOLIC_CELL_ALLOWED_FUNCTION_NAMES = {"sqrt", "abs", "sin", "cos", "tan"}
+_SYMBOLIC_CELL_ALLOWED_FUNCTION_CLASSES = tuple(
+    parsing.ALLOWED_FUNCTIONS[name]
+    for name in _SYMBOLIC_CELL_ALLOWED_FUNCTION_NAMES
+    if isinstance(parsing.ALLOWED_FUNCTIONS[name], type)
+)
+
 
 class DimensionMismatchError(ValueError):
     """Dimensiones incompatibles (sección 5) -> `ErrorCode.DIMENSION_MISMATCH`."""
@@ -49,6 +61,13 @@ class DimensionMismatchError(ValueError):
 
 class SingularMatrixError(ValueError):
     """Inversa de matriz singular -> `ErrorCode.SINGULAR_MATRIX`."""
+
+
+class UnsupportedOperationError(ValueError):
+    """Operación fuera de los límites acotados -> `ErrorCode.UNSUPPORTED_OPERATION`."""
+
+
+SYMBOLIC_MATRIX_LIMIT = 4
 
 
 @dataclass
@@ -75,6 +94,15 @@ class MatrixOperationResult:
     warnings: List[str]
 
 
+@dataclass
+class LUDecompositionResult:
+    lower: sympy.Matrix
+    upper: sympy.Matrix
+    steps: List[Step]
+    has_detailed_steps: bool
+    warnings: List[str]
+
+
 def _floats_to_rational(expr: sympy.Expr) -> sympy.Expr:
     """`sympy.Rational` siempre (sección 8.6) — cualquier `Float` que haya
     sobrevivido al parseo (ej. `0.75`, válido por la etapa 4 del parser
@@ -86,25 +114,30 @@ def _floats_to_rational(expr: sympy.Expr) -> sympy.Expr:
     return expr.xreplace(replacements)
 
 
-def _parse_matrix_cell(text: str) -> sympy.Expr:
+def _parse_matrix_cell(text: str, *, allow_symbolic: bool = False) -> sympy.Expr:
     """Parser restringido de celda (sección 3). Reutiliza el parser general
     (mismas garantías de seguridad) y añade las restricciones propias de
-    una celda: sin variables libres, sin funciones fuera de `sqrt`/`abs`.
+    una celda. Con `allow_symbolic=True` (solo determinante) se admiten
+    variables libres y trigonométricas elementales, necesarias para
+    determinantes simbólicos; el resto de funciones sigue rechazado.
     """
     expr = parsing.parse_expression_tree(text, allow_equation=False)
 
-    if expr.free_symbols:
+    if not allow_symbolic and expr.free_symbols:
         free_names = sorted(s.name for s in expr.free_symbols)
         raise parsing.ParseSecurityError(
             f"Celda de matriz inválida: no se permiten variables libres ({free_names})."
         )
 
     for node in sympy.preorder_traversal(expr):
-        if isinstance(node, _DISALLOWED_CELL_FUNCTION_CLASSES):
-            raise parsing.ParseSecurityError(
-                f"Celda de matriz inválida: función no permitida '{type(node).__name__}' "
-                "(solo se permiten sqrt/abs sobre argumentos numéricos puros)."
-            )
+        if not isinstance(node, _DISALLOWED_CELL_FUNCTION_CLASSES):
+            continue
+        if allow_symbolic and isinstance(node, _SYMBOLIC_CELL_ALLOWED_FUNCTION_CLASSES):
+            continue
+        raise parsing.ParseSecurityError(
+            f"Celda de matriz inválida: función no permitida '{type(node).__name__}' "
+            "(solo se permiten sqrt/abs sobre argumentos numéricos puros)."
+        )
 
     # El parser general usa evaluate=False deliberadamente (preserva la
     # estructura de la expresión para otros endpoints) — para una celda de
@@ -116,8 +149,15 @@ def _parse_matrix_cell(text: str) -> sympy.Expr:
     return _floats_to_rational(expr)
 
 
-def parse_matrix(cells: List[List[str]]) -> sympy.Matrix:
-    rows = [[_parse_matrix_cell(cell) for cell in row] for row in cells]
+def parse_matrix(cells: List[List[str]], *, allow_symbolic: bool = False) -> sympy.Matrix:
+    if not cells or all(not row for row in cells):
+        raise parsing.ParseSecurityError("La matriz no puede estar vacía.")
+    if not cells[0] or any(len(row) != len(cells[0]) for row in cells):
+        raise parsing.ParseSecurityError("Todas las filas de la matriz deben tener la misma longitud y al menos una celda.")
+    rows = [
+        [_parse_matrix_cell(cell, allow_symbolic=allow_symbolic) for cell in row]
+        for row in cells
+    ]
     return sympy.Matrix(rows)
 
 
@@ -242,7 +282,7 @@ def transpose(matrix: sympy.Matrix) -> MatrixOperationResult:
     return MatrixOperationResult(matrix.T, [], False, [])
 
 
-MAX_MATRIX_POWER_EXPONENT = 10
+MAX_MATRIX_POWER_EXPONENT = 32
 
 
 def power(matrix: sympy.Matrix, exponent: int) -> MatrixOperationResult:
@@ -400,6 +440,18 @@ def determinant(matrix: sympy.Matrix) -> ScalarStepResult:
 
     reference = sympy.simplify(matrix.det())
 
+    # MV-B-16..20: entradas simbólicas. La eliminación por filas con pivotes
+    # simbólicos no es válida sin supuestos (un pivote podría anularse para
+    # ciertos valores del parámetro), así que se devuelve la verdad directa
+    # de SymPy sin narrativa de pasos — mismo patrón que las matrices >4×4.
+    # `trigsimp` colapsa sin²+cos²; `factor` presenta la forma factorizada
+    # cuando el resultado es polinómico (Vandermonde, autovalores).
+    if any(expr.free_symbols for expr in matrix):
+        value = sympy.simplify(sympy.trigsimp(reference))
+        if value.is_polynomial():
+            value = sympy.factor(value)
+        return ScalarStepResult(value, [], False, [])
+
     if max(matrix.rows, matrix.cols) > MAX_STEP_MATRIX_SIZE:
         return ScalarStepResult(reference, [], False, [])
 
@@ -510,7 +562,22 @@ def inverse(matrix: sympy.Matrix) -> MatrixStepResult:
     if determinant_value == 0:
         raise SingularMatrixError("La matriz es singular (determinante 0); no tiene inversa.")
 
+    symbolic = any(expr.free_symbols or expr.has(sympy.I) for expr in matrix)
+    if symbolic and max(matrix.rows, matrix.cols) > SYMBOLIC_MATRIX_LIMIT:
+        raise UnsupportedOperationError(
+            "La inversa simbólica está limitada a 4×4."
+        )
+
     reference = matrix.inv()
+
+    # MV-C-08/10/11: celdas complejas o simb��licas. La eliminaci��n por
+    # filas con pivotes simb��licos no es v��lida sin supuestos (un pivote
+    # podr��a anularse para ciertos valores); se devuelve la verdad directa
+    # de SymPy, simplificada con trigsimp. Sin pasos detallados, mismo
+    # criterio que el determinante simb��lico.
+    if symbolic:
+        simplified = reference.applyfunc(lambda e: sympy.simplify(sympy.trigsimp(e)))
+        return MatrixStepResult(simplified, [], False, [])
 
     if max(matrix.rows, matrix.cols) > MAX_STEP_MATRIX_SIZE:
         return MatrixStepResult(reference, [], False, [])
@@ -534,6 +601,67 @@ def inverse(matrix: sympy.Matrix) -> MatrixStepResult:
     for index, step in enumerate(steps):
         step.index = index
     return MatrixStepResult(computed_inverse, steps, True, [])
+
+
+def _symbolic_simplify_matrix(matrix: sympy.Matrix) -> sympy.Matrix:
+    return matrix.applyfunc(lambda expr: sympy.simplify(sympy.trigsimp(expr)))
+
+
+def adjugate(matrix: sympy.Matrix) -> MatrixStepResult:
+    """MV-C-14/15: adjunta = transpuesta de la matriz de cofactores."""
+    if matrix.rows != matrix.cols:
+        raise DimensionMismatchError(
+            f"La adjunta requiere una matriz cuadrada; recibida {matrix.shape}."
+        )
+    return MatrixStepResult(_symbolic_simplify_matrix(matrix.adjugate()), [], False, [])
+
+
+def cofactor_matrix(matrix: sympy.Matrix) -> MatrixStepResult:
+    """MV-C-16: matriz de cofactores (la adjunta es su transpuesta)."""
+    if matrix.rows != matrix.cols:
+        raise DimensionMismatchError(
+            f"La matriz de cofactores requiere una matriz cuadrada; recibida {matrix.shape}."
+        )
+    return MatrixStepResult(_symbolic_simplify_matrix(matrix.adjugate().T), [], False, [])
+
+
+def solve_matrix_equation(
+    matrix_a: sympy.Matrix, matrix_b: sympy.Matrix, x_side: str
+) -> MatrixOperationResult:
+    """MV-C-18/19: resuelve X��A = B o A��X = B.
+
+    ``x_side="left"`` significa que X aparece a la izquierda (X��A = B),
+    por lo que X = B��A^{-1}. ``x_side="right"`` significa A��X = B, por lo
+    que X = A^{-1}��B. El orden se conserva deliberadamente: la inversa no
+    conmuta.
+    """
+    if matrix_a.rows != matrix_a.cols:
+        raise DimensionMismatchError(
+            f"La ecuaci��n matricial requiere una matriz A cuadrada; recibida {matrix_a.shape}."
+        )
+    if sympy.simplify(matrix_a.det()) == 0:
+        raise SingularMatrixError(
+            "La matriz A es singular (determinante 0); la ecuaci��n no tiene soluci��n ��nica."
+        )
+
+    if x_side == "left":
+        if matrix_b.cols != matrix_a.rows:
+            raise DimensionMismatchError(
+                f"X��A = B requiere columnas(B) == filas(A): A es {matrix_a.shape}, "
+                f"B es {matrix_b.shape}."
+            )
+        result = matrix_b * matrix_a.inv()
+    elif x_side == "right":
+        if matrix_b.rows != matrix_a.rows:
+            raise DimensionMismatchError(
+                f"A��X = B requiere filas(B) == filas(A): A es {matrix_a.shape}, "
+                f"B es {matrix_b.shape}."
+            )
+        result = matrix_a.inv() * matrix_b
+    else:
+        raise DimensionMismatchError("x_side debe ser 'left' o 'right'.")
+
+    return MatrixOperationResult(_symbolic_simplify_matrix(result), [], False, [])
 
 
 # ---------------------------------------------------------------------------
@@ -700,6 +828,86 @@ def rref(matrix: sympy.Matrix) -> MatrixStepResult:
     for index, step in enumerate(steps):
         step.index = index
     return MatrixStepResult(working, steps, True, [])
+
+
+def lu_decomposition(matrix: sympy.Matrix) -> LUDecompositionResult:
+    """Descomposición A = L·U por eliminación de Doolittle SIN pivoteo.
+
+    No se simula pivoteo: si aparece un pivote nulo se devuelve un error
+    explícito. La factorización se verifica exactamente antes de publicarse.
+    """
+    rows, cols = matrix.rows, matrix.cols
+    lower = sympy.eye(rows)
+    upper = sympy.zeros(rows, cols)
+    working = matrix.copy()
+    limit = min(rows, cols)
+
+    for pivot_index in range(limit):
+        pivot = working[pivot_index, pivot_index]
+        if pivot == 0:
+            raise UnsupportedOperationError(
+                "LU sin pivoteo no es posible: el pivote en la posición "
+                f"({pivot_index + 1},{pivot_index + 1}) es 0. Se requiere "
+                "intercambio de filas (pivoteo), que esta operación no realiza."
+            )
+        for col in range(pivot_index, cols):
+            upper[pivot_index, col] = working[pivot_index, col]
+        for row in range(pivot_index + 1, rows):
+            factor = sympy.simplify(working[row, pivot_index] / pivot)
+            lower[row, pivot_index] = factor
+            if factor == 0:
+                continue
+            for col in range(pivot_index, cols):
+                working[row, col] = sympy.simplify(
+                    working[row, col] - factor * working[pivot_index, col]
+                )
+
+    if lower * upper != matrix:
+        raise UnsupportedOperationError(
+            "No se pudo verificar la descomposición LU de esta matriz."
+        )
+
+    return LUDecompositionResult(lower, upper, [], False, [])
+
+
+def gram_schmidt(matrix: sympy.Matrix) -> MatrixOperationResult:
+    """Gram-Schmidt SIN normalizar, tomando cada FILA como vector de entrada.
+
+    Devuelve una matriz cuyas filas son los vectores ortogonales en el mismo
+    orden. No se divide por la norma: solo se restan proyecciones.
+    """
+    vectors = [list(matrix.row(index)) for index in range(matrix.rows)]
+    if not vectors or not vectors[0]:
+        raise DimensionMismatchError("Se requiere al menos un vector no vacío.")
+
+    orthogonal: List[List[sympy.Expr]] = []
+    for original in vectors:
+        current = [sympy.simplify(value) for value in original]
+        for basis in orthogonal:
+            denominator = sympy.simplify(sum(value * value for value in basis))
+            if denominator == 0:
+                continue
+            numerator = sympy.simplify(
+                sum(value * basis_value for value, basis_value in zip(original, basis))
+            )
+            factor = sympy.simplify(numerator / denominator)
+            if factor == 0:
+                continue
+            current = [
+                sympy.simplify(value - factor * basis_value)
+                for value, basis_value in zip(current, basis)
+            ]
+        orthogonal.append(current)
+
+    # Verificación exacta de ortogonalidad mutua.
+    for index, first in enumerate(orthogonal):
+        for second in orthogonal[index + 1 :]:
+            if sympy.simplify(sum(a * b for a, b in zip(first, second))) != 0:
+                raise UnsupportedOperationError(
+                    "No se pudo verificar la ortogonalidad del resultado de Gram-Schmidt."
+                )
+
+    return MatrixOperationResult(sympy.Matrix(orthogonal), [], False, [])
 
 
 def kronecker(matrix_a: sympy.Matrix, matrix_b: sympy.Matrix) -> MatrixOperationResult:

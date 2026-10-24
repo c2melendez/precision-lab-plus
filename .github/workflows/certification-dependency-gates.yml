@@ -1,0 +1,86 @@
+name: Certification dependency and security gates
+
+# Security advisories can change without a new SHA: these gates are never reused
+# by ci_guard.py. Preserve all existing PR/main triggers in the called workflows.
+on:
+  push:
+    branches: [qa/syntax-audit-in625-a1]
+    paths:
+      - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+      - 'frontend/.npmrc'
+      - 'frontend/stryker.config.json'
+      - 'backend/requirements*.txt'
+      - 'backend/pyproject.toml'
+      - 'qa/s19/**'
+      - 'backend/app/main.py'
+      - 'backend/app/core/**'
+      - 'backend/app/services/ast_validator.py'
+      - 'backend/app/services/parsing.py'
+      - 'backend/app/services/solve_service.py'
+      - 'backend/app/routers/evaluate.py'
+      - 'backend/app/schemas/responses.py'
+      - 'backend/app/schemas/requests.py'
+      - 'backend/tests/test_parsing.py'
+      - 'backend/tests/test_evaluate.py'
+      - 'backend/tests/test_solve.py'
+      - 'backend/tests/conftest.py'
+      - 'frontend/src/**'
+      - 'frontend/*config*'
+      - 'qa/certification/*.jsonl'
+      - 'scripts/certification/campaign_scope.py'
+      - 'scripts/certification/test_campaign_scope.py'
+      - 'backend/tests/test_exhaustive_module13_security.py'
+      - 'backend/tests/test_s25_deployment_security.py'
+      - '.github/workflows/s25-security.yml'
+      - '.github/workflows/s19-mutation.yml'
+      - '.github/workflows/certification-dependency-gates.yml'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for fresh security/mutation revalidation'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit-request:
+    runs-on: ubuntu-latest
+    outputs:
+      security_frontend: ${{ steps.scope.outputs.security_frontend }}
+      security_backend: ${{ steps.scope.outputs.security_backend }}
+      mutation_frontend: ${{ steps.scope.outputs.mutation_frontend }}
+      mutation_backend: ${{ steps.scope.outputs.mutation_backend }}
+      mutation_lite: ${{ steps.scope.outputs.mutation_lite }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Campaign routing and evidence regressions
+        run: python3 -m unittest discover -s scripts/certification -p 'test_*.py'
+      - name: Select affected components and existing evidence
+        id: scope
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REVALIDATION_REASON: ${{ inputs.reason }}
+        run: python3 scripts/certification/campaign_scope.py
+  security:
+    needs: audit-request
+    if: needs.audit-request.outputs.security_frontend == 'true' || needs.audit-request.outputs.security_backend == 'true'
+    uses: ./.github/workflows/s25-security.yml
+    with:
+      run_frontend: ${{ needs.audit-request.outputs.security_frontend == 'true' }}
+      run_backend: ${{ needs.audit-request.outputs.security_backend == 'true' }}
+      reason: ${{ inputs.reason || '' }}
+  mutation:
+    needs: audit-request
+    if: needs.audit-request.outputs.mutation_frontend == 'true' || needs.audit-request.outputs.mutation_backend == 'true' || needs.audit-request.outputs.mutation_lite == 'true'
+    uses: ./.github/workflows/s19-mutation.yml
+    with:
+      run_frontend: ${{ needs.audit-request.outputs.mutation_frontend == 'true' }}
+      run_backend: ${{ needs.audit-request.outputs.mutation_backend == 'true' }}
+      run_lite: ${{ needs.audit-request.outputs.mutation_lite == 'true' }}
+      reason: ${{ inputs.reason || '' }}

@@ -1,6 +1,20 @@
 name: S19 Mutation Baseline
 
 on:
+  workflow_call:
+    inputs:
+      run_frontend:
+        type: boolean
+        default: true
+      run_backend:
+        type: boolean
+        default: true
+      run_lite:
+        type: boolean
+        default: true
+      reason:
+        type: string
+        default: ''
   pull_request:
     paths:
       - "backend/**"
@@ -8,14 +22,107 @@ on:
       - "qa/s19/**"
       - ".github/workflows/s19-mutation.yml"
   workflow_dispatch:
+    inputs:
+      reason:
+        description: Reason for full mutation revalidation
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
-  plus-frontend-stryker:
+  validate-request:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    steps:
+      - name: Validate explicit revalidation reason
+        env:
+          EVENT: ${{ github.event_name }}
+          REASON: ${{ inputs.reason }}
+        run: |
+          python3 - <<'PYCODE'
+          import json, os
+          reason = os.environ.get("REASON", "")
+          if os.environ["EVENT"] == "workflow_dispatch" and not reason.strip():
+              raise SystemExit("Manual revalidation requires a nonempty reason")
+          print(json.dumps({"event": os.environ["EVENT"], "reason": reason}))
+          PYCODE
+  change-scope:
+    needs: validate-request
+    runs-on: ubuntu-latest
+    outputs:
+      scope: ${{ steps.classify.outputs.scope }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
+      - id: classify
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" != "pull_request" ]]; then
+            echo "scope=full" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          mapfile -t changed_paths < <(git diff --name-only HEAD^ HEAD)
+          if [[ "${#changed_paths[@]}" -eq 0 ]]; then
+            echo "scope=full" >> "$GITHUB_OUTPUT"
+            echo "No commit delta available; failing conservatively to full scope."
+            exit 0
+          fi
+
+          focused_allowed() {
+            case "$1" in
+              backend/tests/test_solve.py|backend/tests/test_parsing.py|backend/tests/test_evaluate.py|.github/workflows/s19-mutation.yml|qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md)
+                return 0 ;;
+              *) return 1 ;;
+            esac
+          }
+          is_targeted_test() {
+            case "$1" in
+              backend/tests/test_solve.py|backend/tests/test_parsing.py|backend/tests/test_evaluate.py)
+                return 0 ;;
+              *) return 1 ;;
+            esac
+          }
+          focused=true
+          has_targeted_test=false
+          for path in "${changed_paths[@]}"; do
+            focused_allowed "$path" || focused=false
+            if is_targeted_test "$path"; then has_targeted_test=true; fi
+          done
+
+          if [[ "$focused" == true && "$has_targeted_test" == true ]]; then
+            scope=focused
+          elif [[ "$focused" == true && "${#changed_paths[@]}" -eq 1 && "${changed_paths[0]}" == ".github/workflows/s19-mutation.yml" ]]; then
+            # Workflow-only scope-filter fixes still run the focused validation job.
+            scope=focused
+          else
+            docs_only=true
+            for path in "${changed_paths[@]}"; do
+              case "$path" in
+                README.md|qa/certification/README.md|qa/certification/CURRENT_STATE.md|qa/certification/EXECUTION_LOG.md|qa/certification/CONTINUITY_NEXT_ACTION.json|qa/certification/EXECUTION_LOG_AS229_SECTION_A.md|qa/certification/ALGEBRA229_PREPARATION.md|qa/certification/ROADMAP_CONTINUITY.md|qa/certification/CONTINUATION_PROMPT.md|qa/certification/EDCX_B6_CHANNEL_AUDIT.md|qa/certification/EDCX_B6_ROW_CONTRACT_DRAFT.md|qa/certification/EDCX_B6_HTTP_CONTRACT_FINDINGS.md|qa/certification/EDCX_B6_ADAPTER_ORACLE_PLAN.md|qa/certification/S19_BACKEND_MUTATION_REVIEW_R288.md|qa/certification/S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md|qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md)
+                  ;;
+                *)
+                  docs_only=false
+                  ;;
+              esac
+            done
+            if [[ "$docs_only" == true ]]; then scope=docs-only; else scope=full; fi
+          fi
+          echo "scope=$scope" >> "$GITHUB_OUTPUT"
+          printf 'S19 mutation scope: %s\n' "$scope"
+          printf 'Changed paths:\n'
+          printf ' - %s\n' "${changed_paths[@]}"
+  plus-frontend-stryker:
+    needs: [validate-request, change-scope]
+    if: needs.change-scope.outputs.scope == 'full' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_frontend)
+    runs-on: ubuntu-latest
+    # Harness remediation (r242): r241 evidence shows 2,627 mutants across
+    # eight scoped files; the 698-test dry run took 78 seconds, but mutation
+    # execution still hit the 60-minute hard ceiling without producing a report.
+    # Keep mutation scope, pins and thresholds unchanged; extend only the ceiling.
+    timeout-minutes: 120
     defaults:
       run:
         working-directory: frontend
@@ -41,6 +148,8 @@ jobs:
           if-no-files-found: warn
 
   lite-frontend-stryker:
+    needs: [validate-request, change-scope]
+    if: needs.change-scope.outputs.scope == 'full' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_lite)
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -75,6 +184,8 @@ jobs:
           if-no-files-found: warn
 
   plus-backend-mutmut:
+    needs: [validate-request, change-scope]
+    if: (needs.change-scope.outputs.scope == 'focused' && github.event_name == 'pull_request') || (needs.change-scope.outputs.scope == 'full' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_backend))
     runs-on: ubuntu-latest
     timeout-minutes: 40
     defaults:
@@ -94,13 +205,41 @@ jobs:
       - name: Verify mutation-specific backend tests
         run: pytest -q --disable-warnings tests/test_parsing.py tests/test_evaluate.py tests/test_solve.py tests/test_exhaustive_module13_security.py
       - name: Run mutation baseline on critical backend surfaces
+        env:
+          SCOPE: ${{ needs.change-scope.outputs.scope }}
         run: |
           mkdir -p ../reports/s19
           set +e
-          mutmut run "app.services.parsing*"             "app.services.ast_validator*"             "app.services.solve_service*"             "app.routers.evaluate*"             "app.schemas.responses*"
+          if [ "$SCOPE" = "focused" ]; then
+            # Keep this test-only commit targeted; SG28 runtime stays outside this scope.
+            mutmut run \
+              "app.services.solve_service.x__absolute_value_cases_result__mutmut_*" \
+              "app.services.solve_service.x__radical_cases_result__mutmut_*" \
+              "app.services.solve_service.x__rational_domain_result__mutmut_*" \
+              "app.services.solve_service.x__absolute_value_steps__mutmut_*" \
+              "app.services.solve_service.x__absolute_value_equidistance_steps__mutmut_*" \
+              "app.services.solve_service.x__domain_step__mutmut_*" \
+              "app.services.solve_service.x__real_radical_value__mutmut_*" \
+              "app.services.parsing.x_validate_g3_structure__mutmut_*" \
+              "app.services.parsing.x_parse_inequality_tree__mutmut_*" \
+              "app.services.parsing.x_parse_chained_inequalities__mutmut_*" \
+              "app.services.parsing.x_permutation_alias_args__mutmut_*" \
+              "app.services.parsing.x_symbolic_pair_binomial_variable__mutmut_*" \
+              "app.services.parsing.x_symbolic_identity_sum_bound__mutmut_*" \
+              "app.routers.evaluate.x__evaluate_impl__mutmut_*" \
+              "app.routers.evaluate.x__render_evaluate_presentation__mutmut_*"
+          else
+            mutmut run \
+              "app.services.parsing*" \
+              "app.services.ast_validator*" \
+              "app.services.solve_service*" \
+              "app.routers.evaluate*" \
+              "app.schemas.responses*"
+          fi
           rc=$?
           mutmut results > ../reports/s19/mutmut-results.txt 2>&1
           echo "$rc" > ../reports/s19/mutmut-exit-code.txt
+          echo "S19 mutation scope: $SCOPE"
           exit "$rc"
       - name: Upload backend mutation report
         if: always()

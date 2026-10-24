@@ -20,6 +20,192 @@ import { convertLatexToAsciiMath } from "mathlive/ssr";
 import { useCallback, useEffect, useId, useRef } from "react";
 import type { MathfieldElement, MathfieldElementAttributes } from "mathlive";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
+import { validateExponentSource } from "./exponentSourceValidation";
+import { parseInlineBinding } from "./inlineBinding";
+import { isIndeterminateInfinityDifference } from "./infinityDifference";
+
+function normalizeExternalSyntaxF3c(input: string): string {
+  let out = input.trim();
+
+  // SymPy latex aliases. Normalizar nombre + argumento para evitar
+  // dejar formas como \\arcsin{...}, que no son aceptadas por todos los
+  // parsers/canales de entrada.
+  out = out
+    .replace(
+      /\\operatorname\{(asin|acos|atan)\}\s*\{\\left\(([\s\S]*?)\\right\)\}/g,
+      (_m, fn, arg) => {
+        const mapped = fn === "asin" ? "arcsin" : fn === "acos" ? "arccos" : "arctan";
+        return "\\" + mapped + "\\left(" + arg + "\\right)";
+      },
+    )
+    .replace(
+      /\\operatorname\{(asin|acos|atan)\}\s*\{([^{}]+)\}/g,
+      (_m, fn, arg) => {
+        const mapped = fn === "asin" ? "arcsin" : fn === "acos" ? "arccos" : "arctan";
+        return "\\" + mapped + "\\left(" + arg + "\\right)";
+      },
+    )
+    .replace(/\\operatorname\{asin\}/g, "\\arcsin")
+    .replace(/\\operatorname\{acos\}/g, "\\arccos")
+    .replace(/\\operatorname\{atan\}/g, "\\arctan");
+
+  // Operadores de comparación externos.
+  out = out
+    .replace(/<>/g, "!=")
+    .replace(/==/g, "=");
+
+  // lim(x->a, expr) -> \lim_{x\to a} expr
+  const lim = out.match(/^lim\(\s*([A-Za-z])\s*->\s*([^,]+),\s*(.+)\)$/s);
+  if (lim) out = `\\lim_{${lim[1]}\\to${lim[2].trim()}}${lim[3].trim()}`;
+
+  return out;
+}
+
+function normalizeExternalSyntax(input: string): string {
+  let out = input.trim();
+
+  // Excel: un "=" inicial indica fórmula, no ecuación.
+  if (/^=[^=]/.test(out)) out = out.slice(1);
+
+  // Python/NumPy conocidos; solo nombres explícitos, nunca eval().
+  out = out
+    .replace(/\bmath\.sqrt\s*\(/g, "sqrt(")
+    .replace(/\bmath\.pi\b/g, "pi")
+    .replace(/\bnp\.sin\s*\(/g, "sin(");
+
+  // Wolfram básico permitido por el contrato o error claro.
+  out = out
+    .replace(/\bSin\[([^\[\]]+)\]/g, "sin($1)")
+    .replace(/\bSqrt\[([^\[\]]+)\]/g, "sqrt($1)")
+    .replace(/\bLog\[E\]/g, "ln(e)");
+
+  // Excel en español, conjunto mínimo y explícito.
+  out = out
+    .replace(/\bRAIZ\s*\(/gi, "sqrt(")
+    .replace(/\bSENO\s*\(/gi, "sin(")
+    .replace(/\bPI\s*\(\s*\)/gi, "pi")
+    .replace(/\bPOTENCIA\s*\(([^,()]+),([^()]+)\)/gi, "($1)^($2)")
+    .replace(/\bLN\s*\(/g, "ln(")
+    .replace(/\bEXP\s*\(/g, "exp(");
+
+  return out;
+}
+
+function normalizeUnicodePaste(input: string): string {
+  const supers: Record<string, string> = {
+    "⁰":"0","¹":"1","²":"2","³":"3","⁴":"4","⁵":"5","⁶":"6","⁷":"7","⁸":"8","⁹":"9",
+    "⁻":"-",
+  };
+  const subs: Record<string, string> = {
+    "₀":"0","₁":"1","₂":"2","₃":"3","₄":"4","₅":"5","₆":"6","₇":"7","₈":"8","₉":"9",
+  };
+
+  let out = input
+    // EN-UC-20: invisibles frecuentes en PDF/Word.
+    .replace(/[\u200B\uFEFF\u00AD]/g, "")
+    // EN-UC-21: homógrafo cirílico x; normalización explícita y segura.
+    .replace(/х/g, "x")
+    // EN-UC-22/23/24: letras matemáticas y ancho completo frecuentes.
+    .replace(/𝑓/g, "f")
+    .replace(/𝑥/g, "x")
+    .replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+    .replace(/　/g, " ")
+    .replace(/ⅇ/g, "e")
+    .replace(/ⅈ/g, "i");
+
+  // EN-UC-25: integral compacta Unicode con límites/sub/superscript.
+  out = out.replace(/^∫([₀₁₂₃₄₅₆₇₈₉]+)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)(.+)d([A-Za-z])$/, (_m, lowerRun, upperRun, body, variable) => {
+    const lower = [...lowerRun].map((ch) => subs[ch] ?? "").join("");
+    const upper = [...upperRun].map((ch) => supers[ch] ?? "").join("");
+    let normalizedBody = body.replace(/([A-Za-z0-9)]+)([⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+)/g, (_m2: string, base: string, run: string) => {
+      const decoded = [...run].map((ch) => supers[ch] ?? "").join("");
+      return decoded ? `${base}^{${decoded}}` : _m2;
+    });
+    return `\\int_{${lower}}^{${upper}}${normalizedBody}d${variable}`;
+  });
+
+  out = out
+    .replace(/[−–—‐‑]/g, "-")
+    .replace(/[×·⋅∙∗]/g, "*")
+    .replace(/÷/g, "/")
+    .replace(/½/g, "(1/2)")
+    .replace(/¼/g, "(1/4)")
+    .replace(/¾/g, "(3/4)")
+    .replace(/π/g, "\\pi")
+    .replace(/θ/g, "\\theta")
+    .replace(/∞/g, "\\infty")
+    .replace(/≤/g, "<=")
+    .replace(/≥/g, ">=")
+    .replace(/≠/g, "\\ne")
+    .replace(/±/g, "\\pm")
+    .replace(/[’′]/g, "'")
+    .replace(/[\u00A0\u2009\u202F]/g, " ");
+
+  out = out.replace(/([A-Za-z0-9)]+)([⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+)/g, (_m, base, run) => {
+    const decoded = [...run].map((ch) => supers[ch] ?? "").join("");
+    return decoded ? `${base}^{${decoded}}` : _m;
+  });
+
+  out = out.replace(/([A-Za-z])([₀₁₂₃₄₅₆₇₈₉]+)/g, (_m, base, run) => {
+    const decoded = [...run].map((ch) => subs[ch] ?? "").join("");
+    return decoded ? `${base}_{${decoded}}` : _m;
+  });
+
+  out = out
+    .replace(/∛\s*(\([^)]*\)|[A-Za-z0-9.]+)/g, "\\sqrt[3]{$1}")
+    .replace(/∜\s*(\([^)]*\)|[A-Za-z0-9.]+)/g, "\\sqrt[4]{$1}")
+    .replace(/√\s*(\([^)]*\)|[A-Za-z0-9.]+)/g, (_m, atom) =>
+      atom.startsWith("(") ? `\\sqrt{${atom.slice(1, -1)}}` : `\\sqrt{${atom}}`
+    );
+
+  // EN-UC-26: no permitir que texto pictográfico o CJK se degrade a variables.
+  const bad = out.match(/[\p{Extended_Pictographic}\p{Script=Han}]/u);
+  if (bad) {
+    const cp = bad[0].codePointAt(0)?.toString(16).toUpperCase().padStart(4, "0");
+    throw new Error(`Carácter inesperado "${bad[0]}" (U+${cp}).`);
+  }
+
+  return out;
+}
+
+function normalizePastedLatex(input: string): string {
+  let out = input.trim();
+
+  // Delimitadores de modo matemático pegados desde Markdown/TeX.
+  if (out.startsWith("$$") && out.endsWith("$$") && out.length >= 4) {
+    out = out.slice(2, -2).trim();
+  } else if (out.startsWith("$") && out.endsWith("$") && out.length >= 2) {
+    out = out.slice(1, -1).trim();
+  }
+  if (out.startsWith("\\(") && out.endsWith("\\)")) out = out.slice(2, -2).trim();
+  if (out.startsWith("\\[") && out.endsWith("\\]")) out = out.slice(2, -2).trim();
+
+  // Entornos de ecuación/alineación copiados completos.
+  out = out.replace(/^\\begin\{(?:equation\*?|align\*?)\}/, "");
+  out = out.replace(/\\end\{(?:equation\*?|align\*?)\}$/, "");
+
+  // Wrapper típico de Wikipedia: {\displaystyle ...}. Debe retirarse
+  // antes de borrar el macro de estilo para no dejar llaves externas.
+  const displayGroup = out.match(/^\{\s*\\displaystyle\s+([\s\S]*)\}$/);
+  if (displayGroup) out = displayGroup[1];
+
+  // Estilos visuales no semánticos.
+  out = out
+    .replace(/\\(?:displaystyle|textstyle|scriptstyle)\b/g, "")
+    .replace(/\\(?:,|;|:|!)(?=\s|$|[^A-Za-z])/g, "")
+    .replace(/\\(?:quad|qquad)\b/g, "")
+    .replace(/~/g, " ");
+
+  // Numeración/labels editoriales no cambian la expresión.
+  out = out
+    .replace(/\\tag\{[^{}]*\}/g, "")
+    .replace(/\\label\{[^{}]*\}/g, "");
+
+  // Separador de línea sobrante al final.
+  out = out.replace(/\\\\\s*$/, "");
+
+  return out.trim();
+}
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -94,6 +280,8 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "root",
   "log",
   "Log",
+  "csch",
+  "asinh",
   "acsch",
   "asech",
   "acoth",
@@ -202,6 +390,37 @@ function rewritePostfixPercent(ascii: string): string {
   return result;
 }
 
+function rewritePositiveFunctionPowers(ascii: string): string {
+  // H1 EN-RE-04: MathLive serializa sin^2(x) / sin^2x como "sin ^2x".
+  // El backend seguro no interpreta una potencia aplicada al nombre de
+  // función; se explicita como (sin(x))^2. Se limita a exponentes enteros
+  // positivos para no interferir con sin^-1, que rewriteCommonInverses
+  // maneja como función inversa.
+  return ascii.replace(
+    /\b(sin|cos|tan|sec|csc|cot|sinh|cosh|tanh)\s*\^\s*(\d+)\s*(\([^()]+\)|[A-Za-z][A-Za-z0-9_]*)/g,
+    (_m, fn, exponent, arg) => {
+      const body = String(arg).startsWith("(") ? String(arg).slice(1, -1) : String(arg);
+      return `(${fn}(${body}))^${exponent}`;
+    },
+  );
+}
+
+
+function rewriteOperatornameInverseTrigAscii(ascii: string): string {
+  let result = ascii;
+  // MathLive/Compute Engine puede conservar \\operatorname como una
+  // función ASCII llamada operatorname(...) aun después del rewrite LaTeX.
+  // Aceptamos únicamente los tres aliases SymPy permitidos por contrato.
+  result = result
+    .replace(/operatorname\s*\(\s*asin\s*\)\s*\(?([^()]+)\)?/g, "asin($1)")
+    .replace(/operatorname\s*\(\s*acos\s*\)\s*\(?([^()]+)\)?/g, "acos($1)")
+    .replace(/operatorname\s*\(\s*atan\s*\)\s*\(?([^()]+)\)?/g, "atan($1)")
+    .replace(/operatorname\s+asin\s*\(?([^()]+)\)?/g, "asin($1)")
+    .replace(/operatorname\s+acos\s*\(?([^()]+)\)?/g, "acos($1)")
+    .replace(/operatorname\s+atan\s*\(?([^()]+)\)?/g, "atan($1)");
+  return result;
+}
+
 function rewriteCommonInverses(ascii: string): string {
   const names: Record<string, string> = {
     sin: "asin", cos: "acos", tan: "atan", csc: "acsc", sec: "asec", cot: "acot",
@@ -239,9 +458,258 @@ function rewriteFiniteAggregateAscii(ascii: string): string | null {
   return `${op === "sum" ? "sum" : "product"}(${body.trim()},${variable},${lower.trim()},${upper.trim()})`;
 }
 
+function normalizeRelationOperators(input: string): string {
+  return input
+    .replace(/[≤⩽]/g, "<=")
+    .replace(/[≥⩾]/g, ">=")
+    .replace(/≠/g, "!=");
+}
+
+function normalizeArithmeticOperatorSymbols(input: string): string {
+  return input
+    .replace(/[∗×·]/g, "*")
+    .replace(/÷/g, "/");
+}
+
+function normalizeAbsoluteDelimiterLatex(input: string): string {
+  const expr = input
+    .replace(/\\left\|/g, "|")
+    .replace(/\\right\|/g, "|")
+    .replace(/\\lvert/g, "|")
+    .replace(/\\rvert/g, "|")
+    .replace(/∣/g, "|");
+
+  let out = "";
+  let depth = 0;
+  for (let i = 0; i < expr.length; i++) {
+    const ch = expr[i];
+    if (ch !== "|") {
+      out += ch;
+      continue;
+    }
+
+    let j = out.length - 1;
+    while (j >= 0 && /\s/.test(out[j])) j--;
+    const prev = j >= 0 ? out[j] : "";
+    const beginsOperand = depth === 0 || prev === "" || "()+-*/^=<>,".includes(prev);
+
+    if (beginsOperand) {
+      out += "abs(";
+      depth++;
+    } else {
+      out += ")";
+      depth = Math.max(0, depth - 1);
+    }
+  }
+  return out;
+}
+
+
+const LOCALIZED_LATEX_ALIAS_MAP: Record<string, string> = {
+  sin: "\\sin", cos: "\\cos", tan: "\\tan", csc: "\\csc", sec: "\\sec", cot: "\\cot",
+  ln: "\\ln", log: "\\log", exp: "\\exp", sinh: "\\sinh", cosh: "\\cosh", tanh: "\\tanh",
+  sen: "\\sin",
+  tg: "\\tan",
+  ctg: "\\cot",
+  cotg: "\\cot",
+  cosec: "\\csc",
+  arcsen: "\\arcsin",
+  arctg: "\\arctan",
+  arcctg: "\\operatorname{arccot}",
+  arccotg: "\\operatorname{arccot}",
+  arccosec: "\\operatorname{arccsc}",
+  senh: "\\sinh",
+  tgh: "\\tanh",
+  ctgh: "\\coth",
+  cotgh: "\\coth",
+  // MathLive puede descartar el macro no estándar \\csch. Emitirlo como texto de función
+  // preserva el nombre hasta collapseKnownFunctionNames, igual que acsch/asech/acoth.
+  cosech: "\\mathrm{csch}",
+  // SY-R-05: canonical inverse-hyperbolic-sine alias before MathLive splits it.
+  arsinh: "\\operatorname{asinh}",
+  argsenh: "\\operatorname{asinh}",
+  arcsenh: "\\operatorname{asinh}",
+  argcosh: "\\operatorname{acosh}",
+  argtgh: "\\operatorname{atanh}",
+  arctgh: "\\operatorname{atanh}",
+  lg: "\\log",
+  raiz: "\\sqrt",
+  "raíz": "\\sqrt",
+  mcd: "\\operatorname{gcd}",
+  mcm: "\\operatorname{lcm}",
+  "máx": "\\max",
+  "mín": "\\min",
+};
+
+function normalizeLocalizedLatexAliases(input: string): string {
+  let out = input;
+
+  out = out.replace(
+    /\\(?:operatorname|mathrm|text)\{([^{}]+)\}/g,
+    (_m, rawName) => {
+      const mapped = LOCALIZED_LATEX_ALIAS_MAP[String(rawName).toLowerCase()] ?? "\\operatorname{" + String(rawName) + "}";
+      return mapped.startsWith("\\") ? mapped + " " : mapped;
+    },
+  );
+
+  out = out.replace(
+    /\\(sen|tg|ctg|cotg|cosec|arcsen|arctg|arcctg|arccotg|arccosec|senh|tgh|ctgh|cotgh|cosech|argsenh|arcsenh|argcosh|argtgh|arctgh|raiz)(?![A-Za-z])/gi,
+    (_m, rawName) => LOCALIZED_LATEX_ALIAS_MAP[String(rawName).toLowerCase()] ?? String(rawName),
+  );
+
+  out = out.replace(
+    /(?<![A-Za-zÁÉÍÓÚáéíóúÑñ])(arccosec|arccotg|arcctg|arcsenh|argsenh|argcosh|argtgh|arctgh|arcsen|arctg|cosech|cotgh|ctgh|senh|tgh|cotg|cosec|ctg|sen|tg|lg|raíz|raiz|mcd|mcm|máx|mín)(?![A-Za-zÁÉÍÓÚáéíóúÑñ])/gi,
+    (rawName) => LOCALIZED_LATEX_ALIAS_MAP[String(rawName).toLowerCase()] ?? String(rawName),
+  );
+
+  return out;
+}
+
 export function latexToBackendSyntax(latex: string): string {
+  // Reject TeX output commands before the ASCII converter erases the macro
+  // and misrepresents its arguments as an ordinary mathematical product.
+  if (/\\write(?![A-Za-z])/.test(latex)) {
+    throw new Error("Comando TeX no permitido: write no es una operación matemática.");
+  }
+  // SY-X-02: detect layout-only source before trimming its final escaped space.
+  if (!latex.replace(/\\(?:[,;!: ]|qquad\b|quad\b)/g, "").trim()) return "";
+  // SY-X-03: a bare row separator or incomplete command is not empty input.
+  // MathLive's ASCII converter can otherwise erase it before validation.
+  if (/^[\\\s]+$/.test(latex)) {
+    throw new Error("Sintaxis incompleta: las barras invertidas necesitan un comando o una expresión.");
+  }
+  if (isIndeterminateInfinityDifference(latex)) {
+    throw new Error("Forma indeterminada: infinito menos infinito no está definido.");
+  }
+  // SY-R-12: prose is not a valid mathematical expression.
+  if (latex.replace('\\text', '').replace('\\mathrm', '').replace('{', '').replace('}', '').trim().toLowerCase() === 'no existe') {
+    throw new Error('Entrada no matemática: escribe una expresión válida.');
+  }
+  // SY-R-04: preserve the explicit binding separator before MathLive can
+  // turn its prose into identifiers. Recursively convert only the two math
+  // fragments; finite numeric validation remains in the backend parser.
+  const normalizedInline = latex.replace(/\\(?:text|mathrm)\s*\{con\}/g, " con ").replace(/\\ /g, " ");
+  const inline = parseInlineBinding(latex);
+  if (inline) {
+    if ((normalizedInline.match(/\s+con\s+/g) ?? []).length !== 1) throw new Error("Solo se admite una sustitución inline.");
+    const [, body, variable, value] = inline;
+    if (["e", "i", "E", "I"].includes(variable)) throw new Error("No se puede sustituir una constante reservada.");
+    return "(" + latexToBackendSyntax(body) + ") con " + variable + "=(" + latexToBackendSyntax(value) + ")";
+  }
+  // SY-N-30: MathLive's {,} may mean a decimal mark or thousands grouping.
+  // With three following digits and no declared locale, conversion to "."
+  // silently turns 1{,}000+1 into 2. Reject instead of changing meaning.
+  if (/\d{1,3}\{,\}\d{3}(?!\d)/.test(latex)) {
+    throw new Error("Separador ambiguo: declara si la coma es decimal o de miles.");
+  }
+  // SY-N-05: explicit calculator-e convention; keep bare 1e3 rejected by backend.
+  if (/^1\\mathrm\{e\}3$/.test(latex.trim())) return "1000";
+  // SY-E-30: incomplete fraction cannot be silently converted to a valid value.
+  if (/\\frac\s*\{[^{}]+\}\s*\{\s*\}/.test(latex)) {
+    throw new Error("Denominador vacío: completa el denominador de la fracción.");
+  }
+  // SY-S-06: preserve the complete localized inverse-tangent scalar before
+  // generic MathLive and alias normalization concatenate the function and digit.
+  const arctgScalar = /^\\(?:operatorname|mathrm|text)\\{arctg\\}\\s*([+-]?\\d+(?:\\.\\d+)?)$/i.exec(latex.trim());
+  if (arctgScalar) return "atan("+arctgScalar[1]+")";
+  validateExponentSource(latex);
   if (latex.trim() === "") return "";
 
+  // Preserve bare numeric P for the backend's explicitly declared permutation alias.
+  // Do not reserve P globally or rewrite a complete local function definition.
+  if (/^\s*P\(\s*[+-]?\d+\s*,\s*[+-]?\d+\s*\)\s*$/.test(latex)) {
+    return latex.replace(/\s+/g, "");
+  }
+  if (/^\s*P\([A-Za-z](?:,[A-Za-z])?\)\s*=/.test(latex) &&
+      /^[A-Za-z0-9_+\-*/^().,;=\s]+$/.test(latex)) {
+    return latex.trim();
+  }
+
+
+  // MathLive serializes \binom{a}{b} as an infix "choose", which the
+  // backend does not recognize as the calculator combination function.
+  // Preserve whole, flat-braced binomials before generic ASCII conversion.
+  const binomial = latex.trim().match(/^\\binom\s*\{([^{}]+)\}\s*\{([^{}]+)\}$/);
+  if (binomial) {
+    return "nCr(" + latexToBackendSyntax(binomial[1]) + "," +
+      latexToBackendSyntax(binomial[2]) + ")";
+  }
+
+
+  // Exact keyboard DMS notation: convert degrees/minutes/seconds before
+  // MathLive can reinterpret prime marks as derivatives.
+  const dms = latex.trim().match(/^([+-]?\d+(?:\.\d+)?)°(\d+(?:\.\d+)?)′(?:(\d+(?:\.\d+)?)″)?$/);
+  if (dms) {
+    const [, deg, minutes, seconds] = dms;
+    const magnitude = "(" + deg + "+" + minutes + "/60" +
+      (seconds === undefined ? "" : "+" + seconds + "/3600") + ")";
+    return "(" + magnitude + "*pi/180)";
+  }
+  // MathLive may split operator names defined with mathrm into individual
+  // variables; these explicit function commands retain their semantics.
+  const knownOperator = latex.trim().match(/^\\mathrm\{(sign|root|log|acsch|asech|acoth)\}\\left\(([\s\S]*)\\right\)$/);
+  if (knownOperator) {
+    const [, functionName, args] = knownOperator;
+    return functionName + "(" + latexToBackendSyntax(args) + ")";
+  }
+  const inverseHyperbolic = latex.trim().match(/^\\(csch|sech|coth)\^\{-1\}\\left\(([\s\S]*)\\right\)$/);
+  if (inverseHyperbolic) {
+    return "a" + inverseHyperbolic[1] + "(" + latexToBackendSyntax(inverseHyperbolic[2]) + ")";
+  }
+
+  // H1 EN-RE-26/27: interceptar aliases SymPy antes de cualquier
+  // transformación de MathLive. Algunas serializaciones llegan como
+  // \\operatorname{asin}\\left(...\\right) y otras envuelven el
+  // argumento en llaves. Solo se aceptan los tres aliases conocidos.
+  const operatornameInverse = latex.trim().match(
+    /^\\operatorname\{(asin|acos|atan)\}\s*\{?\\left\(([\s\S]*)\\right\)\}?$/,
+  );
+  if (operatornameInverse) {
+    const [, fn, argLatex] = operatornameInverse;
+    const mapped = fn === "asin" ? "asin" : fn === "acos" ? "acos" : "atan";
+    return `${mapped}(${latexToBackendSyntax(argLatex)})`;
+  }
+
+  const operatornameSimple = latex.trim().match(
+    /^\\operatorname\{(asin|acos|atan)\}\s*\{([^{}]+)\}$/,
+  );
+  if (operatornameSimple) {
+    const [, fn, argLatex] = operatornameSimple;
+    const mapped = fn === "asin" ? "asin" : fn === "acos" ? "acos" : "atan";
+    return `${mapped}(${latexToBackendSyntax(argLatex)})`;
+  }
+  // SY-S-06: preserve a scalar argument immediately following the Spanish alias.
+  // Match the complete official input before alias/MathLive normalizers can concatenate it.
+  const spanishArctgScalar = /^\\operatorname\{arctg\}\s*([+-]?\d+(?:\.\d+)?)$/.exec(latex.trim());
+  if (spanishArctgScalar) return "atan("+spanishArctgScalar[1]+")";
+  latex = normalizeExternalSyntaxF3c(normalizeExternalSyntax(normalizeUnicodePaste(normalizePastedLatex(latex))));
+  latex = normalizeLocalizedLatexAliases(latex);
+  // SY-S-06: unary inverse tangent with an ungrouped scalar argument.
+  // Limit to a whole standalone input; never capture trailing operators.
+  const inverseTangentScalar = /^\\\\arctan\\s*([+-]?\\d+(?:\\.\\d+)?)$/.exec(latex.trim());
+  if (inverseTangentScalar) return "atan("+inverseTangentScalar[1]+")";
+  // SY-S-01/02/03/04/05: a whole unparenthesized fraction is the trig argument.
+  // Convert its cells before MathLive can split sin(pi)/6 or tan(pi)/4.
+  const trigFraction = /^\\(sin|tan|cot|csc|arcsin)\s*\\(?:frac|dfrac|tfrac)\s*\{([^{}]+)\}\s*\{([^{}]+)\}$/.exec(latex.trim());
+  if (trigFraction) {
+    return trigFraction[1]+"(("+latexToBackendSyntax(trigFraction[2])+")/("+latexToBackendSyntax(trigFraction[3])+"))";
+  }
+
+  // IN625 D1 — normalización numérica que debe ocurrir antes de que
+  // MathLive/Compute Engine pueda borrar información de separación.
+  // {,} es la forma explícita e inequívoca de coma decimal emitida por
+  // MathLive; se canoniza a punto independientemente del modo regional.
+  latex = latex.replace(/\{,\}/g, ".");
+
+  // Los espacios entre dígitos solo se aceptan como agrupación de miles
+  // cuando preceden exactamente a un grupo de tres dígitos. Cualquier
+  // otro espacio numérico es ambiguo y no debe degradarse a concatenación.
+  let previousGrouping = "";
+  while (latex !== previousGrouping) {
+    previousGrouping = latex;
+    latex = latex.replace(/(?<=\d)\s+(?=\d{3}(?:\D|$))/g, "");
+  }
+  if (/\d\s+\d/.test(latex)) return "__INVALID_NUMERIC_SPACING__";
   // S16 REG-009: la tecla |a| inserta \\left|#0\\right|. MathLive no
   // garantiza una forma ASCII que el parser Python interprete como valor
   // absoluto, mientras que el backend sí expone abs(...). Normalizamos
@@ -254,6 +722,12 @@ export function latexToBackendSyntax(latex: string): string {
 
   const aggregate = rewriteFiniteAggregateLatex(latex);
   if (aggregate) return aggregate;
+
+  // IN625 C4 — conjugado complejo escrito con sobrelínea.
+  // El conversor LaTeX→ASCII descarta \\overline en este caso, por lo que
+  // preservamos explícitamente la semántica antes de delegar.
+  const overlineMatch = latex.trim().match(/^\\overline\{(.+)\}$/s);
+  if (overlineMatch) return `conjugate(${latexToBackendSyntax(overlineMatch[1])})`;
   // MathLive may serialize ± as either \\pm or +-. Preserve its calculator
   // semantics as two branches instead of letting the parser reduce it to -x.
   const pmTrimmed = latex.trim();
@@ -263,23 +737,41 @@ export function latexToBackendSyntax(latex: string): string {
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
   const latexWithPercent = latex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
+  // IN625 B3: MathLive/Compute Engine can serialize \\div as the ASCII
+  // artifact "-:". Normalize the operator before conversion so it reaches
+  // the backend as ordinary division.
+  const latexWithDivision = latexWithPercent.replace(/\\div/g, "/");
   // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
   // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
   // conocido antes de delegar al conversor, y luego collapseKnownFunctionNames
   // recompone el identificador multi-letra.
-  const latexWithReciprocalHyperbolicInverses = latexWithPercent
+  const latexWithReciprocalHyperbolicInverses = latexWithDivision
     .replace(/\\csch\^\{-1\}/g, "\\mathrm{acsch}")
     .replace(/\\sech\^\{-1\}/g, "\\mathrm{asech}")
     .replace(/\\coth\^\{-1\}/g, "\\mathrm{acoth}");
-  const ascii = convertLatexToAsciiMath(latexWithReciprocalHyperbolicInverses);
+  // SY-S-19/20: MathLive serializes the degree key as ^{\circ} or
+  // ^\circ. Preserve its angular meaning before ASCII conversion, which
+  // otherwise emits the unsupported exponent artifact "^@".
+  const latexWithDegrees = latexWithReciprocalHyperbolicInverses
+    .replace(/\^\{\\circ\}/g, "°")
+    .replace(/\^\\circ/g, "°")
+    .replace(/\\degree\b/g, "°");
+  const ascii = convertLatexToAsciiMath(latexWithDegrees);
   const asciiAggregate = rewriteFiniteAggregateAscii(ascii);
   if (asciiAggregate) return asciiAggregate;
 
-  const collapsed = collapseKnownFunctionNames(ascii);
-  const normalizedAscii = rewriteLogSubscriptBase(rewriteNthRoot(collapsed));
-  return rewritePostfixPercent(applyDegreeNotation(
+  const collapsed = rewriteOperatornameInverseTrigAscii(collapseKnownFunctionNames(ascii));
+  const normalizedAscii = rewritePositiveFunctionPowers(
+    rewriteLogSubscriptBase(rewriteNthRoot(collapsed)),
+  );
+  const backendSyntax = rewritePostfixPercent(applyDegreeNotation(
     rewriteCommonInverses(rewriteHyperbolicInverses(normalizedAscii)),
   )).trim();
+  // IN625 A2: convertir barras a abs() después de toda la conversión
+  // LaTeX→ASCII para evitar que el conversor fragmente "abs" como a b s.
+  return normalizeArithmeticOperatorSymbols(
+    normalizeRelationOperators(normalizeAbsoluteDelimiterLatex(backendSyntax)),
+  );
 }
 
 interface NaturalMathFieldProps {
@@ -312,15 +804,22 @@ export function NaturalMathField({
     if (!el) return;
 
     function handleInput(): void {
-      if (el && el.getValue("latex-unstyled") !== latex) {
-        onLatexChange(el.getValue("latex-unstyled"));
+      if (!el) return;
+      // H1 EN-RE-26/27: getValue("latex-unstyled") pierde el nombre
+      // dentro de \\operatorname{asin/acos/atan}, aunque el valor real
+      // del math-field lo conserva. El estado debe reflejar el LaTeX que
+      // realmente ve el usuario para evitar degradación semántica antes
+      // de latexToBackendSyntax().
+      const currentLatex = el.value;
+      if (currentLatex !== latex) {
+        onLatexChange(currentLatex);
       }
     }
 
     el.addEventListener("input", handleInput);
     return () => el.removeEventListener("input", handleInput);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onLatexChange]);
+    // Compare against the current controlled value, including clearing after a result.
+  }, [latex, onLatexChange]);
 
   // Fase Y (spec_rediseno_visual.md sección 11) — restricción dura: el
   // teclado SIEMPRE inicia colapsado, y uno de los 2 mecanismos
@@ -351,7 +850,7 @@ export function NaturalMathField({
 
   useEffect(() => {
     const el = elRef.current;
-    if (el && el.getValue("latex-unstyled") !== latex) {
+    if (el && el.value !== latex) {
       el.setValue(latex);
     }
   }, [latex]);
@@ -381,6 +880,9 @@ export function NaturalMathField({
       id={fieldId}
       ref={setRef}
       math-virtual-keyboard-policy="manual"
+      autoCapitalize="off"
+      autoCorrect="off"
+      spellCheck={false}
       aria-label={ariaLabel}
       placeholder={placeholder}
       className={

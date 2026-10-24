@@ -163,3 +163,105 @@ def test_complexity_limit_large_exponent():
 def test_reasonable_expression_within_complexity_limits():
     expr = parsing.parse_expression_tree("x**2 + 2*x + 1")
     assert expr is not None
+
+
+# ---------------------------------------------------------------------------
+# IN625 G3 — raw inputs canonicalizados por MathLive
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "case_id,text",
+    [
+        ("EN-ER-05", "2^"),
+        ("EN-ER-15", r"\foo{x}"),
+        ("EN-ER-19", "{x+1"),
+        ("EN-ER-20", "x+1}"),
+        ("EN-ER-26", "=3"),
+        ("EN-ER-27", "x^{}"),
+        ("EN-ER-31", r"\text{hola}"),
+    ],
+)
+def test_in625_g3_raw_inputs_rejected_before_sympy(case_id, text):
+    with pytest.raises(parsing.ParseSecurityError):
+        parsing.parse_expression_tree(text)
+
+# S19 targeted coverage r292
+@pytest.mark.parametrize(
+    "text",
+    [
+        "",
+        r"\placeholder{}",
+        r"\unknown{x}",
+        "x=",
+        r"\frac{}{x}",
+        r"\frac{x}",
+        r"\sqrt{}",
+        "sin",
+        "x+()",
+        r"\left(x",
+        r"\right)x",
+        "*x",
+        "x+",
+        "x++1",
+    ],
+)
+def test_g3_structure_rejects_incomplete_raw_editing_states(text):
+    with pytest.raises(parsing.ParseSecurityError):
+        parsing.validate_g3_structure(text)
+
+
+@pytest.mark.parametrize("text", ["x+1", r"\frac{x}{2}", "sin(x)"])
+def test_g3_structure_accepts_well_formed_control_inputs(text):
+    parsing.validate_g3_structure(text)
+
+
+@pytest.mark.parametrize(
+    "text,operator",
+    [
+        ("x<3", "<"),
+        ("x>3", ">"),
+        ("x<=3", "<="),
+        ("x>=3", ">="),
+    ],
+)
+def test_inequality_tree_supports_each_contract_operator(text, operator):
+    relation = parsing.parse_inequality_tree(text)
+    assert relation.rel_op == operator
+
+
+@pytest.mark.parametrize("text", ["x=3", "x<", "x<<3"])
+def test_inequality_tree_rejects_missing_or_repeated_operators(text):
+    with pytest.raises(parsing.ParseSecurityError):
+        parsing.parse_inequality_tree(text)
+
+
+def test_chained_inequalities_split_into_two_ordered_relations():
+    relations = parsing.parse_chained_inequalities("1<x<=3")
+    assert relations is not None
+    assert len(relations) == 2
+    assert relations[0].rel_op == "<"
+    assert relations[0].lhs == sympy.Integer(1)
+    assert relations[1].rel_op == "<="
+    assert relations[1].rhs == sympy.Integer(3)
+
+
+def test_simple_inequality_is_not_reclassified_as_a_chain():
+    assert parsing.parse_chained_inequalities("x<3") is None
+
+
+def test_permutation_alias_parser_is_bounded_and_rejects_invalid_ranges():
+    assert parsing.permutation_alias_args("P(5,2)") == (5, 2)
+    assert parsing.permutation_alias_args("P(5,x)") is None
+    with pytest.raises(parsing.ParseSecurityError):
+        parsing.permutation_alias_args("P(2,3)")
+
+
+def test_symbolic_binomial_helper_is_limited_to_single_symbol_choose_two():
+    assert parsing.symbolic_pair_binomial_variable("nCr(x,2)") == "x"
+    assert parsing.symbolic_pair_binomial_variable("nCr(x,3)") is None
+    assert parsing.symbolic_pair_binomial_variable("nCr(i,2)") is None
+
+
+def test_symbolic_sum_helper_requires_distinct_symbolic_upper_bound():
+    assert parsing.symbolic_identity_sum_bound("sum(i,i,1,n)") == "n"
+    assert parsing.symbolic_identity_sum_bound("sum(x,x,1,x)") is None

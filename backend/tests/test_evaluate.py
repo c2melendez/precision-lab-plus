@@ -83,7 +83,21 @@ def test_valid_decimal_point():
     assert body["result_approx"] == pytest.approx(3.14)
 
 
-@pytest.mark.parametrize("expression", [".5", "5.", "1e5"])
+def test_decimal_exponential_trig_presentation_is_bounded():
+    expression = "exp(-1.3983707058413914)+(-1)*sin(-1.3983707058413914)"
+    x = -1.3983707058413914
+    expected = math.exp(x) - math.sin(x)
+
+    response = _evaluate(expression=expression)
+    body = response.json()
+
+    assert response.status_code == 200
+    assert body["success"] is True
+    assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-9)
+    assert float(body["result_text"]) == pytest.approx(expected, rel=1e-9, abs=1e-9)
+
+
+@pytest.mark.parametrize("expression", ["1e5", "foo.bar", "5.__class__"])
 def test_invalid_decimal_or_scientific_notation(expression):
     response = _evaluate(expression=expression)
     body = response.json()
@@ -233,10 +247,11 @@ def test_substitution_with_free_variable_is_validation_error():
 
 
 def test_result_latex_truncated_when_too_long(monkeypatch):
-    # Expresión con muchos términos simbólicos (no un entero gigante, para no
-    # chocar con el límite de conversión int->str de Python) cuyo LaTeX
-    # supera los 10,000 caracteres.
-    huge_expr = sympy.Add(*(sympy.Symbol(f"x{i}") for i in range(3000)))
+    # Un símbolo de nombre largo produce más de 10.000 caracteres de LaTeX
+    # sin construir ni ordenar una suma de 3.000 símbolos (operación
+    # cuadrática/costosa en SymPy que bloqueaba el gate acumulativo).
+    # El mock prueba exclusivamente el truncado de salida del router.
+    huge_expr = sympy.Symbol("x" + "a" * 10_100)
 
     def _fake_evaluate(expression, angle_unit="rad", substitutions=None):
         return evaluate_service.EvaluateResult(
@@ -312,3 +327,55 @@ def test_stdev_with_single_value_is_parse_error():
     body = response.json()
     assert body["success"] is False
     assert body["error_code"] == "PARSE_ERROR"
+
+# S19 targeted coverage r292
+def test_render_evaluate_presentation_reports_bounded_symbolic_helper_warnings():
+    from app.routers.evaluate import _render_evaluate_presentation
+
+    x = sympy.Symbol("x")
+    result = evaluate_service.EvaluateResult(
+        expr=x,
+        input_expr=x,
+        is_numeric=False,
+        sum_bound="n",
+        binomial_variable="k",
+        permutation_alias=True,
+    )
+    presentation = _render_evaluate_presentation(result, source_expression="x")
+    assert "n debe ser un entero no negativo para esta suma simbólica." in presentation["warnings"]
+    assert "k debe ser un entero no negativo para combinaciones." in presentation["warnings"]
+    assert any("P(n,r) se interpreta como permutaciones" in w for w in presentation["warnings"])
+
+
+def test_evaluate_endpoint_maps_domain_errors_to_public_response(monkeypatch):
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "0")
+
+    def _raise_domain_error(*args, **kwargs):
+        raise evaluate_service.DomainErrorResult("controlled domain-error fixture")
+
+    monkeypatch.setattr(evaluate_service, "evaluate", _raise_domain_error)
+    response = _evaluate(expression="1")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is False
+    assert body["operation"] == "evaluate"
+    assert body["error_code"] == "DOMAIN_ERROR"
+    assert body["request_id"]
+
+
+def test_evaluate_endpoint_maps_controlled_timeout_without_claiming_sg28(monkeypatch):
+    from app.services.interruptible import ComputationTimedOut
+
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "0")
+
+    def _raise_controlled_timeout(*args, **kwargs):
+        raise ComputationTimedOut("controlled timeout-mapping fixture")
+
+    monkeypatch.setattr(evaluate_service, "evaluate", _raise_controlled_timeout)
+    response = _evaluate(expression="1")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is False
+    assert body["operation"] == "evaluate"
+    assert body["error_code"] == "TIMEOUT"
+    assert body["request_id"]

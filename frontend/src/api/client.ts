@@ -34,6 +34,7 @@ const ENDPOINT_TO_OPERATION: Record<KnownEndpoint, OperationType | null> = {
   "/evaluate": "evaluate",
   "/simplify": "simplify",
   "/factor": "factor",
+  "/partial-fractions": "partial_fractions",
   "/expand": "expand",
   "/solve": "solve",
   "/derivative": "derivative",
@@ -41,10 +42,15 @@ const ENDPOINT_TO_OPERATION: Record<KnownEndpoint, OperationType | null> = {
   "/matrix/operations": "matrix_operation",
   "/matrix/determinant": "matrix_determinant",
   "/matrix/inverse": "matrix_inverse",
+  "/matrix/adjugate": "matrix_adjugate",
+  "/matrix/cofactor": "matrix_cofactor",
+  "/matrix/solve-equation": "matrix_solve_equation",
   "/matrix/transpose": "matrix_transpose",
   "/matrix/power": "matrix_power",
   "/matrix/ref": "matrix_ref",
   "/matrix/rref": "matrix_rref",
+  "/matrix/lu": "matrix_lu",
+  "/matrix/gram-schmidt": "matrix_gram_schmidt",
   "/graph/2d": "graph_2d",
   "/solve/system": "solve_system",
   "/inequality": "inequality",
@@ -151,6 +157,7 @@ function isValidMathResponseShape(body: unknown): body is MathResponse {
 export async function callApi(
   endpoint: string,
   payload: Record<string, unknown>,
+  options?: { signal?: AbortSignal },
 ): Promise<MathResponse> {
   if (!isKnownEndpoint(endpoint)) {
     throw new UnknownEndpointError(endpoint);
@@ -158,19 +165,68 @@ export async function callApi(
 
   const startTime = performance.now();
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const externalSignal = options?.signal;
+  const abortFromCaller = () => controller.abort();
+  if (externalSignal?.aborted) controller.abort();
+  else externalSignal?.addEventListener("abort", abortFromCaller, { once: true });
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
 
-  let response: Response;
+  const cancelledByCaller = () => !timedOut && Boolean(externalSignal?.aborted);
+  const cancelledResponse = () => synthesizeErrorResponse(endpoint, "Cálculo cancelado por el usuario.", startTime);
   try {
-    response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
+    if (cancelledByCaller()) return cancelledResponse();
+    const response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
+
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch (error) {
+      if (cancelledByCaller()) return cancelledResponse();
+      if (timedOut) {
+        return synthesizeErrorResponse(
+          endpoint,
+          `La solicitud excedió el tiempo máximo de ${REQUEST_TIMEOUT_MS / 1000}s.`,
+          startTime,
+        );
+      }
+      return synthesizeErrorResponse(
+        endpoint,
+        `El servidor respondió con contenido no-JSON (HTTP ${response.status}).`,
+        startTime,
+      );
+    }
+
+    // Reject late responses even when a fetch adapter ignores abort.
+    if (cancelledByCaller()) return cancelledResponse();
+    if (timedOut) {
+      return synthesizeErrorResponse(
+        endpoint,
+        `La solicitud excedió el tiempo máximo de ${REQUEST_TIMEOUT_MS / 1000}s.`,
+        startTime,
+      );
+    }
+
+    if (!isValidMathResponseShape(body)) {
+      return synthesizeErrorResponse(
+        endpoint,
+        "La respuesta del servidor no cumple el contrato MathResponse esperado.",
+        startTime,
+      );
+    }
+
+    return body;
   } catch (error) {
-    clearTimeout(timeoutId);
-    if (error instanceof DOMException && error.name === "AbortError") {
+    if (cancelledByCaller()) return cancelledResponse();
+    if (timedOut) {
       return synthesizeErrorResponse(
         endpoint,
         `La solicitud excedió el tiempo máximo de ${REQUEST_TIMEOUT_MS / 1000}s.`,
@@ -184,26 +240,6 @@ export async function callApi(
     );
   } finally {
     clearTimeout(timeoutId);
+    externalSignal?.removeEventListener("abort", abortFromCaller);
   }
-
-  let body: unknown;
-  try {
-    body = await response.json();
-  } catch {
-    return synthesizeErrorResponse(
-      endpoint,
-      `El servidor respondió con contenido no-JSON (HTTP ${response.status}).`,
-      startTime,
-    );
-  }
-
-  if (!isValidMathResponseShape(body)) {
-    return synthesizeErrorResponse(
-      endpoint,
-      "La respuesta del servidor no cumple el contrato MathResponse esperado.",
-      startTime,
-    );
-  }
-
-  return body;
 }

@@ -112,3 +112,88 @@ def test_solve_parse_error_propagates():
     assert body["success"] is False
     assert body["error_code"] == "PARSE_ERROR"
     assert body["operation"] == "solve"
+
+# S19 targeted coverage r292
+def test_absolute_value_steps_returns_both_real_branches():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x - 1), sympy.Integer(2), evaluate=False)
+    result = solve_service._absolute_value_steps(equation, x)
+    assert result is not None
+    steps, solutions = result
+    assert set(solutions) == {sympy.Integer(-1), sympy.Integer(3)}
+    assert steps[0].rule == "AbsoluteValueDomain"
+
+
+def test_absolute_value_equidistance_returns_midpoint_for_distinct_centers():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x - 1), sympy.Abs(x - 5), evaluate=False)
+    result = solve_service._absolute_value_equidistance_steps(equation, x)
+    assert result is not None
+    steps, solutions = result
+    assert solutions == [sympy.Integer(3)]
+    assert steps[0].rule == "AbsoluteValueEquidistance"
+
+
+def test_absolute_value_case_solver_keeps_only_roots_in_their_regions():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(
+        sympy.Abs(x) + sympy.Abs(x - 2), sympy.Integer(5), evaluate=False
+    )
+    result = solve_service._absolute_value_cases_result(equation, x, [])
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.EQUATION_SOLUTIONS
+    assert {sympy.sympify(solution.text) for solution in result.solutions} == {
+        sympy.Rational(-3, 2), sympy.Rational(7, 2)
+    }
+    assert "pertenece al tramo" in result.steps[0].description
+
+
+def test_absolute_value_case_solver_reports_empty_real_solution_set():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(
+        sympy.Abs(x) + sympy.Abs(x - 2), sympy.Integer(1), evaluate=False
+    )
+    result = solve_service._absolute_value_cases_result(equation, x, [])
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.CONTRADICTION
+    assert result.solutions == []
+
+
+def test_real_radical_value_preserves_odd_real_roots_and_rejects_even_negative():
+    assert solve_service._real_radical_value(sympy.Integer(-8), 3) == sympy.Integer(-2)
+    assert solve_service._real_radical_value(sympy.Integer(-4), 2) is None
+
+
+def test_radical_case_solver_rejects_candidate_that_fails_original_equation():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "sqrt(x)=x-2", allow_equation=True
+    )
+    result = solve_service._radical_cases_result(equation, x, [])
+    assert result is not None
+    assert {sympy.sympify(solution.text) for solution in result.solutions} == {
+        sympy.Integer(4)
+    }
+    assert any("se descarta" in step.description for step in result.steps)
+
+
+def test_rational_domain_identity_preserves_original_denominator_exclusion():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree("x/x=1", allow_equation=True)
+    result = solve_service._rational_domain_result(equation, x, [sympy.Integer(0)], [])
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.IDENTITY
+    assert result.steps[0].rule == "DomainRestriction"
+    assert "x≠0" in result.steps[0].description
+
+
+def test_rational_domain_solver_discards_root_excluded_by_original_denominator():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "((x-1)**2)/(x-1)=0", allow_equation=True
+    )
+    result = solve_service._rational_domain_result(equation, x, [sympy.Integer(1)], [])
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.CONTRADICTION
+    assert result.solutions == []
+    assert "no pertenece al dominio" in result.steps[0].description

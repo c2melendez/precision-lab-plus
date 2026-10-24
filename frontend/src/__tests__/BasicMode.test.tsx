@@ -73,7 +73,7 @@ describe("BasicMode", () => {
     expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
       expression: "2+2",
       angle_unit: "rad",
-    });
+    }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
   });
 
   it("incluye substitutions cuando el usuario añade una fila", async () => {
@@ -94,7 +94,7 @@ describe("BasicMode", () => {
       expression: "x+1",
       angle_unit: "rad",
       substitutions: { x: "3" },
-    });
+    }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
   });
 
   it("no llama a la API con una expresión vacía (payload inválido)", () => {
@@ -119,7 +119,7 @@ describe("BasicMode", () => {
     expect(mockedCallApi).toHaveBeenCalledWith("/solve", {
       equation: "2x+3=7",
       angle_unit: "rad",
-    });
+    }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
   });
 
   it("enruta a /inequality cuando el campo tiene < o >", async () => {
@@ -129,7 +129,7 @@ describe("BasicMode", () => {
 
     await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
 
-    expect(mockedCallApi).toHaveBeenCalledWith("/inequality", { inequality: "x+3>0" });
+    expect(mockedCallApi).toHaveBeenCalledWith("/inequality", { inequality: "x+3>0" }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
   });
 
   it("enruta a /solve/system cuando el campo tiene un entorno \\begin{cases}", async () => {
@@ -324,4 +324,260 @@ describe("BasicMode", () => {
     fireEvent.click(screen.getByLabelText("derivada"));
     expect(useUIStore.getState().activeMode).toBe("basic");
   });
+  it("SG29: ignora una respuesta anterior que llega después del cálculo más reciente", async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecond = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "1+1" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "2+2" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    resolveSecond({ success: true, operation: "evaluate", request_id: "new", result_text: "4", result_latex: "4", result_approx: 4, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("4").length).toBeGreaterThan(0));
+    resolveFirst({ success: true, operation: "evaluate", request_id: "old", result_text: "2", result_latex: "2", result_approx: 2, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.queryByText("2")).not.toBeInTheDocument());
+    expect(screen.getAllByText("4").length).toBeGreaterThan(0);
+  });
+
+  it("SG29: también descarta un error antiguo después de una respuesta reciente", async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecond = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "1+1" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "2+2" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    resolveSecond({ success: true, operation: "evaluate", request_id: "new", result_text: "4", result_latex: "4", result_approx: 4, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("4").length).toBeGreaterThan(0));
+    resolveFirst({ success: false, operation: "evaluate", request_id: "old", error_code: "PARSE_ERROR", error_message: "Error anterior SG29", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.queryByText("Error anterior SG29")).not.toBeInTheDocument());
+    expect(screen.getAllByText("4").length).toBeGreaterThan(0);
+  });
+
+  it("SG29: dos solicitudes /solve fuera de orden preservan la ecuación más reciente", async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecond = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "x=2" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "x=4" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/solve", { equation: "x=2", angle_unit: "rad" }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/solve", { equation: "x=4", angle_unit: "rad" }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
+    resolveSecond({ success: true, operation: "solve", request_id: "new", result_text: "SG29_SOLVE_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("SG29_SOLVE_NEW")[0]).toBeInTheDocument());
+    resolveFirst({ success: true, operation: "solve", request_id: "old", result_text: "SG29_SOLVE_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_SOLVE_OLD")).not.toBeInTheDocument();
+    expect(screen.getAllByText("SG29_SOLVE_NEW")[0]).toBeInTheDocument();
+  });
+
+  it("SG29: respuestas /inequality fuera de orden preservan el resultado reciente", async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecond = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "x>1" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "x>3" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/inequality", { inequality: "x>1" }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/inequality", { inequality: "x>3" }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
+    resolveSecond({ success: true, operation: "solve", request_id: "new", result_text: "SG29_INEQ_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("SG29_INEQ_NEW").length).toBeGreaterThan(0));
+    resolveFirst({ success: true, operation: "solve", request_id: "old", result_text: "SG29_INEQ_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_INEQ_OLD")).not.toBeInTheDocument();
+    expect(screen.getAllByText("SG29_INEQ_NEW").length).toBeGreaterThan(0);
+  });
+
+  it("SG29: dos derivadas fuera de orden mantienen el resultado más reciente", async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecond = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "\\frac{d}{dx}(x^2)" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "\\frac{d}{dx}(x^3)" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/derivative", { expression: "(x^2)", variable: "x", order: 1 });
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/derivative", { expression: "(x^3)", variable: "x", order: 1 });
+    resolveSecond({ success: true, operation: "derivative", request_id: "new", result_text: "SG29_DERIV_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("SG29_DERIV_NEW").length).toBeGreaterThan(0));
+    resolveFirst({ success: true, operation: "derivative", request_id: "old", result_text: "SG29_DERIV_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_DERIV_OLD")).not.toBeInTheDocument();
+    expect(screen.getAllByText("SG29_DERIV_NEW").length).toBeGreaterThan(0);
+  });
+
+
+  it("SG29: dos integrales fuera de orden mantienen el resultado más reciente", async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecond = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "\\int_{0}^{1} x^2\\,dx" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "\\int_{0}^{2} x^2\\,dx" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/integral", {
+      expression: "x^2", variable: "x", lower_bound: "0", upper_bound: "1",
+    });
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/integral", {
+      expression: "x^2", variable: "x", lower_bound: "0", upper_bound: "2",
+    });
+    resolveSecond({ success: true, operation: "integral", request_id: "new", result_text: "SG29_INTEGRAL_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("SG29_INTEGRAL_NEW").length).toBeGreaterThan(0));
+    resolveFirst({ success: true, operation: "integral", request_id: "old", result_text: "SG29_INTEGRAL_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_INTEGRAL_OLD")).not.toBeInTheDocument();
+    expect(screen.getAllByText("SG29_INTEGRAL_NEW").length).toBeGreaterThan(0);
+  });
+
+
+  it("SG29: una integral reciente no puede ser sustituida por una derivada anterior", async () => {
+    let resolveDerivative!: (value: any) => void;
+    let resolveIntegral!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveDerivative = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveIntegral = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "\\frac{d}{dx}(x^2)" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "\\int_{0}^{1} x^2\\,dx" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(mockedCallApi.mock.calls[0][0]).toBe("/derivative");
+    expect(mockedCallApi.mock.calls[1][0]).toBe("/integral");
+    resolveIntegral({ success: true, operation: "integral", request_id: "new", result_text: "SG29_CROSS_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("SG29_CROSS_NEW").length).toBeGreaterThan(0));
+    resolveDerivative({ success: true, operation: "derivative", request_id: "old", result_text: "SG29_CROSS_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_CROSS_OLD")).not.toBeInTheDocument();
+    expect(screen.getAllByText("SG29_CROSS_NEW").length).toBeGreaterThan(0);
+  });
+
+
+  it("SG29: un error tardío de derivada no sustituye una integral reciente", async () => {
+    let resolveDerivative!: (value: any) => void;
+    let resolveIntegral!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveDerivative = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveIntegral = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "\\frac{d}{dx}(x^2)" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "\\int_{0}^{1} x^2\\,dx" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    resolveIntegral({ success: true, operation: "integral", request_id: "new", result_text: "SG29_CROSS_ERROR_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("SG29_CROSS_ERROR_NEW").length).toBeGreaterThan(0));
+    resolveDerivative({ success: false, operation: "derivative", request_id: "old", error_code: "PARSE_ERROR", error_message: "SG29_CROSS_STALE_ERROR", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_CROSS_STALE_ERROR")).not.toBeInTheDocument();
+    expect(screen.getAllByText("SG29_CROSS_ERROR_NEW").length).toBeGreaterThan(0);
+  });
+
+
+  it("SG29: finalizar la solicitud obsoleta no apaga la carga de la solicitud vigente", async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveSecond = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "1+1" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "2+2" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(useUIStore.getState().isLoading).toBe(true);
+    resolveFirst({ success: true, operation: "evaluate", request_id: "old", result_text: "2", result_latex: "2", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(useUIStore.getState().isLoading).toBe(true));
+    resolveSecond({ success: true, operation: "evaluate", request_id: "new", result_text: "4", result_latex: "4", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(useUIStore.getState().isLoading).toBe(false));
+    expect(screen.getAllByText("4").length).toBeGreaterThan(0);
+  });
+
+
+  it("SG29: respuesta matricial obsoleta no sustituye el cálculo más reciente", async () => {
+    let resolveMatrix!: (value: any) => void;
+    let resolveRecent!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveMatrix = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveRecent = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "\\det\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "2+2" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(mockedCallApi).toHaveBeenNthCalledWith(1, "/matrix/determinant", { matrix: [["1", "2"], ["3", "4"]] });
+    expect(mockedCallApi).toHaveBeenNthCalledWith(2, "/evaluate", { expression: "2+2", angle_unit: "rad" }, expect.objectContaining({ signal: expect.any(AbortSignal) }));
+    resolveRecent({ success: true, operation: "evaluate", request_id: "new", result_text: "SG29_MATRIX_NEW", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(screen.getAllByText("SG29_MATRIX_NEW").length).toBeGreaterThan(0));
+    resolveMatrix({ success: true, operation: "matrix_operation", request_id: "old", result_type: "scalar", result_text: "SG29_MATRIX_OLD", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    expect(screen.queryByText("SG29_MATRIX_OLD")).not.toBeInTheDocument();
+    expect(screen.getAllByText("SG29_MATRIX_NEW").length).toBeGreaterThan(0);
+  });
+
+
+  it("SG29: una respuesta matricial antigua no apaga la carga de una evaluación pendiente", async () => {
+    let resolveMatrix!: (value: any) => void;
+    let resolveEvaluation!: (value: any) => void;
+    mockedCallApi
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveMatrix = resolve; }))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveEvaluation = resolve; }));
+    render(<BasicMode />);
+    const input = screen.getByLabelText("Expresión");
+    const form = screen.getByRole("button", { name: "Evaluar" }).closest("form")!;
+    fireEvent.change(input, { target: { value: "\\det\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}" } });
+    fireEvent.submit(form);
+    fireEvent.change(input, { target: { value: "2+2" } });
+    fireEvent.submit(form);
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalledTimes(2));
+    expect(useUIStore.getState().isLoading).toBe(true);
+    resolveMatrix({ success: false, operation: "matrix_operation", request_id: "old", error_message: "SG29_MATRIX_STALE_ERROR", steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(useUIStore.getState().isLoading).toBe(true));
+    expect(screen.queryByText("SG29_MATRIX_STALE_ERROR")).not.toBeInTheDocument();
+    resolveEvaluation({ success: true, operation: "evaluate", request_id: "new", result_text: "SG29_MATRIX_RECENT", result_latex: null, steps: [], has_detailed_steps: false, warnings: [], duration_ms: 1 } as never);
+    await waitFor(() => expect(useUIStore.getState().isLoading).toBe(false));
+    expect(screen.getAllByText("SG29_MATRIX_RECENT").length).toBeGreaterThan(0);
+  });
+
 });

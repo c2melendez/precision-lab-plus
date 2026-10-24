@@ -1,0 +1,71 @@
+name: SG28 Independent Runner Preflight
+
+on:
+  push:
+    branches: [qa/syntax-audit-in625-a1]
+    paths:
+      - '.github/workflows/sg28-independent-runner-preflight.yml'
+      - 'backend/app/services/sg28_*'
+      - 'backend/app/services/distributed_*'
+      - 'backend/tests/test_sg28_*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host_identity:
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [a, b]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Capture disposable runner identity (not DIST acceptance)
+        env:
+          NODE: ${{ matrix.node }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, pathlib, socket
+          boot = pathlib.Path("/proc/sys/kernel/random/boot_id")
+          raw = boot.read_text().strip() if boot.exists() else socket.gethostname()
+          result = {
+              "node": os.environ["NODE"],
+              "sha": os.environ["GIT_SHA"],
+              "runner_fingerprint": hashlib.sha256(raw.encode()).hexdigest(),
+          }
+          pathlib.Path("sg28-node.json").write_text(json.dumps(result), encoding="utf-8")
+          print("preflight identity captured for node", result["node"])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sg28-node-${{ matrix.node }}
+          path: sg28-node.json
+          retention-days: 3
+
+  verify_distinct_runners:
+    needs: host_identity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: sg28-node-*
+          path: identities
+          merge-multiple: false
+      - name: Verify distinct runner boots, not global admission
+        env:
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import json, os, pathlib
+          rows = [json.loads(p.read_text(encoding="utf-8")) for p in pathlib.Path("identities").glob("*/sg28-node.json")]
+          assert len(rows) == 2, "expected two runner identity artifacts"
+          assert {r["node"] for r in rows} == {"a", "b"}
+          assert all(r["sha"] == os.environ["GIT_SHA"] for r in rows)
+          assert len({r["runner_fingerprint"] for r in rows}) == 2, "hosts do not have distinct boot identities"
+          print("SG28 host-isolation preflight PASS: two distinct runner boot identities; DIST-01..08 remain BLOCKED")
+          PY

@@ -18,6 +18,7 @@ export const KNOWN_ENDPOINTS = [
   "/evaluate",
   "/simplify",
   "/factor",
+  "/partial-fractions",
   "/expand",
   "/solve",
   "/derivative",
@@ -25,11 +26,16 @@ export const KNOWN_ENDPOINTS = [
   "/matrix/operations",
   "/matrix/determinant",
   "/matrix/inverse",
+  "/matrix/adjugate",
+  "/matrix/cofactor",
+  "/matrix/solve-equation",
   "/matrix/transpose",
   "/matrix/power",
   // --- Fase C (spec UX estilo ClassCalc §4) ---
   "/matrix/ref",
   "/matrix/rref",
+  "/matrix/lu",
+  "/matrix/gram-schmidt",
   // P5 (spec v2 §6) — faltaba en el cierre original del Parche 5, la
   // agrego ahora al notar que esta whitelist es mantenida a mano (no
   // autogenerada, a diferencia de types/api.ts) y sí puedo/debo tocarla

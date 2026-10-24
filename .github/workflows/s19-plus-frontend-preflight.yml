@@ -1,0 +1,52 @@
+name: S19 Plus Frontend Initial Run
+
+# Diagnose the frontend harness without repeating backend/Lite mutation campaigns.
+# A successful dry run is not a mutation score or a global S19 PASS.
+on:
+  push:
+    branches: [qa/syntax-audit-in625-a1]
+    paths:
+      - 'frontend/src/components/NaturalMathField.tsx'
+      - 'frontend/src/__tests__/in625G1aKeyboardContract.audit.test.ts'
+      - 'frontend/src/__tests__/NaturalMathFieldInputState.test.tsx'
+      - 'frontend/stryker.config.json'
+      - '.github/workflows/s19-plus-frontend-preflight.yml'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Reason for revalidating the initial run
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  mutation-frontend-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reuse only verified evidence for this checkout
+        id: certification_guard
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REVALIDATION_REASON: ${{ inputs.reason }}
+        run: python3 scripts/certification/ci_guard.py --profile plus-mutation-preflight
+      - uses: actions/setup-node@v4
+        if: steps.certification_guard.outputs.skip != 'true'
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install pinned mutation harness
+        if: steps.certification_guard.outputs.skip != 'true'
+        working-directory: frontend
+        run: |
+          npm ci
+          npm install --no-save --package-lock=false @stryker-mutator/core@10.0.0 @stryker-mutator/vitest-runner@10.0.0
+      - name: Stryker frontend initial run
+        if: steps.certification_guard.outputs.skip != 'true'
+        working-directory: frontend
+        run: npx stryker run stryker.config.json --dryRunOnly

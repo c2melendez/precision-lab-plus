@@ -29,7 +29,13 @@ evidencia de (1) y (2) verificada contra el código real.
 
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
+import multiprocessing as mp
+import os
 import re
+import threading
+import atexit
+from multiprocessing import TimeoutError as MultiprocessingTimeout
+from multiprocessing import pool as mp_pool
 from tokenize import TokenError
 
 import sympy
@@ -63,6 +69,37 @@ class ODEParseError(ValueError):
 
 class ODEUnsupportedError(ValueError):
     """EDO bien formada pero fuera del alcance resoluble -> ErrorCode.UNSUPPORTED_OPERATION."""
+
+
+class ODETimeoutError(TimeoutError):
+    """La resolución excedió el presupuesto de tiempo -> ErrorCode.TIMEOUT.
+
+    `sympy.dsolve()` no tiene cancelación cooperativa: una ecuación exacta de
+    primer orden con polinomios de grado alto puede quedar en un bucle interno
+    indefinido. Por eso la resolución corre en un proceso hijo descartable con
+    plazo acotado (ver `_solve_bounded`), y este error solo se usa cuando el
+    plazo se agota y el hijo se termina.
+    """
+
+
+# Presupuesto por resolución. Se mantiene corto porque es una calculadora
+# interactiva; las filas que lo exceden se registran como capability gap, nunca
+# como cálculo bloqueante del servidor.
+DEFAULT_SOLVE_TIMEOUT_SECONDS = 8.0
+MAX_SOLVE_TIMEOUT_SECONDS = 30.0
+
+
+def _solve_timeout_seconds() -> float:
+    raw = os.getenv("ODE_SOLVE_TIMEOUT_SECONDS")
+    if raw is None:
+        return DEFAULT_SOLVE_TIMEOUT_SECONDS
+    try:
+        value = float(raw)
+    except ValueError:
+        return DEFAULT_SOLVE_TIMEOUT_SECONDS
+    if not 1.0 <= value <= MAX_SOLVE_TIMEOUT_SECONDS:
+        return DEFAULT_SOLVE_TIMEOUT_SECONDS
+    return value
 
 
 @dataclass
@@ -217,18 +254,8 @@ def _parse_ode_text(text: str) -> Tuple[sympy.Eq, Optional[dict], int]:
     return equation, ics, order
 
 
-def solve_ode(text: str) -> ODEResult:
-    """Resuelve una EDO en notación prima, con condición inicial opcional
-    en el mismo campo. Usa `sympy.dsolve()` — casos separables, lineales
-    de primer orden, y lineales de orden superior con coeficientes
-    constantes están dentro de lo que `dsolve` resuelve nativamente
-    (spec sección 2.1, "DETERMINADO que es viable").
-
-    Cualquier EDO que dsolve no pueda resolver (fuera de los tipos
-    cubiertos, o sympy.dsolve levanta NotImplementedError) se traduce a
-    ODEUnsupportedError -> ErrorCode.UNSUPPORTED_OPERATION, nunca un
-    resultado inventado ni un error crudo del motor (spec 2.1).
-    """
+def _solve_local(text: str) -> ODEResult:
+    """Resolución sin aislamiento (lógica histórica; también corre en el hijo)."""
     equation, ics, order = _parse_ode_text(text)
 
     try:
@@ -257,3 +284,112 @@ def solve_ode(text: str) -> ODEResult:
         solution=solution,
         has_initial_condition=ics is not None,
     )
+
+
+def _solve_worker(text: str) -> Tuple[str, object]:
+    """Entrada del proceso hijo: devuelve un resultado serializable.
+
+    No propaga excepciones (el `Pool` las reenviaría con la traza del hijo);
+    devuelve una tupla etiquetada que el padre traduce al tipo público.
+    """
+    try:
+        result = _solve_local(text)
+    except ODEParseError as exc:
+        return ("parse_error", str(exc))
+    except ODEUnsupportedError as exc:
+        return ("unsupported", str(exc))
+    except Exception as exc:  # noqa: BLE001 - frontera de proceso
+        return ("internal", f"{type(exc).__name__}: {exc}")
+    return (
+        "ok",
+        (sympy.srepr(result.solution), result.order, result.has_initial_condition),
+    )
+
+
+_pool: Optional[mp_pool.Pool] = None
+_pool_lock = threading.Lock()
+atexit.register(lambda: _discard_pool())
+
+
+def _get_pool() -> "mp_pool.Pool":
+    global _pool
+    if _pool is None:
+        # `spawn` en todas las plataformas: el hijo importa solo
+        # `app.services.ode_service` (sin heredar hilos, event loop ni el
+        # tracer de coverage del proceso servidor). El coste es un arranque
+        # en frío por worker (~1 s una vez); después el pool queda caliente.
+        _pool = mp.get_context("spawn").Pool(processes=2)
+    return _pool
+
+
+def _discard_pool() -> None:
+    """Termina el pool tras un plazo agotado: el hijo colgado no se puede
+    cancelar de forma cooperativa, así que se descarta el proceso entero."""
+    global _pool
+    with _pool_lock:
+        pool, _pool = _pool, None
+    if pool is not None:
+        pool.terminate()
+        pool.join()
+
+
+def _solve_bounded(text: str) -> ODEResult:
+    global _pool
+    with _pool_lock:
+        pool = _get_pool()
+        pending = pool.apply_async(_solve_worker, (text,))
+    try:
+        status, payload = pending.get(timeout=_solve_timeout_seconds())
+    except MultiprocessingTimeout as exc:
+        _discard_pool()
+        raise ODETimeoutError(
+            "La ecuación diferencial excedió el límite de tiempo de resolución. "
+            "Acota la ecuación o usa otra forma equivalente."
+        ) from exc
+    except (mp.ProcessError, OSError, EOFError) as exc:
+        _discard_pool()
+        raise ODEUnsupportedError(
+            "No se pudo completar la resolución de esta ecuación diferencial."
+        ) from exc
+
+    if status == "parse_error":
+        raise ODEParseError(str(payload))
+    if status == "unsupported":
+        raise ODEUnsupportedError(str(payload))
+    if status != "ok":
+        raise ODEUnsupportedError(
+            "No se pudo resolver esta ecuación diferencial."
+        )
+    solution_srepr, order, has_initial_condition = payload
+    solution = sympy.sympify(solution_srepr)
+    return ODEResult(
+        input_text=text,
+        order=int(order),
+        solution=solution,
+        has_initial_condition=bool(has_initial_condition),
+    )
+
+
+def solve_ode(text: str) -> ODEResult:
+    """Resuelve una EDO en notación prima, con condición inicial opcional
+    en el mismo campo. Usa `sympy.dsolve()` — casos separables, lineales
+    de primer orden, y lineales de orden superior con coeficientes
+    constantes están dentro de lo que `dsolve` resuelve nativamente
+    (spec sección 2.1, "DETERMINADO que es viable").
+
+    Cualquier EDO que dsolve no pueda resolver (fuera de los tipos
+    cubiertos, o sympy.dsolve levanta NotImplementedError) se traduce a
+    ODEUnsupportedError -> ErrorCode.UNSUPPORTED_OPERATION, nunca un
+    resultado inventado ni un error crudo del motor (spec 2.1).
+
+    La resolución se ejecuta en un proceso hijo con plazo acotado
+    (`ODE_SOLVE_TIMEOUT_SECONDS`, por defecto 8 s) porque `dsolve` puede no
+    terminar en ecuaciones exactas de grado alto (evidencia: EDCX ED-X-02,
+    >90 s sin respuesta). Agotar el plazo devuelve `ODETimeoutError` ->
+    ErrorCode.TIMEOUT y descarta el proceso, en vez de bloquear el worker
+    del servidor. `ODE_SOLVE_ISOLATION=0` desactiva el aislamiento solo para
+    depuración local.
+    """
+    if os.getenv("ODE_SOLVE_ISOLATION", "1") == "0":
+        return _solve_local(text)
+    return _solve_bounded(text)

@@ -61,6 +61,8 @@ def _build_response(
     result,
 ) -> MathResponse:
     warnings = []
+    # Algebra114 AS-CONV: advertencias de convención emitidas por el servicio.
+    warnings.extend(getattr(result, "warnings", []) or [])
     result_latex = _safe_latex(result.result_expr)
     if result_latex is None:
         warnings.append(
@@ -80,7 +82,11 @@ def _build_response(
         input_text=payload.expression,
         input_latex=input_latex,
         result_latex=result_latex,
-        result_text=_safe_text(result.result_expr),
+        result_text=(
+            result.display_text
+            if getattr(result, "display_text", None) is not None
+            else _safe_text(result.result_expr)
+        ),
         steps=result.steps,
         has_detailed_steps=result.has_detailed_steps,
         warnings=warnings,
@@ -125,6 +131,19 @@ async def factor(payload: ExpressionRequest, request: Request) -> MathResponse:
     return _build_response(request, OperationType.FACTOR, payload, result)
 
 
+@router.post("/partial-fractions", response_model=MathResponse)
+async def partial_fractions(payload: ExpressionRequest, request: Request) -> MathResponse:
+    """Additive HTTP exposure for the certified algebra-service operation."""
+    log_request_event(request.state.request_id, "partial_fractions_request", input_text=payload.expression)
+    try:
+        result = algebra_service.partial_fraction_expression(payload.expression)
+    except parsing.ParseSecurityError as exc:
+        return _error(request, OperationType.PARTIAL_FRACTIONS, ErrorCode.PARSE_ERROR, str(exc))
+    except ComplexityLimitError as exc:
+        return _error(request, OperationType.PARTIAL_FRACTIONS, ErrorCode.COMPLEXITY_LIMIT, str(exc))
+    return _build_response(request, OperationType.PARTIAL_FRACTIONS, payload, result)
+
+
 @router.post("/solve", response_model=MathResponse)
 async def solve(payload: SolveRequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "solve_request", input_text=payload.equation)
@@ -138,6 +157,8 @@ async def solve(payload: SolveRequest, request: Request) -> MathResponse:
         return _error(request, OperationType.SOLVE, ErrorCode.COMPLEXITY_LIMIT, str(exc))
     except solve_service.AmbiguousVariableError as exc:
         return _error(request, OperationType.SOLVE, ErrorCode.AMBIGUOUS_VARIABLE, str(exc))
+    except NotImplementedError as exc:
+        return _error(request, OperationType.SOLVE, ErrorCode.UNSUPPORTED_OPERATION, str(exc))
 
     warnings = list(result.warnings)
     result_data = result.solutions if result.result_type == ResultType.EQUATION_SOLUTIONS else None
