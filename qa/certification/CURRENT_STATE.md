@@ -1,8 +1,8 @@
 ## 2026-10-24 UTC — r289: discrepancia de alcance S19 backend
 
-- El baseline normativo `qa/s19/BASELINE_MUTATION.md` fija como operativo 1,028 mutantes (590 killed, 371 survived, 58 no tests, 9 timeout; score killed 57.39%). El artefacto actual de run 40069907892 contiene 2,309 estados (0 killed, 2,136 survived, 159 no tests, 14 timeout).
-- La diferencia de inventario impide comparar scores o proponer un umbral nuevo sin reconciliar alcance/configuración. Se documentó en `S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md` (commit `412e8c89177cd7b38c0f60b69ca33bb93f627b22`).
-- Siguiente paso: recuperar y comparar el artefacto baseline histórico 10740671311/run 35838270384 contra el artefacto actual; verificar versión/harness, inventario de mutantes, configuración efectiva y estados. No repetir S19 completo ni cambiar producto.
+- El baseline normativo `qa/s19/BASELINE_MUTATION.md` fija como operativo 1,028 mutantes (590 killed, 371 survived, 58 no tests, 9 timeout; score killed 57.39%). El artefacto actual de run 40069907892 contiene 2,309 entradas listadas: 2,136 survived, 159 no tests, 14 timeout. `mutmut results` no incluye necesariamente killed; no se puede inferir cero killed ni calcular el score actual desde ese listado.
+- El crecimiento de entradas listadas de 438 a 2,309 requiere reconciliar alcance/configuración; el artefacto actual no proporciona total/killed comparables. Se documentó en `S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md` (commit `412e8c89177cd7b38c0f60b69ca33bb93f627b22`) y se corrigió la interpretación inicial de mutmut results.
+- Artefacto baseline recuperado: ID 10740671311/run 35838270384, ZIP digest sha256:9a2b4c6790603454d965f35be8c27edc47dc3c802fb5eb1edbb15dcc21d17e44. Siguiente paso: obtener resumen completo de la campaña actual con killed/total y comparar versión/harness, inventario, configuración efectiva y estados. No repetir S19 completo ni cambiar producto.
 - S19 backend sigue BLOCKED; SG28 REVIEW_REQUIRED, S18 CANCELLED por infraestructura, PR #29 abierto, certificación global OPEN. Sin nuevas Actions.
 
 ---
