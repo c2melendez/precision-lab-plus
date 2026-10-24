@@ -68,3 +68,15 @@ Resolver README de main y luego `continuity.json` + `CONTINUITY.md`. Verificar H
 3. Si no hay run de referencia, enumerar ramas y buscar el índice y README de certificación. Elegir solo con evidencia bilateral consistente y vigente. Si hay varios candidatos incompatibles, continuar la inspección y aclarar la ambigüedad antes de publicar; no escoger por memoria del chat o número de revisión aislado.
 4. No reiniciar desde el estado S26 histórico de main ni repetir pruebas por ausencia del puntero. No cambiar default_branch, mover referencias ni lanzar CI para descubrir dónde estamos.
 5. El puntero en README predeterminado puede corregirse mediante un cambio documental acotado; mientras falte, la recuperación por Actions + índices bilaterales verificados mantiene la continuidad. Esta regla es genérica, no un snapshot de un caso o SHA.
+
+
+## Continuidad operativa r292 — 2026-10-24
+
+**HEAD técnico verificado:** `561547252456b30124f4f7a1db06347ee0731079`. La documentación de continuidad se actualiza después en commits separados; no confundir esos commits documentales con el SHA sobre el que corrieron los gates.
+
+- CI [40098526446](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526446), cumulative [40098526501](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526501), Playwright [40098526513](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526513) y S19 focalizado [40098526609](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526609) concluyeron SUCCESS sobre ese SHA.
+- S19 focalizado: 1,666 mutantes, 801 killed, 863 survived, 2 timeout. El workflow está verde, pero la aceptación S19 continúa BLOCKED; no ejecutar la campaña completa ni interpretar estos números como comparables directamente con el baseline histórico.
+- S18 [40098526464](https://github.com/c2melendez/precision-lab-plus/actions/runs/40098526464) fue cancelado por shutdown signal del runner durante `qa/s18/run_differential.py`. Es un bloqueo de infraestructura, no un fallo funcional demostrado.
+- PR #29 sigue OPEN/DRAFT; certificación global OPEN. SECURITY-S25 global BLOCKED, AS-B-29 ON_HOLD y H2-SG28-DIST-01..08 BLOCKED.
+
+**Siguiente acción única:** diagnosticar/restablecer infraestructura S18 y ejecutar solo S18 una vez; no repetir los gates verdes anteriores. Después actualizar continuidad con evidencia exacta y revisar sobrevivientes S19 usando artefactos ya generados.
