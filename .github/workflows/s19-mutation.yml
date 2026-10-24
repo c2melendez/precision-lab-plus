@@ -60,7 +60,7 @@ jobs:
       - id: classify
         shell: bash
         run: |
-          if [[ "$GITHUB_EVENT_NAME" != "pull_request" ]]; then
+          if [[ "$GITHUB_EVENT_NAME" != "pull_request" && "$GITHUB_EVENT_NAME" != "workflow_call" ]]; then
             echo "scope=full" >> "$GITHUB_OUTPUT"
             exit 0
           fi
