@@ -22,10 +22,24 @@ El artefacto de 2026-10-24 registra **2,309 entradas en `mutmut-results.txt`**: 
 Antes de aprobar o imponer un nuevo umbral:
 
 1. Recuperar el artefacto baseline histórico `10740671311` del run `35838270384` y cotejar sus ficheros/reportes con el artefacto actual.
-2. **Completado en r289:** el log final aporta el resumen completo (971 killed, 2,136 survived, 159 no tests, 14 timeout; total 3,280). Comparar versión de Python, mutmut, configuración efectiva, módulos/archivos seleccionados, IDs/nombres de mutantes y categorías de estado; explicar la expansión de inventario por superficie.
+2. **Completado en r289:** el log final aporta el resumen completo (971 killed, 2,136 survived, 159 no tests, 14 timeout; total 3,280). La expansión se concentra en solve_service (+1,071 mutantes), parsing (+717), evaluate (+437) y ast_validator (+27); comparar mutantes sobrevivientes con las funciones añadidas y pruebas existentes.
 3. Explicar la diferencia entre los 1,028 mutantes del baseline y los 2,309 estados actuales; confirmar si el informe actual es de una campaña comparable y si el conteo se obtiene de estados finales únicos.
 4. Solo después proponer una política de score que preserve la definición histórica de killed y mantenga no-tests, timeout y equivalentes/exclusiones separados y auditables. Cualquier cambio de denominador/umbral debe tener justificación explícita y revisión responsable; no se fija aquí un umbral nuevo.
-5. Si el artefacto baseline ya no está disponible, documentar esa limitación y preparar una ejecución diagnóstica focalizada, no una repetición completa, una vez estabilizado el plan.
+5. Priorizar una revisión de pruebas dirigidas para las funciones añadidas de solve_service y evaluate, además de parsing; ejecutar solo una campaña focalizada cuando se haya definido el alcance y estén listas las pruebas, no repetir la campaña completa sin necesidad.
+
+## Actualización r289: comparación de inventario y cambios de código
+
+Se compararon las superficies mutadas entre SHA baseline `7568020f22534bbe41df722e82e7f18fa3a7e37a` y SHA actual `6e6a59ee556cf6bba60a40010ec707f05a01ca52`. La comparación del historial reporta ramas divergentes, por lo que se usan los datos por archivo solo como contexto y no como una comparación global lineal de commits.
+
+| Módulo | Líneas baseline → actual | Funciones baseline → actual | Mutantes baseline | Mutantes actuales | Score killed baseline → actual |
+|---|---:|---:|---:|---:|---:|
+| `services.solve_service` | 239 → 788 | 6 → 16 | 398 | 1,469 | 65.08% → 21.51% |
+| `services.parsing` | 715 → 982 | 19 → 24 | 564 | 1,281 | 51.24% → 42.00% |
+| `routers.evaluate` | 100 → 249 | 3 → 7 | 20 | 457 | 70.00% → 19.47% |
+| `services.ast_validator` | 130 → 147 | 3 → 3 | 46 | 73 | 60.87% → 38.36% |
+| **Total** | — | — | **1,028** | **3,280** | **57.39% → 29.60%** |
+
+El aumento no es un simple cambio de contador: `solve_service.py` creció 239→788 líneas e incorporó 10 funciones, incluidas ramas de valor absoluto, radicales y dominio; `parsing.py` creció 715→982 e incorporó cinco funciones de validación/parseo; `evaluate.py` creció 100→249 e incorporó cuatro funciones, incluida la ruta SG28 `_sg28_ci_slow_evaluate`. Esto explica parte del inventario nuevo, pero **no elimina la deuda de cobertura**: el score bajó en todos los módulos y las superficies nuevas requieren pruebas dirigidas.
 
 ## Actualización r289: interpretación del formato
 
