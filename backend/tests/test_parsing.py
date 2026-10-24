@@ -430,3 +430,92 @@ def test_chained_inequalities_accept_spaces_and_uppercase_middle(text, middle):
 @pytest.mark.parametrize("text", ["1<x<", "<x<3", "x<3", "1<x"])
 def test_chained_inequalities_reject_incomplete_or_simple_inputs(text):
     assert parsing.parse_chained_inequalities(text) is None
+
+
+# ---------------------------------------------------------------------------
+# S19 targeted coverage r299 - allowlist invocation forms and case sensitivity
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        r"\frac{1}{2}",
+        r"\dfrac{1}{2}",
+        r"\tfrac{1}{2}",
+        r"\cfrac{1}{2}",
+        r"\sqrt{1}",
+        r"\sin(1)",
+        r"\cos(1)",
+        r"\tan(1)",
+        r"\csc(1)",
+        r"\sec(1)",
+        r"\cot(1)",
+        r"\ln(1)",
+        r"\log(1)",
+        r"\exp(1)",
+        r"\left(1\right)",
+        r"\pi{1}",
+        r"\infty{1}",
+        r"\theta{1}",
+        r"\alpha{1}",
+        r"\beta{1}",
+        r"\gamma{1}",
+        r"\lambda{1}",
+        r"\zeta{1}",
+        r"\Delta{1}",
+        r"\Lambda{1}",
+        r"\Phi{1}",
+        r"\gcd(2,4)",
+        r"\min(1,2)",
+        r"\max(1,2)",
+        r"\pm(1)",
+        r"\le(1)",
+        r"\ge(1)",
+        r"\leq(1)",
+        r"\geq(1)",
+        r"\neq(1)",
+        r"\ne(1)",
+        r"\lt(1)",
+        r"\gt(1)",
+        r"\operatorname{abs}(1)",
+        r"\mathrm{1}",
+        r"\text{1}+x",
+        r"\lim{1}",
+        r"\int{1}",
+        r"\partial{1}",
+        r"\displaystyle{1}",
+    ],
+)
+def test_g3_allowlist_accepts_brace_or_paren_invocation(text):
+    parsing.validate_g3_structure(text)
+
+
+@pytest.mark.parametrize(
+    "text,command",
+    [
+        (r"\LEFT(1)", "LEFT"),
+        (r"\RIGHT(1)", "RIGHT"),
+        (r"\PM(1)", "PM"),
+        (r"\LE(1)", "LE"),
+        (r"\GE(1)", "GE"),
+        (r"\LEQ(1)", "LEQ"),
+        (r"\GEQ(1)", "GEQ"),
+        (r"\NEQ(1)", "NEQ"),
+        (r"\NE(1)", "NE"),
+        (r"\LT(1)", "LT"),
+        (r"\GT(1)", "GT"),
+        (r"\LIM(1)", "LIM"),
+        (r"\INT(1)", "INT"),
+        (r"\PARTIAL(1)", "PARTIAL"),
+        (r"\DISPLAYSTYLE(1)", "DISPLAYSTYLE"),
+    ],
+)
+def test_g3_allowlist_is_case_sensitive(text, command):
+    with pytest.raises(parsing.ParseSecurityError) as excinfo:
+        parsing.validate_g3_structure(text)
+    assert str(excinfo.value) == f"Comando desconocido: \\{command}."
+
+
+def test_g3_accepts_nested_balanced_braces():
+    parsing.validate_g3_structure(r"\frac{{x+1}}{2}")

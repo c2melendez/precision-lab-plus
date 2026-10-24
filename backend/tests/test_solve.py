@@ -9,6 +9,7 @@ import os
 
 os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
 
+import pytest
 import sympy
 from fastapi.testclient import TestClient
 
@@ -358,3 +359,260 @@ def test_rational_domain_keeps_valid_root_when_numerator_has_variable():
     assert result is not None
     assert result.result_type == solve_service.ResultType.EQUATION_SOLUTIONS
     assert [solution.text for solution in result.solutions] == ["2"]
+
+
+# S19 targeted coverage r299 - remaining branches of the certified real-domain helpers
+def test_absolute_value_steps_symbolic_radius_reports_conditional_branches():
+    x = sympy.Symbol("x")
+    b = sympy.Symbol("b")
+    equation = sympy.Eq(sympy.Abs(x - 1), b, evaluate=False)
+    steps, solutions = solve_service._absolute_value_steps(equation, x)
+    assert solutions == [b + 1, 1 - b]
+    assert steps[0].description == (
+        "Para |x-a| = b: si b < 0 no hay solución; si b = 0, x = a; "
+        "si b > 0, x = a ± b. Las dos expresiones son condicionales a b > 0."
+    )
+
+
+def test_absolute_value_steps_accepts_absolute_value_on_the_right():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(3, sympy.Abs(x - 1), evaluate=False)
+    steps, solutions = solve_service._absolute_value_steps(equation, x)
+    assert set(solutions) == {sympy.Integer(-2), sympy.Integer(4)}
+    assert steps[0].description == (
+        "Si b > 0, las dos ramas x = a + b y x = a - b dan las dos raíces reales."
+    )
+
+
+def test_absolute_value_steps_rejects_non_unit_slope():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(2 * x - 1), 3, evaluate=False)
+    assert solve_service._absolute_value_steps(equation, x) is None
+
+
+def test_absolute_value_steps_rejects_argument_without_variable():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x - x + 3), 3, evaluate=False)
+    assert solve_service._absolute_value_steps(equation, x) is None
+
+
+def test_absolute_value_steps_negative_radius_preserves_step_contract():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x - 1), -2, evaluate=False)
+    steps, solutions = solve_service._absolute_value_steps(equation, x)
+    assert solutions == []
+    assert steps[0].rule == "AbsoluteValueDomain"
+    assert steps[0].latex_before == sympy.latex(equation)
+
+
+def test_absolute_value_equidistance_reports_distinct_centers_description():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x - 1), sympy.Abs(x - 5), evaluate=False)
+    steps, solutions = solve_service._absolute_value_equidistance_steps(equation, x)
+    assert solutions == [sympy.Integer(3)]
+    assert steps[0].description == (
+        "Como a ≠ b, la única solución real es el punto medio x = (a+b)/2."
+    )
+    assert steps[0].latex_after == sympy.latex(sympy.Eq(x, sympy.Integer(3)))
+
+
+def test_absolute_value_equidistance_reports_symbolic_conditional_description():
+    x = sympy.Symbol("x")
+    a = sympy.Symbol("a")
+    b = sympy.Symbol("b")
+    equation = sympy.Eq(sympy.Abs(x - a), sympy.Abs(x - b), evaluate=False)
+    steps, solutions = solve_service._absolute_value_equidistance_steps(equation, x)
+    assert solutions == [(a + b) / 2]
+    assert steps[0].description == (
+        "Si a ≠ b, la única solución real es x = (a+b)/2; "
+        "si a = b, toda x real es solución. La raíz mostrada es condicional a a ≠ b."
+    )
+
+
+def test_absolute_value_equidistance_supports_negative_unit_slope():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(1 - x), sympy.Abs(x - 3), evaluate=False)
+    steps, solutions = solve_service._absolute_value_equidistance_steps(equation, x)
+    assert solutions == [sympy.Integer(2)]
+    assert steps[0].title == "Equidistancia en la recta real"
+
+
+def test_absolute_value_equidistance_rejects_non_unit_slopes():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(2 * x), sympy.Abs(x - 1), evaluate=False)
+    assert solve_service._absolute_value_equidistance_steps(equation, x) is None
+
+
+def test_absolute_value_equidistance_rejects_non_linear_argument():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.Abs(x ** 2), sympy.Abs(x - 1), evaluate=False)
+    assert solve_service._absolute_value_equidistance_steps(equation, x) is None
+
+
+def test_absolute_value_case_solver_assigns_roots_across_three_breakpoints():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(
+        sympy.Abs(x) + sympy.Abs(x - 2) + sympy.Abs(x - 4), 6, evaluate=False
+    )
+    result = solve_service._absolute_value_cases_result(equation, x, [])
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.EQUATION_SOLUTIONS
+    assert [solution.text for solution in result.solutions] == ["0", "4"]
+    description = result.steps[0].description
+    assert "En 0 ≤ x < 2: x = 0, pertenece al tramo y se acepta." in description
+    assert "En 2 ≤ x < 4: x = 4 no pertenece al tramo" in description
+    assert "En x ≥ 4: x = 4, pertenece al tramo y se acepta." in description
+    assert result.steps[0].title == "Análisis por casos del valor absoluto"
+    assert result.steps[0].rule == "AbsoluteValueCases"
+    assert result.has_detailed_steps is True
+
+
+def test_absolute_value_case_solver_contradiction_preserves_step_contract():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(
+        sympy.Abs(x) + sympy.Abs(x - 2), 1, evaluate=False
+    )
+    result = solve_service._absolute_value_cases_result(equation, x, [])
+    assert result is not None
+    assert result.steps[0].latex_after == r"\varnothing"
+    assert result.steps[0].rule == "AbsoluteValueCases"
+    assert "se descarta (raíz extraña)" in result.steps[0].description
+    assert result.has_detailed_steps is True
+    assert result.warnings == []
+
+
+def test_absolute_value_case_solver_rejects_constant_absolute_node():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(
+        sympy.Abs(x) + sympy.Abs(sympy.Integer(2), evaluate=False), 3, evaluate=False
+    )
+    assert solve_service._absolute_value_cases_result(equation, x, []) is None
+
+
+def test_absolute_value_case_solver_rejects_non_polynomial_argument():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(
+        sympy.Abs(x) + sympy.Abs(1 / x, evaluate=False), 2, evaluate=False
+    )
+    assert solve_service._absolute_value_cases_result(equation, x, []) is None
+
+
+def test_absolute_value_case_solver_rejects_missing_or_foreign_symbols():
+    x = sympy.Symbol("x")
+    y = sympy.Symbol("y")
+    assert solve_service._absolute_value_cases_result(
+        sympy.Eq(x, 1, evaluate=False), x, []
+    ) is None
+    assert solve_service._absolute_value_cases_result(
+        sympy.Eq(sympy.Abs(x) + y, 1, evaluate=False), x, []
+    ) is None
+
+
+def test_radical_case_solver_reports_no_real_candidates():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.sqrt(x ** 2 + 1), 0, evaluate=False)
+    result = solve_service._radical_cases_result(equation, x, [])
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.EQUATION_SOLUTIONS
+    assert result.solutions == []
+    assert result.steps[0].latex_after == r"\varnothing"
+    assert result.steps[0].description == (
+        "Al eliminar los radicales no aparece ningún candidato real."
+    )
+
+
+def test_radical_case_solver_rejects_abs_piecewise_and_foreign_symbols():
+    x = sympy.Symbol("x")
+    y = sympy.Symbol("y")
+    assert solve_service._radical_cases_result(
+        sympy.Eq(sympy.Abs(x), sympy.sqrt(x), evaluate=False), x, []
+    ) is None
+    assert solve_service._radical_cases_result(
+        sympy.Eq(sympy.sqrt(x) + y, 1, evaluate=False), x, []
+    ) is None
+
+
+def test_radical_case_solver_rejects_non_polynomial_radicand():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(sympy.sqrt(1 / x), 2, evaluate=False)
+    assert solve_service._radical_cases_result(equation, x, []) is None
+
+
+def test_radical_case_solver_rejects_more_than_three_radicals():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(
+        sympy.sqrt(x)
+        + sympy.sqrt(x - 1)
+        + sympy.sqrt(x - 2)
+        + sympy.sqrt(x - 3),
+        1,
+        evaluate=False,
+    )
+    assert solve_service._radical_cases_result(equation, x, []) is None
+
+
+def test_radical_case_solver_rejects_index_above_four():
+    x = sympy.Symbol("x")
+    equation = sympy.Eq(x ** sympy.Rational(1, 5), 2, evaluate=False)
+    assert solve_service._radical_cases_result(equation, x, []) is None
+
+
+def test_radical_case_solver_extraneous_step_names_the_reason():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "sqrt(x)=x-2", allow_equation=True
+    )
+    result = solve_service._radical_cases_result(equation, x, [])
+    assert result is not None
+    assert result.steps[0].rule == "RadicalCandidates"
+    assert result.steps[0].title == "Eliminación de radicales y verificación"
+    assert "verifica la ecuación original" in result.steps[0].description
+    assert "no satisface la ecuación original; se descarta (raíz extraña)" in (
+        result.steps[0].description
+    )
+
+
+def test_rational_domain_rejects_numerator_above_degree_four():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "x**6/x=0", allow_equation=True
+    )
+    assert solve_service._rational_domain_result(
+        equation, x, [sympy.Integer(0)], []
+    ) is None
+
+
+def test_rational_domain_rejects_non_polynomial_numerator():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "(x+sqrt(x))/x=0", allow_equation=True
+    )
+    assert solve_service._rational_domain_result(
+        equation, x, [sympy.Integer(0)], []
+    ) is None
+
+
+def test_rational_domain_requires_original_exclusions():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree("1/x=0", allow_equation=True)
+    assert solve_service._rational_domain_result(equation, x, [], []) is None
+
+
+@pytest.mark.parametrize(
+    "text", ["P(1234,1)", "P(1,1234)", "P(-1,0)", "P(171,1)", "P(2,3)"]
+)
+def test_permutation_alias_reports_exact_range_message(text):
+    with pytest.raises(solve_service.parsing.ParseSecurityError) as excinfo:
+        solve_service.parsing.permutation_alias_args(text)
+    assert str(excinfo.value) == (
+        "Permutaciones: se requiere 0 <= r <= n <= 170, con enteros."
+    )
+
+
+def test_permutation_alias_accepts_explicit_positive_signs():
+    assert solve_service.parsing.permutation_alias_args("P(+5,+2)") == (5, 2)
+
+
+def test_inequality_tree_resolves_euler_constant_on_each_side():
+    assert solve_service.parsing.parse_inequality_tree("e<x").lhs == sympy.E
+    assert solve_service.parsing.parse_inequality_tree("x<e").rhs == sympy.E
