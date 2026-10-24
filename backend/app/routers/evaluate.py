@@ -4,6 +4,7 @@ app/routers/evaluate.py — `POST /evaluate` (spec, secciones 3, 4, 5, 6, 7, 9).
 
 import time
 import os
+import re
 
 import sympy
 from fastapi import APIRouter, Request
