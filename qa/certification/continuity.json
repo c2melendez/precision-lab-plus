@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 298,
+  "revision": 299,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -51,9 +51,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-S19-TRIAGE-REMAINING-SURVIVORS-R298",
+    "id": "PLUS-S19-VERIFY-R300-STEP-CONTRACT-TESTS",
     "status": "READY",
-    "action": "El clasificador de alcance quedó verificado: el run S19 40136007686 sobre el commit test-only 30a291bb49752f86b00c39fd05cf01eef4f9d0c1 registró 'S19 mutation scope: focused' y 'SCOPE: focused', con artefacto 12577980586 (ZIP SHA-256 a34abe5f5093a50ae59a13f13982edcc9bad24ad9bd9b1be3321f04d4677e1a2). Inventario focalizado: 1,688 mutantes comprobados, 1,082 killed (64.10%), 595 survived y 11 timeout; 1,614 mutantes del inventario total de 3,302 quedaron fuera de foco (not checked). El score focalizado supera el baseline histórico 57.39%, pero S19 sigue BLOCKED porque sobreviven 595 mutantes. Siguiente paso: triar los 595 supervivientes del artefacto, priorizando app.routers.evaluate.x__evaluate_impl (218), x__render_evaluate_presentation (106), solve_service radical/abs/rational (166) y parsing.x_validate_g3_structure (48). Añadir tests focalizados solo cuando un contrato justifique la mutación, sin tocar oráculos ni matrices y sin lanzar S19 full. Hallazgo de producto diferido: en backend/app/services/parsing.py el patrón r\"\\\\left\\([\\\\s\\\\S]*\\\\right\\]\" tiene una clase de caracteres con doble escape, por lo que el mensaje 'Delimitadores incompatibles' es inalcanzable; corregirlo exige un cambio de producto aislado con su regresión y no se incluyó en r298. S18 sigue PASS (run 40105997558, SHA técnico 02d01c3a1f968eab2bf5ecdb438810d55928edce). Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, SG28 H2 BLOCKED, PR #29 OPEN/DRAFT y certificación global OPEN."
+    "action": "El run focalizado S19 40142571395 sobre el commit test-only 1f5faeba (r299) terminó SUCCESS con 'SCOPE: focused'. Artefacto 12579268204, ZIP SHA-256 a5f88cc37d5f041cde03dbcd4919628b613cfbc0f1cb5d5578b790b5a1c8994f. Inventario focalizado: 1,688 mutantes comprobados, 1,473 killed (87.26%), 212 survived y 3 timeout; 1,614 mutantes del inventario total de 3,302 siguen fuera de foco (not checked). Frente a r298 esto supone 391 mutantes más eliminados, 383 supervivientes menos y 8 timeouts menos. El commit test-only cf4a24d8 (r300) añade aserciones exactas del contrato de pasos (índice, latex_before, latex_after, descripción completa) para valor absoluto, equidistancia, casos por tramos, dominio racional y radicales, más sec/cot y el logging de la petición. Siguiente paso: verificar el run S19 focalizado y los gates sobre cf4a24d8; si el inventario baja, continuar la triage de los supervivientes restantes sin tocar SG28, oráculos, matrices ni gates. S19 acceptance sigue BLOCKED: workflow SUCCESS no equivale a aceptación y no se debe lanzar la campaña completa. Los 17 supervivientes de selección del fixture SG28 en _evaluate_impl quedan diferidos porque el plan r290 prohíbe reclamaciones de aceptación SG28 hasta aprobar el contrato. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, SG28 H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, PR #29 OPEN/DRAFT y certificación global OPEN."
   },
   "blockers": [
     {
@@ -86,7 +86,7 @@
       "id": "S19-BACKEND-MUTATION",
       "status": "BLOCKED",
       "kind": "targeted_coverage_and_acceptance",
-      "detail": "Run focalizado 40136007686 sobre 30a291bb (test-only): artifact 12577980586 (ZIP SHA-256 a34abe5f5093a50ae59a13f13982edcc9bad24ad9bd9b1be3321f04d4677e1a2). 1,688 mutantes comprobados: 1,082 killed (64.10%), 595 survived, 11 timeout; 1,614 not checked del inventario total de 3,302. El score focalizado supera el baseline 57.39%, pero la aceptación sigue BLOCKED mientras sobrevivan 595 mutantes. Workflow SUCCESS no significa aceptación; no lanzar campaña completa."
+      "detail": "Run focalizado 40142571395 sobre 1f5faeba (test-only): artifact 12579268204 (ZIP SHA-256 a5f88cc37d5f041cde03dbcd4919628b613cfbc0f1cb5d5578b790b5a1c8994f). 1,688 mutantes comprobados: 1,473 killed (87.26%), 212 survived, 3 timeout; 1,614 not checked del inventario total de 3,302. Supervivientes por función: _radical_cases_result 44, _evaluate_impl 43 (17 son selección del fixture SG28, diferidos), _render_evaluate_presentation 30, _rational_domain_result 27, _absolute_value_cases_result 21, validate_g3_structure 20, _absolute_value_steps 10, permutation_alias_args 9, _absolute_value_equidistance_steps 5, parse_inequality_tree 1, parse_chained_inequalities 1, symbolic_identity_sum_bound 1. La aceptación sigue BLOCKED mientras sobrevivan 212 mutantes; no lanzar la campaña completa."
     },
     {
       "id": "S18-PLUS-EVALUATE-HANG-R293",
