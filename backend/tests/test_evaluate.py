@@ -3,8 +3,10 @@ Tests reales del Módulo 2B para `POST /api/v1/evaluate`, vía `TestClient`
 (HTTP real sobre la app FastAPI) — casos de la sección 15.
 """
 
+import inspect
 import math
 import os
+import re
 
 os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
 
@@ -249,6 +251,89 @@ def test_result_latex_truncated_when_too_long(monkeypatch):
     assert body["success"] is True
     assert body["result_latex"] is None
     assert any("10,000" in w for w in body["warnings"])
+
+
+# ---------------------------------------------------------------------------
+# S18 r293/r294/r295 — guard de presentación para numéricos con decimal + exp
+# (portado desde precision-lab-plus). Un decimal literal entra al AST como
+# Rational exacto vía `rationalize`; `sympy.simplify()` sobre esa forma puede
+# agotar memoria/CPU (contraejemplo del runner S18, seed 180018). El guard usa
+# `approx_value` acotado en su lugar. La regex del guard debe usar `\d` real:
+# un escape duplicado (`\\d` dentro de un raw-string) es el patrón literal
+# "barra-invertida-d" y jamás coincide con dígitos, desactivando el guard.
+# ---------------------------------------------------------------------------
+
+_S18_SEED_180018_EXPRESSION = "exp(-1.3983707058413914)+(-1)*sin(-1.3983707058413914)"
+
+
+def test_s18_decimal_guard_regex_matches_plain_digits():
+    """Regresión anti-escape-duplicado: en un raw-string, `\\\\d` son dos
+    caracteres literales (backslash + d) y jamás coinciden con dígitos, lo
+    que desactiva silenciosamente el guard S18. El código fuente del guard
+    debe contener el patrón correcto (una sola barra)."""
+    import app.routers.evaluate as evaluate_router
+
+    source = inspect.getsource(evaluate_router)
+    # Forma rota (escapes duplicados dentro del raw-string) prohibida:
+    assert "\\\\d" not in source, "escape duplicado (\\\\d) reintroducido en el guard S18"
+    # Comportamiento real del regex del guard (mismo patrón que usa la ruta):
+    pattern = r"(?<![A-Za-z0-9_.])\d+\.\d+(?![A-Za-z0-9_])"
+    assert re.search(pattern, "exp(-1.3983707058413914)") is not None
+    assert re.search(pattern, "2**10") is None
+    assert re.search(pattern, "1398/1000") is None
+    assert re.search(pattern, "1.5x") is None
+
+
+@pytest.mark.parametrize(
+    "expression,expected",
+    [
+        ("exp(-1.3983707058413914)+(-1)*sin(-1.3983707058413914)", 1.23217056607143),
+        ("exp(-0.5)", 0.6065306597126334),
+        ("2*exp(1.5)+0.25", 9.213378140676129),
+    ],
+)
+def test_s18_decimal_exponential_end_to_end(expression, expected):
+    """Sin monkeypatch: los contraejemplos reales del runner S18 responden
+    200 con una presentación acotada y numéricamente correcta."""
+    response = _evaluate(expression=expression, angle_unit="rad")
+    body = response.json()
+    assert response.status_code == 200
+    assert body["success"] is True
+    assert float(body["result_text"]) == pytest.approx(expected, rel=1e-9)
+
+
+def test_s18_decimal_exponential_uses_bounded_approximation(monkeypatch):
+    """El contraejemplo seed 180018 responde 200 con la aproximación flotante
+    acotada, sin invocar `simplify()` (que puede lanzar MemoryError)."""
+    import app.routers.evaluate as evaluate_router
+
+    def _boom(*args, **kwargs):
+        raise MemoryError("simplify() no debe invocarse en el camino del guard S18")
+
+    monkeypatch.setattr(evaluate_router.sympy, "simplify", _boom)
+    response = _evaluate(expression=_S18_SEED_180018_EXPRESSION, angle_unit="rad")
+    body = response.json()
+    assert response.status_code == 200
+    assert body["success"] is True
+    result_value = float(body["result_text"])
+    expected = math.exp(-1.3983707058413914) - math.sin(-1.3983707058413914)
+    assert result_value == pytest.approx(expected, rel=1e-9)
+
+
+def test_s18_simplify_memory_error_never_escapes_as_500(monkeypatch):
+    """Fuera del guard (expresión simbólica), un MemoryError controlado de
+    `simplify()` conserva la expresión original en vez de tumbar la respuesta."""
+    import app.routers.evaluate as evaluate_router
+
+    def _boom(*args, **kwargs):
+        raise MemoryError("presión de memoria simulada")
+
+    monkeypatch.setattr(evaluate_router.sympy, "simplify", _boom)
+    response = _evaluate(expression="x+1.5", angle_unit="rad")
+    body = response.json()
+    assert response.status_code == 200
+    assert body["success"] is True
+    assert "1.5" in body["result_text"] and "x" in body["result_text"]
 
 
 # ---------------------------------------------------------------------------
