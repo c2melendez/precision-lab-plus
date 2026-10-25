@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 300,
+  "revision": 301,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -51,9 +51,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-S19-EQUIVALENCE-TRIAGE-R300",
+    "id": "PLUS-S19-FULL-SCOPE-TRIAGE-R301",
     "status": "READY",
-    "action": "El run focalizado S19 40143618188 sobre el commit test-only cf4a24d8 (r300) terminó SUCCESS con alcance focused. Artefacto 12579234535, ZIP SHA-256 be66391fb4367c85830295b0d5c2045d4bcf0cca19803bf77128bc9d1b5655d8. Inventario focalizado: 1,688 mutantes comprobados, 1,513 killed (89.64%), 173 survived y 2 timeout; 1,614 del inventario total de 3,302 siguen not checked. Frente a r299: +40 killed, −39 supervivientes y −1 timeout. Siguiente paso: triar los 173 supervivientes y separar mutantes equivalentes o inalcanzables de los que expresan un contrato observable. No perseguir: defaults de getattr sobre atributos siempre presentes, `zip(..., strict=False)` sobre secuencias de igual longitud, `diff(var)` frente a `diff(argumento, var)` cuando la pendiente ya es 1, la rama `raw` vacía de G3, el patrón de delimitadores con doble escape, los reemplazos `\\left`/`\\right` que no cambian el conteo, el guard de lado vacío de parse_chained_inequalities, `[A-Za-z]`→`[a-za-z]` y `index`→`rindex`. Los 17 mutantes de selección del fixture SG28 en _evaluate_impl y los 6 de serialización 503 quedan diferidos hasta que el contrato SG28 los autorice. Añadir pruebas solo donde el contrato de pasos o de respuesta lo justifique y verificar con un nuevo run focalizado; no lanzar la campaña completa. S19 acceptance sigue BLOCKED. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, SG28 H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, PR #29 OPEN/DRAFT y certificación global OPEN."
+    "action": "En el SHA test-only cf4a24d8 quedan verificados todos los gates: Playwright 40143618191 SUCCESS (627 passed en 9.9 m y 21 passed en 44.8 s) y gate de dependencias 40143614164 SUCCESS (audit-request, security/backend-security y la cadena de mutación). Ese gate, al invocar el workflow reutilizable S19 desde un evento push, hizo que change-scope viera GITHUB_EVENT_NAME=push y clasificara scope=full; no fue una ejecución manual ni una decisión de repetir. La campaña completa quedó registrada: 3,302 mutantes, 2,314 killed (70.38% de 3,288 comprobados), 961 survived, 13 timeout y 14 sin tests; artefacto 12580460741, ZIP SHA-256 681c5ac7a03ea98f83466683474a110899ce6f7232296c2262b4cad40185d7f0. Siguiente paso: triar los 961 supervivientes de alcance completo, empezando por solve_service (458: solve_equation 161, _source_denominator_exclusions 80, _quadratic_steps 74, _linear_steps 31, _expand_sqrt_tokens 30) y parsing (385: normalize_unicode 104, _try_parse_finite_aggregate 98, parse_expression_tree 52, check_complexity_limits 42), sin tocar oráculos, matrices ni producto. Importante: esas funciones no están en la allowlist del modo focused, así que ampliar la cobertura exige una decisión explícita de alcance documentada, no una edición del workflow para forzar verde. No relanzar la campaña completa ni S19 focused sin tests nuevos: ya existe evidencia de ambos alcances en este SHA. S19 acceptance sigue BLOCKED con 961 supervivientes totales. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, SG28 H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, PR #29 OPEN/DRAFT y certificación global OPEN."
   },
   "blockers": [
     {
@@ -86,7 +86,7 @@
       "id": "S19-BACKEND-MUTATION",
       "status": "BLOCKED",
       "kind": "targeted_coverage_and_acceptance",
-      "detail": "Run focalizado 40143618188 sobre cf4a24d8 (test-only): artifact 12579234535 (ZIP SHA-256 be66391fb4367c85830295b0d5c2045d4bcf0cca19803bf77128bc9d1b5655d8). 1,688 mutantes comprobados: 1,513 killed (89.64%), 173 survived, 2 timeout; 1,614 not checked del inventario total de 3,302. Supervivientes por función: _radical_cases_result 39, _evaluate_impl 37 (17 de selección SG28 y 6 de serialización 503 diferidos), _render_evaluate_presentation 30, _rational_domain_result 21, validate_g3_structure 20, _absolute_value_cases_result 14, _absolute_value_steps 3, _absolute_value_equidistance_steps 3, permutation_alias_args 3, parse_inequality_tree 1, parse_chained_inequalities 1, symbolic_identity_sum_bound 1. La mayoría restante es equivalente o inalcanzable; la aceptación sigue BLOCKED mientras no exista revisión formal de equivalencias o se eliminen los observables."
+      "detail": "Dos inventarios reales en cf4a24d8 (sin cambios de producto). Focalizado 40143618188: 1,688 comprobados, 1,513 killed (89.64%), 173 survived, 2 timeout; artefacto 12579234535 (ZIP SHA-256 be66391fb4367c85830295b0d5c2045d4bcf0cca19803bf77128bc9d1b5655d8). Completo 40143614164 (disparado por el gate de dependencias): 3,302 mutantes, 2,314 killed (70.38% de 3,288 comprobados), 961 survived, 13 timeout, 14 sin tests; artefacto 12580460741 (ZIP SHA-256 681c5ac7a03ea98f83466683474a110899ce6f7232296c2262b4cad40185d7f0). Supervivientes completos por módulo: solve_service 458, parsing 385, evaluate 73, ast_validator 45. La aceptación sigue BLOCKED con 961 supervivientes totales; no relanzar campañas."
     },
     {
       "id": "S18-PLUS-EVALUATE-HANG-R293",
@@ -3073,5 +3073,44 @@
     "follow_on_after_wait": "DRAFT-SG28-REQUEST-LIFETIME-CONTRACT",
     "global_certification": "OPEN",
     "distributed_acceptance": "H2-SG28-DIST-01..08 BLOCKED; this evidence is single-host/loopback and does not qualify as multinode acceptance."
+  },
+  "s19_full_campaign_r301": {
+    "status": "RECORDED_BY_DEPENDENCY_GATE",
+    "sha": "cf4a24d8",
+    "trigger": "El gate certification-dependency-gates.yml invocó el workflow reutilizable S19 desde un evento push. En el workflow llamado, GITHUB_EVENT_NAME es 'push', por lo que change-scope aplicó su rama conservadora scope=full en lugar del clasificador focalizado.",
+    "run_id": 40143614164,
+    "mutation_job_id": 121020825465,
+    "artifact_id": 12580460741,
+    "artifact_sha256": "681c5ac7a03ea98f83466683474a110899ce6f7232296c2262b4cad40185d7f0",
+    "totals": {
+      "inventory": 3302,
+      "checked": 3288,
+      "killed": 2314,
+      "survived": 961,
+      "timeout": 13,
+      "no_tests": 14,
+      "killed_percent_of_checked": 70.38
+    },
+    "survivors_by_module": {
+      "app.services.solve_service": 458,
+      "app.services.parsing": 385,
+      "app.routers.evaluate": 73,
+      "app.services.ast_validator": 45
+    },
+    "survivors_top_functions": {
+      "solve_equation": 161,
+      "normalize_unicode": 104,
+      "_try_parse_finite_aggregate": 98,
+      "_source_denominator_exclusions": 80,
+      "_quadratic_steps": 74,
+      "parse_expression_tree": 52,
+      "check_complexity_limits": 42,
+      "_radical_cases_result": 39,
+      "_evaluate_impl": 37,
+      "_linear_steps": 31,
+      "_render_evaluate_presentation": 30,
+      "_expand_sqrt_tokens": 30
+    },
+    "notes": "El modo focused solo muta 15 funciones de solve_service, parsing y evaluate; las funciones con más supervivientes de esta campaña no están en esa allowlist. No se modificó el workflow ni el alcance."
   }
 }
