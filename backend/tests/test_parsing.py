@@ -265,6 +265,7 @@ def test_symbolic_binomial_helper_is_limited_to_single_symbol_choose_two():
 def test_symbolic_sum_helper_requires_distinct_symbolic_upper_bound():
     assert parsing.symbolic_identity_sum_bound("sum(i,i,1,n)") == "n"
     assert parsing.symbolic_identity_sum_bound("sum(x,x,1,x)") is None
+    assert parsing.symbolic_identity_sum_bound("sum((K),K,1,N)") == "N"
 
 
 # ---------------------------------------------------------------------------

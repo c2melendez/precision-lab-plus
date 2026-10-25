@@ -799,15 +799,88 @@ def test_radical_case_solver_no_candidate_preserves_full_step_contract():
 def test_radical_case_solver_extraneous_root_preserves_full_step_contract():
     x = sympy.Symbol("x")
     equation = sympy.Eq(sympy.sqrt(x), x - 2, evaluate=False)
-    result = solve_service._radical_cases_result(equation, x, [])
+    result = solve_service._radical_cases_result(equation, x, ["w"])
     assert result is not None
     assert [solution.text for solution in result.solutions] == ["4"]
+    assert result.input_eq == equation
+    assert result.variable == x
+    assert result.has_detailed_steps is True
+    assert result.warnings == ["w"]
     assert result.steps[0].index == 0
     assert result.steps[0].latex_before == sympy.latex(equation)
     assert result.steps[0].latex_after == r"x = 4"
     assert result.steps[0].description == (
         "Candidato x = 1: no satisface la ecuación original; se descarta "
         "(raíz extraña). Candidato x = 4: verifica la ecuación original."
+    )
+
+
+def test_radical_case_solver_reports_two_verified_roots():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "sqrt(x**2-4)=0", allow_equation=True
+    )
+    result = solve_service._radical_cases_result(equation, x, ["w"])
+    assert result is not None
+    assert [solution.text for solution in result.solutions] == ["-2", "2"]
+    assert result.input_eq == equation
+    assert result.variable == x
+    assert result.has_detailed_steps is True
+    assert result.warnings == ["w"]
+    assert result.steps[0].latex_after == r"x = -2,\quad x = 2"
+    assert result.steps[0].description == (
+        "Candidato x = -2: verifica la ecuación original. "
+        "Candidato x = 2: verifica la ecuación original."
+    )
+
+
+def test_radical_case_solver_ignores_constant_radicals():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "sqrt(2)+sqrt(x)=3", allow_equation=True
+    )
+    result = solve_service._radical_cases_result(equation, x, [])
+    assert result is not None
+    assert [solution.text for solution in result.solutions] == ["11 - 6*sqrt(2)"]
+    assert result.steps[0].description == (
+        "Candidato x = 11 - 6*sqrt(2): verifica la ecuación original."
+    )
+    assert result.steps[0].latex_after == r"x = 11 - 6 \sqrt{2}"
+
+
+def test_radical_case_solver_reports_negative_radicand_with_three_radicals():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "sqrt(x-1)+sqrt(x-2)+sqrt(x-3)=0", allow_equation=True
+    )
+    result = solve_service._radical_cases_result(equation, x, [])
+    assert result is not None
+    assert result.solutions == []
+    assert result.steps[0].latex_after == r"\varnothing"
+    assert result.steps[0].description == (
+        "Candidato x = 2 - 2*sqrt(3)/3: radicando negativo en una raíz par; "
+        "se descarta (raíz extraña). Candidato x = 2*sqrt(3)/3 + 2: no "
+        "satisface la ecuación original; se descarta (raíz extraña)."
+    )
+
+
+def test_radical_case_solver_rejects_four_zero_sum_radicals():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "sqrt(x-1)+sqrt(x-2)+sqrt(x-3)+sqrt(x-4)=0", allow_equation=True
+    )
+    assert solve_service._radical_cases_result(equation, x, []) is None
+
+
+def test_absolute_value_steps_symbolic_radius_keeps_conditional_description():
+    x = sympy.Symbol("x")
+    radius = sympy.Symbol("r", real=True)
+    equation = sympy.Eq(sympy.Abs(x), radius, evaluate=False)
+    steps, solutions = solve_service._absolute_value_steps(equation, x)
+    assert solutions == [radius, -radius]
+    assert steps[0].description == (
+        "Para |x-a| = b: si b < 0 no hay solución; si b = 0, x = a; "
+        "si b > 0, x = a ± b. Las dos expresiones son condicionales a b > 0."
     )
 
 
