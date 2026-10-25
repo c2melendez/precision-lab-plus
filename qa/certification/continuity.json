@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 303,
+  "revision": 304,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -51,9 +51,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-S19-EQUIVALENCE-REVIEW-R303",
+    "id": "PLUS-S19-EQUIVALENCE-REVIEW-R304",
     "status": "WAITING_ON_CONTRACT_DECISION",
-    "action": "Decisión registrada en r303: la triage focalizada de S19 converge a 122 supervivientes, todos clasificados como equivalentes, inalcanzables, dependientes de orden o diferidos por SG28; no se lanza otro run S19 ni se amplía la allowlist. Siguiente paso: verificar en su SHA exacto el resultado de la matriz de PR despachada por 73be7940 (S19, CI, cumulative, dependency gates y Playwright) y conservar la evidencia; no repetir gates verdes. Para desbloquear S19 se requiere una decisión explícita de aceptación de equivalencias o un cambio de contrato/alcance; no se declara PASS por pruebas estructurales. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, SY-P-23 OPEN, PR #29 OPEN/DRAFT y certificación global OPEN."
+    "action": "Decisión registrada en r304: la campaña completa se re-ejecutó sobre 73be7940 en el gate de dependencias 40154340922 (job 121052752170, artefacto 12583639759) con 2,363 killed / 912 survived / 13 timeout / 14 sin tests, +49 killed y 0 regresiones frente a r301. Los mutantes 16 y 17 de _radical_cases_result sobreviven en la campaña completa con el mismo comando de pruebas, confirmando que son dependientes de orden. El alcance focused sigue congelado en 122 supervivientes clasificados y no se lanza otro run S19. Siguiente paso: reconciliar el resultado de Playwright en 9acc0bff cuando termine y conservar la evidencia; no repetir gates verdes. Para desbloquear S19 se requiere una decisión explícita de aceptación de equivalencias o un cambio de contrato/alcance; no se declara PASS por pruebas estructurales. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, SY-P-23 OPEN, PR #29 OPEN/DRAFT y certificación global OPEN."
   },
   "blockers": [
     {
@@ -86,7 +86,7 @@
       "id": "S19-BACKEND-MUTATION",
       "status": "BLOCKED",
       "kind": "targeted_coverage_and_acceptance",
-      "detail": "Dos inventarios reales. Focalizado r303 (73be7940): 1,688 comprobados, 1,564 killed (92.65%), 122 survived, 2 timeout; artefacto 12584112224; detalle y clasificación en s19_focused_triage_r303. Completo 40143614164 (disparado por el gate de dependencias): 3,302 mutantes, 2,314 killed (70.38% de 3,288 comprobados), 961 survived, 13 timeout, 14 sin tests; artefacto 12580460741 (ZIP SHA-256 681c5ac7a03ea98f83466683474a110899ce6f7232296c2262b4cad40185d7f0). Supervivientes completos por módulo: solve_service 458, parsing 385, evaluate 73, ast_validator 45. La aceptación sigue BLOCKED: el alcance focalizado está clasificado y congelado; no relanzar campañas."
+      "detail": "Dos inventarios reales. Focalizado r303 (73be7940): 1,688 comprobados, 1,564 killed (92.65%), 122 survived, 2 timeout; artefacto 12584112224; detalle y clasificación en s19_focused_triage_r303. Completo r304 (73be7940, gate de dependencias 40154340922): 3,302 mutantes, 2,363 killed (71.87% de 3,288 comprobados), 912 survived, 13 timeout, 14 sin tests; artefacto 12583639759; detalle en s19_full_campaign_r304. Delta contra r301: +49 killed, 0 regresiones. Los mutantes 16 y 17 de _radical_cases_result sobreviven en la campaña completa con el mismo comando de pruebas, lo que confirma que sus kills focalizados dependen del orden de iteración. La aceptación sigue BLOCKED: el alcance focalizado está clasificado y congelado; no relanzar campañas."
     },
     {
       "id": "S18-PLUS-EVALUATE-HANG-R293",
@@ -3307,5 +3307,125 @@
       "deferred_sg28": "_evaluate_impl 34, 37, 39-57"
     },
     "decision_rationale": "Los 122 supervivientes restantes están clasificados como equivalentes, inalcanzables, dependientes de orden o diferidos por SG28. No se amplía la allowlist ni se edita el workflow; un run adicional no cambiaría la aceptación sin una decisión explícita de equivalencias."
+  },
+  "s19_full_campaign_r304": {
+    "run_id": 40154340922,
+    "run_name": "Certification dependency and security gates",
+    "head_sha": "73be7940",
+    "job_id": 121052752170,
+    "job_name": "mutation / plus-backend-mutmut",
+    "artifact_id": 12583639759,
+    "artifact_bytes": 40017,
+    "job_started_at": "2026-10-25T02:26:46Z",
+    "job_completed_at": "2026-10-25T02:48:39Z",
+    "run_completed_at": "2026-10-25T02:48:40Z",
+    "mutmut_exit_code": 0,
+    "log_summary": "3302/3302 2363 killed, 14 no-tests, 13 timeout, 912 survived",
+    "checked": 3288,
+    "total_mutants": 3302,
+    "killed": 2363,
+    "survived": 912,
+    "timeout": 13,
+    "no_tests": 14,
+    "killed_percent": 71.87,
+    "test_command": "pytest -q --disable-warnings tests/test_parsing.py tests/test_evaluate.py tests/test_solve.py tests/test_exhaustive_module13_security.py",
+    "baseline_r301": {
+      "run_id": 40143614164,
+      "artifact_id": 12580460741,
+      "killed": 2314,
+      "survived": 961,
+      "timeout": 13,
+      "no_tests": 14,
+      "killed_percent": 70.38
+    },
+    "delta_vs_r301": {
+      "newly_killed": 49,
+      "regressions": 0,
+      "survivors_delta": -49
+    },
+    "survivors_by_module": {
+      "solve_service": 422,
+      "parsing": 383,
+      "evaluate": 62,
+      "ast_validator": 45
+    },
+    "survivors_by_module_baseline_r301": {
+      "solve_service": 458,
+      "parsing": 385,
+      "evaluate": 73,
+      "ast_validator": 45
+    },
+    "newly_killed_by_function": {
+      "rational_domain_result": [
+        68,
+        77,
+        85,
+        104,
+        113,
+        114,
+        118,
+        119,
+        127,
+        128,
+        129,
+        133,
+        134,
+        143
+      ],
+      "render_evaluate_presentation": [
+        45,
+        46,
+        93,
+        94,
+        116,
+        137,
+        150,
+        151,
+        152,
+        162,
+        163
+      ],
+      "absolute_value_cases_result": [
+        142,
+        143,
+        157,
+        158,
+        163
+      ],
+      "radical_cases_result": [
+        13,
+        37,
+        38,
+        82,
+        84,
+        112,
+        113,
+        114,
+        115,
+        163,
+        164,
+        172,
+        173,
+        177,
+        178,
+        187
+      ],
+      "absolute_value_steps": [
+        25
+      ],
+      "symbolic_identity_sum_bound": [
+        7
+      ],
+      "validate_g3_structure": [
+        66
+      ]
+    },
+    "nondeterministic_mutants": {
+      "mutants": "_radical_cases_result 16 y 17",
+      "evidence": "Ambos sobreviven en la campaña completa sobre 73be7940 con el mismo comando de pruebas que el alcance focalizado, aunque el lote 2 mató el 17 y el lote 3 mató el 16. La diferencia es el orden de iteración de atoms(Pow) bajo aleatorización de hash.",
+      "action": "No perseguir con pruebas adicionales; quedan clasificados como dependientes de orden."
+    },
+    "scope_reading": "Los 912 supervivientes completos son inventario documentado, no objetivo. El alcance focused sigue congelado en 122 supervivientes clasificados.",
+    "acceptance": "BLOCKED"
   }
 }
