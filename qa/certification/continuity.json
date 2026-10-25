@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 301,
+  "revision": 302,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -51,9 +51,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-S19-FULL-SCOPE-TRIAGE-R301",
+    "id": "PLUS-S19-FOCUSED-TRIAGE-R302",
     "status": "READY",
-    "action": "En el SHA test-only cf4a24d8 quedan verificados todos los gates: Playwright 40143618191 SUCCESS (627 passed en 9.9 m y 21 passed en 44.8 s) y gate de dependencias 40143614164 SUCCESS (audit-request, security/backend-security y la cadena de mutación). Ese gate, al invocar el workflow reutilizable S19 desde un evento push, hizo que change-scope viera GITHUB_EVENT_NAME=push y clasificara scope=full; no fue una ejecución manual ni una decisión de repetir. La campaña completa quedó registrada: 3,302 mutantes, 2,314 killed (70.38% de 3,288 comprobados), 961 survived, 13 timeout y 14 sin tests; artefacto 12580460741, ZIP SHA-256 681c5ac7a03ea98f83466683474a110899ce6f7232296c2262b4cad40185d7f0. Siguiente paso: triar los 961 supervivientes de alcance completo, empezando por solve_service (458: solve_equation 161, _source_denominator_exclusions 80, _quadratic_steps 74, _linear_steps 31, _expand_sqrt_tokens 30) y parsing (385: normalize_unicode 104, _try_parse_finite_aggregate 98, parse_expression_tree 52, check_complexity_limits 42), sin tocar oráculos, matrices ni producto. Importante: esas funciones no están en la allowlist del modo focused, así que ampliar la cobertura exige una decisión explícita de alcance documentada, no una edición del workflow para forzar verde. No relanzar la campaña completa ni S19 focused sin tests nuevos: ya existe evidencia de ambos alcances en este SHA. S19 acceptance sigue BLOCKED con 961 supervivientes totales. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, SG28 H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, PR #29 OPEN/DRAFT y certificación global OPEN."
+    "action": "Decisión registrada: se mantiene el alcance focalizado de S19 y no se amplía la allowlist ni se edita el workflow. La campaña completa (2,314 killed, 961 survived) queda como inventario documentado, no como objetivo inmediato. Siguiente paso: continuar la triage de los 173 supervivientes focalizados, priorizando los que expresan un contrato observable: campos de resultado de _absolute_value_cases_result (input_eq, variable, warnings, has_detailed_steps), campos de resultado de _rational_domain_result, el caso de radio complejo de valor absoluto y cualquier rama de _evaluate_impl o _render_evaluate_presentation que cambie la respuesta HTTP. Añadir pruebas solo en backend/tests/test_solve.py, test_parsing.py o test_evaluate.py (los tres archivos que mantienen el scope focused) y verificar con un único run S19 focalizado. No perseguir mutantes equivalentes ya catalogados ni relanzar la campaña completa. S19 acceptance sigue BLOCKED. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, SG28 H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, PR #29 OPEN/DRAFT y certificación global OPEN."
   },
   "blockers": [
     {
@@ -3112,5 +3112,28 @@
       "_expand_sqrt_tokens": 30
     },
     "notes": "El modo focused solo muta 15 funciones de solve_service, parsing y evaluate; las funciones con más supervivientes de esta campaña no están en esa allowlist. No se modificó el workflow ni el alcance."
+  },
+  "s19_scope_decision_r302": {
+    "decision": "KEEP_FOCUSED_SCOPE",
+    "decided_at": "2026-10-24",
+    "rationale": "La allowlist focalizada cubre 15 funciones con contratos observables y tests dedicados. Los 961 supervivientes de la campaña completa se concentran en funciones fuera de esa allowlist; ampliarla sin un contrato que lo justifique convertiría la mutación en una carrera por porcentaje. Se documenta el inventario completo y se sigue triando solo el alcance focalizado.",
+    "full_campaign_reference": "s19_full_campaign_r301",
+    "focused_inventory": {
+      "run_id": 40143618188,
+      "checked": 1688,
+      "killed": 1513,
+      "survived": 173,
+      "timeout": 2,
+      "killed_percent": 89.64
+    },
+    "excluded_now": [
+      "solve_equation 161",
+      "normalize_unicode 104",
+      "_try_parse_finite_aggregate 98",
+      "_source_denominator_exclusions 80",
+      "_quadratic_steps 74",
+      "parse_expression_tree 52",
+      "check_complexity_limits 42"
+    ]
   }
 }
