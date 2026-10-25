@@ -2,6 +2,7 @@
 app/routers/evaluate.py — `POST /evaluate` (spec, secciones 3, 4, 5, 6, 7, 9).
 """
 
+import re
 import time
 
 import sympy
@@ -61,8 +62,45 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         )
 
     warnings = []
+
+    # S18 r293/r294/r295 (portado desde Plus): el parser seguro construye el
+    # AST con `evaluate=False` y la transformación `rationalize`, de modo que
+    # un decimal literal como -1.3983707058413914 entra como Rational exacto
+    # (-6991853529206957/5000000000000000). Para expresiones totalmente
+    # numéricas que contienen exp(), `sympy.simplify()` sobre esa forma puede
+    # agotar memoria/CPU sin límite (contraejemplo reproducido por el runner
+    # S18 con seed 180018: `exp(-1.3983707058413914)+(-1)*sin(-1.3983707058413914)`).
+    # El evaluador ya calculó una aproximación numérica acotada
+    # (`result.approx_value`); para la presentación de ese caso se usa
+    # directamente en vez de pedirle a `simplify()` una forma exacta no
+    # acotada. El guard exige: sin símbolos libres, fuente con un decimal
+    # independiente (no `1.5x`, no fracciones `1398/1000`), presencia real de
+    # `exp` en el AST sin evaluar y aproximación disponible.
+    def _decimal_exponential_source(source_expression: str) -> bool:
+        return re.search(r"(?<![A-Za-z0-9_.])\d+\.\d+(?![A-Za-z0-9_])", source_expression) is not None
+
+    display_expr = result.expr
+    if (
+        not display_expr.free_symbols
+        and payload.expression is not None
+        and _decimal_exponential_source(payload.expression)
+        and display_expr.has(sympy.exp)
+        and result.approx_value is not None
+    ):
+        display_expr = sympy.Float(result.approx_value)
+    else:
+        try:
+            simplified = sympy.simplify(display_expr)
+        except Exception:
+            # Un simplify() controladamente fallido (p. ej. MemoryError bajo
+            # presión) no debe tumbar la respuesta: se conserva la expresión
+            # original para la presentación.
+            simplified = None
+        if simplified is not None:
+            display_expr = simplified
+
     try:
-        result_latex = sympy.latex(result.expr)
+        result_latex = sympy.latex(display_expr)
     except ValueError:
         # Un entero cuya magnitud excede el límite de conversión int->str de
         # Python (`sys.set_int_max_str_digits`) puede surgir incluso dentro
@@ -82,7 +120,7 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
             result_latex = None
             warnings.append("Resultado LaTeX omitido: excede los 10,000 caracteres (sección 4).")
         try:
-            result_text = str(result.expr)
+            result_text = str(display_expr)
         except ValueError:
             result_text = "(resultado numérico demasiado grande para mostrarse)"
 
