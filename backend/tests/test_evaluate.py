@@ -692,11 +692,25 @@ def test_render_simplifies_reciprocal_trigonometry():
     assert presentation["result_latex"] == "2"
 
 
+def test_render_keeps_symbolic_reciprocal_trig_after_bounded_simplification():
+    x = sympy.Symbol("x")
+    presentation = _render_fixture(sympy.csc(x))
+    assert presentation["result_text"] == "csc(x)"
+    assert presentation["result_latex"] == r"\csc{\left(x \right)}"
+    assert presentation["input_latex"] == r"\csc{\left(x \right)}"
+    assert presentation["domain_conditions"] == []
+
+
 def test_render_rewrites_natural_log_in_text_and_latex():
     x = sympy.Symbol("x")
     presentation = _render_fixture(sympy.log(x))
     assert presentation["result_text"] == "ln(x)"
     assert presentation["result_latex"] == r"\ln{\left(x \right)}"
+    assert presentation["input_latex"] == r"\log{\left(x \right)}"
+    assert [condition.kind for condition in presentation["domain_conditions"]] == [
+        "log",
+        "domain",
+    ]
 
 
 def test_render_uses_bounded_numeric_approximation_for_decimal_exponentials():
@@ -729,6 +743,13 @@ def test_render_decimal_exponential_requires_no_free_symbols():
     assert presentation["result_text"] == "exp(x)"
 
 
+@pytest.mark.parametrize("source", ["1.5X", "1.5x"])
+def test_render_requires_standalone_decimal_source_for_approximation(source):
+    raw = sympy.exp(sympy.Float("-1.398"), evaluate=False)
+    presentation = _render_fixture(raw, source=source, approx=123.456, is_numeric=True)
+    assert presentation["result_text"] == "0.247090651392378"
+
+
 def test_render_falls_back_to_original_expression_when_simplify_fails(monkeypatch):
     def _boom(*args, **kwargs):
         raise RuntimeError("controlled simplify failure")
@@ -756,6 +777,12 @@ def test_render_drops_latex_above_the_ten_thousand_character_limit():
     ]
 
 
+def test_render_keeps_latex_at_the_ten_thousand_character_boundary():
+    presentation = _render_fixture(sympy.Symbol("a" * 10000))
+    assert presentation["result_latex"] == "a" * 10000
+    assert presentation["warnings"] == []
+
+
 def test_render_reports_exact_symbolic_helper_warnings():
     x = sympy.Symbol("x")
     result = evaluate_service.EvaluateResult(
@@ -778,6 +805,7 @@ def test_render_reports_missing_input_latex_when_source_cannot_be_reparsed():
     presentation = _render_fixture(sympy.Integer(5), source=".__bad__")
     assert presentation["input_latex"] is None
     assert presentation["result_text"] == "5"
+    assert presentation["domain_conditions"] == []
 
 
 # S19 targeted coverage r300 - remaining reciprocal-trig and request logging

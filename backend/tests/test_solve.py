@@ -666,9 +666,13 @@ def test_absolute_value_case_solver_preserves_full_three_region_contract():
     equation = sympy.Eq(
         sympy.Abs(x) + sympy.Abs(x - 2) + sympy.Abs(x - 4), 6, evaluate=False
     )
-    result = solve_service._absolute_value_cases_result(equation, x, [])
+    result = solve_service._absolute_value_cases_result(equation, x, ["w"])
     assert result is not None
     assert [solution.text for solution in result.solutions] == ["0", "4"]
+    assert result.input_eq == equation
+    assert result.variable == x
+    assert result.has_detailed_steps is True
+    assert result.warnings == ["w"]
     assert result.steps[0].index == 0
     assert result.steps[0].latex_before == sympy.latex(equation)
     assert result.steps[0].latex_after == r"x = 0,\quad x = 4"
@@ -685,6 +689,9 @@ def test_absolute_value_case_solver_contradiction_preserves_full_contract():
     equation = sympy.Eq(sympy.Abs(x) + sympy.Abs(x - 2), 1, evaluate=False)
     result = solve_service._absolute_value_cases_result(equation, x, [])
     assert result is not None
+    assert result.input_eq == equation
+    assert result.variable == x
+    assert result.has_detailed_steps is True
     assert result.steps[0].index == 0
     assert result.steps[0].latex_before == sympy.latex(equation)
     assert result.steps[0].description == (
@@ -745,12 +752,38 @@ def test_rational_domain_all_roots_excluded_is_a_contradiction_step():
     assert result is not None
     assert result.result_type == solve_service.ResultType.CONTRADICTION
     assert result.solutions == []
+    assert result.input_eq == equation
+    assert result.variable == x
+    assert result.has_detailed_steps is True
+    assert result.warnings == []
     assert result.steps[0].description == (
         "Restricción de dominio original: x≠1, x≠-1. x = -1 anula el numerador "
         "pero no pertenece al dominio; se descarta. x = 1 anula el numerador "
         "pero no pertenece al dominio; se descarta."
     )
     assert result.steps[0].latex_after == r"x \neq 1, x \neq -1"
+
+
+def test_rational_domain_uncancelled_degree_four_keeps_valid_root():
+    x = sympy.Symbol("x")
+    equation = solve_service.parsing.parse_expression_tree(
+        "(x**4-1)/(x-1)=1", allow_equation=True
+    )
+    result = solve_service._rational_domain_result(
+        equation, x, [sympy.Integer(1)], ["w"]
+    )
+    assert result is not None
+    assert result.result_type == solve_service.ResultType.EQUATION_SOLUTIONS
+    assert [solution.text for solution in result.solutions] == ["0"]
+    assert result.input_eq == equation
+    assert result.variable == x
+    assert result.has_detailed_steps is True
+    assert result.warnings == ["w"]
+    assert result.steps[0].latex_before == sympy.latex(equation)
+    assert result.steps[0].description == (
+        "Restricción de dominio original: x≠1. x = 1 anula el numerador pero "
+        "no pertenece al dominio; se descarta."
+    )
 
 
 def test_radical_case_solver_no_candidate_preserves_full_step_contract():
