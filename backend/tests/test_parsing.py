@@ -315,6 +315,7 @@ LAYOUT_ONLY_MESSAGE = "Escriba una expresión antes de calcular."
         ("x+()", "Paréntesis vacíos: falta una expresión."),
         (r"\left(x", r"Delimitador incompleto: falta \right."),
         (r"\right)x", r"Delimitador inválido: aparece \right sin \left."),
+        (r"\right(1)", r"Delimitador inválido: aparece \right sin \left."),
         ("x+1)", "Paréntesis de cierre sobrante."),
         ("(x+1", "Paréntesis sin cerrar."),
         ("x+1}", "Llave de cierre sobrante."),
