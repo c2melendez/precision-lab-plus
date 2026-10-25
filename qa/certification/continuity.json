@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 302,
+  "revision": 303,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -51,9 +51,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-S19-FOCUSED-TRIAGE-R302",
-    "status": "READY",
-    "action": "Decisión registrada: se mantiene el alcance focalizado de S19 y no se amplía la allowlist ni se edita el workflow. La campaña completa (2,314 killed, 961 survived) queda como inventario documentado, no como objetivo inmediato. Siguiente paso: continuar la triage de los 173 supervivientes focalizados, priorizando los que expresan un contrato observable: campos de resultado de _absolute_value_cases_result (input_eq, variable, warnings, has_detailed_steps), campos de resultado de _rational_domain_result, el caso de radio complejo de valor absoluto y cualquier rama de _evaluate_impl o _render_evaluate_presentation que cambie la respuesta HTTP. Añadir pruebas solo en backend/tests/test_solve.py, test_parsing.py o test_evaluate.py (los tres archivos que mantienen el scope focused) y verificar con un único run S19 focalizado. No perseguir mutantes equivalentes ya catalogados ni relanzar la campaña completa. S19 acceptance sigue BLOCKED. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, SG28 H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, PR #29 OPEN/DRAFT y certificación global OPEN."
+    "id": "PLUS-S19-EQUIVALENCE-REVIEW-R303",
+    "status": "WAITING_ON_CONTRACT_DECISION",
+    "action": "Decisión registrada en r303: la triage focalizada de S19 converge a 122 supervivientes, todos clasificados como equivalentes, inalcanzables, dependientes de orden o diferidos por SG28; no se lanza otro run S19 ni se amplía la allowlist. Siguiente paso: verificar en su SHA exacto el resultado de la matriz de PR despachada por 73be7940 (S19, CI, cumulative, dependency gates y Playwright) y conservar la evidencia; no repetir gates verdes. Para desbloquear S19 se requiere una decisión explícita de aceptación de equivalencias o un cambio de contrato/alcance; no se declara PASS por pruebas estructurales. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, SY-P-23 OPEN, PR #29 OPEN/DRAFT y certificación global OPEN."
   },
   "blockers": [
     {
@@ -86,7 +86,7 @@
       "id": "S19-BACKEND-MUTATION",
       "status": "BLOCKED",
       "kind": "targeted_coverage_and_acceptance",
-      "detail": "Dos inventarios reales en cf4a24d8 (sin cambios de producto). Focalizado 40143618188: 1,688 comprobados, 1,513 killed (89.64%), 173 survived, 2 timeout; artefacto 12579234535 (ZIP SHA-256 be66391fb4367c85830295b0d5c2045d4bcf0cca19803bf77128bc9d1b5655d8). Completo 40143614164 (disparado por el gate de dependencias): 3,302 mutantes, 2,314 killed (70.38% de 3,288 comprobados), 961 survived, 13 timeout, 14 sin tests; artefacto 12580460741 (ZIP SHA-256 681c5ac7a03ea98f83466683474a110899ce6f7232296c2262b4cad40185d7f0). Supervivientes completos por módulo: solve_service 458, parsing 385, evaluate 73, ast_validator 45. La aceptación sigue BLOCKED con 961 supervivientes totales; no relanzar campañas."
+      "detail": "Dos inventarios reales. Focalizado r303 (73be7940): 1,688 comprobados, 1,564 killed (92.65%), 122 survived, 2 timeout; artefacto 12584112224; detalle y clasificación en s19_focused_triage_r303. Completo 40143614164 (disparado por el gate de dependencias): 3,302 mutantes, 2,314 killed (70.38% de 3,288 comprobados), 961 survived, 13 timeout, 14 sin tests; artefacto 12580460741 (ZIP SHA-256 681c5ac7a03ea98f83466683474a110899ce6f7232296c2262b4cad40185d7f0). Supervivientes completos por módulo: solve_service 458, parsing 385, evaluate 73, ast_validator 45. La aceptación sigue BLOCKED: el alcance focalizado está clasificado y congelado; no relanzar campañas."
     },
     {
       "id": "S18-PLUS-EVALUATE-HANG-R293",
@@ -3135,5 +3135,177 @@
       "parse_expression_tree 52",
       "check_complexity_limits 42"
     ]
+  },
+  "s19_focused_triage_r303": {
+    "decision": "FREEZE_FOCUSED_SCOPE_AFTER_TRIAGE",
+    "scope": "focused (15 funciones de solve_service, parsing y evaluate)",
+    "baseline": {
+      "run_id": 40143618188,
+      "checked": 1688,
+      "killed": 1513,
+      "survived": 173,
+      "timeout": 2,
+      "killed_percent": 89.64
+    },
+    "batches": [
+      {
+        "sha": "a6b03e1e",
+        "run_id": 40152869952,
+        "job_id": 121047977934,
+        "artifact_id": 12583168924,
+        "checked": 1688,
+        "killed": 1543,
+        "survived": 143,
+        "timeout": 2,
+        "killed_percent": 91.41,
+        "local_tests_passed": 438,
+        "files": [
+          "backend/tests/test_solve.py",
+          "backend/tests/test_evaluate.py"
+        ],
+        "killed_mutants": {
+          "absolute_value_cases_result": [
+            142,
+            143,
+            157,
+            158,
+            163
+          ],
+          "rational_domain_result": [
+            68,
+            77,
+            85,
+            104,
+            113,
+            114,
+            118,
+            119,
+            127,
+            128,
+            129,
+            133,
+            134,
+            143
+          ],
+          "render_evaluate_presentation": [
+            45,
+            46,
+            93,
+            94,
+            116,
+            137,
+            150,
+            151,
+            152,
+            162,
+            163
+          ]
+        }
+      },
+      {
+        "sha": "74414ebc",
+        "run_id": 40153456360,
+        "job_id": 121049969054,
+        "artifact_id": 12584005675,
+        "checked": 1688,
+        "killed": 1562,
+        "survived": 124,
+        "timeout": 2,
+        "killed_percent": 92.54,
+        "local_tests_passed": 443,
+        "files": [
+          "backend/tests/test_solve.py",
+          "backend/tests/test_parsing.py"
+        ],
+        "killed_mutants": {
+          "absolute_value_steps": [
+            25
+          ],
+          "radical_cases_result": [
+            13,
+            17,
+            37,
+            38,
+            82,
+            84,
+            112,
+            113,
+            114,
+            115,
+            163,
+            164,
+            172,
+            173,
+            177,
+            178,
+            187
+          ],
+          "symbolic_identity_sum_bound": [
+            7
+          ]
+        }
+      },
+      {
+        "sha": "73be7940",
+        "run_id": 40154343365,
+        "job_id": 121052678895,
+        "artifact_id": 12584112224,
+        "checked": 1688,
+        "killed": 1564,
+        "survived": 122,
+        "timeout": 2,
+        "killed_percent": 92.65,
+        "local_tests_passed": 444,
+        "files": [
+          "backend/tests/test_parsing.py"
+        ],
+        "killed_mutants": {
+          "radical_cases_result": [
+            16
+          ],
+          "validate_g3_structure": [
+            66
+          ]
+        }
+      }
+    ],
+    "final_survivors_by_function": {
+      "render_evaluate_presentation": 19,
+      "evaluate_impl": 37,
+      "absolute_value_equidistance_steps": 3,
+      "absolute_value_steps": 2,
+      "absolute_value_cases_result": 9,
+      "radical_cases_result": 21,
+      "rational_domain_result": 7,
+      "validate_g3_structure": 19,
+      "permutation_alias_args": 3,
+      "parse_chained_inequalities": 1,
+      "parse_inequality_tree": 1
+    },
+    "final_survivors": 122,
+    "timeouts": [
+      205,
+      207
+    ],
+    "equivalence_evidence": {
+      "model_dump_modes": "mode=None, 'XXjsonXX' y 'JSON' devuelven el mismo enum y json.dumps lo serializa igual",
+      "radical_has_guards": "20 ecuaciones probadas, incluidas sqrt(Abs(x))=2, sqrt(sin(x))=1, sqrt(exp(x))=1, sqrt(1/x), sqrt(1/(x+1)), sqrt(2/x)",
+      "radical_is_polynomial": "sqrt(1/x), sqrt(1/(x+1)), sqrt(2/x), sqrt(x/2) sin diferencia; SymPy infiere la variable con None",
+      "abs_fractional_breakpoints": "breakpoints 1/2, 1/3, 1/4, 1/10: resultados idénticos para midpoint /3, muestras +/-2 y comparaciones >=0/>0/>=1",
+      "render_reciprocal_trig": "12 expresiones csc/sec/cot simbólicas sin cambio tras trigsimp",
+      "g3_placeholder": "\\placeholder{x} y \\PLACEHOLDER{x} producen 'Entrada incompleta' por el guard de marcador",
+      "g3_delimiters": "\\left(x\\right] produce 'Paréntesis sin cerrar.'; la rama [\\\\s\\\\S] solo alcanza con contenido en {\\, s, S}"
+    },
+    "deferred": {
+      "sg28_fixture_selection": {
+        "mutants": "34, 37, 39-57 de _evaluate_impl",
+        "reason": "El plan r290 prohíbe declarar aceptación SG28 sin aprobación de contrato."
+      }
+    },
+    "not_chased": {
+      "order_dependent": "_radical_cases_result 17 (continue->break) depende del orden de atoms(Pow); el 16 se eliminó en el run 40154343365 por la misma causa",
+      "deferred_sg28": "_evaluate_impl 34, 37, 39-57"
+    },
+    "decision_rationale": "Los 122 supervivientes restantes están clasificados como equivalentes, inalcanzables, dependientes de orden o diferidos por SG28. No se amplía la allowlist ni se edita el workflow; un run adicional no cambiaría la aceptación sin una decisión explícita de equivalencias."
   }
 }
