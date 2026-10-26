@@ -121,53 +121,48 @@ def evaluate(
         return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=False)
 
     # Sin variables libres sin sustituir -> numérico (sección 6).
-    # Fix (suite de regresión v1.1, caso E147: tan(pi/2) evaluate daba un
-    # número finito gigante en vez de clasificarse como indefinido). El
-    # parser preserva "pi/2" en forma exacta (Rational * pi, no un
-    # Float), pero `expr.evalf()` no simplifica primero — numéricamente
-    # aproxima tan(pi/2) sin darse cuenta de que es una asíntota exacta.
-    # Un `simplify()` SÍ la resuelve a zoo exactamente (trabaja
-    # simbólicamente), pero llamarlo en CADA evaluate (incluso para
-    # expresiones que no tienen ninguna función trig) resultó demasiado
-    # lento en la práctica (~decenas de veces más lento, tumbó el
-    # servidor en la corrida de la suite). Se acota el chequeo caro a
-    # los dos casos donde puede pasar esto: la expresión evalúa a un
-    # número sospechosamente grande, o contiene una función trig directa
-    # aplicada a algo que involucra pi (que es como se cuela un float en
-    # vez de la forma exacta) — evalf() normal sigue siendo el camino
-    # rápido para todo lo demás.
-    # Para funciones trig directas evaluadas en argumentos exactos con π,
-    # resolver primero el posible polo simbólico. Esto evita que expresiones
-    # como sec(pi/2) entren en evalf() antes de que SymPy las reduzca a zoo.
-    exact_trig_with_pi = expr.has(sympy.tan, sympy.sec, sympy.csc, sympy.cot) and expr.has(sympy.pi)
+    # En trigonometría exacta con π, usar la forma simplificada como fuente
+    # numérica. Así csc(pi/2) se convierte en 1 antes de evalf(), mientras
+    # sec(pi/2), tan(pi/2), etc. se reducen a zoo/oo y se clasifican como
+    # dominio inválido sin depender de excepciones internas de SymPy.
+    nonfinite_atoms = (
+        sympy.S.ComplexInfinity,
+        sympy.S.Infinity,
+        sympy.S.NegativeInfinity,
+        sympy.S.NaN,
+    )
+
+    def _contains_nonfinite(value: sympy.Basic) -> bool:
+        if value in nonfinite_atoms:
+            return True
+        return any(value.has(atom) for atom in nonfinite_atoms)
+
+    exact_trig_with_pi = (
+        expr.has(sympy.tan, sympy.sec, sympy.csc, sympy.cot)
+        and expr.has(sympy.pi)
+    )
+    numeric_source = expr
+
     if exact_trig_with_pi:
         try:
-            simplified_pole = sympy.simplify(expr)
-        except (AttributeError, ZeroDivisionError, ValueError, OverflowError):
-            simplified_pole = None
-        if simplified_pole is not None and simplified_pole.has(
-            sympy.zoo, sympy.oo, -sympy.oo, sympy.nan
-        ):
+            # SymPy 1.13.x puede lanzar AttributeError al hacer
+            # simplify(csc(...))/simplify(sec(...)) cuando el árbol vino de
+            # parse_expr(..., evaluate=False). Reescribir las recíprocas a
+            # identidades sin/cos evita ese camino interno defectuoso y
+            # conserva la semántica exacta: csc(pi/2)->1, sec(pi/2)->zoo.
+            rewritten = expr.rewrite(sympy.sin)
+        except (AttributeError, TypeError, ZeroDivisionError, ValueError, OverflowError) as exc:
+            raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
+        if _contains_nonfinite(rewritten):
             raise DomainErrorResult("El resultado no está definido en este dominio.")
+        numeric_source = rewritten
 
     try:
-        numeric_value = expr.evalf()
-    except (AttributeError, ZeroDivisionError, ValueError, OverflowError) as exc:
+        numeric_value = numeric_source.evalf()
+    except (AttributeError, TypeError, ZeroDivisionError, ValueError, OverflowError) as exc:
         raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
-    needs_pole_check = (
-        numeric_value.is_number
-        and numeric_value.is_finite is not False
-        and not numeric_value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan)
-        and exact_trig_with_pi
-    )
-    if needs_pole_check:
-        try:
-            got_big = abs(complex(numeric_value)) > 1e8
-        except Exception:
-            got_big = False
-        if got_big and sympy.simplify(expr).has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
-            raise DomainErrorResult("El resultado no está definido en este dominio.")
-    if numeric_value.has(sympy.zoo, sympy.oo, -sympy.oo, sympy.nan):
+
+    if _contains_nonfinite(numeric_value):
         raise DomainErrorResult("El resultado no está definido en este dominio.")
 
     approx = float(numeric_value) if numeric_value.is_real else None
