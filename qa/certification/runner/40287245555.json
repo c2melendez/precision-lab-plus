@@ -1,0 +1,28 @@
+{
+  "schema_version": 2,
+  "operation": "docs",
+  "repo": "c2melendez/precision-lab-plus",
+  "canonical_branch": "qa/syntax-audit-in625-a1",
+  "base_sha": "b0eccc4ba315485c614910d7c7113bfe2dc43a64",
+  "patch": {
+    "url": "https://gist.githubusercontent.com/c2melendez/3e8928ce6f1848ac99692fcbb85c7de2/raw/1942750642c1667a8f1a830ec2ff85de281300cb/plus-r308.patch",
+    "sha256": "e59c5885ce87ca93b183e69161e77c6988461965bfa00d852829b92af6846475",
+    "bytes": 3930
+  },
+  "commits": [
+    {
+      "sha": "020b4e30f1c9c70e2bcd2b46bee8f85dca9072fa",
+      "subject": "docs(certification): r308 publication and S25/Playwright evidence [skip ci]"
+    }
+  ],
+  "paths": [
+    "qa/certification/CURRENT_STATE.md",
+    "qa/certification/EXECUTION_LOG.md",
+    "qa/certification/continuity.json"
+  ],
+  "patch_head_sha": "020b4e30f1c9c70e2bcd2b46bee8f85dca9072fa",
+  "decision": "PUBLISHED",
+  "runner_run_id": "40287245555",
+  "runner_run_url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/40287245555",
+  "recorded_at": "2026-10-26T07:40:44+00:00"
+}
