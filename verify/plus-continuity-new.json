@@ -3572,34 +3572,29 @@
   "docs_workflows": [
     {
       "workflow": ".github/workflows/certification-runner.yml",
-      "version": "v3",
-      "sha256": "c85eb1d4b89606a51904ec792c7ca8bb141dd9ee9ca0f15b1d0eddc82815e0d7",
-      "blob_sha": "23e42cf6dad30b281036cbbb63eff938c6646fde",
+      "version": "v3-equivalent (gate|docs, CAS push, skip-marker rejection, paths-ignore)",
       "branch": "main",
-      "branch_head_at_install": "5b9c31bc959e241c13985952592a7ade831ae093",
+      "blob_sha": "bcaef28a5408c0a857ed514232f5ec9bd769a1bb",
+      "branch_head_at_verification": "5b9c31bc959e241c13985952592a7ade831ae093",
       "operations": [
         "gate",
         "docs"
       ],
       "dry_run_default": true,
-      "skip_ci_policy": "rejected in documentary inputs; paths-ignore prevents runner loops",
-      "installed_via_pr": "#33",
-      "verified_at": "2026-10-27"
+      "skip_ci_policy": "rejected in documentary packages; paths-ignore prevents runner loops",
+      "verified_at": "2026-10-27",
+      "verification": "YAML+15 bash blocks+5 py heredocs OK via gh-api download"
     },
     {
       "workflow": ".github/workflows/certification-runner.yml",
-      "version": "v3",
-      "sha256": "c85eb1d4b89606a51904ec792c7ca8bb141dd9ee9ca0f15b1d0eddc82815e0d7",
-      "blob_sha": "23e42cf6dad30b281036cbbb63eff938c6646fde",
+      "version": "v2 (gate-only, [skip ci] record commits) - PENDING UPGRADE to v3",
       "branch": "qa/syntax-audit-in625-a1",
-      "branch_head_at_install": "cb0cea5d1f97bb6c5523cdf7cdaba9d448c5cd72",
+      "blob_sha": "169066f60b26cbcb02301351418a386675677755",
+      "branch_head_at_verification": "cb0cea5d1f97bb6c5523cdf7cdaba9d448c5cd72",
       "operations": [
-        "gate",
-        "docs"
+        "gate"
       ],
-      "dry_run_default": true,
-      "skip_ci_policy": "rejected in documentary inputs; paths-ignore prevents runner loops",
-      "installed_via_pr": "#33",
+      "pending_upgrade_pr": "#34 (repair/runner-policy-current-state-20261026 -> canonical, checks green at f2a8f987)",
       "verified_at": "2026-10-27"
     }
   ]
