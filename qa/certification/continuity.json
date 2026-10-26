@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 317,
+  "revision": 318,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -52,9 +52,9 @@
     }
   },
   "next_action": {
-    "id": "H2-EN-SG-TESTS-PR36-VERIFY-R317",
+    "id": "H2-EN-SG-TESTS-PR36-VERIFY-R318",
     "status": "WAIT",
-    "action": "Consultar jobs y logs de los workflows ya activados para el commit ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f. Confirmar que el preflight de crecimiento detiene EN-SG-26 antes de sympy.expand, y verificar E2E y otros gates en el SHA exacto. No despachar ni repetir gates. Para API PR #2, el run 40380285802 falló sin pasos/logs expuestos; causa desconocida, solicitar inspección autorizada solo si la evidencia sigue inaccesible. Mantener EN-SG-21 bloqueado por max_length=500 y global_certification OPEN."
+    "action": "Verificar Playwright run 40381076420 (job 121777141084) para los E2E EN-SG-01..07 y consultar los jobs todavía en curso de H1d #40381076364, S21 #40381076325 y S19 #40381076498. Acumulativo #40381076250 terminó SUCCESS en SHA ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f con 2712 passed, 1 skipped, 10 xfailed, 88.80%; no relanzarlo. Corregir solo fallos nuevos reproducibles. API PR #2 run 40380285802 falló antes de asignar runner (runner_id=0, cero steps); obtener diagnóstico de las dos anotaciones mediante acceso autorizado si la integración sigue sin exponerlas, sin rerun a ciegas. Mantener EN-SG-21 como conflicto con max_length=500 y global_certification OPEN."
   },
   "blockers": [
     {
@@ -3570,7 +3570,7 @@
     }
   },
   "h2_case_evidence_audit_r315": {
-    "status": "PARTIAL_AUDIT_RECORDED",
+    "status": "PARTIAL_AUDIT_BACKEND_GATES_PASS_E2E_PENDING",
     "report": "qa/certification/EN_SG_CASE_EVIDENCE_AUDIT_R315.md",
     "audit_date": "2026-10-26",
     "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -3620,14 +3620,14 @@
       "EN-SG-03",
       "EN-SG-08",
       "EN-SG-20",
-      "EN-SG-26",
       "EN-SG-28",
       "EN-SG-29"
     ],
     "scoped_pass": [
       "EN-SG-23",
       "EN-SG-24",
-      "EN-SG-28"
+      "EN-SG-28",
+      "EN-SG-26"
     ],
     "fully_tested": [
       "EN-SG-09",
@@ -3651,15 +3651,50 @@
     ],
     "next_validation": {
       "pr_url": "https://github.com/c2melendez/precision-lab-plus/pull/36",
-      "head_sha": "8bb1049380f285e2cdadb4d7c274759f34ea4f86",
-      "in_progress_runs": [
-        40379627790,
-        40379628110,
-        40379627901,
-        40379628199,
-        40379627985
+      "head_sha": "ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f",
+      "active_runs": [
+        {
+          "id": 40381076420,
+          "gate": "Playwright E2E",
+          "job_id": 121777141084,
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076364,
+          "gate": "H1d",
+          "job_id": 121777140527,
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076325,
+          "gate": "S21 cross-browser Plus",
+          "job_id": 121777141383,
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076498,
+          "gate": "S19 mutation",
+          "job_ids": [
+            121777588870,
+            121777589154
+          ],
+          "status": "in_progress"
+        }
       ],
-      "note": "Do not dispatch or rerun these gates; collect exact conclusions/jobs and update per-case states."
+      "successful_runs": [
+        40381076250,
+        40381076363,
+        40381076380,
+        40381076251,
+        40381076273,
+        40381076257,
+        40381076414,
+        40381076428,
+        40381076444,
+        40381076495,
+        40381076418
+      ],
+      "note": "Do not rerun the cumulative #40381076250. Wait for the existing E2E/H1d/S21/S19 results and inspect exact logs."
     },
     "last_diagnosis": {
       "prior_run": {
@@ -3723,6 +3758,41 @@
         "artifacts": 0,
         "cause": "undetermined; log endpoint returns 404 BlobNotFound"
       }
+    },
+    "current_run": {
+      "repository": "c2melendez/precision-lab-plus",
+      "workflow": "in625-cumulative-certification",
+      "run_id": 40381076250,
+      "tested_sha": "ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 121777140770,
+          "name": "backend",
+          "conclusion": "success"
+        },
+        {
+          "id": 121777140304,
+          "name": "frontend",
+          "conclusion": "success"
+        }
+      ],
+      "summary": "2712 passed, 1 skipped, 10 xfailed, 1 warning; coverage 88.80%"
+    },
+    "api_ci": {
+      "repository": "c2melendez/precision-lab-readonly-api",
+      "pr": 2,
+      "run_id": 40380285802,
+      "conclusion": "failure_before_runner_assignment",
+      "job_id": 121774362420,
+      "runner_id": 0,
+      "runner_name": "",
+      "steps": 0,
+      "annotations_count": 2,
+      "logs_available": false,
+      "artifacts": 0,
+      "test_execution_evidenced": false,
+      "cause": "undetermined; annotation endpoint not available through connector"
     }
   }
 }

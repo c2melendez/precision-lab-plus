@@ -510,3 +510,12 @@
 - Fix commit `ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f`: preflight conservador de crecimiento antes de `sympy.expand` y regresión de no materialización. Gate acumulativo [40381076250](https://github.com/c2melendez/precision-lab-plus/actions/runs/40381076250) y Playwright [40381076420](https://github.com/c2melendez/precision-lab-plus/actions/runs/40381076420) están en curso en el nuevo SHA; no se atribuye PASS todavía.
 - API PR #2: run [40380285802](https://github.com/c2melendez/precision-lab-readonly-api/actions/runs/40380285802) failed, pero el job no expone steps/logs/artifacts. Causa indeterminada; no se afirma que pytest ejecutara. No relanzar automáticamente.
 - Siguiente acción: `H2-EN-SG-TESTS-PR36-VERIFY-R317`. EN-SG-21 sigue en conflicto con max_length=500; EN-SG-32 es condicional y no hay limitador de frecuencia app-level. Global OPEN y bloqueos existentes se preservan.
+
+
+## 2026-10-26 UTC — r318: preflight EN-SG-26 validado en acumulativo
+
+- Acumulativo PR #36 [40381076250](https://github.com/c2melendez/precision-lab-plus/actions/runs/40381076250), SHA `ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f`, backend job 121777140770 y frontend job 121777140304: SUCCESS. Backend `2712 passed, 1 skipped, 10 xfailed, 1 warning`, cobertura 88.80% en 357.47 s.
+- El log confirma `test_en_sg_21_ten_thousand_terms_preserves_current_request_limit_contract`, `test_en_sg_25_million_factorial_is_bounded_and_returns_a_clear_contract`, `test_en_sg_26_expand_ten_thousand_power_returns_complexity_limit` y `test_en_sg_27_five_level_power_tower_is_symbolic_or_clearly_bounded` SUCCESS, además de `test_algebra.py::test_expand_large_binomial_is_rejected_before_materialization` SUCCESS. EN-SG-26 pasa en alcance backend; el preflight evita la expansión costosa. EN-SG-21 sigue sin aceptación matemática porque el endpoint rechaza por max_length=500.
+- Playwright #40381076420 sigue `in_progress`; no declarar todavía PASS a EN-SG-01..07. H1d #40381076364, S21 Plus #40381076325 y S19 mutation #40381076498 siguen en curso; otros gates ya han pasado y constan en continuity.json.
+- Read-only API PR #2: run #40380285802 falla antes de asignar runner (runner_id=0, runner_name vacío, steps=[], 2 anotaciones listadas pero no accesibles por el conector). No hay evidencia de pytest ni causa concreta; no repetir a ciegas.
+- Siguiente acción única `H2-EN-SG-TESTS-PR36-VERIFY-R318`. Global OPEN y bloqueos existentes permanecen.
