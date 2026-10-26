@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 305,
+  "revision": 306,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -66,8 +66,8 @@
     },
     {
       "id": "SY-P-23",
-      "status": "ACCEPTED_PENDING_CI",
-      "detail": "Convención aceptada 2026-10-26-sy-p-23-exact-block-v1: desambiguación obligatoria solo para la entrada exacta a/bc. Pendiente cumulative y H1d verdes en el commit de registro."
+      "status": "CLOSED",
+      "detail": "Cerrado con 2026-10-26-sy-p-23-exact-block-v1: convención de desambiguación exacta para a/bc; cumulative y H1d verdes en Lite y Plus (ver sy_p_23_acceptance)."
     },
     {
       "id": "SY-X-04-PLUS-HTTP",
@@ -3439,8 +3439,23 @@
       "XFAIL estricto de b y c separadas en Plus aceptado como limitación documentada; no se convierte en PASS."
     ],
     "evidence": "Bloqueo exacto en frontend/src/components/BasicMode.tsx (commit 941ae5a), presente en HEAD QA 061e911. Último H1d y cumulative verdes registrados: 38247671320 y 38247671293 sobre SHA fd55b41. XFAIL estricto test_syp_23_separate_b_c_substitutions_pending conservado.",
-    "status": "ACCEPTED_PENDING_CI",
-    "closes_when": "cumulative y H1d verdes en el commit de registro, con IDs registrados; hasta entonces SY-P-23 permanece OPEN",
-    "gate_runs": []
+    "status": "CLOSED",
+    "closes_when": "Cerrado 2026-10-26 tras cumulative y H1d verdes con IDs registrados. La certificación global sigue OPEN.",
+    "gate_runs": [
+      {
+        "gate": "cumulative",
+        "runner_run": "40273057947",
+        "gate_run": "40273073450",
+        "base_sha": "0fa0625",
+        "conclusion": "success"
+      },
+      {
+        "gate": "h1d",
+        "runner_run": "40273483681",
+        "gate_run": "40273499483",
+        "base_sha": "af9f38e",
+        "conclusion": "success"
+      }
+    ]
   }
 }
