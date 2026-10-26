@@ -472,3 +472,13 @@
 - El runner v2 de esta rama conserva su operación gate; el runner v3 del branch predeterminado recibe la misma corrección para gate y docs.
 - Las corridas iniciadas sobre el SHA previo no deben atribuirse al HEAD que contiene esta corrección. Esperar evidencia exacta del commit actual y reconciliar la baseline tras revisar las pruebas.
 - Certificación global OPEN; bloqueos de producto sin cambio.
+
+## 2026-10-26 UTC — r314: continuidad del runner validada; reentrada H2-EN-SG
+
+- Cumulative [40360048532](https://github.com/c2melendez/precision-lab-plus/actions/runs/40360048532) SUCCESS exacto en `676f36ed2ca9566f5b37d27dd4c4f43065133f82`; frontend y backend completados en SUCCESS.
+- H1d [40360048942](https://github.com/c2melendez/precision-lab-plus/actions/runs/40360048942), Native Syntax [40358546698](https://github.com/c2melendez/precision-lab-plus/actions/runs/40358546698, SHA anterior `405c3770`) y Certification Runner [40360048710](https://github.com/c2melendez/precision-lab-plus/actions/runs/40360048710) SUCCESS. H1d y cumulative de aceptación de este cambio sí corresponden al SHA final; Native Syntax anterior se conserva como evidencia histórica y no se atribuye al SHA final.
+- La regresión de continuidad está corregida: los registros numéricos `qa/certification/runner/<id>.json` no alteran el fingerprint; otros archivos bajo `runner/`, contratos, scripts, tests, workflows y dependencias siguen alterándolo. El planificador pasa a versión 2.
+- Los commits de registro generados por el runner ya no usan `[skip ci]`; `paths-ignore` evita el ciclo solo cuando el push contiene archivos de registro. El validador v3 también rechaza marcadores de omisión en los commits de paquetes documentales.
+- `technical_baseline_sha` se fija al SHA probado `676f36ed2ca9566f5b37d27dd4c4f43065133f82`. Este commit posterior solo actualiza CURRENT_STATE, EXECUTION_LOG y continuity.json, rutas excluidas del fingerprint.
+- Siguiente objetivo: **H2-EN-SG-CASE-EVIDENCE-AUDIT-R314**, inventario EN-SG-01..32 por test, archivo, ejecución exacta y clasificación PASS/FAIL/GAP/MANUAL. Verificar cobertura sin etiquetas antes de escribir tests; añadir solo pruebas test-first para GAP confirmados. Mantener `SG28_EVALUATE_ISOLATION` desactivada en producción y no relanzar gates verdes por rutina.
+- Global OPEN; SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; SG28 multinodo OUT_OF_SCOPE_SINGLE_HOST (no PASS).

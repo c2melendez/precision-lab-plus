@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "revision": 313,
+  "revision": 314,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
+  "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
   "baseline_case": "EDCX-B3-POWERS-ROOTS-R262",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
@@ -51,9 +51,9 @@
     }
   },
   "next_action": {
-    "id": "CONTINUITY-PLANNER-RUNNER-EXCLUSION-R313",
-    "status": "VALIDATION_PENDING",
-    "action": "Validar el SHA exacto final tras corregir la exclusión de registros y retirar [skip ci] de los commits generados por el runner. Confirmar el resultado acumulativo y los gates automáticamente activados por los cambios de workflow; no reutilizar resultados de un SHA anterior. Después, actualizar technical_baseline_sha con el commit técnico validado y reanudar H2-EN-SG-01..32 sin repetir gates por rutina."
+    "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
+    "status": "READY",
+    "action": "Construir la tabla de evidencia por caso EN-SG-01..32 (test, archivo, run/job por SHA exacto, PASS/FAIL/GAP/MANUAL) desde backend/tests/test_in625_h2_security.py, frontend/e2e/in625-h2-sg28-cancel.spec.ts, syntax309 SYX preflights, in625-syntax-native.spec.ts y los runs reales. Para cada GAP, comprobar primero si existe cobertura sin etiqueta; escribir pruebas test-first en Plus API para EN-SG-21, 23..27, 32 y en frontend para 01..08 solo si el GAP está confirmado. No ejecutar cargas extremas en producción. No activar SG28_EVALUATE_ISOLATION en producción; no repetir gates verdes. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, SG28-DIST OUT_OF_SCOPE_SINGLE_HOST, PR #29 OPEN/DRAFT y certificación global OPEN."
   },
   "blockers": [
     {
@@ -3519,9 +3519,53 @@
     "s19_link": "Los mutantes SG28 de _evaluate_impl (líneas 34, 37, 39-57) diferidos en s19_focused_acceptance_r309 se resolverán contra el contrato local, no el distribuido."
   },
   "planner_maintenance": {
-    "status": "VALIDATION_PENDING",
+    "status": "VERIFIED_BILATERAL",
     "change": "numeric_generated_runner_records_excluded_from_gate_fingerprints_and_runner_commits_use_paths_ignore_not_skip_markers",
     "planner_version": 2,
-    "runner_commit_skip_marker": false
+    "runner_commit_skip_marker": false,
+    "validated_head_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
+    "validation": {
+      "lite": {
+        "cumulative": {
+          "run_id": 40359884483,
+          "conclusion": "success",
+          "head_sha": "8c2cd395752959dbdc70cdf4e262d7bf8c597b82",
+          "head_sha_matches": true,
+          "continuity_regressions": "35 tests OK"
+        },
+        "h1d": {
+          "run_id": 40359884531,
+          "conclusion": "success",
+          "head_sha": "8c2cd395752959dbdc70cdf4e262d7bf8c597b82",
+          "head_sha_matches": true
+        },
+        "runner": {
+          "run_id": 40359884623,
+          "conclusion": "success",
+          "head_sha": "8c2cd395752959dbdc70cdf4e262d7bf8c597b82",
+          "head_sha_matches": true
+        }
+      },
+      "plus": {
+        "cumulative": {
+          "run_id": 40360048532,
+          "conclusion": "success",
+          "head_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
+          "head_sha_matches": true
+        },
+        "h1d": {
+          "run_id": 40360048942,
+          "conclusion": "success",
+          "head_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
+          "head_sha_matches": true
+        },
+        "runner": {
+          "run_id": 40360048710,
+          "conclusion": "success",
+          "head_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
+          "head_sha_matches": true
+        }
+      }
+    }
   }
 }
