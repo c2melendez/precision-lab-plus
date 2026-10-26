@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 318,
+  "revision": 319,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -52,9 +52,9 @@
     }
   },
   "next_action": {
-    "id": "H2-EN-SG-TESTS-PR36-VERIFY-R318",
+    "id": "H2-EN-SG-HTML-MACRO-CHECK-PR36-VERIFY-R319",
     "status": "WAIT",
-    "action": "Verificar Playwright run 40381076420 (job 121777141084) para los E2E EN-SG-01..07 y consultar los jobs todavía en curso de H1d #40381076364, S21 #40381076325 y S19 #40381076498. Acumulativo #40381076250 terminó SUCCESS en SHA ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f con 2712 passed, 1 skipped, 10 xfailed, 88.80%; no relanzarlo. Corregir solo fallos nuevos reproducibles. API PR #2 run 40380285802 falló antes de asignar runner (runner_id=0, cero steps); obtener diagnóstico de las dos anotaciones mediante acceso autorizado si la integración sigue sin exponerlas, sin rerun a ciegas. Mantener EN-SG-21 como conflicto con max_length=500 y global_certification OPEN."
+    "action": "Consultar la conclusión y logs de Playwright #40384190563 (job 121787982140), que prueba el SHA 343267ec6e297f2ed71ff5f71994791de0bf7b27 y las regresiones EN-SG-01..07. El acumulativo #40384190661, CI #40384190454, S25 #40384190372, H1a-H1d, Native Syntax, Syntax diagnostic, S18 y S17 están SUCCESS en el mismo SHA; no repetirlos. Recoger luego los gates largos aún en curso: S19 #40384190640, S21 #40384190789, S23 #40384190521 y el tramo Lite de S20 #40384190507. Solo corregir fallos reproducibles de la defensa HTML; no relajar oráculos ni fusionar PR #34/#36 hasta verificar checks requeridos. Mantener EN-SG-21 como conflicto de max_length=500, EN-SG-32 condicional sin limitador app-level y global_certification OPEN."
   },
   "blockers": [
     {
@@ -3570,7 +3570,7 @@
     }
   },
   "h2_case_evidence_audit_r315": {
-    "status": "PARTIAL_AUDIT_BACKEND_GATES_PASS_E2E_PENDING",
+    "status": "PARTIAL_AUDIT_LATEST_E2E_PENDING",
     "report": "qa/certification/EN_SG_CASE_EVIDENCE_AUDIT_R315.md",
     "audit_date": "2026-10-26",
     "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -3793,6 +3793,177 @@
       "artifacts": 0,
       "test_execution_evidenced": false,
       "cause": "undetermined; annotation endpoint not available through connector"
+    },
+    "latest_technical_sha": "343267ec6e297f2ed71ff5f71994791de0bf7b27",
+    "html_macro_remediation": {
+      "commit": "343267ec6e297f2ed71ff5f71994791de0bf7b27",
+      "files": [
+        "frontend/src/components/NaturalMathField.tsx",
+        "frontend/src/__tests__/NaturalMathField.test.ts"
+      ],
+      "cause": "Playwright run 40381076420 failed six EN-SG-05 assertions because htmlClass/htmlStyle left class/style attributes in MathLive DOM.",
+      "fix": "Reject non-mathematical/HTML TeX macros before ASCII conversion; override htmlClass/htmlStyle/htmlId/htmlData macros with inert text in MathLive field.",
+      "unit_cases_added": 14,
+      "current_e2e_run": {
+        "id": 40384190563,
+        "job_id": 121787982140,
+        "status": "in_progress",
+        "conclusion": null
+      },
+      "no_pass_yet": [
+        "EN-SG-01",
+        "EN-SG-02",
+        "EN-SG-03",
+        "EN-SG-04",
+        "EN-SG-05",
+        "EN-SG-06",
+        "EN-SG-07"
+      ]
+    },
+    "latest_ci": {
+      "tested_sha": "343267ec6e297f2ed71ff5f71994791de0bf7b27",
+      "successful_runs": [
+        {
+          "id": 40384190454,
+          "gate": "CI",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190661,
+          "gate": "IN625 cumulative",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190372,
+          "gate": "S25 security",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190580,
+          "gate": "Syntax diagnostic",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190790,
+          "gate": "S18 differential properties",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190506,
+          "gate": "H1a",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190606,
+          "gate": "H1b",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190408,
+          "gate": "H1c",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190670,
+          "gate": "H1d",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190487,
+          "gate": "Native Syntax",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190536,
+          "gate": "S17 API fuzzing",
+          "conclusion": "success"
+        }
+      ],
+      "active_runs": [
+        {
+          "id": 40384190563,
+          "gate": "Playwright E2E",
+          "job_id": 121787982140,
+          "status": "in_progress"
+        },
+        {
+          "id": 40384190640,
+          "gate": "S19 mutation",
+          "jobs": [
+            121788772936,
+            121788773024
+          ],
+          "status": "in_progress"
+        },
+        {
+          "id": 40384190789,
+          "gate": "S21 cross-browser",
+          "jobs": [
+            121787982822
+          ],
+          "status": "in_progress"
+        },
+        {
+          "id": 40384190521,
+          "gate": "S23 accessibility",
+          "jobs": [
+            121787981389
+          ],
+          "status": "in_progress"
+        },
+        {
+          "id": 40384190507,
+          "gate": "S20 performance",
+          "jobs": [
+            121787981918
+          ],
+          "status": "in_progress"
+        }
+      ],
+      "previous_e2e_failure": {
+        "run_id": 40381076420,
+        "tested_sha": "ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f",
+        "general_summary": "657 passed, 6 failed",
+        "failing_cases": [
+          "EN-SG-05 htmlClass desktop/tablet/mobile",
+          "EN-SG-05 htmlStyle desktop/tablet/mobile"
+        ],
+        "sg28_summary": "21 passed"
+      }
     }
+  },
+  "lite_runner_policy_merge": {
+    "sha": "0a3137670d51d85644066a24acc46b88af3d9103",
+    "runs": [
+      {
+        "id": 40382690415,
+        "gate": "cumulative",
+        "conclusion": "success"
+      },
+      {
+        "id": 40382690452,
+        "gate": "H1d",
+        "conclusion": "success"
+      },
+      {
+        "id": 40382690348,
+        "gate": "Certification Runner",
+        "conclusion": "success"
+      },
+      {
+        "id": 40382690350,
+        "gate": "Scientific UI E2E",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "readonly_api_ci_block": {
+    "run_id": 40380285802,
+    "attempts": 2,
+    "runner_id": 0,
+    "steps": 0,
+    "conclusion": "failure before runner assignment",
+    "cause": "undetermined; private-repo hosted-runner quota/billing is a hypothesis only",
+    "next_human_check": "Inspect GitHub account Billing/Actions usage, repository Settings/Actions, and the check-run annotations for job 121783929021; do not rerun blindly."
   }
 }

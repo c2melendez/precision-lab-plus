@@ -519,3 +519,14 @@
 - Playwright #40381076420 sigue `in_progress`; no declarar todavía PASS a EN-SG-01..07. H1d #40381076364, S21 Plus #40381076325 y S19 mutation #40381076498 siguen en curso; otros gates ya han pasado y constan en continuity.json.
 - Read-only API PR #2: run #40380285802 falla antes de asignar runner (runner_id=0, runner_name vacío, steps=[], 2 anotaciones listadas pero no accesibles por el conector). No hay evidencia de pytest ni causa concreta; no repetir a ciegas.
 - Siguiente acción única `H2-EN-SG-TESTS-PR36-VERIFY-R318`. Global OPEN y bloqueos existentes permanecen.
+
+
+## 2026-10-26 UTC — r319: defensa de macros HTML y nuevo SHA bajo E2E
+
+- El Playwright anterior #40381076420 falló seis pruebas: EN-SG-05 `htmlClass`/ `htmlStyle` en desktop/tablet/móvil; la sonda observó clase/estilo dentro del DOM MathLive. La fase SG28 de ese run sí aprobó 21 pruebas. La causa fue corregida sin aflojar el oráculo.
+- Commit técnico actual `343267ec6e297f2ed71ff5f71994791de0bf7b27`: guard frontend en `NaturalMathField.tsx` rechaza macros HTML/definición antes de convertir a ASCII, configura `htmlClass`/`htmlStyle`/`htmlId`/`htmlData` como texto inocuo y agrega 14 unit regressions.
+- En el mismo SHA: CI #40384190454 SUCCESS; acumulativo #40384190661 SUCCESS (backend y frontend); S25 #40384190372 SUCCESS; Syntax diagnostic #40384190580 SUCCESS; S18 #40384190790 SUCCESS; H1a #40384190506, H1b #40384190606, H1c #40384190408, H1d #40384190670, Native Syntax #40384190487 y S17 #40384190536 SUCCESS.
+- Playwright #40384190563 (job 121787982140) seguía `in_progress`; EN-SG-01..07 no tienen PASS atribuido al SHA actual hasta revisar sus logs. S19 #40384190640, S21 #40384190789, S23 #40384190521 y el tramo Lite S20 #40384190507 también siguen activos.
+- Lite runner-policy ya se integró como SHA `0a3137670d51d85644066a24acc46b88af3d9103`; cumulative #40382690415, H1d #40382690452, Runner #40382690348 y Scientific UI E2E #40382690350 SUCCESS.
+- Read-only API #2: run #40380285802 falló dos veces en 3 s con runner_id=0 y cero steps. El repo API es privado, mientras Lite/Plus son públicos; la cuota/billing de runners privados se registra solo como hipótesis, no causa confirmada. No hubo pytest ni nuevos reintentos; revisar anotaciones y Billing/Actions por acceso autorizado.
+- Siguiente acción única: `H2-EN-SG-HTML-MACRO-CHECK-PR36-VERIFY-R319`; global OPEN, bloqueos sin cambio.
