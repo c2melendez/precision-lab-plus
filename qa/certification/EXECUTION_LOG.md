@@ -502,3 +502,11 @@
 - EN-SG-32 es N/A_CONDITIONAL para el código de aplicación observado: backend/app/main.py no configura un rate limiter. Reabrir si hay evidencia de límite externo de Render/proxy.
 - EN-SG-21 sigue en conflicto contractual: matriz pide 10 000 términos y el endpoint restringe a 500 caracteres. La prueba añadida solo confirma rechazo controlado, no valor 10000.
 - Siguiente acción única: H2-EN-SG-TESTS-PR36-VERIFY-R316. Global OPEN; SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; SG28 distribuido OUT_OF_SCOPE_SINGLE_HOST.
+
+
+## 2026-10-26 UTC — r317: preflight de expansión H2 y run API sin logs
+
+- Diagnóstico exacto: run acumulativo PR #36 [40379627790](https://github.com/c2melendez/precision-lab-plus/actions/runs/40379627790), SHA `8bb1049380f285e2cdadb4d7c274759f34ea4f86`, solo falló `test_en_sg_26_expand_ten_thousand_power_returns_complexity_limit` al exceder 20 s; 2710 passed, 1 skipped, 10 xfailed, cobertura 88.77%. Código anterior expandía antes de aplicar el límite de nodos.
+- Fix commit `ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f`: preflight conservador de crecimiento antes de `sympy.expand` y regresión de no materialización. Gate acumulativo [40381076250](https://github.com/c2melendez/precision-lab-plus/actions/runs/40381076250) y Playwright [40381076420](https://github.com/c2melendez/precision-lab-plus/actions/runs/40381076420) están en curso en el nuevo SHA; no se atribuye PASS todavía.
+- API PR #2: run [40380285802](https://github.com/c2melendez/precision-lab-readonly-api/actions/runs/40380285802) failed, pero el job no expone steps/logs/artifacts. Causa indeterminada; no se afirma que pytest ejecutara. No relanzar automáticamente.
+- Siguiente acción: `H2-EN-SG-TESTS-PR36-VERIFY-R317`. EN-SG-21 sigue en conflicto con max_length=500; EN-SG-32 es condicional y no hay limitador de frecuencia app-level. Global OPEN y bloqueos existentes se preservan.

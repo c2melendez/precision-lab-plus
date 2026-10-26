@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 316,
+  "revision": 317,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -52,9 +52,9 @@
     }
   },
   "next_action": {
-    "id": "H2-EN-SG-TESTS-PR36-VERIFY-R316",
+    "id": "H2-EN-SG-TESTS-PR36-VERIFY-R317",
     "status": "WAIT",
-    "action": "Verificar las conclusiones de los workflows activados por el único commit técnico de PR #36, SHA 8bb1049380f285e2cdadb4d7c274759f34ea4f86. En particular cumulative 40379627790 y Playwright 40379628110, más gates S25/S19/H1 reentry activados por el propio PR. No relanzar gates: consultar sus jobs/logs; corregir solo fallos reproducibles de los tests nuevos. Cuando todos terminen, actualizar EN_SG_CASE_EVIDENCE_AUDIT_R315.md y continuidad con las conclusiones exactas. Mantener EN-SG-21 bloqueado por incompatibilidad con max_length=500, no declarar PASS hasta validar resultados, y preservar global OPEN y los bloqueos existentes."
+    "action": "Consultar jobs y logs de los workflows ya activados para el commit ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f. Confirmar que el preflight de crecimiento detiene EN-SG-26 antes de sympy.expand, y verificar E2E y otros gates en el SHA exacto. No despachar ni repetir gates. Para API PR #2, el run 40380285802 falló sin pasos/logs expuestos; causa desconocida, solicitar inspección autorizada solo si la evidencia sigue inaccesible. Mantener EN-SG-21 bloqueado por max_length=500 y global_certification OPEN."
   },
   "blockers": [
     {
@@ -3660,6 +3660,69 @@
         40379627985
       ],
       "note": "Do not dispatch or rerun these gates; collect exact conclusions/jobs and update per-case states."
+    },
+    "last_diagnosis": {
+      "prior_run": {
+        "id": 40379627790,
+        "job_id": 121772036477,
+        "tested_sha": "8bb1049380f285e2cdadb4d7c274759f34ea4f86",
+        "conclusion": "failure",
+        "summary": "2710 passed, 1 failed, 1 skipped, 10 xfailed, 88.77% coverage",
+        "failing_test": "tests/test_in625_h2_gap_regressions.py::test_en_sg_26_expand_ten_thousand_power_returns_complexity_limit",
+        "cause": "sympy.expand ran before checking output node count; input (x+1)**10000 exceeded the 20-second test timeout."
+      },
+      "correction": {
+        "commit": "ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f",
+        "files": [
+          "backend/app/services/algebra_service.py",
+          "backend/tests/test_algebra.py"
+        ],
+        "behavior": "Conservative term-growth preflight rejects oversized expansion before sympy.expand; adds a regression that asserts expansion is not materialized."
+      },
+      "latest_sha": "ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f",
+      "active_runs": [
+        {
+          "id": 40381076250,
+          "gate": "cumulative",
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076420,
+          "gate": "playwright",
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076498,
+          "gate": "S19 mutation",
+          "status": "queued"
+        },
+        {
+          "id": 40381076363,
+          "gate": "S25 security",
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076380,
+          "gate": "S20 performance",
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076251,
+          "gate": "S17 API fuzz",
+          "status": "in_progress"
+        }
+      ],
+      "api_ci": {
+        "repository": "c2melendez/precision-lab-readonly-api",
+        "pr": 2,
+        "run_id": 40380285802,
+        "conclusion": "failure",
+        "job_id": 121774362420,
+        "steps_available": 0,
+        "logs_url": null,
+        "artifacts": 0,
+        "cause": "undetermined; log endpoint returns 404 BlobNotFound"
+      }
     }
   }
 }
