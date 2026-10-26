@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 312,
+  "revision": 313,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -51,9 +51,9 @@
     }
   },
   "next_action": {
-    "id": "CONTINUITY-PLANNER-RUNNER-EXCLUSION-R312",
+    "id": "CONTINUITY-PLANNER-RUNNER-EXCLUSION-R313",
     "status": "VALIDATION_PENDING",
-    "action": "Validar en el SHA exacto del cambio que scripts/certification/continuity.py y sus pruebas pasan en la corrida acumulativa; comprobar que cambiar qa/certification/runner/<id>.json no altera el fingerprint y que archivos no numéricos/contratos sí lo alteran. No repetir gates previos. Solo después de revisar el run, actualizar technical_baseline_sha mediante una publicación documental y reanudar H2-EN-SG-01..32 evidence audit."
+    "action": "Validar el SHA exacto final tras corregir la exclusión de registros y retirar [skip ci] de los commits generados por el runner. Confirmar el resultado acumulativo y los gates automáticamente activados por los cambios de workflow; no reutilizar resultados de un SHA anterior. Después, actualizar technical_baseline_sha con el commit técnico validado y reanudar H2-EN-SG-01..32 sin repetir gates por rutina."
   },
   "blockers": [
     {
@@ -3520,7 +3520,8 @@
   },
   "planner_maintenance": {
     "status": "VALIDATION_PENDING",
-    "change": "numeric_generated_runner_records_excluded_from_gate_fingerprints",
-    "planner_version": 2
+    "change": "numeric_generated_runner_records_excluded_from_gate_fingerprints_and_runner_commits_use_paths_ignore_not_skip_markers",
+    "planner_version": 2,
+    "runner_commit_skip_marker": false
   }
 }
