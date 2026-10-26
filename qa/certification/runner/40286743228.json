@@ -1,0 +1,28 @@
+{
+  "schema_version": 2,
+  "operation": "docs",
+  "repo": "c2melendez/precision-lab-plus",
+  "canonical_branch": "qa/syntax-audit-in625-a1",
+  "base_sha": "bef07d86b017eec5a5922b0e1b9321ace48190b1",
+  "patch": {
+    "url": "https://gist.githubusercontent.com/c2melendez/d7f025cccc23d01d2bee7295c34f17bb/raw/fcc2c0793b21e6e28c5df13b8d0e0365fa738409/plus-r307.patch",
+    "sha256": "cf1d626d0562e84b994c3c7573fdb54e4ddf78d96f23b6aae7ebd676ed5e4e51",
+    "bytes": 7475
+  },
+  "commits": [
+    {
+      "sha": "53279df312b5b9136453836e22c9d195a2ce0765",
+      "subject": "docs(certification): r307 runner v3 docs and Playwright reconciliation [skip ci]"
+    }
+  ],
+  "paths": [
+    "qa/certification/CURRENT_STATE.md",
+    "qa/certification/EXECUTION_LOG.md",
+    "qa/certification/continuity.json"
+  ],
+  "patch_head_sha": "53279df312b5b9136453836e22c9d195a2ce0765",
+  "decision": "PUBLISHED",
+  "runner_run_id": "40286743228",
+  "runner_run_url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/40286743228",
+  "recorded_at": "2026-10-26T07:35:51+00:00"
+}
