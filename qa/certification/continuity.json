@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 308,
+  "revision": 309,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -51,9 +51,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-S19-EQUIVALENCE-REVIEW-R307",
+    "id": "H2-SG28-CONTRACT-APPROVAL-R309",
     "status": "WAITING_ON_CONTRACT_DECISION",
-    "action": "Runner v3 con operación docs desplegado en main (PR #32, merge 903e44ac) con paridad Lite/Plus. Playwright reconciliado: SUCCESS en 9acc0bff (40155180977) y 73be7940 (40154343463). S19 acceptance sigue BLOCKED: 122 focused y 912 completos clasificados; requiere decisión explícita de aceptación de equivalencias o cambio de contrato/alcance, no otro run. Mantener SECURITY-S25 BLOCKED (sin reintento hasta cambio de dependencia/advisory), ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, SY-P-23 CLOSED, PR #29 OPEN/DRAFT y certificación global OPEN."
+    "action": "S19 CLOSED_SCOPED bajo 2026-10-26-s19-focused-acceptance-v1 (opciones B+C, decisión del responsable). Siguiente bloqueo independiente: aprobar o rechazar SG28_LOGICAL_REQUEST_LEASE_CONTRACT_PROPOSAL_v1.md según SG28_CONTRACT_REVIEW_R287.md; sin aprobación no cablear HTTP ni cerrar los mutantes SG28 diferidos. Mantener SECURITY-S25 BLOCKED (sin reintento hasta cambio de dependencia/advisory), ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, PR #29 OPEN/DRAFT y certificación global OPEN. No relanzar S19 ni gates verdes."
   },
   "blockers": [
     {
@@ -85,9 +85,9 @@
     },
     {
       "id": "S19-BACKEND-MUTATION",
-      "status": "BLOCKED",
+      "status": "CLOSED_SCOPED",
       "kind": "targeted_coverage_and_acceptance",
-      "detail": "Dos inventarios reales. Focalizado r303 (73be7940): 1,688 comprobados, 1,564 killed (92.65%), 122 survived, 2 timeout; artefacto 12584112224; detalle y clasificación en s19_focused_triage_r303. Completo r304 (73be7940, gate de dependencias 40154340922): 3,302 mutantes, 2,363 killed (71.87% de 3,288 comprobados), 912 survived, 13 timeout, 14 sin tests; artefacto 12583639759; detalle en s19_full_campaign_r304. Delta contra r301: +49 killed, 0 regresiones. Los mutantes 16 y 17 de _radical_cases_result sobreviven en la campaña completa con el mismo comando de pruebas, lo que confirma que sus kills focalizados dependen del orden de iteración. La aceptación sigue BLOCKED: el alcance focalizado está clasificado y congelado; no relanzar campañas."
+      "detail": "Aceptado bajo 2026-10-26-s19-focused-acceptance-v1 (ver s19_focused_acceptance_r309): alcance focalizado 92.65% killed (piso 90%, sin regresión contra 73be7940); campaña completa solo informativa; mutantes SG28 de _evaluate_impl (líneas 34, 37, 39-57) diferidos a H2-SG28. Detalle previo: Dos inventarios reales. Focalizado r303 (73be7940): 1,688 comprobados, 1,564 killed (92.65%), 122 survived, 2 timeout; artefacto 12584112224; detalle y clasificación en s19_focused_triage_r303. Completo r304 (73be7940, gate de dependencias 40154340922): 3,302 mutantes, 2,363 killed (71.87% de 3,288 comprobados), 912 survived, 13 timeout, 14 sin tests; artefacto 12583639759; detalle en s19_full_campaign_r304. Delta contra r301: +49 killed, 0 regresiones. Los mutantes 16 y 17 de _radical_cases_result sobreviven en la campaña completa con el mismo comando de pruebas, lo que confirma que sus kills focalizados dependen del orden de iteración. La aceptación sigue BLOCKED: el alcance focalizado está clasificado y congelado; no relanzar campañas."
     },
     {
       "id": "S18-PLUS-EVALUATE-HANG-R293",
@@ -3457,5 +3457,47 @@
         "conclusion": "success"
       }
     ]
+  },
+  "s19_focused_acceptance_r309": {
+    "decision": "ACCEPT_FOCUSED_SCOPE_WITH_SG28_EXCEPTION",
+    "options": "B+C",
+    "decided_by": "responsable del proyecto (usuario)",
+    "decided_at": "2026-10-26",
+    "contract_id": "2026-10-26-s19-focused-acceptance-v1",
+    "acceptance_scope": "focused (15 funciones de solve_service, parsing y evaluate; allowlist de r302)",
+    "criteria": {
+      "metric": "killed_percent sobre mutantes comprobados del alcance focalizado",
+      "floor_killed_percent": 90.0,
+      "no_regression_reference": {
+        "run_id": 40154343365,
+        "sha": "73be7940",
+        "checked": 1688,
+        "killed": 1564,
+        "survived": 122,
+        "timeout": 2,
+        "killed_percent": 92.65
+      },
+      "regression_rule": "una corrida futura sobre la misma allowlist no puede bajar de 1,564 killed ni superar 122 survived; los kills no deterministas de _radical_cases_result 16 y 17 no cuentan como mejora ni como regresión"
+    },
+    "accepted_survivors": {
+      "classes": [
+        "equivalente",
+        "inalcanzable",
+        "dependiente del orden de iteración (atoms(Pow))"
+      ],
+      "count_excluding_sg28_exception": "122 menos los de la excepción SG28, clasificados en s19_focused_triage_r303"
+    },
+    "sg28_exception": {
+      "function": "_evaluate_impl",
+      "mutants": "líneas 34, 37 y 39-57 (selección de fixture SG28)",
+      "status": "DEFERRED_TO_H2_SG28",
+      "note": "No son equivalentes: quedan sin aceptar hasta que el contrato SG28 se apruebe. S19 queda CLOSED_SCOPED, no CLOSED."
+    },
+    "informational_only": {
+      "full_campaign": "s19_full_campaign_r304 (3,302 mutantes; 2,363 killed, 71.87% de 3,288 comprobados; 912 survived)",
+      "role": "inventario informativo; no es gate de aceptación"
+    },
+    "rationale": "El inventario backend creció de 1,028 (baseline) a 3,302 mutantes (r289), lo que explica la caída del score; los supervivientes de la campaña completa están fuera de la allowlist con contratos observables. Aceptar el alcance focalizado con criterio versionado evita perseguir porcentaje sobre código fuera de contrato.",
+    "limits": "No es PASS global de S19 ni cierra H2-SG28-DIST. No autoriza relanzar campañas; una nueva corrida solo si cambia un insumo del alcance focalizado."
   }
 }

@@ -442,3 +442,9 @@
 - `operation=docs` publicó r307: run 40286743228 (dry-run 40286675700), base `bef07d86`, commits `53279df3` + `b0eccc4b`.
 - Playwright SUCCESS en `9acc0bff` (40155180977) y `73be7940` (40154343463).
 - S25 SUCCESS en 061e9110/9acc0bff/73be7940/3697ac9b; permanece BLOCKED por condición de aceptación explícita. S19 BLOCKED por contrato.
+
+## 2026-10-26 UTC — r309: decisión de aceptación S19 (B+C)
+
+- Decisión del responsable: contrato `2026-10-26-s19-focused-acceptance-v1`. Piso 90.0% killed sobre el alcance focalizado y sin regresión contra 40154343365 (73be7940: 1,564 killed / 122 survived / 2 timeout).
+- Campaña completa r304 (71.87%) solo informativa. Mutantes SG28 de `_evaluate_impl` (líneas 34, 37, 39–57) diferidos a H2-SG28.
+- S19 CLOSED_SCOPED; sin Actions ni cambios de producto. Índice `continuity.json` r309.
