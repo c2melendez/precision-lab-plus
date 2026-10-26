@@ -170,3 +170,28 @@ def test_algebra_domain_metadata_omits_numeric_domain_tautologies():
         body = response.json()
         assert body["success"] is True
         assert body["domain_conditions"] == []
+
+
+def test_expand_large_binomial_is_rejected_before_materialization(monkeypatch):
+    """The H2 expansion guard must run before SymPy materializes 10001 terms."""
+    import sympy
+    from app.services import algebra_service
+    from app.services.ast_validator import ComplexityLimitError
+
+    x = sympy.Symbol("x")
+    expression = sympy.Pow(
+        sympy.Add(x, sympy.Integer(1), evaluate=False),
+        sympy.Integer(10000),
+        evaluate=False,
+    )
+    monkeypatch.setattr(
+        algebra_service.parsing,
+        "parse_expression_tree",
+        lambda *_args, **_kwargs: expression,
+    )
+    def unexpected_expand(*_args, **_kwargs):
+        pytest.fail("sympy.expand must not be called after the preflight rejects growth")
+
+    monkeypatch.setattr(algebra_service.sympy, "expand", unexpected_expand)
+    with pytest.raises(ComplexityLimitError, match="antes de materializar"):
+        algebra_service.expand_expression("(x+1)**10000")
