@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 314,
+  "revision": 315,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -24,7 +24,8 @@
     "qa/certification/EDCX_B6_ADAPTER_ORACLE_PLAN.md",
     "qa/certification/S19_BACKEND_MUTATION_REVIEW_R288.md",
     "qa/certification/S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md",
-    "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md"
+    "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md",
+    "qa/certification/EN_SG_CASE_EVIDENCE_AUDIT_R315.md"
   ],
   "gates": {
     "cumulative": {
@@ -51,9 +52,9 @@
     }
   },
   "next_action": {
-    "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
+    "id": "H2-EN-SG-GAP-TEST-FIRST-R315",
     "status": "READY",
-    "action": "Construir la tabla de evidencia por caso EN-SG-01..32 (test, archivo, run/job por SHA exacto, PASS/FAIL/GAP/MANUAL) desde backend/tests/test_in625_h2_security.py, frontend/e2e/in625-h2-sg28-cancel.spec.ts, syntax309 SYX preflights, in625-syntax-native.spec.ts y los runs reales. Para cada GAP, comprobar primero si existe cobertura sin etiqueta; escribir pruebas test-first en Plus API para EN-SG-21, 23..27, 32 y en frontend para 01..08 solo si el GAP está confirmado. No ejecutar cargas extremas en producción. No activar SG28_EVALUATE_ISOLATION en producción; no repetir gates verdes. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, SG28-DIST OUT_OF_SCOPE_SINGLE_HOST, PR #29 OPEN/DRAFT y certificación global OPEN."
+    "action": "Resolver o recuperar la fuente primaria matriz_entrada_sintaxis_calculadora.md (H.2) y fijar los vectores/umbrales faltantes sin inventarlos. Luego añadir pruebas test-first aisladas para los gaps confirmados EN-SG-25 (factorial con CPU budget), EN-SG-26 (expansión 10000), EN-SG-27 (vector original), EN-SG-32 (umbral exacto) y casos frontend EN-SG-02/04/05/06/07. Resolver formalmente EN-SG-21 porque 10000 términos contradicen el límite del request de 500 caracteres. Reutilizar evidencia exacta ya registrada; no relanzar cumulative/H1d ni activar cargas en producción. Mantener global OPEN y los bloqueos existentes."
   },
   "blockers": [
     {
@@ -3567,5 +3568,71 @@
         }
       }
     }
+  },
+  "h2_case_evidence_audit_r315": {
+    "status": "PARTIAL_AUDIT_RECORDED",
+    "report": "qa/certification/EN_SG_CASE_EVIDENCE_AUDIT_R315.md",
+    "audit_date": "2026-10-26",
+    "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
+    "run": {
+      "repository": "c2melendez/precision-lab-plus",
+      "workflow": "in625-cumulative-certification",
+      "run_id": 40374409722,
+      "job_id": 121753424481,
+      "tested_sha": "f2a8f9877d8a1b1cde9bf074abbe75b475258913",
+      "conclusion": "success",
+      "summary": "2707 passed, 1 skipped, 10 xfailed, 1 warning"
+    },
+    "e2e_run": {
+      "repository": "c2melendez/precision-lab-plus",
+      "workflow": "playwright",
+      "run_id": 40374409444,
+      "job_id": 121753422799,
+      "tested_sha": "f2a8f9877d8a1b1cde9bf074abbe75b475258913",
+      "status_at_audit": "in_progress",
+      "counts_as_pass": false
+    },
+    "source_matrix_status": "Not found in the canonical GitHub branch; Library search did not surface the original matrix file",
+    "confirmed_gaps": [
+      "EN-SG-02",
+      "EN-SG-04",
+      "EN-SG-05",
+      "EN-SG-06",
+      "EN-SG-07",
+      "EN-SG-21",
+      "EN-SG-25",
+      "EN-SG-27",
+      "EN-SG-32"
+    ],
+    "partial": [
+      "EN-SG-01",
+      "EN-SG-03",
+      "EN-SG-08",
+      "EN-SG-20",
+      "EN-SG-26",
+      "EN-SG-28",
+      "EN-SG-29"
+    ],
+    "scoped_pass": [
+      "EN-SG-23",
+      "EN-SG-24"
+    ],
+    "fully_tested": [
+      "EN-SG-09",
+      "EN-SG-10",
+      "EN-SG-11",
+      "EN-SG-12",
+      "EN-SG-13",
+      "EN-SG-14",
+      "EN-SG-15",
+      "EN-SG-16",
+      "EN-SG-17",
+      "EN-SG-18",
+      "EN-SG-19",
+      "EN-SG-22",
+      "EN-SG-30",
+      "EN-SG-31"
+    ],
+    "global_certification": "OPEN"
   }
 }
