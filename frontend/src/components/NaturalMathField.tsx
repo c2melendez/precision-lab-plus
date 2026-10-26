@@ -571,6 +571,12 @@ export function latexToBackendSyntax(latex: string): string {
   if (/\\write(?![A-Za-z])/.test(latex)) {
     throw new Error("Comando TeX no permitido: write no es una operación matemática.");
   }
+  // H2: reject HTML/definition commands before ASCII conversion can erase
+  // them and silently reinterpret their arguments as a mathematical product.
+  const unsupportedCommand = /\\(url|href|includegraphics|htmlClass|htmlStyle|htmlId|htmlData|def|gdef|edef|newcommand|renewcommand|providecommand|let|catcode|input|include|openin)(?![A-Za-z])/i.exec(latex);
+  if (unsupportedCommand) {
+    throw new Error(`Comando TeX no permitido: ${unsupportedCommand[1]} no es una operación matemática.`);
+  }
   // SY-X-02: detect layout-only source before trimming its final escaped space.
   if (!latex.replace(/\\(?:[,;!: ]|qquad\b|quad\b)/g, "").trim()) return "";
   // SY-X-03: a bare row separator or incomplete command is not empty input.
@@ -869,6 +875,14 @@ export function NaturalMathField({
       if (el) {
         el.mathVirtualKeyboardPolicy = "manual";
         window.mathVirtualKeyboard.hide();
+        // H2: disable HTML-extension macros in MathLive's shadow DOM.
+        el.macros = {
+          ...el.macros,
+          htmlClass: "\\text{Comando TeX no permitido}",
+          htmlStyle: "\\text{Comando TeX no permitido}",
+          htmlId: "\\text{Comando TeX no permitido}",
+          htmlData: "\\text{Comando TeX no permitido}",
+        };
       }
       fieldRef?.(el);
     },

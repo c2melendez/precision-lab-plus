@@ -49,6 +49,27 @@ describe("latexToBackendSyntax", () => {
   });
 });
 
+describe("latexToBackendSyntax — comandos TeX no matemáticos", () => {
+  it.each([
+    "\\url{http://example.com}",
+    "\\includegraphics{x.png}",
+    "\\href{javascript:alert(1)}{x}",
+    "\\htmlClass{a}{x}",
+    "\\htmlStyle{color:red}{x}",
+    "\\htmlId{unsafe-id}{x}",
+    "\\htmlData{onload=alert(1)}{x}",
+    "\\def\\a{\\a}\\a",
+    "\\newcommand{\\a}{\\a}\\a",
+    "\\let\\a\\b",
+    "\\catcode",
+    "\\input{/etc/passwd}",
+    "\\include{x}",
+    "\\openin1=x",
+  ])("rechaza el comando antes de convertir a ASCII: %s", (latex) => {
+    expect(() => latexToBackendSyntax(latex)).toThrow("Comando TeX no permitido:");
+  });
+});
+
 // Fase 10 (auditoría Fase 0 v2, port de precision-lab-lite): las teclas
 // del menú "Stat" que usan \mathrm{...} (mean/median/mode/stdev/var/mad/
 // sort/mod/lcm/nCr/nPr) llegaban al backend deletreadas como variables
