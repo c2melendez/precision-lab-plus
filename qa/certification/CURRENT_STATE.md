@@ -961,3 +961,12 @@ Ver r252.
 - **Pendiente real (un host).** Evidencia por caso de EN-SG-01..32 (`IN625_H2_MATRIX.md`). Sin referencia etiquetada en tests: EN-SG-01..08, 21, 23..27 y 32; puede haber cobertura sin etiqueta (preflights syntax309, `in625-syntax-native.spec.ts`) que debe verificarse antes de añadir tests. EN-SG-29 tiene test backend; falta evidencia de run por SHA exacto.
 - Solo documentación; sin Actions ni cambios de producto. Estados sin cambio: SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; DIST OUT_OF_SCOPE_SINGLE_HOST; H2 y certificación global OPEN.
 - **Siguiente acción:** auditoría de evidencia por caso EN-SG-01..32 y pruebas test-first solo para los GAP confirmados.
+
+
+## 2026-10-26 UTC — r312: exclusión de registros generados del fingerprint; validación pendiente
+
+- Corrección aplicada en `scripts/certification/continuity.py`: la huella ignora únicamente `qa/certification/runner/<id>.json` con ID numérico; el algoritmo pasa a versión 2.
+- Pruebas de regresión: cambiar el contenido de un registro generado no invalida evidencia; añadir un archivo no numérico en `runner/` o modificar un contrato sí invalida la huella.
+- Se actualizó `CONTINUITY.md` para eliminar el snapshot histórico r235 y documentar la excepción estricta y los marcadores de Actions.
+- El siguiente paso es validar este commit mediante la corrida acumulativa activada por el cambio técnico y reconciliar `technical_baseline_sha` con evidencia exacta antes de volver a usar el planificador. No repetir otros gates verdes por rutina.
+- El objetivo H2-EN-SG-01..32 vuelve a estar en cola después de validar la corrección. Certificación global: OPEN.

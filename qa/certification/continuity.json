@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 311,
+  "revision": 312,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -51,9 +51,9 @@
     }
   },
   "next_action": {
-    "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R311",
-    "status": "READY",
-    "action": "Construir la tabla de evidencia por caso EN-SG-01..32 (test, archivo, run/job por SHA exacto, PASS/FAIL/GAP/MANUAL) desde backend/tests/test_in625_h2_security.py, frontend/e2e/in625-h2-sg28-cancel.spec.ts, syntax309 SYX preflights, in625-syntax-native.spec.ts y los runs reales. Para cada GAP, escribir primero la prueba en Plus API (EN-SG-21, 23..27, 32; 01..08 en frontend) sin cargas extremas en producción. No activar SG28_EVALUATE_ISOLATION en producción; no repetir gates verdes. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, PR #29 OPEN/DRAFT y certificación global OPEN."
+    "id": "CONTINUITY-PLANNER-RUNNER-EXCLUSION-R312",
+    "status": "VALIDATION_PENDING",
+    "action": "Validar en el SHA exacto del cambio que scripts/certification/continuity.py y sus pruebas pasan en la corrida acumulativa; comprobar que cambiar qa/certification/runner/<id>.json no altera el fingerprint y que archivos no numéricos/contratos sí lo alteran. No repetir gates previos. Solo después de revisar el run, actualizar technical_baseline_sha mediante una publicación documental y reanudar H2-EN-SG-01..32 evidence audit."
   },
   "blockers": [
     {
@@ -3468,7 +3468,7 @@
     "acceptance_scope": "focused (15 funciones de solve_service, parsing y evaluate; allowlist de r302)",
     "criteria": {
       "metric": "killed_percent sobre mutantes comprobados del alcance focalizado",
-      "floor_killed_percent": 90.0,
+      "floor_killed_percent": 90,
       "no_regression_reference": {
         "run_id": 40154343365,
         "sha": "73be7940",
@@ -3517,5 +3517,10 @@
     ],
     "sg28_flag": "SG28_EVALUATE_ISOLATION permanece desactivada por defecto; activarla en Render/producción requiere autorización aparte.",
     "s19_link": "Los mutantes SG28 de _evaluate_impl (líneas 34, 37, 39-57) diferidos en s19_focused_acceptance_r309 se resolverán contra el contrato local, no el distribuido."
+  },
+  "planner_maintenance": {
+    "status": "VALIDATION_PENDING",
+    "change": "numeric_generated_runner_records_excluded_from_gate_fingerprints",
+    "planner_version": 2
   }
 }

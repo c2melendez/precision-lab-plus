@@ -456,3 +456,12 @@
 ## 2026-10-26 UTC — r311: corrección del bloque local H2-SG28
 
 - La cuota/concurrencia local ya estaba implementada y probada; se corrige `still_required_local` de r310. Siguiente: auditoría de evidencia EN-SG-01..32. Índice r311; sin Actions.
+
+
+## 2026-10-26 UTC — r312: exclusión de registros generados del fingerprint; validación pendiente
+
+- Corrección aplicada en `scripts/certification/continuity.py`: la huella ignora únicamente `qa/certification/runner/<id>.json` con ID numérico; el algoritmo pasa a versión 2.
+- Pruebas de regresión: cambiar el contenido de un registro generado no invalida evidencia; añadir un archivo no numérico en `runner/` o modificar un contrato sí invalida la huella.
+- Se actualizó `CONTINUITY.md` para eliminar el snapshot histórico r235 y documentar la excepción estricta y los marcadores de Actions.
+- El siguiente paso es validar este commit mediante la corrida acumulativa activada por el cambio técnico y reconciliar `technical_baseline_sha` con evidencia exacta antes de volver a usar el planificador. No repetir otros gates verdes por rutina.
+- El objetivo H2-EN-SG-01..32 vuelve a estar en cola después de validar la corrección. Certificación global: OPEN.
