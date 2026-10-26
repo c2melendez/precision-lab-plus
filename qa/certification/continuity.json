@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 304,
+  "revision": 305,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -66,7 +66,8 @@
     },
     {
       "id": "SY-P-23",
-      "status": "OPEN"
+      "status": "ACCEPTED_PENDING_CI",
+      "detail": "Convención aceptada 2026-10-26-sy-p-23-exact-block-v1: desambiguación obligatoria solo para la entrada exacta a/bc. Pendiente cumulative y H1d verdes en el commit de registro."
     },
     {
       "id": "SY-X-04-PLUS-HTTP",
@@ -3427,5 +3428,19 @@
     },
     "scope_reading": "Los 912 supervivientes completos son inventario documentado, no objetivo. El alcance focused sigue congelado en 122 supervivientes clasificados.",
     "acceptance": "BLOCKED"
+  },
+  "sy_p_23_acceptance": {
+    "acceptance_revision": "2026-10-26-sy-p-23-exact-block-v1",
+    "decided_on": "2026-10-26T05:07Z",
+    "decided_by": "Carlos César Meléndez Oviedo",
+    "decisions": [
+      "Desambiguación obligatoria solo para la entrada exacta a/bc o \\frac{a}{bc} sin bc definida ni agrupación explícita.",
+      "Sin detector general de ambigüedad: expresiones como 2+a/bc quedan fuera.",
+      "XFAIL estricto de b y c separadas en Plus aceptado como limitación documentada; no se convierte en PASS."
+    ],
+    "evidence": "Bloqueo exacto en frontend/src/components/BasicMode.tsx (commit 941ae5a), presente en HEAD QA 061e911. Último H1d y cumulative verdes registrados: 38247671320 y 38247671293 sobre SHA fd55b41. XFAIL estricto test_syp_23_separate_b_c_substitutions_pending conservado.",
+    "status": "ACCEPTED_PENDING_CI",
+    "closes_when": "cumulative y H1d verdes en el commit de registro, con IDs registrados; hasta entonces SY-P-23 permanece OPEN",
+    "gate_runs": []
   }
 }
