@@ -945,3 +945,12 @@ Ver r252.
 - **Alcance de la decisión.** S19 backend pasa a **CLOSED_SCOPED**, no a PASS global. No cierra H2-SG28-DIST ni la certificación global. Es un cambio solo documental: no se ejecutaron Actions ni se tocó producto.
 - **Estado.** SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; H2-SG28-DIST-01..08 BLOCKED; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; SY-P-23 CLOSED; PR #29 OPEN/DRAFT; certificación global OPEN.
 - **Siguiente acción:** aprobar o rechazar `SG28_LOGICAL_REQUEST_LEASE_CONTRACT_PROPOSAL_v1.md` según `SG28_CONTRACT_REVIEW_R287.md`. No relanzar S19 ni gates verdes.
+
+## 2026-10-26 UTC — r310: SG28 acotado a un solo host (opción 2)
+
+- **Decisión del responsable (2026-10-26):** contrato `2026-10-26-sg28-single-host-scope-v1`. SG28 se certifica para un solo host; la admisión distribuida queda **fuera de alcance** para el despliegue actual (un único servicio backend). Registrada en `continuity.json` (`sg28_single_host_decision_r310`).
+- `SG28_LOGICAL_REQUEST_LEASE_CONTRACT_PROPOSAL_v1.md` queda archivado/no aprobado como contrato vigente (referencia de diseño; archivo sin modificar). **H2-SG28-DIST-01..08 = OUT_OF_SCOPE_SINGLE_HOST**: no es PASS ni certificación multinodo; no se afirma K=1 entre hosts.
+- **Condición de reapertura:** más de una instancia del backend con cuota compartida, o exigencia de certificación multinodo; entonces v2 del contrato y pruebas en hosts independientes.
+- **Sigue requerido en local:** cuotas y concurrencia con respuesta ante saturación; trabajo costoso restante en el proceso principal (simplificación/LaTeX); cancelación HTTP real, recuperación A/B y ausencia de procesos huérfanos; paridad off/on. Los mutantes SG28 de S19 (`_evaluate_impl` 34, 37, 39–57) se resolverán contra ese contrato local.
+- `SG28_EVALUATE_ISOLATION` sigue **desactivada por defecto**; activarla en producción requiere autorización aparte. H2 y la certificación global continúan OPEN. Solo documentación; sin Actions.
+- **Siguiente acción:** bloque local H2-SG28 (cuota/concurrencia y trabajo costoso en proceso principal), test-first, sin activar la bandera.

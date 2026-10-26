@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 309,
+  "revision": 310,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -51,14 +51,15 @@
     }
   },
   "next_action": {
-    "id": "H2-SG28-CONTRACT-APPROVAL-R309",
-    "status": "WAITING_ON_CONTRACT_DECISION",
-    "action": "S19 CLOSED_SCOPED bajo 2026-10-26-s19-focused-acceptance-v1 (opciones B+C, decisión del responsable). Siguiente bloqueo independiente: aprobar o rechazar SG28_LOGICAL_REQUEST_LEASE_CONTRACT_PROPOSAL_v1.md según SG28_CONTRACT_REVIEW_R287.md; sin aprobación no cablear HTTP ni cerrar los mutantes SG28 diferidos. Mantener SECURITY-S25 BLOCKED (sin reintento hasta cambio de dependencia/advisory), ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, PR #29 OPEN/DRAFT y certificación global OPEN. No relanzar S19 ni gates verdes."
+    "id": "H2-SG28-LOCAL-QUOTA-CONCURRENCY-R310",
+    "status": "READY",
+    "action": "Bloque local de H2-SG28 (un solo host): leer backend/app/routers/evaluate.py, services/interruptible.py, services/request_cancellation.py y tests backend/tests/test_in625_sg28_*.py; definir y probar test-first límites de concurrencia/saturación y trabajo costoso restante en el proceso principal (simplificación/LaTeX), sin activar SG28_EVALUATE_ISOLATION en producción. Verificar antes HEAD y runs por SHA exacto; no repetir gates verdes. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, PR #29 OPEN/DRAFT y certificación global OPEN."
   },
   "blockers": [
     {
       "id": "H2-SG28-DIST-01..08",
-      "status": "BLOCKED"
+      "status": "OUT_OF_SCOPE_SINGLE_HOST",
+      "detail": "Decisión 2026-10-26-sg28-single-host-scope-v1 (sg28_single_host_decision_r310). No es PASS; reapertura si hay más de una instancia con cuota compartida."
     },
     {
       "id": "SECURITY-S25",
@@ -3499,5 +3500,23 @@
     },
     "rationale": "El inventario backend creció de 1,028 (baseline) a 3,302 mutantes (r289), lo que explica la caída del score; los supervivientes de la campaña completa están fuera de la allowlist con contratos observables. Aceptar el alcance focalizado con criterio versionado evita perseguir porcentaje sobre código fuera de contrato.",
     "limits": "No es PASS global de S19 ni cierra H2-SG28-DIST. No autoriza relanzar campañas; una nueva corrida solo si cambia un insumo del alcance focalizado."
+  },
+  "sg28_single_host_decision_r310": {
+    "decision": "OPTION_2_SINGLE_HOST_SCOPE",
+    "contract_id": "2026-10-26-sg28-single-host-scope-v1",
+    "decided_by": "responsable del proyecto (usuario)",
+    "decided_at": "2026-10-26",
+    "summary": "SG28 se certifica para un solo host (cuota local al proceso, cancelación real, limpieza del hijo y recuperación). La admisión distribuida entre hosts queda fuera de alcance para el despliegue actual (un único servicio backend).",
+    "proposal_status": "SG28_LOGICAL_REQUEST_LEASE_CONTRACT_PROPOSAL_v1.md queda ARCHIVADO/NO APROBADO como contrato vigente; se conserva como diseño de referencia si se escala. No se edita el archivo.",
+    "dist_01_08": "OUT_OF_SCOPE_SINGLE_HOST: no es PASS ni certificación multinodo; no se afirma K=1 entre hosts.",
+    "reopen_condition": "Ejecutar más de una instancia del backend con cuota compartida, o exigir certificación multinodo. Entonces redactar v2 del contrato (presupuesto, máquina de estados, reloj, fencing, tabla HTTP) y probar en hosts independientes.",
+    "still_required_local": [
+      "cuotas y concurrencia local con límites y respuesta ante saturación",
+      "operaciones costosas restantes en el proceso principal (simplificación/LaTeX)",
+      "cancelación HTTP real, recuperación A/B y ausencia de procesos huérfanos",
+      "paridad de endpoint con bandera off/on"
+    ],
+    "sg28_flag": "SG28_EVALUATE_ISOLATION permanece desactivada por defecto; activarla en Render/producción requiere autorización aparte.",
+    "s19_link": "Los mutantes SG28 de _evaluate_impl (líneas 34, 37, 39-57) diferidos en s19_focused_acceptance_r309 se resolverán contra el contrato local, no el distribuido."
   }
 }

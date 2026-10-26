@@ -448,3 +448,7 @@
 - Decisión del responsable: contrato `2026-10-26-s19-focused-acceptance-v1`. Piso 90.0% killed sobre el alcance focalizado y sin regresión contra 40154343365 (73be7940: 1,564 killed / 122 survived / 2 timeout).
 - Campaña completa r304 (71.87%) solo informativa. Mutantes SG28 de `_evaluate_impl` (líneas 34, 37, 39–57) diferidos a H2-SG28.
 - S19 CLOSED_SCOPED; sin Actions ni cambios de producto. Índice `continuity.json` r309.
+
+## 2026-10-26 UTC — r310: SG28 un solo host (opción 2)
+
+- Contrato `2026-10-26-sg28-single-host-scope-v1`: DIST-01..08 OUT_OF_SCOPE_SINGLE_HOST (no PASS); propuesta de lease distribuido archivada; reapertura si hay varias instancias. Siguiente: bloque local de cuota/concurrencia. Índice r310; sin Actions.
