@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 314,
+  "revision": 319,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -24,7 +24,8 @@
     "qa/certification/EDCX_B6_ADAPTER_ORACLE_PLAN.md",
     "qa/certification/S19_BACKEND_MUTATION_REVIEW_R288.md",
     "qa/certification/S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md",
-    "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md"
+    "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md",
+    "qa/certification/EN_SG_CASE_EVIDENCE_AUDIT_R315.md"
   ],
   "gates": {
     "cumulative": {
@@ -51,9 +52,9 @@
     }
   },
   "next_action": {
-    "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "status": "READY",
-    "action": "Construir la tabla de evidencia por caso EN-SG-01..32 (test, archivo, run/job por SHA exacto, PASS/FAIL/GAP/MANUAL) desde backend/tests/test_in625_h2_security.py, frontend/e2e/in625-h2-sg28-cancel.spec.ts, syntax309 SYX preflights, in625-syntax-native.spec.ts y los runs reales. Para cada GAP, comprobar primero si existe cobertura sin etiqueta; escribir pruebas test-first en Plus API para EN-SG-21, 23..27, 32 y en frontend para 01..08 solo si el GAP está confirmado. No ejecutar cargas extremas en producción. No activar SG28_EVALUATE_ISOLATION en producción; no repetir gates verdes. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, SG28-DIST OUT_OF_SCOPE_SINGLE_HOST, PR #29 OPEN/DRAFT y certificación global OPEN."
+    "id": "H2-EN-SG-HTML-MACRO-CHECK-PR36-VERIFY-R319",
+    "status": "WAIT",
+    "action": "Consultar la conclusión y logs de Playwright #40384190563 (job 121787982140), que prueba el SHA 343267ec6e297f2ed71ff5f71994791de0bf7b27 y las regresiones EN-SG-01..07. El acumulativo #40384190661, CI #40384190454, S25 #40384190372, H1a-H1d, Native Syntax, Syntax diagnostic, S18 y S17 están SUCCESS en el mismo SHA; no repetirlos. Recoger luego los gates largos aún en curso: S19 #40384190640, S21 #40384190789, S23 #40384190521 y el tramo Lite de S20 #40384190507. Solo corregir fallos reproducibles de la defensa HTML; no relajar oráculos ni fusionar PR #34/#36 hasta verificar checks requeridos. Mantener EN-SG-21 como conflicto de max_length=500, EN-SG-32 condicional sin limitador app-level y global_certification OPEN."
   },
   "blockers": [
     {
@@ -3567,5 +3568,402 @@
         }
       }
     }
+  },
+  "h2_case_evidence_audit_r315": {
+    "status": "PARTIAL_AUDIT_LATEST_E2E_PENDING",
+    "report": "qa/certification/EN_SG_CASE_EVIDENCE_AUDIT_R315.md",
+    "audit_date": "2026-10-26",
+    "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
+    "run": {
+      "repository": "c2melendez/precision-lab-plus",
+      "workflow": "in625-cumulative-certification",
+      "run_id": 40374409722,
+      "job_id": 121753424481,
+      "tested_sha": "f2a8f9877d8a1b1cde9bf074abbe75b475258913",
+      "conclusion": "success",
+      "summary": "2707 passed, 1 skipped, 10 xfailed, 1 warning"
+    },
+    "e2e_run": {
+      "repository": "c2melendez/precision-lab-plus",
+      "workflow": "playwright",
+      "run_id": 40374409444,
+      "job_id": 121753422799,
+      "tested_sha": "f2a8f9877d8a1b1cde9bf074abbe75b475258913",
+      "status_at_audit": "in_progress",
+      "counts_as_pass": false,
+      "status": "success",
+      "counts": {
+        "general_passed": 627,
+        "sg28_passed": 21
+      },
+      "conclusion": "success"
+    },
+    "source_matrix_status": {
+      "status": "RECOVERED_EXTRACT_PENDING_CI",
+      "original_archive": "Precision_Lab_Certification_HANDOFF_ACTIVE_v0_3_CONTINUED_14_2026-10-07_CORRECTED.zip",
+      "original_path": "legacy_sources/matriz_entrada_sintaxis_calculadora(2).md",
+      "sha256": "58fbc0ed04aef158148981fc28074d470e45ec07a67604f89b3847b55c625528",
+      "extract_pr": "https://github.com/c2melendez/precision-lab-plus/pull/36"
+    },
+    "confirmed_gaps": [
+      "EN-SG-02",
+      "EN-SG-04",
+      "EN-SG-05",
+      "EN-SG-06",
+      "EN-SG-07",
+      "EN-SG-21",
+      "EN-SG-25",
+      "EN-SG-27"
+    ],
+    "partial": [
+      "EN-SG-01",
+      "EN-SG-03",
+      "EN-SG-08",
+      "EN-SG-20",
+      "EN-SG-28",
+      "EN-SG-29"
+    ],
+    "scoped_pass": [
+      "EN-SG-23",
+      "EN-SG-24",
+      "EN-SG-28",
+      "EN-SG-26"
+    ],
+    "fully_tested": [
+      "EN-SG-09",
+      "EN-SG-10",
+      "EN-SG-11",
+      "EN-SG-12",
+      "EN-SG-13",
+      "EN-SG-14",
+      "EN-SG-15",
+      "EN-SG-16",
+      "EN-SG-17",
+      "EN-SG-18",
+      "EN-SG-19",
+      "EN-SG-22",
+      "EN-SG-30",
+      "EN-SG-31"
+    ],
+    "global_certification": "OPEN",
+    "conditional_not_applicable": [
+      "EN-SG-32: no app-level rate limiter is configured in backend/app/main.py; reopen only if external proxy/platform rate limiting is evidenced"
+    ],
+    "next_validation": {
+      "pr_url": "https://github.com/c2melendez/precision-lab-plus/pull/36",
+      "head_sha": "ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f",
+      "active_runs": [
+        {
+          "id": 40381076420,
+          "gate": "Playwright E2E",
+          "job_id": 121777141084,
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076364,
+          "gate": "H1d",
+          "job_id": 121777140527,
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076325,
+          "gate": "S21 cross-browser Plus",
+          "job_id": 121777141383,
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076498,
+          "gate": "S19 mutation",
+          "job_ids": [
+            121777588870,
+            121777589154
+          ],
+          "status": "in_progress"
+        }
+      ],
+      "successful_runs": [
+        40381076250,
+        40381076363,
+        40381076380,
+        40381076251,
+        40381076273,
+        40381076257,
+        40381076414,
+        40381076428,
+        40381076444,
+        40381076495,
+        40381076418
+      ],
+      "note": "Do not rerun the cumulative #40381076250. Wait for the existing E2E/H1d/S21/S19 results and inspect exact logs."
+    },
+    "last_diagnosis": {
+      "prior_run": {
+        "id": 40379627790,
+        "job_id": 121772036477,
+        "tested_sha": "8bb1049380f285e2cdadb4d7c274759f34ea4f86",
+        "conclusion": "failure",
+        "summary": "2710 passed, 1 failed, 1 skipped, 10 xfailed, 88.77% coverage",
+        "failing_test": "tests/test_in625_h2_gap_regressions.py::test_en_sg_26_expand_ten_thousand_power_returns_complexity_limit",
+        "cause": "sympy.expand ran before checking output node count; input (x+1)**10000 exceeded the 20-second test timeout."
+      },
+      "correction": {
+        "commit": "ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f",
+        "files": [
+          "backend/app/services/algebra_service.py",
+          "backend/tests/test_algebra.py"
+        ],
+        "behavior": "Conservative term-growth preflight rejects oversized expansion before sympy.expand; adds a regression that asserts expansion is not materialized."
+      },
+      "latest_sha": "ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f",
+      "active_runs": [
+        {
+          "id": 40381076250,
+          "gate": "cumulative",
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076420,
+          "gate": "playwright",
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076498,
+          "gate": "S19 mutation",
+          "status": "queued"
+        },
+        {
+          "id": 40381076363,
+          "gate": "S25 security",
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076380,
+          "gate": "S20 performance",
+          "status": "in_progress"
+        },
+        {
+          "id": 40381076251,
+          "gate": "S17 API fuzz",
+          "status": "in_progress"
+        }
+      ],
+      "api_ci": {
+        "repository": "c2melendez/precision-lab-readonly-api",
+        "pr": 2,
+        "run_id": 40380285802,
+        "conclusion": "failure",
+        "job_id": 121774362420,
+        "steps_available": 0,
+        "logs_url": null,
+        "artifacts": 0,
+        "cause": "undetermined; log endpoint returns 404 BlobNotFound"
+      }
+    },
+    "current_run": {
+      "repository": "c2melendez/precision-lab-plus",
+      "workflow": "in625-cumulative-certification",
+      "run_id": 40381076250,
+      "tested_sha": "ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 121777140770,
+          "name": "backend",
+          "conclusion": "success"
+        },
+        {
+          "id": 121777140304,
+          "name": "frontend",
+          "conclusion": "success"
+        }
+      ],
+      "summary": "2712 passed, 1 skipped, 10 xfailed, 1 warning; coverage 88.80%"
+    },
+    "api_ci": {
+      "repository": "c2melendez/precision-lab-readonly-api",
+      "pr": 2,
+      "run_id": 40380285802,
+      "conclusion": "failure_before_runner_assignment",
+      "job_id": 121774362420,
+      "runner_id": 0,
+      "runner_name": "",
+      "steps": 0,
+      "annotations_count": 2,
+      "logs_available": false,
+      "artifacts": 0,
+      "test_execution_evidenced": false,
+      "cause": "undetermined; annotation endpoint not available through connector"
+    },
+    "latest_technical_sha": "343267ec6e297f2ed71ff5f71994791de0bf7b27",
+    "html_macro_remediation": {
+      "commit": "343267ec6e297f2ed71ff5f71994791de0bf7b27",
+      "files": [
+        "frontend/src/components/NaturalMathField.tsx",
+        "frontend/src/__tests__/NaturalMathField.test.ts"
+      ],
+      "cause": "Playwright run 40381076420 failed six EN-SG-05 assertions because htmlClass/htmlStyle left class/style attributes in MathLive DOM.",
+      "fix": "Reject non-mathematical/HTML TeX macros before ASCII conversion; override htmlClass/htmlStyle/htmlId/htmlData macros with inert text in MathLive field.",
+      "unit_cases_added": 14,
+      "current_e2e_run": {
+        "id": 40384190563,
+        "job_id": 121787982140,
+        "status": "in_progress",
+        "conclusion": null
+      },
+      "no_pass_yet": [
+        "EN-SG-01",
+        "EN-SG-02",
+        "EN-SG-03",
+        "EN-SG-04",
+        "EN-SG-05",
+        "EN-SG-06",
+        "EN-SG-07"
+      ]
+    },
+    "latest_ci": {
+      "tested_sha": "343267ec6e297f2ed71ff5f71994791de0bf7b27",
+      "successful_runs": [
+        {
+          "id": 40384190454,
+          "gate": "CI",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190661,
+          "gate": "IN625 cumulative",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190372,
+          "gate": "S25 security",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190580,
+          "gate": "Syntax diagnostic",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190790,
+          "gate": "S18 differential properties",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190506,
+          "gate": "H1a",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190606,
+          "gate": "H1b",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190408,
+          "gate": "H1c",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190670,
+          "gate": "H1d",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190487,
+          "gate": "Native Syntax",
+          "conclusion": "success"
+        },
+        {
+          "id": 40384190536,
+          "gate": "S17 API fuzzing",
+          "conclusion": "success"
+        }
+      ],
+      "active_runs": [
+        {
+          "id": 40384190563,
+          "gate": "Playwright E2E",
+          "job_id": 121787982140,
+          "status": "in_progress"
+        },
+        {
+          "id": 40384190640,
+          "gate": "S19 mutation",
+          "jobs": [
+            121788772936,
+            121788773024
+          ],
+          "status": "in_progress"
+        },
+        {
+          "id": 40384190789,
+          "gate": "S21 cross-browser",
+          "jobs": [
+            121787982822
+          ],
+          "status": "in_progress"
+        },
+        {
+          "id": 40384190521,
+          "gate": "S23 accessibility",
+          "jobs": [
+            121787981389
+          ],
+          "status": "in_progress"
+        },
+        {
+          "id": 40384190507,
+          "gate": "S20 performance",
+          "jobs": [
+            121787981918
+          ],
+          "status": "in_progress"
+        }
+      ],
+      "previous_e2e_failure": {
+        "run_id": 40381076420,
+        "tested_sha": "ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f",
+        "general_summary": "657 passed, 6 failed",
+        "failing_cases": [
+          "EN-SG-05 htmlClass desktop/tablet/mobile",
+          "EN-SG-05 htmlStyle desktop/tablet/mobile"
+        ],
+        "sg28_summary": "21 passed"
+      }
+    }
+  },
+  "lite_runner_policy_merge": {
+    "sha": "0a3137670d51d85644066a24acc46b88af3d9103",
+    "runs": [
+      {
+        "id": 40382690415,
+        "gate": "cumulative",
+        "conclusion": "success"
+      },
+      {
+        "id": 40382690452,
+        "gate": "H1d",
+        "conclusion": "success"
+      },
+      {
+        "id": 40382690348,
+        "gate": "Certification Runner",
+        "conclusion": "success"
+      },
+      {
+        "id": 40382690350,
+        "gate": "Scientific UI E2E",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "readonly_api_ci_block": {
+    "run_id": 40380285802,
+    "attempts": 2,
+    "runner_id": 0,
+    "steps": 0,
+    "conclusion": "failure before runner assignment",
+    "cause": "undetermined; private-repo hosted-runner quota/billing is a hypothesis only",
+    "next_human_check": "Inspect GitHub account Billing/Actions usage, repository Settings/Actions, and the check-run annotations for job 121783929021; do not rerun blindly."
   }
 }

@@ -482,3 +482,51 @@
 - `technical_baseline_sha` se fija al SHA probado `676f36ed2ca9566f5b37d27dd4c4f43065133f82`. Este commit posterior solo actualiza CURRENT_STATE, EXECUTION_LOG y continuity.json, rutas excluidas del fingerprint.
 - Siguiente objetivo: **H2-EN-SG-CASE-EVIDENCE-AUDIT-R314**, inventario EN-SG-01..32 por test, archivo, ejecución exacta y clasificación PASS/FAIL/GAP/MANUAL. Verificar cobertura sin etiquetas antes de escribir tests; añadir solo pruebas test-first para GAP confirmados. Mantener `SG28_EVALUATE_ISOLATION` desactivada en producción y no relanzar gates verdes por rutina.
 - Global OPEN; SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; SG28 multinodo OUT_OF_SCOPE_SINGLE_HOST (no PASS).
+
+## 2026-10-26 UTC — r315: EN-SG-01..32 evidencia reconciliada
+
+- Auditoría por caso: [EN_SG_CASE_EVIDENCE_AUDIT_R315.md](EN_SG_CASE_EVIDENCE_AUDIT_R315.md). Se usó la continuidad r314 y los logs de la corrida acumulativa Plus **40374409722**, job **121753424481**, SHA probado **f2a8f9877d8a1b1cde9bf074abbe75b475258913**: **2707 passed, 1 skipped, 10 xfailed, 1 warning**. Este run prueba el HEAD del PR de reparación de guardrails, no afirma que ese PR esté integrado.
+- El E2E Playwright Plus **40374409444**, job **121753422799**, seguía `in_progress` al corte. No contar como PASS hasta consultar su conclusión y logs; el histórico 40065789096 es de SHA anterior y solo evidencia SG28 single-host.
+- Confirmados como cubiertos en el SHA/run exacto: EN-SG-09..19, 22, 30, 31. EN-SG-23/24 quedan cubiertos por equivalencia explícita con SY-X-10/11 y rechazo `COMPLEXITY_LIMIT`; no repetirlos para sumar una etiqueta H2. EN-SG-29 está PASS solo en concurrencia backend; la parte UI “última entrada” sigue incompleta.
+- EN-SG-20 solo acredita rechazo temprano por `max_length=500`, no profundidad interna. EN-SG-21 queda en GAP/decisión contractual: 10 000 términos superan el límite público de 500 caracteres y SY-X-04 solo cubre 500 sumandos. No relajar el límite para fabricar PASS.
+- No se encontró la fuente primaria `matriz_entrada_sintaxis_calculadora.md` en la rama canónica ni en el resultado de búsqueda de biblioteca. No inventar vectores para EN-SG-02/04/05/06/07/25/27/32; recuperar la fuente antes de fijarlos. EN-SG-25 solo debe probarse en CI aislado con presupuesto CPU; nunca en producción.
+- Se añadió la ruta de este informe a `prose_only_paths`; la auditoría y el índice no deben alterar la huella técnica. SHA técnico base permanece `676f36ed2ca9566f5b37d27dd4c4f43065133f82`. Certificación global OPEN; SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; SG28 distribuido OUT_OF_SCOPE_SINGLE_HOST.
+- Siguiente acción única: **H2-EN-SG-GAP-TEST-FIRST-R315** — recuperar fuente primaria, cerrar contradicción EN-SG-21 y escribir únicamente las regresiones confirmadas y aisladas. No despachar gates por la actualización documental.
+
+
+## 2026-10-26 UTC — r316: fuente H2 recuperada y SG28 E2E reconciliado
+
+- Playwright Plus run 40374409444, job 121753422799, SHA f2a8f9877d8a1b1cde9bf074abbe75b475258913: SUCCESS, 627 tests generales + 21 SG28, de los cuales 7 escenarios se ejecutaron en desktop/tablet/mobile. EN-SG-28 queda PASS_SCOPED single-host, no aceptación distribuida.
+- Recuperada la fuente primaria H.2 del ZIP corregido: legacy_sources/matriz_entrada_sintaxis_calculadora(2).md, SHA-256 58fbc0ed04aef158148981fc28074d470e45ec07a67604f89b3847b55c625528. Extracto versionado en PR #36; su CI aún está en curso.
+- PR #36, SHA 8bb1049380f285e2cdadb4d7c274759f34ea4f86, añade regresiones acotadas para EN-SG-21/25/26/27 y E2E para EN-SG-01..07. Runs iniciados automáticamente: cumulative 40379627790, Playwright 40379628110 y gates adicionales S25/S19/H1*/S17/S18/S20/S21/S23/Syntax. No se despacharon manualmente ni se cancelan; recopilar logs tras su conclusión.
+- EN-SG-32 es N/A_CONDITIONAL para el código de aplicación observado: backend/app/main.py no configura un rate limiter. Reabrir si hay evidencia de límite externo de Render/proxy.
+- EN-SG-21 sigue en conflicto contractual: matriz pide 10 000 términos y el endpoint restringe a 500 caracteres. La prueba añadida solo confirma rechazo controlado, no valor 10000.
+- Siguiente acción única: H2-EN-SG-TESTS-PR36-VERIFY-R316. Global OPEN; SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; SG28 distribuido OUT_OF_SCOPE_SINGLE_HOST.
+
+
+## 2026-10-26 UTC — r317: preflight de expansión H2 y run API sin logs
+
+- Diagnóstico exacto: run acumulativo PR #36 [40379627790](https://github.com/c2melendez/precision-lab-plus/actions/runs/40379627790), SHA `8bb1049380f285e2cdadb4d7c274759f34ea4f86`, solo falló `test_en_sg_26_expand_ten_thousand_power_returns_complexity_limit` al exceder 20 s; 2710 passed, 1 skipped, 10 xfailed, cobertura 88.77%. Código anterior expandía antes de aplicar el límite de nodos.
+- Fix commit `ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f`: preflight conservador de crecimiento antes de `sympy.expand` y regresión de no materialización. Gate acumulativo [40381076250](https://github.com/c2melendez/precision-lab-plus/actions/runs/40381076250) y Playwright [40381076420](https://github.com/c2melendez/precision-lab-plus/actions/runs/40381076420) están en curso en el nuevo SHA; no se atribuye PASS todavía.
+- API PR #2: run [40380285802](https://github.com/c2melendez/precision-lab-readonly-api/actions/runs/40380285802) failed, pero el job no expone steps/logs/artifacts. Causa indeterminada; no se afirma que pytest ejecutara. No relanzar automáticamente.
+- Siguiente acción: `H2-EN-SG-TESTS-PR36-VERIFY-R317`. EN-SG-21 sigue en conflicto con max_length=500; EN-SG-32 es condicional y no hay limitador de frecuencia app-level. Global OPEN y bloqueos existentes se preservan.
+
+
+## 2026-10-26 UTC — r318: preflight EN-SG-26 validado en acumulativo
+
+- Acumulativo PR #36 [40381076250](https://github.com/c2melendez/precision-lab-plus/actions/runs/40381076250), SHA `ee7500cbb1152fe856cc5a8e9b5b5bb9be83612f`, backend job 121777140770 y frontend job 121777140304: SUCCESS. Backend `2712 passed, 1 skipped, 10 xfailed, 1 warning`, cobertura 88.80% en 357.47 s.
+- El log confirma `test_en_sg_21_ten_thousand_terms_preserves_current_request_limit_contract`, `test_en_sg_25_million_factorial_is_bounded_and_returns_a_clear_contract`, `test_en_sg_26_expand_ten_thousand_power_returns_complexity_limit` y `test_en_sg_27_five_level_power_tower_is_symbolic_or_clearly_bounded` SUCCESS, además de `test_algebra.py::test_expand_large_binomial_is_rejected_before_materialization` SUCCESS. EN-SG-26 pasa en alcance backend; el preflight evita la expansión costosa. EN-SG-21 sigue sin aceptación matemática porque el endpoint rechaza por max_length=500.
+- Playwright #40381076420 sigue `in_progress`; no declarar todavía PASS a EN-SG-01..07. H1d #40381076364, S21 Plus #40381076325 y S19 mutation #40381076498 siguen en curso; otros gates ya han pasado y constan en continuity.json.
+- Read-only API PR #2: run #40380285802 falla antes de asignar runner (runner_id=0, runner_name vacío, steps=[], 2 anotaciones listadas pero no accesibles por el conector). No hay evidencia de pytest ni causa concreta; no repetir a ciegas.
+- Siguiente acción única `H2-EN-SG-TESTS-PR36-VERIFY-R318`. Global OPEN y bloqueos existentes permanecen.
+
+
+## 2026-10-26 UTC — r319: defensa de macros HTML y nuevo SHA bajo E2E
+
+- El Playwright anterior #40381076420 falló seis pruebas: EN-SG-05 `htmlClass`/ `htmlStyle` en desktop/tablet/móvil; la sonda observó clase/estilo dentro del DOM MathLive. La fase SG28 de ese run sí aprobó 21 pruebas. La causa fue corregida sin aflojar el oráculo.
+- Commit técnico actual `343267ec6e297f2ed71ff5f71994791de0bf7b27`: guard frontend en `NaturalMathField.tsx` rechaza macros HTML/definición antes de convertir a ASCII, configura `htmlClass`/`htmlStyle`/`htmlId`/`htmlData` como texto inocuo y agrega 14 unit regressions.
+- En el mismo SHA: CI #40384190454 SUCCESS; acumulativo #40384190661 SUCCESS (backend y frontend); S25 #40384190372 SUCCESS; Syntax diagnostic #40384190580 SUCCESS; S18 #40384190790 SUCCESS; H1a #40384190506, H1b #40384190606, H1c #40384190408, H1d #40384190670, Native Syntax #40384190487 y S17 #40384190536 SUCCESS.
+- Playwright #40384190563 (job 121787982140) seguía `in_progress`; EN-SG-01..07 no tienen PASS atribuido al SHA actual hasta revisar sus logs. S19 #40384190640, S21 #40384190789, S23 #40384190521 y el tramo Lite S20 #40384190507 también siguen activos.
+- Lite runner-policy ya se integró como SHA `0a3137670d51d85644066a24acc46b88af3d9103`; cumulative #40382690415, H1d #40382690452, Runner #40382690348 y Scientific UI E2E #40382690350 SUCCESS.
+- Read-only API #2: run #40380285802 falló dos veces en 3 s con runner_id=0 y cero steps. El repo API es privado, mientras Lite/Plus son públicos; la cuota/billing de runners privados se registra solo como hipótesis, no causa confirmada. No hubo pytest ni nuevos reintentos; revisar anotaciones y Billing/Actions por acceso autorizado.
+- Siguiente acción única: `H2-EN-SG-HTML-MACRO-CHECK-PR36-VERIFY-R319`; global OPEN, bloqueos sin cambio.
