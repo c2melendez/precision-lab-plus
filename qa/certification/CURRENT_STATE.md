@@ -954,3 +954,10 @@ Ver r252.
 - **Sigue requerido en local:** cuotas y concurrencia con respuesta ante saturación; trabajo costoso restante en el proceso principal (simplificación/LaTeX); cancelación HTTP real, recuperación A/B y ausencia de procesos huérfanos; paridad off/on. Los mutantes SG28 de S19 (`_evaluate_impl` 34, 37, 39–57) se resolverán contra ese contrato local.
 - `SG28_EVALUATE_ISOLATION` sigue **desactivada por defecto**; activarla en producción requiere autorización aparte. H2 y la certificación global continúan OPEN. Solo documentación; sin Actions.
 - **Siguiente acción:** bloque local H2-SG28 (cuota/concurrencia y trabajo costoso en proceso principal), test-first, sin activar la bandera.
+
+## 2026-10-26 UTC — r311: corrección del siguiente bloque local de H2-SG28
+
+- **Corrección de r310.** Al leer `evaluate.py`, `interruptible.py`, `request_cancellation.py` y los tests, la cuota local por proceso, el 503 estructurado, la admisión única por solicitud lógica, el aislamiento de cálculo y presentación, la cancelación por desconexión, los presupuestos CPU/memoria y la recuperación **ya existen y tienen pruebas** (`test_in625_sg28_*.py`, `test_sg28_admission_scope.py`). No se escribe código nuevo para ellas.
+- **Pendiente real (un host).** Evidencia por caso de EN-SG-01..32 (`IN625_H2_MATRIX.md`). Sin referencia etiquetada en tests: EN-SG-01..08, 21, 23..27 y 32; puede haber cobertura sin etiqueta (preflights syntax309, `in625-syntax-native.spec.ts`) que debe verificarse antes de añadir tests. EN-SG-29 tiene test backend; falta evidencia de run por SHA exacto.
+- Solo documentación; sin Actions ni cambios de producto. Estados sin cambio: SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; DIST OUT_OF_SCOPE_SINGLE_HOST; H2 y certificación global OPEN.
+- **Siguiente acción:** auditoría de evidencia por caso EN-SG-01..32 y pruebas test-first solo para los GAP confirmados.

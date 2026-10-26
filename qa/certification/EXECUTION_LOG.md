@@ -452,3 +452,7 @@
 ## 2026-10-26 UTC — r310: SG28 un solo host (opción 2)
 
 - Contrato `2026-10-26-sg28-single-host-scope-v1`: DIST-01..08 OUT_OF_SCOPE_SINGLE_HOST (no PASS); propuesta de lease distribuido archivada; reapertura si hay varias instancias. Siguiente: bloque local de cuota/concurrencia. Índice r310; sin Actions.
+
+## 2026-10-26 UTC — r311: corrección del bloque local H2-SG28
+
+- La cuota/concurrencia local ya estaba implementada y probada; se corrige `still_required_local` de r310. Siguiente: auditoría de evidencia EN-SG-01..32. Índice r311; sin Actions.
