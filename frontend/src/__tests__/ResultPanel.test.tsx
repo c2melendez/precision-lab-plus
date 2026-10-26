@@ -239,7 +239,30 @@ describe("ResultPanel", () => {
     it("formato 'scn' muestra notación científica", () => {
       render(<ResultPanel result={fractionResult} isLoading={false} />);
       fireEvent.click(screen.getByRole("button", { name: "scn" }));
-      expect(screen.getByText(/8\.888889e-1/)).toBeInTheDocument();
+      expect(document.querySelector(".katex")?.textContent).toContain("8.888888889");
+    });
+
+    it("SY-N-31: seleccionar scn muestra la notación científica real y conserva el resultado exacto", () => {
+      const exact = String.raw`\frac{1}{3000000}`;
+      const { container } = render(
+        <ResultPanel
+          result={{ ...baseResult, result_text: "1/3000000", result_latex: exact, result_approx: 1 / 3000000 }}
+          isLoading={false}
+        />,
+      );
+      const findFormat = (name: string) => Array.from(container.querySelectorAll("button")).find(button => button.textContent?.trim() === name);
+      const scientificButton = findFormat("scn");
+      expect(scientificButton).toBeDefined();
+      fireEvent.click(scientificButton!);
+      expect(scientificButton).toHaveAttribute("aria-pressed", "true");
+      const rendered = container.querySelector(".katex");
+      expect(rendered).not.toBeNull();
+      expect(rendered?.textContent).toContain("3.333333333");
+      expect(rendered?.textContent).toContain("10");
+      fireEvent.click(findFormat("exacto")!);
+      expect(findFormat("exacto")).toHaveAttribute("aria-pressed", "true");
+      expect(container.querySelector(".katex")?.textContent).toContain("3000000");
+      expect(Array.from(container.querySelectorAll("button")).find(button => button.textContent?.trim() === "Copiar resultado")).toBeEnabled();
     });
 
     it("formato 'frac' muestra la fracción cuando result_latex ya es \\frac{}{}", () => {

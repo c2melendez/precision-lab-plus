@@ -139,6 +139,76 @@ describe("MatrixMode", () => {
     });
   });
 
+  it("adjunta: llama a /matrix/adjugate con la matriz A", async () => {
+    render(<MatrixMode />);
+    fireEvent.change(screen.getByLabelText("Operación"), { target: { value: "adjugate" } });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 1 columna 1"), {
+      target: { value: "1" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 1 columna 2"), {
+      target: { value: "2" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 2 columna 1"), {
+      target: { value: "3" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 2 columna 2"), {
+      target: { value: "4" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Calcular" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
+    expect(mockedCallApi).toHaveBeenCalledWith("/matrix/adjugate", {
+      matrix: [
+        ["1", "2"],
+        ["3", "4"],
+      ],
+    });
+  });
+
+  it("ecuación matricial: envía A, B y x_side a /matrix/solve-equation", async () => {
+    render(<MatrixMode />);
+    fireEvent.change(screen.getByLabelText("Operación"), { target: { value: "solveEquation" } });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 1 columna 1"), {
+      target: { value: "1" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 1 columna 2"), {
+      target: { value: "2" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 2 columna 1"), {
+      target: { value: "3" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 2 columna 2"), {
+      target: { value: "4" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz B celda fila 1 columna 1"), {
+      target: { value: "5" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz B celda fila 1 columna 2"), {
+      target: { value: "6" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz B celda fila 2 columna 1"), {
+      target: { value: "7" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz B celda fila 2 columna 2"), {
+      target: { value: "8" },
+    });
+    fireEvent.change(screen.getByLabelText("Incógnita X"), { target: { value: "right" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Calcular" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
+    expect(mockedCallApi).toHaveBeenCalledWith("/matrix/solve-equation", {
+      matrix_a: [
+        ["1", "2"],
+        ["3", "4"],
+      ],
+      matrix_b: [
+        ["5", "6"],
+        ["7", "8"],
+      ],
+      x_side: "right",
+    });
+  });
+
   it("potencia: rechaza un exponente no entero antes de llamar a la API", () => {
     render(<MatrixMode />);
     fireEvent.change(screen.getByLabelText("Operación"), { target: { value: "power" } });
@@ -161,5 +231,57 @@ describe("MatrixMode", () => {
 
     expect(screen.getByRole("alert")).toHaveTextContent("número entero");
     expect(mockedCallApi).not.toHaveBeenCalled();
+  });
+
+  it("LU: llama a /matrix/lu con la matriz A (MV-D-16)", async () => {
+    render(<MatrixMode />);
+    fireEvent.change(screen.getByLabelText("Operación"), { target: { value: "lu" } });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 1 columna 1"), {
+      target: { value: "2" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 1 columna 2"), {
+      target: { value: "1" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 2 columna 1"), {
+      target: { value: "4" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 2 columna 2"), {
+      target: { value: "3" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Calcular" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
+    expect(mockedCallApi).toHaveBeenCalledWith("/matrix/lu", {
+      matrix: [
+        ["2", "1"],
+        ["4", "3"],
+      ],
+    });
+  });
+
+  it("Gram-Schmidt: llama a /matrix/gram-schmidt con las filas de A (MV-D-17)", async () => {
+    render(<MatrixMode />);
+    fireEvent.change(screen.getByLabelText("Operación"), { target: { value: "gramSchmidt" } });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 1 columna 1"), {
+      target: { value: "1" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 1 columna 2"), {
+      target: { value: "0" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 2 columna 1"), {
+      target: { value: "0" },
+    });
+    fireEvent.change(screen.getByLabelText("Matriz A celda fila 2 columna 2"), {
+      target: { value: "1" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Calcular" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
+    expect(mockedCallApi).toHaveBeenCalledWith("/matrix/gram-schmidt", {
+      matrix: [
+        ["1", "0"],
+        ["0", "1"],
+      ],
+    });
   });
 });

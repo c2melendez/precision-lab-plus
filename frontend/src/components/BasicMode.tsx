@@ -44,6 +44,7 @@ import type { MathfieldElement } from "mathlive";
 import type { MathResponse } from "../api/client";
 import { submitAndRecord } from "../api/submitWithHistory";
 import { useUIStore } from "../store/useUIStore";
+import { validateExponentSource } from "./exponentSourceValidation";
 import { useKeyboardPanelStore } from "../store/useKeyboardPanelStore";
 import { useLayoutModeStore } from "../store/useLayoutModeStore";
 import { CalculatorScreen } from "./CalculatorScreen";
@@ -51,7 +52,12 @@ import { detectCalculusIntent, type CalculusIntent } from "./calculusIntent";
 import { latexToBackendSyntax } from "./NaturalMathField";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
-import { splitSystemLatex } from "./systemSplit";
+import { splitSystemLatex, splitFreeSystemLatex } from "./systemSplit";
+import { detectPiecewiseIntent } from "./piecewiseIntent";
+import { detectRelationIntent } from "./relationIntent";
+import { parseInlineBinding } from "./inlineBinding";
+import { detectConstrainedEquationIntent, satisfiesConstraint } from "./constrainedEquationIntent";
+import { detectMatrixIntent } from "./matrixIntent";
 
 interface SubstitutionRow {
   name: string;
@@ -70,15 +76,33 @@ const EXAMPLES: { display: string; latex: string }[] = [
 // comporte igual sin importar desde qué pantalla se escribió.
 const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
 
+function isIntervalUnionLatex(input: string): boolean {
+  const compact = input.replace(/\s+/g, "");
+  const interval = String.raw`\\left\((?:-?\\infty|-?\d+(?:\.\d+)?),(?:-?\\infty|-?\d+(?:\.\d+)?)\\right\)`;
+  const union = new RegExp("^" + interval + "(?:\\\\cup" + interval + ")+$");
+  return union.test(compact);
+}
+
+function matrixDataToLatex(data: unknown): string | null {
+  if (!Array.isArray(data) || !data.every((row) => Array.isArray(row))) return null;
+  const rows = (data as unknown[][]).map((row) => row.map((cell) => String(cell)).join("&"));
+  return `\\begin{pmatrix}${rows.join("\\\\")}\\end{pmatrix}`;
+}
+
 export function BasicMode() {
   const formRef = useRef<HTMLFormElement>(null);
   const [mathField, setMathField] = useState<MathfieldElement | null>(null);
   const [latex, setLatex] = useState("");
+  const [partialFractionsMode, setPartialFractionsMode] = useState(false);
   const [angleUnit, setAngleUnit] = useState<"rad" | "deg">("rad");
   const [substitutions, setSubstitutions] = useState<SubstitutionRow[]>([]);
   const [systemVariables, setSystemVariables] = useState("x, y");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<MathResponse | null>(null);
+  // SG29: prevent late responses from replacing the most recent basic request.
+  const latestSubmissionRef = useRef(0);
+  const activeBasicRequest = useRef<AbortController | null>(null);
+  const [basicRequestActive, setBasicRequestActive] = useState(false);
 
   const setLoading = useUIStore((state) => state.setLoading);
   const setErrorMessage = useUIStore((state) => state.setErrorMessage);
@@ -86,7 +110,15 @@ export function BasicMode() {
   const setActiveMode = useUIStore((state) => state.setActiveMode);
   const setPendingGraphResult = useUIStore((state) => state.setPendingGraphResult);
 
-  const systemRows = splitSystemLatex(latex);
+  const piecewiseIntent = detectPiecewiseIntent(latex);
+  const constrainedIntent = piecewiseIntent ? null : detectConstrainedEquationIntent(latex);
+  // Un sistema de varias filas tiene prioridad sobre la clasificación
+  // de una relación aislada: "cases" con varias incógnitas no es una gráfica.
+  const candidateSystemRows = piecewiseIntent ? null : (splitSystemLatex(latex) ?? splitFreeSystemLatex(latex));
+  const inlineBinding = parseInlineBinding(latex);
+  const relationIntent = piecewiseIntent || constrainedIntent || candidateSystemRows || inlineBinding
+    ? null : detectRelationIntent(latex);
+  const systemRows = piecewiseIntent || relationIntent || constrainedIntent ? null : candidateSystemRows;
 
   function addSubstitutionRow(): void {
     setSubstitutions((rows) => [...rows, { name: "", value: "" }]);
@@ -110,6 +142,7 @@ export function BasicMode() {
   // ecuación -> /solve/system (sin cambios); todas inecuación ->
   // /inequality/system (nuevo); mezcla -> error explícito.
   async function submitSystem(rows: string[]): Promise<void> {
+    const submissionId = ++latestSubmissionRef.current;
     const rowsBackend = rows.map((row) => latexToBackendSyntax(row));
     if (rowsBackend.some((r) => r === "")) {
       setValidationError("Todas las filas del sistema deben tener contenido.");
@@ -152,12 +185,13 @@ export function BasicMode() {
         { equations, variables: variableList },
         `Sistema: ${equations.join(" ; ")}`,
       );
+      if (submissionId !== latestSubmissionRef.current) return;
       setLastResult(result);
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
     } finally {
-      setLoading(false);
+      if (submissionId === latestSubmissionRef.current) setLoading(false);
     }
   }
 
@@ -166,6 +200,7 @@ export function BasicMode() {
   // importar cuántas inecuaciones haya en el sistema — a diferencia de
   // submitSystem (ecuaciones) no se exige #variables === #filas.
   async function submitInequalitySystem(inequalitiesBackend: string[]): Promise<void> {
+    const submissionId = ++latestSubmissionRef.current;
     const variableList = systemVariables
       .split(",")
       .map((v) => v.trim())
@@ -203,12 +238,13 @@ export function BasicMode() {
               ? `Región no acotada. Vértices finitos: ${verticesText}`
               : `Vértices del polígono factible: ${verticesText}`;
       }
+      if (submissionId !== latestSubmissionRef.current) return;
       setLastResult(result);
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
     } finally {
-      setLoading(false);
+      if (submissionId === latestSubmissionRef.current) setLoading(false);
     }
   }
 
@@ -217,6 +253,7 @@ export function BasicMode() {
   // completo. Mismos endpoints y misma forma de payload que
   // DerivativeMode.tsx/IntegralMode.tsx.
   async function submitCalculus(intent: CalculusIntent): Promise<void> {
+    const submissionId = ++latestSubmissionRef.current;
     // Fase E: "ode" no tiene innerLatex (no hay envoltura que
     // desenvolver, ver calculusIntent.ts) -- usa cleanedExpression.
     // NIVEL DE EVIDENCIA 2 para la conversión de la prima (') a través de
@@ -290,20 +327,156 @@ export function BasicMode() {
                       { expression: trimmedInner },
                       `Sing(${trimmedInner})`,
                     );
+      if (submissionId !== latestSubmissionRef.current) return;
       setLastResult(result);
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
     } finally {
-      setLoading(false);
+      if (submissionId === latestSubmissionRef.current) setLoading(false);
     }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    const submissionId = ++latestSubmissionRef.current;
+    try {
+      validateExponentSource(latex);
+    } catch (error) {
+      setValidationError(error instanceof Error ? error.message : "Exponente inválido.");
+      return;
+    }
+
+    // H1 EN-RE-12: una unión de intervalos producida por el propio solver
+    // es una salida matemática válida, aunque no sea una expresión
+    // algebraica para /evaluate. Se acepta localmente para preservar
+    // round-trip sin reinterpretarla como una operación distinta.
+    if (isIntervalUnionLatex(latex)) {
+      setValidationError(null);
+      setErrorMessage(null);
+      setLastResult({
+        success: true,
+        operation: "evaluate",
+        request_id: crypto.randomUUID(),
+        result_type: "scalar",
+        input_text: latex,
+        input_latex: latex,
+        result_text: latex,
+        result_latex: latex,
+        result_data: null,
+        steps: [],
+        has_detailed_steps: false,
+        warnings: ["Intervalo preservado como conjunto solución."],
+        duration_ms: 0,
+      });
+      return;
+    }
+
+    if (piecewiseIntent) {
+      setValidationError(null);
+      setErrorMessage(null);
+      setLastResult({
+        success: true,
+        operation: "evaluate",
+        request_id: `local-piecewise-${Date.now()}`,
+        result_type: "scalar",
+        result_text: "Función a trozos",
+        result_latex: latex,
+        steps: [],
+        has_detailed_steps: false,
+        warnings: [],
+        duration_ms: 0,
+      });
+      return;
+    }
 
     if (systemRows) {
       await submitSystem(systemRows);
+      return;
+    }
+
+    let matrixIntent: ReturnType<typeof detectMatrixIntent>;
+    try {
+      matrixIntent = detectMatrixIntent(latex);
+    } catch (error) {
+      setValidationError(error instanceof Error ? error.message : "La matriz no es válida.");
+      setLastResult(null);
+      setLoading(false);
+      setErrorMessage(null);
+      return;
+    }
+    if (matrixIntent) {
+      setValidationError(null);
+      setLoading(true);
+      setErrorMessage(null);
+      try {
+        if (matrixIntent.kind === "absolute") {
+          const result = await submitAndRecord("/evaluate",
+            {expression:"abs("+latexToBackendSyntax(matrixIntent.scalar)+")",angle_unit:angleUnit},latex);
+          if (submissionId !== latestSubmissionRef.current) return;
+          setLastResult(result);
+          if (!result.success) setErrorMessage(result.error_message ?? "Ocurrió un error.");
+          return;
+        }
+        if (matrixIntent.kind === "literal" || matrixIntent.kind === "basis") {
+          const resultLatex = matrixIntent.kind === "basis"
+            ? "\\left("+matrixIntent.matrix[0].join(", ")+"\\right)" : latex.trim();
+          setLastResult({
+            success: true,
+            operation: "matrix_operation",
+            request_id: crypto.randomUUID(),
+            result_type: "matrix",
+            result_data: matrixIntent.matrix,
+            result_latex: resultLatex,
+            result_text: resultLatex,
+            steps: [],
+            has_detailed_steps: false,
+            warnings: matrixIntent.kind === "basis" ? ["Coordenadas en la base canónica: ("+matrixIntent.matrix[0].join(", ")+")."] : [],
+            duration_ms: 0,
+          });
+          return;
+        }
+
+        const matrixA = ((matrixIntent.kind === "multiply" || matrixIntent.kind === "dot") ? matrixIntent.left : matrixIntent.matrix)
+          .map((row) => row.map((cell) => latexToBackendSyntax(cell)));
+        let result: MathResponse;
+
+        if (matrixIntent.kind === "scale") {
+          const scalar = latexToBackendSyntax(matrixIntent.scalar);
+          const diagonal = matrixA.map((_,r)=>matrixA.map((__,col)=>r===col ? scalar : "0"));
+          result = await submitAndRecord("/matrix/operations",
+            {operation:"multiply",matrix_a:diagonal,matrix_b:matrixA},latex);
+        } else if (matrixIntent.kind === "inverse") {
+          result = await submitAndRecord("/matrix/inverse", { matrix: matrixA }, latex);
+        } else if (matrixIntent.kind === "transpose") {
+          result = await submitAndRecord("/matrix/transpose", { matrix: matrixA }, latex);
+        } else if (matrixIntent.kind === "determinant") {
+          result = await submitAndRecord("/matrix/determinant", { matrix: matrixA }, latex);
+        } else if (matrixIntent.kind === "power") {
+          result = await submitAndRecord("/matrix/power", { matrix: matrixA, exponent: matrixIntent.exponent }, latex);
+        } else {
+          const matrixB = matrixIntent.right.map((row) => row.map((cell) => latexToBackendSyntax(cell)));
+          result = await submitAndRecord(
+            "/matrix/operations",
+            { operation: matrixIntent.kind === "dot" ? "dot" : "multiply", matrix_a: matrixA, matrix_b: matrixB },
+            latex,
+          );
+        }
+
+        if (result.success && result.result_type === "matrix") {
+          const matrixLatex = matrixDataToLatex(result.result_data);
+          if (matrixLatex) {
+            result.result_latex = matrixLatex;
+            result.result_text = matrixLatex;
+          }
+        }
+
+        if (submissionId !== latestSubmissionRef.current) return;
+        setLastResult(result);
+        if (!result.success) setErrorMessage(result.error_message ?? "Ocurrió un error.");
+      } finally {
+        if (submissionId === latestSubmissionRef.current) setLoading(false);
+      }
       return;
     }
 
@@ -313,15 +486,116 @@ export function BasicMode() {
       return;
     }
 
-    const trimmed = latexToBackendSyntax(latex);
+    if (constrainedIntent) {
+      const equationBackend = latexToBackendSyntax(constrainedIntent.equationLatex);
+      setValidationError(null);
+      setLoading(true);
+      setErrorMessage(null);
+      try {
+        const result = await submitAndRecord(
+          "/solve",
+          { equation: equationBackend, variable: constrainedIntent.variable, angle_unit: angleUnit },
+          latex,
+        );
+        if (result.success) {
+          const solutions = Array.isArray(result.result_data)
+            ? result.result_data.filter((item): item is { text: string; latex: string; is_complex: boolean } =>
+                !Array.isArray(item) && typeof item === "object" && item !== null && "text" in item)
+            : [];
+          const filtered = solutions.filter((solution) => {
+            if (typeof solution !== "object" || solution === null || !("text" in solution)) return false;
+            const numeric = Number((solution as { text: string }).text);
+            return Number.isFinite(numeric) && satisfiesConstraint(numeric, constrainedIntent);
+          });
+          result.result_data = filtered;
+          result.result_text = filtered.length
+            ? filtered.map((solution) => `${constrainedIntent.variable}=${(solution as { text: string }).text}`).join(", ")
+            : "Sin solución bajo la restricción";
+        }
+        setLastResult(result);
+        if (!result.success) {
+          setErrorMessage(result.error_message ?? "Ocurrió un error.");
+        }
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    if (relationIntent) {
+      const label =
+        relationIntent.kind === "functionDefinition"
+          ? "Definición de función"
+          : relationIntent.kind === "explicitRelation"
+            ? "Relación explícita"
+            : "Relación implícita";
+      const localResult: MathResponse = {
+        success: true,
+        operation: "evaluate",
+        request_id: crypto.randomUUID(),
+        result_type: "scalar",
+        input_text: latex,
+        input_latex: latex,
+        result_text: latex,
+        result_latex: latex,
+        result_data: null,
+        steps: [],
+        has_detailed_steps: false,
+        warnings: [label],
+        duration_ms: 0,
+      };
+      setValidationError(null);
+      setLastResult(localResult);
+      return;
+    }
+
+    // SY-P-23: unwrap only balanced parentheses enclosing the WHOLE input.
+    // MathLive otherwise converts the defined compound name bc to b*c.
+    let bcCandidate = latex.trim();
+    while (bcCandidate.startsWith("(") && bcCandidate.endsWith(")")) {
+      let depth = 0;
+      let outerWrap = true;
+      for (let i = 0; i < bcCandidate.length; i++) {
+        if (bcCandidate[i] === "(") depth++;
+        else if (bcCandidate[i] === ")") depth--;
+        if (depth < 0 || (depth === 0 && i < bcCandidate.length - 1)) {
+          outerWrap = false;
+          break;
+        }
+      }
+      if (!outerWrap || depth !== 0) break;
+      bcCandidate = bcCandidate.slice(1, -1).trim();
+    }
+    const isBareCompoundBc =
+      /^a\s*\/\s*bc$/.test(bcCandidate) ||
+      /^\\frac\s*\{a\}\s*\{bc\}$/.test(bcCandidate);
+    const namedBc = substitutions.some((row) => row.name.trim() === "bc" && row.value.trim() !== "");
+    const compoundBcExpression = namedBc && isBareCompoundBc;
+    // Ambiguous input without a defined bc requires explicit grouping.
+    const ambiguousBcOccurrence = /(?:^|[^a-zA-Z])a\s*\/\s*bc(?=$|[^a-zA-Z])|\\frac\s*\{a\}\s*\{bc\}/.test(latex);
+    const unresolvedBcExpression = !namedBc && (isBareCompoundBc || ambiguousBcOccurrence);
+    if (unresolvedBcExpression) {
+      setValidationError("SY-P-23: define la variable bc o escribe (a/b)*c o a/(b*c) antes de calcular.");
+      return;
+    }
+    let trimmed: string;
+    try {
+      trimmed = compoundBcExpression ? "a/bc" : latexToBackendSyntax(latex);
+    } catch (error) {
+      // Conversion errors are local validation, before any HTTP request.
+      setValidationError(error instanceof Error ? error.message : "La expresión no es válida.");
+      return;
+    }
     if (!trimmed) {
       setValidationError("La expresión no puede estar vacía.");
       return;
     }
     setValidationError(null);
 
-    const isInequality = INEQUALITY_OPERATOR_PATTERN.test(trimmed);
-    const isEquation = !isInequality && trimmed.includes("=");
+    // The equals sign in "expression con x=value" binds a value; it does
+    // not turn the complete source into an equation or graphical relation.
+    const isInequality = !inlineBinding && INEQUALITY_OPERATOR_PATTERN.test(trimmed);
+    const isEquation = !inlineBinding && !isInequality && trimmed.includes("=");
 
     const substitutionsPayload =
       !isInequality && !isEquation && substitutions.length > 0
@@ -332,13 +606,19 @@ export function BasicMode() {
           )
         : undefined;
 
+    activeBasicRequest.current?.abort();
+    const controller = new AbortController();
+    activeBasicRequest.current = controller;
+    setBasicRequestActive(true);
     setLoading(true);
     setErrorMessage(null);
     try {
       const result = isInequality
-        ? await submitAndRecord("/inequality", { inequality: trimmed }, trimmed)
+        ? await submitAndRecord("/inequality", { inequality: trimmed }, trimmed, { signal: controller.signal })
         : isEquation
-          ? await submitAndRecord("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed)
+          ? await submitAndRecord("/solve", { equation: trimmed, angle_unit: angleUnit }, trimmed, { signal: controller.signal })
+          : partialFractionsMode
+            ? await submitAndRecord("/partial-fractions", { expression: trimmed }, trimmed, { signal: controller.signal })
           : await submitAndRecord(
               "/evaluate",
               {
@@ -347,13 +627,19 @@ export function BasicMode() {
                 ...(substitutionsPayload ? { substitutions: substitutionsPayload } : {}),
               },
               trimmed,
+              { signal: controller.signal },
             );
+      if (submissionId !== latestSubmissionRef.current) return;
       setLastResult(result);
       if (!result.success) {
         setErrorMessage(result.error_message ?? "Ocurrió un error.");
       }
     } finally {
-      setLoading(false);
+      if (activeBasicRequest.current === controller) {
+        activeBasicRequest.current = null;
+        setBasicRequestActive(false);
+      }
+      if (submissionId === latestSubmissionRef.current) setLoading(false);
     }
   }
 
@@ -506,6 +792,17 @@ export function BasicMode() {
     );
   });
 
+  // SG28-E2E-08: leaving this module must cancel its pending HTTP work.
+  // Invalidate its response before aborting so an already-resolving promise
+  // cannot commit an obsolete result after the mode is unmounted.
+  useEffect(() => {
+    return () => {
+      ++latestSubmissionRef.current;
+      activeBasicRequest.current?.abort();
+      activeBasicRequest.current = null;
+    };
+  }, []);
+
   useEffect(() => {
     return () => clearKeyboardContent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -556,6 +853,26 @@ export function BasicMode() {
           onGraphExpression={handleGraphExpression}
         />
 
+        {/(?:^|[^a-zA-Z])a\s*\/\s*bc(?:$|[^a-zA-Z])|\\frac\s*\{a\}\s*\{bc\}/.test(latex) && (
+          <p role="status" aria-label="Convención de división ambigua" className="rounded-lg border border-paper-line bg-paper-soft px-3 py-2 text-sm text-ink">
+            Interpretación ambigua de a/bc: escribe (a/b)*c o a/(b*c) para indicar la agrupación. Si bc es una única variable, consérvala como identificador definido.
+          </p>
+        )}
+        <label className="flex items-center gap-2 text-sm text-ink">
+          <input type="checkbox" aria-label="Descomponer en fracciones parciales" checked={partialFractionsMode} onChange={(event) => setPartialFractionsMode(event.target.checked)} />
+          Fracciones parciales (variable x)
+        </label>
+        {basicRequestActive && (
+          <button type="button" onClick={() => {
+            ++latestSubmissionRef.current;
+            activeBasicRequest.current?.abort();
+            activeBasicRequest.current = null;
+            setBasicRequestActive(false);
+            setLoading(false);
+          }} aria-label="Detener cálculo" className="rounded-lg border px-4 py-2">
+            Detener cálculo
+          </button>
+        )}
         {systemRows && (
           <div className="-mt-4 flex flex-wrap items-center gap-2 px-2">
             <label htmlFor="system-variables-inline" className="text-xs text-muted">

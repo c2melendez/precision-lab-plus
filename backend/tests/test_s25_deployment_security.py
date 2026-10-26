@@ -1,3 +1,11 @@
+import os
+
+# S25 asserts CORS round-trip for ORIGIN below; CORSMiddleware only echoes
+# Access-Control-Allow-Origin when the origin is allow-listed, so pin it in
+# the environment BEFORE importing the app (same pattern as the SY*/SR* HTTP
+# suites). Without this, the module silently depended on ambient CI env.
+os.environ.setdefault("CORS_ORIGINS", "https://security-test.example")
+
 from fastapi.testclient import TestClient
 
 from app.main import app

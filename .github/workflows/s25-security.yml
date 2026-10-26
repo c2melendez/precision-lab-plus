@@ -1,6 +1,17 @@
 name: S25 Security Gate
 
 on:
+  workflow_call:
+    inputs:
+      run_frontend:
+        type: boolean
+        default: true
+      run_backend:
+        type: boolean
+        default: true
+      reason:
+        type: string
+        default: ''
   pull_request:
     paths:
       - "backend/**"
@@ -13,12 +24,34 @@ on:
       - "frontend/**"
       - ".github/workflows/s25-security.yml"
   workflow_dispatch:
+    inputs:
+      reason:
+        description: Reason for fresh full security revalidation
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
+  validate-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate explicit revalidation reason
+        env:
+          EVENT: ${{ github.event_name }}
+          REASON: ${{ inputs.reason }}
+        run: |
+          python3 - <<'PYCODE'
+          import json, os
+          reason = os.environ.get("REASON", "")
+          if os.environ["EVENT"] == "workflow_dispatch" and not reason.strip():
+              raise SystemExit("Manual revalidation requires a nonempty reason")
+          print(json.dumps({"event": os.environ["EVENT"], "reason": reason}))
+          PYCODE
   frontend-audit:
+    needs: validate-request
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || inputs.run_frontend
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -45,6 +78,8 @@ jobs:
           retention-days: 14
 
   backend-security:
+    needs: validate-request
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || inputs.run_backend
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:

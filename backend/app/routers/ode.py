@@ -10,6 +10,7 @@ import time
 
 import sympy
 from fastapi import APIRouter, Request
+from starlette.concurrency import run_in_threadpool
 
 from app.core.logging import log_request_event
 from app.schemas.requests import ODERequest
@@ -27,7 +28,9 @@ def _duration_ms(request: Request) -> float:
 async def solve_ode(payload: ODERequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "ode_request", input_text=payload.expression)
     try:
-        result = ode_service.solve_ode(payload.expression)
+        # La resolución espera a un proceso hijo (plazo acotado): se ejecuta
+        # fuera del event loop para no serializar el resto del servidor.
+        result = await run_in_threadpool(ode_service.solve_ode, payload.expression)
     except ode_service.ODEParseError as exc:
         return MathResponse(
             success=False,
@@ -45,6 +48,16 @@ async def solve_ode(payload: ODERequest, request: Request) -> MathResponse:
             request_id=request.state.request_id,
             has_detailed_steps=False,
             error_code=ErrorCode.UNSUPPORTED_OPERATION,
+            error_message=str(exc),
+            duration_ms=_duration_ms(request),
+        )
+    except ode_service.ODETimeoutError as exc:
+        return MathResponse(
+            success=False,
+            operation=OperationType.ODE,
+            request_id=request.state.request_id,
+            has_detailed_steps=False,
+            error_code=ErrorCode.TIMEOUT,
             error_message=str(exc),
             duration_ms=_duration_ms(request),
         )

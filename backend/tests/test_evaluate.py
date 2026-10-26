@@ -83,7 +83,21 @@ def test_valid_decimal_point():
     assert body["result_approx"] == pytest.approx(3.14)
 
 
-@pytest.mark.parametrize("expression", [".5", "5.", "1e5"])
+def test_decimal_exponential_trig_presentation_is_bounded():
+    expression = "exp(-1.3983707058413914)+(-1)*sin(-1.3983707058413914)"
+    x = -1.3983707058413914
+    expected = math.exp(x) - math.sin(x)
+
+    response = _evaluate(expression=expression)
+    body = response.json()
+
+    assert response.status_code == 200
+    assert body["success"] is True
+    assert body["result_approx"] == pytest.approx(expected, rel=1e-9, abs=1e-9)
+    assert float(body["result_text"]) == pytest.approx(expected, rel=1e-9, abs=1e-9)
+
+
+@pytest.mark.parametrize("expression", ["1e5", "foo.bar", "5.__class__"])
 def test_invalid_decimal_or_scientific_notation(expression):
     response = _evaluate(expression=expression)
     body = response.json()
@@ -233,10 +247,11 @@ def test_substitution_with_free_variable_is_validation_error():
 
 
 def test_result_latex_truncated_when_too_long(monkeypatch):
-    # Expresión con muchos términos simbólicos (no un entero gigante, para no
-    # chocar con el límite de conversión int->str de Python) cuyo LaTeX
-    # supera los 10,000 caracteres.
-    huge_expr = sympy.Add(*(sympy.Symbol(f"x{i}") for i in range(3000)))
+    # Un símbolo de nombre largo produce más de 10.000 caracteres de LaTeX
+    # sin construir ni ordenar una suma de 3.000 símbolos (operación
+    # cuadrática/costosa en SymPy que bloqueaba el gate acumulativo).
+    # El mock prueba exclusivamente el truncado de salida del router.
+    huge_expr = sympy.Symbol("x" + "a" * 10_100)
 
     def _fake_evaluate(expression, angle_unit="rad", substitutions=None):
         return evaluate_service.EvaluateResult(
@@ -312,3 +327,516 @@ def test_stdev_with_single_value_is_parse_error():
     body = response.json()
     assert body["success"] is False
     assert body["error_code"] == "PARSE_ERROR"
+
+# S19 targeted coverage r292
+def test_render_evaluate_presentation_reports_bounded_symbolic_helper_warnings():
+    from app.routers.evaluate import _render_evaluate_presentation
+
+    x = sympy.Symbol("x")
+    result = evaluate_service.EvaluateResult(
+        expr=x,
+        input_expr=x,
+        is_numeric=False,
+        sum_bound="n",
+        binomial_variable="k",
+        permutation_alias=True,
+    )
+    presentation = _render_evaluate_presentation(result, source_expression="x")
+    assert "n debe ser un entero no negativo para esta suma simbólica." in presentation["warnings"]
+    assert "k debe ser un entero no negativo para combinaciones." in presentation["warnings"]
+    assert any("P(n,r) se interpreta como permutaciones" in w for w in presentation["warnings"])
+
+
+def test_evaluate_endpoint_maps_domain_errors_to_public_response(monkeypatch):
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "0")
+
+    def _raise_domain_error(*args, **kwargs):
+        raise evaluate_service.DomainErrorResult("controlled domain-error fixture")
+
+    monkeypatch.setattr(evaluate_service, "evaluate", _raise_domain_error)
+    response = _evaluate(expression="1")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is False
+    assert body["operation"] == "evaluate"
+    assert body["error_code"] == "DOMAIN_ERROR"
+    assert body["request_id"]
+
+
+def test_evaluate_endpoint_maps_controlled_timeout_without_claiming_sg28(monkeypatch):
+    from app.services.interruptible import ComputationTimedOut
+
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "0")
+
+    def _raise_controlled_timeout(*args, **kwargs):
+        raise ComputationTimedOut("controlled timeout-mapping fixture")
+
+    monkeypatch.setattr(evaluate_service, "evaluate", _raise_controlled_timeout)
+    response = _evaluate(expression="1")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is False
+    assert body["operation"] == "evaluate"
+    assert body["error_code"] == "TIMEOUT"
+    assert body["request_id"]
+
+
+# ---------------------------------------------------------------------------
+# S19 targeted coverage r299 - _evaluate_impl error mapping and isolation wiring
+# ---------------------------------------------------------------------------
+
+import asyncio
+import json
+import time
+import types
+
+from app.routers import evaluate as evaluate_router
+from app.schemas.requests import EvaluateRequest
+from app.services import parsing as _parsing
+from app.services.ast_validator import ComplexityLimitError as _ComplexityLimitError
+from app.services.interruptible import (
+    ComputationCancelled as _ComputationCancelled,
+    ComputationFailed as _ComputationFailed,
+    ComputationTimedOut as _ComputationTimedOut,
+)
+from app.services.request_cancellation import (
+    IsolationCapacityExceeded as _IsolationCapacityExceeded,
+)
+
+
+def _impl_request():
+    return types.SimpleNamespace(
+        state=types.SimpleNamespace(
+            request_id="s19-evaluate-impl",
+            start_time=time.perf_counter(),
+        )
+    )
+
+
+def _run_impl(payload, **kwargs):
+    return asyncio.run(
+        evaluate_router._evaluate_impl(payload, _impl_request(), **kwargs)
+    )
+
+
+def _raise(exc):
+    def _raiser(*args, **kwargs):
+        raise exc
+
+    return _raiser
+
+
+def _fixture_result():
+    expr = sympy.Integer(2)
+    return evaluate_service.EvaluateResult(
+        expr=expr,
+        input_expr=expr,
+        is_numeric=True,
+        approx_value=2.0,
+    )
+
+
+_FIXTURE_PRESENTATION = {
+    "warnings": [],
+    "input_latex": "2",
+    "result_latex": "2",
+    "result_text": "2",
+    "domain_conditions": [],
+}
+
+
+@pytest.mark.parametrize(
+    "exc,expected_code,expected_message",
+    [
+        (_parsing.ParseSecurityError("parse boom"), "PARSE_ERROR", "parse boom"),
+        (
+            _ComplexityLimitError("complexity boom"),
+            "COMPLEXITY_LIMIT",
+            "complexity boom",
+        ),
+        (
+            evaluate_service.SubstitutionValidationError("substitution boom"),
+            "VALIDATION_ERROR",
+            "substitution boom",
+        ),
+        (
+            evaluate_service.DomainErrorResult("domain boom"),
+            "DOMAIN_ERROR",
+            "domain boom",
+        ),
+        (
+            _ComputationTimedOut("timeout fixture"),
+            "TIMEOUT",
+            "El cálculo excedió el tiempo permitido.",
+        ),
+        (
+            _ComputationCancelled("cancelled fixture"),
+            "TIMEOUT",
+            "El cálculo fue interrumpido.",
+        ),
+        (AttributeError("attribute boom"), "DOMAIN_ERROR", "El resultado no está definido en este dominio."),
+        (ZeroDivisionError("zero boom"), "DOMAIN_ERROR", "El resultado no está definido en este dominio."),
+        (ValueError("value boom"), "DOMAIN_ERROR", "El resultado no está definido en este dominio."),
+        (OverflowError("overflow boom"), "DOMAIN_ERROR", "El resultado no está definido en este dominio."),
+    ],
+)
+def test_evaluate_impl_maps_non_isolated_errors(monkeypatch, exc, expected_code, expected_message):
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "0")
+    monkeypatch.setattr(evaluate_service, "evaluate", _raise(exc))
+
+    response = _run_impl(EvaluateRequest(expression="1"))
+
+    assert response.success is False
+    assert response.error_code == expected_code
+    assert response.error_message == expected_message
+    assert response.request_id == "s19-evaluate-impl"
+
+
+@pytest.mark.parametrize(
+    "error_type,expected_code",
+    [
+        ("ParseSecurityError", "PARSE_ERROR"),
+        ("ComplexityLimitError", "COMPLEXITY_LIMIT"),
+        ("MemoryError", "COMPLEXITY_LIMIT"),
+        ("SubstitutionValidationError", "VALIDATION_ERROR"),
+        ("DomainErrorResult", "DOMAIN_ERROR"),
+        ("AttributeError", "DOMAIN_ERROR"),
+        ("ZeroDivisionError", "DOMAIN_ERROR"),
+        ("ValueError", "DOMAIN_ERROR"),
+        ("OverflowError", "DOMAIN_ERROR"),
+        ("SomethingElse", "INTERNAL_ERROR"),
+        (None, "INTERNAL_ERROR"),
+    ],
+)
+def test_evaluate_impl_maps_isolated_child_failure_types(monkeypatch, error_type, expected_code):
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "1")
+    prefix = f"{error_type}: " if error_type else ""
+    failure = _ComputationFailed(f"{prefix}child boom", error_type)
+
+    async def _fake_run_for_request(request, operation, *args, **kwargs):
+        raise failure
+
+    monkeypatch.setattr(evaluate_router, "run_for_request", _fake_run_for_request)
+
+    response = _run_impl(EvaluateRequest(expression="1"))
+
+    assert response.success is False
+    assert response.error_code == expected_code
+    assert response.error_message == "child boom"
+
+
+def test_evaluate_impl_returns_503_when_isolation_capacity_is_exhausted(monkeypatch):
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "1")
+
+    async def _fake_run_for_request(request, operation, *args, **kwargs):
+        raise _IsolationCapacityExceeded("capacity")
+
+    monkeypatch.setattr(evaluate_router, "run_for_request", _fake_run_for_request)
+
+    response = _run_impl(EvaluateRequest(expression="1"))
+
+    assert response.status_code == 503
+    body = json.loads(response.body)
+    assert body["error_code"] == "INTERNAL_ERROR"
+    assert body["error_message"] == "Capacidad de cálculo temporalmente agotada."
+
+
+def test_evaluate_impl_isolated_success_serializes_public_fields(monkeypatch):
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "1")
+    calls = []
+    result = _fixture_result()
+
+    async def _fake_run_for_request(request, operation, *args, **kwargs):
+        calls.append((operation, args, kwargs))
+        if operation is evaluate_router._render_evaluate_presentation:
+            return dict(_FIXTURE_PRESENTATION)
+        return result
+
+    monkeypatch.setattr(evaluate_router, "run_for_request", _fake_run_for_request)
+
+    response = _run_impl(
+        EvaluateRequest(expression="7+11", angle_unit="deg", substitutions={"x": "1"}),
+        admission_reserved=True,
+    )
+
+    assert response.success is True
+    assert response.result_type == "scalar"
+    assert response.input_text == "7+11"
+    assert response.result_approx == 2.0
+    assert response.steps == []
+    assert response.has_detailed_steps is False
+    assert response.result_text == "2"
+    assert response.request_id == "s19-evaluate-impl"
+    assert [call[0] for call in calls] == [
+        evaluate_service.evaluate,
+        evaluate_router._render_evaluate_presentation,
+    ]
+    assert calls[0][1] == ("7+11", "deg", {"x": "1"})
+    assert calls[0][2] == {"timeout_seconds": 6, "admission_reserved": True}
+    assert calls[1][1] == (result, "7+11")
+    assert calls[1][2] == {"timeout_seconds": 4, "admission_reserved": True}
+
+
+@pytest.mark.parametrize(
+    "exc,expected_code,expected_message",
+    [
+        (
+            _IsolationCapacityExceeded("capacity"),
+            "INTERNAL_ERROR",
+            "Capacidad de cálculo temporalmente agotada.",
+        ),
+        (
+            _ComputationTimedOut("presentation timeout"),
+            "TIMEOUT",
+            "La presentación excedió el tiempo permitido.",
+        ),
+        (
+            _ComputationCancelled("presentation cancelled"),
+            "TIMEOUT",
+            "La presentación fue interrumpida.",
+        ),
+        (
+            _ComputationFailed("MemoryError: presentation boom", "MemoryError"),
+            "COMPLEXITY_LIMIT",
+            "presentation boom",
+        ),
+        (
+            _ComputationFailed("ValueError: presentation boom", "ValueError"),
+            "INTERNAL_ERROR",
+            "presentation boom",
+        ),
+        (
+            _ComputationFailed("plain presentation boom", None),
+            "INTERNAL_ERROR",
+            "plain presentation boom",
+        ),
+    ],
+)
+def test_evaluate_impl_maps_presentation_phase_failures(
+    monkeypatch, exc, expected_code, expected_message
+):
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "1")
+    calls = []
+
+    async def _fake_run_for_request(request, operation, *args, **kwargs):
+        calls.append(operation)
+        if len(calls) == 1:
+            return _fixture_result()
+        raise exc
+
+    monkeypatch.setattr(evaluate_router, "run_for_request", _fake_run_for_request)
+
+    response = _run_impl(EvaluateRequest(expression="1"))
+
+    if isinstance(exc, _IsolationCapacityExceeded):
+        assert response.status_code == 503
+        body = json.loads(response.body)
+        assert body["error_code"] == expected_code
+        assert body["error_message"] == expected_message
+    else:
+        assert response.success is False
+        assert response.error_code == expected_code
+        assert response.error_message == expected_message
+
+
+def test_computation_failure_message_strips_only_matching_type_prefix():
+    assert evaluate_router._computation_failure_message(
+        _ComputationFailed("ValueError: boom", "ValueError")
+    ) == "boom"
+    assert evaluate_router._computation_failure_message(
+        _ComputationFailed("ValueError: boom", None)
+    ) == "ValueError: boom"
+    assert evaluate_router._computation_failure_message(
+        _ComputationFailed("boom", "ValueError")
+    ) == "boom"
+
+
+# S19 targeted coverage r299 - _render_evaluate_presentation branches
+def _render_fixture(expr, *, input_expr=None, source=None, approx=None, is_numeric=False):
+    result = evaluate_service.EvaluateResult(
+        expr=expr,
+        input_expr=input_expr if input_expr is not None else expr,
+        is_numeric=is_numeric,
+        approx_value=approx,
+    )
+    return evaluate_router._render_evaluate_presentation(result, source_expression=source)
+
+
+@pytest.mark.parametrize(
+    "expr,expected_text,expected_latex",
+    [
+        (sympy.sqrt(3 + 2 * sympy.sqrt(2)), "1 + sqrt(2)", "1 + \\sqrt{2}"),
+        (
+            sympy.sqrt(5 + 2 * sympy.sqrt(6)),
+            "sqrt(2) + sqrt(3)",
+            "\\sqrt{2} + \\sqrt{3}",
+        ),
+        (sympy.sqrt(5), "sqrt(5)", "\\sqrt{5}"),
+        (
+            sympy.Integer(2) ** sympy.Rational(1, 3),
+            "2**(1/3)",
+            "\\sqrt[3]{2}",
+        ),
+    ],
+)
+def test_render_denests_only_nested_square_roots(expr, expected_text, expected_latex):
+    presentation = _render_fixture(expr)
+    assert presentation["result_text"] == expected_text
+    assert presentation["result_latex"] == expected_latex
+    assert presentation["warnings"] == []
+
+
+def test_render_simplifies_reciprocal_trigonometry():
+    presentation = _render_fixture(sympy.csc(sympy.pi / 6))
+    assert presentation["result_text"] == "2"
+    assert presentation["result_latex"] == "2"
+
+
+def test_render_keeps_symbolic_reciprocal_trig_after_bounded_simplification():
+    x = sympy.Symbol("x")
+    presentation = _render_fixture(sympy.csc(x))
+    assert presentation["result_text"] == "csc(x)"
+    assert presentation["result_latex"] == r"\csc{\left(x \right)}"
+    assert presentation["input_latex"] == r"\csc{\left(x \right)}"
+    assert presentation["domain_conditions"] == []
+
+
+def test_render_rewrites_natural_log_in_text_and_latex():
+    x = sympy.Symbol("x")
+    presentation = _render_fixture(sympy.log(x))
+    assert presentation["result_text"] == "ln(x)"
+    assert presentation["result_latex"] == r"\ln{\left(x \right)}"
+    assert presentation["input_latex"] == r"\log{\left(x \right)}"
+    assert [condition.kind for condition in presentation["domain_conditions"]] == [
+        "log",
+        "domain",
+    ]
+
+
+def test_render_uses_bounded_numeric_approximation_for_decimal_exponentials():
+    raw = sympy.exp(sympy.Float("-1.398"), evaluate=False)
+    presentation = _render_fixture(
+        raw, source="exp(-1.398)", approx=123.456, is_numeric=True
+    )
+    assert presentation["result_text"] == "123.456000000000"
+    assert presentation["result_latex"] == "123.456"
+
+
+@pytest.mark.parametrize(
+    "source,approx",
+    [
+        ("exp(-1398/1000)", 123.456),
+        ("exp(-1.398)", None),
+    ],
+)
+def test_render_decimal_exponential_requires_decimal_source_and_approximation(
+    source, approx
+):
+    raw = sympy.exp(sympy.Float("-1.398"), evaluate=False)
+    presentation = _render_fixture(raw, source=source, approx=approx, is_numeric=True)
+    assert presentation["result_text"] == "0.247090651392378"
+
+
+def test_render_decimal_exponential_requires_no_free_symbols():
+    x = sympy.Symbol("x")
+    presentation = _render_fixture(sympy.exp(x), source="exp(1.5)", approx=1.0)
+    assert presentation["result_text"] == "exp(x)"
+
+
+@pytest.mark.parametrize("source", ["1.5X", "1.5x"])
+def test_render_requires_standalone_decimal_source_for_approximation(source):
+    raw = sympy.exp(sympy.Float("-1.398"), evaluate=False)
+    presentation = _render_fixture(raw, source=source, approx=123.456, is_numeric=True)
+    assert presentation["result_text"] == "0.247090651392378"
+
+
+def test_render_falls_back_to_original_expression_when_simplify_fails(monkeypatch):
+    def _boom(*args, **kwargs):
+        raise RuntimeError("controlled simplify failure")
+
+    monkeypatch.setattr(sympy, "simplify", _boom)
+    presentation = _render_fixture(sympy.Integer(7))
+    assert presentation["result_text"] == "7"
+    assert presentation["result_latex"] == "7"
+
+
+def test_render_handles_integers_too_large_to_stringify(monkeypatch):
+    presentation = _render_fixture(sympy.Integer(10) ** 10000)
+    assert presentation["result_latex"] is None
+    assert presentation["result_text"] == "(resultado numérico demasiado grande para mostrarse)"
+    assert presentation["warnings"] == [
+        "Resultado LaTeX omitido: el valor numérico es demasiado grande para representarse."
+    ]
+
+
+def test_render_drops_latex_above_the_ten_thousand_character_limit():
+    presentation = _render_fixture(sympy.Symbol("a" * 10001))
+    assert presentation["result_latex"] is None
+    assert presentation["warnings"] == [
+        "Resultado LaTeX omitido: excede los 10,000 caracteres (sección 4)."
+    ]
+
+
+def test_render_keeps_latex_at_the_ten_thousand_character_boundary():
+    presentation = _render_fixture(sympy.Symbol("a" * 10000))
+    assert presentation["result_latex"] == "a" * 10000
+    assert presentation["warnings"] == []
+
+
+def test_render_reports_exact_symbolic_helper_warnings():
+    x = sympy.Symbol("x")
+    result = evaluate_service.EvaluateResult(
+        expr=x,
+        input_expr=x,
+        is_numeric=False,
+        sum_bound="n",
+        binomial_variable="k",
+        permutation_alias=True,
+    )
+    presentation = evaluate_router._render_evaluate_presentation(result, source_expression="x")
+    assert presentation["warnings"] == [
+        "n debe ser un entero no negativo para esta suma simbólica.",
+        "k debe ser un entero no negativo para combinaciones.",
+        "P(n,r) se interpreta como permutaciones (nPr); una definición local de P prevalece.",
+    ]
+
+
+def test_render_reports_missing_input_latex_when_source_cannot_be_reparsed():
+    presentation = _render_fixture(sympy.Integer(5), source=".__bad__")
+    assert presentation["input_latex"] is None
+    assert presentation["result_text"] == "5"
+    assert presentation["domain_conditions"] == []
+
+
+# S19 targeted coverage r300 - remaining reciprocal-trig and request logging
+@pytest.mark.parametrize(
+    "expr,expected",
+    [
+        (sympy.sec(sympy.pi / 3), "2"),
+        (sympy.cot(sympy.pi / 4), "1"),
+    ],
+)
+def test_render_simplifies_each_reciprocal_trigger(expr, expected):
+    presentation = _render_fixture(expr)
+    assert presentation["result_text"] == expected
+    assert presentation["result_latex"] == expected
+
+
+def test_evaluate_impl_logs_request_id_and_input_text(monkeypatch):
+    monkeypatch.setenv("SG28_EVALUATE_ISOLATION", "0")
+    calls = []
+
+    def _record(*args, **kwargs):
+        calls.append((args, kwargs))
+
+    monkeypatch.setattr(evaluate_router, "log_request_event", _record)
+    monkeypatch.setattr(
+        evaluate_service, "evaluate", lambda *args, **kwargs: _fixture_result()
+    )
+
+    response = _run_impl(EvaluateRequest(expression="7+11"))
+
+    assert response.success is True
+    assert calls == [
+        (("s19-evaluate-impl", "evaluate_request"), {"input_text": "7+11"})
+    ]

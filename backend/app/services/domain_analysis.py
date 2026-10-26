@@ -142,4 +142,50 @@ def extract_domain_conditions(expr: sympy.Expr) -> List[DomainCondition]:
         result.append(_condition_to_model(condition, kind))
 
     result.sort(key=lambda item: (item.variable or "", item.kind, item.text))
+    summary = real_domain_summary(expr) if result else None
+    if summary is not None:
+        result.append(summary)
     return result
+
+
+def _set_text(domain: sympy.Set, var: sympy.Symbol) -> tuple[str, str] | None:
+    """SymPy-parsable relational for the real domain, e.g. Ne(x, -1) & Ne(x, 1)."""
+    complement = sympy.S.Reals - domain
+    if isinstance(complement, sympy.FiniteSet) and complement:
+        relation = sympy.And(*(sympy.Ne(var, p) for p in sorted(complement, key=float)))
+    else:
+        parts = domain.args if isinstance(domain, sympy.Union) else (domain,)
+        pieces = []
+        for part in parts:
+            if not isinstance(part, sympy.Interval):
+                return None
+            bounds = []
+            if part.start != -sympy.oo:
+                bounds.append(var > part.start if part.left_open else var >= part.start)
+            if part.end != sympy.oo:
+                bounds.append(var < part.end if part.right_open else var <= part.end)
+            if not bounds:
+                return None
+            pieces.append(sympy.And(*bounds))
+        relation = sympy.Or(*pieces)
+    return str(relation), sympy.latex(relation)
+
+
+def real_domain_summary(expr: sympy.Expr) -> DomainCondition | None:
+    """Algebra114 AS-DOM: combined real domain of a univariate ORIGINAL expression."""
+    symbols = list(expr.free_symbols)
+    if len(symbols) != 1:
+        return None
+    var = symbols[0]
+    try:
+        from sympy.calculus.util import continuous_domain
+
+        domain = continuous_domain(expr, var, sympy.S.Reals)
+        if domain == sympy.S.Reals or domain is sympy.S.EmptySet:
+            return None
+        rendered = _set_text(domain, var)
+    except Exception:
+        return None
+    if rendered is None:
+        return None
+    return DomainCondition(text=rendered[0], latex=rendered[1], variable=str(var), kind="domain")

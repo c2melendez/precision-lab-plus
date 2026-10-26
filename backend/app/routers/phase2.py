@@ -171,8 +171,28 @@ async def solve_system(payload: SolveSystemRequest, request: Request) -> MathRes
 async def inequality(payload: InequalityRequest, request: Request) -> MathResponse:
     log_request_event(request.state.request_id, "inequality_request")
 
+    # SY-Q-09: strict point exclusion on the real line. The guarded
+    # additive path does not affect the original ordered-inequality parser.
+    import re
+    normalized_neq = payload.inequality.replace("\\neq", "!=").replace("≠", "!=").replace(" ", "")
+    point_exclusion = re.fullmatch(r"([A-Za-z])!=([+-]?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+))", normalized_neq)
+    if point_exclusion:
+        variable_name, excluded_text = point_exclusion.groups()
+        if payload.variable is not None and payload.variable != variable_name:
+            return _error(request, OperationType.INEQUALITY, ErrorCode.INVALID_VARIABLE, "La variable no coincide con la desigualdad.")
+        excluded = sympy.Rational(excluded_text)
+        solution_set = sympy.S.Reals - sympy.FiniteSet(excluded)
+        return MathResponse(
+            success=True, operation=OperationType.INEQUALITY,
+            request_id=request.state.request_id, result_type=ResultType.SCALAR,
+            input_text=payload.inequality, result_text=str(solution_set),
+            result_latex=sympy.latex(solution_set), has_detailed_steps=False,
+            duration_ms=_duration_ms(request),
+        )
+
     try:
-        parsed = parsing.parse_inequality_tree(payload.inequality)
+        chained = parsing.parse_chained_inequalities(payload.inequality)
+        parsed = None if chained else parsing.parse_inequality_tree(payload.inequality)
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.INEQUALITY, ErrorCode.PARSE_ERROR, str(exc))
     except ComplexityLimitError as exc:
@@ -180,7 +200,11 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
 
     variable = payload.variable
     if variable is None:
-        free_symbols = parsed.free_symbols
+        free_symbols = (
+            set().union(*(rel.free_symbols for rel in chained))
+            if chained
+            else parsed.free_symbols
+        )
         if len(free_symbols) != 1:
             return _error(
                 request,
@@ -192,7 +216,11 @@ async def inequality(payload: InequalityRequest, request: Request) -> MathRespon
         variable = str(next(iter(free_symbols)))
 
     try:
-        result = phase2_service.compute_inequality(parsed, variable)
+        result = (
+            phase2_service.compute_chained_inequality(chained, variable)
+            if chained
+            else phase2_service.compute_inequality(parsed, variable)
+        )
     except parsing.ParseSecurityError as exc:
         return _error(request, OperationType.INEQUALITY, ErrorCode.PARSE_ERROR, str(exc))
 
@@ -221,6 +249,7 @@ async def inequality_system(payload: InequalitySystemRequest, request: Request) 
     log_request_event(request.state.request_id, "inequality_system_request")
 
     parsed_constraints = []
+    parsed_relations = []
     for text in payload.inequalities:
         try:
             rel = parsing.parse_inequality_tree(text)
@@ -229,6 +258,30 @@ async def inequality_system(payload: InequalitySystemRequest, request: Request) 
         except ComplexityLimitError as exc:
             return _error(request, OperationType.INEQUALITY_SYSTEM, ErrorCode.COMPLEXITY_LIMIT, str(exc))
         parsed_constraints.append((rel.lhs - rel.rhs, rel.rel_op))
+        parsed_relations.append(rel)
+
+    # SY-Q-17: one-dimensional systems are intersections, not polygons.
+    if len(payload.variables) == 1:
+        variable = payload.variables[0]
+        try:
+            symbol = phase2_service._validate_variable(variable)
+            free_symbols = set().union(*(rel.free_symbols for rel in parsed_relations))
+            if free_symbols - {symbol}:
+                return _error(request, OperationType.INEQUALITY_SYSTEM, ErrorCode.INVALID_VARIABLE,
+                              "Las inecuaciones contienen variables distintas de la indicada.")
+            result = phase2_service.compute_chained_inequality(parsed_relations, variable)
+        except parsing.ParseSecurityError as exc:
+            return _error(request, OperationType.INEQUALITY_SYSTEM, ErrorCode.PARSE_ERROR, str(exc))
+        except (NotImplementedError, ValueError, TypeError) as exc:
+            return _error(request, OperationType.INEQUALITY_SYSTEM, ErrorCode.UNSUPPORTED_OPERATION,
+                          "No se pudo resolver la intersección real: " + str(exc))
+        return MathResponse(
+            success=True, operation=OperationType.INEQUALITY_SYSTEM,
+            request_id=request.state.request_id, result_type=ResultType.SCALAR,
+            input_text="; ".join(payload.inequalities), result_text=str(result.solution_set),
+            result_latex=sympy.latex(result.solution_set), has_detailed_steps=False,
+            warnings=result.warnings, duration_ms=_duration_ms(request),
+        )
 
     try:
         result = linear_inequality_system.solve_linear_inequality_system(

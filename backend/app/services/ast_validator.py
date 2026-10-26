@@ -117,6 +117,23 @@ def check_complexity_limits(expr: sympy.Basic) -> None:
 
         if node.is_Pow:
             _base, exponent = node.args
+            # SY-X-10: an unevaluated power in exponent position can encode
+            # an astronomical integer without being an Integer node yet.
+            # Reject the canonical 10^(10^10) class before SymPy evaluation.
+            if exponent.is_Pow:
+                inner_base, inner_exponent = exponent.args
+                if inner_base.is_Integer and inner_exponent.is_Integer:
+                    base = abs(int(inner_base))
+                    power = int(inner_exponent)
+                    # Bounded magnitude proof: no astronomical integer is built.
+                    if base >= 2 and power >= 1:
+                        bounded = 1
+                        for _ in range(min(power, 14)):
+                            bounded *= base
+                            if bounded > MAX_ABS_INTEGER_EXPONENT:
+                                raise ComplexityLimitError(
+                                    "Potencia anidada excede el límite de tamaño antes del cálculo."
+                                )
             if exponent.is_Integer and abs(int(exponent)) > MAX_ABS_INTEGER_EXPONENT:
                 raise ComplexityLimitError(
                     f"Exponente entero fuera de rango (máx. "

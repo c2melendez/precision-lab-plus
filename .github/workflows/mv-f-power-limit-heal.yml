@@ -1,0 +1,52 @@
+name: MV-F power limit heal
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Reason for raising matrix power exponent bound
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mv-f-power-limit-heal
+  cancel-in-progress: false
+
+jobs:
+  heal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: qa/syntax-audit-in625-a1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate reason
+        env:
+          REASON: ${{ inputs.reason }}
+        run: |
+          test -n "$(printf '%s' "$REASON" | tr -d '[:space:]')"
+          printf 'Reason: %s\n' "$REASON"
+
+      - name: Raise MAX_MATRIX_POWER_EXPONENT to 32
+        run: |
+          f=backend/app/services/matrix_service.py
+          grep -q 'MAX_MATRIX_POWER_EXPONENT = 10' "$f"
+          sed -i 's/MAX_MATRIX_POWER_EXPONENT = 10/MAX_MATRIX_POWER_EXPONENT = 32/' "$f"
+          grep -q 'MAX_MATRIX_POWER_EXPONENT = 32' "$f"
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/app/services/matrix_service.py
+          if git diff --cached --quiet; then
+            echo "Already at 32"
+            exit 0
+          fi
+          git commit -m "feat(matrices): MAX_MATRIX_POWER_EXPONENT = 32 for MV-F-15 (A**30)"
+          git push origin HEAD:qa/syntax-audit-in625-a1

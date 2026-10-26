@@ -1,4 +1,7 @@
 import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import {installScriptProbe,verifyInsertionControl} from "./scriptInertProbe";
+import {installFileProbe,verifyFileProbeControl} from "./fileAccessProbe";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
 // Native integration: real MathLive, React handlers, HTTP API and rendered result.
@@ -24,23 +27,9 @@ async function enter(field: Locator, source: string) {
 
 async function evaluate(page: Page, field: Locator, source: string, expected: number, backendExpression = source) {
   await enter(field, source);
-  const responsePromise = page.waitForResponse((response) => {
-    if (response.request().method() !== "POST") return false;
-    if (response.url().includes("/api/v1/evaluate")) return true;
-    if (!response.url().includes("/api/v1/")) return false;
-    try {
-      const body = response.request().postDataJSON();
-      return Boolean(body && typeof body === "object" && "expression" in body);
-    } catch {
-      return false;
-    }
-  });
-  // Do not focus the MathLive field here: focus opens its modal virtual keyboard,
-  // which covers Evaluar in desktop/tablet/mobile Playwright contexts.
-  const evalButton = page.getByRole("button", { name: "Evaluar", exact: true });
-  await expect(evalButton).toBeVisible();
-  await expect(evalButton).toBeEnabled();
-  await evalButton.click();
+  const responsePromise = page.waitForResponse((response) =>
+    response.url().endsWith("/api/v1/evaluate") && response.request().method() === "POST");
+  await page.getByRole("button", { name: "Evaluar", exact: true }).click();
   const response = await responsePromise;
   expect(response.status()).toBe(200);
   expect(response.request().postDataJSON().expression).toBe(backendExpression);
@@ -234,10 +223,224 @@ test("SY-X-08 native principal complex root, HTTP reentry and finite recovery", 
   ids.push(recovery.requestId, again.requestId);
   expect(new Set(ids).size).toBe(5);
   expect(errors).toEqual([]);
-  await testInfo.attach("SY-X-08-native-http-evidence", {
-    body: JSON.stringify({ domain: "existing principal complex branch", canonical, project: testInfo.project.name, evidence, ids, errors }, null, 2),
-    contentType: "application/json",
-  });
+  await testInfo.attach("SY-X-08-native-http-evidence", {body:JSON.stringify({domain:"existing principal complex branch", canonical, project:testInfo.project.name, evidence, ids, errors},null,2),contentType:"application/json"});
+});
+
+test("SY-X-13 original nested derivative, exact HTTP output reentry and recovery",async({page},testInfo)=>{
+  const errors:string[]=[];
+  const evidence:unknown[]=[];
+  const ids:string[]=[];
+  page.on("pageerror",error=>errors.push(error.message));
+  await page.goto("/");
+  const field=page.locator("math-field").first();
+  await expect(field).toBeVisible();
+  const original=fixture("SY-X-13");
+  expect(original).toBe(String.raw`\frac{d}{dx}x^{x^{x}}`);
+  const checkPython=String.raw`import json,sys,sympy as s
+b=json.load(sys.stdin); x=s.Symbol('x',positive=True)
+expected=x**(x**x)*(x**x*(s.log(x)+1)*s.log(x)+x**(x-1))
+actual=s.sympify(b['result_text'],locals={'x':x})
+assert not actual.has(s.Derivative)
+assert s.simplify(actual-expected)==0
+if 'input' in b:
+ assert s.simplify(s.sympify(b['input'].replace('^','**'),locals={'x':x})-x**(x**x))==0
+print('exact positive-real equivalence')`;
+  async function symbolic(source:string,path:string){
+    await field.evaluate((node,value)=>{
+      (node as HTMLElement & {setValue(v:string):void}).setValue(value);
+      node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));
+    },source);
+    const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+    expect(serialized).not.toBe("");
+    const pending=page.waitForResponse(r=>r.url().endsWith(path)&&r.request().method()==="POST");
+    await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+    const response=await pending;
+    expect(response.status()).toBe(200);
+    const payload=response.request().postDataJSON();
+    if(path.endsWith("/derivative")){expect(payload.variable).toBe("x");expect(payload.order).toBe(1);}
+    const body=await response.json();
+    expect(body.success).toBe(true);expect(body.error_code).toBeNull();
+    expect(body.result_latex).toBeTruthy();expect(body.request_id).toBeTruthy();
+    const checked={result_text:body.result_text,...(path.endsWith("/derivative")?{input:payload.expression}:{})};
+    expect(execFileSync("python",["-c",checkPython],{input:JSON.stringify(checked),timeout:10000,encoding:"utf8"}).trim()).toBe("exact positive-real equivalence");
+    const visible=page.locator('[aria-live="polite"] .a11y-scale-result-lg .katex-html').last();
+    await expect(visible).toBeVisible();await expect(visible).toContainText("x");
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    ids.push(body.request_id);evidence.push({source,serialized,payload,body});
+    return body.result_latex as string;
+  }
+  await symbolic(await symbolic(original,"/api/v1/derivative"),"/api/v1/evaluate");
+  const recovered=await evaluate(page,field,"2+3",5);
+  const reentered=await evaluate(page,field,recovered.reentry,5);
+  ids.push(recovered.requestId,reentered.requestId);
+  expect(new Set(ids).size).toBe(4);expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-13-native-http-evidence",{body:JSON.stringify({original,domain:"x>0; no complex branch claim",project:testInfo.project.name,evidence,ids,errors},null,2),contentType:"application/json"});
+});
+
+test("SY-X-14 original50 reciprocals show actual AST-depth limit and HTTP recovery",async({page},testInfo)=>{
+  const errors:string[]=[];
+  page.on("pageerror",e=>errors.push(e.message));
+  await page.goto("/");
+  const field=page.locator("math-field").first();await expect(field).toBeVisible();
+  const canonical=fixture("SY-X-14");
+  expect(canonical).toBe(String.raw`\underbrace{\frac{1}{\frac{1}{\cdots\frac{1}{x}}}}_{50\text{ niveles}}`);
+  let source="x";for(let i=0;i<50;i++)source=String.raw`\frac{1}{${source}}`;
+  expect(source.length).toBe(501);expect(source.match(/\\frac/g)).toHaveLength(50);
+  await field.evaluate((node,value)=>{(node as HTMLElement & {setValue(v:string):void}).setValue(value);node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));},source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  expect(serialized.match(/\\frac/g)).toHaveLength(50);
+  const pending=page.waitForResponse(r=>r.url().endsWith("/api/v1/evaluate")&&r.request().method()==="POST");
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const response=await pending;expect(response.status()).toBe(200);
+  const expression=response.request().postDataJSON().expression as string;
+  expect(expression.match(/\//g)).toHaveLength(50);expect(expression.match(/x/g)).toHaveLength(1);
+  expect(expression.length).toBeLessThanOrEqual(500);
+  const rejected=await response.json();
+  expect(rejected.success).toBe(false);expect(rejected.error_code).toBe("COMPLEXITY_LIMIT");
+  expect(rejected.error_message).toContain("profundidad máxima de 30");
+  expect(rejected.result_text).toBeNull();expect(rejected.result_latex).toBeNull();
+  const alert=page.getByRole("alert").filter({hasText:"COMPLEXITY_LIMIT"});
+  await expect(alert).toContainText("profundidad máxima de 30");
+  await expect(page.locator(".a11y-scale-result-lg")).toHaveCount(0);
+  const recovered=await evaluate(page,field,"2+3",5);
+  const reentered=await evaluate(page,field,recovered.reentry,5);
+  expect(new Set([rejected.request_id,recovered.requestId,reentered.requestId]).size).toBe(3);
+  expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-14-native-http-limit-evidence",{body:JSON.stringify({canonical,source,serialized,expression,project:testInfo.project.name,rejected,recovered,reentered,errors,scope:"Rejection/recovery PASS only;50-layer mathematical parity remains BLOCKED"},null,2),contentType:"application/json"});
+});
+
+test("SY-X-15 original script text never executes or becomes HTML, then HTTP recovery",async({page},testInfo)=>{
+  const probe=await installScriptProbe(page);
+  const requests:Array<{url:string;body:unknown}>=[];
+  page.on("request",request=>{if(request.url().includes("/api/v1/")&&request.method()==="POST")requests.push({url:request.url(),body:request.postDataJSON()});});
+  await page.goto("/");
+  const field=page.locator("math-field").first();await expect(field).toBeVisible();
+  const source=fixture("SY-X-15");expect(source).toBe(String.raw`\text{<script>alert(1)</script>}`);
+  await field.evaluate((node,value)=>{(node as HTMLElement & {setValue(v:string):void}).setValue(value);node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));},source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  expect(serialized).toContain("<script>alert(1)</script>");
+  const ingestion=await probe.assertInert();
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  let outcome="";
+  await expect.poll(async()=>{
+    const alerts=await page.getByRole("alert").allInnerTexts();
+    if(alerts.some(text=>text.trim()))return outcome="clear-error";
+    const text=(await page.locator(".a11y-scale-result-lg").allInnerTexts()).join(" ");
+    if(text.includes("<script>alert(1)</script>"))return outcome="inert-text";
+    return "pending";
+  }).not.toBe("pending");
+  const notice=(await page.getByRole("alert").allInnerTexts()).join(" ");
+  if(outcome==="clear-error")await expect(page.locator(".a11y-scale-result-lg")).toHaveCount(0);
+  const rejected=await probe.assertInert();
+  const invalidRequests=requests.length;
+  const recovered=await evaluate(page,field,"2+3",5);
+  const reentered=await evaluate(page,field,recovered.reentry,5);
+  expect(reentered.requestId).not.toBe(recovered.requestId);
+  expect(requests).toHaveLength(invalidRequests+2);
+  const final=await probe.assertInert();
+  await testInfo.attach("SY-X-15-native-inert-text-evidence",{body:JSON.stringify({source,serialized,project:testInfo.project.name,outcome,notice,ingestion,rejected,final,requests,recovered,reentered},null,2),contentType:"application/json"});
+});
+
+test("SY-X-15 probe positive control detects inert script insertion in closed shadow DOM",async({page},testInfo)=>{
+  const evidence=await verifyInsertionControl(page,"/");
+  await testInfo.attach("SY-X-15-probe-control",{body:JSON.stringify(evidence),contentType:"application/json"});
+});
+
+test("SY-X-16 file probe control detects and blocks only a synthetic sentinel",async({page},testInfo)=>{
+  const evidence=await verifyFileProbeControl(page,"/");
+  await testInfo.attach("SY-X-16-file-probe-control",{body:JSON.stringify(evidence),contentType:"application/json"});
+});
+test("SY-X-16 original input command is rejected without file fetch, then HTTP recovery",async({page},testInfo)=>{
+  const probe=await installFileProbe(page);
+  const requests:Array<{url:string;body:unknown}>=[];
+  page.on("request",request=>{if(request.url().includes("/api/v1/")&&request.method()==="POST")requests.push({url:request.url(),body:request.postDataJSON()});});
+  await page.goto("/");
+  const field=page.locator("math-field").first();await expect(field).toBeVisible();
+  const source=fixture("SY-X-16");expect(source).toBe(String.raw`\input{/etc/passwd}`);
+  await field.evaluate((node,value)=>{(node as HTMLElement & {setValue(v:string):void}).setValue(value);node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));},source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  expect(serialized).toContain("input");expect(serialized).toContain("/etc/passwd");
+  const ingestion=probe.assertNoAccess();
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const alerts=page.getByRole("alert");await expect(alerts.first()).toBeVisible();
+  const notice=(await alerts.allInnerTexts()).join(" ");expect(notice.trim()).not.toBe("");
+  await expect(page.locator(".a11y-scale-result-lg")).toHaveCount(0);
+  const rejected=probe.assertNoAccess();const invalidRequests=requests.length;
+  const recovered=await evaluate(page,field,"2+3",5);
+  const reentered=await evaluate(page,field,recovered.reentry,5);
+  expect(recovered.requestId).not.toBe(reentered.requestId);expect(requests).toHaveLength(invalidRequests+2);
+  const final=probe.assertNoAccess();
+  await testInfo.attach("SY-X-16-native-file-command-evidence",{body:JSON.stringify({source,serialized,project:testInfo.project.name,notice,ingestion,rejected,final,requests,recovered,reentered},null,2),contentType:"application/json"});
+});
+test("SY-X-17 original shell escape command is rejected, then HTTP recovery",async({page},testInfo)=>{
+  const probe=await installFileProbe(page);
+  const requests:Array<{url:string;body:unknown}>=[];
+  page.on("request",request=>{if(request.url().includes("/api/v1/")&&request.method()==="POST")requests.push({url:request.url(),body:request.postDataJSON()});});
+  await page.goto("/");
+  const field=page.locator("math-field").first();await expect(field).toBeVisible();
+  const source=fixture("SY-X-17");expect(source).toBe(String.raw`\write18{ls}`);
+  await field.evaluate((node,value)=>{(node as HTMLElement & {setValue(v:string):void}).setValue(value);node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));},source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  expect(serialized).toContain("write");expect(serialized).toContain("18");expect(serialized).toContain("ls");
+  const ingestion=probe.assertNoAccess();
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const alerts=page.getByRole("alert");await expect(alerts.first()).toBeVisible();
+  const notice=(await alerts.allInnerTexts()).join(" ");expect(notice.trim()).not.toBe("");
+  await expect(page.locator(".a11y-scale-result-lg")).toHaveCount(0);
+  expect(notice).toContain("Comando TeX no permitido");
+  expect(requests).toHaveLength(0); // local rejection must not fabricate invalid HTTP evidence
+  const rejected=probe.assertNoAccess();const invalidRequests=requests.length;
+  const recovered=await evaluate(page,field,"2+3",5);
+  const reentered=await evaluate(page,field,recovered.reentry,5);
+  expect(recovered.requestId).not.toBe(reentered.requestId);expect(requests).toHaveLength(invalidRequests+2);
+  const final=probe.assertNoAccess();
+  await testInfo.attach("SY-X-17-native-shell-command-evidence",{body:JSON.stringify({source,serialized,project:testInfo.project.name,notice,ingestion,rejected,final,requests,recovered,reentered},null,2),contentType:"application/json"});
+});
+test("SY-X-18 original Python-like command is rejected, then HTTP recovery",async({page},testInfo)=>{
+  const probe=await installFileProbe(page);
+  const requests:Array<{url:string;body:unknown}>=[];
+  page.on("request",request=>{if(request.url().includes("/api/v1/")&&request.method()==="POST")requests.push({url:request.url(),body:request.postDataJSON()});});
+  await page.goto("/");
+  const field=page.locator("math-field").first();await expect(field).toBeVisible();
+  const source=fixture("SY-X-18");expect(source).toBe(String.raw`__import__('os').system('ls')`);
+  await field.evaluate((node,value)=>{(node as HTMLElement & {setValue(v:string):void}).setValue(value);node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));},source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  // Subscript/prime formatting may change, but every payload letter must survive in order.
+  expect(serialized.replace(/\\[A-Za-z]+/g,"").replace(/[^A-Za-z]/g,"")).toBe("importossystemls");
+  const ingestion=probe.assertNoAccess();
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const alerts=page.getByRole("alert");await expect(alerts.first()).toBeVisible();
+  const notice=(await alerts.allInnerTexts()).join(" ");expect(notice.trim()).not.toBe("");
+  await expect(page.locator(".a11y-scale-result-lg")).toHaveCount(0);
+  const rejected=probe.assertNoAccess();const invalidRequests=requests.length;
+  const recovered=await evaluate(page,field,"2+3",5);
+  const reentered=await evaluate(page,field,recovered.reentry,5);
+  expect(recovered.requestId).not.toBe(reentered.requestId);expect(requests).toHaveLength(invalidRequests+2);
+  const final=probe.assertNoAccess();
+  await testInfo.attach("SY-X-18-native-python-command-evidence",{body:JSON.stringify({source,serialized,project:testInfo.project.name,notice,ingestion,rejected,final,requests,recovered,reentered},null,2),contentType:"application/json"});
+});
+test("SY-X-19 original file-read expression is rejected, then HTTP recovery",async({page},testInfo)=>{
+  const probe=await installFileProbe(page);
+  const requests:Array<{url:string;body:unknown}>=[];
+  page.on("request",request=>{if(request.url().includes("/api/v1/")&&request.method()==="POST")requests.push({url:request.url(),body:request.postDataJSON()});});
+  await page.goto("/");
+  const field=page.locator("math-field").first();await expect(field).toBeVisible();
+  const source=fixture("SY-X-19");expect(source).toBe(String.raw`open('/etc/passwd').read()`);
+  await field.evaluate((node,value)=>{(node as HTMLElement & {setValue(v:string):void}).setValue(value);node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));},source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  // Subscript/prime formatting may change, but every payload letter must survive in order.
+  expect(serialized.replace(/\\[A-Za-z]+/g,"").replace(/[^A-Za-z]/g,"")).toBe("openetcpasswdread");
+  const ingestion=probe.assertNoAccess();
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const alerts=page.getByRole("alert");await expect(alerts.first()).toBeVisible();
+  const notice=(await alerts.allInnerTexts()).join(" ");expect(notice.trim()).not.toBe("");
+  await expect(page.locator(".a11y-scale-result-lg")).toHaveCount(0);
+  const rejected=probe.assertNoAccess();const invalidRequests=requests.length;
+  const recovered=await evaluate(page,field,"2+3",5);
+  const reentered=await evaluate(page,field,recovered.reentry,5);
+  expect(recovered.requestId).not.toBe(reentered.requestId);expect(requests).toHaveLength(invalidRequests+2);
+  const final=probe.assertNoAccess();
+  await testInfo.attach("SY-X-19-native-file-read-evidence",{body:JSON.stringify({source,serialized,project:testInfo.project.name,notice,ingestion,rejected,final,requests,recovered,reentered},null,2),contentType:"application/json"});
 });
 
 const rejectionMessages: Record<string, string> = {
@@ -441,5 +644,124 @@ test("SY-X-12 native non-elementary integral notice, finite integral recovery an
       source, project: testInfo.project.name, integrand, rejected, finite, recovered, reentered, errors,
     }, null, 2),
     contentType: "application/json",
+  });
+});
+
+
+test("SY-X-20 native invalid Unicode source is rejected with finite HTTP recovery", async ({page}, testInfo) => {
+  const errors:string[]=[];
+  const requests:Array<{url:string;body:unknown}>=[];
+  page.on("pageerror",e=>errors.push(e.message));
+  page.on("request",request=>{
+    if(request.url().includes("/api/v1/") && request.method()==="POST")
+      requests.push({url:request.url(),body:request.postDataJSON()});
+  });
+  await page.goto("/");
+  const field=page.locator("math-field").first();
+  await expect(field).toBeVisible();
+  const source=fixture("SY-X-20");
+  expect(source).toBe("😀+1");
+  expect([...source].map(c=>c.codePointAt(0))).toEqual([0x1f600,43,49]);
+  await field.evaluate((node,value)=>{
+    (node as HTMLElement & {setValue(v:string):void}).setValue(value);
+    node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));
+  },source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  expect(serialized).toContain("😀");
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const alerts=page.getByRole("alert");
+  await expect(alerts.first()).toBeVisible();
+  const notice=(await alerts.allInnerTexts()).join(" ");
+  expect(notice).toMatch(/car[aá]cter|inv[aá]lid|permitid|reconocid|sintaxis/i);
+  await expect(page.locator(".a11y-scale-result-lg")).toHaveCount(0);
+  const invalidRequests=requests.length;
+  const recovered=await evaluate(page,field,"2+3",5);
+  const reentered=await evaluate(page,field,recovered.reentry,5);
+  expect(reentered.requestId).not.toBe(recovered.requestId);
+  expect(requests).toHaveLength(invalidRequests+2);
+  expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-20-native-unicode-evidence",{
+    body:JSON.stringify({source,serialized,notice,invalidRequests,requests,project:testInfo.project.name,recovered,reentered,errors},null,2),
+    contentType:"application/json"
+  });
+});
+
+
+test("SY-X-21 native zero-width source has exact value or clear error and recovers",async({page},testInfo)=>{
+  const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
+  await page.goto("/");
+  const field=page.locator("math-field").first();await expect(field).toBeVisible();
+  const source=fixture("SY-X-21");
+  expect([...source].map(ch=>ch.codePointAt(0))).toEqual([49,0x200b,43,0x200b,50]);
+  await field.evaluate((node,value)=>{
+    (node as HTMLElement & {setValue(v:string):void}).setValue(value);
+    node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));
+  },source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const alert=page.getByRole("alert").first();
+  const result=page.locator(".a11y-scale-result-lg").first();
+  await expect.poll(async()=>{
+    if(await alert.isVisible().catch(()=>false))return "error";
+    if(await result.isVisible().catch(()=>false))return "value";
+    return "pending";
+  },{timeout:15000}).not.toBe("pending");
+  const isError=await alert.isVisible().catch(()=>false);
+  const notice=isError ? (await alert.innerText()).trim():"";
+  if(isError){
+    expect(notice).toMatch(/car[aá]cter|inv[aá]lid|permitid|reconocid|sintaxis|expresi[oó]n/i);
+    await expect(result).toHaveCount(0);
+  }else{
+    const renderedValues=(await result.innerText()).trim().split(/\s+/);
+    expect(renderedValues.length).toBeGreaterThan(0);
+    for(const renderedValue of renderedValues)expect(renderedValue).toMatch(/^3(?:\.0+)?$/);
+  }
+  const first=await evaluate(page,field,"2+3",5);
+  const second=await evaluate(page,field,first.reentry,5);
+  expect(first.requestId).not.toBe(second.requestId);expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-21-native-evidence",{
+    body:JSON.stringify({source,serialized,isError,notice,project:testInfo.project.name,first,second,errors},null,2),
+    contentType:"application/json"
+  });
+});
+
+
+test("SY-X-22 native 10000-digit source rejects clearly or stays exact, then recovers",async({page},testInfo)=>{
+  test.setTimeout(120000);
+  const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
+  await page.goto("/");
+  const field=page.locator("math-field").first();await expect(field).toBeVisible();
+  const source="9".repeat(10000)+"+1";
+  expect(source.length).toBe(10002);
+  await field.evaluate((node,value)=>{
+    (node as HTMLElement & {setValue(v:string):void}).setValue(value);
+    node.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText",data:value}));
+  },source);
+  const serialized=await field.evaluate(node=>(node as HTMLElement & {value:string}).value);
+  await page.getByRole("button",{name:"Evaluar",exact:true}).click();
+  const alert=page.getByRole("alert").first();
+  const result=page.locator(".a11y-scale-result-lg").first();
+  await expect.poll(async()=>{
+    if(await alert.isVisible().catch(()=>false))return "error";
+    if(await result.isVisible().catch(()=>false))return "value";
+    return "pending";
+  },{timeout:30000}).not.toBe("pending");
+  const rejected=await alert.isVisible().catch(()=>false);
+  const notice=rejected?(await alert.innerText()).trim():"";
+  if(rejected){
+    expect(notice).toMatch(/longitud|tamañ|l[ií]mit|demasiad|car[aá]cter|inv[aá]lid|expresi[oó]n|sintaxis/i);
+    await expect(result).toHaveCount(0);
+  }else{
+    const exact="1"+"0".repeat(10000);
+    for(const value of (await result.innerText()).trim().split(/\s+/))expect(value).toBe(exact);
+    expect(serialized.replace(/\s/g,"")).toContain("9".repeat(10000));
+  }
+  const first=await evaluate(page,field,"2+3",5);
+  const second=await evaluate(page,field,first.reentry,5);
+  expect(first.requestId).not.toBe(second.requestId);
+  expect(errors).toEqual([]);
+  await testInfo.attach("SY-X-22-native-evidence",{
+    body:JSON.stringify({sourceLength:source.length,serializedLength:serialized.length,rejected,notice,project:testInfo.project.name,first,second,errors},null,2),
+    contentType:"application/json"
   });
 });

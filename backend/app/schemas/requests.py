@@ -67,14 +67,19 @@ class MatrixSingleRequest(BaseModel):
     # /determinant y /inverse: validar cuadrada -> si no, DIMENSION_MISMATCH.
 
 
+class MatrixEquationRequest(BaseModel):
+    matrix_a: List[List[str]] = Field(..., min_length=1, max_length=6)
+    matrix_b: List[List[str]] = Field(..., min_length=1, max_length=6)
+    # "left": X·A = B (X = B·A^-1); "right": A·X = B (X = A^-1·B).
+    x_side: Literal["left", "right"]
+
+
 class MatrixPowerRequest(BaseModel):
     matrix: List[List[str]] = Field(..., min_length=1, max_length=6)
-    exponent: int = Field(..., ge=-10, le=10)
+    exponent: int = Field(..., ge=-32, le=32)
     # Cuadrada obligatoria -> DIMENSION_MISMATCH si no. Exponente negativo
     # requiere matriz invertible -> SINGULAR_MATRIX si no. Rango acotado
-    # (igual criterio que otros límites de complejidad, sección 7/9) para
-    # evitar entradas de tamaño explosivo (A**10 en una matriz 6x6 ya es
-    # bastante trabajo simbólico).
+    # a ±32 (MV-F-15 usa A**30; 6×6 sigue acotado por tamaño de matriz).
 
 
 class Graph2DRequest(BaseModel):

@@ -13,6 +13,7 @@ import uuid
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import API_V1_PREFIX, get_settings
 from app.core.exception_handlers import (
@@ -21,22 +22,26 @@ from app.core.exception_handlers import (
     validation_exception_handler,
 )
 from app.core.logging import configure_logging
-from app.routers import algebra, calculus, complex_analysis, evaluate, graphing, health, matrices, ode, phase2, statistics
+from app.services.disconnect_tracking import DisconnectTrackingMiddleware
+from app.routers import (
+    algebra,
+    calculus,
+    complex_analysis,
+    evaluate,
+    graphing,
+    health,
+    matrices,
+    matrix_spaces,
+    ode,
+    phase2,
+    statistics,
+)
 
 configure_logging()
 
 app = FastAPI(
     title="Calculadora Científica Web",
     version="0.1.0",
-    # FIX (post-entrega, corrige Módulo 1): por defecto FastAPI sirve el
-    # esquema OpenAPI en "/openapi.json" (raíz), no bajo el prefijo /api/v1
-    # de los routers. La spec (sección 9) y frontend/package.json
-    # ("generate-types": openapi-typescript
-    # http://localhost:8000/api/v1/openapi.json ...) asumen que vive en
-    # /api/v1/openapi.json. Sin este parámetro, `npm run generate-types`
-    # devolvía 404 (documentado en README como limitación conocida).
-    # Se fija aquí para que la ruta real coincida con la que la spec y el
-    # script del frontend ya esperaban.
     openapi_url=f"{API_V1_PREFIX}/openapi.json",
     docs_url=f"{API_V1_PREFIX}/docs",
     redoc_url=f"{API_V1_PREFIX}/redoc",
@@ -44,9 +49,6 @@ app = FastAPI(
 
 settings = get_settings()
 
-# CORS: nunca "*" con credenciales. Esta app no usa cookies/autenticación de
-# sesión, así que allow_credentials queda explícitamente en False (decisión
-# DEDUCIBLE, sin sección numerada que lo determine — ver cierre del Módulo 1).
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -61,6 +63,33 @@ async def request_context_middleware(request: Request, call_next):
     """Genera request_id/start_time ANTES de cualquier validación posterior."""
     request.state.request_id = str(uuid.uuid4())
     request.state.start_time = time.perf_counter()
+    declared_size = request.headers.get("content-length")
+    if request.method in {"POST", "PUT", "PATCH"} and declared_size is not None:
+        try:
+            oversized = int(declared_size) > 1024 * 1024
+        except ValueError:
+            oversized = False
+        if oversized:
+            return JSONResponse(
+                status_code=413,
+                content={"success": False, "request_id": request.state.request_id,
+                         "error_code": "PAYLOAD_TOO_LARGE",
+                         "error_message": "El cuerpo de la solicitud supera el límite de 1 MiB."},
+                headers={"X-Request-ID": request.state.request_id},
+            )
+    if request.method in {"POST", "PUT", "PATCH"} and declared_size is None:
+        body = bytearray()
+        async for chunk in request.stream():
+            body.extend(chunk)
+            if len(body) > 1024 * 1024:
+                return JSONResponse(
+                    status_code=413,
+                    content={"success": False, "request_id": request.state.request_id,
+                             "error_code": "PAYLOAD_TOO_LARGE",
+                             "error_message": "El cuerpo de la solicitud supera el límite de 1 MiB."},
+                    headers={"X-Request-ID": request.state.request_id},
+                )
+        request._body = bytes(body)
     response = await call_next(request)
     response.headers["X-Request-ID"] = request.state.request_id
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -80,6 +109,8 @@ async def request_context_middleware(request: Request, call_next):
     return response
 
 
+app.add_middleware(DisconnectTrackingMiddleware)
+
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(TimeoutError, timeout_exception_handler)
 app.add_exception_handler(Exception, generic_exception_handler)
@@ -89,12 +120,9 @@ app.include_router(evaluate.router, prefix=API_V1_PREFIX)
 app.include_router(algebra.router, prefix=API_V1_PREFIX)
 app.include_router(calculus.router, prefix=API_V1_PREFIX)
 app.include_router(matrices.router, prefix=API_V1_PREFIX)
+app.include_router(matrix_spaces.router, prefix=API_V1_PREFIX)
 app.include_router(graphing.router, prefix=API_V1_PREFIX)
 app.include_router(phase2.router, prefix=API_V1_PREFIX)
 app.include_router(statistics.router, prefix=API_V1_PREFIX)
-# Fase E/F de Track A (spec_edo_complejos_teclado.md) — integrado sobre la
-# base de Track B/C ya en curso, siguiendo el protocolo defensivo del
-# mapa de coordinación (sección 4): estos dos routers son exclusivos de
-# Track A, sin fricción con B/C.
 app.include_router(ode.router, prefix=API_V1_PREFIX)
 app.include_router(complex_analysis.router, prefix=API_V1_PREFIX)

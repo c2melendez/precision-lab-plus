@@ -39,7 +39,10 @@ def _error(
 
 def _safe_latex(expr: sympy.Expr) -> Optional[str]:
     try:
-        return sympy.latex(expr)
+        latex = sympy.latex(expr)
+        # Precision Lab reserva \\log para base 10 y usa \\ln para el
+        # logaritmo natural. SymPy serializa log natural como \\log.
+        return latex.replace(r"\log", r"\ln")
     except ValueError:
         return None
 
@@ -114,6 +117,14 @@ async def integral(payload: IntegralRequest, request: Request) -> MathResponse:
         return _error(request, OperationType.INTEGRAL, ErrorCode.COMPLEXITY_LIMIT, str(exc))
     except integral_service.UnsupportedInfiniteBoundsError as exc:
         return _error(request, OperationType.INTEGRAL, ErrorCode.UNSUPPORTED_IN_PHASE_1, str(exc))
+
+    # SY-X-12: a formal Integral is not an antiderivative. Do not append
+    # '+ C' or present it as successful elementary integration.
+    if not result.is_definite and result.antiderivative.has(sympy.Integral):
+        return _error(
+            request, OperationType.INTEGRAL, ErrorCode.UNSUPPORTED_OPERATION,
+            "Sin forma elemental identificada; la integral permanece sin resolver.",
+        )
 
     warnings = list(result.warnings)
 

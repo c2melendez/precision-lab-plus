@@ -233,6 +233,29 @@ function detectDerivative(latex: string): Extract<CalculusIntent, { kind: "deriv
   return { kind: "derivative", variable, order: order as 1 | 2 | 3 | 4 | 5, innerLatex };
 }
 
+// IN625 E1a: también se acepta la notación operatoria sin paréntesis
+// explícitos, por ejemplo \\frac{d}{dx}x^{2} o \\frac{d}{dx}\\sin x.
+// Se restringe a una expresión completa que empiece por d/d<variable>.
+const BARE_DERIVATIVE_PREFIX = /^\\frac\{d(?:\^\{?(\d)\}?)?\}\{d([a-zA-Z])(?:\^\{?\d\}?)?\}(.+)$/s;
+
+function detectBareDerivative(
+  latex: string,
+): Extract<CalculusIntent, { kind: "derivative" }> | null {
+  const trimmed = latex.trim();
+  const m = BARE_DERIVATIVE_PREFIX.exec(trimmed);
+  if (!m) return null;
+  const order = m[1] ? Number(m[1]) : 1;
+  if (order < 1 || order > 5) return null;
+  const innerLatex = m[3].trim();
+  if (!innerLatex || innerLatex.startsWith("\\left(")) return null;
+  return {
+    kind: "derivative",
+    variable: m[2],
+    order: order as 1 | 2 | 3 | 4 | 5,
+    innerLatex,
+  };
+}
+
 const PARTIAL_DERIVATIVE_PREFIX = /^\\frac\{\\partial\}\{\\partial\s*([a-zA-Z])\}\\left\(/;
 
 function detectPartialDerivative(
@@ -265,8 +288,34 @@ function getComputeEngine(): ComputeEngine {
 }
 
 function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integral" }> | null {
-  const trimmed = latex.trim();
+  const trimmed = latex
+    .trim()
+    .replace(/\\displaystyle/g, "")
+    .replace(/\\differentialD\s*([A-Za-z])/g, "\\,d$1")
+    .replace(/\\mathrm\{d\}\s*([A-Za-z])/g, "\\,d$1");
   if (trimmed.length === 0) return null;
+
+  // IN625 E1c: escáner propio para las formas canónicas de integral.
+  // Permite variable arbitraria y límites finitos simbólicos (ej. pi),
+  // que el MathJSON de Compute Engine no siempre conserva como números.
+  const canonical = trimmed.match(
+    /^\\int(?:_(?:\{([^{}]+)\}|([^\s^]+))\^(?:\{([^{}]+)\}|([^\s]+)))?\s*(.*?)\s*(?:\\,)?d([A-Za-z])$/s,
+  );
+  if (canonical) {
+    const lower = canonical[1] ?? canonical[2] ?? null;
+    const upper = canonical[3] ?? canonical[4] ?? null;
+    const innerLatex = canonical[5].trim();
+    const variable = canonical[6];
+    if (!innerLatex) return null;
+    if ((lower === null) !== (upper === null)) return null;
+    return {
+      kind: "integral",
+      variable,
+      lowerBound: lower,
+      upperBound: upper,
+      innerLatex,
+    };
+  }
 
   let expr;
   try {
@@ -320,13 +369,14 @@ function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integra
  * lateral a mano sigue cayendo a "no reconocido" y el usuario puede usar
  * LimitMode.tsx, que siempre soportó dirección vía su propio selector.
  */
-const LATERAL_LIMIT = /^\\lim_\{\s*([a-zA-Z])\s*\\to\s*(.+?)\s*\^\{\s*([+-])\s*\}\s*\}(.+)$/s;
+const LATERAL_LIMIT = /^\\lim_\{\s*([a-zA-Z])\s*\\to\s*(.+?)\s*\^(?:\{\s*([+-])\s*\}|([+-]))\s*\}(.+)$/s;
 
 function detectLateralLimit(latex: string): Extract<CalculusIntent, { kind: "limit" }> | null {
   const trimmed = latex.trim();
   const m = LATERAL_LIMIT.exec(trimmed);
   if (!m) return null;
-  const [, variable, pointLatex, sign, innerLatex] = m;
+  const [, variable, pointLatex, signBraced, signBare, innerLatex] = m;
+  const sign = signBraced ?? signBare;
   if (innerLatex.trim().length === 0) return null;
 
   // El punto puede venir como número, o como \infty (mismo criterio que
@@ -395,9 +445,12 @@ function detectLimit(latex: string): Extract<CalculusIntent, { kind: "limit" }> 
  * (más barato, solo regex); integral y límite comparten el mismo motor
  * de reconocimiento (Compute Engine). */
 export function detectCalculusIntent(latex: string): CalculusIntent | null {
+  // IN625 E1b: variantes tipográficas equivalentes del contrato.
+  latex = latex.replace(/\\displaystyle/g, "").replace(/\\rightarrow/g, "\\to");
   return (
     detectPartialDerivative(latex) ??
     detectDerivative(latex) ??
+    detectBareDerivative(latex) ??
     detectODE(latex) ??
     detectResidue(latex) ??
     detectSingularities(latex) ??

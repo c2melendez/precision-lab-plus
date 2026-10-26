@@ -111,14 +111,11 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
       });
     });
 
-    // Bug real encontrado al verificar contra el paquete instalado
-    // (0.58.0): la notación lateral da MathJSON sin sentido
-    // (PseudoInverse/Superminus de un Error), no un punto+dirección
-    // utilizable. Se verifica que NO se detecte como límite en vez de
-    // fabricar un resultado con datos rotos — cae al flujo normal
-    // (probablemente /evaluate, que fallará con un error claro).
-    it("NO detecta límite lateral escrito a mano sin llaves en el exponente (notación rota en Compute Engine 0.58.0 para esta forma)", () => {
-      expect(detectCalculusIntent("\\lim_{x\\to 0^+} \\frac{1}{x}")).toBeNull();
+    // El detector dedicado de límites laterales valida el texto LaTeX antes
+    // de recurrir a Compute Engine: las formas con o sin llaves conservan
+    // el punto y la dirección. Ambas son válidas para el contrato de entrada.
+    it("detecta límite lateral derecho sin llaves en el exponente", () => {
+      expect(detectCalculusIntent("\\lim_{x\\to 0^+} \\frac{1}{x}")).toEqual({ kind: "limit", variable: "x", point: "0", innerLatex: "\\frac{1}{x}", direction: "right" });
     });
 
     // Corrección post-auditoría (hallazgo de paridad Lite/Full): la tecla
@@ -147,8 +144,8 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
       });
     });
 
-    it("NO detecta límite lateral izquierdo (notación rota en esta versión del motor)", () => {
-      expect(detectCalculusIntent("\\lim_{x\\to 0^-} \\frac{1}{x}")).toBeNull();
+    it("detecta límite lateral izquierdo sin llaves en el exponente", () => {
+      expect(detectCalculusIntent("\\lim_{x\\to 0^-} \\frac{1}{x}")).toEqual({ kind: "limit", variable: "x", point: "0", innerLatex: "\\frac{1}{x}", direction: "left" });
     });
   });
 
