@@ -436,3 +436,9 @@
 - Playwright E2E SUCCESS en `9acc0bff` (40155180977) y `73be7940` (40154343463); se cierra la reconciliación pendiente de r304.
 - S19 acceptance sin cambio (BLOCKED por decisión de contrato); no se repiten gates.
 - Siguiente acción en `continuity.json` r307.
+
+## 2026-10-26 UTC — r308: IDs de publicación y evidencia S25/Playwright
+
+- `operation=docs` publicó r307: run 40286743228 (dry-run 40286675700), base `bef07d86`, commits `53279df3` + `b0eccc4b`.
+- Playwright SUCCESS en `9acc0bff` (40155180977) y `73be7940` (40154343463).
+- S25 SUCCESS en 061e9110/9acc0bff/73be7940/3697ac9b; permanece BLOCKED por condición de aceptación explícita. S19 BLOCKED por contrato.

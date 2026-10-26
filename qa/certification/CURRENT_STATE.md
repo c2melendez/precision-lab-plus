@@ -929,3 +929,10 @@ Ver r252.
 - **S19 acceptance** sigue **BLOCKED**: 122 supervivientes focalizados clasificados y 912 completos como inventario; requiere decisión explícita de contrato o cambio de alcance. No se lanza otro run S19.
 - **Estado.** SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; H2-SG28-DIST-01..08 BLOCKED; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; SY-P-23 CLOSED; PR #29 OPEN/DRAFT; certificación global OPEN.
 - **Siguiente acción.** Obtener decisión contractual sobre S19 o un cambio de insumo; no repetir gates verdes.
+
+## 2026-10-26 UTC — r308: evidencia de publicación y estado vigente de S25/Playwright
+
+- **Publicación real con `operation=docs`.** Run [40286743228](https://github.com/c2melendez/precision-lab-plus/actions/runs/40286743228) **SUCCESS** (dry-run [40286675700](https://github.com/c2melendez/precision-lab-plus/actions/runs/40286675700)), base `bef07d86`, commits `53279df3` (documentación) y `b0eccc4b` (registro), registro `qa/certification/runner/40286743228.json`.
+- **Playwright exacto.** [40155180977](https://github.com/c2melendez/precision-lab-plus/actions/runs/40155180977) SUCCESS en `9acc0bff`; [40154343463](https://github.com/c2melendez/precision-lab-plus/actions/runs/40154343463) SUCCESS en `73be7940`.
+- **S25 vigente.** El gate S25 pasó en `061e9110` ([40270160118](https://github.com/c2melendez/precision-lab-plus/actions/runs/40270160118)), `9acc0bff` (40155180899), `73be7940` (40154343356) y `3697ac9b` (40156332163); el gate de dependencias pasó en `73be7940` ([40154340922](https://github.com/c2melendez/precision-lab-plus/actions/runs/40154340922)). No se cierra **SECURITY-S25**: su condición de salida exige aceptación explícita; permanece BLOCKED.
+- **S19 acceptance** sigue BLOCKED por decisión contractual. **Siguiente acción:** obtener esa decisión o un cambio de insumo; no repetir gates verdes.
