@@ -70,3 +70,11 @@ Para comunicar una interpretación matemática inequívoca, solicitar paréntesi
 - Decisiones de Carlos (05:04 UTC): desambiguación obligatoria solo para la entrada exacta `a/bc` o `\frac{a}{bc}`; sin detector general de ambigüedad; XFAIL de `b` y `c` separadas en Plus aceptado como limitación documentada, no convertido en PASS.
 - Evidencia: Bloqueo exacto en frontend/src/components/BasicMode.tsx (commit 941ae5a), presente en HEAD QA 061e911. Último H1d y cumulative verdes registrados: 38247671320 y 38247671293 sobre SHA fd55b41. XFAIL estricto test_syp_23_separate_b_c_substitutions_pending conservado.
 - Estado: **OPEN, ACCEPTED_PENDING_CI**. El cierre se registrará solo cuando cumulative y H1d estén verdes en el commit de registro, con IDs de run.
+
+## 2026-10-26 — Cierre de SY-P-23 bajo `2026-10-26-sy-p-23-exact-block-v1`
+- cumulative: runner `40273057947` → gate `40273073450`, **success**, sobre base `0fa0625`.
+- h1d: runner `40273483681` → gate `40273499483`, **success**, sobre base `af9f38e`.
+- Criterios de salida: convención decidida (opción 3); bloqueo exacto presente en ambos frontends; casos numéricos discriminantes existentes; cumulative y H1d verdes con IDs registrados.
+- Limitación aceptada: XFAIL estricto de `b` y `c` separadas en Plus; no se convierte en PASS.
+- La certificación global sigue OPEN.
+
