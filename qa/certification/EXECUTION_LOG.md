@@ -492,3 +492,13 @@
 - No se encontró la fuente primaria `matriz_entrada_sintaxis_calculadora.md` en la rama canónica ni en el resultado de búsqueda de biblioteca. No inventar vectores para EN-SG-02/04/05/06/07/25/27/32; recuperar la fuente antes de fijarlos. EN-SG-25 solo debe probarse en CI aislado con presupuesto CPU; nunca en producción.
 - Se añadió la ruta de este informe a `prose_only_paths`; la auditoría y el índice no deben alterar la huella técnica. SHA técnico base permanece `676f36ed2ca9566f5b37d27dd4c4f43065133f82`. Certificación global OPEN; SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; SG28 distribuido OUT_OF_SCOPE_SINGLE_HOST.
 - Siguiente acción única: **H2-EN-SG-GAP-TEST-FIRST-R315** — recuperar fuente primaria, cerrar contradicción EN-SG-21 y escribir únicamente las regresiones confirmadas y aisladas. No despachar gates por la actualización documental.
+
+
+## 2026-10-26 UTC — r316: fuente H2 recuperada y SG28 E2E reconciliado
+
+- Playwright Plus run 40374409444, job 121753422799, SHA f2a8f9877d8a1b1cde9bf074abbe75b475258913: SUCCESS, 627 tests generales + 21 SG28, de los cuales 7 escenarios se ejecutaron en desktop/tablet/mobile. EN-SG-28 queda PASS_SCOPED single-host, no aceptación distribuida.
+- Recuperada la fuente primaria H.2 del ZIP corregido: legacy_sources/matriz_entrada_sintaxis_calculadora(2).md, SHA-256 58fbc0ed04aef158148981fc28074d470e45ec07a67604f89b3847b55c625528. Extracto versionado en PR #36; su CI aún está en curso.
+- PR #36, SHA 8bb1049380f285e2cdadb4d7c274759f34ea4f86, añade regresiones acotadas para EN-SG-21/25/26/27 y E2E para EN-SG-01..07. Runs iniciados automáticamente: cumulative 40379627790, Playwright 40379628110 y gates adicionales S25/S19/H1*/S17/S18/S20/S21/S23/Syntax. No se despacharon manualmente ni se cancelan; recopilar logs tras su conclusión.
+- EN-SG-32 es N/A_CONDITIONAL para el código de aplicación observado: backend/app/main.py no configura un rate limiter. Reabrir si hay evidencia de límite externo de Render/proxy.
+- EN-SG-21 sigue en conflicto contractual: matriz pide 10 000 términos y el endpoint restringe a 500 caracteres. La prueba añadida solo confirma rechazo controlado, no valor 10000.
+- Siguiente acción única: H2-EN-SG-TESTS-PR36-VERIFY-R316. Global OPEN; SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; SG28 distribuido OUT_OF_SCOPE_SINGLE_HOST.

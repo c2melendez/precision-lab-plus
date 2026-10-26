@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 315,
+  "revision": 316,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -52,9 +52,9 @@
     }
   },
   "next_action": {
-    "id": "H2-EN-SG-GAP-TEST-FIRST-R315",
-    "status": "READY",
-    "action": "Resolver o recuperar la fuente primaria matriz_entrada_sintaxis_calculadora.md (H.2) y fijar los vectores/umbrales faltantes sin inventarlos. Luego añadir pruebas test-first aisladas para los gaps confirmados EN-SG-25 (factorial con CPU budget), EN-SG-26 (expansión 10000), EN-SG-27 (vector original), EN-SG-32 (umbral exacto) y casos frontend EN-SG-02/04/05/06/07. Resolver formalmente EN-SG-21 porque 10000 términos contradicen el límite del request de 500 caracteres. Reutilizar evidencia exacta ya registrada; no relanzar cumulative/H1d ni activar cargas en producción. Mantener global OPEN y los bloqueos existentes."
+    "id": "H2-EN-SG-TESTS-PR36-VERIFY-R316",
+    "status": "WAIT",
+    "action": "Verificar las conclusiones de los workflows activados por el único commit técnico de PR #36, SHA 8bb1049380f285e2cdadb4d7c274759f34ea4f86. En particular cumulative 40379627790 y Playwright 40379628110, más gates S25/S19/H1 reentry activados por el propio PR. No relanzar gates: consultar sus jobs/logs; corregir solo fallos reproducibles de los tests nuevos. Cuando todos terminen, actualizar EN_SG_CASE_EVIDENCE_AUDIT_R315.md y continuidad con las conclusiones exactas. Mantener EN-SG-21 bloqueado por incompatibilidad con max_length=500, no declarar PASS hasta validar resultados, y preservar global OPEN y los bloqueos existentes."
   },
   "blockers": [
     {
@@ -3590,9 +3590,21 @@
       "job_id": 121753422799,
       "tested_sha": "f2a8f9877d8a1b1cde9bf074abbe75b475258913",
       "status_at_audit": "in_progress",
-      "counts_as_pass": false
+      "counts_as_pass": false,
+      "status": "success",
+      "counts": {
+        "general_passed": 627,
+        "sg28_passed": 21
+      },
+      "conclusion": "success"
     },
-    "source_matrix_status": "Not found in the canonical GitHub branch; Library search did not surface the original matrix file",
+    "source_matrix_status": {
+      "status": "RECOVERED_EXTRACT_PENDING_CI",
+      "original_archive": "Precision_Lab_Certification_HANDOFF_ACTIVE_v0_3_CONTINUED_14_2026-10-07_CORRECTED.zip",
+      "original_path": "legacy_sources/matriz_entrada_sintaxis_calculadora(2).md",
+      "sha256": "58fbc0ed04aef158148981fc28074d470e45ec07a67604f89b3847b55c625528",
+      "extract_pr": "https://github.com/c2melendez/precision-lab-plus/pull/36"
+    },
     "confirmed_gaps": [
       "EN-SG-02",
       "EN-SG-04",
@@ -3601,8 +3613,7 @@
       "EN-SG-07",
       "EN-SG-21",
       "EN-SG-25",
-      "EN-SG-27",
-      "EN-SG-32"
+      "EN-SG-27"
     ],
     "partial": [
       "EN-SG-01",
@@ -3615,7 +3626,8 @@
     ],
     "scoped_pass": [
       "EN-SG-23",
-      "EN-SG-24"
+      "EN-SG-24",
+      "EN-SG-28"
     ],
     "fully_tested": [
       "EN-SG-09",
@@ -3633,6 +3645,21 @@
       "EN-SG-30",
       "EN-SG-31"
     ],
-    "global_certification": "OPEN"
+    "global_certification": "OPEN",
+    "conditional_not_applicable": [
+      "EN-SG-32: no app-level rate limiter is configured in backend/app/main.py; reopen only if external proxy/platform rate limiting is evidenced"
+    ],
+    "next_validation": {
+      "pr_url": "https://github.com/c2melendez/precision-lab-plus/pull/36",
+      "head_sha": "8bb1049380f285e2cdadb4d7c274759f34ea4f86",
+      "in_progress_runs": [
+        40379627790,
+        40379628110,
+        40379627901,
+        40379628199,
+        40379627985
+      ],
+      "note": "Do not dispatch or rerun these gates; collect exact conclusions/jobs and update per-case states."
+    }
   }
 }
