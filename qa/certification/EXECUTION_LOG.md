@@ -429,3 +429,10 @@
 - **Lectura de alcance:** los 912 supervivientes completos son inventario documentado, no objetivo. El alcance `focused` sigue **congelado en 122** supervivientes clasificados. La campaña completa no cambia esa decisión: sus 49 kills transferibles ya están cubiertos por los tests de `backend/tests/` y los supervivientes restantes están fuera del contrato observable.
 - **Matriz de PR en `9acc0bff`:** 16 de 17 workflows **SUCCESS** (AA229, CI, A1–D, cumulative, H1a–H1d, native syntax, S17, S18, S19, S20, S21, S23, S25); Playwright seguía en progreso al escribir este corte y no se declara verde hasta reconciliarlo. El run S19 [40155181008](https://github.com/c2melendez/precision-lab-plus/actions/runs/40155181008) clasificó el commit como `docs-only` y omitió `plus-backend-mutmut`, como estaba previsto. Este push documental vuelve a despachar la matriz de PR; no se persigue esa cascada.
 - **Estado de bloqueos sin cambios:** S19 acceptance **BLOCKED** (122 focalizados clasificados; 912 completos como inventario), SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, SY-P-23 OPEN, PR #29 OPEN/DRAFT, certificación global OPEN.
+
+## 2026-10-26 UTC — r307: runner v3 docs y reconciliación de Playwright
+
+- PR #32 (`ci/runner-v3-docs`) fusionado en `main`: merge `903e44acba68c95026abc22f06bf482b207d7bad`; paridad con Lite (blob `23e42cf6dad30b281036cbbb63eff938c6646fde`).
+- Playwright E2E SUCCESS en `9acc0bff` (40155180977) y `73be7940` (40154343463); se cierra la reconciliación pendiente de r304.
+- S19 acceptance sin cambio (BLOCKED por decisión de contrato); no se repiten gates.
+- Siguiente acción en `continuity.json` r307.

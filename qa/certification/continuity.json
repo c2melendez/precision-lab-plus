@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 306,
+  "revision": 307,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "ab2204258d21bddb9a5baf7664f62c7f96245182",
@@ -51,9 +51,9 @@
     }
   },
   "next_action": {
-    "id": "PLUS-S19-EQUIVALENCE-REVIEW-R304",
+    "id": "PLUS-S19-EQUIVALENCE-REVIEW-R307",
     "status": "WAITING_ON_CONTRACT_DECISION",
-    "action": "Decisión registrada en r304: la campaña completa se re-ejecutó sobre 73be7940 en el gate de dependencias 40154340922 (job 121052752170, artefacto 12583639759) con 2,363 killed / 912 survived / 13 timeout / 14 sin tests, +49 killed y 0 regresiones frente a r301. Los mutantes 16 y 17 de _radical_cases_result sobreviven en la campaña completa con el mismo comando de pruebas, confirmando que son dependientes de orden. El alcance focused sigue congelado en 122 supervivientes clasificados y no se lanza otro run S19. Siguiente paso: reconciliar el resultado de Playwright en 9acc0bff cuando termine y conservar la evidencia; no repetir gates verdes. Para desbloquear S19 se requiere una decisión explícita de aceptación de equivalencias o un cambio de contrato/alcance; no se declara PASS por pruebas estructurales. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, SY-P-23 OPEN, PR #29 OPEN/DRAFT y certificación global OPEN."
+    "action": "Runner v3 con operación docs desplegado en main (PR #32, merge 903e44ac) con paridad Lite/Plus. Playwright reconciliado: SUCCESS en 9acc0bff (40155180977) y 73be7940 (40154343463). S19 acceptance sigue BLOCKED: 122 focused y 912 completos clasificados; requiere decisión explícita de aceptación de equivalencias o cambio de contrato/alcance, no otro run. Mantener SECURITY-S25 BLOCKED (sin reintento hasta cambio de dependencia/advisory), ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST-01..08 BLOCKED, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, SY-P-23 CLOSED, PR #29 OPEN/DRAFT y certificación global OPEN."
   },
   "blockers": [
     {
