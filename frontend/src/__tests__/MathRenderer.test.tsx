@@ -35,4 +35,15 @@ describe("MathRenderer", () => {
     expect(container.textContent).toBe(payload);
     expect(screen.getByText(payload)).toBeInTheDocument();
   });
+
+  it("EN-SG-03 (literal original H.2): x^{2}\\text{<b>hola</b>} se muestra sin interpretar HTML", () => {
+    const payload = "x^{2}\\\\text{<b>hola</b>}";
+    const { container } = render(<MathRenderer latex={payload} />);
+
+    // Literal de la matriz fuente; el texto interno no debe crear nodos HTML.
+    expect(container.querySelector("b")).toBeNull();
+    expect(container.querySelector("img, svg, script")).toBeNull();
+    expect(container.textContent).toBe(payload);
+    expect(screen.getByText(payload)).toBeInTheDocument();
+  });
 });
