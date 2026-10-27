@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 330,
+  "revision": 331,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -34,9 +34,9 @@
   "next_action": {
     "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
     "status": "IN_PROGRESS",
-    "action": "Plus CI 40602481512 has frontend Typecheck, Unit/parity and Production build SUCCESS; backend job is still validating the new EN-SG-08 probe-backed test. Runner fingerprint step passed on retry of run 40602481567 after restoring prose_only_paths. Lite Runner fingerprint/push summary also passed on retry of run 40602548307; Lite CI 40602548219 remains FAILURE at npm audit hard gate, with typecheck/unit/build skipped. Keep EN-SG-08 PENDING until backend tests complete. Last inspected security job 40601719418 was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. Global OPEN.",
+    "action": "Plus CI 40602481512 frontend and backend jobs both SUCCESS; probe-backed EN-SG-08 regression passed (file/process probes report no side effects for tested macros). Plus cumulative gate 40602481756 SUCCESS. Lite CI 40602548219 remains blocked at npm audit hard gate: 4 LOW advisories (deepmerge prototype poisoning GHSA-gcqx-w48m-w2h4 propagates through @rollup/plugin-node-resolve/workbox-build/vite-plugin-pwa; npm suggests a major-version downgrade to vite-plugin-pwa 0.2.1, not applied). Lite typecheck/unit/build were skipped. Lite cumulative gate 40602548264 SUCCESS but does not replace failed CI. Runner retries succeeded in both repos. Keep SECURITY-S25 BLOCKED because security job 40601719418 was SKIPPED. Global OPEN.",
     "previous_id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "updated_utc": "2026-10-27T23:35:00Z"
+    "updated_utc": "2026-10-27T23:40:00Z"
   },
   "blockers": [
     {
@@ -106,7 +106,8 @@
       "EN-SG-22",
       "EN-SG-29",
       "EN-SG-30",
-      "EN-SG-31"
+      "EN-SG-31",
+      "EN-SG-08"
     ],
     "gap": [
       "EN-SG-01",
@@ -115,7 +116,6 @@
       "EN-SG-05",
       "EN-SG-06",
       "EN-SG-07",
-      "EN-SG-08",
       "EN-SG-21",
       "EN-SG-23",
       "EN-SG-24",
@@ -125,11 +125,9 @@
       "EN-SG-28",
       "EN-SG-32"
     ],
-    "pending_execution": [
-      "EN-SG-08 probe-backed regression in Plus CI 40602481512 backend job"
-    ]
+    "pending_execution": []
   },
-  "ledger_note": "r330 motor-only. Plus CI 40602481512 frontend Typecheck/Unit-parity/Production build SUCCESS, backend pending on EN-SG-08 probe test. Plus Runner retry 40602481567 SUCCESS; Lite Runner retry 40602548307 SUCCESS after prose_only_paths restored. Lite CI 40602548219 FAILED at npm audit hard gate (typecheck/unit/build skipped). Last inspected security job 40601719418 SKIPPED, not PASS. Global OPEN.",
+  "ledger_note": "r331 motor-only. Plus CI 40602481512 frontend+backend SUCCESS; EN-SG-08 probe-backed backend test passed. Plus cumulative gate 40602481756 SUCCESS. Lite CI 40602548219 FAILED at hard npm audit gate (4 LOW vulnerabilities); typecheck/unit/build skipped. Lite cumulative gate 40602548264 SUCCESS but not substitute for CI. Runner retries both repos SUCCESS. SECURITY-S25 remains BLOCKED; global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
