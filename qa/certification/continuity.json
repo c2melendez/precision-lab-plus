@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 317,
+  "revision": 318,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -56,9 +56,9 @@
     }
   },
   "next_action": {
-    "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
+    "id": "COMPASS-BRIDGE-V1-1-PHASE2-R1",
     "status": "READY",
-    "action": "Construir la tabla de evidencia por caso EN-SG-01..32 (test, archivo, run/job por SHA exacto, PASS/FAIL/GAP/MANUAL) desde backend/tests/test_in625_h2_security.py, frontend/e2e/in625-h2-sg28-cancel.spec.ts, syntax309 SYX preflights, in625-syntax-native.spec.ts y los runs reales. Para cada GAP, comprobar primero si existe cobertura sin etiqueta; escribir pruebas test-first en Plus API para EN-SG-21, 23..27, 32 y en frontend para 01..08 solo si el GAP está confirmado. No ejecutar cargas extremas en producción. No activar SG28_EVALUATE_ISOLATION en producción; no repetir gates verdes. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, SG28-DIST OUT_OF_SCOPE_SINGLE_HOST, PR #29 OPEN/DRAFT y certificación global OPEN."
+    "action": "Prioridad P0: verificar en modo solo lectura que Cert Runner Compass despliega la corrección f051a4b1 o una posterior con tratamiento correcto de HTTP 204 y clasificación de rechazos definitivos vs inciertos. No usar GET /api/run. Si se confirma, iniciar B3 autorizado con una sola solicitud idempotente a lite/h1d/dry_run=true; registrar idempotency_id, status_url y conteos de runs antes/después. No reenviar ante 409/error de red/DISPATCH_OUTCOME_UNKNOWN; consultar estado por lectura. Continuar B4/B5, B6 y C1-C3 en orden. La certificación global permanece OPEN."
   },
   "blockers": [
     {
@@ -3599,5 +3599,77 @@
       "no_synthetic_commits": true,
       "reuse_only_if_same_sha_fingerprint_acceptance_and_configuration": true
     }
+  },
+  "bridge_certification_compass_v1_1": {
+    "as_of_utc": "2026-10-27",
+    "status": "OPEN_NOT_CERTIFIED",
+    "architecture": {
+      "bridge": "Cert Runner Compass / Lovable project 57b9141d-9f69-4fef-9b7f-0f81f2eaec2f",
+      "persistence": "Lovable Cloud; not Supabase oqlzftercvraprnvjifo",
+      "runner": "GitHub Actions certification-runner.yml in Lite/Plus",
+      "readonly_api": "precision-lab-readonly-api on Render; GET-only, separate credentials"
+    },
+    "phase1": {
+      "status": "PASS_NO_RUNS",
+      "tests": [
+        "A1",
+        "A2",
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "B1",
+        "B2a",
+        "B2b"
+      ],
+      "passed": 9,
+      "runner_runs_created": 0,
+      "gate_runs_created": 0,
+      "simulated_passes": [
+        "E1",
+        "E4"
+      ],
+      "runner_baseline_lite_before_after": 26,
+      "baseline_is_historical_not_current": true
+    },
+    "fixes_reported": {
+      "idempotency_commit": "7b6ccae9",
+      "dispatch_classification_commit": "f051a4b1",
+      "deployment_reported_by_owner": true,
+      "independently_verified_deployment": false,
+      "tests_reported": 30,
+      "behaviors": [
+        "associate a run after GitHub HTTP 204 before finalizing",
+        "definite 401/403/404/422 rejections => GITHUB_DISPATCH_REJECTED_<status>",
+        "network/timeout/5xx => DISPATCH_OUTCOME_UNKNOWN"
+      ]
+    },
+    "blockers": [
+      "GET /api/run can dispatch and must not be used; disabling/restricting it remains pending",
+      "D1 read-only lookup by Idempotency-Key missing for POST failure before idempotency_id/status_url",
+      "D2 requires deliberately revoked test key",
+      "D3-D5 pending; D5 requires a real HTTP 204 and run association",
+      "E2/E3 depend on B3/B5; E5 requires review of real configured-GPT responses",
+      "Independently inspect deployed correction before first live POST",
+      "Runner YAML in Plus and defaultBranch source not yet reviewed"
+    ],
+    "authorization": {
+      "phase2_authorized_by_owner": true,
+      "received_utc_date": "2026-10-27",
+      "previous_run_cap_superseded": true,
+      "rationale": "Owner states Lite and Plus are public and have no run limit; still record and verify all runs, and prevent accidental/duplicate dispatches.",
+      "multi_day_20_run_campaign_in_v1_1": false
+    },
+    "immediate_next_action": "Read-only verification of deployed Compass fix; then B3 one controlled POST, record idempotency_id/status_url and pre/post run counts; continue B4/B5, B6, then C1-C3 in order.",
+    "latest_execution": {
+      "post_or_workflow_triggered_by_this_documentation_update": false,
+      "status": "DOCUMENTATION_UPDATE_ONLY",
+      "phase2_runs_started": false
+    }
+  },
+  "prior_math_next_action_deferred_2026_10_27": {
+    "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
+    "status": "READY",
+    "action": "Construir la tabla de evidencia por caso EN-SG-01..32 (test, archivo, run/job por SHA exacto, PASS/FAIL/GAP/MANUAL) desde backend/tests/test_in625_h2_security.py, frontend/e2e/in625-h2-sg28-cancel.spec.ts, syntax309 SYX preflights, in625-syntax-native.spec.ts y los runs reales. Para cada GAP, comprobar primero si existe cobertura sin etiqueta; escribir pruebas test-first en Plus API para EN-SG-21, 23..27, 32 y en frontend para 01..08 solo si el GAP está confirmado. No ejecutar cargas extremas en producción. No activar SG28_EVALUATE_ISOLATION en producción; no repetir gates verdes. Mantener SECURITY-S25 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, SG28-DIST OUT_OF_SCOPE_SINGLE_HOST, PR #29 OPEN/DRAFT y certificación global OPEN."
   }
 }
