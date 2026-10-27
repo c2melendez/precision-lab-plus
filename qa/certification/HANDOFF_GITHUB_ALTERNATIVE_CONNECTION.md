@@ -69,3 +69,19 @@ Como mínimo una validación integral satisfactoria por día de trabajo. Al inic
 - **D-04: aprobado.** Implementar `connection-smoke.yml` como dispatch-only, sin gate matemático. Orden obligatorio: primero la auditoría de D-01; después el smoke. Prueba Runner → resultado; no prueba Bridge completo ni idempotencia.
 - **Pendientes:** D-02, D-03, D-05 (cupo diario de Actions, requerido antes del smoke), D-06 (responsable de rotación de claves), D-07 (`correlation_id` en el Runner).
 - **Clave:** la `SERVICE_API_KEY` anterior fue revocada por el responsable; la nueva se configura en el servicio antes de cualquier validación.
+
+
+## Corte actualizado — Cert Runner Compass v1.1 (2026-10-27 UTC)
+
+> **Precedencia:** este corte actualiza el estado de la ruta ejecutora implementada como Cert Runner Compass. Corrige las frases históricas que indiquen que todavía no existe Bridge implementado. No cierra la certificación global ni sustituye la auditoría independiente de Supabase/D-01.
+
+- **Estado:** OPEN / NO CERTIFICADO. Fase 1: 9/9 OK sin runs (A1–A6, B1, B2a/B2b). E1 y E4 se aprobaron en simulación, sin enviar solicitudes. Total descriptivo: 11 comprobaciones/simulaciones aprobadas de ~20; no equivale a certificación.
+- **Arquitectura:** GPT/LLM → Cert Runner Compass (Lovable, proyecto `57b9141d-9f69-4fef-9b7f-0f81f2eaec2f`, `X-Bridge-Key` + `Idempotency-Key`) → GitHub Actions. Persistencia Compass en Lovable Cloud, **no** en Supabase `oqlzftercvraprnvjifo`. La API Render `precision-lab-readonly-api` es separada, GET-only y usa `X-API-Key`; no despacha workflows.
+- **Correcciones reportadas:** commit `7b6ccae9` (idempotencia durable, 27 pruebas) y `f051a4b1` (HTTP 204: localizar/asociar run; 401/403/404/422 como `GITHUB_DISPATCH_REJECTED_<status>`; red/timeout/5xx como `DISPATCH_OUTCOME_UNKNOWN`, 30 pruebas). El responsable dice que está desplegado; verificación independiente pendiente.
+- **Línea base histórica:** Lite tenía 26 runs antes y después de Fase 1. Último run previo citado: `40429625526`, push, success, 2026-10-27 00:57 UTC. No tratar el número 26 como conteo actual garantizado. Smoke temprano Lite/h1d: `409 DISPATCH_OUTCOME_UNKNOWN`; no se observaron runs nuevos desde 04:00 UTC en esa revisión (evidencia fuerte, no absoluta).
+- **Bloqueos:** no usar `GET /api/run` (puede despachar); desactivarlo/restringirlo sigue pendiente. D1: falta lookup read-only por `Idempotency-Key` si el POST falla antes de devolver ID/URL. D2 requiere clave de prueba deliberadamente revocada. D3–D5 pendientes; D5 requiere HTTP 204 real. E2/E3 dependen de B3/B5; E5 exige revisar respuestas reales del GPT. Pendiente leer runner YAML de Plus y el origen de `defaultBranch`. El runner de Lite ejecuta incluso con `dry_run=true`; `both` puede generar dos runs; SHA usado como ref puede dar 422, hipótesis aún no verificada.
+- **Decisión del responsable (2026-10-27):** continuar Fase 2; el tope previo de 3 runs runner + 1 gate queda sustituido como límite operativo porque los repositorios son públicos y sin ese límite. Aun así, contar runs pre/post y evitar dispatches accidentales/duplicados. Las 20 ejecuciones multi-día siguen fuera de v1.1.
+- **Secuencia:** verificación read-only del despliegue de `f051a4b1` o posterior; después B3 (un POST controlado, registrar `idempotency_id`, `status_url` y conteos), B4/B5, B6, C1 (un runner + un gate), C2/C3 y luego D/E según prerrequisitos. Ante 409, error de red o `DISPATCH_OUTCOME_UNKNOWN`, no reenviar; consultar estado por lectura. No declarar certificación hasta cerrar criterios A–E y registrar estados finales.
+- **Claves:** las expuestas previamente se consideran comprometidas y deben rotarse por el responsable. No escribir ni repetir valores reales.
+
+La suite v1.1 y el registro de Fase 1 recibidos el 2026-10-27 UTC son la base de este corte. Los registros previos permanecen como historia; este addendum prevalece para el estado actual de Compass.
