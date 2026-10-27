@@ -19,7 +19,7 @@
 |----|-------|--------------|-----------------|----------------|
 | EN-SG-01 | N1 | HTML script invalid/escape/no exec | No dedicated harness row | **GAP** |
 | EN-SG-02 | N1 | HTML image event | No dedicated harness row | **GAP** |
-| EN-SG-03 | N2 | Math text containing HTML → literal | Synthetic `img/onerror` regression in `frontend/src/__tests__/MathRenderer.test.tsx`; Plus CI `40597214760` unit/parity step passed after renderer guard commit `21eccd6ff4612afc73b78bfac816052de360c9ee`; exact original matrix literal still not recovered | **PARTIAL** (synthetic payload passes; exact-source criterion pending) |
+| EN-SG-03 | N2 | `x^{2}\\text{<b>hola</b>}` → literal, no bold/tags | Synthetic `img/onerror` regression plus exact-source regression in `frontend/src/__tests__/MathRenderer.test.tsx`; source `Matrices.zip` / `matriz_entrada_sintaxis_calculadora.md`, SHA-256 `58fbc0ed04aef158148981fc28074d470e45ec07a67604f89b3847b55c625528`; exact-source test commit `2e755ecdd8fef3536f8f4a7076aff961eea15cab`; Plus CI `40599001729` is IN_PROGRESS | **PARTIAL** (exact source now traced; CI evidence pending) |
 | EN-SG-04 | N2 | Unsafe LaTeX hyperlink | No dedicated harness row | **GAP** |
 | EN-SG-05 | N2 | URL/image/HTML macros blocked | No dedicated harness row | **GAP** |
 | EN-SG-06 | N2 | Recursive macro definition | No dedicated harness row | **GAP** |
@@ -52,10 +52,11 @@
 
 ## EN-SG-01..08 — test-first, no product change yet
 
-1. Locate original Part H.2 rows for exact inputs (project library matrix).
-2. For 01–04: frontend/render tests if browser-first; do not claim API coverage alone.
-3. For 05–08: parser rejection tests with audit hooks (`file_access_probe` / `process_launch_probe`) asserting zero open/exec attempts.
-4. Do not implement until exact matrix literals are versioned beside the test.
+1. Original Part H.2 source recovered from `Matrices.zip`: `matriz_entrada_sintaxis_calculadora.md`, SHA-256 `58fbc0ed04aef158148981fc28074d470e45ec07a67604f89b3847b55c625528`, rows EN-SG-01..32 at source lines 864–901.
+2. EN-SG-03 now has a regression using the exact original literal; Plus CI `40599001729` on SHA `2e755ecdd8fef3536f8f4a7076aff961eea15cab` must finish before classification changes.
+3. For 01–04: frontend/render tests if browser-first; do not claim API coverage alone.
+4. For 05–08: parser rejection tests with audit hooks (`file_access_probe` / `process_launch_probe`) asserting zero open/exec attempts.
+5. Do not implement other rows until their exact source literals and expectations are versioned beside their tests.
 
 ## Execution record — 2026-10-27
 
@@ -69,7 +70,7 @@
 
 - PARTIAL (existing API/harness evidence, including synthetic EN-SG-03): 17
 - GAP (unimplemented or not matrix-complete): 15
-- PENDING EXECUTION: 0
+- PENDING EXECUTION: 1 (EN-SG-03 exact-source frontend regression; Plus CI `40599001729` in progress)
 - Matrix-complete PASS: 0
 
-Next: recover the exact source-matrix literals before promoting EN-SG-03 or implementing EN-SG-01/02/04..08. The synthetic EN-SG-03 regression is verified by Plus CI, but remains PARTIAL until its exact source-matrix input and expected behavior are traced. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314` until evidence is reconciled. Security job in dependency/security workflow `40597214739` was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. No production stress tests.
+Next: exact H.2 source literals have been recovered and EN-SG-03's exact-source regression was committed at `2e755ecdd8fef3536f8f4a7076aff961eea15cab`; wait for Plus CI `40599001729` and inspect its Unit/parity step before classifying. Then implement tests for EN-SG-01/02/04..08 from source literals, only after checking existing coverage. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314`. Security job in dependency/security workflow `40597214739` was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. No production stress tests.
