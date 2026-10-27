@@ -56,7 +56,7 @@
 2. EN-SG-03 exact-source regression passed in Plus CI `40599001729` (typecheck, Unit/parity and production build all SUCCESS).
 3. For 01–04: frontend/render tests if browser-first; do not claim API coverage alone.
 4. For 05–08: parser rejection tests with audit hooks (`file_access_probe` / `process_launch_probe`) asserting zero open/exec attempts.
-5. Current frontend batch commit: `9d13cd39227839099c1809ddd2c4eeed32ee4842`; CI `40601412886` has Typecheck, Unit/parity and production build SUCCESS, backend job pending. Strengthen EN-SG-05 to assert `\\url` produces no anchor; do not claim EN-SG-08 PASS without file/process probes.
+5. Frontend test batch commit `9d13cd39227839099c1809ddd2c4eeed32ee4842` passed Typecheck, Unit/parity and production build in CI `40601412886`; backend job was still running. Follow-up commit `2db9e7b1d15c49b22299d4007cfda01959c67efc` strengthens EN-SG-04/05 by asserting no anchors at all; its CI must be inspected before promoting those cases. Do not claim EN-SG-08 PASS without file/process probes.
 
 ## Execution record — 2026-10-27
 
@@ -68,9 +68,9 @@
 
 ## Counts and next action
 
-- PARTIAL: 21 (including frontend-only evidence for EN-SG-01/02/04..07)
-- GAP: 8 (including EN-SG-08 and cases without sufficient matrix evidence)
-- PENDING EXECUTION: 1 (Plus CI `40601412886` backend job still running)
+- PARTIAL: 22 (including frontend-only evidence for EN-SG-01/02/04..07)
+- GAP: 9 (including EN-SG-08 and cases without sufficient matrix evidence)
+- PENDING EXECUTION: 1 (new Plus CI for commit `2db9e7b1d15c49b22299d4007cfda01959c67efc` queued/in progress)
 - Matrix-complete PASS: 1 (EN-SG-03 exact frontend behavior)
 
-Next: finish CI `40601412886`; strengthen EN-SG-05 with a no-anchor assertion; add file-access/process-launch probes for EN-SG-08; only then address Runner orchestration mismatches. Exact-source EN-SG-03 is PASS for frontend render behavior; global certification remains OPEN. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314`. Security job in dependency/security workflow `40597214739` was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. No production stress tests.
+Next: inspect CI for `2db9e7b1d15c49b22299d4007cfda01959c67efc`; add file-access/process-launch probes for EN-SG-08; only then address Runner orchestration mismatches. Exact-source EN-SG-03 is PASS for frontend render behavior; global certification remains OPEN. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314`. Security job in dependency/security workflow `40597214739` was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. No production stress tests.
