@@ -70,7 +70,7 @@
 
 - PARTIAL: 22 (including frontend-only evidence for EN-SG-01/02/04..07)
 - GAP: 8 (EN-SG-08 moved to pending execution; remaining cases lack sufficient matrix evidence)
-- PENDING EXECUTION: 2 (Plus CI `40601719487` completion and new SG08 probe-backed test CI)
+- PENDING EXECUTION: 1 (EN-SG-08 probe-backed backend regression; CI `40602481512` backend job in progress)
 - Matrix-complete PASS: 1 (EN-SG-03 exact frontend behavior)
 
 Next: inspect the SG08 probe-backed test run; the Runner now fingerprints push events and no longer exposes a misleading cross-repository `both` option. Cross-repository fan-out remains unimplemented; dispatch once per repository. Exact-source EN-SG-03 is PASS for frontend render behavior; global certification remains OPEN. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314`. Security job in dependency/security workflow `40597214739` was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. No production stress tests.
