@@ -24,7 +24,7 @@
 | EN-SG-05 | N2 | `\url`, `\includegraphics`, `\htmlClass`, `\htmlStyle` | Exact-input regressions assert no anchor or active HTML; follow-up commit `2db9e7b1d15c49b22299d4007cfda01959c67efc`; CI `40601719487` Unit/parity and production build SUCCESS, backend job pending | **PARTIAL** (frontend only; no file/process probe) |
 | EN-SG-06 | N2 | `\\def\\a{\\a}\\a` | Exact-input regression added; CI `40601412886` Unit/parity SUCCESS; no dedicated timeout/recovery assertion yet | **PARTIAL** |
 | EN-SG-07 | N2 | `\\newcommand`, `\\let`, `\\catcode` | Exact-input regressions added; CI `40601412886` Unit/parity SUCCESS; clear-error expectations not yet fully asserted | **PARTIAL** |
-| EN-SG-08 | N2 | `\\input`, `\\include`, `\\write18`, `\\openin` | Exact-input frontend regressions added; CI `40601412886` Unit/parity SUCCESS; file-access/process probes are not connected to these matrix rows | **GAP** (no file/exec probe evidence) |
+| EN-SG-08 | N2 | `\\input{/etc/passwd}`, `\\include{x}`, `\\write18{ls}`, `\\openin1=x` | Backend probe-backed test added in `backend/tests/test_in625_h2_security.py`, using `file_access_probe.py` and `process_launch_probe.py`; commit under validation | **PENDING EXECUTION** (CI required) |
 | EN-SG-09 | N3 | Python introspection/exec rejection | `test_in625_h2_rejects_python_constructs…` | **PARTIAL** (API reject) |
 | EN-SG-10 | N3 | Python file read rejection | same | **PARTIAL** |
 | EN-SG-11 | N3 | Python class introspection | same | **PARTIAL** |
@@ -69,8 +69,8 @@
 ## Counts and next action
 
 - PARTIAL: 22 (including frontend-only evidence for EN-SG-01/02/04..07)
-- GAP: 9 (including EN-SG-08 and cases without sufficient matrix evidence)
-- PENDING EXECUTION: 1 (Plus CI `40601719487` backend job still running)
+- GAP: 8 (EN-SG-08 moved to pending execution; remaining cases lack sufficient matrix evidence)
+- PENDING EXECUTION: 2 (Plus CI `40601719487` completion and new SG08 probe-backed test CI)
 - Matrix-complete PASS: 1 (EN-SG-03 exact frontend behavior)
 
-Next: finish CI `40601719487`; add file-access/process-launch probe assertions for EN-SG-08 using existing `backend/tests/file_access_probe.py` and `backend/tests/process_launch_probe.py`; then address Runner orchestration mismatches. Exact-source EN-SG-03 is PASS for frontend render behavior; global certification remains OPEN. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314`. Security job in dependency/security workflow `40597214739` was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. No production stress tests.
+Next: inspect the SG08 probe-backed test run; the Runner now fingerprints push events and no longer exposes a misleading cross-repository `both` option. Cross-repository fan-out remains unimplemented; dispatch once per repository. Exact-source EN-SG-03 is PASS for frontend render behavior; global certification remains OPEN. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314`. Security job in dependency/security workflow `40597214739` was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. No production stress tests.

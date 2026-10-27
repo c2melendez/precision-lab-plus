@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 327,
+  "revision": 328,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -34,9 +34,9 @@
   "next_action": {
     "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
     "status": "IN_PROGRESS",
-    "action": "Bridge parked. Exact H.2 source recovered from Matrices.zip. EN-SG-03 exact-source frontend test passed CI 40599001729. Frontend tests EN-SG-01..08 added in 9d13cd39227839099c1809ddd2c4eeed32ee4842 and no-anchor assertions tightened in 2db9e7b1d15c49b22299d4007cfda01959c67efc. Latest CI 40601719487 has Typecheck, Unit/parity and Production build SUCCESS; backend job still running. EN-SG-01/02/04..07 remain PARTIAL (frontend evidence only); EN-SG-08 GAP pending backend file/process probes (helpers already exist at backend/tests/file_access_probe.py and backend/tests/process_launch_probe.py but are not wired into H2 tests). Runner discrepancies: push fingerprint step does not run on push; target_repo=both does not fan out to other repo. Security job 40601719418 SKIPPED, not PASS; SECURITY-S25 BLOCKED. Global OPEN.",
+    "action": "Bridge parked. Plus exact-source EN-SG-03 test passed CI 40599001729. Exact frontend tests EN-SG-01..08 and no-anchor assertions passed Typecheck, Unit/parity and Production build in CI 40601719487; backend tests also completed SUCCESS. Added backend EN-SG-08 probe-backed rejection tests using existing file_access_probe.py and process_launch_probe.py; validate in new CI. Runner corrected: push now computes the documented cumulative fingerprint; target_repo options are scoped to current repo, avoiding false claim of cross-repo fan-out. To run both repos, dispatch separately in each. Security job 40601719418 was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. Global OPEN.",
     "previous_id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "updated_utc": "2026-10-27T23:27:00Z"
+    "updated_utc": "2026-10-27T23:30:00Z"
   },
   "blockers": [
     {
@@ -126,10 +126,9 @@
       "EN-SG-32"
     ],
     "pending_execution": [
-      "Plus CI 40601719487 backend job",
-      "Wire file-access/process-launch probes to EN-SG-08 H2 cases"
+      "Run CI for EN-SG-08 probe-backed backend tests and Runner fingerprint behavior"
     ]
   },
-  "ledger_note": "r327 motor-only scope. Plus CI 40601719487 Typecheck, Unit/parity and Production build SUCCESS; backend job pending. EN-SG-03 exact frontend PASS; EN-SG-01/02/04..07 frontend-only PARTIAL; EN-SG-08 GAP pending probe-backed backend tests. Probe helper files exist but are not wired into test_in625_h2_security.py. Security job 40601719418 SKIPPED, not PASS. Global OPEN.",
+  "ledger_note": "r328 motor-only scope, Bridge parked. Plus CI 40601719487 completed SUCCESS: frontend Typecheck, Unit/parity, Production build and backend tests all passed. Added EN-SG-08 tests using file/process audit probes; new CI pending. Runner push fingerprint corrected; target_repo scoped to local repo, no cross-repo fan-out. Security job 40601719418 SKIPPED, not PASS. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add."
 }

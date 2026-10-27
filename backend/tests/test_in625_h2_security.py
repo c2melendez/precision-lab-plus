@@ -6,6 +6,8 @@ not proof of browser escaping, sandboxing, or resource-limit behavior.
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+from tests.file_access_probe import forbid_target_read
+from tests.process_launch_probe import forbid_process_launch
 
 client = TestClient(app, raise_server_exceptions=False)
 
@@ -363,3 +365,24 @@ def test_in625_h2_sg29_twenty_concurrent_evaluations_are_isolated():
         assert body.get("request_id"), (index, body)
         ids.add(body["request_id"])
     assert len(ids) == 20, "Every concurrent response needs a unique request ID"
+
+
+@pytest.mark.parametrize("case_id, expression", [
+    ("EN-SG-08 input", r"\input{/etc/passwd}"),
+    ("EN-SG-08 include", r"\include{x}"),
+    ("EN-SG-08 write18", r"\write18{ls}"),
+    ("EN-SG-08 openin", r"\openin1=x"),
+])
+def test_in625_h2_sg08_file_and_shell_macros_are_rejected_without_side_effects(case_id, expression):
+    """SG08: unsupported file/shell macros must reject before any file read or process launch."""
+    with forbid_target_read() as file_attempts, forbid_process_launch() as process_attempts:
+        response = client.post(
+            "/api/v1/evaluate",
+            json={"expression": expression, "angle_unit": "rad"},
+        )
+    assert response.status_code == 200, (case_id, response.status_code, response.text[:200])
+    result = response.json()
+    assert result.get("success") is False, (case_id, result)
+    assert result.get("error_code") == "PARSE_ERROR", (case_id, result)
+    assert file_attempts == [], (case_id, file_attempts)
+    assert process_attempts == [], (case_id, process_attempts)
