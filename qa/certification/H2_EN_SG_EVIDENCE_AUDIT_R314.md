@@ -19,7 +19,7 @@
 |----|-------|--------------|-----------------|----------------|
 | EN-SG-01 | N1 | HTML script invalid/escape/no exec | No dedicated harness row | **GAP** |
 | EN-SG-02 | N1 | HTML image event | No dedicated harness row | **GAP** |
-| EN-SG-03 | N2 | `x^{2}\\text{<b>hola</b>}` → literal, no bold/tags | Synthetic `img/onerror` regression plus exact-source regression in `frontend/src/__tests__/MathRenderer.test.tsx`; source `Matrices.zip` / `matriz_entrada_sintaxis_calculadora.md`, SHA-256 `58fbc0ed04aef158148981fc28074d470e45ec07a67604f89b3847b55c625528`; exact-source test commit `2e755ecdd8fef3536f8f4a7076aff961eea15cab`; Plus CI `40599001729` is IN_PROGRESS | **PARTIAL** (exact source now traced; CI evidence pending) |
+| EN-SG-03 | N2 | `x^{2}\text{<b>hola</b>}` → literal, no bold/tags | Synthetic `img/onerror` regression plus exact-source regression in `frontend/src/__tests__/MathRenderer.test.tsx`; source `Matrices.zip` / `matriz_entrada_sintaxis_calculadora.md`, SHA-256 `58fbc0ed04aef158148981fc28074d470e45ec07a67604f89b3847b55c625528`; exact-source test commit `2e755ecdd8fef3536f8f4a7076aff961eea15cab`; Plus CI `40599001729` is IN_PROGRESS | **PARTIAL** (exact source now traced; CI evidence pending) |
 | EN-SG-04 | N2 | Unsafe LaTeX hyperlink | No dedicated harness row | **GAP** |
 | EN-SG-05 | N2 | URL/image/HTML macros blocked | No dedicated harness row | **GAP** |
 | EN-SG-06 | N2 | Recursive macro definition | No dedicated harness row | **GAP** |
