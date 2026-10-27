@@ -19,7 +19,7 @@
 |----|-------|--------------|-----------------|----------------|
 | EN-SG-01 | N1 | HTML script invalid/escape/no exec | No dedicated harness row | **GAP** |
 | EN-SG-02 | N1 | HTML image event | No dedicated harness row | **GAP** |
-| EN-SG-03 | N2 | Math text containing HTML → literal | `frontend/src/__tests__/MathRenderer.test.tsx`, regression added in commit `58a395306cf90bfee81c2e5ae79c58ebf3105a85`; CI execution not yet verified | **PENDING EXECUTION** |
+| EN-SG-03 | N2 | Math text containing HTML → literal | Synthetic `img/onerror` regression in `frontend/src/__tests__/MathRenderer.test.tsx`; Plus CI `40597214760` unit/parity step passed after renderer guard commit `21eccd6ff4612afc73b78bfac816052de360c9ee`; exact original matrix literal still not recovered | **PARTIAL** (synthetic payload passes; exact-source criterion pending) |
 | EN-SG-04 | N2 | Unsafe LaTeX hyperlink | No dedicated harness row | **GAP** |
 | EN-SG-05 | N2 | URL/image/HTML macros blocked | No dedicated harness row | **GAP** |
 | EN-SG-06 | N2 | Recursive macro definition | No dedicated harness row | **GAP** |
@@ -67,9 +67,9 @@
 
 ## Counts and next action
 
-- PARTIAL (existing API/harness evidence): 16
+- PARTIAL (existing API/harness evidence, including synthetic EN-SG-03): 17
 - GAP (unimplemented or not matrix-complete): 15
-- PENDING EXECUTION: 1 (EN-SG-03)
+- PENDING EXECUTION: 0
 - Matrix-complete PASS: 0
 
-Next: inspect CI for corrective Plus commit `21eccd6ff4612afc73b78bfac816052de360c9ee`; verify EN-SG-03 passes and backend job completes. Then continue EN-SG-01/02/04..08 using exact source-matrix literals. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314` until evidence is reconciled. Parallel candidate: SECURITY-S25 only with local npm.
+Next: inspect CI for corrective Plus commit `21eccd6ff4612afc73b78bfac816052de360c9ee`; verify EN-SG-03 passes and backend job completes. The Plus CI run `40597214760` has the unit/parity step green, but the frontend job's production build and backend tests were still in progress at last inspection. Recover the exact source-matrix literals before promoting EN-SG-03 or implementing EN-SG-01/02/04..08. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314` until evidence is reconciled. Parallel candidate: SECURITY-S25 only with local npm.
