@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 315,
+  "revision": 316,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -24,7 +24,9 @@
     "qa/certification/EDCX_B6_ADAPTER_ORACLE_PLAN.md",
     "qa/certification/S19_BACKEND_MUTATION_REVIEW_R288.md",
     "qa/certification/S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md",
-    "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md"
+    "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md",
+    "qa/certification/HANDOFF_GITHUB_ALTERNATIVE_CONNECTION.md",
+    "qa/certification/ROADMAP_GITHUB_ALTERNATIVE_CONNECTION.md"
   ],
   "gates": {
     "cumulative": {
