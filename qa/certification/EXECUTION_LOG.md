@@ -498,3 +498,10 @@
 - Render reporta healthCheckPath vacío aunque render.yaml declara /healthz. La presencia de secretos no está confirmada y sus valores no se consultaron.
 - No se localizó una implementación/endpoint Bridge inequívoco en los repositorios inspeccionados; no hay evidencia de E2E Bridge→Runner.
 - Se corrigió el comentario obsoleto del Runner Plus sobre [skip ci]. No se despacharon gates matemáticos. El E2E diario permanece NOT_YET_VERIFIED; no cambiar el next_action de continuidad ni repetir gates verdes.
+
+## 2026-10-27 UTC — reconciliación de runs compartidos y estado de integración
+
+- Plus run [40429424316](https://github.com/c2melendez/precision-lab-plus/actions/runs/40429424316): job `h1d` SUCCESS en rama canónica `qa/syntax-audit-in625-a1`, SHA `c6549bfd4943938be0db2a43fad5bfa33b169708`; logs confirman 38 pruebas Playwright pasadas. Esto valida H1d en ese SHA, no el circuito API→Bridge→Runner.
+- Lite run [40403964745](https://github.com/c2melendez/precision-lab-lite/actions/runs/40403964745): job frontend SUCCESS en checkout combinado de PR, HEAD `cdc9c94841505e3d39696fb4c349c7cc396743ef` (merge de `c26a88536551fa256113ba7da3d9f872fea189f9` en `4507082a101fbc5a196cfbfe335db6e83c2cb6d0`), no el SHA de la rama canónica. Log: auditoría npm 0 vulnerabilidades, typecheck, pruebas (47 en una fase y 515 en otra) y build completados. En la limpieza posterior aparece advertencia de Git: `No url found for submodule path 'fix/pkg/sim' in .gitmodules`; no falló el job, pero queda como higiene de checkout a inspeccionar en el SHA del PR.
+- No se lanzaron nuevas Actions para duplicar estos resultados. No se encontraron en estos runs pruebas autenticadas de la API ni evidencia de Bridge→Runner.
+- Estado de esta sección: API live y endpoints públicos comprobados; llamada autenticada y lectura actual de ambos repos pendientes; discrepancia `healthCheckPath` efectiva pendiente; Bridge no localizado/validado; E2E global `NOT_YET_VERIFIED`. No cambiar el `next_action` matemático de continuidad ni declarar certificación global cerrada.
