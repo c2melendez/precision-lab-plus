@@ -37,7 +37,7 @@ describe("MathRenderer", () => {
   });
 
   it("EN-SG-03 (literal original H.2): x^{2}\\text{<b>hola</b>} se muestra sin interpretar HTML", () => {
-    const payload = "x^{2}\\\\text{<b>hola</b>}";
+    const payload = "x^{2}\\text{<b>hola</b>}";
     const { container } = render(<MathRenderer latex={payload} />);
 
     // Literal de la matriz fuente; el texto interno no debe crear nodos HTML.
