@@ -60,7 +60,7 @@ describe("MathRenderer", () => {
   it("EN-SG-04: href con javascript no produce enlace ejecutable", () => {
     const payload = "\\href{javascript:alert(1)}{x}";
     const { container } = render(<MathRenderer latex={payload} />);
-    expect(container.querySelector('a[href^="javascript:"]')).toBeNull();
+    expect(container.querySelector("a")).toBeNull();
     expect(container.querySelector("script")).toBeNull();
   });
 
@@ -80,6 +80,6 @@ describe("MathRenderer", () => {
   ])("%s: la entrada no genera HTML activo ni enlaces ejecutables", (_id, payload) => {
     const { container } = render(<MathRenderer latex={payload} />);
     expect(container.querySelector("script, img, iframe, object, embed")).toBeNull();
-    expect(container.querySelector('a[href^="javascript:"]')).toBeNull();
+    expect(container.querySelector("a")).toBeNull();
   });
 });
