@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 329,
+  "revision": 330,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -34,9 +34,9 @@
   "next_action": {
     "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
     "status": "IN_PROGRESS",
-    "action": "Plus CI 40602481512 has frontend Typecheck, Unit/parity and Production build SUCCESS; backend job is still validating the new EN-SG-08 probe-backed test. Runner fingerprint step now passes after restoring prose_only_paths in continuity.json; Lite runner's corresponding retry is queued. Keep EN-SG-08 PENDING until backend tests complete. Last inspected security job 40601719418 had security job SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. Global OPEN.",
+    "action": "Plus CI 40602481512 has frontend Typecheck, Unit/parity and Production build SUCCESS; backend job is still validating the new EN-SG-08 probe-backed test. Runner fingerprint step passed on retry of run 40602481567 after restoring prose_only_paths. Lite Runner fingerprint/push summary also passed on retry of run 40602548307; Lite CI 40602548219 remains FAILURE at npm audit hard gate, with typecheck/unit/build skipped. Keep EN-SG-08 PENDING until backend tests complete. Last inspected security job 40601719418 was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. Global OPEN.",
     "previous_id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "updated_utc": "2026-10-27T23:33:00Z"
+    "updated_utc": "2026-10-27T23:35:00Z"
   },
   "blockers": [
     {
@@ -129,7 +129,7 @@
       "EN-SG-08 probe-backed regression in Plus CI 40602481512 backend job"
     ]
   },
-  "ledger_note": "r329 motor-only scope. Plus CI 40602481512 frontend Typecheck/Unit-parity/Production build SUCCESS; backend pending on EN-SG-08 probe-backed regression. Plus Runner retry passed fingerprint and push summary after prose_only_paths restored. Lite Runner retry queued; Lite CI dependency audit failed on npm audit hard gate (separate blocker). Last inspected security job 40601719418 was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. Global OPEN.",
+  "ledger_note": "r330 motor-only. Plus CI 40602481512 frontend Typecheck/Unit-parity/Production build SUCCESS, backend pending on EN-SG-08 probe test. Plus Runner retry 40602481567 SUCCESS; Lite Runner retry 40602548307 SUCCESS after prose_only_paths restored. Lite CI 40602548219 FAILED at npm audit hard gate (typecheck/unit/build skipped). Last inspected security job 40601719418 SKIPPED, not PASS. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
