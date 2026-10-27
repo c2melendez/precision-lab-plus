@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 320,
+  "revision": 321,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -8,35 +8,126 @@
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
-    "cumulative": {"workflow": ".github/workflows/in625-cumulative-certification.yml", "inputs": ["*"], "acceptance_revision": "2026-10-16-continuity-v1"},
-    "h1d": {"workflow": ".github/workflows/in625-h1d-reentry.yml", "inputs": ["*"], "acceptance_revision": "2026-10-16-continuity-v1"},
-    "security": {"workflow": ".github/workflows/certification-dependency-gates.yml", "inputs": ["*"], "acceptance_revision": "2026-10-16-continuity-v1", "allow_reuse": false}
+    "cumulative": {
+      "workflow": ".github/workflows/in625-cumulative-certification.yml",
+      "inputs": [
+        "*"
+      ],
+      "acceptance_revision": "2026-10-16-continuity-v1"
+    },
+    "h1d": {
+      "workflow": ".github/workflows/in625-h1d-reentry.yml",
+      "inputs": [
+        "*"
+      ],
+      "acceptance_revision": "2026-10-16-continuity-v1"
+    },
+    "security": {
+      "workflow": ".github/workflows/certification-dependency-gates.yml",
+      "inputs": [
+        "*"
+      ],
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "allow_reuse": false
+    }
   },
   "next_action": {
     "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
     "status": "IN_PROGRESS",
-    "action": "Bridge parked. EN-SG-03 literal-HTML fallback regression added in frontend/src/__tests__/MathRenderer.test.tsx (commit 58a395306cf90bfee81c2e5ae79c58ebf3105a85). CI push branch filter fixed in Plus commit 50fd09331f46122048ff479d099bfcb12b5faec5 and Lite commit 0f84d5a18a7684677fb1046efd1d75dc429990f3. Available run/status lookup returned no push evidence; inspect Actions runs before classifying EN-SG-03. Then continue exact-source-matrix coverage EN-SG-01/02/04..08. No extreme loads in production; no SG28 isolation prod. Global OPEN.",
+    "action": "Bridge parked. Plus run 40596662550 failed frontend Unit and parity tests at EN-SG-03: KaTeX did not force markup-like payload through literal-text fallback (149/150 files pass; 1036 passed, 1 failed, 28 todo). Added renderer guard in commit 21eccd6ff4612afc73b78bfac816052de360c9ee; verify next CI, then recover exact matrix literals for EN-SG-01/02/04..08. Lite run 40596658330 frontend CI passed. Global OPEN.",
     "previous_id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "updated_utc": "2026-10-27T22:55:00Z"
+    "updated_utc": "2026-10-27T23:20:00Z"
   },
   "blockers": [
-    {"id": "H2-SG28-DIST-01..08", "status": "OUT_OF_SCOPE_SINGLE_HOST", "detail": "2026-10-26-sg28-single-host-scope-v1. No es PASS."},
-    {"id": "SECURITY-S25", "status": "BLOCKED"},
-    {"id": "SY-P-23", "status": "CLOSED", "detail": "2026-10-26-sy-p-23-exact-block-v1"},
-    {"id": "SY-X-04-PLUS-HTTP", "status": "BLOCKED"},
-    {"id": "ALGEBRA229-AS-B-29", "status": "ON_HOLD"},
-    {"id": "EDCX-B5", "status": "BLOCKED", "kind": "capability", "detail": "VC-LG-01..25 sin canal/endpoint."},
-    {"id": "S19-BACKEND-MUTATION", "status": "CLOSED_SCOPED", "kind": "targeted_coverage_and_acceptance", "detail": "2026-10-26-s19-focused-acceptance-v1; 92.65% killed scoped."},
-    {"id": "S18-PLUS-EVALUATE-HANG-R293", "status": "RESOLVED_SCOPED", "kind": "reproducible_behavior", "detail": "SHA 02d01c3a S18 run 40105997558 PASS."},
-    {"id": "S18-PRESENTATION-SIMPLIFY-DECIMAL-EXP-R294", "status": "RESOLVED_SCOPED", "kind": "targeted_regression", "detail": "SHA 02d01c3a S18 run 40105997558 PASS."}
+    {
+      "id": "H2-SG28-DIST-01..08",
+      "status": "OUT_OF_SCOPE_SINGLE_HOST",
+      "detail": "2026-10-26-sg28-single-host-scope-v1. No es PASS."
+    },
+    {
+      "id": "SECURITY-S25",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "SY-P-23",
+      "status": "CLOSED",
+      "detail": "2026-10-26-sy-p-23-exact-block-v1"
+    },
+    {
+      "id": "SY-X-04-PLUS-HTTP",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "ALGEBRA229-AS-B-29",
+      "status": "ON_HOLD"
+    },
+    {
+      "id": "EDCX-B5",
+      "status": "BLOCKED",
+      "kind": "capability",
+      "detail": "VC-LG-01..25 sin canal/endpoint."
+    },
+    {
+      "id": "S19-BACKEND-MUTATION",
+      "status": "CLOSED_SCOPED",
+      "kind": "targeted_coverage_and_acceptance",
+      "detail": "2026-10-26-s19-focused-acceptance-v1; 92.65% killed scoped."
+    },
+    {
+      "id": "S18-PLUS-EVALUATE-HANG-R293",
+      "status": "RESOLVED_SCOPED",
+      "kind": "reproducible_behavior",
+      "detail": "SHA 02d01c3a S18 run 40105997558 PASS."
+    },
+    {
+      "id": "S18-PRESENTATION-SIMPLIFY-DECIMAL-EXP-R294",
+      "status": "RESOLVED_SCOPED",
+      "kind": "targeted_regression",
+      "detail": "SHA 02d01c3a S18 run 40105997558 PASS."
+    }
   ],
   "h2_en_sg_evidence_audit_r314": {
     "status": "PARTIAL",
     "document": "qa/certification/H2_EN_SG_EVIDENCE_AUDIT_R314.md",
-    "covered_or_partial": ["EN-SG-09", "EN-SG-10", "EN-SG-11", "EN-SG-12", "EN-SG-13", "EN-SG-14", "EN-SG-15", "EN-SG-16", "EN-SG-17", "EN-SG-18", "EN-SG-19", "EN-SG-20", "EN-SG-22", "EN-SG-29", "EN-SG-30", "EN-SG-31"],
-    "gap": ["EN-SG-01", "EN-SG-02", "EN-SG-04", "EN-SG-05", "EN-SG-06", "EN-SG-07", "EN-SG-08", "EN-SG-21", "EN-SG-23", "EN-SG-24", "EN-SG-25", "EN-SG-26", "EN-SG-27", "EN-SG-28", "EN-SG-32"],
-    "pending_execution": ["EN-SG-03"]
+    "covered_or_partial": [
+      "EN-SG-09",
+      "EN-SG-10",
+      "EN-SG-11",
+      "EN-SG-12",
+      "EN-SG-13",
+      "EN-SG-14",
+      "EN-SG-15",
+      "EN-SG-16",
+      "EN-SG-17",
+      "EN-SG-18",
+      "EN-SG-19",
+      "EN-SG-20",
+      "EN-SG-22",
+      "EN-SG-29",
+      "EN-SG-30",
+      "EN-SG-31"
+    ],
+    "gap": [
+      "EN-SG-01",
+      "EN-SG-02",
+      "EN-SG-04",
+      "EN-SG-05",
+      "EN-SG-06",
+      "EN-SG-07",
+      "EN-SG-08",
+      "EN-SG-21",
+      "EN-SG-23",
+      "EN-SG-24",
+      "EN-SG-25",
+      "EN-SG-26",
+      "EN-SG-27",
+      "EN-SG-28",
+      "EN-SG-32"
+    ],
+    "pending_execution": [
+      "EN-SG-03"
+    ]
   },
-  "ledger_note": "r320 motor-only scope, Bridge parked. EN-SG-03 regression pending CI execution evidence; CI branch filters corrected bilaterally. Global OPEN.",
+  "ledger_note": "r321 motor-only scope, Bridge parked. Lite CI 40596658330 frontend success. Plus CI 40596662550 frontend failed at EN-SG-03; renderer guard committed 21eccd6ff4612afc73b78bfac816052de360c9ee awaiting CI. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add."
 }
