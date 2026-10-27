@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 321,
+  "revision": 322,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -34,9 +34,9 @@
   "next_action": {
     "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
     "status": "IN_PROGRESS",
-    "action": "Bridge parked. Plus run 40596662550 failed frontend Unit and parity tests at EN-SG-03: KaTeX did not force markup-like payload through literal-text fallback (149/150 files pass; 1036 passed, 1 failed, 28 todo). Added renderer guard in commit 21eccd6ff4612afc73b78bfac816052de360c9ee; verify next CI, then recover exact matrix literals for EN-SG-01/02/04..08. Lite run 40596658330 frontend CI passed. Global OPEN.",
+    "action": "Bridge parked. Plus CI run 40597214760: frontend Unit and parity tests passed after renderer guard commit 21eccd6ff4612afc73b78bfac816052de360c9ee; frontend production build and backend tests still in progress at last inspection. EN-SG-03 remains PARTIAL because exact original matrix literal is not yet recovered. Continue with exact-source retrieval before EN-SG-01/02/04..08. Global OPEN.",
     "previous_id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "updated_utc": "2026-10-27T23:20:00Z"
+    "updated_utc": "2026-10-27T23:25:00Z"
   },
   "blockers": [
     {
@@ -90,6 +90,7 @@
     "status": "PARTIAL",
     "document": "qa/certification/H2_EN_SG_EVIDENCE_AUDIT_R314.md",
     "covered_or_partial": [
+      "EN-SG-03",
       "EN-SG-09",
       "EN-SG-10",
       "EN-SG-11",
@@ -124,10 +125,8 @@
       "EN-SG-28",
       "EN-SG-32"
     ],
-    "pending_execution": [
-      "EN-SG-03"
-    ]
+    "pending_execution": []
   },
-  "ledger_note": "r321 motor-only scope, Bridge parked. Lite CI 40596658330 frontend success. Plus CI 40596662550 frontend failed at EN-SG-03; renderer guard committed 21eccd6ff4612afc73b78bfac816052de360c9ee awaiting CI. Global OPEN.",
+  "ledger_note": "r322 motor-only scope, Bridge parked. Lite run 40596658330 frontend success. Plus CI 40597214760 unit/parity step passed; full CI in progress. EN-SG-03 PARTIAL pending exact source literal. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add."
 }
