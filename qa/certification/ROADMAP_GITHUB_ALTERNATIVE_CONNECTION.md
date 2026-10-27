@@ -14,7 +14,7 @@ GitHub es fuente de verdad. La API desplegada es read-only; no añadir dispatch 
 | Planificador | GET read-only; no inicia gates | Live no verificado |
 | Render health check | `healthCheckPath` efectivo vacío, YAML declara `/healthz` | Reconciliar |
 | `GITHUB_READ_TOKEN`, `SERVICE_API_KEY` | Presencia no confirmada; valores no deben divulgarse | No demostrado |
-| Bridge | Contrato v1 DRAFT (`BRIDGE_CONTRACT_GITHUB_ALTERNATIVE_CONNECTION_v1.md`); sin implementación ni E2E | BLOCKED |
+| Bridge | Cert Runner Compass implementado; idempotencia durable y clasificación 204/rechazos reportadas en commits 7b6ccae9/f051a4b1; despliegue pendiente de verificación independiente y suite v1.1 Fase 1 aprobada sin runs | OPEN / no certificado |
 | Runner Lite/Plus | Workflows/ledger existen, pero sin E2E de la ruta completa | Parcial |
 | Supabase `oqlzftercvraprnvjifo` | `ACTIVE_HEALTHY`; sin relación de aplicación demostrada con API/Bridge e inventario parcial (ledger `-05`) | BLOCKED |
 | Idempotencia durable | Esquema desconocido; reinicio no probado | BLOCKED |
@@ -131,3 +131,18 @@ En un entorno controlado, verificar en orden:
 `validation_id`, `correlation_id`, hash de idempotency key, UTC, repo/branch/requested SHA/actual HEAD, versiones/configuración, estado/timestamp de API/Bridge/Runner, commit/PR si aplica, workflow/run/job IDs, logs/artefactos, resultado por etapa, reason code final y siguiente paso. No inventar commits o PR si no eran necesarios.
 
 **Regla de cierre:** hasta que todas las casillas de Fase 8 estén demostradas, el mecanismo queda BLOCKED/FAILED y la certificación general de motores matemáticos no se reanuda.
+
+## Corte actualizado — Cert Runner Compass v1.1 (2026-10-27 UTC)
+
+> **Precedencia:** este corte actualiza el estado de la ruta ejecutora implementada como Cert Runner Compass. Corrige las frases históricas que indiquen que todavía no existe Bridge implementado. No cierra la certificación global ni sustituye la auditoría independiente de Supabase/D-01.
+
+- **Estado:** OPEN / NO CERTIFICADO. Fase 1: 9/9 OK sin runs (A1–A6, B1, B2a/B2b). E1 y E4 se aprobaron en simulación, sin enviar solicitudes. Total descriptivo: 11 comprobaciones/simulaciones aprobadas de ~20; no equivale a certificación.
+- **Arquitectura:** GPT/LLM → Cert Runner Compass (Lovable, proyecto `57b9141d-9f69-4fef-9b7f-0f81f2eaec2f`, `X-Bridge-Key` + `Idempotency-Key`) → GitHub Actions. Persistencia Compass en Lovable Cloud, **no** en Supabase `oqlzftercvraprnvjifo`. La API Render `precision-lab-readonly-api` es separada, GET-only y usa `X-API-Key`; no despacha workflows.
+- **Correcciones reportadas:** commit `7b6ccae9` (idempotencia durable, 27 pruebas) y `f051a4b1` (HTTP 204: localizar/asociar run; 401/403/404/422 como `GITHUB_DISPATCH_REJECTED_<status>`; red/timeout/5xx como `DISPATCH_OUTCOME_UNKNOWN`, 30 pruebas). El responsable dice que está desplegado; verificación independiente pendiente.
+- **Línea base histórica:** Lite tenía 26 runs antes y después de Fase 1. Último run previo citado: `40429625526`, push, success, 2026-10-27 00:57 UTC. No tratar el número 26 como conteo actual garantizado. Smoke temprano Lite/h1d: `409 DISPATCH_OUTCOME_UNKNOWN`; no se observaron runs nuevos desde 04:00 UTC en esa revisión (evidencia fuerte, no absoluta).
+- **Bloqueos:** no usar `GET /api/run` (puede despachar); desactivarlo/restringirlo sigue pendiente. D1: falta lookup read-only por `Idempotency-Key` si el POST falla antes de devolver ID/URL. D2 requiere clave de prueba deliberadamente revocada. D3–D5 pendientes; D5 requiere HTTP 204 real. E2/E3 dependen de B3/B5; E5 exige revisar respuestas reales del GPT. Pendiente leer runner YAML de Plus y el origen de `defaultBranch`. El runner de Lite ejecuta incluso con `dry_run=true`; `both` puede generar dos runs; SHA usado como ref puede dar 422, hipótesis aún no verificada.
+- **Decisión del responsable (2026-10-27):** continuar Fase 2; el tope previo de 3 runs runner + 1 gate queda sustituido como límite operativo porque los repositorios son públicos y sin ese límite. Aun así, contar runs pre/post y evitar dispatches accidentales/duplicados. Las 20 ejecuciones multi-día siguen fuera de v1.1.
+- **Secuencia:** verificación read-only del despliegue de `f051a4b1` o posterior; después B3 (un POST controlado, registrar `idempotency_id`, `status_url` y conteos), B4/B5, B6, C1 (un runner + un gate), C2/C3 y luego D/E según prerrequisitos. Ante 409, error de red o `DISPATCH_OUTCOME_UNKNOWN`, no reenviar; consultar estado por lectura. No declarar certificación hasta cerrar criterios A–E y registrar estados finales.
+- **Claves:** las expuestas previamente se consideran comprometidas y deben rotarse por el responsable. No escribir ni repetir valores reales.
+
+La suite v1.1 y el registro de Fase 1 recibidos el 2026-10-27 UTC son la base de este corte. Los registros previos permanecen como historia; este addendum prevalece para el estado actual de Compass.
