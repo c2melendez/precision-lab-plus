@@ -62,14 +62,14 @@
 - Added an EN-SG-03 frontend regression in `frontend/src/__tests__/MathRenderer.test.tsx`: a supplied HTML `img/onerror` payload must fall back to a literal text node; no `img` or `svg` node may appear.
 - Test commit: `58a395306cf90bfee81c2e5ae79c58ebf3105a85`.
 - Corrected `.github/workflows/ci.yml` branch filters in Plus (commit `50fd09331f46122048ff479d099bfcb12b5faec5`) and Lite (commit `0f84d5a18a7684677fb1046efd1d75dc429990f3`) to include the verified canonical branch. Previously CI push filters named `main`, `master`, and `qa/exhaustive-suite-module-01`, but omitted `qa/syntax-audit-in625-a1`.
-- The available workflow-run lookup returned no runs for these SHAs and the commit-status lookup returned no statuses. The run-list connector is PR-only; this is **not evidence that push CI passed or failed**. Inspect the actual Actions page/run for each SHA before promoting EN-SG-03.
+- Observed Actions run 40596662550 for Plus SHA `50fd09331f46122048ff479d099bfcb12b5faec5`: frontend `Unit and parity tests` failed because EN-SG-03 expected the payload exactly but KaTeX returned normalized/duplicated text; 149 test files passed, 1 failed; 1036 tests passed, 1 failed, 28 todo. This exposes a product-side gap: markup-like input did not force the plain-text fallback. Corrective renderer guard committed as `21eccd6ff4612afc73b78bfac816052de360c9ee`; awaiting its CI run. Lite run 40596658330 passed its frontend job (not evidence for Plus EN-SG-03).
 - No production service was targeted and no extreme payloads were run.
 
 ## Counts and next action
 
-- PARTIAL (existing API/harness evidence): 15
-- GAP (unimplemented or not matrix-complete): 16
+- PARTIAL (existing API/harness evidence): 16
+- GAP (unimplemented or not matrix-complete): 15
 - PENDING EXECUTION: 1 (EN-SG-03)
 - Matrix-complete PASS: 0
 
-Next: retrieve and inspect the CI run triggered on Plus SHA `50fd09331f46122048ff479d099bfcb12b5faec5` and Lite SHA `0f84d5a18a7684677fb1046efd1d75dc429990f3`; verify the Plus frontend job executed the new EN-SG-03 test. Then continue EN-SG-01/02/04..08 using exact source-matrix literals. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314` until evidence is reconciled. Parallel candidate: SECURITY-S25 only with local npm.
+Next: inspect CI for corrective Plus commit `21eccd6ff4612afc73b78bfac816052de360c9ee`; verify EN-SG-03 passes and backend job completes. Then continue EN-SG-01/02/04..08 using exact source-matrix literals. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314` until evidence is reconciled. Parallel candidate: SECURITY-S25 only with local npm.
