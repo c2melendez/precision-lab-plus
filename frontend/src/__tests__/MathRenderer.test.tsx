@@ -46,4 +46,40 @@ describe("MathRenderer", () => {
     expect(container.textContent).toBe(payload);
     expect(screen.getByText(payload)).toBeInTheDocument();
   });
+
+  it.each([
+    ["EN-SG-01", "<script>alert(1)</script>"],
+    ["EN-SG-02", "<img src=x onerror=alert(1)>"],
+  ])("%s: HTML activo se muestra como texto escapado", (_id, payload) => {
+    const { container } = render(<MathRenderer latex={payload} />);
+    expect(container.querySelector("script, img, svg")).toBeNull();
+    expect(container.textContent).toBe(payload);
+    expect(screen.getByText(payload)).toBeInTheDocument();
+  });
+
+  it("EN-SG-04: href con javascript no produce enlace ejecutable", () => {
+    const payload = "\\href{javascript:alert(1)}{x}";
+    const { container } = render(<MathRenderer latex={payload} />);
+    expect(container.querySelector('a[href^="javascript:"]')).toBeNull();
+    expect(container.querySelector("script")).toBeNull();
+  });
+
+  it.each([
+    ["EN-SG-05 url", "\\url{http://example.com}"],
+    ["EN-SG-05 includegraphics", "\\includegraphics{x.png}"],
+    ["EN-SG-05 htmlClass", "\\htmlClass{a}{x}"],
+    ["EN-SG-05 htmlStyle", "\\htmlStyle{color:red}{x}"],
+    ["EN-SG-06 recursive def", "\\def\\a{\\a}\\a"],
+    ["EN-SG-07 recursive newcommand", "\\newcommand{\\a}{\\a}\\a"],
+    ["EN-SG-07 let", "\\let\\a\\b"],
+    ["EN-SG-07 catcode", "\\catcode"],
+    ["EN-SG-08 input", "\\input{/etc/passwd}"],
+    ["EN-SG-08 include", "\\include{x}"],
+    ["EN-SG-08 write18", "\\write18{ls}"],
+    ["EN-SG-08 openin", "\\openin1=x"],
+  ])("%s: la entrada no genera HTML activo ni enlaces ejecutables", (_id, payload) => {
+    const { container } = render(<MathRenderer latex={payload} />);
+    expect(container.querySelector("script, img, iframe, object, embed")).toBeNull();
+    expect(container.querySelector('a[href^="javascript:"]')).toBeNull();
+  });
 });
