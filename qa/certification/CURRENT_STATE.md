@@ -1007,3 +1007,10 @@ Ver r252.
 - `technical_baseline_sha` se fija al SHA probado `676f36ed2ca9566f5b37d27dd4c4f43065133f82`. Este commit posterior solo actualiza CURRENT_STATE, EXECUTION_LOG y continuity.json, rutas excluidas del fingerprint.
 - Siguiente objetivo: **H2-EN-SG-CASE-EVIDENCE-AUDIT-R314**, inventario EN-SG-01..32 por test, archivo, ejecución exacta y clasificación PASS/FAIL/GAP/MANUAL. Verificar cobertura sin etiquetas antes de escribir tests; añadir solo pruebas test-first para GAP confirmados. Mantener `SG28_EVALUATE_ISOLATION` desactivada en producción y no relanzar gates verdes por rutina.
 - Global OPEN; SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; SG28 multinodo OUT_OF_SCOPE_SINGLE_HOST (no PASS).
+
+## 2026-10-27 — Persistencia del Bridge: decisión de mínimo privilegio
+
+- Se registra una decisión de diseño: no reutilizar ni modificar `public.calls`/`public.history`; el proyecto Supabase actual solo queda como candidato condicionado a un esquema privado dedicado. Si no se puede demostrar el aislamiento, usar un proyecto dedicado después de confirmar organización/coste.
+- No se ejecutó DDL, no se cambiaron grants/RLS, no se eliminó ni pausó el proyecto y no se lanzaron Actions. La API read-only permanece separada del Bridge.
+- Referencia: [DATABASE_MINIMUM_PRIVILEGE_DECISION_2026-10-27.md](DATABASE_MINIMUM_PRIVILEGE_DECISION_2026-10-27.md).
+- P0.1 sigue BLOCKED hasta completar inventario de exposición Data API/roles/consumidores y aprobar una migración versionada. Certificación global OPEN; no se repiten gates verdes.
