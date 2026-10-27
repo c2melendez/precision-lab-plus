@@ -72,4 +72,4 @@
 - PENDING EXECUTION: 0
 - Matrix-complete PASS: 0
 
-Next: inspect CI for corrective Plus commit `21eccd6ff4612afc73b78bfac816052de360c9ee`; verify EN-SG-03 passes and backend job completes. The Plus CI run `40597214760` has the unit/parity step green, but the frontend job's production build and backend tests were still in progress at last inspection. Recover the exact source-matrix literals before promoting EN-SG-03 or implementing EN-SG-01/02/04..08. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314` until evidence is reconciled. Parallel candidate: SECURITY-S25 only with local npm.
+Next: recover the exact source-matrix literals before promoting EN-SG-03 or implementing EN-SG-01/02/04..08. The synthetic EN-SG-03 regression is verified by Plus CI, but remains PARTIAL until its exact source-matrix input and expected behavior are traced. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314` until evidence is reconciled. Security job in dependency/security workflow `40597214739` was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. No production stress tests.
