@@ -20,9 +20,15 @@ interface MathRendererProps {
 
 export function MathRenderer({ latex, fallbackText, className }: MathRendererProps) {
   const rendered = useMemo(() => {
+    // KaTeX can render malformed markup-like input as an error expression
+    // rather than throwing. Force suspicious HTML-tag payloads through the
+    // React text-node fallback; never pass them to the HTML renderer.
+    if (/<\/?[a-z][^>]*>/i.test(latex)) {
+      return { html: null };
+    }
+
     try {
-      // katex.renderToString sanea su propia salida — es la "API segura"
-      // a la que se refiere la sección 11. `latex` nunca se inserta crudo.
+      // Only KaTeX-generated output reaches dangerouslySetInnerHTML.
       return { html: katex.renderToString(latex, { throwOnError: true, displayMode: false }) };
     } catch {
       return { html: null };
