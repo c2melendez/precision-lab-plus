@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 328,
+  "revision": 329,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -36,7 +36,7 @@
     "status": "IN_PROGRESS",
     "action": "Bridge parked. Plus exact-source EN-SG-03 test passed CI 40599001729. Exact frontend tests EN-SG-01..08 and no-anchor assertions passed Typecheck, Unit/parity and Production build in CI 40601719487; backend tests also completed SUCCESS. Added backend EN-SG-08 probe-backed rejection tests using existing file_access_probe.py and process_launch_probe.py; validate in new CI. Runner corrected: push now computes the documented cumulative fingerprint; target_repo options are scoped to current repo, avoiding false claim of cross-repo fan-out. To run both repos, dispatch separately in each. Security job 40601719418 was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. Global OPEN.",
     "previous_id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "updated_utc": "2026-10-27T23:30:00Z"
+    "updated_utc": "2026-10-27T23:32:00Z"
   },
   "blockers": [
     {
@@ -130,5 +130,24 @@
     ]
   },
   "ledger_note": "r328 motor-only scope, Bridge parked. Plus CI 40601719487 completed SUCCESS: frontend Typecheck, Unit/parity, Production build and backend tests all passed. Added EN-SG-08 tests using file/process audit probes; new CI pending. Runner push fingerprint corrected; target_repo scoped to local repo, no cross-repo fan-out. Security job 40601719418 SKIPPED, not PASS. Global OPEN.",
-  "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add."
+  "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
+  "prose_only_paths": [
+    "README.md",
+    "qa/certification/README.md",
+    "qa/certification/continuity.json",
+    "qa/certification/CURRENT_STATE.md",
+    "qa/certification/EXECUTION_LOG.md",
+    "qa/certification/CONTINUITY_NEXT_ACTION.json",
+    "qa/certification/EXECUTION_LOG_AS229_SECTION_A.md",
+    "qa/certification/ALGEBRA229_PREPARATION.md",
+    "qa/certification/ROADMAP_CONTINUITY.md",
+    "qa/certification/CONTINUATION_PROMPT.md",
+    "qa/certification/EDCX_B6_CHANNEL_AUDIT.md",
+    "qa/certification/EDCX_B6_ROW_CONTRACT_DRAFT.md",
+    "qa/certification/EDCX_B6_HTTP_CONTRACT_FINDINGS.md",
+    "qa/certification/EDCX_B6_ADAPTER_ORACLE_PLAN.md",
+    "qa/certification/S19_BACKEND_MUTATION_REVIEW_R288.md",
+    "qa/certification/S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md",
+    "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md"
+  ]
 }
