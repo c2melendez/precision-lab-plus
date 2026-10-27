@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 326,
+  "revision": 327,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -34,9 +34,9 @@
   "next_action": {
     "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
     "status": "IN_PROGRESS",
-    "action": "Bridge parked. Exact H.2 source recovered from Matrices.zip. EN-SG-03 exact source test passed in CI 40599001729. Added exact-input frontend tests for EN-SG-01..08 in 9d13cd39227839099c1809ddd2c4eeed32ee4842; CI 40601412886 frontend typecheck, Unit/parity and production build SUCCESS, backend was still running. Follow-up commit 2db9e7b1d15c49b22299d4007cfda01959c67efc strengthens EN-SG-04/05 by asserting no anchor at all; inspect its CI before classifying. EN-SG-08 remains GAP pending file/process probes. Runner push fingerprint and target_repo=both fan-out discrepancies remain. Security job 40601412812 SKIPPED, not PASS; SECURITY-S25 BLOCKED. Global OPEN.",
+    "action": "Bridge parked. Exact H.2 source recovered from Matrices.zip. EN-SG-03 exact-source frontend test passed CI 40599001729. Frontend tests EN-SG-01..08 added in 9d13cd39227839099c1809ddd2c4eeed32ee4842 and no-anchor assertions tightened in 2db9e7b1d15c49b22299d4007cfda01959c67efc. Latest CI 40601719487 has Typecheck, Unit/parity and Production build SUCCESS; backend job still running. EN-SG-01/02/04..07 remain PARTIAL (frontend evidence only); EN-SG-08 GAP pending backend file/process probes (helpers already exist at backend/tests/file_access_probe.py and backend/tests/process_launch_probe.py but are not wired into H2 tests). Runner discrepancies: push fingerprint step does not run on push; target_repo=both does not fan out to other repo. Security job 40601719418 SKIPPED, not PASS; SECURITY-S25 BLOCKED. Global OPEN.",
     "previous_id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "updated_utc": "2026-10-27T23:24:00Z"
+    "updated_utc": "2026-10-27T23:27:00Z"
   },
   "blockers": [
     {
@@ -126,10 +126,10 @@
       "EN-SG-32"
     ],
     "pending_execution": [
-      "CI for Plus exact-input H2 tests commit 2db9e7b1d15c49b22299d4007cfda01959c67efc",
-      "Connect file-access/process-launch probes to EN-SG-08"
+      "Plus CI 40601719487 backend job",
+      "Wire file-access/process-launch probes to EN-SG-08 H2 cases"
     ]
   },
-  "ledger_note": "r326 motor-only, Bridge parked. Plus EN-SG-03 exact-source test passed CI 40599001729. EN-SG-01..08 tests in 9d13cd39227839099c1809ddd2c4eeed32ee4842 had frontend checks/build pass in CI 40601412886; follow-up commit 2db9e7b1d15c49b22299d4007cfda01959c67efc strengthens no-anchor assertions, CI pending. EN-SG-08 GAP pending file/process probes. Security job 40601412812 SKIPPED, not PASS. Global OPEN.",
+  "ledger_note": "r327 motor-only scope. Plus CI 40601719487 Typecheck, Unit/parity and Production build SUCCESS; backend job pending. EN-SG-03 exact frontend PASS; EN-SG-01/02/04..07 frontend-only PARTIAL; EN-SG-08 GAP pending probe-backed backend tests. Probe helper files exist but are not wired into test_in625_h2_security.py. Security job 40601719418 SKIPPED, not PASS. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add."
 }
