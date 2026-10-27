@@ -491,3 +491,10 @@
 - La política prohíbe commits vacíos/artificiales, gates omitidos y PASS sin ejecución comprobada. Si no hay cambio legítimo, el mecanismo autorizado no mutante debe validar la ruta sin fabricar un push.
 - `continuity.json` registra versión `2026-10-26-dynamic-routes-daily-e2e-v1`, estado `NOT_YET_VERIFIED`, sin evidencias inventadas. La certificación global sigue OPEN y se conserva la siguiente acción canónica existente.
 - Cambio documental; no se despacharon manualmente workflows ni se declaró certificación operativa.
+
+## 2026-10-26 — diagnóstico API/Bridge/Runner
+
+- Render API está live. Logs muestran GET /healthz=200 y GET /openapi.json=200; GET /v1/status sin API key=401, esperado. No se verificó una llamada autenticada ni el estado bilateral de GitHub.
+- Render reporta healthCheckPath vacío aunque render.yaml declara /healthz. La presencia de secretos no está confirmada y sus valores no se consultaron.
+- No se localizó una implementación/endpoint Bridge inequívoco en los repositorios inspeccionados; no hay evidencia de E2E Bridge→Runner.
+- Se corrigió el comentario obsoleto del Runner Plus sobre [skip ci]. No se despacharon gates matemáticos. El E2E diario permanece NOT_YET_VERIFIED; no cambiar el next_action de continuidad ni repetir gates verdes.
