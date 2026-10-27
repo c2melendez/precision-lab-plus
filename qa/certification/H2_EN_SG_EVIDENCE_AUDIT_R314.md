@@ -11,6 +11,7 @@
 - No extreme loads, rate bursts, or dynamic execution against production services.
 - A green unit/API rejection is not global certification PASS for H2.
 - Browser XSS/escape and UI stop/recovery require distinct evidence (not only API).
+- A test added but not executed by the relevant CI run remains pending; do not promote it to PASS.
 
 ## Traceability
 
@@ -18,7 +19,7 @@
 |----|-------|--------------|-----------------|----------------|
 | EN-SG-01 | N1 | HTML script invalid/escape/no exec | No dedicated harness row | **GAP** |
 | EN-SG-02 | N1 | HTML image event | No dedicated harness row | **GAP** |
-| EN-SG-03 | N2 | Math text containing HTML → literal | No dedicated harness row | **GAP** |
+| EN-SG-03 | N2 | Math text containing HTML → literal | `frontend/src/__tests__/MathRenderer.test.tsx`, regression added in commit `58a395306cf90bfee81c2e5ae79c58ebf3105a85`; CI execution not yet verified | **PENDING EXECUTION** |
 | EN-SG-04 | N2 | Unsafe LaTeX hyperlink | No dedicated harness row | **GAP** |
 | EN-SG-05 | N2 | URL/image/HTML macros blocked | No dedicated harness row | **GAP** |
 | EN-SG-06 | N2 | Recursive macro definition | No dedicated harness row | **GAP** |
@@ -49,19 +50,26 @@
 | EN-SG-31 | N3 | 5 MiB → 413 | `sg31` tests | **PARTIAL** |
 | EN-SG-32 | N3 | Burst + conditional rate limit | Not in harness | **GAP** |
 
-## EN-SG-01..08 — recommended next design (test-first, no product change yet)
+## EN-SG-01..08 — test-first, no product change yet
 
 1. Locate original Part H.2 rows for exact inputs (project library matrix).
 2. For 01–04: frontend/render tests if browser-first; do not claim API coverage alone.
 3. For 05–08: parser rejection tests with audit hooks (`file_access_probe` / `process_launch_probe`) asserting zero open/exec attempts.
 4. Do not implement until exact matrix literals are versioned beside the test.
 
-## Counts
+## Execution record — 2026-10-27
 
-- PARTIAL: 16
-- GAP: 16
-- PASS (matrix-complete): 0
+- Added an EN-SG-03 frontend regression in `frontend/src/__tests__/MathRenderer.test.tsx`: a supplied HTML `img/onerror` payload must fall back to a literal text node; no `img` or `svg` node may appear.
+- Test commit: `58a395306cf90bfee81c2e5ae79c58ebf3105a85`.
+- Corrected `.github/workflows/ci.yml` branch filters in Plus (commit `50fd09331f46122048ff479d099bfcb12b5faec5`) and Lite (commit `0f84d5a18a7684677fb1046efd1d75dc429990f3`) to include the verified canonical branch. Previously CI push filters named `main`, `master`, and `qa/exhaustive-suite-module-01`, but omitted `qa/syntax-audit-in625-a1`.
+- The available workflow-run lookup returned no runs for these SHAs and the commit-status lookup returned no statuses. The run-list connector is PR-only; this is **not evidence that push CI passed or failed**. Inspect the actual Actions page/run for each SHA before promoting EN-SG-03.
+- No production service was targeted and no extreme payloads were run.
 
-## Next action
+## Counts and next action
 
-Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314` until gap rows have either mapped existing tests with exact matrix literals or new tests after contract check. Parallel candidate: SECURITY-S25 only with local npm.
+- PARTIAL (existing API/harness evidence): 15
+- GAP (unimplemented or not matrix-complete): 16
+- PENDING EXECUTION: 1 (EN-SG-03)
+- Matrix-complete PASS: 0
+
+Next: retrieve and inspect the CI run triggered on Plus SHA `50fd09331f46122048ff479d099bfcb12b5faec5` and Lite SHA `0f84d5a18a7684677fb1046efd1d75dc429990f3`; verify the Plus frontend job executed the new EN-SG-03 test. Then continue EN-SG-01/02/04..08 using exact source-matrix literals. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314` until evidence is reconciled. Parallel candidate: SECURITY-S25 only with local npm.
