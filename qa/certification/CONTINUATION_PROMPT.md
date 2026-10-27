@@ -99,3 +99,50 @@ Resolver README de main y luego `continuity.json` + `CONTINUITY.md`. Verificar H
 
 - En revisión del commit r294 se detectó que el patrón regex del guard decimal quedó con escapes duplicados por la serialización del cambio (`\\d` literal), por lo que no activaría la protección. Se corrige a `\d+\.\d+` en el código Python. Esta revisión de código se hizo antes de aceptar el resultado de S18; el run de r294 no debe considerarse validación del fix.
 - La corrección de presentación y la regresión HTTP permanecen focalizadas en el contraejemplo S18. El siguiente commit debe demostrar que el guard se activa y que CI/S18 terminan; no repetir S19 completo ni aceptar gates solo por estado queued. Certificación global OPEN; S19 BLOCKED; S25 global BLOCKED; AS-B-29 ON_HOLD; SG28 H2 BLOCKED; PR #29 abierto/draft.
+
+
+## Política obligatoria de descubrimiento de capacidades y selección dinámica de rutas
+
+Esta política cambia únicamente **cómo** se ejecutan las operaciones; no cambia los requisitos, las matrices, los contratos, los oráculos, los umbrales, las reglas de seguridad ni los criterios de aceptación existentes. Si esta sección parece entrar en conflicto con una regla de certificación, prevalecen los requisitos de certificación y seguridad ya establecidos.
+
+### Descubrimiento de capacidades por sesión
+
+Al iniciar cada sesión, identifica qué herramientas, conectores, credenciales y permisos están realmente disponibles. Distingue entre capacidad confirmada, capacidad aún no probada y capacidad no disponible. No presupongas que otra cuenta o sesión del mismo modelo tiene las mismas capacidades. No declares imposible una operación solo porque no conozcas la herramienta; inspecciona las herramientas disponibles y prueba una vía autorizada de forma controlada. Nunca inventes credenciales ni eludas controles de acceso.
+
+### Orden preferente de rutas
+
+Evalúa estas rutas en el siguiente orden, pasando rápidamente a la siguiente cuando la anterior no esté disponible o no pueda completar la operación:
+
+1. **Acceso directo al repositorio:** credenciales/herramientas Git o GitHub para consultar, editar, crear commits y publicar en la rama autorizada.
+2. **Acceso directo al Runner:** utilizar su interfaz autorizada cuando permita preparar/publicar el cambio o ejecutar la operación requerida.
+3. **Bridge:** transmitir la operación mediante el intermediario documentado cuando la ruta directa al repositorio o al Runner no sea viable.
+4. **API_GPT:** utilizar la API documentada como alternativa para las sesiones con restricciones mayores, dentro de sus permisos y capacidades reales.
+
+Este orden es preferente, no una obligación de insistir indefinidamente. Se puede comenzar en una ruta posterior cuando la evidencia confirme que las anteriores no están disponibles o son incompatibles con la operación. Registrar la ruta elegida y los fallos relevantes, sin repetir intentos inútiles.
+
+### La selección de ruta no reduce los criterios
+
+- Conserva la rama canónica, la comprobación de HEAD, `expected_sha`/compare-and-swap y la protección contra sobrescrituras concurrentes.
+- Conserva el protocolo RUN / WAIT / REUSE / DIAGNOSE / REVIEW, la comparación de huellas, la verificación de SHA, jobs, pasos y logs, y las reglas de no repetir gates verdes o fallos sin cambios relevantes.
+- No omitas gates, pruebas, revisiones de seguridad, criterios contractuales ni pruebas de regresión por haber encontrado una ruta más fácil.
+- No publiques cambios fuera de la rama autorizada, no habilites funciones protegidas ni despliegues o fusiones fuera de los permisos ya concedidos.
+- No generes commits vacíos, cambios artificiales ni marcadores `[skip ci]`/`[ci skip]` para activar Actions. Los cambios documentales deben seguir las reglas existentes de filtros; los cambios técnicos deben activar y verificar sus gates pertinentes.
+- Un commit aceptado por GitHub, una respuesta HTTP 2xx o un workflow SUCCESS con pasos omitidos/reutilizados no demuestra por sí solo que se ejecutó el recorrido integral.
+
+### Salvaguarda obligatoria: validación diaria end-to-end
+
+La salvaguarda diaria sigue siendo obligatoria e independiente de la ruta seleccionada. En cada día de trabajo debe existir evidencia comprobable de una validación integral del recorrido:
+
+`PUSH / evento autorizado → API → Bridge → Runner → resultado verificado`
+
+La evidencia debe identificar, como mínimo: fecha/hora, repositorio, rama, SHA, identificador de correlación/ejecución, evento de activación, resultado de cada etapa, jobs y logs revisados, estado de idempotencia y enlace a la evidencia original. Debe confirmarse que el Runner procesó la tarea y que el resultado final coincide con lo esperado; la mera aceptación de la solicitud no es PASS.
+
+Antes de lanzar una nueva validación, consulta el registro compartido y los runs reales. Reutiliza evidencia diaria solo si el SHA, las huellas de los insumos, la revisión de aceptación y las versiones/configuraciones pertinentes siguen siendo válidos y no hubo cambios que la invaliden. Si falta evidencia vigente, ejecuta la validación integral por el mecanismo autorizado y evita duplicar una corrida equivalente en curso.
+
+La validación integral debe utilizar un push real asociado a un cambio coherente cuando exista tal cambio. Si no existe un cambio legítimo, **no fabriques un commit ni modifiques archivos artificialmente**: utiliza el mecanismo autorizado de activación no mutante que exista para probar el recorrido y registra explícitamente que no se necesitó un nuevo push. Esta excepción evita contradecir la prohibición vigente de commits artificiales; no permite omitir la validación diaria.
+
+Si API, Bridge, Runner, persistencia, credenciales o permisos impiden completar la prueba, registra `BLOCKED` o `FAILED`, la etapa exacta y la condición necesaria para reanudar. No declares PASS integral ni certificación global cerrada por una prueba parcial. El estado global de certificación permanece el que determine la evidencia canónica, no esta política.
+
+### Registro y continuidad entre LLM
+
+Registrar en `continuity.json` el estado de la política, la última evidencia integral verificada (o la ausencia de ella), el SHA y la única siguiente acción. Mantener sincronizados Lite y Plus y no sobrescribir la tarea canónica existente. El siguiente LLM debe consultar este registro y GitHub antes de repetir una operación. La política de rutas es común a todas las sesiones, pero cada sesión debe descubrir sus capacidades reales nuevamente.
