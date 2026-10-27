@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 323,
+  "revision": 324,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
@@ -34,9 +34,9 @@
   "next_action": {
     "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
     "status": "IN_PROGRESS",
-    "action": "Bridge parked. Verified Plus CI 40597214760 SUCCESS: backend regression, typecheck, unit/parity and production build. Cumulative gate 40597214983, H1d reentry 40597214683, native syntax/recovery 40597214718 and Certification Runner 40597214724 all SUCCESS. Security workflow 40597214739 completed but security job SKIPPED (not PASS); SECURITY-S25 remains BLOCKED. EN-SG-03 synthetic regression passes but stays PARTIAL until exact source matrix literal is recovered. Next: recover exact H.2 source literals before adding EN-SG-01/02/04..08 tests. Global OPEN.",
+    "action": "Bridge parked. Plus renderer guard and synthetic EN-SG-03 regression are verified by CI run 40597214760. Recovered exact original H.2 source from Matrices.zip: matriz_entrada_sintaxis_calculadora.md, SHA-256 58fbc0ed04aef158148981fc28074d470e45ec07a67604f89b3847b55c625528, lines 864–901. Added exact EN-SG-03 literal regression in commit 2e755ecdd8fef3536f8f4a7076aff961eea15cab; CI 40599001729 plus cumulative 40599001638, H1d 40599001704, native syntax 40599001743 are IN_PROGRESS at time of record. Do not duplicate these runs. Security workflow 40599001902 completed SUCCESS but its security job is SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. Next: inspect the existing runs and then implement only confirmed EN-SG-01/02/04..08 gaps from exact literals. Global OPEN.",
     "previous_id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "updated_utc": "2026-10-27T23:50:00Z"
+    "updated_utc": "2026-10-27T23:02:00Z"
   },
   "blockers": [
     {
@@ -125,8 +125,10 @@
       "EN-SG-28",
       "EN-SG-32"
     ],
-    "pending_execution": []
+    "pending_execution": [
+      "EN-SG-03 exact-source regression; Plus CI 40599001729 in progress"
+    ]
   },
-  "ledger_note": "r323 motor-only scope; Bridge parked. Lite CI 40596658330 SUCCESS. Plus CI 40597214760, cumulative 40597214983, H1d 40597214683, native syntax 40597214718, runner 40597214724 SUCCESS. Security job in 40597214739 SKIPPED, not PASS. EN-SG-03 remains PARTIAL pending exact source literal. Global OPEN.",
+  "ledger_note": "r324 motor-only scope; Bridge parked. Lite CI 40596658330 SUCCESS. Plus CI 40599001729, cumulative 40599001638, H1d 40599001704, native syntax 40599001743 IN_PROGRESS on exact-source regression commit 2e755ecdd8fef3536f8f4a7076aff961eea15cab. Security job in 40599001902 SKIPPED, not PASS. Exact H.2 source recovered from Matrices.zip; EN-SG-03 remains PARTIAL pending exact-source CI. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add."
 }
