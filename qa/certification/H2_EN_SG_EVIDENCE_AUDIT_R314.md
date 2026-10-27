@@ -17,14 +17,14 @@
 
 | ID | Level | Matrix theme | Evidence source | Classification |
 |----|-------|--------------|-----------------|----------------|
-| EN-SG-01 | N1 | HTML script invalid/escape/no exec | No dedicated harness row | **GAP** |
-| EN-SG-02 | N1 | HTML image event | No dedicated harness row | **GAP** |
+| EN-SG-01 | N1 | `<script>alert(1)</script>` → escaped text, no execution | Exact-input frontend regression added in `frontend/src/__tests__/MathRenderer.test.tsx`; Unit/parity passed in CI `40601412886` on `9d13cd39227839099c1809ddd2c4eeed32ee4842`; backend job still running | **PARTIAL** (frontend evidence; full CI pending) |
+| EN-SG-02 | N1 | `<img src=x onerror=alert(1)>` → escaped text, no execution | Exact-input frontend regression added in `frontend/src/__tests__/MathRenderer.test.tsx`; Unit/parity passed in CI `40601412886` on `9d13cd39227839099c1809ddd2c4eeed32ee4842`; backend job still running | **PARTIAL** (frontend evidence; full CI pending) |
 | EN-SG-03 | N2 | `x^{2}\text{<b>hola</b>}` → literal, no bold/tags | Synthetic `img/onerror` regression plus exact-source regression in `frontend/src/__tests__/MathRenderer.test.tsx`; source `Matrices.zip` / `matriz_entrada_sintaxis_calculadora.md`, SHA-256 `58fbc0ed04aef158148981fc28074d470e45ec07a67604f89b3847b55c625528`; exact-source test commit `2e755ecdd8fef3536f8f4a7076aff961eea15cab`; Plus CI `40599001729` is IN_PROGRESS | **PARTIAL** (exact source now traced; CI evidence pending) |
-| EN-SG-04 | N2 | Unsafe LaTeX hyperlink | No dedicated harness row | **GAP** |
-| EN-SG-05 | N2 | URL/image/HTML macros blocked | No dedicated harness row | **GAP** |
-| EN-SG-06 | N2 | Recursive macro definition | No dedicated harness row | **GAP** |
-| EN-SG-07 | N2 | New macros/alias/catcode error | No dedicated harness row | **GAP** |
-| EN-SG-08 | N2 | File/shell macros never open files | Probes exist; not matrix-row tests | **GAP** (probe-only) |
+| EN-SG-04 | N2 | `\\href{javascript:alert(1)}{x}` | Exact-input test added; no `javascript:` anchor asserted; CI `40601412886` Unit/parity SUCCESS, backend job pending | **PARTIAL** (frontend only) |
+| EN-SG-05 | N2 | `\\url`, `\\includegraphics`, `\\htmlClass`, `\\htmlStyle` | Exact-input tests added; assertions currently check active HTML and `javascript:` links, not yet that safe URL anchors are absent; CI `40601412886` Unit/parity SUCCESS | **PARTIAL** (assertions need tightening) |
+| EN-SG-06 | N2 | `\\def\\a{\\a}\\a` | Exact-input regression added; CI `40601412886` Unit/parity SUCCESS; no dedicated timeout/recovery assertion yet | **PARTIAL** |
+| EN-SG-07 | N2 | `\\newcommand`, `\\let`, `\\catcode` | Exact-input regressions added; CI `40601412886` Unit/parity SUCCESS; clear-error expectations not yet fully asserted | **PARTIAL** |
+| EN-SG-08 | N2 | `\\input`, `\\include`, `\\write18`, `\\openin` | Exact-input frontend regressions added; CI `40601412886` Unit/parity SUCCESS; file-access/process probes are not connected to these matrix rows | **GAP** (no file/exec probe evidence) |
 | EN-SG-09 | N3 | Python introspection/exec rejection | `test_in625_h2_rejects_python_constructs…` | **PARTIAL** (API reject) |
 | EN-SG-10 | N3 | Python file read rejection | same | **PARTIAL** |
 | EN-SG-11 | N3 | Python class introspection | same | **PARTIAL** |
@@ -50,13 +50,13 @@
 | EN-SG-31 | N3 | 5 MiB → 413 | `sg31` tests | **PARTIAL** |
 | EN-SG-32 | N3 | Burst + conditional rate limit | Not in harness | **GAP** |
 
-## EN-SG-01..08 — test-first, no product change yet
+## EN-SG-01..08 — exact-input frontend regression batch
 
 1. Original Part H.2 source recovered from `Matrices.zip`: `matriz_entrada_sintaxis_calculadora.md`, SHA-256 `58fbc0ed04aef158148981fc28074d470e45ec07a67604f89b3847b55c625528`, rows EN-SG-01..32 at source lines 864–901.
-2. EN-SG-03 now has a regression using the exact original literal; Plus CI `40599001729` on SHA `2e755ecdd8fef3536f8f4a7076aff961eea15cab` must finish before classification changes.
+2. EN-SG-03 exact-source regression passed in Plus CI `40599001729` (typecheck, Unit/parity and production build all SUCCESS).
 3. For 01–04: frontend/render tests if browser-first; do not claim API coverage alone.
 4. For 05–08: parser rejection tests with audit hooks (`file_access_probe` / `process_launch_probe`) asserting zero open/exec attempts.
-5. Do not implement other rows until their exact source literals and expectations are versioned beside their tests.
+5. Current frontend batch commit: `9d13cd39227839099c1809ddd2c4eeed32ee4842`; CI `40601412886` has Typecheck, Unit/parity and production build SUCCESS, backend job pending. Strengthen EN-SG-05 to assert `\\url` produces no anchor; do not claim EN-SG-08 PASS without file/process probes.
 
 ## Execution record — 2026-10-27
 
@@ -68,9 +68,9 @@
 
 ## Counts and next action
 
-- PARTIAL (existing API/harness evidence, including synthetic EN-SG-03): 17
-- GAP (unimplemented or not matrix-complete): 15
-- PENDING EXECUTION: 1 (EN-SG-03 exact-source frontend regression; Plus CI `40599001729` in progress)
-- Matrix-complete PASS: 0
+- PARTIAL: 21 (including frontend-only evidence for EN-SG-01/02/04..07)
+- GAP: 8 (including EN-SG-08 and cases without sufficient matrix evidence)
+- PENDING EXECUTION: 1 (Plus CI `40601412886` backend job still running)
+- Matrix-complete PASS: 1 (EN-SG-03 exact frontend behavior)
 
-Next: exact H.2 source literals have been recovered and EN-SG-03's exact-source regression was committed at `2e755ecdd8fef3536f8f4a7076aff961eea15cab`; wait for Plus CI `40599001729` and inspect its Unit/parity step before classifying. Then implement tests for EN-SG-01/02/04..08 from source literals, only after checking existing coverage. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314`. Security job in dependency/security workflow `40597214739` was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. No production stress tests.
+Next: finish CI `40601412886`; strengthen EN-SG-05 with a no-anchor assertion; add file-access/process-launch probes for EN-SG-08; only then address Runner orchestration mismatches. Exact-source EN-SG-03 is PASS for frontend render behavior; global certification remains OPEN. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314`. Security job in dependency/security workflow `40597214739` was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. No production stress tests.
