@@ -1,3 +1,5 @@
+> **Política operativa añadida — 2026-10-26.** El Prompt único `qa/certification/CONTINUATION_PROMPT.md` ahora exige descubrir capacidades reales por sesión y evaluar las rutas en orden preferente: acceso directo al repositorio → Runner → Bridge → API_GPT. Esto modifica el mecanismo de ejecución, no los criterios técnicos, matrices, contratos, oráculos ni aceptación. La salvaguarda diaria end-to-end sigue obligatoria: PUSH/evento autorizado → API → Bridge → Runner → resultado verificado. El índice `continuity.json` registra la política en versión `2026-10-26-dynamic-routes-daily-e2e-v1`; la validación integral aún figura `NOT_YET_VERIFIED` y no se inventa evidencia. No se alteró la tarea canónica siguiente ni el estado global OPEN. No crear commits artificiales: si no hay cambio legítimo, utilizar un trigger no mutante autorizado para probar el recorrido.
+
 ## 2026-10-24 UTC — r291: revalidación automática posterior a documentación
 
 - Tras commits de documentación, PR #29 disparó nuevamente workflows en SHA `91ab2cfaf5a85f4c5a504a078eae361be702b16b`; no fue una campaña focalizada del plan r290.
