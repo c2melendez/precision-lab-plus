@@ -482,3 +482,12 @@
 - `technical_baseline_sha` se fija al SHA probado `676f36ed2ca9566f5b37d27dd4c4f43065133f82`. Este commit posterior solo actualiza CURRENT_STATE, EXECUTION_LOG y continuity.json, rutas excluidas del fingerprint.
 - Siguiente objetivo: **H2-EN-SG-CASE-EVIDENCE-AUDIT-R314**, inventario EN-SG-01..32 por test, archivo, ejecución exacta y clasificación PASS/FAIL/GAP/MANUAL. Verificar cobertura sin etiquetas antes de escribir tests; añadir solo pruebas test-first para GAP confirmados. Mantener `SG28_EVALUATE_ISOLATION` desactivada en producción y no relanzar gates verdes por rutina.
 - Global OPEN; SECURITY-S25 BLOCKED; ALGEBRA229-AS-B-29 ON_HOLD; EDCX-B5 BLOCKED; SY-X-04-PLUS-HTTP BLOCKED; SG28 multinodo OUT_OF_SCOPE_SINGLE_HOST (no PASS).
+
+## 2026-10-26 — Política de rutas dinámicas y salvaguarda diaria end-to-end
+
+- Se actualizó `qa/certification/CONTINUATION_PROMPT.md` sin eliminar ni reemplazar sus criterios previos.
+- Orden preferente por sesión: acceso directo al repositorio → Runner → Bridge → API_GPT; cambiar de ruta cuando la anterior no sea viable, registrando la restricción real.
+- Se reafirmó la salvaguarda diaria: PUSH/evento autorizado → API → Bridge → Runner → resultado verificable, con SHA, run/jobs/logs, idempotencia y evidencia final.
+- La política prohíbe commits vacíos/artificiales, gates omitidos y PASS sin ejecución comprobada. Si no hay cambio legítimo, el mecanismo autorizado no mutante debe validar la ruta sin fabricar un push.
+- `continuity.json` registra versión `2026-10-26-dynamic-routes-daily-e2e-v1`, estado `NOT_YET_VERIFIED`, sin evidencias inventadas. La certificación global sigue OPEN y se conserva la siguiente acción canónica existente.
+- Cambio documental; no se despacharon manualmente workflows ni se declaró certificación operativa.
