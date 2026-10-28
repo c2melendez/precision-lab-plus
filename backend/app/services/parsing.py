@@ -717,7 +717,21 @@ _TRANSFORMATIONS = standard_transformations + (
 def _parse_side(side_text: str, local_dict: Dict[str, object]) -> sympy.Expr:
     from app.services import ast_validator  # import diferido: evita ciclo con parsing.py
 
+    # EN-SG-25: SymPy's factorial_notation transform calls factorial(n) during
+    # parse_expr, so `1000000!` built an 18.5-Mbit integer (~7 s) before the
+    # AST limits could run. Bound the literal argument from the source text;
+    # this keeps the rejection cheap and turns a misleading DOMAIN_ERROR into
+    # an explicit COMPLEXITY_LIMIT.
+    for digits in re.findall(r"(?<![A-Za-z0-9_.])(\d+)\s*!", side_text):
+        normalized_digits = digits.lstrip("0") or "0"
+        if len(normalized_digits) > 4 or int(normalized_digits) > ast_validator.MAX_FACTORIAL_INTEGER_ARGUMENT:
+            raise ast_validator.ComplexityLimitError(
+                "Factorial fuera de rango (máx. "
+                f"{ast_validator.MAX_FACTORIAL_INTEGER_ARGUMENT}): {digits}."
+            )
+
     global_dict = build_minimal_global_dict()
+
     try:
         with warnings.catch_warnings():
             # Suprime el SymPyDeprecationWarning de "Tuple dentro de Mul"

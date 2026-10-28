@@ -13,6 +13,12 @@ MAX_AST_NODES = 200
 MAX_AST_DEPTH = 30
 MAX_INTEGER_LITERAL_DIGITS = 64
 MAX_ABS_INTEGER_EXPONENT = 10_000
+# EN-SG-25: an unevaluated factorial keeps a small AST, so the node/depth
+# limits do not bound its cost. `1000000!` took ~8 s before failing with a
+# misleading DOMAIN_ERROR; reject the argument before SymPy builds the
+# integer. 1000! (2,568 digits) is computed in microseconds and no matrix
+# case above 170! relies on larger arguments.
+MAX_FACTORIAL_INTEGER_ARGUMENT = 1_000
 
 
 class ComplexityLimitError(ValueError):
@@ -108,12 +114,17 @@ def check_complexity_limits(expr: sympy.Basic) -> None:
             )
 
         if node.is_Integer:
-            digit_count = len(str(abs(int(node))))
+            # Estimate digits from the binary size: str() on an astronomically
+            # large integer raises ValueError (Python's 4,300-digit guard)
+            # instead of reporting the limit, e.g. after factual evaluation.
+            magnitude = abs(int(node))
+            digit_count = 1 if magnitude == 0 else int(magnitude.bit_length() * 0.30103) + 1
             if digit_count > MAX_INTEGER_LITERAL_DIGITS:
                 raise ComplexityLimitError(
                     f"Literal entero con demasiados dígitos (máx. "
                     f"{MAX_INTEGER_LITERAL_DIGITS}): {digit_count}."
                 )
+
 
         if node.is_Pow:
             _base, exponent = node.args
@@ -138,6 +149,20 @@ def check_complexity_limits(expr: sympy.Basic) -> None:
                 raise ComplexityLimitError(
                     f"Exponente entero fuera de rango (máx. "
                     f"{MAX_ABS_INTEGER_EXPONENT} en valor absoluto): {exponent}."
+                )
+
+        # EN-SG-25: bound an unevaluated factorial by its argument, not by
+        # the AST size, so the limit is reached before integer construction.
+        if isinstance(node, sympy.Function) and node.func is sympy.factorial:
+            argument = node.args[0] if node.args else None
+            if (
+                argument is not None
+                and argument.is_Integer
+                and int(argument) > MAX_FACTORIAL_INTEGER_ARGUMENT
+            ):
+                raise ComplexityLimitError(
+                    "Factorial fuera de rango (máx. "
+                    f"{MAX_FACTORIAL_INTEGER_ARGUMENT}): {argument}."
                 )
 
         for child in node.args:

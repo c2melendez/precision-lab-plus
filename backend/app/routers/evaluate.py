@@ -53,11 +53,29 @@ def _render_evaluate_presentation(result, source_expression=None):
             and result.expr.has(sympy.exp)
             and result.approx_value is not None
         )
+        # EN-SG-26: sympy.simplify() on a symbolic power with a large integer
+        # exponent is unbounded and dominated the whole request
+        # ((x+1)^1000 ~5 s; (x+1)^10000 did not finish in 60 s with the
+        # default route). The exact expression is already canonical for
+        # display, so only skip simplification when that cost is expected.
+        large_symbolic_power = any(
+            atom.is_Pow
+            and atom.exp.is_Integer
+            and abs(int(atom.exp)) > _MAX_SIMPLIFY_POWER_EXPONENT
+            for atom in sympy.preorder_traversal(result.expr)
+        )
+        if large_symbolic_power:
+            warnings.append(
+                "Presentación sin simplificar: potencia simbólica de exponente elevado."
+            )
         display_expr = (
             sympy.Float(result.approx_value)
             if decimal_exponential
+            else result.expr
+            if large_symbolic_power
             else sympy.simplify(result.expr)
         )
+
     except Exception:
         display_expr = result.expr
 
@@ -145,6 +163,8 @@ def _render_evaluate_presentation(result, source_expression=None):
 router = APIRouter(tags=["evaluate"])
 
 _MAX_RESULT_LATEX_LENGTH = 10_000
+# EN-SG-26: bound the presentation-time simplify() for symbolic powers.
+_MAX_SIMPLIFY_POWER_EXPONENT = 200
 
 
 def _duration_ms(request: Request) -> float:

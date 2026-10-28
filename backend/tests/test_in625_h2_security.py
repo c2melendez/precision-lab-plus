@@ -386,3 +386,117 @@ def test_in625_h2_sg08_file_and_shell_macros_are_rejected_without_side_effects(c
     assert result.get("error_code") == "PARSE_ERROR", (case_id, result)
     assert file_attempts == [], (case_id, file_attempts)
     assert process_attempts == [], (case_id, process_attempts)
+
+
+# --- H2 N3 resource-bound tranche (EN-SG-21, 23, 24, 25, 26, 27) -------------
+# These are in-process rejection/bound checks. They do not exercise a browser,
+# a production deployment, or extreme concurrent load (see H2 matrix gate).
+
+def _timed_evaluate(expression, timeout_budget):
+    import time
+
+    started = time.monotonic()
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": expression, "angle_unit": "rad"},
+    )
+    elapsed = time.monotonic() - started
+    assert elapsed < timeout_budget, (
+        f"{expression!r} took {elapsed:.2f}s (budget {timeout_budget}s)"
+    )
+    return response
+
+
+@pytest.mark.parametrize("case_id, expression", [
+    ("EN-SG-23 exponential tower", "10^(10^10)"),
+    ("EN-SG-23 exponential tower **", "10**(10**10)"),
+    ("EN-SG-24 9^(9^9)", "9^(9^9)"),
+    ("EN-SG-27 nested power of two above bound", "2^(2^10000)"),
+])
+def test_in625_h2_sg23_sg24_sg27_astronomical_powers_are_rejected_before_evaluation(
+    case_id, expression
+):
+    """Matrix rows 23/24/27: symbolic value or explicit error, never a hang."""
+    response = _timed_evaluate(expression, timeout_budget=2.0)
+    assert response.status_code == 200, (case_id, response.text[:200])
+    result = response.json()
+    assert result.get("success") is False, (case_id, result)
+    assert result.get("error_code") == "COMPLEXITY_LIMIT", (case_id, result)
+    assert result.get("error_message"), (case_id, result)
+    assert "traceback" not in response.text.lower(), case_id
+
+
+@pytest.mark.parametrize("case_id, expression, expected_text", [
+    ("EN-SG-27 2^(2^(2^2))", "2^(2^(2^2))", "65536"),
+])
+def test_in625_h2_sg27_bounded_nested_powers_keep_exact_value(
+    case_id, expression, expected_text
+):
+    response = _timed_evaluate(expression, timeout_budget=2.0)
+    assert response.status_code == 200, (case_id, response.text[:200])
+    result = response.json()
+    assert result.get("success") is True, (case_id, result)
+    assert result.get("result_text") == expected_text, (case_id, result)
+
+
+def test_in625_h2_sg27_too_large_display_is_omitted_without_crash():
+    """A tower whose integer cannot be printed warns instead of failing or hanging."""
+    response = _timed_evaluate("2^(2^(2^(2^2)))", timeout_budget=2.0)
+    assert response.status_code == 200, response.text[:200]
+    result = response.json()
+    assert result.get("success") is True, result
+    assert result.get("result_latex") is None, result
+    assert any("demasiado grande" in warning for warning in result.get("warnings", [])), result
+    assert "traceback" not in response.text.lower()
+
+
+def test_in625_h2_sg25_huge_factorial_hits_a_clear_limit_quickly():
+    """Matrix row 25: 1000000! needs a clear limit, not 8 s plus DOMAIN_ERROR."""
+    response = _timed_evaluate("1000000!", timeout_budget=2.0)
+    assert response.status_code == 200, response.text[:200]
+    result = response.json()
+    assert result.get("success") is False, result
+    assert result.get("error_code") == "COMPLEXITY_LIMIT", result
+    assert "actorial" in str(result.get("error_message")), result
+
+
+def test_in625_h2_sg25_certified_factorials_still_succeed():
+    """Regression guard: certified 100!/170! rows must keep their exact result."""
+    for expression in ("100!", "170!", "5!", "0!"):
+        response = _timed_evaluate(expression, timeout_budget=3.0)
+        assert response.status_code == 200, (expression, response.text[:200])
+        result = response.json()
+        assert result.get("success") is True, (expression, result)
+        assert result.get("result_text"), (expression, result)
+
+
+def test_in625_h2_sg26_symbolic_power_10000_is_bounded():
+    """Matrix row 26: (x+1)^10000 must not spend minutes in presentation."""
+    response = _timed_evaluate("(x+1)^10000", timeout_budget=3.0)
+    assert response.status_code == 200, response.text[:200]
+    result = response.json()
+    if result.get("success") is False:
+        assert result.get("error_code") == "COMPLEXITY_LIMIT", result
+    else:
+        # Exact unevaluated power is an acceptable bounded presentation.
+        assert "10000" in str(result.get("result_text")), result
+        assert "traceback" not in response.text.lower(), result
+
+    # Recovery: the service must answer normally right after the heavy case.
+    after = client.post("/api/v1/evaluate", json={"expression": "2+3", "angle_unit": "rad"})
+    assert after.status_code == 200 and after.json().get("result_text") == "5", after.text[:200]
+
+
+def test_in625_h2_sg21_ten_thousand_terms_meet_the_request_length_contract():
+    """Matrix row 21 conflicts with the 500-character request contract.
+
+    A literal 10,000-term sum is 19,999 characters, so the API rejects it at
+    the validation boundary (422 VALIDATION_ERROR) before any timing budget
+    can apply. This test records the boundary; it is not a PASS for row 21.
+    """
+    expression = "+".join(["1"] * 10_000)
+    response = _timed_evaluate(expression, timeout_budget=2.0)
+    assert response.status_code == 422, response.text[:200]
+    body = response.json()
+    assert body.get("error_code") == "VALIDATION_ERROR", body
+    assert "500" in str(body.get("error_message")), body
