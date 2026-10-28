@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 333,
+  "revision": 336,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "bd1742bd217d4b265d33f6d108098f04b5a789f9",
@@ -10,33 +10,27 @@
   "gates": {
     "cumulative": {
       "workflow": ".github/workflows/in625-cumulative-certification.yml",
-      "inputs": [
-        "*"
-      ],
+      "inputs": ["*"],
       "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "h1d": {
       "workflow": ".github/workflows/in625-h1d-reentry.yml",
-      "inputs": [
-        "*"
-      ],
+      "inputs": ["*"],
       "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "security": {
       "workflow": ".github/workflows/certification-dependency-gates.yml",
-      "inputs": [
-        "*"
-      ],
+      "inputs": ["*"],
       "acceptance_revision": "2026-10-16-continuity-v1",
       "allow_reuse": false
     }
   },
   "next_action": {
     "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "status": "IN_PROGRESS",
-    "action": "EN-SG-06/07 certified PASS (scoped frontend DOM) on SHA bd1742bd: product pins KaTeX maxExpand=1000 and exposes data-render-fallback; tests assert <2s bound, syntax fallback for recursive \\def/\\newcommand/\\catcode, inert/safe path for \\let, and finite-macro regression. Frontend job of CI 40651541570 SUCCESS (typecheck, Unit/parity, production build). Gaps remaining: EN-SG-21 (500-char contract), EN-SG-28 (UI stop/recovery), EN-SG-32 (no rate limiter). SECURITY-S25 stays BLOCKED pending bilateral acceptance. Global OPEN.",
+    "status": "DONE",
+    "action": "R314 closed. EN-SG-21 PASS (scoped request-length contract, max_length=500 kept). EN-SG-28 OUT_OF_SCOPE (no UI stop; preemptive bounds). EN-SG-32 OUT_OF_SCOPE (no rate limiter; single-host). Final: PASS scoped 14, PARTIAL 16, OUT_OF_SCOPE 2, GAP 0. Document: H2_EN_SG_EVIDENCE_AUDIT_R314.md. SECURITY-S25 remains BLOCKED pending bilateral acceptance. Global OPEN.",
     "previous_id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "updated_utc": "2026-10-28T07:45:00Z"
+    "updated_utc": "2026-10-28T21:28:00Z"
   },
   "blockers": [
     {
@@ -87,47 +81,15 @@
     }
   ],
   "h2_en_sg_evidence_audit_r314": {
-    "status": "PARTIAL",
+    "status": "COMPLETE",
     "document": "qa/certification/H2_EN_SG_EVIDENCE_AUDIT_R314.md",
-    "covered_or_partial": [
-      "EN-SG-01",
-      "EN-SG-02",
-      "EN-SG-03",
-      "EN-SG-04",
-      "EN-SG-05",
-      "EN-SG-06",
-      "EN-SG-07",
-      "EN-SG-08",
-      "EN-SG-09",
-      "EN-SG-10",
-      "EN-SG-11",
-      "EN-SG-12",
-      "EN-SG-13",
-      "EN-SG-14",
-      "EN-SG-15",
-      "EN-SG-16",
-      "EN-SG-17",
-      "EN-SG-18",
-      "EN-SG-19",
-      "EN-SG-20",
-      "EN-SG-22",
-      "EN-SG-23",
-      "EN-SG-24",
-      "EN-SG-25",
-      "EN-SG-26",
-      "EN-SG-27",
-      "EN-SG-29",
-      "EN-SG-30",
-      "EN-SG-31"
-    ],
-    "gap": [
-      "EN-SG-21",
-      "EN-SG-28",
-      "EN-SG-32"
-    ],
+    "pass_scoped": ["EN-SG-01", "EN-SG-02", "EN-SG-03", "EN-SG-04", "EN-SG-05", "EN-SG-06", "EN-SG-07", "EN-SG-08", "EN-SG-21", "EN-SG-23", "EN-SG-24", "EN-SG-25", "EN-SG-26", "EN-SG-27"],
+    "partial": ["EN-SG-09", "EN-SG-10", "EN-SG-11", "EN-SG-12", "EN-SG-13", "EN-SG-14", "EN-SG-15", "EN-SG-16", "EN-SG-17", "EN-SG-18", "EN-SG-19", "EN-SG-20", "EN-SG-22", "EN-SG-29", "EN-SG-30", "EN-SG-31"],
+    "out_of_scope": ["EN-SG-28", "EN-SG-32"],
+    "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r333 motor-only. EN-SG-06/07 PASS (scoped frontend DOM) on SHA bd1742bd / CI 40651541570 frontend SUCCESS: maxExpand=1000 pinned, data-render-fallback signal, <2s bound, syntax fallback for recursive macros, inert path for \\let. Gaps: 21/28/32. SECURITY-S25 BLOCKED (bilateral). Global OPEN.",
+  "ledger_note": "r336 motor-only. H2 EN-SG R314 CLOSED: EN-SG-21 PASS scoped length contract (max_length=500 kept); EN-SG-28 OUT_OF_SCOPE; EN-SG-32 OUT_OF_SCOPE. PASS scoped 14 / PARTIAL 16 / OUT_OF_SCOPE 2 / GAP 0. SECURITY-S25 BLOCKED bilateral. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
