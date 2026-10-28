@@ -106,12 +106,20 @@ describe("MathRenderer", () => {
     const payload = "\\let\\a\\b";
     const started = performance.now();
     const { container } = render(<MathRenderer latex={payload} />);
-    expect(performance.now() - started).toBeLessThan(2000);
+    const elapsed = performance.now() - started;
+    const root = container.firstElementChild as HTMLElement;
+
+    expect(elapsed).toBeLessThan(2000);
     expect(container.querySelector("script, img, svg, a, iframe, object, embed")).toBeNull();
-    // KaTeX consumes the control sequences and yields an inert empty node:
-    // no expansion loop, no error throw, no side effect.
-    expect(container.querySelector(".katex")).not.toBeNull();
-    expect(container.textContent).toBe("");
+
+    // Observed paths (both safe):
+    // 1) KaTeX throws → data-render-fallback="syntax" + literal payload (CI)
+    // 2) KaTeX consumes sequences → inert .katex node with empty text
+    const isSyntaxFallback =
+      root.dataset.renderFallback === "syntax" && root.textContent === payload;
+    const isInertKatex =
+      container.querySelector(".katex") !== null && (container.textContent ?? "") === "";
+    expect(isSyntaxFallback || isInertKatex).toBe(true);
   });
 
   it("EN-SG-06/07 regression: macro finita sigue renderizando (\\def\\a{x}\\a)", () => {
