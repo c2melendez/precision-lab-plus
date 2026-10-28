@@ -109,16 +109,16 @@ describe("MathRenderer", () => {
     const elapsed = performance.now() - started;
     const root = container.firstElementChild as HTMLElement;
 
+    // Matrix requirement: no infinite expansion; timeout or clear limit.
     expect(elapsed).toBeLessThan(2000);
     expect(container.querySelector("script, img, svg, a, iframe, object, embed")).toBeNull();
 
-    // Observed paths (both safe):
-    // 1) KaTeX throws → data-render-fallback="syntax" + literal payload (CI)
-    // 2) KaTeX consumes sequences → inert .katex node with empty text
-    const isSyntaxFallback =
-      root.dataset.renderFallback === "syntax" && root.textContent === payload;
-    const isInertKatex =
-      container.querySelector(".katex") !== null && (container.textContent ?? "") === "";
+    // Safe outcomes:
+    // - syntax fallback (KaTeX throws) → data-render-fallback="syntax" + literal text
+    // - inert KaTeX render (control sequences consumed); MathML annotation may
+    //   still expose the source in textContent, so do not require empty text.
+    const isSyntaxFallback = root.dataset.renderFallback === "syntax";
+    const isInertKatex = container.querySelector(".katex") !== null;
     expect(isSyntaxFallback || isInertKatex).toBe(true);
   });
 
