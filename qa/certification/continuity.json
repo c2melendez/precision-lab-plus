@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 336,
+  "revision": 337,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "bd1742bd217d4b265d33f6d108098f04b5a789f9",
@@ -26,11 +26,11 @@
     }
   },
   "next_action": {
-    "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
+    "id": "SECURITY-S25-BILATERAL-ACCEPTANCE",
     "status": "DONE",
-    "action": "R314 closed. EN-SG-21 PASS (scoped request-length contract, max_length=500 kept). EN-SG-28 OUT_OF_SCOPE (no UI stop; preemptive bounds). EN-SG-32 OUT_OF_SCOPE (no rate limiter; single-host). Final: PASS scoped 14, PARTIAL 16, OUT_OF_SCOPE 2, GAP 0. Document: H2_EN_SG_EVIDENCE_AUDIT_R314.md. SECURITY-S25 remains BLOCKED pending bilateral acceptance. Global OPEN.",
+    "action": "SECURITY-S25 ACCEPTED_BILATERAL. Plus independent green on technical baseline bd1742bd (CI 40651541570 + dependency/security gates, npm audit high, pip-audit, Bandit, test_s25_deployment_security). Lite independent green on 11f8a5f4 (CI 40765520289, npm audit 0). Explicit bilateral acceptance recorded 2026-10-28; no joint run required under single-host policy. allow_reuse remains false. Global OPEN.",
     "previous_id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "updated_utc": "2026-10-28T21:28:00Z"
+    "updated_utc": "2026-10-28T21:36:00Z"
   },
   "blockers": [
     {
@@ -40,7 +40,8 @@
     },
     {
       "id": "SECURITY-S25",
-      "status": "BLOCKED"
+      "status": "ACCEPTED_BILATERAL",
+      "detail": "2026-10-28 bilateral acceptance. Plus bd1742bd + Lite 11f8a5f4 independent green gates. allow_reuse=false retained."
     },
     {
       "id": "SY-P-23",
@@ -89,7 +90,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r336 motor-only. H2 EN-SG R314 CLOSED: EN-SG-21 PASS scoped length contract (max_length=500 kept); EN-SG-28 OUT_OF_SCOPE; EN-SG-32 OUT_OF_SCOPE. PASS scoped 14 / PARTIAL 16 / OUT_OF_SCOPE 2 / GAP 0. SECURITY-S25 BLOCKED bilateral. Global OPEN.",
+  "ledger_note": "r337 motor-only. SECURITY-S25 ACCEPTED_BILATERAL (Plus bd1742bd + Lite 11f8a5f4 independent green). H2 EN-SG R314 CLOSED. Global OPEN. Remaining blockers: SY-X-04-PLUS-HTTP, EDCX-B5, ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST OUT_OF_SCOPE_SINGLE_HOST.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
