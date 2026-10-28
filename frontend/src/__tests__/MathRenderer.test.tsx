@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { MathRenderer } from "../components/MathRenderer";
+import { MathRenderer, MAX_KATEX_EXPANSIONS } from "../components/MathRenderer";
 
 describe("MathRenderer", () => {
   it("renderiza LaTeX válido vía katex.renderToString (HTML generado por KaTeX)", () => {
@@ -55,6 +55,8 @@ describe("MathRenderer", () => {
     expect(container.querySelector("script, img, svg")).toBeNull();
     expect(container.textContent).toBe(payload);
     expect(screen.getByText(payload)).toBeInTheDocument();
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.dataset.renderFallback).toBe("markup");
   });
 
   it("EN-SG-04: href con javascript no produce enlace ejecutable", () => {
@@ -69,10 +71,6 @@ describe("MathRenderer", () => {
     ["EN-SG-05 includegraphics", "\\includegraphics{x.png}"],
     ["EN-SG-05 htmlClass", "\\htmlClass{a}{x}"],
     ["EN-SG-05 htmlStyle", "\\htmlStyle{color:red}{x}"],
-    ["EN-SG-06 recursive def", "\\def\\a{\\a}\\a"],
-    ["EN-SG-07 recursive newcommand", "\\newcommand{\\a}{\\a}\\a"],
-    ["EN-SG-07 let", "\\let\\a\\b"],
-    ["EN-SG-07 catcode", "\\catcode"],
     ["EN-SG-08 input", "\\input{/etc/passwd}"],
     ["EN-SG-08 include", "\\include{x}"],
     ["EN-SG-08 write18", "\\write18{ls}"],
@@ -81,5 +79,45 @@ describe("MathRenderer", () => {
     const { container } = render(<MathRenderer latex={payload} />);
     expect(container.querySelector("script, img, iframe, object, embed")).toBeNull();
     expect(container.querySelector("a")).toBeNull();
+  });
+
+  // EN-SG-06 / EN-SG-07: recursion bound + clear fallback (no infinite expansion).
+  it.each([
+    ["EN-SG-06 recursive def", "\\def\\a{\\a}\\a"],
+    ["EN-SG-06 recursive def duplicate", "\\def\\x{\\x\\x}\\x"],
+    ["EN-SG-07 recursive newcommand", "\\newcommand{\\a}{\\a}\\a"],
+    ["EN-SG-07 catcode", "\\catcode"],
+  ])("%s: expansión acotada, fallback literal y señal data-render-fallback=syntax", (_id, payload) => {
+    const started = performance.now();
+    const { container } = render(<MathRenderer latex={payload} />);
+    const elapsed = performance.now() - started;
+
+    expect(elapsed).toBeLessThan(2000);
+    expect(MAX_KATEX_EXPANSIONS).toBe(1000);
+
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.dataset.renderFallback).toBe("syntax");
+    expect(container.querySelector("script, img, svg, a, iframe, object, embed")).toBeNull();
+    expect(container.querySelector(".katex")).toBeNull();
+    expect(root.textContent).toBe(payload);
+  });
+
+  it("EN-SG-07 let: alias de macro no se expande ni ejecuta nada (inert, acotado)", () => {
+    const payload = "\\let\\a\\b";
+    const started = performance.now();
+    const { container } = render(<MathRenderer latex={payload} />);
+    expect(performance.now() - started).toBeLessThan(2000);
+    expect(container.querySelector("script, img, svg, a, iframe, object, embed")).toBeNull();
+    // KaTeX consumes the control sequences and yields an inert empty node:
+    // no expansion loop, no error throw, no side effect.
+    expect(container.querySelector(".katex")).not.toBeNull();
+    expect(container.textContent).toBe("");
+  });
+
+  it("EN-SG-06/07 regression: macro finita sigue renderizando (\\def\\a{x}\\a)", () => {
+    const { container } = render(<MathRenderer latex={"\\def\\a{x}\\a"} />);
+    expect(container.querySelector(".katex")).not.toBeNull();
+    expect(container.textContent).toContain("x");
+    expect((container.firstElementChild as HTMLElement).dataset.renderFallback).toBeUndefined();
   });
 });
