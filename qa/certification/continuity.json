@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 338,
+  "revision": 339,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "1e4c52930057a6fc6fb3796327af3c8e5b095c50",
@@ -26,11 +26,11 @@
     }
   },
   "next_action": {
-    "id": "SY-X-04-PLUS-HTTP",
+    "id": "EDCX-B5-OUT-OF-SCOPE",
     "status": "DONE",
-    "action": "SY-X-04-PLUS-HTTP PASS (scoped request-length contract + functional subset). Canonical 500-term sum rejected at max_length=500 (422 VALIDATION_ERROR). Functional subset (200 terms) yields equivalent of 200x. Recovery after oversize rejection verified. Tests: backend/tests/test_sy_x04_http.py on SHA 1e4c5293. Aligns with EN-SG-21 length-contract decision. Global OPEN.",
-    "previous_id": "SECURITY-S25-BILATERAL-ACCEPTANCE",
-    "updated_utc": "2026-10-28T21:52:00Z"
+    "action": "EDCX-B5 (VC-LG-01..25) declared OUT_OF_SCOPE (capability). No locus/region description endpoint or semantic output exists in Plus (only residue/singularities). Documented in qa/certification/EDCX_B5_CAPABILITY_GAP.md. Parity with Lite NO_EJECUTADO. Global OPEN.",
+    "previous_id": "SY-X-04-PLUS-HTTP",
+    "updated_utc": "2026-10-28T23:07:00Z"
   },
   "blockers": [
     {
@@ -59,9 +59,9 @@
     },
     {
       "id": "EDCX-B5",
-      "status": "BLOCKED",
+      "status": "OUT_OF_SCOPE",
       "kind": "capability",
-      "detail": "VC-LG-01..25 sin canal/endpoint."
+      "detail": "2026-10-28. VC-LG-01..25 geometric loci. No channel/endpoint for locus/region description. Documented EDCX_B5_CAPABILITY_GAP.md. Not FAIL."
     },
     {
       "id": "S19-BACKEND-MUTATION",
@@ -91,7 +91,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r338. SY-X-04-PLUS-HTTP PASS_SCOPED (length contract + functional subset; test_sy_x04_http.py). SECURITY-S25 ACCEPTED_BILATERAL. H2 EN-SG R314 CLOSED. Global OPEN. Remaining: EDCX-B5 BLOCKED, ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST OUT_OF_SCOPE_SINGLE_HOST.",
+  "ledger_note": "r339. EDCX-B5 (VC-LG-01..25) OUT_OF_SCOPE (capability). No locus/region description endpoint. Document EDCX_B5_CAPABILITY_GAP.md. SY-X-04-PLUS-HTTP PASS_SCOPED. SECURITY-S25 ACCEPTED_BILATERAL. H2 EN-SG R314 CLOSED. Global OPEN. Remaining: ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST OUT_OF_SCOPE_SINGLE_HOST, EDCX-B6 REVIEW.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
@@ -108,6 +108,7 @@
     "qa/certification/EDCX_B6_ROW_CONTRACT_DRAFT.md",
     "qa/certification/EDCX_B6_HTTP_CONTRACT_FINDINGS.md",
     "qa/certification/EDCX_B6_ADAPTER_ORACLE_PLAN.md",
+    "qa/certification/EDCX_B5_CAPABILITY_GAP.md",
     "qa/certification/S19_BACKEND_MUTATION_REVIEW_R288.md",
     "qa/certification/S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md",
     "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md",
