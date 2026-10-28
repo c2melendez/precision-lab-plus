@@ -88,7 +88,7 @@ The 10 new tests pass locally in 1.71 s, and CI backend reported exactly +10 tes
 
 Frontend evidence for EN-SG-01/02/04/05 is the `MathRenderer.test.tsx` batch (20 tests) inside the same frontend job; it asserts the exact payload is rendered as a text node with no `script/img/svg` and, for `\href`, no anchor at all. This is jsdom DOM evidence, not a real-browser session.
 
-Scope limits: no production service was targeted; no real-browser E2E; EN-SG-21/28/32 remain open; the security/backend-security job of [40609140075](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140075) passed (pip-audit + Bandit + CORS/security regressions) but SECURITY-S25 stays BLOCKED because its exit condition requires explicit bilateral acceptance and Lite's npm audit gate is still red.
+Scope limits: no production service was targeted; no real-browser E2E; EN-SG-21/28/32 remain open. Workflow [40609140075](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140075) concluded SUCCESS on `29fc1295`: `security / backend-security` passed (pip-audit + Bandit + CORS/security regressions), `security / frontend-audit` was skipped by path scope, and `mutation / plus-backend-mutmut` succeeded (that result is S19 campaign evidence, not H2 certification). SECURITY-S25 nevertheless stays BLOCKED: its exit condition requires explicit bilateral acceptance and Lite's npm audit hard gate is still red.
 
 ## Execution record — 2026-10-27 (r314)
 

@@ -2,7 +2,7 @@
 ## 2026-10-28 UTC - r332: cotas de recurso EN-SG-23/24/25/26/27 y certificación por fila
 
 - SHA `29fc1295d7087a40a34b2a7b611cf73a76e96df3`. Plus CI [40609140000](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140000) SUCCESS: backend 2,721 passed, 1 skipped, 10 xfailed, 88.78% de cobertura; frontend 150 archivos / 1,053 tests, 28 todo. Acumulativo [40609140346](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140346) SUCCESS.
-- Workflow [40609140075](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140075): `security / backend-security` SUCCESS con pip-audit de runtime, Bandit medium/high y regresiones de seguridad/CORS. `frontend-audit` skipped por alcance de rutas. No se interpreta como cierre de SECURITY-S25.
+- Workflow [40609140075](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140075) concluyó SUCCESS: `security / backend-security` SUCCESS con pip-audit de runtime, Bandit medium/high y regresiones de seguridad/CORS; `frontend-audit` skipped por alcance de rutas; `plus-backend-mutmut` SUCCESS (evidencia S19, no H2). No se interpreta como cierre de SECURITY-S25.
 - Producto: límite de factorial 1000 + estimación de dígitos por bits (`ast_validator.py`), pre-chequeo de factorial en `parsing.py` y `_MAX_SIMPLIFY_POWER_EXPONENT = 200` en `evaluate.py`.
 - Medición: `1000000!` de 7.96 s con `DOMAIN_ERROR` a `COMPLEXITY_LIMIT` en <2 s; `(x+1)^10000` de >60 s a ~13 ms con potencia exacta sin evaluar y aviso; `2^(2^(2^2))` = `65536`; `2^(2^(2^(2^2)))` con `result_latex=null` y aviso; torres astronómicas siguen en `COMPLEXITY_LIMIT`.
 - 10 regresiones nuevas en `backend/tests/test_in625_h2_security.py`; el backend pasó de 2,711 a 2,721 tests, lo que confirma su ejecución en CI.
