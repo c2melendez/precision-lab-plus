@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "revision": 331,
+  "revision": 332,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "676f36ed2ca9566f5b37d27dd4c4f43065133f82",
+  "technical_baseline_sha": "29fc1295d7087a40a34b2a7b611cf73a76e96df3",
   "baseline_case": "EDCX-B3-POWERS-ROOTS-R262",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
@@ -34,9 +34,9 @@
   "next_action": {
     "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
     "status": "IN_PROGRESS",
-    "action": "Plus CI 40602481512 frontend and backend jobs both SUCCESS; probe-backed EN-SG-08 regression passed (file/process probes report no side effects for tested macros). Plus cumulative gate 40602481756 SUCCESS. Lite CI 40602548219 remains blocked at npm audit hard gate: 4 LOW advisories (deepmerge prototype poisoning GHSA-gcqx-w48m-w2h4 propagates through @rollup/plugin-node-resolve/workbox-build/vite-plugin-pwa; npm suggests a major-version downgrade to vite-plugin-pwa 0.2.1, not applied). Lite typecheck/unit/build were skipped. Lite cumulative gate 40602548264 SUCCESS but does not replace failed CI. Runner retries succeeded in both repos. Keep SECURITY-S25 BLOCKED because security job 40601719418 was SKIPPED. Global OPEN.",
+    "action": "Plus CI 40609140000 SUCCESS on 29fc1295 (backend 2,721 passed/1 skipped/10 xfailed, 88.78% coverage; frontend 150 files/1,053 passed); cumulative 40609140346 SUCCESS. Certification dependency/security workflow 40609140075: security/backend-security SUCCESS (pip-audit runtime + Bandit medium/high + security/CORS regressions); frontend-audit skipped by path scope, mutation jobs separate. EN-SG evidence advanced and certified at row level: EN-SG-23/24/27 reject astronomical powers with COMPLEXITY_LIMIT before evaluation (<2 s), EN-SG-27 keeps 2^(2^(2^2))=65536 exact and omits oversized display with a warning, EN-SG-25 rejects 1000000!/1000! with an explicit factorial limit in <2 s while certified 100!/170!/171!/5!/0! stay exact, EN-SG-26 bounds (x+1)^10000 to ~13 ms with an exact unevaluated power plus presentation warning, and EN-SG-21 is recorded as a 422 VALIDATION_ERROR contract boundary (still GAP). EN-SG-01/02/04/05 certified as PASS (scoped frontend DOM) by the MathRenderer batch. Range(en_sg)=11 PASS scoped, 18 PARTIAL, 3 GAP (21/28/32). Keep SECURITY-S25 BLOCKED: bilateral exit condition plus Lite npm audit hard gate (deepmerge LOW) still red; Lite CI and LITE-SEC-DEEPMERGE-IMPLEMENTATION-R321 remain pending. Global OPEN.",
     "previous_id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "updated_utc": "2026-10-27T23:40:00Z"
+    "updated_utc": "2026-10-28T01:20:00Z"
   },
   "blockers": [
     {
@@ -90,7 +90,12 @@
     "status": "PARTIAL",
     "document": "qa/certification/H2_EN_SG_EVIDENCE_AUDIT_R314.md",
     "covered_or_partial": [
+      "EN-SG-01",
+      "EN-SG-02",
       "EN-SG-03",
+      "EN-SG-04",
+      "EN-SG-05",
+      "EN-SG-08",
       "EN-SG-09",
       "EN-SG-10",
       "EN-SG-11",
@@ -104,30 +109,25 @@
       "EN-SG-19",
       "EN-SG-20",
       "EN-SG-22",
-      "EN-SG-29",
-      "EN-SG-30",
-      "EN-SG-31",
-      "EN-SG-08"
-    ],
-    "gap": [
-      "EN-SG-01",
-      "EN-SG-02",
-      "EN-SG-04",
-      "EN-SG-05",
-      "EN-SG-06",
-      "EN-SG-07",
-      "EN-SG-21",
       "EN-SG-23",
       "EN-SG-24",
       "EN-SG-25",
       "EN-SG-26",
       "EN-SG-27",
+      "EN-SG-29",
+      "EN-SG-30",
+      "EN-SG-31"
+    ],
+    "gap": [
+      "EN-SG-06",
+      "EN-SG-07",
+      "EN-SG-21",
       "EN-SG-28",
       "EN-SG-32"
     ],
     "pending_execution": []
   },
-  "ledger_note": "r331 motor-only. Plus CI 40602481512 frontend+backend SUCCESS; EN-SG-08 probe-backed backend test passed. Plus cumulative gate 40602481756 SUCCESS. Lite CI 40602548219 FAILED at hard npm audit gate (4 LOW vulnerabilities); typecheck/unit/build skipped. Lite cumulative gate 40602548264 SUCCESS but not substitute for CI. Runner retries both repos SUCCESS. SECURITY-S25 remains BLOCKED; global OPEN.",
+  "ledger_note": "r332 motor-only. Plus CI 40609140000 SUCCESS on 29fc1295 (backend 2,721 passed; frontend 1,053 passed) and cumulative 40609140346 SUCCESS. Security backend job of 40609140075 SUCCESS (pip-audit + Bandit + security/CORS regressions); frontend-audit skipped by path scope. EN-SG row-level certification advanced: 23/24/25/26/27 PASS (scoped backend API) with certified-factorial regression guards; 01/02/04/05 PASS (scoped frontend DOM); 21/28/32 remain GAP; 06/07 and 09..20/22/29..31 PARTIAL. SECURITY-S25 remains BLOCKED (bilateral exit condition; Lite npm audit hard gate red on deepmerge LOW). Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",

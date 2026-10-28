@@ -1,6 +1,6 @@
 # H2 EN-SG evidence audit R314 (Plus)
 
-**Status:** PARTIAL · **As of:** 2026-10-27 UTC
+**Status:** PARTIAL · **As of:** 2026-10-28 UTC · **Last certified SHA:** `29fc1295d7087a40a34b2a7b611cf73a76e96df3`
 **Canonical branch:** `qa/syntax-audit-in625-a1`
 **Primary matrix:** `qa/certification/IN625_H2_MATRIX.md` (inventory, not PASS results)
 **Primary harness:** `backend/tests/test_in625_h2_security.py` (in-process TestClient)
@@ -12,16 +12,18 @@
 - A green unit/API rejection is not global certification PASS for H2.
 - Browser XSS/escape and UI stop/recovery require distinct evidence (not only API).
 - A test added but not executed by the relevant CI run remains pending; do not promote it to PASS.
+- `PASS (scoped ...)` is row-level only: it states what the cited job actually executed. It never closes H2 or the global certification.
+- Product bounds introduced to satisfy a row are certified together with regression guards for already-certified behavior on the same surface (e.g. certified factorials).
 
 ## Traceability
 
 | ID | Level | Matrix theme | Evidence source | Classification |
 |----|-------|--------------|-----------------|----------------|
-| EN-SG-01 | N1 | `<script>alert(1)</script>` → escaped text, no execution | Exact-input frontend regression added in `frontend/src/__tests__/MathRenderer.test.tsx`; Unit/parity passed in CI `40601412886` on `9d13cd39227839099c1809ddd2c4eeed32ee4842`; backend job still running | **PARTIAL** (frontend evidence; full CI pending) |
-| EN-SG-02 | N1 | `<img src=x onerror=alert(1)>` → escaped text, no execution | Exact-input frontend regression added in `frontend/src/__tests__/MathRenderer.test.tsx`; Unit/parity passed in CI `40601412886` on `9d13cd39227839099c1809ddd2c4eeed32ee4842`; backend job still running | **PARTIAL** (frontend evidence; full CI pending) |
+| EN-SG-01 | N1 | `<script>alert(1)</script>` → escaped text, no execution | Exact-payload DOM regression in `frontend/src/__tests__/MathRenderer.test.tsx` asserts no `script/img/svg` node and exact text node; executed in Plus CI `40609140000` (backend 2,721 passed / frontend 1,053 passed, SHA `29fc1295`) | **PASS (scoped frontend DOM)** (jsdom render only; no real-browser session) |
+| EN-SG-02 | N1 | `<img src=x onerror=alert(1)>` → escaped text, no execution | Same regression batch; asserts no `script/img/svg` node and exact text node; executed in Plus CI `40609140000` (backend 2,721 passed / frontend 1,053 passed, SHA `29fc1295`) | **PASS (scoped frontend DOM)** (jsdom render only; no real-browser session) |
 | EN-SG-03 | N2 | `x^{2}\text{<b>hola</b>}` → literal, no bold/tags | Exact-source frontend regression passed in Plus CI `40599001729` (typecheck, Unit/parity and production build SUCCESS); original source SHA-256 `58fbc0ed04aef158148981fc28074d470e45ec07a67604f89b3847b55c625528` | **PASS** (exact frontend render behavior verified) |
-| EN-SG-04 | N2 | `\href{javascript:alert(1)}{x}` | Exact-input regression asserts no anchor; follow-up no-anchor assertion in commit `2db9e7b1d15c49b22299d4007cfda01959c67efc`; CI `40601719487` Unit/parity and production build SUCCESS, backend job pending | **PARTIAL** (frontend only, latest assertion pending CI) |
-| EN-SG-05 | N2 | `\url`, `\includegraphics`, `\htmlClass`, `\htmlStyle` | Exact-input regressions assert no anchor or active HTML; follow-up commit `2db9e7b1d15c49b22299d4007cfda01959c67efc`; CI `40601719487` Unit/parity and production build SUCCESS, backend job pending | **PARTIAL** (frontend only; no file/process probe) |
+| EN-SG-04 | N2 | `\href{javascript:alert(1)}{x}` | Regression asserts no anchor and no script node for the exact payload; executed in Plus CI `40609140000` (backend 2,721 passed / frontend 1,053 passed, SHA `29fc1295`) | **PASS (scoped frontend DOM)** |
+| EN-SG-05 | N2 | `\url`, `\includegraphics`, `\htmlClass`, `\htmlStyle` | Four exact-payload regressions assert no anchor and no `script/img/iframe/object/embed`; executed in Plus CI `40609140000` (backend 2,721 passed / frontend 1,053 passed, SHA `29fc1295`) | **PASS (scoped frontend DOM)** |
 | EN-SG-06 | N2 | `\\def\\a{\\a}\\a` | Exact-input regression added; CI `40601412886` Unit/parity SUCCESS; no dedicated timeout/recovery assertion yet | **PARTIAL** |
 | EN-SG-07 | N2 | `\\newcommand`, `\\let`, `\\catcode` | Exact-input regressions added; CI `40601412886` Unit/parity SUCCESS; clear-error expectations not yet fully asserted | **PARTIAL** |
 | EN-SG-08 | N2 | `\\input{/etc/passwd}`, `\\include{x}`, `\\write18{ls}`, `\\openin1=x` | Backend probe-backed test in `backend/tests/test_in625_h2_security.py`, using `file_access_probe.py` and `process_launch_probe.py`; CI `40602481512` backend tests SUCCESS (2,711 passed, 1 skipped, 10 xfailed; 88.82% coverage) | **PASS** (probe-backed backend regression passed in CI `40602481512`; frontend checks/build also passed) |
@@ -37,13 +39,13 @@
 | EN-SG-18 | N3 | Reserved words inert | multiple `sg18` tests | **PARTIAL** |
 | EN-SG-19 | N2 | 50 parens → 1 | `sg19_sg20` test | **PARTIAL** |
 | EN-SG-20 | N3 | 1000 parens controlled depth | 422 at `max_length=500` | **PARTIAL** (boundary, not depth guard) |
-| EN-SG-21 | N3 | Sum of 10k terms <2s | Not in harness | **GAP** (no extreme load in prod) |
+| EN-SG-21 | N3 | Sum of 10k terms <2s | `test_in625_h2_sg21_ten_thousand_terms_meet_the_request_length_contract`; a literal 10,000-term sum is 19,999 characters, so the 500-character request contract rejects it with 422 `VALIDATION_ERROR` before any timing budget applies | **GAP** (product/contract conflict recorded; not a PASS) |
 | EN-SG-22 | N3 | ~100k char input | oversized expression → 422 | **PARTIAL** |
-| EN-SG-23 | N3 | 10^(10^10) | Not in harness | **GAP** |
-| EN-SG-24 | N3 | 9^(9^9) | Not in harness | **GAP** |
-| EN-SG-25 | N3 | Factorial 1e6 | Not in harness | **GAP** |
-| EN-SG-26 | N3 | (x+1)^10000 | Not in harness | **GAP** |
-| EN-SG-27 | N3 | Nested powers of 2 | Not in harness | **GAP** |
+| EN-SG-23 | N3 | 10^(10^10) | `test_in625_h2_sg23_sg24_sg27_astronomical_powers_are_rejected_before_evaluation`; `10^(10^10)` and `10**(10**10)` return 200 with `success=false`, `COMPLEXITY_LIMIT`, no traceback, under a 2 s budget; executed in Plus CI `40609140000` (backend 2,721 passed / frontend 1,053 passed, SHA `29fc1295`) | **PASS (scoped backend API)** |
+| EN-SG-24 | N3 | 9^(9^9) | Same parametrized test; `9^(9^9)` returns 200 with `COMPLEXITY_LIMIT` before evaluation, under a 2 s budget; executed in Plus CI `40609140000` (backend 2,721 passed / frontend 1,053 passed, SHA `29fc1295`) | **PASS (scoped backend API)** |
+| EN-SG-25 | N3 | Factorial 1e6 | `test_in625_h2_sg25_huge_factorial_hits_a_clear_limit_quickly` (1000000! → `COMPLEXITY_LIMIT`, under 2 s) plus `test_in625_h2_sg25_certified_factorials_still_succeed` (100!/170!/5!/0! still exact); executed in Plus CI `40609140000` (backend 2,721 passed / frontend 1,053 passed, SHA `29fc1295`) | **PASS (scoped backend API)** |
+| EN-SG-26 | N3 | (x+1)^10000 | `test_in625_h2_sg26_symbolic_power_10000_is_bounded`; returns 200 in ~13 ms with the exact unevaluated power (`\left(x + 1\right)^{10000}`), a presentation warning, no traceback, and the service answers `2+3=5` immediately afterwards; executed in Plus CI `40609140000` (backend 2,721 passed / frontend 1,053 passed, SHA `29fc1295`) | **PASS (scoped backend API)** |
+| EN-SG-27 | N3 | Nested powers of 2 | Three tests: rejection above the bound (`2^(2^10000)` → `COMPLEXITY_LIMIT`), exact value below it (`2^(2^(2^2))` = `65536`), and overflow display (`2^(2^(2^(2^2)))` → `success=true`, `result_latex=null`, explicit "demasiado grande" warning, no crash); executed in Plus CI `40609140000` (backend 2,721 passed / frontend 1,053 passed, SHA `29fc1295`) | **PASS (scoped backend API)** |
 | EN-SG-28 | N3 | Stop long calc + recovery | SG28 interrupt/cancel tests only | **GAP** (UI not closed) |
 | EN-SG-29 | N3 | 20 concurrent + last input | backend ThreadPool test | **PARTIAL** (no frontend) |
 | EN-SG-30 | N3 | JSON special characters | multiple sg30 tests | **PARTIAL** |
@@ -56,9 +58,39 @@
 2. EN-SG-03 exact-source regression passed in Plus CI `40599001729` (typecheck, Unit/parity and production build all SUCCESS).
 3. For 01–04: frontend/render tests if browser-first; do not claim API coverage alone.
 4. For 05–08: parser rejection tests with audit hooks (`file_access_probe` / `process_launch_probe`) asserting zero open/exec attempts.
-5. Frontend test batch commit `9d13cd39227839099c1809ddd2c4eeed32ee4842` passed Typecheck, Unit/parity and production build in CI `40601412886`; backend job was still running. Follow-up commit `2db9e7b1d15c49b22299d4007cfda01959c67efc` strengthens EN-SG-04/05 by asserting no anchors at all; its CI must be inspected before promoting those cases. Do not claim EN-SG-08 PASS without file/process probes.
+5. Frontend test batch commit `9d13cd39227839099c1809ddd2c4eeed32ee4842` passed Typecheck, Unit/parity and production build in CI `40601412886`; backend job was still running. Follow-up commit `2db9e7b1d15c49b22299d4007cfda01959c67efc` strengthens EN-SG-04/05 by asserting no anchors at all. That evidence is now certified: CI `40609140000` executed `MathRenderer.test.tsx` (20 tests) with 150 files / 1,053 tests passing, so EN-SG-01/02/04/05 are `PASS (scoped frontend DOM)`. EN-SG-06/07 stay PARTIAL: the batch only proves no active HTML is produced, not recursion timeout or a clear error message. EN-SG-08 PASS still rests on the file/process probes, not on the render batch.
 
-## Execution record — 2026-10-27
+## Execution record — 2026-10-28 (r332)
+
+Commit `29fc1295d7087a40a34b2a7b611cf73a76e96df3` (`fix(h2): bound EN-SG-25/26 resource cases and add N3 regression tranche`) on the canonical branch, certified by Plus CI [40609140000](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140000) (backend + frontend SUCCESS; backend 2,721 passed, 1 skipped, 10 xfailed, 88.78% coverage; frontend 150 files / 1,053 passed, 28 todo) and cumulative gate [40609140346](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140346) SUCCESS.
+
+Observed behavior before the change (local probes at the parent SHA, in-process TestClient, no production target):
+
+| Input | Before | After |
+|---|---|---|
+| `10^(10^10)`, `9^(9^9)`, `2^(2^10000)` | `COMPLEXITY_LIMIT` | `COMPLEXITY_LIMIT` (now asserted in CI) |
+| `1000000!` | 7.96 s, then `DOMAIN_ERROR` | `COMPLEXITY_LIMIT` with an explicit factorial message in <2 s |
+| `1000!` | slow path | `COMPLEXITY_LIMIT` (literal exceeds the 64-digit rule) |
+| `(x+1)^10000` | hung >60 s in presentation | 13 ms, exact unevaluated power + presentation warning |
+| `(x+1)^201` | full `sympy.simplify()` | exact unevaluated power + same warning (guard threshold 200) |
+| `2^(2^(2^2))` | `65536` | `65536` |
+| `2^(2^(2^(2^2)))` | result too large warning | unchanged: `success=true`, `result_latex=null`, explicit warning |
+
+Product changes (test-first, minimal, no DDL, no permission change):
+
+1. `backend/app/services/ast_validator.py` — factorial argument limit `1000` and a bit-length-based digit estimate so huge factorials are rejected before evaluation.
+2. `backend/app/services/parsing.py` — text-level factorial pre-check in `_parse_side` so the rejection happens at parse time, with the same user-facing code.
+3. `backend/app/routers/evaluate.py` — `_MAX_SIMPLIFY_POWER_EXPONENT = 200`: symbolic integer powers above that magnitude skip `sympy.simplify()` in presentation and emit `Presentación sin simplificar: potencia simbólica de exponente elevado.`
+
+Regression tranche (10 tests appended to `backend/tests/test_in625_h2_security.py`): EN-SG-23/24/27 pre-evaluation rejection with a 2 s budget, EN-SG-27 exactness at `65536`, EN-SG-27 overflow-display omission with warning, EN-SG-25 clear limit, EN-SG-25 certified factorials (`100!`, `170!`, `5!`, `0!`, `171!` through the finite-aggregate path), EN-SG-26 bounded symbolic power plus recovery (`2+3=5`), and EN-SG-21 recorded as a 422 `VALIDATION_ERROR` contract boundary.
+
+The 10 new tests pass locally in 1.71 s, and CI backend reported exactly +10 tests over the previous run `40602481512` (2,711 → 2,721 passed).
+
+Frontend evidence for EN-SG-01/02/04/05 is the `MathRenderer.test.tsx` batch (20 tests) inside the same frontend job; it asserts the exact payload is rendered as a text node with no `script/img/svg` and, for `\href`, no anchor at all. This is jsdom DOM evidence, not a real-browser session.
+
+Scope limits: no production service was targeted; no real-browser E2E; EN-SG-21/28/32 remain open; the security/backend-security job of [40609140075](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140075) passed (pip-audit + Bandit + CORS/security regressions) but SECURITY-S25 stays BLOCKED because its exit condition requires explicit bilateral acceptance and Lite's npm audit gate is still red.
+
+## Execution record — 2026-10-27 (r314)
 
 - Added an EN-SG-03 frontend regression in `frontend/src/__tests__/MathRenderer.test.tsx`: a supplied HTML `img/onerror` payload must fall back to a literal text node; no `img` or `svg` node may appear.
 - Test commit: `58a395306cf90bfee81c2e5ae79c58ebf3105a85`.
@@ -68,9 +100,9 @@
 
 ## Counts and next action
 
-- PARTIAL: 22 (including frontend-only evidence for EN-SG-01/02/04..07)
-- GAP: 8 (EN-SG-08 moved to pending execution; remaining cases lack sufficient matrix evidence)
-- PENDING EXECUTION: 1 (EN-SG-08 probe-backed backend regression; CI `40602481512` backend and frontend jobs SUCCESS)
-- Matrix-complete PASS: 1 (EN-SG-03 exact frontend behavior)
+- PASS (scoped): 11 — EN-SG-01, 02, 03, 04, 05, 08, 23, 24, 25, 26, 27. Each one is bounded to the cited job and the tested surface.
+- PARTIAL: 18 — EN-SG-06, 07, 09..20, 22, 29, 30, 31.
+- GAP: 3 — EN-SG-21 (request contract conflict), EN-SG-28 (UI stop/recovery), EN-SG-32 (no rate limiter exists).
+- PENDING EXECUTION: none.
 
-Next: inspect the SG08 probe-backed test run; the Runner now fingerprints push events and no longer exposes a misleading cross-repository `both` option. Cross-repository fan-out remains unimplemented; dispatch once per repository. Exact-source EN-SG-03 is PASS for frontend render behavior; global certification remains OPEN. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314`. Security job in dependency/security workflow `40597214739` was SKIPPED, not PASS; SECURITY-S25 remains BLOCKED. No production stress tests. CI `40602481512` completed with frontend and backend SUCCESS; EN-SG-08 is PASS for the tested file/process side-effect assertions only. Remaining matrix rows and global certification stay OPEN.
+Next: continue with EN-SG-06/07 (recursion timeout and clear-error assertions) and EN-SG-09..20 deeper side-effect probes, then EN-SG-31/32 boundary work. EN-SG-28 needs frontend stop/recovery evidence and EN-SG-21 needs a contract decision on the 500-character request limit; neither may be forced green. Keep `next_action` = `H2-EN-SG-CASE-EVIDENCE-AUDIT-R314`. SECURITY-S25 remains BLOCKED (bilateral, Lite npm audit red); global certification remains OPEN. No production stress tests.

@@ -1,3 +1,16 @@
+
+## 2026-10-28 UTC - r332: cotas de recurso EN-SG-23/24/25/26/27 y certificación por fila
+
+- SHA `29fc1295d7087a40a34b2a7b611cf73a76e96df3`. Plus CI [40609140000](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140000) SUCCESS: backend 2,721 passed, 1 skipped, 10 xfailed, 88.78% de cobertura; frontend 150 archivos / 1,053 tests, 28 todo. Acumulativo [40609140346](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140346) SUCCESS.
+- Workflow [40609140075](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140075): `security / backend-security` SUCCESS con pip-audit de runtime, Bandit medium/high y regresiones de seguridad/CORS. `frontend-audit` skipped por alcance de rutas. No se interpreta como cierre de SECURITY-S25.
+- Producto: límite de factorial 1000 + estimación de dígitos por bits (`ast_validator.py`), pre-chequeo de factorial en `parsing.py` y `_MAX_SIMPLIFY_POWER_EXPONENT = 200` en `evaluate.py`.
+- Medición: `1000000!` de 7.96 s con `DOMAIN_ERROR` a `COMPLEXITY_LIMIT` en <2 s; `(x+1)^10000` de >60 s a ~13 ms con potencia exacta sin evaluar y aviso; `2^(2^(2^2))` = `65536`; `2^(2^(2^(2^2)))` con `result_latex=null` y aviso; torres astronómicas siguen en `COMPLEXITY_LIMIT`.
+- 10 regresiones nuevas en `backend/tests/test_in625_h2_security.py`; el backend pasó de 2,711 a 2,721 tests, lo que confirma su ejecución en CI.
+- Auditoría `H2_EN_SG_EVIDENCE_AUDIT_R314.md`: EN-SG-23/24/25/26/27 PASS (scoped backend API); EN-SG-01/02/04/05 PASS (scoped frontend DOM); recuento 11 PASS con alcance / 18 PARTIAL / 3 GAP (21, 28, 32).
+- EN-SG-21 no se cierra: la suma literal de 10,000 términos excede el contrato de 500 caracteres y devuelve 422 `VALIDATION_ERROR`.
+- Bloqueos: SECURITY-S25 BLOCKED, SG28-DIST OUT_OF_SCOPE_SINGLE_HOST, ALGEBRA229-AS-B-29 ON_HOLD, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, PR #29 OPEN/DRAFT, global OPEN. Sin DDL ni cambios de permisos.
+
+---
 ## 2026-10-24 UTC — r291: revalidación automática posterior a documentación
 
 - Tras commits de documentación, PR #29 disparó nuevamente workflows en SHA `91ab2cfaf5a85f4c5a504a078eae361be702b16b`; no fue una campaña focalizada del plan r290.
