@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "revision": 332,
+  "revision": 333,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "29fc1295d7087a40a34b2a7b611cf73a76e96df3",
+  "technical_baseline_sha": "bd1742bd217d4b265d33f6d108098f04b5a789f9",
   "baseline_case": "EDCX-B3-POWERS-ROOTS-R262",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
@@ -34,9 +34,9 @@
   "next_action": {
     "id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
     "status": "IN_PROGRESS",
-    "action": "Plus CI 40609140000 SUCCESS on 29fc1295 (backend 2,721 passed/1 skipped/10 xfailed, 88.78% coverage; frontend 150 files/1,053 passed); cumulative 40609140346 SUCCESS. Certification dependency/security workflow 40609140075 concluded SUCCESS on the same SHA: security/backend-security SUCCESS (pip-audit runtime + Bandit medium/high + security/CORS regressions), frontend-audit skipped by path scope, mutation plus-backend-mutmut SUCCESS (that campaign is S19 evidence, not H2 certification). EN-SG evidence advanced and certified at row level: EN-SG-23/24/27 reject astronomical powers with COMPLEXITY_LIMIT before evaluation (<2 s), EN-SG-27 keeps 2^(2^(2^2))=65536 exact and omits oversized display with a warning, EN-SG-25 rejects 1000000!/1000! with an explicit factorial limit in <2 s while certified 100!/170!/171!/5!/0! stay exact, EN-SG-26 bounds (x+1)^10000 to ~13 ms with an exact unevaluated power plus presentation warning, and EN-SG-21 is recorded as a 422 VALIDATION_ERROR contract boundary (still GAP). EN-SG-01/02/04/05 certified as PASS (scoped frontend DOM) by the MathRenderer batch. Range(en_sg)=11 PASS scoped, 18 PARTIAL, 3 GAP (21/28/32). Keep SECURITY-S25 BLOCKED: bilateral exit condition plus Lite npm audit hard gate (deepmerge LOW) still red; Lite CI and LITE-SEC-DEEPMERGE-IMPLEMENTATION-R321 remain pending. Global OPEN.",
+    "action": "EN-SG-06/07 certified PASS (scoped frontend DOM) on SHA bd1742bd: product pins KaTeX maxExpand=1000 and exposes data-render-fallback; tests assert <2s bound, syntax fallback for recursive \\def/\\newcommand/\\catcode, inert/safe path for \\let, and finite-macro regression. Frontend job of CI 40651541570 SUCCESS (typecheck, Unit/parity, production build). Gaps remaining: EN-SG-21 (500-char contract), EN-SG-28 (UI stop/recovery), EN-SG-32 (no rate limiter). SECURITY-S25 stays BLOCKED pending bilateral acceptance. Global OPEN.",
     "previous_id": "H2-EN-SG-CASE-EVIDENCE-AUDIT-R314",
-    "updated_utc": "2026-10-28T01:20:00Z"
+    "updated_utc": "2026-10-28T07:45:00Z"
   },
   "blockers": [
     {
@@ -95,6 +95,8 @@
       "EN-SG-03",
       "EN-SG-04",
       "EN-SG-05",
+      "EN-SG-06",
+      "EN-SG-07",
       "EN-SG-08",
       "EN-SG-09",
       "EN-SG-10",
@@ -119,15 +121,13 @@
       "EN-SG-31"
     ],
     "gap": [
-      "EN-SG-06",
-      "EN-SG-07",
       "EN-SG-21",
       "EN-SG-28",
       "EN-SG-32"
     ],
     "pending_execution": []
   },
-  "ledger_note": "r332 motor-only. Plus CI 40609140000 SUCCESS on 29fc1295 (backend 2,721 passed; frontend 1,053 passed) and cumulative 40609140346 SUCCESS. Dependency/security workflow 40609140075 concluded SUCCESS on the same SHA: backend-security SUCCESS (pip-audit + Bandit + security/CORS regressions), frontend-audit skipped by path scope, plus-backend-mutmut SUCCESS (S19 campaign evidence, not H2 certification). EN-SG row-level certification advanced: 23/24/25/26/27 PASS (scoped backend API) with certified-factorial regression guards; 01/02/04/05 PASS (scoped frontend DOM); 21/28/32 remain GAP; 06/07 and 09..20/22/29..31 PARTIAL. SECURITY-S25 remains BLOCKED (bilateral exit condition; Lite npm audit hard gate red on deepmerge LOW). Global OPEN.",
+  "ledger_note": "r333 motor-only. EN-SG-06/07 PASS (scoped frontend DOM) on SHA bd1742bd / CI 40651541570 frontend SUCCESS: maxExpand=1000 pinned, data-render-fallback signal, <2s bound, syntax fallback for recursive macros, inert path for \\let. Gaps: 21/28/32. SECURITY-S25 BLOCKED (bilateral). Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
@@ -146,6 +146,7 @@
     "qa/certification/EDCX_B6_ADAPTER_ORACLE_PLAN.md",
     "qa/certification/S19_BACKEND_MUTATION_REVIEW_R288.md",
     "qa/certification/S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md",
-    "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md"
+    "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md",
+    "qa/certification/H2_EN_SG_EVIDENCE_AUDIT_R314.md"
   ]
 }
