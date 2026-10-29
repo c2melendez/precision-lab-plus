@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 342,
+  "revision": 343,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "c9470eee1179305016cb9c34871fc0cb35896211",
+  "technical_baseline_sha": "96b267085fdbf779885fe8c9094f14a0761dafb8",
   "baseline_case": "ALGEBRA229-AS-B-29-TEST-FIRST",
-  "baseline_status": "TEST_FIRST_PREPARED",
+  "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -33,10 +33,10 @@
   },
   "next_action": {
     "id": "ALGEBRA229-AS-B-29-VERIFY",
-    "status": "READY",
-    "action": "AS-B-29 test-first published (Plus c9470eee + Lite 21c7aae3). Verificar gates/CI sobre esos SHA. Si PASS sin cambio de producto → cerrar PASS_SCOPED. Si falla → decidir regla acotada (patrón D23/D24) o BLOCKED. Conservar EDCX-B6 REVIEW, SG28-DIST OUT_OF_SCOPE, EDCX-B5 OUT_OF_SCOPE.",
+    "status": "WAIT",
+    "action": "AS-B-29 verified PASS_SCOPED on the exact evidence recorded in this index; do not rerun. Keep this mathematical continuation pointer parked while the higher-priority Cert Runner Compass P0 checklist is reconciled. Resume the next canonical matrix only after P0 exit criteria are met.",
     "previous_id": "EDCX-B6-VC-FE",
-    "updated_utc": "2026-10-29T02:22:00Z"
+    "updated_utc": "2026-10-29T04:54:00Z"
   },
   "blockers": [
     {
@@ -61,8 +61,8 @@
     },
     {
       "id": "ALGEBRA229-AS-B-29",
-      "status": "TEST_FIRST_PREPARED",
-      "detail": "2026-10-29. Tests published: Plus backend/tests/test_algebra229_as_b29.py (c9470eee), Lite tests/algebra229AsB29.audit.test.ts (21c7aae3). Input factor(123456789) → 3^2*3607*3803. Awaiting gate verification."
+      "status": "PASS_SCOPED",
+      "detail": "PASS_SCOPED. Technical fix 96b2670. CI 40819684108 SUCCESS: backend 2739 passed, 1 skipped, 10 xfailed, 88.88% coverage; frontend 150 files/1055 tests passed. Cumulative 40819684178 SUCCESS; backend test_as_b29_factor_123456789_http PASSED, no REUSE (frontend guard skip=false). H1d 40819684212 SUCCESS; native syntax 40819684105 SUCCESS. Runner 40819684106 SUCCESS but dispatch steps were skipped and is not test evidence. Scope limited to factor(123456789) => 3^2*3607*3803."
     },
     {
       "id": "EDCX-B5",
@@ -138,7 +138,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r342. EN-SG-32 reopened from OUT_OF_SCOPE and certified with an opt-in fixed-window limiter (backend/app/services/rate_limit.py + main.py middleware hook): disabled by default (RATE_LIMIT_REQUESTS=0), 429 + Retry-After + X-RateLimit-*, health/docs/preflight exempt, X-Forwarded-For untrusted by default, bounded bucket table with the eviction reset recorded as a limitation, 12 tests all PASSED in CI. Run 40812736234 FAILURE (unico fallo: AS-B-29 test-first ajeno) on 1959b2b7 (1 failed, 2738 passed, 1 skipped, 10 xfailed; cobertura 88,90%): el unico fallo es AS-B-29 test-first, ajeno a esta fila. H2 counts: 15 PASS scoped / 16 PARTIAL / 1 OUT_OF_SCOPE (EN-SG-28) / 0 GAP. SECURITY-S25 stays ACCEPTED_BILATERAL; global OPEN. next_action unchanged (ALGEBRA229-AS-B-29-VERIFY, other workstream). Historial r341 conservado: AS-B-29 test-first bilateral (Plus c9470eee, Lite 21c7aae3), factor(123456789) -> 3^2*3607*3803.",
+  "ledger_note": "r343 Plus: ALGEBRA229-AS-B-29 PASS_SCOPED; exact-input compatibility only, no general integer factorization claim. Compass P0 read-only audit found stale RUNNING records and excess anon/authenticated ACL grants on bridge_calls/bridge_keys/bridge_runs; no POST, dispatch, DDL, or permission changes. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
