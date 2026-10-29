@@ -75,3 +75,35 @@ def test_edcx_b6_scalar_complex_values_match_independent_principal_oracle(
     assert actual.imag == pytest.approx(expected.imag, rel=1e-9, abs=1e-9), (
         f"{case_id}: {expression} -> {body['result_text']}"
     )
+
+
+def test_edcx_b6_vc_fe_13_log_exp_uses_principal_branch():
+    """Log(exp(3*pi*i)) is i*pi on the principal branch, not 3*i*pi."""
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": "Log(exp(3*pi*i))"},
+    )
+    assert response.status_code == 200, response.text
+
+    body = response.json()
+    assert body["success"] is True, body
+    assert body.get("error_code") is None, body
+    assert isinstance(body.get("result_text"), str) and body["result_text"], body
+    assert isinstance(body.get("result_latex"), str) and body["result_latex"], body
+    assert body.get("result_approx") is None, body
+
+    actual = _decode_complex_result(body["result_text"])
+    assert actual.real == pytest.approx(0.0, abs=1e-9), body
+    assert actual.imag == pytest.approx(math.pi, rel=1e-9, abs=1e-9), body
+    assert actual.imag != pytest.approx(3 * math.pi, rel=1e-9, abs=1e-9), body
+
+
+def test_edcx_b6_vc_fe_14_log_zero_returns_controlled_domain_error():
+    """Log(0) is undefined and must not be reported as a successful value."""
+    response = client.post("/api/v1/evaluate", json={"expression": "Log(0)"})
+    assert response.status_code == 200, response.text
+
+    body = response.json()
+    assert body["success"] is False, body
+    assert body.get("error_code") == "DOMAIN_ERROR", body
+    assert body.get("result_text") in (None, ""), body
