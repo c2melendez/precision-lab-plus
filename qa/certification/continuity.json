@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 349,
+  "revision": 350,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "c22ebf5eb6c9b656b319a20431f7ee1161608e79",
-  "baseline_case": "EDCX-B6-VC-FE-SCALAR-SCOPED",
-  "baseline_status": "PASS_SCOPED",
+  "technical_baseline_sha": "81702b3205e8593a6a1b0eae5b7c85d5223c9dce",
+  "baseline_case": "EDCX-B6-VC-FE-TRIG-23-31-TEST-FIRST",
+  "baseline_status": "TEST_FIRST_PREPARED",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -32,11 +32,11 @@
     }
   },
   "next_action": {
-    "id": "COMPASS-P0-ACCESS-REVIEW",
-    "status": "WAIT",
-    "previous_id": "EDCX-B6-VC-FE-SCALAR-SCOPED",
-    "action": "EDCX-B6 scalar principal-branch subset (VC-FE-01..03,05..10,13,14,16..22) is PASS_SCOPED on technical SHA c22ebf5eb6c9. Do not rerun those cases. Compass P0 remains WAIT. Exit criteria in qa/certification/COMPASS_ACCESS_REVIEW_2026-10-29.md (A-E). No POST, workflow dispatch, DDL, permission change, or credential swap. Resume next mathematical matrix (remaining EDCX-B6 rows or other) only after P0 exit criteria pass or explicit human override.",
-    "updated_utc": "2026-10-29T21:45:00Z"
+    "id": "EDCX-B6-VC-FE-TRIG-VERIFY",
+    "status": "READY",
+    "previous_id": "COMPASS-P0-ACCESS-REVIEW",
+    "action": "EDCX-B6 VC-FE-23..31 (principal complex trig scalars) test-first published on SHA 81702b32. File: backend/tests/test_edcx_b6_trig_complex.py. Independent cmath oracle. Verify CI + Cumulative + H1d on that SHA. If all green without product change → PASS_SCOPED the subset. If red → classify harness/product/capability. Compass P0 remains WAIT (do not block on it for this mathematical step). Scalar subset 01-22 already PASS_SCOPED.",
+    "updated_utc": "2026-10-29T21:48:00Z"
   },
   "blockers": [
     {
@@ -74,6 +74,11 @@
       "id": "EDCX-B6-VC-FE-SCALAR",
       "status": "PASS_SCOPED",
       "detail": "2026-10-29. Principal-branch scalar complex subset PASS_SCOPED. Covered IDs: VC-FE-01,02,03,05,06,07,08,09,10,13,14,16,17,18,19,20,21a,21b,22a,22b. Test file: backend/tests/test_edcx_b6_complex_contract.py. Independent oracle: Python cmath. Technical SHA c22ebf5eb6c9. CI 40830757255 SUCCESS, Cumulative 40830757291 SUCCESS, H1d 40830757290 SUCCESS. Scope: scalar principal values only; does not certify multivalued logs/powers, symbolic identities, or the remaining 53-row matrix. Lite remains NO_EJECUTADO."
+    },
+    {
+      "id": "EDCX-B6-VC-FE-TRIG-23-31",
+      "status": "TEST_FIRST_PREPARED",
+      "detail": "2026-10-29. Test-first published: backend/tests/test_edcx_b6_trig_complex.py (SHA 81702b32). Cases VC-FE-23..31 (sin/cos/tan/cot of pure imag and complex arguments). Independent cmath oracle. Awaiting CI/Cumulative/H1d verification."
     },
     {
       "id": "S19-BACKEND-MUTATION",
@@ -143,7 +148,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r349: EDCX-B6 scalar principal-branch subset (VC-FE-01..03,05..10,13,14,16..22) PASS_SCOPED on c22ebf5eb6c9 (CI 40830757255, Cumulative 40830757291, H1d 40830757290). Independent cmath oracle. Does not close full B6 matrix. AS-B-29 PASS_SCOPED. Compass P0 remains WAIT. Global OPEN.",
+  "ledger_note": "r350: EDCX-B6 VC-FE-23..31 (complex trig scalars) test-first prepared on 81702b32. Previous scalar subset 01-22 PASS_SCOPED. Compass P0 remains WAIT. Global OPEN. Next: verify gates on the new test SHA.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
