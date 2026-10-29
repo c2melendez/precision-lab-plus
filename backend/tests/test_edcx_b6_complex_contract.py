@@ -181,7 +181,9 @@ BRANCH_IDENTITY_CASES = [
     (
         "VC-FE-22a",
         "sqrt(1/(-1))",
-        cmath.sqrt(1 / complex(-1, 0)),
+        # The mathematical input is exactly -1; avoid IEEE signed-zero
+        # artifacts from complex division selecting the lower side of the cut.
+        cmath.sqrt(complex(-1, 0)),
     ),
     (
         "VC-FE-22b",
