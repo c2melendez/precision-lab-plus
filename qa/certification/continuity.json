@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 352,
+  "revision": 353,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "6ffe64e80a31771463d4af33b4969f1c45bb21f7",
-  "baseline_case": "EDCX-B6-VC-FE-HYPERBOLIC-37-41-TEST-FIRST",
+  "technical_baseline_sha": "ff7d8363aa4ba027cd73d67d3de3bed448ffc11e",
+  "baseline_case": "EDCX-B6-VC-FE-INVERSE-TEST-FIRST",
   "baseline_status": "TEST_FIRST_PREPARED",
   "global_certification": "OPEN",
   "gates": {
@@ -26,11 +26,11 @@
     }
   },
   "next_action": {
-    "id": "EDCX-B6-VC-FE-HYPERBOLIC-VERIFY",
+    "id": "EDCX-B6-VC-FE-INVERSE-VERIFY",
     "status": "READY",
-    "previous_id": "EDCX-B6-VC-FE-TRIG-VERIFY",
-    "action": "EDCX-B6 VC-FE-37..41 (principal complex hyperbolic) test-first on SHA 6ffe64e8. File: backend/tests/test_edcx_b6_hyperbolic_complex.py. Independent cmath oracle; accepts exact symbolic real with result_approx=None. Verify CI+Cumulative+H1d. Trig 23-31 still VERIFYING on harness fix 382563b1. Scalar 01-22 PASS_SCOPED. Compass P0 WAIT.",
-    "updated_utc": "2026-10-29T22:28:00Z"
+    "previous_id": "EDCX-B6-VC-FE-HYPERBOLIC-VERIFY",
+    "action": "EDCX-B6 inverse principal cases (VC-FE-43,44,46,48,50,51,52) test-first on SHA ff7d8363. File: backend/tests/test_edcx_b6_inverse_complex.py. Excluded branch-ambiguous 45/49/53. Verify CI+Cumulative+H1d. Trig and hyperbolic still pending verification. Scalar 01-22 PASS_SCOPED. Compass P0 WAIT.",
+    "updated_utc": "2026-10-29T22:54:00Z"
   },
   "blockers": [
     {
@@ -72,12 +72,17 @@
     {
       "id": "EDCX-B6-VC-FE-TRIG-23-31",
       "status": "VERIFYING",
-      "detail": "Harness fix 382563b1 for exact symbolic real (VC-FE-29/30). Awaiting re-verification of gates."
+      "detail": "Harness fix 382563b1. Awaiting re-verification."
     },
     {
       "id": "EDCX-B6-VC-FE-HYPERBOLIC-37-41",
       "status": "TEST_FIRST_PREPARED",
-      "detail": "2026-10-29. Test-first: backend/tests/test_edcx_b6_hyperbolic_complex.py (SHA 6ffe64e8). Cases VC-FE-37a/b,38,39,40,41. Independent cmath; accepts exact symbolic real. Awaiting CI verification."
+      "detail": "Test-first SHA 6ffe64e8. Awaiting CI verification."
+    },
+    {
+      "id": "EDCX-B6-VC-FE-INVERSE",
+      "status": "TEST_FIRST_PREPARED",
+      "detail": "2026-10-29. Test-first: backend/tests/test_edcx_b6_inverse_complex.py (SHA ff7d8363). Cases VC-FE-43,44,46,48(DOMAIN_ERROR),50,51,52. Excluded 45/49/53 (branch convention). Independent cmath. Awaiting CI."
     },
     {
       "id": "S19-BACKEND-MUTATION",
@@ -109,7 +114,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r352: EDCX-B6 hyperbolic VC-FE-37..41 test-first prepared (6ffe64e8). Trig 23-31 still VERIFYING (harness fix). Scalar 01-22 PASS_SCOPED. Compass P0 WAIT. Global OPEN.",
+  "ledger_note": "r353: EDCX-B6 inverse principal (43,44,46,48,50-52) test-first ff7d8363. Hyperbolic and trig still pending verification. Scalar PASS_SCOPED. Compass P0 WAIT. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
