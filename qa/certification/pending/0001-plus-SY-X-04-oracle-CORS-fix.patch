@@ -1,0 +1,124 @@
+From 68d148bd2a2aeb1ef53432c92c7eebdd7be649c0 Mon Sep 17 00:00:00 2001
+From: cert-session <cert@localhost>
+Date: Thu, 29 Oct 2026 00:47:43 +0000
+Subject: [PATCH] =?UTF-8?q?test(syntax):=20SY-X-04=20Plus=20HTTP=20?=
+ =?UTF-8?q?=E2=80=94=20fix=20faulty=20oracle=20(AST-node=20boundary)=20+?=
+ =?UTF-8?q?=20harness=20CORS=20pinning=20[paths:=20backend]?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ backend/tests/conftest.py         | 31 +++++++++++++++++++
+ backend/tests/test_sy_x04_http.py | 49 ++++++++++++++++++++++++-------
+ 2 files changed, 69 insertions(+), 11 deletions(-)
+ create mode 100644 backend/tests/conftest.py
+
+diff --git a/backend/tests/conftest.py b/backend/tests/conftest.py
+new file mode 100644
+index 0000000..1fef960
+--- /dev/null
++++ b/backend/tests/conftest.py
+@@ -0,0 +1,31 @@
++"""Pytest bootstrap for the backend suite — ORACLE/HARNESS layer.
++
++Every HTTP test module pins CORS via `os.environ.setdefault("CORS_ORIGINS", ...)`
++before importing `app.main`. Because Settings caches per process and pytest runs
++all modules in one process, the FIRST module alphabetically wins: S25
++(test_s25_deployment_security.py) asserted an origin that earlier modules
++(test_algebra.py, test_evaluate.py, ...) had already pinned to a different value,
++so the full-suite run failed with order-dependent 403/CORS round-trip errors
++while isolated runs passed. This conftest establishes a canonical test allow-list
++BEFORE any module import (conftest is loaded first by pytest); the per-module
++setdefault() calls then become no-ops and every assertion keeps holding because
++each pinned origin is included here.
++"""
++import os
++
++_CANONICAL_TEST_ORIGINS = ",".join(
++    [
++        "http://localhost:5173",          # dev frontend + generic suites
++        "https://security-test.example",  # S25 deployment-security asserts
++    ]
++)
++
++_existing = os.environ.get("CORS_ORIGINS")
++if _existing:
++    if "http://localhost:5173" not in _existing:
++        _existing += ",http://localhost:5173"
++    if "https://security-test.example" not in _existing:
++        _existing += ",https://security-test.example"
++    os.environ["CORS_ORIGINS"] = _existing
++else:
++    os.environ["CORS_ORIGINS"] = _CANONICAL_TEST_ORIGINS
+diff --git a/backend/tests/test_sy_x04_http.py b/backend/tests/test_sy_x04_http.py
+index d5c8a91..44fdfa9 100644
+--- a/backend/tests/test_sy_x04_http.py
++++ b/backend/tests/test_sy_x04_http.py
+@@ -4,14 +4,21 @@ Matrix row:
+   entrada: x+x+x+⋯+x (500 términos)
+   esperado: 500x
+ 
+-EvaluateRequest.max_length=500. A literal 500-term sum is ~999 characters
+-and is rejected at the Pydantic validation boundary (422 VALIDATION_ERROR)
+-before any CAS work. This test certifies that contract behaviour and, in a
+-second case, that a sum which does fit the contract produces the expected
+-equivalent result.
+-
+-Classification: PASS (scoped request-length contract + functional subset).
+-Does not claim unrestricted 500-term HTTP evaluation.
++Two independent contracts bound this input class:
++  * EvaluateRequest.max_length=500 -- a literal 500-term sum is ~999 chars
++    and is rejected at the Pydantic validation boundary (422
++    VALIDATION_ERROR) before any CAS work.
++  * ast_validator.MAX_AST_NODES=200 (Etapa 9 seccion 7) -- parsed with
++    evaluate=False, an n-term flat sum has n Symbol nodes plus one Add
++    node; n=200 reaches 201 nodes and is rejected as COMPLEXITY_LIMIT.
++
++This module certifies all three regimes on the real HTTP channel:
++oversize rejection (422), complexity-boundary rejection (COMPLEXITY_LIMIT
++at exactly 200 terms) and functional success below the boundary
++(199 terms -> 199*x).
++
++Classification: PASS (scoped length contract + AST-node boundary +
++functional subset). Does not claim unrestricted 500-term HTTP evaluation.
+ """
+ import pytest
+ from fastapi.testclient import TestClient
+@@ -45,10 +52,30 @@ def test_sy_x04_five_hundred_term_sum_rejected_at_request_length_boundary():
+     assert "traceback" not in response.text.lower()
+ 
+ 
++def test_sy_x04_two_hundred_term_sum_hits_ast_node_complexity_limit():
++    """Exactly 200 terms (399 chars, within max_length) exceeds the
++    MAX_AST_NODES=200 contract (201 nodes) -> controlled COMPLEXITY_LIMIT,
++    HTTP 200 with success=false. Product behaviour per Etapa 9 §7."""
++    expression = _n_term_sum(200)
++    assert len(expression) <= 500, len(expression)
++
++    response = client.post(
++        "/api/v1/evaluate",
++        json={"expression": expression, "angle_unit": "rad"},
++    )
++    assert response.status_code == 200, response.text[:300]
++    body = response.json()
++    assert body.get("success") is False, body
++    assert body.get("error_code") == "COMPLEXITY_LIMIT", body
++    assert "200" in str(body.get("error_message")), body
++    assert "traceback" not in response.text.lower()
++
++
+ def test_sy_x04_functional_subset_within_length_contract_yields_nx():
+-    """A sum that fits max_length=500 must simplify to N*x (or equivalent)."""
+-    # 200 terms → "x+"*199 + "x" = 399 chars, safely under 500.
+-    n = 200
++    """A sum inside BOTH contracts (length <=500, AST nodes <=200) must
++    simplify to N*x. Maximal such case: 199 terms = 200 nodes."""
++    # 199 terms -> "x+"*198 + "x" = 397 chars; 199 Symbols + 1 Add = 200 nodes.
++    n = 199
+     expression = _n_term_sum(n)
+     assert len(expression) <= 500, len(expression)
+ 
+-- 
+2.39.5
+
