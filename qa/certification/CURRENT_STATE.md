@@ -1084,3 +1084,10 @@ Ver r252.
 - Se revisó la lógica de `scripts/certification/continuity.py`: `plan()` devuelve `CURRENT` solo si el fingerprint del HEAD observado coincide con el baseline técnico después de aplicar `prose_only_paths` y excluir `continuity.json`/registros numéricos del Runner.
 - Se añadió `qa/certification/BRIDGE_CERT_COMPASS_V1_1_STATUS_2026-10-28.md` a `prose_only_paths`: es un informe de estado, no un contrato ejecutable. Comparación de árboles GitHub recursivos completos (ambos `truncated=false`): HEAD documental frente a baseline técnico `96b267085fdbf779885fe8c9094f14a0761dafb8`; 845 entradas seleccionadas en ambos y cero diferencias. Estado reconstruido del planner: `CURRENT`.
 - No cambió ningún insumo técnico, no se activó ningún gate por las actualizaciones documentales y no se creó una corrida nueva. `ALGEBRA229-AS-B-29-VERIFY` permanece `WAIT` bajo la prioridad P0 de Compass; global OPEN.
+
+
+## 2026-10-29 UTC — r345: causa de reconciliación diferida de Compass aclarada
+
+- Revisión de `src/lib/bridge/lookup.server.ts` y `src/lib/bridge/core.server.ts`: los estados finales de un ledger `RUNNING` se persisten al realizar GET autenticado de lookup/estado y recibir la conclusión de GitHub; no se encontró un worker de fondo.
+- Los registros vinculados a los runs 40461232174, 40461306085 y 40463419492 se clasifican `PENDING_OWNER_LOOKUP / REVIEW`, no como `FAIL` de producto confirmado, porque no hay evidencia de consulta autenticada posterior a su finalización. No recrear runs ni sustituir hashes de claves para eludir propiedad.
+- Sigue abierta la revisión de mínimo privilegio para los grants de `anon`/`authenticated`. No se ejecutó DDL ni cambio de permisos. Certificación global OPEN.
