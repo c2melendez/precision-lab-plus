@@ -61,13 +61,18 @@ def test_edcx_b6_complex_trig_match_independent_principal_oracle(
         f"{case_id}: missing result_latex: {body}"
     )
 
-    # result_approx is real-only; allow it only when imaginary part is ~0.
+    # result_approx is a real-only numeric channel. The product may return an
+    # exact symbolic real form (e.g. cosh(1)) with result_approx=None; that is
+    # accepted when the decoded value matches the oracle. When a float is
+    # provided it must agree with the oracle.
+    approx = body.get("result_approx")
     if abs(expected.imag) <= 1e-9:
-        assert body.get("result_approx") == pytest.approx(
-            expected.real, rel=1e-9, abs=1e-9
-        ), f"{case_id}: {body}"
+        if approx is not None:
+            assert approx == pytest.approx(
+                expected.real, rel=1e-9, abs=1e-9
+            ), f"{case_id}: {body}"
     else:
-        assert body.get("result_approx") is None, f"{case_id}: {body}"
+        assert approx is None, f"{case_id}: {body}"
 
     actual = _decode_complex_result(body["result_text"])
     assert actual.real == pytest.approx(expected.real, rel=1e-9, abs=1e-9), (
