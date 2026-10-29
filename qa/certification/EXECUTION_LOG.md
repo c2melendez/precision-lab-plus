@@ -643,3 +643,10 @@ La suite v1.1 y el registro de Fase 1 recibidos el 2026-10-27 UTC son la base de
 - Se revisó la lógica de `scripts/certification/continuity.py`: `plan()` devuelve `CURRENT` solo si el fingerprint del HEAD observado coincide con el baseline técnico después de aplicar `prose_only_paths` y excluir `continuity.json`/registros numéricos del Runner.
 - Se añadió `qa/certification/BRIDGE_CERT_COMPASS_V1_1_STATUS_2026-10-28.md` a `prose_only_paths`: es un informe de estado, no un contrato ejecutable. Comparación de árboles GitHub recursivos completos (ambos `truncated=false`): HEAD documental frente a baseline técnico `96b267085fdbf779885fe8c9094f14a0761dafb8`; 845 entradas seleccionadas en ambos y cero diferencias. Estado reconstruido del planner: `CURRENT`.
 - No cambió ningún insumo técnico, no se activó ningún gate por las actualizaciones documentales y no se creó una corrida nueva. `ALGEBRA229-AS-B-29-VERIFY` permanece `WAIT` bajo la prioridad P0 de Compass; global OPEN.
+
+
+## 2026-10-29 UTC — Compass P0 access proposal r346
+
+- Añadido `qa/certification/COMPASS_ACCESS_REVIEW_2026-10-29.md` como propuesta no aplicada. La inspección de catálogo encontró grants amplios a roles de cliente y un rol interno que requiere atribución; no se cambiaron permisos ni datos.
+- Los tres registros históricos requieren acceso autenticado de su propietario, pero la credencial asociada está revocada. No repetir acciones ni utilizar credenciales de otros registros; el índice r346 deja el siguiente paso en espera de una vía autorizada y auditable.
+- Lovable marca Compass como publicado, pero no provee un SHA independiente del artefacto live; procedencia permanece PARCIAL. Sin POST, dispatch o DDL.
