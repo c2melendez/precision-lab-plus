@@ -166,7 +166,9 @@ BRANCH_IDENTITY_CASES = [
     (
         "VC-FE-20",
         "sqrt((-i)^2)",
-        cmath.sqrt(complex(0, -1) ** 2),
+        # Exact symbolic square is -1; normalize signed zero so cmath uses
+        # the principal square root on the upper side of the negative axis.
+        cmath.sqrt(complex(-1, 0)),
     ),
     (
         "VC-FE-21a",
