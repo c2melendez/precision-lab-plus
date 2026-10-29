@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 353,
+  "revision": 354,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "ff7d8363aa4ba027cd73d67d3de3bed448ffc11e",
-  "baseline_case": "EDCX-B6-VC-FE-INVERSE-TEST-FIRST",
+  "technical_baseline_sha": "082fdb7c48add1476554ef90e840fab698b89561",
+  "baseline_case": "EDCX-B6-VC-FE-FORMULA-REAL-TEST-FIRST",
   "baseline_status": "TEST_FIRST_PREPARED",
   "global_certification": "OPEN",
   "gates": {
@@ -26,11 +26,11 @@
     }
   },
   "next_action": {
-    "id": "EDCX-B6-VC-FE-INVERSE-VERIFY",
+    "id": "EDCX-B6-VC-FE-FORMULA-REAL-VERIFY",
     "status": "READY",
-    "previous_id": "EDCX-B6-VC-FE-HYPERBOLIC-VERIFY",
-    "action": "EDCX-B6 inverse principal cases (VC-FE-43,44,46,48,50,51,52) test-first on SHA ff7d8363. File: backend/tests/test_edcx_b6_inverse_complex.py. Excluded branch-ambiguous 45/49/53. Verify CI+Cumulative+H1d. Trig and hyperbolic still pending verification. Scalar 01-22 PASS_SCOPED. Compass P0 WAIT.",
-    "updated_utc": "2026-10-29T22:54:00Z"
+    "previous_id": "EDCX-B6-VC-FE-INVERSE-VERIFY",
+    "action": "EDCX-B6 VC-FE-42 and VC-FE-47 (inverse formulas at real points) test-first on SHA 082fdb7c. File: backend/tests/test_edcx_b6_formula_real_points.py. Verify CI+Cumulative+H1d. Inverse/hyperbolic/trig still pending. Scalar 01-22 PASS_SCOPED. Remaining harder rows (04,11-12,15,32-36,45,49,53) not started. Compass P0 WAIT.",
+    "updated_utc": "2026-10-29T23:06:00Z"
   },
   "blockers": [
     {
@@ -77,12 +77,17 @@
     {
       "id": "EDCX-B6-VC-FE-HYPERBOLIC-37-41",
       "status": "TEST_FIRST_PREPARED",
-      "detail": "Test-first SHA 6ffe64e8. Awaiting CI verification."
+      "detail": "Test-first SHA 6ffe64e8. Awaiting CI."
     },
     {
       "id": "EDCX-B6-VC-FE-INVERSE",
       "status": "TEST_FIRST_PREPARED",
-      "detail": "2026-10-29. Test-first: backend/tests/test_edcx_b6_inverse_complex.py (SHA ff7d8363). Cases VC-FE-43,44,46,48(DOMAIN_ERROR),50,51,52. Excluded 45/49/53 (branch convention). Independent cmath. Awaiting CI."
+      "detail": "Test-first SHA ff7d8363 (43,44,46,48,50-52). Awaiting CI."
+    },
+    {
+      "id": "EDCX-B6-VC-FE-FORMULA-REAL",
+      "status": "TEST_FIRST_PREPARED",
+      "detail": "2026-10-29. Test-first: backend/tests/test_edcx_b6_formula_real_points.py (SHA 082fdb7c). VC-FE-42 (arcsin formula at z=1/2 -> pi/6), VC-FE-47 (arctan formula at z=1 -> pi/4). Awaiting CI."
     },
     {
       "id": "S19-BACKEND-MUTATION",
@@ -114,7 +119,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r353: EDCX-B6 inverse principal (43,44,46,48,50-52) test-first ff7d8363. Hyperbolic and trig still pending verification. Scalar PASS_SCOPED. Compass P0 WAIT. Global OPEN.",
+  "ledger_note": "r354: EDCX-B6 formula-at-real-point VC-FE-42,47 test-first 082fdb7c. Inverse/hyperbolic/trig still pending CI. Scalar PASS_SCOPED. Compass P0 WAIT. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
