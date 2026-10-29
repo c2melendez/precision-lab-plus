@@ -604,3 +604,14 @@ Referencia de suite/handoff recibido en la sesión: registro de Fase 1 y plan v1
 - **Claves:** las expuestas previamente se consideran comprometidas y deben rotarse por el responsable. No escribir ni repetir valores reales.
 
 La suite v1.1 y el registro de Fase 1 recibidos el 2026-10-27 UTC son la base de este corte. Los registros previos permanecen como historia; este addendum prevalece para el estado actual de Compass.
+
+
+## 2026-10-29 — r340 (Plus): SY-X-04 harness fix, gates verdes, índice reconciliado
+
+- 01:20 UTC — Push técnico `09064f9` a `qa/syntax-audit-in625-a1`: corrección focalizada de `backend/tests/test_sy_x04_http.py` (frontera n=199 OK / n=200 COMPLEXITY_LIMIT fijada como regresión permanente; docstring con los dos límites independientes max_length=500 chars y MAX_AST_NODES=200). Verificación local previa: pytest 4 passed.
+- 01:27 UTC — Push activa automáticamente 4 corridas en el SHA correcto (sin commits artificiales): CI 40800577284, Cumulative 40800577150, H1d 40800577200, Runner 40800577170.
+- 01:28–01:34 UTC — Conclusiones verificadas por API + logs de jobs: Runner SUCCESS 01:28:01; H1d SUCCESS 01:29:47; CI SUCCESS 01:33:03 (backend 2725 passed/1 skipped/10 xfailed, cov 88.79%, jobs frontend/backend success); Cumulative SUCCESS 01:34:48 (guard: `skip=false, reason: No reusable completed evidence found` → evidencia ejecutada realmente en este checkout; 4 tests sy_x04 PASSED listados nominalmente en el log del job 123207441241).
+- Clasificación del fallo previo (40775454881 sobre 1e4c529): harness (expectativa de test incompatible con contrato AST vigente). Producto correcto: Add(200 términos)=201 nodos > MAX_AST_NODES=200 → COMPLEXITY_LIMIT legítimo. Sondeo empírico local confirmó fronteras: 199→200 OK; 200→COMPLEXITY_LIMIT; 500 términos (999 chars)→422 VALIDATION_ERROR.
+- Decisión de alcance: SY-X-04-PLUS-HTTP queda PASS_SCOPED honesto. Fila completa de matriz (500 sumandos) requiere aprobación humana Opción B/C (SY_X_04_LENGTH_DECISION.md); no se relajan contratos para fabricar verde. Escalado como decisión irreductible.
+- Reconciliación de índice: continuity.json r339→r340 (technical_baseline_sha 1e4c529→09064f9, blocker SY-X-04 actualizado con runs reales, next_action EDCX-B6-VC-FE READY_REVIEW). Commit documental `9e2dee516` publicado con expected blob-sha (compare-and-swap); 0 runs generados por el commit documental (paths-ignore + [skip ci] redundantes confirmados por API).
+- Pendiente Lite: sincronía documental de este evento en su EXECUTION_LOG/CURRENT_STATE corresponde a la paridad informativa; no hay cambio técnico Lite derivado (el bug de harness era exclusivo del test Plus).
