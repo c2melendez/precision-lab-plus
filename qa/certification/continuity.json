@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 345,
+  "revision": 346,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "96b267085fdbf779885fe8c9094f14a0761dafb8",
@@ -32,11 +32,11 @@
     }
   },
   "next_action": {
-    "id": "ALGEBRA229-AS-B-29-VERIFY",
+    "id": "COMPASS-P0-ACCESS-REVIEW",
     "status": "WAIT",
-    "action": "AS-B-29 verified PASS_SCOPED on the exact evidence recorded in this index; do not rerun. Keep this mathematical continuation pointer parked while the higher-priority Cert Runner Compass P0 checklist is reconciled. Resume the next canonical matrix only after P0 exit criteria are met.",
-    "previous_id": "EDCX-B6-VC-FE",
-    "updated_utc": "2026-10-29T04:59:00Z"
+    "previous_id": "ALGEBRA229-AS-B-29-VERIFY",
+    "action": "AS-B-29 is PASS_SCOPED; do not rerun it. Compass P0 remains open: the owner-scoped status checks are blocked because the original credential is no longer valid. Review qa/certification/COMPASS_ACCESS_REVIEW_2026-10-29.md and obtain an approved recovery route before continuing. No database changes or workflow dispatches. Resume the next mathematical matrix only after P0 exit criteria pass.",
+    "updated_utc": "2026-10-29T05:02:00Z"
   },
   "blockers": [
     {
@@ -138,12 +138,13 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r345: AS-B-29 PASS_SCOPED; current technical baseline retained at 96b26708. Planner HEAD fingerprint is CURRENT after prose-only exclusions. Compass P0 source review confirms ledger reconciliation is lazy and occurs only through authenticated GET lookup/status; the three historic RUNNING rows need owner-scoped read-only reconciliation, not a new dispatch. Broad anon/authenticated ACL grants on three bridge tables remain pending least-privilege review. No POST, dispatch, DDL, or permission changes. Global OPEN.",
+  "ledger_note": "r346: AS-B-29 PASS_SCOPED; Compass P0 pending owner-scoped recovery and access review. Proposal recorded in qa/certification/COMPASS_ACCESS_REVIEW_2026-10-29.md. No POST, dispatch or database changes. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
     "qa/certification/ALGEBRA229_PREPARATION.md",
     "qa/certification/BRIDGE_CERT_COMPASS_V1_1_STATUS_2026-10-28.md",
+    "qa/certification/COMPASS_ACCESS_REVIEW_2026-10-29.md",
     "qa/certification/CONTINUATION_PROMPT.md",
     "qa/certification/CONTINUITY_NEXT_ACTION.json",
     "qa/certification/CURRENT_STATE.md",
