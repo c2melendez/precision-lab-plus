@@ -4,14 +4,22 @@ Matrix row:
   entrada: x+x+x+⋯+x (500 términos)
   esperado: 500x
 
-EvaluateRequest.max_length=500. A literal 500-term sum is ~999 characters
-and is rejected at the Pydantic validation boundary (422 VALIDATION_ERROR)
-before any CAS work. This test certifies that contract behaviour and, in a
-second case, that a sum which does fit the contract produces the expected
-equivalent result.
+Two independent limits apply before any CAS work:
+  1. EvaluateRequest.max_length=500 characters. A literal 500-term sum is
+     ~999 characters and is rejected at the Pydantic boundary (422
+     VALIDATION_ERROR).
+  2. ast_validator.MAX_AST_NODES=200. With evaluate=False, an n-term flat
+     Add has exactly n+1 nodes, so sums of >=200 terms are rejected with
+     COMPLEXITY_LIMIT even when they fit the character budget. The largest
+     passing flat sum is 199 terms (200 nodes, 397 chars).
 
-Classification: PASS (scoped request-length contract + functional subset).
-Does not claim unrestricted 500-term HTTP evaluation.
+These tests certify both contract boundaries and the functional subset
+within them (n*x equivalence for admissible sizes), plus recovery after
+each rejection class.
+
+Classification: PASS (scoped length + AST-node contracts + functional
+subset). Does not claim unrestricted 500-term HTTP evaluation; that would
+require a contractual change to MAX_AST_NODES or a flattened-add evaluator.
 """
 import pytest
 from fastapi.testclient import TestClient
@@ -46,9 +54,15 @@ def test_sy_x04_five_hundred_term_sum_rejected_at_request_length_boundary():
 
 
 def test_sy_x04_functional_subset_within_length_contract_yields_nx():
-    """A sum that fits max_length=500 must simplify to N*x (or equivalent)."""
-    # 200 terms → "x+"*199 + "x" = 399 chars, safely under 500.
-    n = 200
+    """A sum that fits BOTH contracts must simplify to N*x (or equivalent).
+
+    Empirically verified boundary: n=199 terms -> 200 AST nodes (allowed,
+    `nodes > MAX_AST_NODES` is the rejection condition) and 397 chars
+    (< 500). n=200 terms -> 201 nodes -> COMPLEXITY_LIMIT. See
+    test_sy_x04_two_hundred_term_sum_rejected_at_ast_node_boundary below.
+    """
+    # 199 terms → "x+"*198 + "x" = 397 chars, 200 AST nodes: both limits pass.
+    n = 199
     expression = _n_term_sum(n)
     assert len(expression) <= 500, len(expression)
 
@@ -68,7 +82,7 @@ def test_sy_x04_functional_subset_within_length_contract_yields_nx():
         or body.get("output")
         or ""
     ).replace(" ", "").lower()
-    # Common acceptable forms: "200*x", "200x", "x*200"
+    # Common acceptable forms: "199*x", "199x", "x*199"
     acceptable = (
         f"{n}*x" in text
         or f"{n}x" in text
@@ -76,6 +90,30 @@ def test_sy_x04_functional_subset_within_length_contract_yields_nx():
         or text == str(n)  # if evaluated under a substitution (should not happen)
     )
     assert acceptable, (text, body)
+
+
+def test_sy_x04_two_hundred_term_sum_rejected_at_ast_node_boundary():
+    """200-term sum fits the 500-char request contract but exceeds
+    MAX_AST_NODES=200 (flat Add of 200 terms -> 201 nodes).
+
+    Expected controlled rejection: HTTP 200 with success=false and
+    error_code=COMPLEXITY_LIMIT — no traceback, no unhandled crash.
+    This pins the second boundary so the functional subset above cannot
+    silently drift past it.
+    """
+    expression = _n_term_sum(200)
+    assert len(expression) <= 500, len(expression)  # passes length contract
+
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"expression": expression, "angle_unit": "rad"},
+    )
+    assert response.status_code == 200, response.text[:300]
+    body = response.json()
+    assert body.get("success") is False, body
+    assert body.get("error_code") == "COMPLEXITY_LIMIT", body
+    assert "200" in str(body.get("error_message")), body
+    assert "traceback" not in response.text.lower()
 
 
 def test_sy_x04_recovery_after_oversize_rejection():
