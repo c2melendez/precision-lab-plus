@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 341,
+  "revision": 342,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "c9470eee1179305016cb9c34871fc0cb35896211",
@@ -87,6 +87,11 @@
       "status": "RESOLVED_SCOPED",
       "kind": "targeted_regression",
       "detail": "SHA 02d01c3a S18 run 40105997558 PASS."
+    },
+    {
+      "id": "H2-EN-SG-32",
+      "status": "PASS_SCOPED",
+      "evidence": "CI 40812736234 on 1959b2b7: 12/12 EN-SG-32 tests PASSED; the run fails only on AS-B-29 test-first (other workstream)."
     }
   ],
   "h2_en_sg_evidence_audit_r314": {
@@ -106,7 +111,8 @@
       "EN-SG-24",
       "EN-SG-25",
       "EN-SG-26",
-      "EN-SG-27"
+      "EN-SG-27",
+      "EN-SG-32"
     ],
     "partial": [
       "EN-SG-09",
@@ -127,13 +133,12 @@
       "EN-SG-31"
     ],
     "out_of_scope": [
-      "EN-SG-28",
-      "EN-SG-32"
+      "EN-SG-28"
     ],
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r341. AS-B-29 test-first prepared bilateral (Plus c9470eee, Lite 21c7aae3). factor(123456789) → 3^2*3607*3803. Status TEST_FIRST_PREPARED. SY-X-04 PASS_SCOPED, SECURITY-S25 ACCEPTED_BILATERAL, EDCX-B5 OUT_OF_SCOPE, H2 EN-SG R314 CLOSED. Global OPEN. Next: verify gates on test SHA; then EDCX-B6 or close AS-B-29.",
+  "ledger_note": "r342. EN-SG-32 reopened from OUT_OF_SCOPE and certified with an opt-in fixed-window limiter (backend/app/services/rate_limit.py + main.py middleware hook): disabled by default (RATE_LIMIT_REQUESTS=0), 429 + Retry-After + X-RateLimit-*, health/docs/preflight exempt, X-Forwarded-For untrusted by default, bounded bucket table with the eviction reset recorded as a limitation, 12 tests all PASSED in CI. Run 40812736234 FAILURE (unico fallo: AS-B-29 test-first ajeno) on 1959b2b7 (1 failed, 2738 passed, 1 skipped, 10 xfailed; cobertura 88,90%): el unico fallo es AS-B-29 test-first, ajeno a esta fila. H2 counts: 15 PASS scoped / 16 PARTIAL / 1 OUT_OF_SCOPE (EN-SG-28) / 0 GAP. SECURITY-S25 stays ACCEPTED_BILATERAL; global OPEN. next_action unchanged (ALGEBRA229-AS-B-29-VERIFY, other workstream). Historial r341 conservado: AS-B-29 test-first bilateral (Plus c9470eee, Lite 21c7aae3), factor(123456789) -> 3^2*3607*3803.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",

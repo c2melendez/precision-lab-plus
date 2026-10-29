@@ -1,4 +1,17 @@
 
+## 2026-10-29 UTC - r342: EN-SG-32 limitador opt-in certificado
+
+- Fila reabierta desde OUT_OF_SCOPE (r336) por decision del operador; se certifica un control real en lugar de una excepcion de alcance.
+- `backend/app/services/rate_limit.py`: ventana fija por cliente, reloj monotono inyectable, tabla acotada (10.000 claves, desalojo LRU por ultima vez visto). Enganchado en `request_context_middleware` antes de routing/cuerpo/validacion, junto al guard 413.
+- Desactivado por defecto (`RATE_LIMIT_REQUESTS=0`, sin 429 ni `X-RateLimit-*`); `RATE_LIMIT_WINDOW_SECONDS=60`; `RATE_LIMIT_TRUST_FORWARDED_FOR=false` para que un `X-Forwarded-For` falsificado no estrene cubo.
+- 429 con `RATE_LIMITED`, `Retry-After`, `X-RateLimit-*`, `X-Request-ID` y cabeceras de seguridad base. Exentos health/docs/redoc/openapi y preflight CORS.
+- 12 pruebas nuevas en `backend/tests/test_in625_h2_rate_limit.py`, todas PASSED en CI (`40812736234`); suite backend completa ejecutada en local antes de publicar (2717 passed / 5 failed / 2 errors, ninguno de EN-SG-32; detalle en el audit).
+- CI [40812736234](https://github.com/c2melendez/precision-lab-plus/actions/runs/40812736234) `FAILURE (unico fallo: AS-B-29 test-first ajeno)`: 1 failed, 2738 passed, 1 skipped, 10 xfailed; cobertura 88,90% (gate 75%); frontend SUCCESS.
+- Incidencia corregida antes de certificar: `ea1319ce` publico `main.py` con mojibake cp1252 + BOM (detectado por `test_health`); `26bfd6f9` lo reconstruyo desde el blob. SHA certificado `1959b2b7`.
+- Recuento H2: 15 PASS scoped / 16 PARTIAL / 1 OUT_OF_SCOPE / 0 GAP. SECURITY-S25 ACCEPTED_BILATERAL; global OPEN.
+
+---
+
 ## 2026-10-28 UTC - r332: cotas de recurso EN-SG-23/24/25/26/27 y certificación por fila
 
 - SHA `29fc1295d7087a40a34b2a7b611cf73a76e96df3`. Plus CI [40609140000](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140000) SUCCESS: backend 2,721 passed, 1 skipped, 10 xfailed, 88.78% de cobertura; frontend 150 archivos / 1,053 tests, 28 todo. Acumulativo [40609140346](https://github.com/c2melendez/precision-lab-plus/actions/runs/40609140346) SUCCESS.
