@@ -15,11 +15,16 @@ Design constraints recorded for the certification audit:
 - **Client identity.** The peer address by default. ``X-Forwarded-For`` is
   ignored unless ``RATE_LIMIT_TRUST_FORWARDED_FOR=true``, because an untrusted
   client can forge that header to obtain a fresh bucket per request.
-- **Bounded memory.** At most ``RATE_LIMIT_MAX_TRACKED_CLIENTS`` buckets are
-  kept; the least recently seen is evicted first. An evicted client starts a
-  new window, which is the safe direction for this control (a client cannot
-  force eviction cheaply enough to gain unlimited throughput in practice) and
-  is asserted by the regression suite.
+- **Bounded memory.** At most ``max_tracked_clients`` buckets (10 000 by
+  default) are kept; the least recently seen is evicted first. Eviction is a
+  documented limitation of a fixed-window counter without a shared store: an
+  evicted client starts a fresh window, so an attacker who can rotate through
+  more than ``max_tracked_clients`` source addresses within one window can
+  reset its own counter. The regression suite asserts the bound and records
+  that reset behaviour instead of claiming otherwise.
+- **Exemptions.** Liveness and the schema/docs endpoints are matched exactly
+  (``EXEMPT_PATHS``), so application traffic cannot inherit an exemption from
+  a path suffix, and CORS ``OPTIONS`` preflight is never throttled.
 """
 from __future__ import annotations
 

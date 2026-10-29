@@ -195,8 +195,11 @@ def test_in625_h2_sg32_tracked_keys_are_bounded(restore_limiter):
         limiter.check(f"192.0.2.{index}")
     assert limiter.tracked_clients <= 3
 
-    # Eviction must not resurrect an unlimited bucket for an evicted client.
+    # Documented limitation: the most recent client keeps its counter...
     assert limiter.check("192.0.2.9").allowed is False
+    # ...while an evicted one starts a fresh window (no shared store, so the
+    # bound wins over strict per-client accounting).
+    assert limiter.check("192.0.2.0").allowed is True
 
 
 def test_in625_h2_sg32_invalid_configuration_is_rejected():
