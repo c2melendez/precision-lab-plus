@@ -1,42 +1,36 @@
 {
   "schema_version": 1,
-  "revision": 351,
+  "revision": 352,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "382563b15a0250eb1fa48082b6e51ebc6438f590",
-  "baseline_case": "EDCX-B6-VC-FE-TRIG-23-31-HARNESS-FIX",
-  "baseline_status": "VERIFYING",
+  "technical_baseline_sha": "6ffe64e80a31771463d4af33b4969f1c45bb21f7",
+  "baseline_case": "EDCX-B6-VC-FE-HYPERBOLIC-37-41-TEST-FIRST",
+  "baseline_status": "TEST_FIRST_PREPARED",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
       "workflow": ".github/workflows/in625-cumulative-certification.yml",
-      "inputs": [
-        "*"
-      ],
+      "inputs": ["*"],
       "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "h1d": {
       "workflow": ".github/workflows/in625-h1d-reentry.yml",
-      "inputs": [
-        "*"
-      ],
+      "inputs": ["*"],
       "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "security": {
       "workflow": ".github/workflows/certification-dependency-gates.yml",
-      "inputs": [
-        "*"
-      ],
+      "inputs": ["*"],
       "acceptance_revision": "2026-10-16-continuity-v1",
       "allow_reuse": false
     }
   },
   "next_action": {
-    "id": "EDCX-B6-VC-FE-TRIG-VERIFY",
+    "id": "EDCX-B6-VC-FE-HYPERBOLIC-VERIFY",
     "status": "READY",
-    "previous_id": "EDCX-B6-VC-FE-TRIG-23-31-TEST-FIRST",
-    "action": "Harness fix 382563b1: accept exact symbolic real results (cosh(1)/-cosh(1)) with result_approx=None for VC-FE-29/30. Classification: harness, not product. Re-verify CI + Cumulative + H1d on 382563b1. If green → PASS_SCOPED VC-FE-23..31. Scalar 01-22 already PASS_SCOPED. Compass P0 remains WAIT.",
-    "updated_utc": "2026-10-29T22:10:30Z"
+    "previous_id": "EDCX-B6-VC-FE-TRIG-VERIFY",
+    "action": "EDCX-B6 VC-FE-37..41 (principal complex hyperbolic) test-first on SHA 6ffe64e8. File: backend/tests/test_edcx_b6_hyperbolic_complex.py. Independent cmath oracle; accepts exact symbolic real with result_approx=None. Verify CI+Cumulative+H1d. Trig 23-31 still VERIFYING on harness fix 382563b1. Scalar 01-22 PASS_SCOPED. Compass P0 WAIT.",
+    "updated_utc": "2026-10-29T22:28:00Z"
   },
   "blockers": [
     {
@@ -47,7 +41,7 @@
     {
       "id": "SECURITY-S25",
       "status": "ACCEPTED_BILATERAL",
-      "detail": "2026-10-28 bilateral acceptance. Plus bd1742bd + Lite 11f8a5f4 independent green gates. allow_reuse=false retained."
+      "detail": "2026-10-28 bilateral acceptance. allow_reuse=false retained."
     },
     {
       "id": "SY-P-23",
@@ -57,7 +51,7 @@
     {
       "id": "SY-X-04-PLUS-HTTP",
       "status": "PASS_SCOPED",
-      "detail": "2026-10-29 r340 harness fix 09064f9. Deriva de indice r338 corregida."
+      "detail": "2026-10-29 r340 harness fix 09064f9."
     },
     {
       "id": "ALGEBRA229-AS-B-29",
@@ -68,7 +62,7 @@
       "id": "EDCX-B5",
       "status": "OUT_OF_SCOPE",
       "kind": "capability",
-      "detail": "2026-10-28. VC-LG-01..25 geometric loci. Documented EDCX_B5_CAPABILITY_GAP.md."
+      "detail": "2026-10-28. VC-LG-01..25 geometric loci."
     },
     {
       "id": "EDCX-B6-VC-FE-SCALAR",
@@ -78,7 +72,12 @@
     {
       "id": "EDCX-B6-VC-FE-TRIG-23-31",
       "status": "VERIFYING",
-      "detail": "Test-first + harness fix. Original red on 81702b32: VC-FE-29/30 exact cosh(1)/-cosh(1) with result_approx=None vs test requiring float. Fix 382563b1 allows None when decoded value matches oracle. Awaiting re-verification."
+      "detail": "Harness fix 382563b1 for exact symbolic real (VC-FE-29/30). Awaiting re-verification of gates."
+    },
+    {
+      "id": "EDCX-B6-VC-FE-HYPERBOLIC-37-41",
+      "status": "TEST_FIRST_PREPARED",
+      "detail": "2026-10-29. Test-first: backend/tests/test_edcx_b6_hyperbolic_complex.py (SHA 6ffe64e8). Cases VC-FE-37a/b,38,39,40,41. Independent cmath; accepts exact symbolic real. Awaiting CI verification."
     },
     {
       "id": "S19-BACKEND-MUTATION",
@@ -110,7 +109,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r351: EDCX-B6 trig VC-FE-23..31 harness fix 382563b1 (exact symbolic real accepted). Classification harness not product. Re-verify gates. Scalar 01-22 PASS_SCOPED. Compass P0 WAIT. Global OPEN.",
+  "ledger_note": "r352: EDCX-B6 hyperbolic VC-FE-37..41 test-first prepared (6ffe64e8). Trig 23-31 still VERIFYING (harness fix). Scalar 01-22 PASS_SCOPED. Compass P0 WAIT. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
