@@ -153,3 +153,79 @@ def test_edcx_b6_complex_powers_match_independent_principal_oracle(
     assert actual.imag == pytest.approx(expected.imag, rel=1e-9, abs=1e-9), (
         f"{case_id}: {expression} -> {body['result_text']}"
     )
+
+# VC-FE-19..22: branch-sensitive fractional powers and square-root identities.
+# Each comparison is evaluated as separate API requests; cmath supplies the
+# independent principal-branch oracle rather than the product's SymPy path.
+BRANCH_IDENTITY_CASES = [
+    (
+        "VC-FE-19",
+        "(-1)^(1/3)",
+        cmath.exp(cmath.log(complex(-1, 0)) / 3),
+    ),
+    (
+        "VC-FE-20",
+        "sqrt((-i)^2)",
+        cmath.sqrt(complex(0, -1) ** 2),
+    ),
+    (
+        "VC-FE-21a",
+        "sqrt(-1)*sqrt(-1)",
+        cmath.sqrt(complex(-1, 0)) * cmath.sqrt(complex(-1, 0)),
+    ),
+    (
+        "VC-FE-21b",
+        "sqrt((-1)*(-1))",
+        cmath.sqrt(complex((-1) * (-1), 0)),
+    ),
+    (
+        "VC-FE-22a",
+        "sqrt(1/(-1))",
+        cmath.sqrt(1 / complex(-1, 0)),
+    ),
+    (
+        "VC-FE-22b",
+        "1/sqrt(-1)",
+        1 / cmath.sqrt(complex(-1, 0)),
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ("case_id", "expression", "expected"),
+    BRANCH_IDENTITY_CASES,
+    ids=[case[0] for case in BRANCH_IDENTITY_CASES],
+)
+def test_edcx_b6_vc_fe_19_to_22_match_independent_principal_branch_oracle(
+    case_id, expression, expected
+):
+    """Branch-sensitive expressions match cmath, including both sides of comparisons."""
+    response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, f"{case_id}: {response.text}"
+
+    body = response.json()
+    assert body["success"] is True, f"{case_id}: {body}"
+    assert body.get("error_code") is None, f"{case_id}: {body}"
+    assert isinstance(body.get("result_text"), str) and body["result_text"], (
+        f"{case_id}: missing scalar result_text: {body}"
+    )
+    assert isinstance(body.get("result_latex"), str) and body["result_latex"], (
+        f"{case_id}: missing result_latex: {body}"
+    )
+
+    # result_approx represents real-valued results only.
+    if abs(expected.imag) <= 1e-9:
+        assert body.get("result_approx") == pytest.approx(
+            expected.real, rel=1e-9, abs=1e-9
+        ), f"{case_id}: {body}"
+    else:
+        assert body.get("result_approx") is None, f"{case_id}: {body}"
+
+    actual = _decode_complex_result(body["result_text"])
+    assert actual.real == pytest.approx(expected.real, rel=1e-9, abs=1e-9), (
+        f"{case_id}: {expression} -> {body['result_text']}"
+    )
+    assert actual.imag == pytest.approx(expected.imag, rel=1e-9, abs=1e-9), (
+        f"{case_id}: {expression} -> {body['result_text']}"
+    )
+
