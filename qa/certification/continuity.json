@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 348,
+  "revision": 349,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "96b267085fdbf779885fe8c9094f14a0761dafb8",
-  "baseline_case": "ALGEBRA229-AS-B-29-TEST-FIRST",
+  "technical_baseline_sha": "c22ebf5eb6c9b656b319a20431f7ee1161608e79",
+  "baseline_case": "EDCX-B6-VC-FE-SCALAR-SCOPED",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -34,9 +34,9 @@
   "next_action": {
     "id": "COMPASS-P0-ACCESS-REVIEW",
     "status": "WAIT",
-    "previous_id": "ALGEBRA229-AS-B-29-VERIFY",
-    "action": "AS-B-29 is PASS_SCOPED; do not rerun it. Compass P0 remains WAIT. Exit criteria are recorded in qa/certification/COMPASS_ACCESS_REVIEW_2026-10-29.md: (A) owner-authorized auditable recovery for the three stale records using their original owner credential or approved recovery path; (B) approved least-privilege migration and verified effective grants; (C) attribution/decision for the internal role with RLS bypass; (D) complete server-route/browser-consumer review; (E) independently verify deployed artifact provenance or formally accept a scoped exception. Current evidence does not satisfy A/B/C/E; D is partial. No POST, workflow dispatch, DDL, permission change, or credential swap. Resume the next mathematical matrix only after P0 exit criteria pass.",
-    "updated_utc": "2026-10-29T05:05:00Z"
+    "previous_id": "EDCX-B6-VC-FE-SCALAR-SCOPED",
+    "action": "EDCX-B6 scalar principal-branch subset (VC-FE-01..03,05..10,13,14,16..22) is PASS_SCOPED on technical SHA c22ebf5eb6c9. Do not rerun those cases. Compass P0 remains WAIT. Exit criteria in qa/certification/COMPASS_ACCESS_REVIEW_2026-10-29.md (A-E). No POST, workflow dispatch, DDL, permission change, or credential swap. Resume next mathematical matrix (remaining EDCX-B6 rows or other) only after P0 exit criteria pass or explicit human override.",
+    "updated_utc": "2026-10-29T21:45:00Z"
   },
   "blockers": [
     {
@@ -69,6 +69,11 @@
       "status": "OUT_OF_SCOPE",
       "kind": "capability",
       "detail": "2026-10-28. VC-LG-01..25 geometric loci. No channel/endpoint for locus/region description. Documented EDCX_B5_CAPABILITY_GAP.md. Not FAIL."
+    },
+    {
+      "id": "EDCX-B6-VC-FE-SCALAR",
+      "status": "PASS_SCOPED",
+      "detail": "2026-10-29. Principal-branch scalar complex subset PASS_SCOPED. Covered IDs: VC-FE-01,02,03,05,06,07,08,09,10,13,14,16,17,18,19,20,21a,21b,22a,22b. Test file: backend/tests/test_edcx_b6_complex_contract.py. Independent oracle: Python cmath. Technical SHA c22ebf5eb6c9. CI 40830757255 SUCCESS, Cumulative 40830757291 SUCCESS, H1d 40830757290 SUCCESS. Scope: scalar principal values only; does not certify multivalued logs/powers, symbolic identities, or the remaining 53-row matrix. Lite remains NO_EJECUTADO."
     },
     {
       "id": "S19-BACKEND-MUTATION",
@@ -138,7 +143,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r348: AS-B-29 PASS_SCOPED; Compass P0 exit criteria documented. P0 remains WAIT: owner lookup blocked by revoked credential, least-privilege migration and bypass-role attribution need approval, route review partial, deployment provenance unresolved. No POST, dispatch, DDL or permission changes. Global OPEN.",
+  "ledger_note": "r349: EDCX-B6 scalar principal-branch subset (VC-FE-01..03,05..10,13,14,16..22) PASS_SCOPED on c22ebf5eb6c9 (CI 40830757255, Cumulative 40830757291, H1d 40830757290). Independent cmath oracle. Does not close full B6 matrix. AS-B-29 PASS_SCOPED. Compass P0 remains WAIT. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
