@@ -107,3 +107,42 @@ def test_edcx_b6_vc_fe_14_log_zero_returns_controlled_domain_error():
     assert body["success"] is False, body
     assert body.get("error_code") == "DOMAIN_ERROR", body
     assert body.get("result_text") in (None, ""), body
+
+
+POWER_CASES = [
+    ("VC-FE-16", "(-1)^i", cmath.exp(1j * cmath.log(-1))),
+    ("VC-FE-17", "2^i", cmath.exp(1j * math.log(2))),
+    ("VC-FE-18", "(1+i)^i", cmath.exp(1j * cmath.log(1 + 1j))),
+]
+
+
+@pytest.mark.parametrize(
+    ("case_id", "expression", "expected"),
+    POWER_CASES,
+    ids=[case[0] for case in POWER_CASES],
+)
+def test_edcx_b6_complex_powers_match_independent_principal_oracle(
+    case_id, expression, expected
+):
+    """Principal complex powers are checked against Python cmath, not SymPy."""
+    response = client.post("/api/v1/evaluate", json={"expression": expression})
+    assert response.status_code == 200, f"{case_id}: {response.text}"
+
+    body = response.json()
+    assert body["success"] is True, f"{case_id}: {body}"
+    assert body.get("error_code") is None, f"{case_id}: {body}"
+    assert isinstance(body.get("result_text"), str) and body["result_text"], (
+        f"{case_id}: missing scalar result_text: {body}"
+    )
+    assert isinstance(body.get("result_latex"), str) and body["result_latex"], (
+        f"{case_id}: missing result_latex: {body}"
+    )
+    assert body.get("result_approx") is None, f"{case_id}: {body}"
+
+    actual = _decode_complex_result(body["result_text"])
+    assert actual.real == pytest.approx(expected.real, rel=1e-9, abs=1e-9), (
+        f"{case_id}: {expression} -> {body['result_text']}"
+    )
+    assert actual.imag == pytest.approx(expected.imag, rel=1e-9, abs=1e-9), (
+        f"{case_id}: {expression} -> {body['result_text']}"
+    )
