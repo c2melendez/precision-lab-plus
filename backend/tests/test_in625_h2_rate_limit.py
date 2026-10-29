@@ -1,4 +1,4 @@
-﻿"""EN-SG-32: opt-in rate limiting (in-process TestClient only).
+"""EN-SG-32: opt-in rate limiting (in-process TestClient only).
 
 The limiter is disabled by default (RATE_LIMIT_REQUESTS=0), so these tests
 inject an explicitly enabled limiter through ``app.state.rate_limiter`` and

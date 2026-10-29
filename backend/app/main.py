@@ -1,7 +1,7 @@
-﻿"""
-Punto de entrada de la aplicaciÃ³n FastAPI (spec, secciÃ³n 9):
+"""
+Punto de entrada de la aplicación FastAPI (spec, sección 9):
 
-- Middleware de request_id/start_time ANTES de cualquier validaciÃ³n.
+- Middleware de request_id/start_time ANTES de cualquier validación.
 - CORS desde CORS_ORIGINS (env), nunca "*" con allow_credentials=True.
 - Prefijo /api/v1.
 - GET /api/v1/health -> {"status": "ok"}.
@@ -45,7 +45,7 @@ from app.routers import (
 configure_logging()
 
 app = FastAPI(
-    title="Calculadora CientÃ­fica Web",
+    title="Calculadora Científica Web",
     version="0.1.0",
     openapi_url=f"{API_V1_PREFIX}/openapi.json",
     docs_url=f"{API_V1_PREFIX}/docs",
@@ -73,7 +73,7 @@ app.add_middleware(
 
 @app.middleware("http")
 async def request_context_middleware(request: Request, call_next):
-    """Genera request_id/start_time ANTES de cualquier validaciÃ³n posterior."""
+    """Genera request_id/start_time ANTES de cualquier validación posterior."""
     request.state.request_id = str(uuid.uuid4())
     request.state.start_time = time.perf_counter()
     # EN-SG-32: opt-in throttling before routing, body reading and validation.
@@ -123,7 +123,7 @@ async def request_context_middleware(request: Request, call_next):
                 status_code=413,
                 content={"success": False, "request_id": request.state.request_id,
                          "error_code": "PAYLOAD_TOO_LARGE",
-                         "error_message": "El cuerpo de la solicitud supera el lÃ­mite de 1 MiB."},
+                         "error_message": "El cuerpo de la solicitud supera el límite de 1 MiB."},
                 headers={"X-Request-ID": request.state.request_id},
             )
     if request.method in {"POST", "PUT", "PATCH"} and declared_size is None:
@@ -135,7 +135,7 @@ async def request_context_middleware(request: Request, call_next):
                     status_code=413,
                     content={"success": False, "request_id": request.state.request_id,
                              "error_code": "PAYLOAD_TOO_LARGE",
-                             "error_message": "El cuerpo de la solicitud supera el lÃ­mite de 1 MiB."},
+                             "error_message": "El cuerpo de la solicitud supera el límite de 1 MiB."},
                     headers={"X-Request-ID": request.state.request_id},
                 )
         request._body = bytes(body)
