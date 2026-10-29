@@ -137,7 +137,14 @@ def test_edcx_b6_complex_powers_match_independent_principal_oracle(
     assert isinstance(body.get("result_latex"), str) and body["result_latex"], (
         f"{case_id}: missing result_latex: {body}"
     )
-    assert body.get("result_approx") is None, f"{case_id}: {body}"
+    # result_approx is a real-only channel: allow it when the complex oracle's
+    # imaginary part is zero; genuinely non-real results must leave it unset.
+    if abs(expected.imag) <= 1e-9:
+        assert body.get("result_approx") == pytest.approx(
+            expected.real, rel=1e-9, abs=1e-9
+        ), f"{case_id}: {body}"
+    else:
+        assert body.get("result_approx") is None, f"{case_id}: {body}"
 
     actual = _decode_complex_result(body["result_text"])
     assert actual.real == pytest.approx(expected.real, rel=1e-9, abs=1e-9), (
