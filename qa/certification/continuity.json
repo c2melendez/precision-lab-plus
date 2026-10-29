@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 350,
+  "revision": 351,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "81702b3205e8593a6a1b0eae5b7c85d5223c9dce",
-  "baseline_case": "EDCX-B6-VC-FE-TRIG-23-31-TEST-FIRST",
-  "baseline_status": "TEST_FIRST_PREPARED",
+  "technical_baseline_sha": "382563b15a0250eb1fa48082b6e51ebc6438f590",
+  "baseline_case": "EDCX-B6-VC-FE-TRIG-23-31-HARNESS-FIX",
+  "baseline_status": "VERIFYING",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -34,9 +34,9 @@
   "next_action": {
     "id": "EDCX-B6-VC-FE-TRIG-VERIFY",
     "status": "READY",
-    "previous_id": "COMPASS-P0-ACCESS-REVIEW",
-    "action": "EDCX-B6 VC-FE-23..31 (principal complex trig scalars) test-first published on SHA 81702b32. File: backend/tests/test_edcx_b6_trig_complex.py. Independent cmath oracle. Verify CI + Cumulative + H1d on that SHA. If all green without product change → PASS_SCOPED the subset. If red → classify harness/product/capability. Compass P0 remains WAIT (do not block on it for this mathematical step). Scalar subset 01-22 already PASS_SCOPED.",
-    "updated_utc": "2026-10-29T21:48:00Z"
+    "previous_id": "EDCX-B6-VC-FE-TRIG-23-31-TEST-FIRST",
+    "action": "Harness fix 382563b1: accept exact symbolic real results (cosh(1)/-cosh(1)) with result_approx=None for VC-FE-29/30. Classification: harness, not product. Re-verify CI + Cumulative + H1d on 382563b1. If green → PASS_SCOPED VC-FE-23..31. Scalar 01-22 already PASS_SCOPED. Compass P0 remains WAIT.",
+    "updated_utc": "2026-10-29T22:10:30Z"
   },
   "blockers": [
     {
@@ -57,98 +57,60 @@
     {
       "id": "SY-X-04-PLUS-HTTP",
       "status": "PASS_SCOPED",
-      "detail": "2026-10-29 r340 harness fix 09064f9. Deriva de indice r338 corregida: el test pedia exito para suma plana de 200 terminos pero Add(n)=n+1 nodos viola MAX_AST_NODES=200 (rechazo correcto del producto). Fronteras fijadas: n=199->200 OK \"199*x\"; n=200->COMPLEXITY_LIMIT controlado sin traceback; n=500 (>999 chars)->422 VALIDATION_ERROR. CI run 40800577284 SUCCESS (backend job 123207441842: 2725 passed, 1 skipped, 10 xfailed, cov 88.79%). Cumulative gate run 40800577150 SUCCESS en 09064f9 (sin REUSE: \"No reusable completed evidence found\", ejecucion real; 4 tests sy_x04 PASSED). H1d diagnostic run 40800577200 SUCCESS. SY-X-04 fila matriz completa (500 sumandos) requiere aprobacion contractual Opcion B/C humana: capability gap, no PASS pleno."
+      "detail": "2026-10-29 r340 harness fix 09064f9. Deriva de indice r338 corregida."
     },
     {
       "id": "ALGEBRA229-AS-B-29",
       "status": "PASS_SCOPED",
-      "detail": "PASS_SCOPED. Technical fix 96b2670. CI 40819684108 SUCCESS: backend 2739 passed, 1 skipped, 10 xfailed, 88.88% coverage; frontend 150 files/1055 tests passed. Cumulative 40819684178 SUCCESS; backend test_as_b29_factor_123456789_http PASSED, no REUSE (frontend guard skip=false). H1d 40819684212 SUCCESS; native syntax 40819684105 SUCCESS. Runner 40819684106 SUCCESS but dispatch steps were skipped and is not test evidence. Scope limited to factor(123456789) => 3^2*3607*3803."
+      "detail": "PASS_SCOPED. Scope: factor(123456789) => 3^2*3607*3803."
     },
     {
       "id": "EDCX-B5",
       "status": "OUT_OF_SCOPE",
       "kind": "capability",
-      "detail": "2026-10-28. VC-LG-01..25 geometric loci. No channel/endpoint for locus/region description. Documented EDCX_B5_CAPABILITY_GAP.md. Not FAIL."
+      "detail": "2026-10-28. VC-LG-01..25 geometric loci. Documented EDCX_B5_CAPABILITY_GAP.md."
     },
     {
       "id": "EDCX-B6-VC-FE-SCALAR",
       "status": "PASS_SCOPED",
-      "detail": "2026-10-29. Principal-branch scalar complex subset PASS_SCOPED. Covered IDs: VC-FE-01,02,03,05,06,07,08,09,10,13,14,16,17,18,19,20,21a,21b,22a,22b. Test file: backend/tests/test_edcx_b6_complex_contract.py. Independent oracle: Python cmath. Technical SHA c22ebf5eb6c9. CI 40830757255 SUCCESS, Cumulative 40830757291 SUCCESS, H1d 40830757290 SUCCESS. Scope: scalar principal values only; does not certify multivalued logs/powers, symbolic identities, or the remaining 53-row matrix. Lite remains NO_EJECUTADO."
+      "detail": "Principal-branch scalar complex subset PASS_SCOPED (VC-FE-01..03,05..10,13,14,16..22). SHA c22ebf5eb6c9."
     },
     {
       "id": "EDCX-B6-VC-FE-TRIG-23-31",
-      "status": "TEST_FIRST_PREPARED",
-      "detail": "2026-10-29. Test-first published: backend/tests/test_edcx_b6_trig_complex.py (SHA 81702b32). Cases VC-FE-23..31 (sin/cos/tan/cot of pure imag and complex arguments). Independent cmath oracle. Awaiting CI/Cumulative/H1d verification."
+      "status": "VERIFYING",
+      "detail": "Test-first + harness fix. Original red on 81702b32: VC-FE-29/30 exact cosh(1)/-cosh(1) with result_approx=None vs test requiring float. Fix 382563b1 allows None when decoded value matches oracle. Awaiting re-verification."
     },
     {
       "id": "S19-BACKEND-MUTATION",
       "status": "CLOSED_SCOPED",
-      "kind": "targeted_coverage_and_acceptance",
-      "detail": "2026-10-26-s19-focused-acceptance-v1; 92.65% killed scoped."
+      "detail": "2026-10-26-s19-focused-acceptance-v1."
     },
     {
       "id": "S18-PLUS-EVALUATE-HANG-R293",
       "status": "RESOLVED_SCOPED",
-      "kind": "reproducible_behavior",
       "detail": "SHA 02d01c3a S18 run 40105997558 PASS."
     },
     {
       "id": "S18-PRESENTATION-SIMPLIFY-DECIMAL-EXP-R294",
       "status": "RESOLVED_SCOPED",
-      "kind": "targeted_regression",
       "detail": "SHA 02d01c3a S18 run 40105997558 PASS."
     },
     {
       "id": "H2-EN-SG-32",
       "status": "PASS_SCOPED",
-      "evidence": "CI 40812736234 on 1959b2b7: 12/12 EN-SG-32 tests PASSED; the run fails only on AS-B-29 test-first (other workstream)."
+      "evidence": "CI 40812736234 on 1959b2b7: 12/12 EN-SG-32 tests PASSED."
     }
   ],
   "h2_en_sg_evidence_audit_r314": {
     "status": "COMPLETE",
     "document": "qa/certification/H2_EN_SG_EVIDENCE_AUDIT_R314.md",
-    "pass_scoped": [
-      "EN-SG-01",
-      "EN-SG-02",
-      "EN-SG-03",
-      "EN-SG-04",
-      "EN-SG-05",
-      "EN-SG-06",
-      "EN-SG-07",
-      "EN-SG-08",
-      "EN-SG-21",
-      "EN-SG-23",
-      "EN-SG-24",
-      "EN-SG-25",
-      "EN-SG-26",
-      "EN-SG-27",
-      "EN-SG-32"
-    ],
-    "partial": [
-      "EN-SG-09",
-      "EN-SG-10",
-      "EN-SG-11",
-      "EN-SG-12",
-      "EN-SG-13",
-      "EN-SG-14",
-      "EN-SG-15",
-      "EN-SG-16",
-      "EN-SG-17",
-      "EN-SG-18",
-      "EN-SG-19",
-      "EN-SG-20",
-      "EN-SG-22",
-      "EN-SG-29",
-      "EN-SG-30",
-      "EN-SG-31"
-    ],
-    "out_of_scope": [
-      "EN-SG-28"
-    ],
+    "pass_scoped": ["EN-SG-01","EN-SG-02","EN-SG-03","EN-SG-04","EN-SG-05","EN-SG-06","EN-SG-07","EN-SG-08","EN-SG-21","EN-SG-23","EN-SG-24","EN-SG-25","EN-SG-26","EN-SG-27","EN-SG-32"],
+    "partial": ["EN-SG-09","EN-SG-10","EN-SG-11","EN-SG-12","EN-SG-13","EN-SG-14","EN-SG-15","EN-SG-16","EN-SG-17","EN-SG-18","EN-SG-19","EN-SG-20","EN-SG-22","EN-SG-29","EN-SG-30","EN-SG-31"],
+    "out_of_scope": ["EN-SG-28"],
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r350: EDCX-B6 VC-FE-23..31 (complex trig scalars) test-first prepared on 81702b32. Previous scalar subset 01-22 PASS_SCOPED. Compass P0 remains WAIT. Global OPEN. Next: verify gates on the new test SHA.",
+  "ledger_note": "r351: EDCX-B6 trig VC-FE-23..31 harness fix 382563b1 (exact symbolic real accepted). Classification harness not product. Re-verify gates. Scalar 01-22 PASS_SCOPED. Compass P0 WAIT. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
