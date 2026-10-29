@@ -1044,3 +1044,16 @@ Ver r252.
 - EN-SG-21 sigue GAP: una suma literal de 10,000 términos mide 19,999 caracteres y el contrato de 500 caracteres la rechaza con 422 `VALIDATION_ERROR`; no se fuerza el verde ni se relaja el contrato. EN-SG-06/07 siguen PARTIAL (falta timeout de recursión y error claro) y EN-SG-28/32 siguen GAP (UI stop/recovery y ausencia de rate limiter).
 - Bloqueos sin cambios: SECURITY-S25 BLOCKED (condición de salida bilateral; el hard gate de npm audit de Lite sigue rojo por deepmerge LOW), H2-SG28-DIST-01..08 OUT_OF_SCOPE_SINGLE_HOST, ALGEBRA229-AS-B-29 ON_HOLD, EDCX-B5 BLOCKED, SY-X-04-PLUS-HTTP BLOCKED, PR #29 OPEN/DRAFT y certificación global OPEN.
 - Sin DDL, sin cambios de permisos, sin servicios de producción y sin cargas extremas fuera del TestClient en proceso.
+
+
+## 2026-10-29 UTC — r340: corrección de deriva de harness SY-X-04 Plus y reconciliación del índice
+
+**HEAD técnico certificado:** `09064f926bea4ccb762f5db05094ee69cb9ada0e` (commit `test(syntax): SY-X-04 Plus HTTP — fix harness drift vs MAX_AST_NODES contract`), rama `qa/syntax-audit-in625-a1`. Índice reconciliado a r340 en el commit documental posterior.
+
+- Diagnóstico del fallo CI 40775454881 (SHA 1e4c529, r338): **bug de harness**, no regresión de producto. El test SY-X-04 pedía éxito para una suma plana de 200 términos, pero un Add plano de n términos genera n+1 nodos AST y el contrato vigente `ast_validator.MAX_AST_NODES=200` la rechaza correctamente (201 > 200).
+- Corrección publicada en `backend/tests/test_sy_x04_http.py` (commit `09064f9`): subconjunto funcional ajustado al máximo admisible (n=199 → HTTP 200, `result_text='199*x'`, 397 chars) y **nuevo caso de frontera fijado**: suma de 200 términos debe rechazarse de forma controlada con `error_code=COMPLEXITY_LIMIT` sin traceback (regresión permanente anti-deriva). Ningún oráculo matemático relajado; ningún gate eliminado.
+- Evidencia real en `09064f9` (evento push, todas concluidas): CI **40800577284 SUCCESS** (backend job 123207441842: 2,725 passed, 1 skipped, 10 xfailed, cobertura 88.79%); gate acumulativo **40800577150 SUCCESS** (guard REUSE informó `skip=false — No reusable completed evidence found`, ejecución real; los 4 tests `test_sy_x04_http.py` PASSED en el job 123207441241); H1d **40800577200 SUCCESS**; Certification Runner **40800577170 SUCCESS**.
+- Estado SY-X-04-PLUS-HTTP: **PASS_SCOPED corregido**. La fila matriz completa (500 sumandos explícitos → 500x) sigue pendiente de **aprobación contractual humana** (Opción B: elevar max_length ≥999 y MAX_AST_NODES, o C: endpoint versionado; ver `SY_X_04_LENGTH_DECISION.md`). Incluso elevando max_length, MAX_AST_NODES bloquearía 500 términos: es capability gap, no PASS pleno.
+- Conteo de tests backend: 2,721 (r332/40609140000) → 2,725 (09064f9): +4 por la suite sy_x04 actualizada con el caso de frontera n=200.
+- Bloqueos conservados: H2-SG28-DIST OUT_OF_SCOPE_SINGLE_HOST, SECURITY-S25 ACCEPTED_BILATERAL (allow_reuse=false), ALGEBRA229-AS-B-29 ON_HOLD, EDCX-B5 OUT_OF_SCOPE (capability), PR #29 OPEN/DRAFT. Global OPEN.
+- **Siguiente acción exacta:** EDCX-B6 (VC-FE, 53 filas) — Fase A: inspeccionar cobertura frontend existente de validación/canales visuales en Lite y Plus, decidir RUN/WAIT/REUSE por gate según protocolo; no despachar gates verdes vigentes ni repetir bloqueos sin cambio de precondición.
