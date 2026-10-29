@@ -81,6 +81,15 @@ class Settings:
         ]
         self.math_timeout_seconds: float = float(os.environ.get("MATH_TIMEOUT_SECONDS", "10"))
         self.graph_2d_default_points: int = int(os.environ.get("GRAPH_2D_DEFAULT_POINTS", "200"))
+        # EN-SG-32: opt-in rate limiting. The shipped default is disabled so a
+        # deployment that has not opted in keeps the previous behaviour.
+        self.rate_limit_requests: int = int(os.environ.get("RATE_LIMIT_REQUESTS", "0"))
+        self.rate_limit_window_seconds: float = float(
+            os.environ.get("RATE_LIMIT_WINDOW_SECONDS", "60")
+        )
+        self.rate_limit_trust_forwarded_for: bool = os.environ.get(
+            "RATE_LIMIT_TRUST_FORWARDED_FOR", "false"
+        ).strip().lower() in {"1", "true", "yes", "on"}
 
 
 @lru_cache
