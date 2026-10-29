@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 340,
+  "revision": 341,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "09064f926bea4ccb762f5db05094ee69cb9ada0e",
-  "baseline_case": "SY-X-04-PLUS-HTTP-R340-HARNESS-FIX",
-  "baseline_status": "PASS_SCOPED",
+  "technical_baseline_sha": "c9470eee1179305016cb9c34871fc0cb35896211",
+  "baseline_case": "ALGEBRA229-AS-B-29-TEST-FIRST",
+  "baseline_status": "TEST_FIRST_PREPARED",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -32,11 +32,11 @@
     }
   },
   "next_action": {
-    "id": "EDCX-B6-VC-FE",
-    "status": "READY_REVIEW",
-    "action": "EDCX-B6 (VC-FE, 53 filas): revisar cobertura frontend existente y decidir RUN/WAIT/REUSE por gate segun protocolo. Bloqueos vigentes a conservar: SG28-DIST OUT_OF_SCOPE, ALGEBRA229-AS-B-29 ON_HOLD, EDCX-B5 OUT_OF_SCOPE, SY-X-04 completo pendiente de aprobacion humana Opcion B/C.",
-    "previous_id": "SY-X-04-PLUS-HTTP-R340-HARNESS-FIX",
-    "updated_utc": "2026-10-29T01:40:00Z"
+    "id": "ALGEBRA229-AS-B-29-VERIFY",
+    "status": "READY",
+    "action": "AS-B-29 test-first published (Plus c9470eee + Lite 21c7aae3). Verificar gates/CI sobre esos SHA. Si PASS sin cambio de producto → cerrar PASS_SCOPED. Si falla → decidir regla acotada (patrón D23/D24) o BLOCKED. Conservar EDCX-B6 REVIEW, SG28-DIST OUT_OF_SCOPE, EDCX-B5 OUT_OF_SCOPE.",
+    "previous_id": "EDCX-B6-VC-FE",
+    "updated_utc": "2026-10-29T02:22:00Z"
   },
   "blockers": [
     {
@@ -61,7 +61,8 @@
     },
     {
       "id": "ALGEBRA229-AS-B-29",
-      "status": "ON_HOLD"
+      "status": "TEST_FIRST_PREPARED",
+      "detail": "2026-10-29. Tests published: Plus backend/tests/test_algebra229_as_b29.py (c9470eee), Lite tests/algebra229AsB29.audit.test.ts (21c7aae3). Input factor(123456789) → 3^2*3607*3803. Awaiting gate verification."
     },
     {
       "id": "EDCX-B5",
@@ -132,7 +133,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r339. EDCX-B5 (VC-LG-01..25) OUT_OF_SCOPE (capability). No locus/region description endpoint. Document EDCX_B5_CAPABILITY_GAP.md. SY-X-04-PLUS-HTTP PASS_SCOPED. SECURITY-S25 ACCEPTED_BILATERAL. H2 EN-SG R314 CLOSED. Global OPEN. Remaining: ALGEBRA229-AS-B-29 ON_HOLD, H2-SG28-DIST OUT_OF_SCOPE_SINGLE_HOST, EDCX-B6 REVIEW.",
+  "ledger_note": "r341. AS-B-29 test-first prepared bilateral (Plus c9470eee, Lite 21c7aae3). factor(123456789) → 3^2*3607*3803. Status TEST_FIRST_PREPARED. SY-X-04 PASS_SCOPED, SECURITY-S25 ACCEPTED_BILATERAL, EDCX-B5 OUT_OF_SCOPE, H2 EN-SG R314 CLOSED. Global OPEN. Next: verify gates on test SHA; then EDCX-B6 or close AS-B-29.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
