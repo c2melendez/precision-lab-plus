@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 347,
+  "revision": 348,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "96b267085fdbf779885fe8c9094f14a0761dafb8",
@@ -35,7 +35,7 @@
     "id": "COMPASS-P0-ACCESS-REVIEW",
     "status": "WAIT",
     "previous_id": "ALGEBRA229-AS-B-29-VERIFY",
-    "action": "AS-B-29 is PASS_SCOPED; do not rerun it. Compass P0 remains open: historic owner-scoped GETs are blocked because the associated credential is revoked. Review qa/certification/COMPASS_ACCESS_REVIEW_2026-10-29.md and obtain an approved recovery route before continuing. No database changes or workflow dispatches. Resume the next mathematical matrix only after P0 exit criteria pass.",
+    "action": "AS-B-29 is PASS_SCOPED; do not rerun it. Compass P0 remains WAIT. Exit criteria are recorded in qa/certification/COMPASS_ACCESS_REVIEW_2026-10-29.md: (A) owner-authorized auditable recovery for the three stale records using their original owner credential or approved recovery path; (B) approved least-privilege migration and verified effective grants; (C) attribution/decision for the internal role with RLS bypass; (D) complete server-route/browser-consumer review; (E) independently verify deployed artifact provenance or formally accept a scoped exception. Current evidence does not satisfy A/B/C/E; D is partial. No POST, workflow dispatch, DDL, permission change, or credential swap. Resume the next mathematical matrix only after P0 exit criteria pass.",
     "updated_utc": "2026-10-29T05:05:00Z"
   },
   "blockers": [
@@ -138,7 +138,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r347: AS-B-29 PASS_SCOPED; Compass access review is the canonical next action. Historic owner lookups await an approved recovery path; access proposal recorded. No POST, dispatch or database changes. Global OPEN.",
+  "ledger_note": "r348: AS-B-29 PASS_SCOPED; Compass P0 exit criteria documented. P0 remains WAIT: owner lookup blocked by revoked credential, least-privilege migration and bypass-role attribution need approval, route review partial, deployment provenance unresolved. No POST, dispatch, DDL or permission changes. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
