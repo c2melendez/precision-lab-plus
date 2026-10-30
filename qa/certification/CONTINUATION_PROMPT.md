@@ -1,5 +1,9 @@
 # Prompt único permanente de continuidad — Precision Lab Certification
 
+## ENMIENDA VIGENTE 2026-10-30 — separación API_GPT / Compass / motor matemático
+
+La certificación del motor matemático **no depende** de precision-lab-readonly-api ni Cert Runner Compass. API_GPT/GPT Actions es un frente de integración y evaluación multi-LLM de solo lectura; Compass/Bridge es un frente independiente de despacho y auditoría. Sus estados OPEN/BLOCKED no deben propagarse como bloqueos de las matrices matemáticas. Continuar la siguiente tarea matemática indicada por el estado de cada repositorio y sus matrices fuente. Mantener Compass como backlog independiente: no marcarlo cerrado ni alterar sus controles de seguridad. No mezclar evidencia de GPT Actions/Bridge con PASS del motor matemático.
+
 Continúa autónomamente el sistema de certificación de Precision Lab. GitHub es la fuente de verdad.
 
 
