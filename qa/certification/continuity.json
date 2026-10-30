@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 358,
+  "revision": 359,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
@@ -32,11 +32,11 @@
     }
   },
   "next_action": {
-    "id": "EDCX-B6-VC-FE-BRANCH-CONVENTIONS-45-49-53",
-    "status": "REVIEW",
-    "previous_id": "EDCX-B6-VC-FE-32..41-PLUS-ONLY",
-    "action": "Resolve and document the principal-branch/cut convention against the source matrix and actual /api/v1/evaluate semantics for VC-FE-45 (arcsin(2)), VC-FE-49 (arctan(2i)), and VC-FE-53 (artanh(2)). Do not run or accept these rows until the sign/branch convention is explicit. VC-FE-43,44,46,48,50,51,52 are already PASS_SCOPED in the executed cumulative on SHA adbf5c38. Keep global certification OPEN; Plus-only evidence; no bilateral inference.",
-    "updated_utc": "2026-10-30T22:30:00Z"
+    "id": "EDCX-B6-VC-FE-45-CONTRACT-CONFLICT",
+    "status": "BLOCKED",
+    "previous_id": "EDCX-B6-VC-FE-BRANCH-CONVENTIONS-45-49-53",
+    "action": "Resolver el conflicto contractual de VC-FE-45 (arcsin(2)): la matriz B6 solicita valor complejo con signo de rama ±, pero EV-I-12 y la implementación vigente exigen DOMAIN_ERROR para asin real fuera de dominio. No debilitar EV-I-12 ni aceptar VC-FE-45 sin decisión versionada. Después continuar con las filas VC-FE restantes y la auditoría de cobertura de Lite.",
+    "updated_utc": "2026-10-30T23:10:00Z"
   },
   "blockers": [
     {
@@ -83,12 +83,12 @@
     {
       "id": "EDCX-B6-VC-FE-HYPERBOLIC-37-41",
       "status": "PASS_SCOPED",
-      "detail": "r358: Plus only, VC-FE-37..41 (six harness cases: 37a/37b, 38..41) passed in cumulative 41134338772 on exact SHA adbf5c3826480a015456c8f64257f866f23ca3c4. Independent Python cmath/math principal-branch oracle; tolerance 1e-9; test blob 40f45a2f50c897cac705354273abed6ec586d820. CI 41134338836, Cumulative 41134338772 (all six PASSED; backend 2798 passed, 1 skipped, 10 xfailed; 88.91% coverage), H1d 41134338840 and Runner 41134338750 all SUCCESS on same SHA. Lite not executed; no bilateral claim."
+      "detail": "r358: Plus only, VC-FE-37..41 (six harness cases: 37a/37b, 38..41) passed in cumulative 41134338772 on exact SHA adbf5c3826480a015456c8f64257f866f23ca3c4. Independent Python cmath/math principal-branch oracle; tolerance 1e-9; test blob 40f45a2f50c897cac705354273abed6ec586d820. CI 41134338836, Cumulative 41134338772 (all six PASSED; backend 2798 passed, 1 skipped, 10 xfailed; 88.91% coverage), H1d 41134338840 and Runner 41134338750 all SUCCESS on same SHA. Lite not executed; no bilateral claim. Revalidación adicional en cumulative 41136659987, SHA 218d682848a03a000930e2028f057563847381f3: seis instancias (37a/37b y 38..41) PASSED."
     },
     {
       "id": "EDCX-B6-VC-FE-INVERSE",
       "status": "PASS_SCOPED_PARTIAL",
-      "detail": "r358: Plus only, executed subset VC-FE-43,44,46,48,50,51,52 (seven harness tests including controlled DOMAIN_ERROR at VC-FE-48) passed in cumulative 41134338772 on exact SHA adbf5c3826480a015456c8f64257f866f23ca3c4. Independent Python cmath/math principal-branch oracle; tolerance 1e-9; test blob 8355a4909532275a99e593f09b640d8df557a917. Branch-sensitive VC-FE-45,49,53 remain REVIEW and excluded. Same-SHA CI 41134338836, H1d 41134338840 and Runner 41134338750 SUCCESS. Lite not executed; no bilateral claim."
+      "detail": "r359: Plus únicamente. En r358 se ejecutaron VC-FE-43,44,46,48,50,51,52; en SHA 218d682848a03a000930e2028f057563847381f3 se añadieron y pasaron VC-FE-49 (atan(2i), cmath.atan(2j)) y VC-FE-53 (atanh(2), convención de borde inferior/parte imaginaria negativa, cmath.atanh(complex(2.0,-0.0))). Test backend/tests/test_edcx_b6_inverse_complex.py; cumulative 41136659987 SUCCESS (backend 2800 passed, 1 skipped, 10 xfailed; log enumera VC-FE-49 y VC-FE-53 PASSED), CI 41136660010 SUCCESS (backend/frontend), H1d 41136660018 SUCCESS (38 passed), Runner 41136660038 SUCCESS (dispatch/persistencia skipped). Tolerancia 1e-9; oráculo Python cmath independiente, SymPy solo decodifica result_text. VC-FE-45 sigue excluida y BLOCKED por conflicto con EV-I-12. Solo Plus; no bilateral."
     },
     {
       "id": "EDCX-B6-VC-FE-FORMULA-REAL",
@@ -119,6 +119,12 @@
       "id": "EDCX-B6-VC-FE-SYMBOLIC-32-36",
       "status": "PASS_SCOPED",
       "detail": "r358: Plus only, VC-FE-32..36 passed 15 finite numeric substitution checks in cumulative 41134338772 on exact SHA adbf5c3826480a015456c8f64257f866f23ca3c4. Independent Python math/cmath oracle; declared real x,y pairs for 32/33 and complex z points for 34/35/36; tolerance 1e-9. Test blob 9ba9eea1186ed76ddaf32b0ff6d0c80c0daea721. VC-FE-36 accepts result_approx=null per real-only optional contract while independently decoding result_text. CI 41134338836, cumulative 41134338772, H1d 41134338840 and Runner 41134338750 SUCCESS on same SHA. Finite substitutions only; no universal symbolic proof, no Lite or bilateral claim."
+    },
+    {
+      "id": "EDCX-B6-VC-FE-45",
+      "status": "BLOCKED",
+      "kind": "contract_conflict",
+      "detail": "La fila B6 VC-FE-45 pide asin(2) complejo con ± rama, mientras EV-I-12 congelado y backend/app/services/evaluate_service.py rechazan asin(2) en dominio real con DOMAIN_ERROR. No se relaja EV-I-12 ni se marca PASS. Requiere resolución contractual versionada o canal complejo explícito."
     }
   ],
   "h2_en_sg_evidence_audit_r314": {
