@@ -30,6 +30,10 @@ INVERSE_CASES = [
     ("VC-FE-51", "acosh(0)", cmath.acosh(0)),
     # VC-FE-52: arcosh(-1) -> i*pi
     ("VC-FE-52", "acosh(-1)", cmath.acosh(-1)),
+    # VC-FE-49: arctan(2i), principal upper-side cut convention.
+    ("VC-FE-49", "atan(2*i)", cmath.atan(2j)),
+    # VC-FE-53: artanh(2), principal upper-side cut convention.
+    ("VC-FE-53", "atanh(2)", cmath.atanh(2 + 0j)),
 ]
 
 
