@@ -675,3 +675,12 @@ La suite v1.1 y el registro de Fase 1 recibidos el 2026-10-27 UTC son la base de
 - P0-F **PASS_SCOPED** para esta revisión: no se enviaron solicitudes ni se despacharon workflows; se conserva la prohibición de repetir B3/B6 y de usar `GET /api/run`.
 - Se actualizó `continuity.json` a r348 y se añadió el informe de revisión a `prose_only_paths`. El siguiente paso canónico sigue siendo `COMPASS-P0-ACCESS-REVIEW`, estado `WAIT`; certificación global `OPEN`. La próxima matriz matemática permanece estacionada.
 - **Salida P0 no concedida:** requieren acción/aprobación del propietario la ruta de recuperación autenticada, la decisión de mínimo privilegio, la atribución del rol privilegiado y la procedencia de despliegue (o excepción formal y acotada). La documentación por sí sola no satisface esos criterios.
+
+
+## 2026-10-29 UTC — r355: EDCX-B6 VC-FE-42/47 PASS_SCOPED (Plus)
+
+- Se sincroniza el ledger narrativo con `continuity.json` r355 y el informe `EDCX_B6_VC_FE_42_47_ACCEPTANCE_R355.md`.
+- Plus: VC-FE-42 (`arcsin(1/2)=π/6`) y VC-FE-47 (`arctan(1)=π/4`) **PASS_SCOPED** sobre SHA técnico `082fdb7c48add1476554ef90e840fab698b89561`; archivo de prueba `backend/tests/test_edcx_b6_formula_real_points.py`.
+- Evidencia ya obtenida: CI [40970642357](https://github.com/c2melendez/precision-lab-plus/actions/runs/40970642357), Cumulative [40970642413](https://github.com/c2melendez/precision-lab-plus/actions/runs/40970642413), H1d [40970642305](https://github.com/c2melendez/precision-lab-plus/actions/runs/40970642305), Certification Runner [40970642558](https://github.com/c2melendez/precision-lab-plus/actions/runs/40970642558); todos SUCCESS. Cumulative: `skip=false`, ambas pruebas PASSED; backend 2,783 passed, 1 skipped, 10 xfailed; cobertura 88.91%.
+- Alcance: solo Plus y estas dos filas. Lite r334 no ejecutado; no hay aceptación bilateral ni cierre EDCX-B6 completo. Compass P0 WAIT; certificación global OPEN.
+- Se trata de una actualización documental. **No se modificó código de producto ni se ejecutaron workflows/pruebas.** No repetir los cuatro runs indicados salvo causa nueva justificada. Próxima acción: `COMPASS-P0-ACCESS-REVIEW (WAIT)`; no avanzar a otra matriz matemática antes de cumplir los criterios de salida P0.
