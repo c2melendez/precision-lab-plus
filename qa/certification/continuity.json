@@ -1,36 +1,42 @@
 {
   "schema_version": 1,
-  "revision": 354,
+  "revision": 355,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "082fdb7c48add1476554ef90e840fab698b89561",
-  "baseline_case": "EDCX-B6-VC-FE-FORMULA-REAL-TEST-FIRST",
-  "baseline_status": "TEST_FIRST_PREPARED",
+  "baseline_case": "EDCX-B6-VC-FE-FORMULA-REAL",
+  "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
       "workflow": ".github/workflows/in625-cumulative-certification.yml",
-      "inputs": ["*"],
+      "inputs": [
+        "*"
+      ],
       "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "h1d": {
       "workflow": ".github/workflows/in625-h1d-reentry.yml",
-      "inputs": ["*"],
+      "inputs": [
+        "*"
+      ],
       "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "security": {
       "workflow": ".github/workflows/certification-dependency-gates.yml",
-      "inputs": ["*"],
+      "inputs": [
+        "*"
+      ],
       "acceptance_revision": "2026-10-16-continuity-v1",
       "allow_reuse": false
     }
   },
   "next_action": {
-    "id": "EDCX-B6-VC-FE-FORMULA-REAL-VERIFY",
-    "status": "READY",
-    "previous_id": "EDCX-B6-VC-FE-INVERSE-VERIFY",
-    "action": "EDCX-B6 VC-FE-42 and VC-FE-47 (inverse formulas at real points) test-first on SHA 082fdb7c. File: backend/tests/test_edcx_b6_formula_real_points.py. Verify CI+Cumulative+H1d. Inverse/hyperbolic/trig still pending. Scalar 01-22 PASS_SCOPED. Remaining harder rows (04,11-12,15,32-36,45,49,53) not started. Compass P0 WAIT.",
-    "updated_utc": "2026-10-29T23:06:00Z"
+    "id": "COMPASS-P0-ACCESS-REVIEW",
+    "status": "WAIT",
+    "previous_id": "EDCX-B6-VC-FE-FORMULA-REAL-VERIFY",
+    "action": "Plus VC-FE-42 and VC-FE-47 are PASS_SCOPED on exact SHA 082fdb7c48add1476554ef90e840fab698b89561. CI 40970642357, Cumulative 40970642413, H1d 40970642305 and Runner 40970642558 all SUCCESS; cumulative guard skip=false and both tests PASSED. Do not rerun these cases. Lite remains r334 / Compass P0 WAIT; no bilateral acceptance. Keep remaining EDCX-B6 rows at existing statuses. Resume broader mathematical work only after Compass P0 exit criteria are met. Global certification OPEN.",
+    "updated_utc": "2026-10-29T23:09:20Z"
   },
   "blockers": [
     {
@@ -86,8 +92,8 @@
     },
     {
       "id": "EDCX-B6-VC-FE-FORMULA-REAL",
-      "status": "TEST_FIRST_PREPARED",
-      "detail": "2026-10-29. Test-first: backend/tests/test_edcx_b6_formula_real_points.py (SHA 082fdb7c). VC-FE-42 (arcsin formula at z=1/2 -> pi/6), VC-FE-47 (arctan formula at z=1 -> pi/4). Awaiting CI."
+      "status": "PASS_SCOPED",
+      "detail": "2026-10-29 r355, Plus only. SHA 082fdb7c48add1476554ef90e840fab698b89561. VC-FE-42 arcsin(1/2)=pi/6 and VC-FE-47 arctan(1)=pi/4. CI 40970642357, Cumulative 40970642413 (guard skip=false; both tests PASSED), H1d 40970642305, Runner 40970642558; all SUCCESS on exact SHA. Lite not executed; no bilateral claim."
     },
     {
       "id": "S19-BACKEND-MUTATION",
@@ -113,13 +119,48 @@
   "h2_en_sg_evidence_audit_r314": {
     "status": "COMPLETE",
     "document": "qa/certification/H2_EN_SG_EVIDENCE_AUDIT_R314.md",
-    "pass_scoped": ["EN-SG-01","EN-SG-02","EN-SG-03","EN-SG-04","EN-SG-05","EN-SG-06","EN-SG-07","EN-SG-08","EN-SG-21","EN-SG-23","EN-SG-24","EN-SG-25","EN-SG-26","EN-SG-27","EN-SG-32"],
-    "partial": ["EN-SG-09","EN-SG-10","EN-SG-11","EN-SG-12","EN-SG-13","EN-SG-14","EN-SG-15","EN-SG-16","EN-SG-17","EN-SG-18","EN-SG-19","EN-SG-20","EN-SG-22","EN-SG-29","EN-SG-30","EN-SG-31"],
-    "out_of_scope": ["EN-SG-28"],
+    "pass_scoped": [
+      "EN-SG-01",
+      "EN-SG-02",
+      "EN-SG-03",
+      "EN-SG-04",
+      "EN-SG-05",
+      "EN-SG-06",
+      "EN-SG-07",
+      "EN-SG-08",
+      "EN-SG-21",
+      "EN-SG-23",
+      "EN-SG-24",
+      "EN-SG-25",
+      "EN-SG-26",
+      "EN-SG-27",
+      "EN-SG-32"
+    ],
+    "partial": [
+      "EN-SG-09",
+      "EN-SG-10",
+      "EN-SG-11",
+      "EN-SG-12",
+      "EN-SG-13",
+      "EN-SG-14",
+      "EN-SG-15",
+      "EN-SG-16",
+      "EN-SG-17",
+      "EN-SG-18",
+      "EN-SG-19",
+      "EN-SG-20",
+      "EN-SG-22",
+      "EN-SG-29",
+      "EN-SG-30",
+      "EN-SG-31"
+    ],
+    "out_of_scope": [
+      "EN-SG-28"
+    ],
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r354: EDCX-B6 formula-at-real-point VC-FE-42,47 test-first 082fdb7c. Inverse/hyperbolic/trig still pending CI. Scalar PASS_SCOPED. Compass P0 WAIT. Global OPEN.",
+  "ledger_note": "r355: Plus-only PASS_SCOPED for EDCX-B6 VC-FE-42 and VC-FE-47 on 082fdb7c; four exact-SHA gates SUCCESS, cumulative real execution (skip=false). Lite r334 remains Compass P0 WAIT; no bilateral acceptance. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
