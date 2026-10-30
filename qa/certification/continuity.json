@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 355,
+  "revision": 356,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "082fdb7c48add1476554ef90e840fab698b89561",
@@ -32,11 +32,11 @@
     }
   },
   "next_action": {
-    "id": "COMPASS-P0-ACCESS-REVIEW",
-    "status": "WAIT",
-    "previous_id": "EDCX-B6-VC-FE-FORMULA-REAL-VERIFY",
-    "action": "Plus VC-FE-42 and VC-FE-47 are PASS_SCOPED on exact SHA 082fdb7c48add1476554ef90e840fab698b89561. CI 40970642357, Cumulative 40970642413, H1d 40970642305 and Runner 40970642558 all SUCCESS; cumulative guard skip=false and both tests PASSED. Do not rerun these cases. Lite remains r334 / Compass P0 WAIT; no bilateral acceptance. Keep remaining EDCX-B6 rows at existing statuses. Resume broader mathematical work only after Compass P0 exit criteria are met. Global certification OPEN.",
-    "updated_utc": "2026-10-29T23:09:20Z"
+    "id": "MATH-ENGINE-RESUME-RECONCILIATION",
+    "status": "REVIEW",
+    "previous_id": "COMPASS-P0-ACCESS-REVIEW",
+    "action": "Compass P0 is an independent API_GPT/Bridge workstream and is no longer a prerequisite for mathematical certification. Resume the mathematical engine from the repository's own open matrix and evidence. Plus: continuar EDCX-B6, empezando por reconciliar la evidencia existente de VC-FE trig 23–31 (estado previo VERIFYING); después seguir con los subgrupos hyperbolic/inverse/real según sus estados y sin repetir los gates verdes de VC-FE-42/47. No afirmar aceptación bilateral. Keep Compass findings OPEN in its separate backlog; do not claim global certification or repeat green workflows.",
+    "updated_utc": "2026-10-30T05:16:58Z"
   },
   "blockers": [
     {
@@ -160,7 +160,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r355: Plus-only PASS_SCOPED for EDCX-B6 VC-FE-42 and VC-FE-47 on 082fdb7c; four exact-SHA gates SUCCESS, cumulative real execution (skip=false). Acceptance report indexed in prose_only_paths and CURRENT_STATE/EXECUTION_LOG synchronized. Lite r334 remains Compass P0 WAIT; no bilateral acceptance. Global OPEN.",
+  "ledger_note": "r356: scope amendment 2026-10-30. Compass/API_GPT/Bridge remains an independent OPEN workstream; its P0 no longer blocks mathematical engine certification. Next action is MATH-ENGINE-RESUME-RECONCILIATION. Plus: continuar EDCX-B6, empezando por reconciliar la evidencia existente de VC-FE trig 23–31 (estado previo VERIFYING); después seguir con los subgrupos hyperbolic/inverse/real según sus estados y sin repetir los gates verdes de VC-FE-42/47. No afirmar aceptación bilateral. Global certification remains OPEN; no product code, tests, Actions, permissions, RLS, credentials, data or deployments changed.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
@@ -179,8 +179,10 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/EXECUTION_LOG_AS229_SECTION_A.md",
     "qa/certification/H2_EN_SG_EVIDENCE_AUDIT_R314.md",
+    "qa/certification/HANDOFF_GITHUB_ALTERNATIVE_CONNECTION.md",
     "qa/certification/README.md",
     "qa/certification/ROADMAP_CONTINUITY.md",
+    "qa/certification/ROADMAP_GITHUB_ALTERNATIVE_CONNECTION.md",
     "qa/certification/S19_BACKEND_MUTATION_REVIEW_R288.md",
     "qa/certification/S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md",
     "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md",
