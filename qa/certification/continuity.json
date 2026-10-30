@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 359,
+  "revision": 360,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
@@ -171,7 +171,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r358: Plus-only EDCX-B6 evidence reconciled on exact SHA adbf5c3826480a015456c8f64257f866f23ca3c4. VC-FE-32..36 PASS_SCOPED (15 finite substitutions); VC-FE-37..41 PASS_SCOPED (six harness cases); inverse subset VC-FE-43,44,46,48,50,51,52 PASS_SCOPED (seven tests). CI 41134338836, cumulative 41134338772 (2798 passed, 1 skipped, 10 xfailed; 88.91% coverage), H1d 41134338840, Runner 41134338750 all SUCCESS on same SHA. Branch-cut rows 45,49,53 remain REVIEW; no universal identity proof, no bilateral acceptance, global OPEN. Next action is explicit branch convention review.",
+  "ledger_note": "r358: Plus-only EDCX-B6 evidence reconciled on exact SHA adbf5c3826480a015456c8f64257f866f23ca3c4. VC-FE-32..36 PASS_SCOPED (15 finite substitutions); VC-FE-37..41 PASS_SCOPED (six harness cases); inverse subset VC-FE-43,44,46,48,50,51,52 PASS_SCOPED (seven tests). CI 41134338836, cumulative 41134338772 (2798 passed, 1 skipped, 10 xfailed; 88.91% coverage), H1d 41134338840, Runner 41134338750 all SUCCESS on same SHA. Branch-cut rows 45,49,53 remain REVIEW; no universal identity proof, no bilateral acceptance, global OPEN. Next action is explicit branch convention review. r360 Runner reconciliation: Plus Certification Runner push run 41136660038 SUCCESS on SHA 218d682848a03a000930e2028f057563847381f3; canonical branch resolution, checkout, base SHA and fingerprint succeeded. Dispatch, wait, QA record, persistence and commit were SKIPPED. Lite counterpart 41138509571 SUCCESS on c8c29d820e5bd16ab4df8a528bcea9b4a72f8acc with the same push-only scope. This is PASS_SCOPED for push/no-dispatch, not certification of workflow_dispatch or Observer→Bridge E2E. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
@@ -199,5 +199,37 @@
     "qa/certification/S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md",
     "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md",
     "qa/certification/continuity.json"
-  ]
+  ],
+  "runner_certification_r360": {
+    "status": "PASS_SCOPED_PUSH_ONLY",
+    "runner_workflow": ".github/workflows/certification-runner.yml",
+    "canonical_branch": "qa/syntax-audit-in625-a1",
+    "technical_sha": "218d682848a03a000930e2028f057563847381f3",
+    "run_id": 41136660038,
+    "run_url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/41136660038",
+    "event": "push",
+    "conclusion": "success",
+    "verified_steps": [
+      "Resolve canonical branch from default-branch README",
+      "Checkout canonical branch",
+      "Record base commit",
+      "Read-only planner fingerprint for selected gate",
+      "Push summary"
+    ],
+    "skipped_steps": [
+      "Gate policy and workflow resolution",
+      "Dry-run summary",
+      "Detect an equivalent active gate run before dispatch",
+      "Wait for the equivalent active gate run",
+      "Dispatch gate workflow and wait for its result",
+      "Record result in QA (dispatch runs only)",
+      "Persist execution observation in continuity records",
+      "Commit runner and documentary records"
+    ],
+    "decision": "PASS_SCOPED for push/no-dispatch path only; workflow_dispatch dispatch chain, durable receipt and replay remain unverified and are not certified.",
+    "companion_lite_run": 41138509571,
+    "companion_lite_sha": "c8c29d820e5bd16ab4df8a528bcea9b4a72f8acc",
+    "global_certification": "OPEN",
+    "updated_utc": "2026-10-30T23:50:00Z"
+  }
 }
