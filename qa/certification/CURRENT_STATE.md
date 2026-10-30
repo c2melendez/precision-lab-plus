@@ -1114,3 +1114,10 @@ Por instrucción expresa del responsable, se separan los frentes que antes queda
 Esta enmienda **revoca la dependencia de secuencia** introducida por las instrucciones históricas “Compass P0 antes de motores matemáticos” y “no reanudar matrices hasta satisfacer P0”. No declara resueltos los hallazgos de Compass, no cambia permisos, RLS, credenciales, datos ni despliegues, y no convierte ningún resultado parcial en PASS. Los hallazgos de acceso, idempotencia, procedencia y E2E permanecen en el backlog independiente de Compass.
 
 La continuación matemática debe seguir la matriz y el estado de cada repositorio, sin mezclar aceptación de API/Bridge con aceptación del motor. Mantener global_certification: OPEN hasta cumplir los criterios matemáticos globales. No repetir pruebas ni workflows verdes sin cambio justificado de precondición.
+
+
+## Siguiente paso matemático vigente — 2026-10-30
+
+**Siguiente paso matemático vigente:** revisar/reconciliar la evidencia existente del subgrupo EDCX-B6 VC-FE trig 23–31, que figura VERIFYING. Determinar si la evidencia disponible permite REUSE/REVIEW o si cambió una precondición que justifique una prueba focalizada. No repetir VC-FE-42/47 ni los cuatro workflows verdes de SHA 082fdb7c. Después continuar los subgrupos hyperbolic e inverse según sus estados TEST_FIRST_PREPARED.
+
+Compass P0 permanece en su propio backlog de integración/seguridad y no es condición de entrada para esta tarea matemática. Certificación global OPEN.
