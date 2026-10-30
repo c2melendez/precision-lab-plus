@@ -18,6 +18,7 @@ app/services/algebra_service.py — `/simplify`, `/factor`, `/expand`
 """
 
 import re
+from math import comb
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
@@ -26,7 +27,7 @@ from sympy import im as sp_im
 
 from app.schemas.responses import DomainCondition, Step
 from app.services import domain_analysis, parsing
-from app.services.ast_validator import check_complexity_limits
+from app.services.ast_validator import MAX_AST_NODES, ComplexityLimitError, check_complexity_limits
 from app.services.step_verification import verify_step_equivalence
 
 
@@ -441,8 +442,46 @@ def simplify_expression(expression: str) -> AlgebraResult:
     )
 
 
+def _expanded_term_upper_bound(expr: sympy.Expr, cap: int = MAX_AST_NODES) -> int:
+    """Conservative upper bound on terms after expansion, capped at cap + 1.
+
+    This preflight avoids materializing a huge polynomial just to discover
+    afterward that its expanded tree violates the existing node budget.
+    It deliberately keeps ordinary expansions such as (x+1)**60 on the
+    existing post-expansion node check; 10000-term growth is rejected first.
+    """
+    if expr.is_Add:
+        total = 0
+        for arg in expr.args:
+            total += _expanded_term_upper_bound(arg, cap)
+            if total > cap:
+                return cap + 1
+        return total
+    if expr.is_Mul:
+        total = 1
+        for arg in expr.args:
+            total *= _expanded_term_upper_bound(arg, cap)
+            if total > cap:
+                return cap + 1
+        return total
+    if expr.is_Pow and expr.exp.is_Integer and int(expr.exp) > 1:
+        base_terms = _expanded_term_upper_bound(expr.base, cap)
+        if base_terms <= 1:
+            return base_terms
+        if base_terms > cap:
+            return cap + 1
+        # (sum of k terms)**n has at most C(n+k-1,k-1) monomials.
+        return min(comb(int(expr.exp) + base_terms - 1, base_terms - 1), cap + 1)
+    return 1
+
+
 def expand_expression(expression: str) -> AlgebraResult:
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
+    if _expanded_term_upper_bound(input_expr) > MAX_AST_NODES:
+        raise ComplexityLimitError(
+            f"La expansión potencial supera el límite de {MAX_AST_NODES} nodos; "
+            "se rechaza antes de materializar el resultado."
+        )
     result_expr = sympy.expand(input_expr)
 
     # Aclaración recibida del usuario para el Módulo 3 (contradicción real
