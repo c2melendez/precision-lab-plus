@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 356,
+  "revision": 357,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "082fdb7c48add1476554ef90e840fab698b89561",
@@ -34,8 +34,8 @@
   "next_action": {
     "id": "MATH-ENGINE-RESUME-RECONCILIATION",
     "status": "REVIEW",
-    "previous_id": "COMPASS-P0-ACCESS-REVIEW",
-    "action": "Compass P0 is an independent API_GPT/Bridge workstream and is no longer a prerequisite for mathematical certification. Resume the mathematical engine from the repository's own open matrix and evidence. Plus: continuar EDCX-B6, empezando por reconciliar la evidencia existente de VC-FE trig 23–31 (estado previo VERIFYING); después seguir con los subgrupos hyperbolic/inverse/real según sus estados y sin repetir los gates verdes de VC-FE-42/47. No afirmar aceptación bilateral. Keep Compass findings OPEN in its separate backlog; do not claim global certification or repeat green workflows.",
+    "previous_id": "EDCX-B6-VC-FE-TRIG-23-31",
+    "action": "Compass P0 remains an independent API_GPT/Bridge workstream and is not a prerequisite for mathematical certification. Plus: VC-FE-23..31 is now PASS_SCOPED on exact SHA 082fdb7c with nine explicit PASSED cases; next review the contract/channel for VC-FE-32..36 symbolic identities in matrix order, without repeating the trig tests or green workflows. Lite: continue its own next mathematical matrix after ALGEBRA229-AS-B-29 PASS_SCOPED; reconcile Lite-specific H2/EN-SG evidence and do not infer EDCX-B6 acceptance from Plus. Keep global certification OPEN.",
     "updated_utc": "2026-10-30T05:16:58Z"
   },
   "blockers": [
@@ -77,8 +77,8 @@
     },
     {
       "id": "EDCX-B6-VC-FE-TRIG-23-31",
-      "status": "VERIFYING",
-      "detail": "Harness fix 382563b1. Awaiting re-verification."
+      "status": "PASS_SCOPED",
+      "detail": "r357: Plus only, VC-FE-23..31 (9 complex trig scalar rows) passed on exact SHA 082fdb7c48add1476554ef90e840fab698b89561. Independent cmath/math principal-branch oracle, tolerance 1e-9. CI 40970642357, Cumulative 40970642413 (skip=false; log confirms all nine cases PASSED), H1d 40970642305, Runner 40970642558; all SUCCESS. Acceptance report qa/certification/EDCX_B6_VC_FE_23_31_ACCEPTANCE_R357.md. Lite not executed; no bilateral claim."
     },
     {
       "id": "EDCX-B6-VC-FE-HYPERBOLIC-37-41",
@@ -160,7 +160,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r356: scope amendment 2026-10-30. Compass/API_GPT/Bridge remains an independent OPEN workstream; its P0 no longer blocks mathematical engine certification. Next action is MATH-ENGINE-RESUME-RECONCILIATION. Plus: continuar EDCX-B6, empezando por reconciliar la evidencia existente de VC-FE trig 23–31 (estado previo VERIFYING); después seguir con los subgrupos hyperbolic/inverse/real según sus estados y sin repetir los gates verdes de VC-FE-42/47. No afirmar aceptación bilateral. Global certification remains OPEN; no product code, tests, Actions, permissions, RLS, credentials, data or deployments changed.",
+  "ledger_note": "r357: Compass/API_GPT/Bridge remains an independent OPEN workstream and no longer blocks math certification. Plus EDCX-B6 VC-FE-23..31 PASS_SCOPED on exact SHA 082fdb7c; all nine cases confirmed PASSED in Cumulative 40970642413, with CI/H1d/Runner green. Next Plus review: VC-FE-32..36 symbolic identity contract. Lite remains on its own math matrix after AS-B-29 PASS_SCOPED; no EDCX-B6 bilateral claim. Global OPEN; no product code or new tests/workflows executed in this documentary reconciliation.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
@@ -175,6 +175,7 @@
     "qa/certification/EDCX_B6_CHANNEL_AUDIT.md",
     "qa/certification/EDCX_B6_HTTP_CONTRACT_FINDINGS.md",
     "qa/certification/EDCX_B6_ROW_CONTRACT_DRAFT.md",
+    "qa/certification/EDCX_B6_VC_FE_23_31_ACCEPTANCE_R357.md",
     "qa/certification/EDCX_B6_VC_FE_42_47_ACCEPTANCE_R355.md",
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/EXECUTION_LOG_AS229_SECTION_A.md",
