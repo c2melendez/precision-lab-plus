@@ -1,10 +1,10 @@
-# Corte vigente de certificación — 2026-10-30 UTC (r366)
+# Corte vigente de certificación — 2026-10-30 UTC (r368)
 
 **Fuente de verdad:** rama `qa/syntax-audit-in625-a1`, `continuity.json` y evidencia Actions. Este corte supersede estados históricos anteriores.
 
 - **Motor Plus:** el siguiente paso matemático permanece bloqueado en la resolución versionada del conflicto VC-FE-45 (asin(2) complejo ± frente a EV-I-12 real-domain DOMAIN_ERROR). No debilitar EV-I-12 ni importar aceptación de Lite. Global OPEN.
 - **Certification Runner Plus:** PASS_SCOPED solo para push/no-dispatch. Run 41136660038 SUCCESS sobre SHA `218d682848a03a000930e2028f057563847381f3`; resolución canónica, checkout, BASE_SHA y fingerprint correctos. Gate policy, dry-run, detección/espera, dispatch, registro QA, persistencia y commit documental SKIPPED.
-- **Certification Runner Lite:** última evidencia Lite 41144150833 SUCCESS sobre SHA `c791540390b2e5a3c27f11b7a9a444ad04012a20`; resolución canónica, checkout, BASE_SHA, fingerprint y Push summary SUCCESS. Dispatch, registro y persistencia SKIPPED. Plus 41136660038 SUCCESS sobre SHA `218d682848a03a000930e2028f057563847381f3`, mismo alcance push/no-dispatch.
+- **Certification Runner Lite:** última evidencia Lite 41144965611 SUCCESS sobre SHA `a1a69ae9429afc9481d9febf34885b9242968917`; resolución canónica, checkout, BASE_SHA, fingerprint y Push summary SUCCESS. Dispatch, registro y persistencia SKIPPED. Plus 41136660038 SUCCESS sobre SHA `218d682848a03a000930e2028f057563847381f3`, mismo alcance push/no-dispatch.
 - **Mecanismo paralelo Observer→Bridge→Actions→Runner:** fases A/B cerradas. O5 IN_PROGRESS: falta evidencia E2E request→receipt durable→Actions→Runner→resultado y replay idempotente sin segundo workflow. O6 PENDING por ausencia deliberada de dispatch real; no es FAIL. O7 PENDING y depende de O6. Los runs push del Runner no crean recibo ni despachan gates.
 - **Compass Runner:** cerrado para el alcance de la conciliación documental vigente; no es prerrequisito de la certificación matemática ni debe confundirse con el Certification Runner de los repositorios.
 - **Restricciones:** sin merges, despliegues, producción ni despachos reales. Global certification **OPEN**.
