@@ -1,3 +1,16 @@
+# Corte vigente de certificación — 2026-10-30 UTC (r360)
+
+**Fuente de verdad:** rama `qa/syntax-audit-in625-a1`, `continuity.json` y evidencia Actions. Este corte supersede estados históricos anteriores.
+
+- **Motor Plus:** el siguiente paso matemático permanece bloqueado en la resolución versionada del conflicto VC-FE-45 (asin(2) complejo ± frente a EV-I-12 real-domain DOMAIN_ERROR). No debilitar EV-I-12 ni importar aceptación de Lite. Global OPEN.
+- **Certification Runner Plus:** PASS_SCOPED solo para push/no-dispatch. Run 41136660038 SUCCESS sobre SHA `218d682848a03a000930e2028f057563847381f3`; canonical branch resolution, checkout y fingerprint correctos. Dispatch, wait, registro, persistencia y commit documental SKIPPED.
+- **Certification Runner Lite:** run paralelo 41138509571 SUCCESS sobre SHA `c8c29d820e5bd16ab4df8a528bcea9b4a72f8acc`, mismo alcance push/no-dispatch.
+- **Mecanismo paralelo Observer→Bridge→Actions→Runner:** fases A/B cerradas; O5 IN_PROGRESS; O6 PENDING por ausencia deliberada de dispatch real; O7 PENDING. Pruebas simuladas y CI no sustituyen la cadena E2E real ni el replay idempotente.
+- **Compass Runner:** cerrado para el alcance de la conciliación documental vigente; no es prerrequisito de la certificación matemática ni debe confundirse con el Certification Runner de los repositorios.
+- **Restricciones:** sin merges, despliegues, producción ni despachos reales. Global certification **OPEN**.
+
+---
+
 ## PRIORIDAD P0 — Estado actual Cert Runner Compass v1.1 (2026-10-27 UTC)
 
 **Estado:** Bridge OPEN / NO CERTIFICADO. La Fase 1 se completó sin runs; E1 y E4 fueron simulaciones. El responsable autorizó continuar la Fase 2 y confirmó que la restricción anterior de máximo 3 runs runner + 1 gate deja de ser límite operativo porque Lite y Plus son públicos. Esta autorización no elimina la obligación de contar los runs y prevenir duplicados.
