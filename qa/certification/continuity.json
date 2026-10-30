@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 362,
+  "revision": 364,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
@@ -355,5 +355,48 @@
     ],
     "global_certification": "OPEN",
     "updated_utc": "2026-10-30T23:23:15Z"
+  },
+  "runner_certification_r368": {
+    "status": "PASS_SCOPED_PUSH_ONLY",
+    "canonical_branch": "qa/syntax-audit-in625-a1",
+    "lite": {
+      "run_id": 41144965611,
+      "run_url": "https://github.com/c2melendez/precision-lab-lite/actions/runs/41144965611",
+      "sha": "a1a69ae9429afc9481d9febf34885b9242968917",
+      "event": "push",
+      "conclusion": "success"
+    },
+    "plus": {
+      "run_id": 41136660038,
+      "run_url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/41136660038",
+      "sha": "218d682848a03a000930e2028f057563847381f3",
+      "event": "push",
+      "conclusion": "success"
+    },
+    "verified_steps": [
+      "Resolve canonical branch from default-branch README",
+      "Checkout canonical branch",
+      "Record base commit",
+      "Read-only planner fingerprint",
+      "Push summary"
+    ],
+    "skipped_steps": [
+      "Gate policy/workflow resolution",
+      "Dry-run summary",
+      "Equivalent active-run detection/wait",
+      "Workflow dispatch",
+      "QA receipt recording",
+      "Continuity persistence",
+      "Documentary commit"
+    ],
+    "not_certified": [
+      "workflow_dispatch dispatch path",
+      "Gate dispatch/result wait",
+      "durable receipt correlation",
+      "Observer→Bridge→Actions→Runner end-to-end trace",
+      "idempotent replay without duplicate workflow"
+    ],
+    "global_certification": "OPEN",
+    "updated_utc": "2026-10-30T23:29:00Z"
   }
 }
