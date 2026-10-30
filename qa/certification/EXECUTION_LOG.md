@@ -714,3 +714,14 @@ Compass P0 permanece en su propio backlog de integración/seguridad y no es cond
 - Evidencia exacta: CI 40970642357, Cumulative 40970642413 (`skip=false`; backend 2,783 passed, 1 skipped, 10 xfailed, 88.91% coverage), H1d 40970642305 y Certification Runner 40970642558; todos SUCCESS sobre el mismo SHA.
 - Se publica `EDCX_B6_VC_FE_23_31_ACCEPTANCE_R357.md`. VC-FE-23..31 pasa de VERIFYING a PASS_SCOPED, exclusivamente Plus. Lite no ejecutó el lote; no hay aceptación bilateral ni cierre de EDCX-B6.
 - Próximo paso matemático Plus: revisar contrato/canal de VC-FE-32..36 (identidades simbólicas), en orden de matriz. No repetir el lote 23..31 ni los cuatro workflows citados sin causa nueva. Compass P0 permanece independiente y no bloquea el motor. Global OPEN.
+
+
+## 2026-10-30 UTC — r358: EDCX-B6 VC-FE-32..41 e inversas seleccionadas PASS_SCOPED
+
+- SHA técnico evaluado: `adbf5c3826480a015456c8f64257f866f23ca3c4`.
+- CI [41134338836](https://github.com/c2melendez/precision-lab-plus/actions/runs/41134338836): SUCCESS backend/frontend; H1d [41134338840](https://github.com/c2melendez/precision-lab-plus/actions/runs/41134338840): SUCCESS; cumulative [41134338772](https://github.com/c2melendez/precision-lab-plus/actions/runs/41134338772): SUCCESS, backend 2,798 passed, 1 skipped, 10 xfailed, cobertura 88.91%; Runner [41134338750](https://github.com/c2melendez/precision-lab-plus/actions/runs/41134338750): SUCCESS.
+- VC-FE-32..36: 15 sustituciones finitas PASS con oráculo Python math/cmath independiente; VC-FE-36 compara texto complejo decodificado y respeta result_approx opcional real-only.
+- VC-FE-37..41: seis casos (37a/37b, 38..41) PASSED con cmath/math y tolerancia 1e-9.
+- Inversas: VC-FE-43,44,46,48,50,51,52 PASSED; VC-FE-48 confirma DOMAIN_ERROR controlado. VC-FE-45,49,53 quedan REVIEW por convención de rama/corte pendiente.
+- Aceptación detallada: `qa/certification/EDCX_B6_VC_FE_32_41_AND_INVERSE_SUBSET_ACCEPTANCE_R358.md`.
+- Alcance Plus únicamente. No prueba universalidad simbólica, no cierra EDCX-B6 ni implica paridad Lite. Global OPEN.
