@@ -160,7 +160,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r355: Plus-only PASS_SCOPED for EDCX-B6 VC-FE-42 and VC-FE-47 on 082fdb7c; four exact-SHA gates SUCCESS, cumulative real execution (skip=false). Lite r334 remains Compass P0 WAIT; no bilateral acceptance. Global OPEN.",
+  "ledger_note": "r355: Plus-only PASS_SCOPED for EDCX-B6 VC-FE-42 and VC-FE-47 on 082fdb7c; four exact-SHA gates SUCCESS, cumulative real execution (skip=false). Acceptance report indexed in prose_only_paths and CURRENT_STATE/EXECUTION_LOG synchronized. Lite r334 remains Compass P0 WAIT; no bilateral acceptance. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
@@ -175,6 +175,7 @@
     "qa/certification/EDCX_B6_CHANNEL_AUDIT.md",
     "qa/certification/EDCX_B6_HTTP_CONTRACT_FINDINGS.md",
     "qa/certification/EDCX_B6_ROW_CONTRACT_DRAFT.md",
+    "qa/certification/EDCX_B6_VC_FE_42_47_ACCEPTANCE_R355.md",
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/EXECUTION_LOG_AS229_SECTION_A.md",
     "qa/certification/H2_EN_SG_EVIDENCE_AUDIT_R314.md",
