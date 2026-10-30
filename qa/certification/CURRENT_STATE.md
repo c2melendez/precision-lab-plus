@@ -1101,3 +1101,16 @@ Ver r252.
 - **Lite:** r334, sin ejecución para estas filas y sin aceptación bilateral. **Compass P0:** WAIT. **Certificación global:** OPEN. Las demás filas EDCX-B6 conservan sus estados anteriores.
 - **Próxima acción canónica:** `COMPASS-P0-ACCESS-REVIEW (WAIT)`. No reanudar matrices matemáticas adicionales hasta satisfacer los criterios de salida P0. No POST, workflow_dispatch, DDL, cambios de grants/permisos, rotación de credenciales ni despliegue.
 - **Control de no repetición:** no volver a ejecutar los cuatro workflows 40970642357, 40970642413, 40970642305 y 40970642558, ni las pruebas VC-FE-42/47, salvo que cambie la precondición técnica o aparezca una discrepancia nueva y justificada.
+
+
+## Enmienda de alcance — 2026-10-30: Compass independiente del motor matemático
+
+Por instrucción expresa del responsable, se separan los frentes que antes quedaron acoplados por prioridad documental:
+
+- **Objetivo principal de Precision Lab:** ampliar, verificar y certificar las capacidades del motor matemático, con sus matrices, contratos, oráculos y evidencia propios.
+- **API_GPT / GPT Actions:** proyecto de integración y evaluación de la API de solo lectura con GPTs/LLMs diferentes. Su propósito es consultar estado, planificar en modo lectura y recuperar evidencia; no es un requisito matemático ni una condición para aceptar resultados del motor.
+- **Cert Runner Compass / Bridge:** frente independiente de automatización de GitHub Actions. Conserva sus hallazgos y su estado OPEN/NO CERTIFICADO, pero deja de ser un bloqueo o prerrequisito para continuar la certificación matemática.
+
+Esta enmienda **revoca la dependencia de secuencia** introducida por las instrucciones históricas “Compass P0 antes de motores matemáticos” y “no reanudar matrices hasta satisfacer P0”. No declara resueltos los hallazgos de Compass, no cambia permisos, RLS, credenciales, datos ni despliegues, y no convierte ningún resultado parcial en PASS. Los hallazgos de acceso, idempotencia, procedencia y E2E permanecen en el backlog independiente de Compass.
+
+La continuación matemática debe seguir la matriz y el estado de cada repositorio, sin mezclar aceptación de API/Bridge con aceptación del motor. Mantener global_certification: OPEN hasta cumplir los criterios matemáticos globales. No repetir pruebas ni workflows verdes sin cambio justificado de precondición.
