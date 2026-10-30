@@ -684,3 +684,18 @@ La suite v1.1 y el registro de Fase 1 recibidos el 2026-10-27 UTC son la base de
 - Evidencia ya obtenida: CI [40970642357](https://github.com/c2melendez/precision-lab-plus/actions/runs/40970642357), Cumulative [40970642413](https://github.com/c2melendez/precision-lab-plus/actions/runs/40970642413), H1d [40970642305](https://github.com/c2melendez/precision-lab-plus/actions/runs/40970642305), Certification Runner [40970642558](https://github.com/c2melendez/precision-lab-plus/actions/runs/40970642558); todos SUCCESS. Cumulative: `skip=false`, ambas pruebas PASSED; backend 2,783 passed, 1 skipped, 10 xfailed; cobertura 88.91%.
 - Alcance: solo Plus y estas dos filas. Lite r334 no ejecutado; no hay aceptación bilateral ni cierre EDCX-B6 completo. Compass P0 WAIT; certificación global OPEN.
 - Se trata de una actualización documental. **No se modificó código de producto ni se ejecutaron workflows/pruebas.** No repetir los cuatro runs indicados salvo causa nueva justificada. Próxima acción: `COMPASS-P0-ACCESS-REVIEW (WAIT)`; no avanzar a otra matriz matemática antes de cumplir los criterios de salida P0.
+
+
+## 2026-10-30 — Enmienda de alcance: Compass deja de bloquear el motor matemático
+
+## Enmienda de alcance — 2026-10-30: Compass independiente del motor matemático
+
+Por instrucción expresa del responsable, se separan los frentes que antes quedaron acoplados por prioridad documental:
+
+- **Objetivo principal de Precision Lab:** ampliar, verificar y certificar las capacidades del motor matemático, con sus matrices, contratos, oráculos y evidencia propios.
+- **API_GPT / GPT Actions:** proyecto de integración y evaluación de la API de solo lectura con GPTs/LLMs diferentes. Su propósito es consultar estado, planificar en modo lectura y recuperar evidencia; no es un requisito matemático ni una condición para aceptar resultados del motor.
+- **Cert Runner Compass / Bridge:** frente independiente de automatización de GitHub Actions. Conserva sus hallazgos y su estado OPEN/NO CERTIFICADO, pero deja de ser un bloqueo o prerrequisito para continuar la certificación matemática.
+
+Esta enmienda **revoca la dependencia de secuencia** introducida por las instrucciones históricas “Compass P0 antes de motores matemáticos” y “no reanudar matrices hasta satisfacer P0”. No declara resueltos los hallazgos de Compass, no cambia permisos, RLS, credenciales, datos ni despliegues, y no convierte ningún resultado parcial en PASS. Los hallazgos de acceso, idempotencia, procedencia y E2E permanecen en el backlog independiente de Compass.
+
+La continuación matemática debe seguir la matriz y el estado de cada repositorio, sin mezclar aceptación de API/Bridge con aceptación del motor. Mantener global_certification: OPEN hasta cumplir los criterios matemáticos globales. No repetir pruebas ni workflows verdes sin cambio justificado de precondición.
