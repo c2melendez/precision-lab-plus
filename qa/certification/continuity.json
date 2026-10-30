@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 357,
+  "revision": 358,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "082fdb7c48add1476554ef90e840fab698b89561",
-  "baseline_case": "EDCX-B6-VC-FE-FORMULA-REAL",
+  "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
+  "baseline_case": "EDCX-B6-VC-FE-32..41-PLUS-ONLY",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -32,11 +32,11 @@
     }
   },
   "next_action": {
-    "id": "MATH-ENGINE-RESUME-RECONCILIATION",
+    "id": "EDCX-B6-VC-FE-BRANCH-CONVENTIONS-45-49-53",
     "status": "REVIEW",
-    "previous_id": "EDCX-B6-VC-FE-TRIG-23-31",
-    "action": "Compass P0 remains an independent API_GPT/Bridge workstream and is not a prerequisite for mathematical certification. Plus: VC-FE-23..31 is now PASS_SCOPED on exact SHA 082fdb7c with nine explicit PASSED cases; next review the contract/channel for VC-FE-32..36 symbolic identities in matrix order, without repeating the trig tests or green workflows. Lite: continue its own next mathematical matrix after ALGEBRA229-AS-B-29 PASS_SCOPED; reconcile Lite-specific H2/EN-SG evidence and do not infer EDCX-B6 acceptance from Plus. Keep global certification OPEN.",
-    "updated_utc": "2026-10-30T05:16:58Z"
+    "previous_id": "EDCX-B6-VC-FE-32..41-PLUS-ONLY",
+    "action": "Resolve and document the principal-branch/cut convention against the source matrix and actual /api/v1/evaluate semantics for VC-FE-45 (arcsin(2)), VC-FE-49 (arctan(2i)), and VC-FE-53 (artanh(2)). Do not run or accept these rows until the sign/branch convention is explicit. VC-FE-43,44,46,48,50,51,52 are already PASS_SCOPED in the executed cumulative on SHA adbf5c38. Keep global certification OPEN; Plus-only evidence; no bilateral inference.",
+    "updated_utc": "2026-10-30T22:30:00Z"
   },
   "blockers": [
     {
@@ -82,13 +82,13 @@
     },
     {
       "id": "EDCX-B6-VC-FE-HYPERBOLIC-37-41",
-      "status": "TEST_FIRST_PREPARED",
-      "detail": "Test-first SHA 6ffe64e8. Awaiting CI."
+      "status": "PASS_SCOPED",
+      "detail": "r358: Plus only, VC-FE-37..41 (six harness cases: 37a/37b, 38..41) passed in cumulative 41134338772 on exact SHA adbf5c3826480a015456c8f64257f866f23ca3c4. Independent Python cmath/math principal-branch oracle; tolerance 1e-9; test blob 40f45a2f50c897cac705354273abed6ec586d820. CI 41134338836, Cumulative 41134338772 (all six PASSED; backend 2798 passed, 1 skipped, 10 xfailed; 88.91% coverage), H1d 41134338840 and Runner 41134338750 all SUCCESS on same SHA. Lite not executed; no bilateral claim."
     },
     {
       "id": "EDCX-B6-VC-FE-INVERSE",
-      "status": "TEST_FIRST_PREPARED",
-      "detail": "Test-first SHA ff7d8363 (43,44,46,48,50-52). Awaiting CI."
+      "status": "PASS_SCOPED_PARTIAL",
+      "detail": "r358: Plus only, executed subset VC-FE-43,44,46,48,50,51,52 (seven harness tests including controlled DOMAIN_ERROR at VC-FE-48) passed in cumulative 41134338772 on exact SHA adbf5c3826480a015456c8f64257f866f23ca3c4. Independent Python cmath/math principal-branch oracle; tolerance 1e-9; test blob 8355a4909532275a99e593f09b640d8df557a917. Branch-sensitive VC-FE-45,49,53 remain REVIEW and excluded. Same-SHA CI 41134338836, H1d 41134338840 and Runner 41134338750 SUCCESS. Lite not executed; no bilateral claim."
     },
     {
       "id": "EDCX-B6-VC-FE-FORMULA-REAL",
@@ -114,6 +114,11 @@
       "id": "H2-EN-SG-32",
       "status": "PASS_SCOPED",
       "evidence": "CI 40812736234 on 1959b2b7: 12/12 EN-SG-32 tests PASSED."
+    },
+    {
+      "id": "EDCX-B6-VC-FE-SYMBOLIC-32-36",
+      "status": "PASS_SCOPED",
+      "detail": "r358: Plus only, VC-FE-32..36 passed 15 finite numeric substitution checks in cumulative 41134338772 on exact SHA adbf5c3826480a015456c8f64257f866f23ca3c4. Independent Python math/cmath oracle; declared real x,y pairs for 32/33 and complex z points for 34/35/36; tolerance 1e-9. Test blob 9ba9eea1186ed76ddaf32b0ff6d0c80c0daea721. VC-FE-36 accepts result_approx=null per real-only optional contract while independently decoding result_text. CI 41134338836, cumulative 41134338772, H1d 41134338840 and Runner 41134338750 SUCCESS on same SHA. Finite substitutions only; no universal symbolic proof, no Lite or bilateral claim."
     }
   ],
   "h2_en_sg_evidence_audit_r314": {
@@ -160,7 +165,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r357: Compass/API_GPT/Bridge remains an independent OPEN workstream and no longer blocks math certification. Plus EDCX-B6 VC-FE-23..31 PASS_SCOPED on exact SHA 082fdb7c; all nine cases confirmed PASSED in Cumulative 40970642413, with CI/H1d/Runner green. Next Plus review: VC-FE-32..36 symbolic identity contract. Lite remains on its own math matrix after AS-B-29 PASS_SCOPED; no EDCX-B6 bilateral claim. Global OPEN; no product code or new tests/workflows executed in this documentary reconciliation.",
+  "ledger_note": "r358: Plus-only EDCX-B6 evidence reconciled on exact SHA adbf5c3826480a015456c8f64257f866f23ca3c4. VC-FE-32..36 PASS_SCOPED (15 finite substitutions); VC-FE-37..41 PASS_SCOPED (six harness cases); inverse subset VC-FE-43,44,46,48,50,51,52 PASS_SCOPED (seven tests). CI 41134338836, cumulative 41134338772 (2798 passed, 1 skipped, 10 xfailed; 88.91% coverage), H1d 41134338840, Runner 41134338750 all SUCCESS on same SHA. Branch-cut rows 45,49,53 remain REVIEW; no universal identity proof, no bilateral acceptance, global OPEN. Next action is explicit branch convention review.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
