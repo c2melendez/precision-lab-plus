@@ -757,3 +757,10 @@ Compass P0 permanece en su propio backlog de integración/seguridad y no es cond
 - **Mecanismo paralelo:** fases A/B cerradas (lectura staging autenticada del recibo existente: HTTP 200; anónima: HTTP 401). O5 IN_PROGRESS por falta de una traza real Observer→Bridge→Actions→Runner→evidencia y replay sin duplicación. O6 PENDING por la restricción vigente de no ejecutar dispatch real; no es FAIL. O7 PENDING, dependiente de O6.
 - El contrato de regresión del Runner se mantiene idéntico en ambos repositorios (blob `ff5c499cb6eae8277279265a26a897ff982288a0`); las diferencias YAML documentadas son los defaults locales y comentarios, con el contrato `target_repo=both` compartido.
 - No se hizo merge, deploy, cambio de producción ni despacho real. Global OPEN. El bloqueo matemático Plus VC-FE-45 permanece sin cambios.
+
+## 2026-10-30 UTC — r366: actualización bilateral del Certification Runner
+
+- Lite: [41144150833](https://github.com/c2melendez/precision-lab-lite/actions/runs/41144150833), SHA `c791540390b2e5a3c27f11b7a9a444ad04012a20`, push SUCCESS. Canonical branch, checkout, BASE_SHA, fingerprint y Push summary SUCCESS; dispatch, receipt, persistencia y commit documental SKIPPED.
+- Plus: [41136660038](https://github.com/c2melendez/precision-lab-plus/actions/runs/41136660038), SHA `218d682848a03a000930e2028f057563847381f3`, push SUCCESS. Canonical branch, checkout, BASE_SHA y fingerprint SUCCESS; dispatch/espera/registro/persistencia SKIPPED.
+- Estado bilateral: PASS_SCOPED_PUSH_ONLY. No se certifica workflow_dispatch, gate dispatch, recibo durable, trazabilidad E2E Observer→Bridge→Actions→Runner ni replay idempotente.
+- Mecanismo paralelo: fases A/B CLOSED; O5 IN_PROGRESS; O6 PENDING por ausencia deliberada de dispatch real; O7 PENDING y dependiente de O6. Global OPEN. Sin merge, deploy, producción ni despacho real.
