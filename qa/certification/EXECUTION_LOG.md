@@ -1,4 +1,18 @@
 
+## 2026-10-30 UTC — r359: VC-FE-49 y VC-FE-53 aceptadas en alcance Plus
+
+- SHA técnico exacto: `218d682848a03a000930e2028f057563847381f3`, rama `qa/syntax-audit-in625-a1`.
+- CI [41136660010](https://github.com/c2melendez/precision-lab-plus/actions/runs/41136660010) SUCCESS: backend y frontend; QA dependency audit, typecheck, unit/parity, build y upload SUCCESS.
+- Cumulative [41136659987](https://github.com/c2melendez/precision-lab-plus/actions/runs/41136659987) SUCCESS: backend 2,800 passed, 1 skipped, 10 xfailed; 88.91% coverage; frontend SUCCESS. Log enumera explícitamente VC-FE-49 y VC-FE-53 PASSED; también revalida VC-FE-37a/b y 38..41.
+- H1d [41136660018](https://github.com/c2melendez/precision-lab-plus/actions/runs/41136660018) SUCCESS: 38 E2E passed.
+- Runner [41136660038](https://github.com/c2melendez/precision-lab-plus/actions/runs/41136660038) SUCCESS; dispatch y persistencia omitidos por política, no evidencia de despacho real.
+- VC-FE-49: `atan(2*i)`, esperado independiente `cmath.atan(2j)`; VC-FE-53: `atanh(2)`, se fija convención de borde inferior mediante `cmath.atanh(complex(2.0, -0.0))` (parte imaginaria negativa), permitido por matriz ±. Decodificación de `result_text` con SymPy; expected no depende del producto; tolerancia 1e-9.
+- Aceptación acotada en `EDCX_B6_VC_FE_49_53_ACCEPTANCE_R359.md`. VC-FE-49 y 53 PASS_SCOPED Plus; no bilateral, no cierre B6 ni global.
+- VC-FE-45 permanece BLOCKED: la matriz solicita rama compleja ± para `asin(2)`, pero EV-I-12 congelado exige DOMAIN_ERROR para entrada real fuera del dominio y el evaluador aplica esa guardia. No se debilita EV-I-12 ni se acepta la fila sin resolución versionada.
+- Se mantiene global OPEN; Lite no ejecutó este lote; no merge, deploy ni despacho real.
+
+---
+
 ## 2026-10-29 UTC - r342: EN-SG-32 limitador opt-in certificado
 
 - Fila reabierta desde OUT_OF_SCOPE (r336) por decision del operador; se certifica un control real en lugar de una excepcion de alcance.
