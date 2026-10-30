@@ -1,4 +1,13 @@
 
+## 2026-10-30 UTC — r360: reconciliación del Certification Runner (Plus)
+
+- Run [41136660038](https://github.com/c2melendez/precision-lab-plus/actions/runs/41136660038), SHA técnico `218d682848a03a000930e2028f057563847381f3`, rama qa/syntax-audit-in625-a1, evento push: workflow SUCCESS.
+- Pasos realmente aprobados: resolver rama canónica desde README predeterminado, checkout de la rama canónica, registrar BASE_SHA, calcular fingerprint read-only y Push summary.
+- Gate policy, dry-run summary, detección/espera de gate equivalente, dispatch, registro QA, persistencia y commit documental quedaron SKIPPED. No hubo gate dispatch ni ejecución de workflow_dispatch.
+- Lite equivalente: [41138509571](https://github.com/c2melendez/precision-lab-lite/actions/runs/41138509571), SHA `c8c29d820e5bd16ab4df8a528bcea9b4a72f8acc`, también SUCCESS con los mismos pasos de dispatch/persistencia SKIPPED.
+- Decisión: Runner PASS_SCOPED para camino push/no-dispatch. No certificado para dispatch real, espera/reutilización, persistencia del receipt ni replay idempotente end-to-end.
+- El estado del motor Plus no cambia: su siguiente acción sigue siendo resolver el conflicto contractual VC-FE-45. Global OPEN. Sin merge, deploy ni dispatch real.
+
 ## 2026-10-30 UTC — r359: VC-FE-49 y VC-FE-53 aceptadas en alcance Plus
 
 - SHA técnico exacto: `218d682848a03a000930e2028f057563847381f3`, rama `qa/syntax-audit-in625-a1`.
