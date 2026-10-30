@@ -32,8 +32,9 @@ INVERSE_CASES = [
     ("VC-FE-52", "acosh(-1)", cmath.acosh(-1)),
     # VC-FE-49: arctan(2i), principal upper-side cut convention.
     ("VC-FE-49", "atan(2*i)", cmath.atan(2j)),
-    # VC-FE-53: artanh(2), principal upper-side cut convention.
-    ("VC-FE-53", "atanh(2)", cmath.atanh(2 + 0j)),
+    # VC-FE-53: the matrix permits either sign on the cut. Pin the
+    # evaluator's lower-side boundary convention (negative imaginary part).
+    ("VC-FE-53", "atanh(2)", cmath.atanh(complex(2.0, -0.0))),
 ]
 
 
