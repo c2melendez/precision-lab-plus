@@ -764,3 +764,9 @@ Compass P0 permanece en su propio backlog de integración/seguridad y no es cond
 - Plus: [41136660038](https://github.com/c2melendez/precision-lab-plus/actions/runs/41136660038), SHA `218d682848a03a000930e2028f057563847381f3`, push SUCCESS. Canonical branch, checkout, BASE_SHA y fingerprint SUCCESS; dispatch/espera/registro/persistencia SKIPPED.
 - Estado bilateral: PASS_SCOPED_PUSH_ONLY. No se certifica workflow_dispatch, gate dispatch, recibo durable, trazabilidad E2E Observer→Bridge→Actions→Runner ni replay idempotente.
 - Mecanismo paralelo: fases A/B CLOSED; O5 IN_PROGRESS; O6 PENDING por ausencia deliberada de dispatch real; O7 PENDING y dependiente de O6. Global OPEN. Sin merge, deploy, producción ni despacho real.
+
+## 2026-10-30 UTC — r368: reconciliación bilateral del Certification Runner
+
+- Lite: [41144965611](https://github.com/c2melendez/precision-lab-lite/actions/runs/41144965611), SHA `a1a69ae9429afc9481d9febf34885b9242968917`, push SUCCESS. Canonical branch, checkout, BASE_SHA, fingerprint y Push summary SUCCESS; dispatch, receipt y persistencia SKIPPED.
+- Plus: [41136660038](https://github.com/c2melendez/precision-lab-plus/actions/runs/41136660038), SHA `218d682848a03a000930e2028f057563847381f3`, push SUCCESS. Canonical branch, checkout, BASE_SHA y fingerprint SUCCESS; dispatch/espera/registro/persistencia SKIPPED.
+- Estado bilateral: PASS_SCOPED_PUSH_ONLY. No se certifica workflow_dispatch, gate dispatch, receipt durable, trazabilidad E2E ni replay idempotente. Global OPEN.
