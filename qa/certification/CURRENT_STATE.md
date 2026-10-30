@@ -1091,3 +1091,13 @@ Ver r252.
 - Revisión de `src/lib/bridge/lookup.server.ts` y `src/lib/bridge/core.server.ts`: los estados finales de un ledger `RUNNING` se persisten al realizar GET autenticado de lookup/estado y recibir la conclusión de GitHub; no se encontró un worker de fondo.
 - Los registros vinculados a los runs 40461232174, 40461306085 y 40463419492 se clasifican `PENDING_OWNER_LOOKUP / REVIEW`, no como `FAIL` de producto confirmado, porque no hay evidencia de consulta autenticada posterior a su finalización. No recrear runs ni sustituir hashes de claves para eludir propiedad.
 - Sigue abierta la revisión de mínimo privilegio para los grants de `anon`/`authenticated`. No se ejecutó DDL ni cambio de permisos. Certificación global OPEN.
+
+
+## 2026-10-29 UTC — r355: sincronización documental de EDCX-B6 VC-FE-42/47
+
+- **Estado vigente Plus:** `continuity.json` r355 registra `EDCX-B6-VC-FE-FORMULA-REAL` como **PASS_SCOPED** exclusivamente para VC-FE-42 (`arcsin(1/2)=π/6`) y VC-FE-47 (`arctan(1)=π/4`), sobre SHA técnico `082fdb7c48add1476554ef90e840fab698b89561`.
+- Evidencia ya existente —no repetir—: CI [40970642357](https://github.com/c2melendez/precision-lab-plus/actions/runs/40970642357), Cumulative [40970642413](https://github.com/c2melendez/precision-lab-plus/actions/runs/40970642413), H1d [40970642305](https://github.com/c2melendez/precision-lab-plus/actions/runs/40970642305) y Certification Runner [40970642558](https://github.com/c2melendez/precision-lab-plus/actions/runs/40970642558), todos SUCCESS en el SHA exacto; el gate acumulativo registró `skip=false` y ambas pruebas PASSED.
+- Informe de aceptación: [EDCX_B6_VC_FE_42_47_ACCEPTANCE_R355.md](EDCX_B6_VC_FE_42_47_ACCEPTANCE_R355.md). Este addendum sincroniza el estado narrativo; no amplía el alcance ni sustituye evidencia de ejecución.
+- **Lite:** r334, sin ejecución para estas filas y sin aceptación bilateral. **Compass P0:** WAIT. **Certificación global:** OPEN. Las demás filas EDCX-B6 conservan sus estados anteriores.
+- **Próxima acción canónica:** `COMPASS-P0-ACCESS-REVIEW (WAIT)`. No reanudar matrices matemáticas adicionales hasta satisfacer los criterios de salida P0. No POST, workflow_dispatch, DDL, cambios de grants/permisos, rotación de credenciales ni despliegue.
+- **Control de no repetición:** no volver a ejecutar los cuatro workflows 40970642357, 40970642413, 40970642305 y 40970642558, ni las pruebas VC-FE-42/47, salvo que cambie la precondición técnica o aparezca una discrepancia nueva y justificada.
