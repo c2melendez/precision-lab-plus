@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 360,
+  "revision": 361,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
@@ -231,5 +231,67 @@
     "companion_lite_sha": "c8c29d820e5bd16ab4df8a528bcea9b4a72f8acc",
     "global_certification": "OPEN",
     "updated_utc": "2026-10-30T23:50:00Z"
+  },
+  "runner_certification_r365": {
+    "status": "PASS_SCOPED_PUSH_ONLY",
+    "canonical_branch": "qa/syntax-audit-in625-a1",
+    "lite": {
+      "run_id": 41142684118,
+      "run_url": "https://github.com/c2melendez/precision-lab-lite/actions/runs/41142684118",
+      "sha": "5901316519ca98d0810ac0f228c91abe6380ee7f",
+      "event": "push",
+      "conclusion": "success"
+    },
+    "plus": {
+      "run_id": 41136660038,
+      "run_url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/41136660038",
+      "sha": "218d682848a03a000930e2028f057563847381f3",
+      "event": "push",
+      "conclusion": "success"
+    },
+    "verified_steps": [
+      "Resolve canonical branch from default-branch README",
+      "Checkout canonical branch",
+      "Record base commit",
+      "Read-only planner fingerprint",
+      "Push summary"
+    ],
+    "skipped_steps": [
+      "Gate policy/workflow resolution",
+      "Dry-run summary",
+      "Equivalent active-run detection/wait",
+      "Workflow dispatch",
+      "QA receipt recording",
+      "Continuity persistence",
+      "Documentary commit"
+    ],
+    "not_certified": [
+      "workflow_dispatch dispatch path",
+      "Gate dispatch/result wait",
+      "durable receipt correlation",
+      "Observer→Bridge→Actions→Runner end-to-end trace",
+      "idempotent replay without duplicate workflow"
+    ],
+    "global_certification": "OPEN",
+    "updated_utc": "2026-10-30T23:09:14Z"
+  },
+  "parallel_mechanism_r365": {
+    "status": "IN_PROGRESS",
+    "phases": {
+      "A": "CLOSED",
+      "B": "CLOSED",
+      "O5": "IN_PROGRESS",
+      "O6": "PENDING",
+      "O7": "PENDING"
+    },
+    "note": "Observer staging→Bridge read-only receipt lookup is proven (authenticated 200, anonymous 401). O5 remains open until real request→receipt→Actions→Runner evidence and idempotent replay are demonstrated. O6 remains pending because real dispatch is intentionally inactive; O7 depends on O6. Push/no-dispatch Runner passes do not satisfy this chain.",
+    "operational_limits": [
+      "No real workflow dispatch",
+      "No merge",
+      "No deploy",
+      "No production cut"
+    ],
+    "global_certification": "OPEN",
+    "updated_utc": "2026-10-30T23:09:14Z"
   }
 }
