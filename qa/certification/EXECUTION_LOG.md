@@ -748,3 +748,12 @@ Compass P0 permanece en su propio backlog de integración/seguridad y no es cond
 - Inversas: VC-FE-43,44,46,48,50,51,52 PASSED; VC-FE-48 confirma DOMAIN_ERROR controlado. VC-FE-45,49,53 quedan REVIEW por convención de rama/corte pendiente.
 - Aceptación detallada: `qa/certification/EDCX_B6_VC_FE_32_41_AND_INVERSE_SUBSET_ACCEPTANCE_R358.md`.
 - Alcance Plus únicamente. No prueba universalidad simbólica, no cierra EDCX-B6 ni implica paridad Lite. Global OPEN.
+
+## 2026-10-30 UTC — r365: reconciliación bilateral del Certification Runner y mecanismo paralelo
+
+- **Lite:** Certification Runner [41142684118](https://github.com/c2melendez/precision-lab-lite/actions/runs/41142684118), SHA `5901316519ca98d0810ac0f228c91abe6380ee7f`, evento push, SUCCESS. Resolución de rama canónica, checkout, BASE_SHA, fingerprint read-only y Push summary SUCCESS. Gate policy, dry-run, detección/espera, dispatch, registro QA, persistencia y commit documental SKIPPED.
+- **Plus:** Certification Runner [41136660038](https://github.com/c2melendez/precision-lab-plus/actions/runs/41136660038), SHA `218d682848a03a000930e2028f057563847381f3`, evento push, SUCCESS. Mismos pasos de resolución canónica, checkout y fingerprint; dispatch/espera/registro/persistencia SKIPPED.
+- **Decisión conjunta:** PASS_SCOPED_PUSH_ONLY en ambos productos. No se certifica el camino workflow_dispatch, despacho de gate, recibo durable, correlación E2E ni replay idempotente.
+- **Mecanismo paralelo:** fases A/B cerradas (lectura staging autenticada del recibo existente: HTTP 200; anónima: HTTP 401). O5 IN_PROGRESS por falta de una traza real Observer→Bridge→Actions→Runner→evidencia y replay sin duplicación. O6 PENDING por la restricción vigente de no ejecutar dispatch real; no es FAIL. O7 PENDING, dependiente de O6.
+- El contrato de regresión del Runner se mantiene idéntico en ambos repositorios (blob `ff5c499cb6eae8277279265a26a897ff982288a0`); las diferencias YAML documentadas son los defaults locales y comentarios, con el contrato `target_repo=both` compartido.
+- No se hizo merge, deploy, cambio de producción ni despacho real. Global OPEN. El bloqueo matemático Plus VC-FE-45 permanece sin cambios.
