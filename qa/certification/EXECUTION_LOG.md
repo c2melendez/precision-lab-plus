@@ -706,3 +706,11 @@ La continuación matemática debe seguir la matriz y el estado de cada repositor
 **Siguiente paso matemático vigente:** revisar/reconciliar la evidencia existente del subgrupo EDCX-B6 VC-FE trig 23–31, que figura VERIFYING. Determinar si la evidencia disponible permite REUSE/REVIEW o si cambió una precondición que justifique una prueba focalizada. No repetir VC-FE-42/47 ni los cuatro workflows verdes de SHA 082fdb7c. Después continuar los subgrupos hyperbolic e inverse según sus estados TEST_FIRST_PREPARED.
 
 Compass P0 permanece en su propio backlog de integración/seguridad y no es condición de entrada para esta tarea matemática. Certificación global OPEN.
+
+## 2026-10-30 UTC — r357: EDCX-B6 VC-FE-23..31 PASS_SCOPED (Plus)
+
+- Se revisó el test `backend/tests/test_edcx_b6_trig_complex.py` y el log del job backend del gate acumulativo. Las nueve filas VC-FE-23..31 aparecen explícitamente PASSED en el SHA técnico `082fdb7c48add1476554ef90e840fab698b89561`.
+- Oráculo independiente `cmath`/`math`, rama principal, tolerancia `1e-9`; se validan HTTP 200, éxito, ausencia de error, resultado escalar/LaTeX y valor complejo decodificado. El test contempla el canal `result_approx` real-only y acepta forma simbólica exacta para resultados reales.
+- Evidencia exacta: CI 40970642357, Cumulative 40970642413 (`skip=false`; backend 2,783 passed, 1 skipped, 10 xfailed, 88.91% coverage), H1d 40970642305 y Certification Runner 40970642558; todos SUCCESS sobre el mismo SHA.
+- Se publica `EDCX_B6_VC_FE_23_31_ACCEPTANCE_R357.md`. VC-FE-23..31 pasa de VERIFYING a PASS_SCOPED, exclusivamente Plus. Lite no ejecutó el lote; no hay aceptación bilateral ni cierre de EDCX-B6.
+- Próximo paso matemático Plus: revisar contrato/canal de VC-FE-32..36 (identidades simbólicas), en orden de matriz. No repetir el lote 23..31 ni los cuatro workflows citados sin causa nueva. Compass P0 permanece independiente y no bloquea el motor. Global OPEN.
