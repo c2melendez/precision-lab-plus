@@ -1,5 +1,20 @@
 # Corte vigente de certificación — 2026-10-30 UTC (r368)
 
+<!-- certification-runner:latest:start -->
+## Última observación de certification-runner (registro automático)
+
+- Registrado UTC: 2026-10-31T01:48:00+00:00
+- Repositorio / gate: `c2melendez/precision-lab-plus` / `cumulative`
+- SHA base del checkout probado: `efee4a920973b68294872ff94036c5a1f87c5d7e`
+- Runner: [`41156606640`](https://github.com/c2melendez/precision-lab-plus/actions/runs/41156606640)
+- Workflow de gate: [`41156621432`](https://github.com/c2melendez/precision-lab-plus/actions/runs/41156621432)
+- Estado/conclusión observados: `completed` / `success`
+- Clasificación automática: `GATE_WORKFLOW_SUCCESS_LOG_AND_ACCEPTANCE_REVIEW_REQUIRED`
+- **No equivale a PASS de certificación.** Revisar jobs, pasos, logs, huella, canal, oráculo y revisión de aceptación antes de aceptar o reutilizar evidencia.
+- Este registro no modifica `next_action` ni cierra bloqueos; la siguiente tarea canónica sigue siendo la de `continuity.json` hasta una reconciliación explícita.
+<!-- certification-runner:latest:end -->
+
+
 **Fuente de verdad:** rama `qa/syntax-audit-in625-a1`, `continuity.json` y evidencia Actions. Este corte supersede estados históricos anteriores.
 
 - **Motor Plus:** el siguiente paso matemático permanece bloqueado en la resolución versionada del conflicto VC-FE-45 (asin(2) complejo ± frente a EV-I-12 real-domain DOMAIN_ERROR). No debilitar EV-I-12 ni importar aceptación de Lite. Global OPEN.

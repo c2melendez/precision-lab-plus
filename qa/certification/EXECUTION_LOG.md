@@ -770,3 +770,12 @@ Compass P0 permanece en su propio backlog de integración/seguridad y no es cond
 - Lite: [41144965611](https://github.com/c2melendez/precision-lab-lite/actions/runs/41144965611), SHA `a1a69ae9429afc9481d9febf34885b9242968917`, push SUCCESS. Canonical branch, checkout, BASE_SHA, fingerprint y Push summary SUCCESS; dispatch, receipt y persistencia SKIPPED.
 - Plus: [41136660038](https://github.com/c2melendez/precision-lab-plus/actions/runs/41136660038), SHA `218d682848a03a000930e2028f057563847381f3`, push SUCCESS. Canonical branch, checkout, BASE_SHA y fingerprint SUCCESS; dispatch/espera/registro/persistencia SKIPPED.
 - Estado bilateral: PASS_SCOPED_PUSH_ONLY. No se certifica workflow_dispatch, gate dispatch, receipt durable, trazabilidad E2E ni replay idempotente. Global OPEN.
+
+## 2026-10-31T01:48:00+00:00 — certification-runner observation
+
+- Runner run: https://github.com/c2melendez/precision-lab-plus/actions/runs/41156606640
+- Gate: `cumulative`; base SHA: `efee4a920973b68294872ff94036c5a1f87c5d7e`.
+- Gate run: https://github.com/c2melendez/precision-lab-plus/actions/runs/41156621432; status: `completed`; conclusion: `success`.
+- Classification: `GATE_WORKFLOW_SUCCESS_LOG_AND_ACCEPTANCE_REVIEW_REQUIRED`. Jobs/steps snapshot stored in `qa/certification/runner/41156606640.json`.
+- This is execution telemetry, not acceptance. Logs, required-step execution, fingerprint, channel, oracle and acceptance revision still require review.
+- No objective/blocker was closed and `continuity.json.next_action` was deliberately left unchanged.
