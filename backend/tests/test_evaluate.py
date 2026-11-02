@@ -324,3 +324,20 @@ def test_nested_astronomical_powers_return_complexity_limit(expression):
     assert body["result_latex"] is None
     assert body["request_id"]
 
+@pytest.mark.parametrize(
+    "expression,expected",
+    [
+        ("2+3", "5"),
+        ("1/3+2/3", "1"),
+        ("2*(3+4)", "14"),
+    ],
+)
+def test_numeric_result_presentation_is_canonical(expression, expected):
+    response = _evaluate(expression=expression)
+    body = response.json()
+    assert response.status_code == 200, body
+    assert body["success"] is True, body
+    assert body["result_text"] == expected
+    assert body["result_latex"] == expected
+    assert body["result_approx"] == pytest.approx(float(expected))
+
