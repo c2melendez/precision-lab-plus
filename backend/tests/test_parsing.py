@@ -184,3 +184,8 @@ def test_nested_integer_power_exponent_at_limit_is_allowed():
     expr = sympy.sympify("x**(100**2)", evaluate=False)
     ast_validator.check_complexity_limits(expr)
 
+def test_nested_integer_power_with_numeric_cancellation_remains_within_limit():
+    # 101**2 is 10,201, but the complete exponent expression reduces to 1.
+    expr = sympy.sympify("x**((101**2) - 10201 + 1)", evaluate=False)
+    ast_validator.check_complexity_limits(expr)
+
