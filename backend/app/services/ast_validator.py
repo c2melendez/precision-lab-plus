@@ -13,6 +13,7 @@ MAX_AST_NODES = 200
 MAX_AST_DEPTH = 30
 MAX_INTEGER_LITERAL_DIGITS = 64
 MAX_ABS_INTEGER_EXPONENT = 10_000
+MAX_INTEGER_EVALUATION_BITS = 16_384
 
 
 class ComplexityLimitError(ValueError):
@@ -93,19 +94,19 @@ def check_complexity_limits(expr: sympy.Basic) -> None:
     Exceder cualquiera -> \`ComplexityLimitError\`.
 
     El límite del exponente también se aplica al valor de expresiones
-    enteras numéricas anidadas (p. ej. \`10**(10**10)\`). La comprobación es
-    acotada: no expande potencias cuyo resultado supera el umbral.
+    enteras numéricas anidadas (p. ej. \`10**(10**10)\`). La evaluación tiene
+    un presupuesto de bits independiente y no materializa enteros astronómicos.
     """
 
-    exceeds_limit = object()
+    exceeds_budget = object()
     integer_value_cache = {}
 
     def _known_integer_value(node):
-        """Devuelve int, None (no demostrablemente entero) o sentinel de exceso.
+        """Devuelve int, None o sentinel cuando excede el presupuesto.
 
-        Solo evalúa literales y árboles numéricos Add/Mul/Pow. Las potencias
-        se multiplican hasta superar MAX_ABS_INTEGER_EXPONENT y entonces se
-        saturan; nunca se materializa el entero astronómico.
+        Solo evalúa árboles numéricos enteros Add/Mul/Pow. Las potencias se
+        acotan por tamaño de bits; así se pueden resolver sumas/restas
+        moderadas sin calcular una potencia astronómica.
         """
         if node in integer_value_cache:
             return integer_value_cache[node]
@@ -115,36 +116,41 @@ def check_complexity_limits(expr: sympy.Basic) -> None:
             value = int(node)
         elif node.is_Add:
             parts = [_known_integer_value(arg) for arg in node.args]
-            if any(part is exceeds_limit for part in parts):
-                value = exceeds_limit
+            if any(part is exceeds_budget for part in parts):
+                value = exceeds_budget
             elif not any(part is None for part in parts):
                 value = sum(parts)
+                if abs(value).bit_length() > MAX_INTEGER_EVALUATION_BITS:
+                    value = exceeds_budget
         elif node.is_Mul:
             parts = [_known_integer_value(arg) for arg in node.args]
-            if any(part == 0 for part in parts if part is not None and part is not exceeds_limit):
+            if any(part == 0 for part in parts if part is not None and part is not exceeds_budget):
                 value = 0
-            elif any(part is exceeds_limit for part in parts):
-                value = exceeds_limit
+            elif any(part is exceeds_budget for part in parts):
+                value = exceeds_budget
             elif not any(part is None for part in parts):
                 value = 1
                 for part in parts:
                     value *= part
+                    if abs(value).bit_length() > MAX_INTEGER_EVALUATION_BITS:
+                        value = exceeds_budget
+                        break
         elif node.is_Pow:
             base = _known_integer_value(node.args[0])
             exponent = _known_integer_value(node.args[1])
 
-            if exponent is exceeds_limit:
+            if exponent is exceeds_budget:
                 if base == 0:
                     value = 0
                 elif base == 1:
                     value = 1
                 elif base is not None and base != -1:
-                    value = exceeds_limit
-            elif base is exceeds_limit:
+                    value = exceeds_budget
+            elif base is exceeds_budget:
                 if exponent == 0:
                     value = 1
                 elif isinstance(exponent, int) and exponent > 0:
-                    value = exceeds_limit
+                    value = exceeds_budget
             elif isinstance(base, int) and isinstance(exponent, int):
                 if exponent < 0:
                     if base == 1:
@@ -155,17 +161,17 @@ def check_complexity_limits(expr: sympy.Basic) -> None:
                     value = 1
                 elif base in (-1, 0, 1):
                     value = pow(base, exponent)
-                elif exponent > MAX_ABS_INTEGER_EXPONENT:
-                    value = exceeds_limit
+                elif exponent > MAX_INTEGER_EVALUATION_BITS:
+                    value = exceeds_budget
+                elif (abs(base).bit_length() - 1) * exponent > MAX_INTEGER_EVALUATION_BITS:
+                    value = exceeds_budget
                 else:
-                    result = 1
-                    for _ in range(exponent):
-                        result *= base
-                        if abs(result) > MAX_ABS_INTEGER_EXPONENT:
-                            value = exceeds_limit
-                            break
-                    else:
-                        value = result
+                    result = pow(base, exponent)
+                    value = (
+                        exceeds_budget
+                        if result.bit_length() > MAX_INTEGER_EVALUATION_BITS
+                        else result
+                    )
 
         integer_value_cache[node] = value
         return value
@@ -190,7 +196,7 @@ def check_complexity_limits(expr: sympy.Basic) -> None:
         if node.is_Pow:
             _base, exponent = node.args
             exponent_value = _known_integer_value(exponent)
-            if exponent_value is exceeds_limit or (
+            if exponent_value is exceeds_budget or (
                 isinstance(exponent_value, int)
                 and abs(exponent_value) > MAX_ABS_INTEGER_EXPONENT
             ):
