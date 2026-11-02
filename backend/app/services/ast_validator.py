@@ -90,13 +90,85 @@ def validate_ast_safety(tree: sympy.Basic) -> None:
 def check_complexity_limits(expr: sympy.Basic) -> None:
     """Etapa 9 (sección 7): nodos ≤ 200, profundidad ≤ 30, dígitos máximos
     por entero literal ≤ 64, exponente entero absoluto máximo ≤ 10,000.
-    Exceder cualquiera -> `ComplexityLimitError`.
+    Exceder cualquiera -> \`ComplexityLimitError\`.
 
-    Caso de prueba de la sección 15: `2**100000000` -> `COMPLEXITY_LIMIT`
-    (el exponente, 100000000, excede `MAX_ABS_INTEGER_EXPONENT`; el árbol
-    en sí, con `evaluate=False`, tiene solo 3 nodos — nunca se llega a
-    calcular el número real de ~30 millones de dígitos).
+    El límite del exponente también se aplica al valor de expresiones
+    enteras numéricas anidadas (p. ej. \`10**(10**10)\`). La comprobación es
+    acotada: no expande potencias cuyo resultado supera el umbral.
     """
+
+    exceeds_limit = object()
+    integer_value_cache = {}
+
+    def _known_integer_value(node):
+        """Devuelve int, None (no demostrablemente entero) o sentinel de exceso.
+
+        Solo evalúa literales y árboles numéricos Add/Mul/Pow. Las potencias
+        se multiplican hasta superar MAX_ABS_INTEGER_EXPONENT y entonces se
+        saturan; nunca se materializa el entero astronómico.
+        """
+        if node in integer_value_cache:
+            return integer_value_cache[node]
+
+        value = None
+        if node.is_Integer:
+            value = int(node)
+        elif node.is_Add:
+            parts = [_known_integer_value(arg) for arg in node.args]
+            if any(part is exceeds_limit for part in parts):
+                value = exceeds_limit
+            elif not any(part is None for part in parts):
+                value = sum(parts)
+        elif node.is_Mul:
+            parts = [_known_integer_value(arg) for arg in node.args]
+            if any(part == 0 for part in parts if part is not None and part is not exceeds_limit):
+                value = 0
+            elif any(part is exceeds_limit for part in parts):
+                value = exceeds_limit
+            elif not any(part is None for part in parts):
+                value = 1
+                for part in parts:
+                    value *= part
+        elif node.is_Pow:
+            base = _known_integer_value(node.args[0])
+            exponent = _known_integer_value(node.args[1])
+
+            if exponent is exceeds_limit:
+                if base == 0:
+                    value = 0
+                elif base == 1:
+                    value = 1
+                elif base is not None and base != -1:
+                    value = exceeds_limit
+            elif base is exceeds_limit:
+                if exponent == 0:
+                    value = 1
+                elif isinstance(exponent, int) and exponent > 0:
+                    value = exceeds_limit
+            elif isinstance(base, int) and isinstance(exponent, int):
+                if exponent < 0:
+                    if base == 1:
+                        value = 1
+                    elif base == -1:
+                        value = -1 if abs(exponent) % 2 else 1
+                elif exponent == 0:
+                    value = 1
+                elif base in (-1, 0, 1):
+                    value = pow(base, exponent)
+                elif exponent > MAX_ABS_INTEGER_EXPONENT:
+                    value = exceeds_limit
+                else:
+                    result = 1
+                    for _ in range(exponent):
+                        result *= base
+                        if abs(result) > MAX_ABS_INTEGER_EXPONENT:
+                            value = exceeds_limit
+                            break
+                    else:
+                        value = result
+
+        integer_value_cache[node] = value
+        return value
 
     def _walk(node: sympy.Basic, depth: int, counters: dict) -> None:
         counters["nodes"] += 1
@@ -117,7 +189,11 @@ def check_complexity_limits(expr: sympy.Basic) -> None:
 
         if node.is_Pow:
             _base, exponent = node.args
-            if exponent.is_Integer and abs(int(exponent)) > MAX_ABS_INTEGER_EXPONENT:
+            exponent_value = _known_integer_value(exponent)
+            if exponent_value is exceeds_limit or (
+                isinstance(exponent_value, int)
+                and abs(exponent_value) > MAX_ABS_INTEGER_EXPONENT
+            ):
                 raise ComplexityLimitError(
                     f"Exponente entero fuera de rango (máx. "
                     f"{MAX_ABS_INTEGER_EXPONENT} en valor absoluto): {exponent}."
@@ -127,3 +203,4 @@ def check_complexity_limits(expr: sympy.Basic) -> None:
             _walk(child, depth + 1, counters)
 
     _walk(expr, 0, {"nodes": 0})
+
