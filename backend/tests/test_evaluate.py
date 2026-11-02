@@ -312,3 +312,15 @@ def test_stdev_with_single_value_is_parse_error():
     body = response.json()
     assert body["success"] is False
     assert body["error_code"] == "PARSE_ERROR"
+
+@pytest.mark.parametrize("expression", ["10^10^10", "9^9^9"])
+def test_nested_astronomical_powers_return_complexity_limit(expression):
+    response = _evaluate(expression=expression)
+    body = response.json()
+    assert response.status_code == 200, body
+    assert body["success"] is False
+    assert body["error_code"] == "COMPLEXITY_LIMIT"
+    assert body["result_text"] is None
+    assert body["result_latex"] is None
+    assert body["request_id"]
+

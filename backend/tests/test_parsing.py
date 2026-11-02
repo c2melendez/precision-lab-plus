@@ -163,3 +163,24 @@ def test_complexity_limit_large_exponent():
 def test_reasonable_expression_within_complexity_limits():
     expr = parsing.parse_expression_tree("x**2 + 2*x + 1")
     assert expr is not None
+
+@pytest.mark.parametrize(
+    "expression",
+    [
+        "10**(10**10)",
+        "9**(9**9)",
+        "x**((100**2)+1)",
+    ],
+)
+def test_nested_integer_power_exponent_exceeds_complexity_limit(expression):
+    # The inner power is small enough to pass its own exponent check, but its
+    # numeric value becomes the outer exponent and exceeds the 10,000 contract.
+    expr = sympy.sympify(expression, evaluate=False)
+    with pytest.raises(ast_validator.ComplexityLimitError):
+        ast_validator.check_complexity_limits(expr)
+
+
+def test_nested_integer_power_exponent_at_limit_is_allowed():
+    expr = sympy.sympify("x**(100**2)", evaluate=False)
+    ast_validator.check_complexity_limits(expr)
+
