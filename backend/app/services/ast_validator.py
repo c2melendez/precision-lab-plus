@@ -91,10 +91,10 @@ def validate_ast_safety(tree: sympy.Basic) -> None:
 def check_complexity_limits(expr: sympy.Basic) -> None:
     """Etapa 9 (sección 7): nodos ≤ 200, profundidad ≤ 30, dígitos máximos
     por entero literal ≤ 64, exponente entero absoluto máximo ≤ 10,000.
-    Exceder cualquiera -> \`ComplexityLimitError\`.
+    Exceder cualquiera -> `ComplexityLimitError`.
 
     El límite del exponente también se aplica al valor de expresiones
-    enteras numéricas anidadas (p. ej. \`10**(10**10)\`). La evaluación tiene
+    enteras numéricas anidadas (p. ej. `10**(10**10)`). La evaluación tiene
     un presupuesto de bits independiente y no materializa enteros astronómicos.
     """
 
