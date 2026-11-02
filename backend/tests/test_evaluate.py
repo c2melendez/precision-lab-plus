@@ -312,3 +312,32 @@ def test_stdev_with_single_value_is_parse_error():
     body = response.json()
     assert body["success"] is False
     assert body["error_code"] == "PARSE_ERROR"
+
+@pytest.mark.parametrize("expression", ["10^10^10", "9^9^9"])
+def test_nested_astronomical_powers_return_complexity_limit(expression):
+    response = _evaluate(expression=expression)
+    body = response.json()
+    assert response.status_code == 200, body
+    assert body["success"] is False
+    assert body["error_code"] == "COMPLEXITY_LIMIT"
+    assert body["result_text"] is None
+    assert body["result_latex"] is None
+    assert body["request_id"]
+
+@pytest.mark.parametrize(
+    "expression,expected",
+    [
+        ("2+3", "5"),
+        ("1/3+2/3", "1"),
+        ("2*(3+4)", "14"),
+    ],
+)
+def test_numeric_result_presentation_is_canonical(expression, expected):
+    response = _evaluate(expression=expression)
+    body = response.json()
+    assert response.status_code == 200, body
+    assert body["success"] is True, body
+    assert body["result_text"] == expected
+    assert body["result_latex"] == expected
+    assert body["result_approx"] == pytest.approx(float(expected))
+
