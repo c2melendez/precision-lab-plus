@@ -1,4 +1,4 @@
-# Corte vigente de certificación — 2026-11-03 UTC (r370)
+# Corte vigente de certificación — 2026-11-03 UTC (r371)
 
 ## Reconciliación bilateral — 2026-11-03 (r370)
 
@@ -6,6 +6,13 @@
 - La CI estándar Lite 41612413592 falló únicamente en npm audit (8 moderadas); se mantiene como deuda de seguridad separada, sin tocar dependencias ni umbrales. Plus no hereda ese resultado.
 - Plus no ejecutó AS-EXP-09 y no se afirma paridad. El siguiente paso Plus sigue BLOCKED en VC-FE-45 por conflicto contractual con EV-I-12; no debilitar EV-I-12 ni inferir raíces complejas sin decisión versionada.
 - La clasificación global permanece OPEN.
+
+## Reconciliación bilateral — 2026-11-03 (r371)
+
+- Lite — Algebra114 AS-EXP-10: PASS_SCOPED en SHA 5a6662e03e413063f9e73ca1f4210b7a155da5ca; acumulativo 41613294097 SUCCESS y H1d 41613294038 SUCCESS (22/22). Aceptación en Lite: qa/certification/ALGEBRA114_AS_EXP_10_ACCEPTANCE_R371.md.
+- La CI Lite 41613294023 falló únicamente por npm audit (8 moderadas); permanece como deuda separada y no se cambia el umbral. Plus no hereda ese resultado.
+- Plus no ejecutó AS-EXP-10 y no se afirma paridad. Se preserva el bloqueo VC-FE-45 frente a EV-I-12 sin cambios.
+- Global certification OPEN.
 
 <!-- certification-runner:latest:start -->
 ## Última observación de certification-runner (registro automático)
