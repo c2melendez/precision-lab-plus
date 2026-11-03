@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 364,
+  "revision": 365,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
@@ -445,5 +445,20 @@
     "acceptance_reviewed": false,
     "certification_pass": false,
     "recorded_at": "2026-10-31T01:55:31+00:00"
-  }
+  },
+  "lite_companion_as_exp09_r370": {
+    "status": "PASS_SCOPED_LITE_ONLY",
+    "sha": "13bf8b535a00b40c464057dc663b2d97ea6c44bd",
+    "test_blob": "9ca2c77978836221bebb44b3a8401cf344c0550b",
+    "acceptance": "qa/certification/ALGEBRA114_AS_EXP_09_ACCEPTANCE_R370.md",
+    "cumulative_run": 41612413595,
+    "h1d_run": 41612413591,
+    "ci_run": {
+      "id": 41612413592,
+      "status": "FAILURE",
+      "reason": "Lite npm audit 8 moderate findings"
+    },
+    "note": "Plus did not execute AS-EXP-09. No parity inferred. Preserve next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT unchanged."
+  },
+  "updated_utc": "2026-11-03T09:38:26Z"
 }
