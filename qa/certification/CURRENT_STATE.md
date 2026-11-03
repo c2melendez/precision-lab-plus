@@ -1,4 +1,12 @@
-# Corte vigente de certificación — 2026-11-03 UTC (r372)
+# Corte vigente de certificación — 2026-11-03 UTC (r373)
+
+## Reconciliación bilateral — 2026-11-03 (r373)
+
+- Lite — Algebra114 AS-FAC-02: **PASS_SCOPED** en SHA `4a14dd0bd6c1797a5415b93ced37d53425d68908`; acumulativo [41615433227](https://github.com/c2melendez/precision-lab-lite/actions/runs/41615433227) SUCCESS (2,259 passed; test focalizado ejecutado) y H1d [41615433418](https://github.com/c2melendez/precision-lab-lite/actions/runs/41615433418) SUCCESS (22/22). Aceptación en Lite: `qa/certification/ALGEBRA114_AS_FAC_02_ACCEPTANCE_R373.md`.
+- CI Lite [41615433266](https://github.com/c2melendez/precision-lab-lite/actions/runs/41615433266) falló únicamente en npm audit (8 moderadas); no se cambió el umbral ni se modifica el estado de Plus.
+- Plus no ejecutó AS-FAC-02; no se afirma paridad. Se preserva el siguiente paso Plus BLOCKED en VC-FE-45 por conflicto contractual con EV-I-12. No debilitar EV-I-12 ni aceptar ramas complejas sin decisión versionada.
+- Lite Certification Runner [41615433272](https://github.com/c2melendez/precision-lab-lite/actions/runs/41615433272) SUCCESS tras usar `github.token` de alcance repository; Plus conserva su propia corrección ya verificada. Global certification OPEN.
+
 
 ## Reconciliación bilateral — 2026-11-03 (r370)
 
