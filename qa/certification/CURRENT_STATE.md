@@ -1,4 +1,11 @@
-# Corte vigente de certificación — 2026-10-30 UTC (r368)
+# Corte vigente de certificación — 2026-11-03 UTC (r370)
+
+## Reconciliación bilateral — 2026-11-03 (r370)
+
+- Lite — Algebra114 AS-EXP-09: PASS_SCOPED en SHA 13bf8b535a00b40c464057dc663b2d97ea6c44bd, con test independiente, acumulativo 41612413595 SUCCESS y H1d 41612413591 SUCCESS (22/22). Aceptación ubicada en el repositorio Lite: qa/certification/ALGEBRA114_AS_EXP_09_ACCEPTANCE_R370.md.
+- La CI estándar Lite 41612413592 falló únicamente en npm audit (8 moderadas); se mantiene como deuda de seguridad separada, sin tocar dependencias ni umbrales. Plus no hereda ese resultado.
+- Plus no ejecutó AS-EXP-09 y no se afirma paridad. El siguiente paso Plus sigue BLOCKED en VC-FE-45 por conflicto contractual con EV-I-12; no debilitar EV-I-12 ni inferir raíces complejas sin decisión versionada.
+- La clasificación global permanece OPEN.
 
 <!-- certification-runner:latest:start -->
 ## Última observación de certification-runner (registro automático)
