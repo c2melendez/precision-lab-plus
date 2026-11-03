@@ -829,3 +829,9 @@ Compass P0 permanece en su propio backlog de integración/seguridad y no es cond
 - Lite aceptó AS-FAC-04 como PASS_SCOPED en SHA 5e3709adb0edeab0af39fff715044a19670b81f1; acumulativo 41616409423 SUCCESS (2,259 passed; test focalizado ejecutado), H1d 41616409288 SUCCESS (22/22). Aceptación: Lite qa/certification/ALGEBRA114_AS_FAC_04_ACCEPTANCE_R375.md.
 - CI Lite 41616409340 falló únicamente en npm audit (8 moderadas); no se modificaron dependencias ni umbrales.
 - Plus no ejecutó AS-FAC-04; no se declara paridad. Se preserva la acción Plus BLOCKED: resolver versionadamente VC-FE-45 frente a EV-I-12. Global OPEN.
+
+## 2026-11-03 UTC — r376: nota bilateral de Algebra114 AS-FAC-05 (Lite-only)
+
+- Lite aceptó AS-FAC-05 como PASS_SCOPED en SHA d3ca5bcdceeaa2a4826e74340ce4b20424a590d1; acumulativo 41616706336 SUCCESS (2,259 passed; test focalizado ejecutado), H1d 41616706384 SUCCESS (22/22). Aceptación: Lite qa/certification/ALGEBRA114_AS_FAC_05_ACCEPTANCE_R376.md.
+- CI Lite 41616706450 falló únicamente en npm audit (8 moderadas); no se modificaron dependencias ni umbrales.
+- Plus no ejecutó AS-FAC-05; no se declara paridad. Se preserva la acción Plus BLOCKED: resolver versionadamente VC-FE-45 frente a EV-I-12. Global OPEN.
