@@ -1,7 +1,7 @@
 """EDCX-B6 principal inverse complex trig/hyperbolic scalars (test-first).
 
-Covered: VC-FE-43, 44, 46, 48 (domain error), 50, 51, 52.
-Excluded for now (branch convention undecided): 45, 49, 53.
+Covered: VC-FE-43, 44, 46, 48 (domain error), 49, 50, 51, 52, 53.
+Excluded for now (contract conflict with EV-I-12): VC-FE-45.
 Independent oracle: cmath / math. Accepts exact symbolic real with
 result_approx=None. Product function names: asin/acos/atan/asinh/acosh/atanh
 (also arcsin/arccos/arctan aliases).
