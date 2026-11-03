@@ -796,3 +796,10 @@ Compass P0 permanece en su propio backlog de integración/seguridad y no es cond
 - No se ejecutó Plus para AS-EXP-09; no se declara paridad.
 - Se preserva sin cambios la siguiente acción Plus: resolver versionadamente VC-FE-45 frente a EV-I-12. Global OPEN.
 
+## 2026-11-03 UTC — r371: nota bilateral de Algebra114 AS-EXP-10 (Lite-only)
+
+- Lite aceptó AS-EXP-10 como PASS_SCOPED en SHA 5a6662e03e413063f9e73ca1f4210b7a155da5ca; acumulativo 41613294097 SUCCESS (2,259 passed / 8 expected fail / 34 TODO, test focalizado ejecutado) y H1d 41613294038 SUCCESS (22 passed).
+- La CI Lite 41613294023 falló solo por npm audit (8 moderadas). No se modificaron dependencias ni umbrales.
+- Plus no ejecutó AS-EXP-10; no se declara paridad.
+- Se preserva la acción Plus: resolver versionadamente VC-FE-45 frente a EV-I-12. Global OPEN.
+
