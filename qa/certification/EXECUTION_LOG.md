@@ -810,3 +810,10 @@ Compass P0 permanece en su propio backlog de integración/seguridad y no es cond
 - Plus no ejecutó AS-FAC-01; no se declara paridad.
 - Se preserva la acción Plus: resolver versionadamente VC-FE-45 frente a EV-I-12. Global OPEN.
 
+
+## 2026-11-03 UTC — r373: nota bilateral de Algebra114 AS-FAC-02 (Lite-only)
+
+- Lite aceptó AS-FAC-02 como PASS_SCOPED en SHA 4a14dd0bd6c1797a5415b93ced37d53425d68908; acumulativo 41615433227 SUCCESS (2,259 passed; test focalizado ejecutado), H1d 41615433418 SUCCESS (22/22). Aceptación: Lite qa/certification/ALGEBRA114_AS_FAC_02_ACCEPTANCE_R373.md.
+- CI Lite 41615433266 falló únicamente en npm audit (8 moderadas); no se modificaron dependencias ni umbrales.
+- Plus no ejecutó AS-FAC-02; no se declara paridad. Se preserva la acción Plus BLOCKED: resolver versionadamente VC-FE-45 frente a EV-I-12. Global OPEN.
+- El Runner Lite 41615433272 SUCCESS tras corregir la fuente del token del workflow; la ejecución fue push/no-dispatch.
