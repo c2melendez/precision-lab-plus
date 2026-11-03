@@ -788,3 +788,11 @@ Compass P0 permanece en su propio backlog de integración/seguridad y no es cond
 - Classification: `GATE_WORKFLOW_SUCCESS_LOG_AND_ACCEPTANCE_REVIEW_REQUIRED`. Jobs/steps snapshot stored in `qa/certification/runner/41157106651.json`.
 - This is execution telemetry, not acceptance. Logs, required-step execution, fingerprint, channel, oracle and acceptance revision still require review.
 - No objective/blocker was closed and `continuity.json.next_action` was deliberately left unchanged.
+
+## 2026-11-03 UTC — r370: nota bilateral de Algebra114 AS-EXP-09 (Lite-only)
+
+- Lite aceptó AS-EXP-09 como PASS_SCOPED en SHA 13bf8b535a00b40c464057dc663b2d97ea6c44bd; acumulativo 41612413595 SUCCESS (2,259 passed / 8 expected fail / 34 TODO, test focalizado ejecutado) y H1d 41612413591 SUCCESS (22 passed).
+- La CI Lite 41612413592 falló solo por npm audit (8 moderadas). No se modificaron dependencias ni umbrales.
+- No se ejecutó Plus para AS-EXP-09; no se declara paridad.
+- Se preserva sin cambios la siguiente acción Plus: resolver versionadamente VC-FE-45 frente a EV-I-12. Global OPEN.
+
