@@ -112,18 +112,22 @@ function validateLocalExpression(latex: string, converted: string): string | nul
     return "La expresión no puede estar vacía.";
   }
 
-  if (/(?:\\\\infty|∞|\\\\infinity|\\boo\\b)\\s*-\\s*(?:\\\\infty|∞|\\\\infinity|\\boo\\b)/i.test(raw)) {
+  const normalizedRaw = raw.replace(/\s+/g, "");
+  if (/(?:\\infty|∞|infinity|oo)[-−](?:\\infty|∞|infinity|oo)/i.test(normalizedRaw)) {
     return "Forma indeterminada: infinito menos infinito no está definido.";
   }
 
-  const textOnly = raw.match(/^\\\\text\\s*\\{([\\s\\S]*)\\}$/);
+  const textOnly = raw.match(/^\\text\s*\{([\s\S]*)\}$/);
   if (textOnly) {
     return /incompleta/i.test(textOnly[1])
       ? "Sintaxis incompleta"
       : "Entrada no matemática: escribe una expresión válida.";
   }
 
-  if (/[+\\-*/^=,]\\s*$/.test(converted)) return "Sintaxis incompleta";
+  const normalizedConverted = converted.trimEnd();
+  if (["+", "-", "*", "/", "^", "=", ","].some((suffix) => normalizedConverted.endsWith(suffix))) {
+    return "Sintaxis incompleta";
+  }
   return null;
 }
 
