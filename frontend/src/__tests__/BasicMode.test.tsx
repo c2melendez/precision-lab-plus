@@ -97,6 +97,34 @@ describe("BasicMode", () => {
     });
   });
 
+  it("converts inline con x=... notation to evaluate substitutions", async () => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), {
+      target: { value: "(abs(x)+x) con x=(-4)" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
+    expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
+      expression: "(abs(x)+x)",
+      angle_unit: "rad",
+      substitutions: { x: "-4" },
+    });
+  });
+
+  it("rejects text-only input locally without calling the API", () => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), {
+      target: { value: String.raw`\text{no existe}` },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Entrada no matemática: escribe una expresión válida.",
+    );
+    expect(mockedCallApi).not.toHaveBeenCalled();
+  });
+
   it("no llama a la API con una expresión vacía (payload inválido)", () => {
     render(<BasicMode />);
     fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);

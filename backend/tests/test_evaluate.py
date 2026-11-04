@@ -196,6 +196,34 @@ def test_evaluate_without_substitutions_is_symbolic():
     assert body["result_text"] == "sin(x)"
 
 
+def test_numeric_arithmetic_is_reduced_for_exact_display():
+    response = _evaluate(expression="2+3")
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_text"] == "5"
+    assert body["result_latex"] == "5"
+    assert body["result_approx"] == pytest.approx(5.0)
+
+
+def test_principal_complex_square_root_is_reduced_for_exact_display():
+    response = _evaluate(expression="sqrt(-1)")
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_text"] == "I"
+    assert body["result_latex"] == "i"
+    assert body["result_approx"] is None
+
+
+def test_evaluate_long_expression_returns_readable_500_character_error():
+    expression = "1+" * 4999 + "11"
+    response = _evaluate(expression=expression)
+    body = response.json()
+    assert response.status_code == 422
+    assert body["success"] is False
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert body["error_message"] == "Entrada demasiado larga: el máximo permitido es de 500 caracteres."
+
+
 def test_inverse_trig_always_radians_regardless_of_angle_unit():
     response = _evaluate(expression="asin(1)", angle_unit="deg")
     body = response.json()
@@ -210,6 +238,14 @@ def test_inverse_trig_always_radians_regardless_of_angle_unit():
 
 def test_complexity_limit_huge_exponent():
     response = _evaluate(expression="2**100000000")
+    body = response.json()
+    assert body["success"] is False
+    assert body["error_code"] == "COMPLEXITY_LIMIT"
+
+
+@pytest.mark.parametrize("expression", ["10**(10**10)", "9**(9**9)"])
+def test_complexity_limit_nested_integer_exponents(expression):
+    response = _evaluate(expression=expression)
     body = response.json()
     assert body["success"] is False
     assert body["error_code"] == "COMPLEXITY_LIMIT"

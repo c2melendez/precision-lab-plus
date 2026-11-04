@@ -70,6 +70,63 @@ const EXAMPLES: { display: string; latex: string }[] = [
 // comporte igual sin importar desde qué pantalla se escribió.
 const INEQUALITY_OPERATOR_PATTERN = /[<>]/;
 
+type InlineBindingParse = {
+  expression: string;
+  substitutions: Record<string, string>;
+  present: boolean;
+  error?: string;
+};
+
+function parseInlineBindings(expression: string): InlineBindingParse {
+  const marker = /\s+con\s+/i.exec(expression);
+  if (!marker || marker.index === undefined) {
+    return { expression, substitutions: {}, present: false };
+  }
+
+  const formula = expression.slice(0, marker.index).trim();
+  const bindingText = expression.slice(marker.index + marker[0].length).trim();
+  if (!formula || !bindingText) {
+    return { expression: formula, substitutions: {}, present: true, error: "Sintaxis incompleta" };
+  }
+
+  const substitutions: Record<string, string> = {};
+  for (const item of bindingText.split(/\s*,\s*/)) {
+    const match = item.match(/^([A-Za-z][A-Za-z0-9_]*)\s*=\s*(?:\(\s*([^()]*)\s*\)|(.+))$/);
+    if (!match) {
+      return { expression: formula, substitutions: {}, present: true, error: "Sintaxis incompleta" };
+    }
+    const name = match[1];
+    const value = (match[2] ?? match[3] ?? "").trim();
+    if (!value || Object.prototype.hasOwnProperty.call(substitutions, name)) {
+      return { expression: formula, substitutions: {}, present: true, error: "Sintaxis incompleta" };
+    }
+    substitutions[name] = value;
+  }
+
+  return { expression: formula, substitutions, present: true };
+}
+
+function validateLocalExpression(latex: string, converted: string): string | null {
+  const raw = latex.trim();
+  if (!raw || /vac[ií]a/i.test(raw) || !converted.trim()) {
+    return "La expresión no puede estar vacía.";
+  }
+
+  if (/(?:\\\\infty|∞|\\\\infinity|\\boo\\b)\\s*-\\s*(?:\\\\infty|∞|\\\\infinity|\\boo\\b)/i.test(raw)) {
+    return "Forma indeterminada: infinito menos infinito no está definido.";
+  }
+
+  const textOnly = raw.match(/^\\\\text\\s*\\{([\\s\\S]*)\\}$/);
+  if (textOnly) {
+    return /incompleta/i.test(textOnly[1])
+      ? "Sintaxis incompleta"
+      : "Entrada no matemática: escribe una expresión válida.";
+  }
+
+  if (/[+\\-*/^=,]\\s*$/.test(converted)) return "Sintaxis incompleta";
+  return null;
+}
+
 export function BasicMode() {
   const formRef = useRef<HTMLFormElement>(null);
   const [mathField, setMathField] = useState<MathfieldElement | null>(null);
@@ -314,25 +371,40 @@ export function BasicMode() {
     }
 
     const trimmed = latexToBackendSyntax(latex);
-    if (!trimmed) {
-      setValidationError("La expresión no puede estar vacía.");
+    const localError = validateLocalExpression(latex, trimmed);
+    if (localError) {
+      setLastResult(null);
+      setErrorMessage(null);
+      setValidationError(localError);
+      return;
+    }
+
+    const inline = parseInlineBindings(trimmed);
+    if (inline.error) {
+      setLastResult(null);
+      setErrorMessage(null);
+      setValidationError(inline.error);
       return;
     }
     setValidationError(null);
 
+    const expression = inline.expression;
     const isInequality = INEQUALITY_OPERATOR_PATTERN.test(trimmed);
-    const isEquation = !isInequality && trimmed.includes("=");
+    const isEquation = !isInequality && !inline.present && expression.includes("=");
 
+    const explicitSubstitutions = Object.fromEntries(
+      substitutions
+        .filter((row) => row.name.trim() !== "")
+        .map((row) => [row.name, row.value]),
+    );
+    const mergedSubstitutions = { ...explicitSubstitutions, ...inline.substitutions };
     const substitutionsPayload =
-      !isInequality && !isEquation && substitutions.length > 0
-        ? Object.fromEntries(
-            substitutions
-              .filter((row) => row.name.trim() !== "")
-              .map((row) => [row.name, row.value]),
-          )
+      !isInequality && !isEquation && Object.keys(mergedSubstitutions).length > 0
+        ? mergedSubstitutions
         : undefined;
 
     setLoading(true);
+    setLastResult(null);
     setErrorMessage(null);
     try {
       const result = isInequality
@@ -342,7 +414,7 @@ export function BasicMode() {
           : await submitAndRecord(
               "/evaluate",
               {
-                expression: trimmed,
+                expression,
                 angle_unit: angleUnit,
                 ...(substitutionsPayload ? { substitutions: substitutionsPayload } : {}),
               },

@@ -59,6 +59,16 @@ def test_fallback_for_unmapped_rule_sin_of_sin():
     assert any("directo de SymPy" in w for w in body["warnings"])
 
 
+def test_non_elementary_integral_is_reported_as_unsupported():
+    response = _integral("sin(x**x)")
+    body = response.json()
+    assert body["success"] is False
+    assert body["error_code"] == "UNSUPPORTED_OPERATION"
+    assert body["error_message"] == "Sin forma elemental para esta integral."
+    assert body["result_text"] is None
+    assert body["result_latex"] is None
+
+
 def test_infinite_upper_bound_returns_exact_message():
     response = _integral("exp(-x)", lower_bound="0", upper_bound="oo")
     body = response.json()
