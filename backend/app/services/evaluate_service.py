@@ -150,8 +150,21 @@ def evaluate(
         ):
             raise DomainErrorResult("El resultado no está definido en este dominio.")
 
+    # Reduce bounded numeric expressions before formatting so exact answers are
+    # displayed (2+3 -> 5, sqrt(-1) -> I). Avoid constructing very large powers.
+    display_expr = expr
+    has_large_literal_power = any(
+        node.is_Pow and node.args[1].is_Integer and abs(int(node.args[1])) > 64
+        for node in sympy.preorder_traversal(expr)
+    )
+    if not has_large_literal_power:
+        try:
+            display_expr = expr.doit(deep=True)
+        except (AttributeError, ZeroDivisionError, ValueError, OverflowError):
+            display_expr = expr
+
     try:
-        numeric_value = expr.evalf()
+        numeric_value = display_expr.evalf()
     except (AttributeError, ZeroDivisionError, ValueError, OverflowError) as exc:
         raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
     needs_pole_check = (
@@ -172,4 +185,4 @@ def evaluate(
 
     approx = float(numeric_value) if numeric_value.is_real else None
 
-    return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=True, approx_value=approx)
+    return EvaluateResult(expr=display_expr, input_expr=input_expr, is_numeric=True, approx_value=approx)

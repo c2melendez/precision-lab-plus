@@ -87,17 +87,67 @@ def validate_ast_safety(tree: sympy.Basic) -> None:
             raise ParseSecurityError(f"Función no reconocida: '{node.func.__name__}'.")
 
 
+def _bounded_integer_value(node: sympy.Basic, cap: int = 1 << 4096) -> int | None:
+    """Evaluate integer AST nodes with saturation, without expanding huge powers."""
+    if node.is_Integer:
+        return int(node)
+    if node.is_Add:
+        values = [_bounded_integer_value(child, cap) for child in node.args]
+        if any(value is None for value in values):
+            return None
+        total = sum(value for value in values if value is not None)
+        return max(-cap, min(cap, total))
+    if node.is_Mul:
+        values = [_bounded_integer_value(child, cap) for child in node.args]
+        if any(value is None for value in values):
+            return None
+        product = 1
+        for value in values:
+            product *= value
+            if product > cap:
+                product = cap
+            elif product < -cap:
+                product = -cap
+        return product
+    if node.is_Pow:
+        base = _bounded_integer_value(node.args[0], cap)
+        exponent = _bounded_integer_value(node.args[1], cap)
+        if base is None or exponent is None:
+            return None
+        if exponent < 0:
+            if base == 1:
+                return 1
+            if base == -1:
+                return -1 if exponent % 2 else 1
+            return None
+        if exponent == 0:
+            return 1
+        if base == 0:
+            return 0
+        negative = base < 0 and exponent % 2 == 1
+        factor = min(abs(base), cap)
+        result = 1
+        remaining = exponent
+        while remaining:
+            if remaining & 1:
+                result *= factor
+                if result > cap:
+                    return -cap if negative else cap
+            remaining >>= 1
+            if remaining:
+                factor *= factor
+                if factor > cap:
+                    factor = cap
+        return -result if negative else result
+    return None
+
+
 def check_complexity_limits(expr: sympy.Basic) -> None:
-    """Etapa 9 (sección 7): nodos ≤ 200, profundidad ≤ 30, dígitos máximos
-    por entero literal ≤ 64, exponente entero absoluto máximo ≤ 10,000.
-    Exceder cualquiera -> `ComplexityLimitError`.
+    """Enforce AST, nesting, literal-digit and evaluated integer-exponent limits.
 
-    Caso de prueba de la sección 15: `2**100000000` -> `COMPLEXITY_LIMIT`
-    (el exponente, 100000000, excede `MAX_ABS_INTEGER_EXPONENT`; el árbol
-    en sí, con `evaluate=False`, tiene solo 3 nodos — nunca se llega a
-    calcular el número real de ~30 millones de dígitos).
+    Exponent values may themselves be integer expressions. The bounded evaluator
+    detects those without expanding the outer power or constructing huge integers.
     """
-
     def _walk(node: sympy.Basic, depth: int, counters: dict) -> None:
         counters["nodes"] += 1
         if counters["nodes"] > MAX_AST_NODES:
@@ -117,7 +167,8 @@ def check_complexity_limits(expr: sympy.Basic) -> None:
 
         if node.is_Pow:
             _base, exponent = node.args
-            if exponent.is_Integer and abs(int(exponent)) > MAX_ABS_INTEGER_EXPONENT:
+            exponent_value = _bounded_integer_value(exponent)
+            if exponent_value is not None and abs(exponent_value) > MAX_ABS_INTEGER_EXPONENT:
                 raise ComplexityLimitError(
                     f"Exponente entero fuera de rango (máx. "
                     f"{MAX_ABS_INTEGER_EXPONENT} en valor absoluto): {exponent}."
