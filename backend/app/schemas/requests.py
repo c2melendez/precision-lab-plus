@@ -25,7 +25,7 @@ class ExpressionRequest(BaseModel):
 
 class EvaluateRequest(BaseModel):
     # Route-level validation returns the explicit calculator 500-character contract.
-    expression: str = Field(..., min_length=1, max_length=10_000)
+    expression: str = Field(..., min_length=1, max_length=10_000, json_schema_extra={"maxLength": 500})
     angle_unit: Literal["rad", "deg"] = "rad"
     substitutions: Optional[Dict[str, str]] = None
 

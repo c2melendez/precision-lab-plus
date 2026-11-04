@@ -100,6 +100,29 @@ def _apply_degree_conversion(expr: sympy.Expr) -> sympy.Expr:
     return expr.replace(_is_direct_trig, _convert)
 
 
+def _can_safely_reduce_numeric_expression(expr: sympy.Basic) -> bool:
+    """Allow exact reduction only for small arithmetic trees.
+
+    Deliberately exclude factorials, combinatorics and arbitrary special functions:
+    ``doit()`` on those can materialize enormous exact integers or symbolic forms.
+    """
+    safe_nodes = (sympy.Add, sympy.Mul, sympy.Pow, sympy.Abs, sympy.Piecewise)
+    nodes = list(sympy.preorder_traversal(expr))
+    if len(nodes) > 50:
+        return False
+
+    for node in nodes:
+        if node.is_Number:
+            if node.is_Integer and len(str(abs(int(node)))) > 64:
+                return False
+            continue
+        if not isinstance(node, safe_nodes):
+            return False
+        if node.is_Pow and node.args[1].is_Integer and abs(int(node.args[1])) > 64:
+            return False
+    return True
+
+
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
@@ -150,14 +173,11 @@ def evaluate(
         ):
             raise DomainErrorResult("El resultado no está definido en este dominio.")
 
-    # Reduce bounded numeric expressions before formatting so exact answers are
-    # displayed (2+3 -> 5, sqrt(-1) -> I). Avoid constructing very large powers.
+    # Reduce only small arithmetic trees before formatting so exact answers are
+    # displayed (2+3 -> 5, sqrt(-1) -> I). Special functions, factorials and
+    # combinatorics stay on the bounded evalf() path.
     display_expr = expr
-    has_large_literal_power = any(
-        node.is_Pow and node.args[1].is_Integer and abs(int(node.args[1])) > 64
-        for node in sympy.preorder_traversal(expr)
-    )
-    if not has_large_literal_power:
+    if _can_safely_reduce_numeric_expression(expr):
         try:
             display_expr = expr.doit(deep=True)
         except (AttributeError, ZeroDivisionError, ValueError, OverflowError):
