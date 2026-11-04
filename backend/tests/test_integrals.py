@@ -48,15 +48,15 @@ def test_definite_integral_minimum_three_steps():
     assert body["result_text"] == "8/3"
 
 
-def test_fallback_for_unmapped_rule_sin_of_sin():
-    # sin(sin(x)) no tiene antiderivada elemental (manualintegrate ->
-    # DontKnowRule) -> fallback completo a integrate() directo.
+def test_fallback_for_unmapped_rule_without_elementary_result_is_unsupported():
+    # sin(sin(x)) -> DontKnowRule; SymPy deja un Integral(...) sin resolver.
     response = _integral("sin(sin(x))")
     body = response.json()
-    assert body["success"] is True
-    assert body["has_detailed_steps"] is False
-    assert body["steps"] == []
-    assert any("directo de SymPy" in w for w in body["warnings"])
+    assert body["success"] is False
+    assert body["error_code"] == "UNSUPPORTED_OPERATION"
+    assert body["error_message"] == "Sin forma elemental para esta integral."
+    assert body["result_text"] is None
+    assert body["result_latex"] is None
 
 
 def test_non_elementary_integral_is_reported_as_unsupported():
