@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 389,
+  "revision": 390,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
-  "baseline_case": "EDCX-B6-VC-FE-32..41-PLUS-ONLY",
+  "technical_baseline_sha": "1ff1230e63d6788f1fec2b769b779f70f308eba5",
+  "baseline_case": "ALGEBRA114-AS-RAT-04",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -238,7 +238,8 @@
     "qa/certification/S19_BACKEND_MUTATION_REVIEW_R288.md",
     "qa/certification/S19_BACKEND_MUTATION_SCOPE_DRIFT_R289.md",
     "qa/certification/S19_BACKEND_TARGETED_TEST_PLAN_R290.md",
-    "qa/certification/continuity.json"
+    "qa/certification/continuity.json",
+    "qa/certification/ALGEBRA114_AS_RAT_04_ACCEPTANCE_R390.md"
   ],
   "runner_certification_r360": {
     "status": "PASS_SCOPED_PUSH_ONLY",
@@ -500,7 +501,7 @@
     },
     "note": "Plus did not execute AS-EXP-09. No parity inferred. Preserve next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT unchanged."
   },
-  "updated_utc": "2026-11-05T08:26:00Z",
+  "updated_utc": "2026-11-05T09:03:13.700Z",
   "lite_companion_as_exp10_r371": {
     "status": "PASS_SCOPED_LITE_ONLY",
     "sha": "5a6662e03e413063f9e73ca1f4210b7a155da5ca",
@@ -793,14 +794,17 @@
     "note": "Plus backend/service+HTTP only. RAT-03 and RAT-04 still have SymPy-based tests without independent numeric oracles; they are not accepted by this suite. No Lite UI parity claim. Preserve EDCX-B6 VC-FE-45 contract conflict and global OPEN."
   },
   "plus_algebra114_next_action": {
-    "id": "AS-RAT-04-ORACLE-AUDIT",
+    "id": "AS-RAT-07-ORACLE-AUDIT",
     "status": "READY",
     "previous_cases": [
       "AS-RAT-01",
       "AS-RAT-02",
-      "AS-RAT-03"
+      "AS-RAT-03",
+      "AS-RAT-04",
+      "AS-RAT-05",
+      "AS-RAT-06"
     ],
-    "action": "Strengthen backend/tests/test_algebra114_as_rat04.py with exact fixture, service+HTTP, and an independent math.cbrt(4)/2 oracle. Verify positivity and cube equals 1/2; do not use SymPy alone for numeric expected."
+    "action": "Strengthen backend/tests/test_algebra114_as_rat07.py with the exact Algebra114 source row, service+HTTP behavior, and an independent Python math.sqrt oracle for both sqrt(2+sqrt(3)) and (sqrt(6)+sqrt(2))/2. Require positivity and verify the squared identity 2+sqrt(3); do not use SymPy alone for numeric expected."
   },
   "plus_algebra114_as_rat03_r389": {
     "status": "PASS_SCOPED",
@@ -822,5 +826,27 @@
     "scope": "backend/service+HTTP only",
     "oracle": "Python math.sqrt(2), math.sqrt(3); positivity and conjugate identity",
     "note": "No UI parity claim. Global EDCX-B6 VC-FE-45 contract block is separate and remains unchanged. Global certification OPEN."
+  },
+  "plus_algebra114_as_rat04_r390": {
+    "status": "PASS_SCOPED",
+    "sha": "1ff1230e63d6788f1fec2b769b779f70f308eba5",
+    "source_blob": "b30ca7fcec641334ce8128ca25bec542a9d04e79",
+    "test": "backend/tests/test_algebra114_as_rat04.py",
+    "test_blob": "6cfb85dda9ff884ebd270a03bcdbb6e247627c9a",
+    "acceptance": "qa/certification/ALGEBRA114_AS_RAT_04_ACCEPTANCE_R390.md",
+    "ci_run": 41995788422,
+    "ci_status": "SUCCESS",
+    "cumulative_run": 41995788254,
+    "cumulative_status": "SUCCESS",
+    "cumulative_backend_summary": "2800 passed, 1 skipped, 10 xfailed",
+    "focal_test": "tests/test_algebra114_as_rat04.py::test_as_rat_04_cube_root_denominator_service_http_independent_oracle PASSED",
+    "h1d_run": 41995788274,
+    "h1d_status": "SUCCESS",
+    "h1d_passed": 38,
+    "runner_run": 41995788237,
+    "runner_status": "SUCCESS_PUSH_ONLY",
+    "scope": "Plus backend/service+HTTP only",
+    "oracle": "Python math.cbrt(4.0)/2.0 independent of SymPy; positivity and cube identity",
+    "note": "No Lite UI parity claim. Runner was push-only; dispatch and persistence steps were skipped. Global EDCX-B6 VC-FE-45 contract block remains separate and unchanged; global certification OPEN."
   }
 }

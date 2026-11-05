@@ -978,3 +978,11 @@ La siguiente acción de Algebra114 en Plus será reforzar AS-RAT-03 con un orác
 
 
 
+
+
+## 2026-11-05 UTC — r390: Plus Algebra114 AS-RAT-04 PASS_SCOPED
+
+- SHA técnico probado: `1ff1230e63d6788f1fec2b769b779f70f308eba5`; test `backend/tests/test_algebra114_as_rat04.py`, blob `6cfb85dda9ff884ebd270a03bcdbb6e247627c9a`; aceptación `ALGEBRA114_AS_RAT_04_ACCEPTANCE_R390.md`.
+- La fila exacta AS-RAT-04 se comprobó en `algebra114_source.md`. Servicio `simplify_expression` y HTTP `POST /api/v1/simplify`; oráculo independiente `math.cbrt(4.0)/2.0`, positividad e identidad del cubo `1/2` para ambas salidas.
+- Acumulativo [41995788254](https://github.com/c2melendez/precision-lab-plus/actions/runs/41995788254) SUCCESS; log focal RAT-04 PASSED; backend 2,800 passed, 1 skipped, 10 xfailed. CI [41995788422](https://github.com/c2melendez/precision-lab-plus/actions/runs/41995788422) SUCCESS. H1d [41995788274](https://github.com/c2melendez/precision-lab-plus/actions/runs/41995788274) SUCCESS, 38/38. Runner [41995788237](https://github.com/c2melendez/precision-lab-plus/actions/runs/41995788237) SUCCESS push-only; dispatch/persist skipped.
+- Aceptación limitada a Plus backend/servicio HTTP; no se infiere paridad UI. Siguiente caso Plus RAT-07. Se preserva EDCX-B6 VC-FE-45 BLOCKED frente a EV-I-12; global OPEN.

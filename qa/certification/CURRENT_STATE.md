@@ -1,3 +1,17 @@
+# Actualización de certificación — 2026-11-05 UTC (r390)
+
+## Plus — Algebra114 AS-RAT-04 PASS_SCOPED
+
+- AS-RAT-04 fue reforzada y ejecutada en el SHA técnico `1ff1230e63d6788f1fec2b769b779f70f308eba5`; test `backend/tests/test_algebra114_as_rat04.py`, blob `6cfb85dda9ff884ebd270a03bcdbb6e247627c9a`; aceptación `ALGEBRA114_AS_RAT_04_ACCEPTANCE_R390.md`.
+- La prueba conserva la fila exacta de `algebra114_source.md`, servicio `simplify_expression` y HTTP `POST /api/v1/simplify`; el oráculo independiente usa `math.cbrt(4.0)/2.0`, verifica positividad y cubo `1/2` para servicio y respuesta HTTP.
+- Acumulativo [41995788254](https://github.com/c2melendez/precision-lab-plus/actions/runs/41995788254) **SUCCESS**; el log confirma explícitamente el test RAT-04 como PASSED; backend 2,800 passed, 1 skipped, 10 xfailed.
+- CI [41995788422](https://github.com/c2melendez/precision-lab-plus/actions/runs/41995788422) **SUCCESS** en frontend y backend; auditoría de dependencias, typecheck, unit/parity, build y tests backend completos.
+- H1d [41995788274](https://github.com/c2melendez/precision-lab-plus/actions/runs/41995788274) **SUCCESS**, 38/38. Runner [41995788237](https://github.com/c2melendez/precision-lab-plus/actions/runs/41995788237) **SUCCESS_PUSH_ONLY**; despacho y persistencia omitidos.
+- El commit documental `bcb25ec3272d5d15d3ccac2749d090f23b44b6a3` no alteró insumos técnicos. Se reconcilia `technical_baseline_sha` a `1ff1230e63d6788f1fec2b769b779f70f308eba5`, manteniendo el bloqueo global separado.
+- Siguiente caso de Algebra114 Plus: **AS-RAT-07** (RAT-05 y RAT-06 ya están aceptadas en backend). Siguiente acción global permanece **BLOCKED** en EDCX-B6 VC-FE-45 por conflicto contractual con EV-I-12; no debilitar EV-I-12 ni afirmar paridad UI.
+
+Global certification **OPEN**.
+
 # Actualización de certificación — 2026-11-05 UTC (r389)
 
 ## Reconciliación bilateral — 2026-11-05 (r389): Plus RAT-03 y Lite RAT-07
