@@ -1,3 +1,14 @@
+# Actualización de certificación — 2026-11-05 UTC (r398)
+
+## Algebra229 AS-A-11 — PASS_SCOPED bilateral
+
+- Plus SHA `8c7362c40afb6c3992ca956033870fd577034d8f`; test `backend/tests/test_algebra229_as_a11.py`, blob `c7cc8bcb0736c1f0ba1774f3d6039debf48a9aae`; fila exacta, servicio+HTTP, equivalencia simbólica y ocho ternas con exponenciación entera Python independiente.
+- CI [42023819574](https://github.com/c2melendez/precision-lab-plus/actions/runs/42023819574) **SUCCESS**; backend 2,800 passed / 1 skipped / 10 XFAIL y frontend 150 archivos / 1,055 passed.
+- Acumulativo [42023819742](https://github.com/c2melendez/precision-lab-plus/actions/runs/42023819742) **SUCCESS**; guard `skip=false`; ambos tests focales PASSED, backend 2,800 passed / 1 skipped / 10 XFAIL.
+- H1d [42023819511](https://github.com/c2melendez/precision-lab-plus/actions/runs/42023819511) **SUCCESS**, 38/38; Runner 42023819548 push-only.
+- Lite SHA `0393cfb4a7a690fd35f77a70afba3b900b8a8b7c`; cumulative 42023809086, H1d 42023809104 y Scientific UI 42023809065 SUCCESS. CI estándar 42023809135 permanece FAILURE por audit de cuatro moderadas.
+- A11 queda cerrada bilateralmente como PASS_SCOPED. Siguiente fila: **AS-A-12** `(x^2-1)^2`. El bloqueo global EDCX-B6 VC-FE-45/EV-I-12 sigue sin cambios; global OPEN.
+
 # Actualización de certificación — 2026-11-05 UTC (r397)
 
 ## Algebra229 AS-A-10 — PASS_SCOPED bilateral
