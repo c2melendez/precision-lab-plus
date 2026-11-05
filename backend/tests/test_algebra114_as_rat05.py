@@ -12,8 +12,8 @@ from app.services.algebra_service import simplify_expression
 def test_as_rat_05_cubic_conjugate_service_http_independent_oracle():
     source = (Path(__file__).resolve().parents[2] / "qa/certification/algebra114_source.md").read_text()
     expected_row = (
-        r"| AS-RAT-05 | N2 | \\(\\frac{1}{\\sqrt[3]{2}+1}\\) | "
-        r"\\(\\frac{\\sqrt[3]{4}-\\sqrt[3]{2}+1}{3}\\) |"
+        r"| AS-RAT-05 | N2 | \(\frac{1}{\sqrt[3]{2}+1}\) | "
+        r"\(\frac{\sqrt[3]{4}-\sqrt[3]{2}+1}{3}\) |"
     )
     assert expected_row.replace(" ", "") in source.replace(" ", "")
 

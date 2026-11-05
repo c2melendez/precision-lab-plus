@@ -12,9 +12,9 @@ from app.services.algebra_service import simplify_expression
 def test_as_rat_06_variable_radical_quotient_service_http_independent_oracle():
     source = (Path(__file__).resolve().parents[2] / "qa/certification/algebra114_source.md").read_text()
     expected_row = (
-        r"| AS-RAT-06 | N2 | \\(\\frac{\\sqrt{x+h}-\\sqrt{x}}{h}\\) | "
-        r"\\(\\frac{1}{\\sqrt{x+h}+\\sqrt{x}}\\), con "
-        r"\\(x>0\\), \\(h>-x\\), \\(h\\neq0\\) |"
+        r"| AS-RAT-06 | N2 | \(\frac{\sqrt{x+h}-\sqrt{x}}{h}\) | "
+        r"\(\frac{1}{\sqrt{x+h}+\sqrt{x}}\), con "
+        r"\(x>0\), \(h>-x\), \(h\neq0\) |"
     )
     assert expected_row.replace(" ", "") in source.replace(" ", "")
 
