@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 387,
+  "revision": 388,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
@@ -500,7 +500,7 @@
     },
     "note": "Plus did not execute AS-EXP-09. No parity inferred. Preserve next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT unchanged."
   },
-  "updated_utc": "2026-11-03T09:50:47Z",
+  "updated_utc": "2026-11-05T08:26:00Z",
   "lite_companion_as_exp10_r371": {
     "status": "PASS_SCOPED_LITE_ONLY",
     "sha": "5a6662e03e413063f9e73ca1f4210b7a155da5ca",
@@ -743,5 +743,62 @@
     ],
     "independent_oracle": "All eight backend tests now compare service and HTTP results to exact arithmetic using Python fractions.Fraction for non-singular integer sample points; original denominator exclusions are separately asserted for PF-05 and PF-08.",
     "note": "This is Plus backend/service+HTTP certification only. Runner was push-only and does not certify workflow dispatch or persistence. Preserve the separate VC-FE-45 / EV-I-12 contract block; global certification remains OPEN."
+  },
+  "plus_algebra114_as_rat_suite_r388": {
+    "status": "PASS_SCOPED_PARTIAL",
+    "sha": "a4ab5b03cbde3d53789609823cbfb2314c5aea10",
+    "source_blob": "b30ca7fcec641334ce8128ca25bec542a9d04e79",
+    "accepted_cases": [
+      {
+        "id": "AS-RAT-01",
+        "test": "backend/tests/test_algebra114_as_rat01.py",
+        "test_blob": "b8ac2bf64caab4372f7dc2978519d7deb35607ee",
+        "acceptance": "qa/certification/ALGEBRA114_AS_RAT_01_ACCEPTANCE_R388.md",
+        "status": "PASS_SCOPED"
+      },
+      {
+        "id": "AS-RAT-02",
+        "test": "backend/tests/test_algebra114_as_rat02.py",
+        "test_blob": "0f80e81db9b82e97376039c56393fbb4ff8802b5",
+        "acceptance": "qa/certification/ALGEBRA114_AS_RAT_02_ACCEPTANCE_R388.md",
+        "status": "PASS_SCOPED"
+      },
+      {
+        "id": "AS-RAT-05",
+        "test": "backend/tests/test_algebra114_as_rat05.py",
+        "test_blob": "604db61ea58e6578c346a37630e02b59b9ad697d",
+        "acceptance": "qa/certification/ALGEBRA114_AS_RAT_05_ACCEPTANCE_R388.md",
+        "status": "PASS_SCOPED"
+      },
+      {
+        "id": "AS-RAT-06",
+        "test": "backend/tests/test_algebra114_as_rat06.py",
+        "test_blob": "855857bacdb636bb2d98622cfeba8fb25e89fc97",
+        "acceptance": "qa/certification/ALGEBRA114_AS_RAT_06_ACCEPTANCE_R388.md",
+        "status": "PASS_SCOPED"
+      }
+    ],
+    "ci_run": 41993715914,
+    "ci_status": "SUCCESS",
+    "ci_backend_summary": "2800 passed",
+    "cumulative_run": 41993716059,
+    "cumulative_status": "SUCCESS",
+    "cumulative_backend_summary": "2800 passed, 1 skipped, 10 xfailed",
+    "h1d_run": 41993715913,
+    "h1d_status": "SUCCESS",
+    "h1d_passed": 38,
+    "runner_run": 41993716068,
+    "runner_status": "SUCCESS_PUSH_ONLY",
+    "frontend_summary": "Cumulative and CI unit/parity/build steps SUCCESS",
+    "note": "Plus backend/service+HTTP only. RAT-03 and RAT-04 still have SymPy-based tests without independent numeric oracles; they are not accepted by this suite. No Lite UI parity claim. Preserve EDCX-B6 VC-FE-45 contract conflict and global OPEN."
+  },
+  "plus_algebra114_next_action": {
+    "id": "AS-RAT-03-ORACLE-AUDIT",
+    "status": "READY",
+    "previous_cases": [
+      "AS-RAT-01",
+      "AS-RAT-02"
+    ],
+    "action": "Strengthen backend/tests/test_algebra114_as_rat03.py with exact fixture, service+HTTP behavior and an independent math.sqrt oracle for sqrt(3)-sqrt(2). Do not use SymPy alone for numeric expected."
   }
 }

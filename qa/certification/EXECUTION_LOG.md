@@ -946,3 +946,21 @@ El resultado AS-PF-04 es exclusivo de Lite. Plus conserva su bloqueo contractual
 
 
 
+
+
+## Reconciliación Plus — 2026-11-05 (r388): Algebra114 AS-RAT-01, 02, 05 y 06
+
+- SHA técnico: `a4ab5b03cbde3d53789609823cbfb2314c5aea10`; fuente original `algebra114_source.md`, blob `b30ca7fcec641334ce8128ca25bec542a9d04e79`.
+- Plus — AS-RAT-01: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_rat01.py`, blob `b8ac2bf64caab4372f7dc2978519d7deb35607ee`; aceptación `ALGEBRA114_AS_RAT_01_ACCEPTANCE_R388.md`.
+- Plus — AS-RAT-02: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_rat02.py`, blob `0f80e81db9b82e97376039c56393fbb4ff8802b5`; aceptación `ALGEBRA114_AS_RAT_02_ACCEPTANCE_R388.md`.
+- Plus — AS-RAT-05: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_rat05.py`, blob `604db61ea58e6578c346a37630e02b59b9ad697d`; aceptación `ALGEBRA114_AS_RAT_05_ACCEPTANCE_R388.md`.
+- Plus — AS-RAT-06: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_rat06.py`, blob `855857bacdb636bb2d98622cfeba8fb25e89fc97`; aceptación `ALGEBRA114_AS_RAT_06_ACCEPTANCE_R388.md`.
+- CI [41993715914](https://github.com/c2melendez/precision-lab-plus/actions/runs/41993715914) **SUCCESS**; backend 2,800 passed; frontend regresión y build SUCCESS.
+- Acumulativo [41993716059](https://github.com/c2melendez/precision-lab-plus/actions/runs/41993716059) **SUCCESS**; RAT-01/02/05/06 explícitamente PASSED; 2,800 backend passed, 1 skipped, 10 xfailed.
+- H1d [41993715913](https://github.com/c2melendez/precision-lab-plus/actions/runs/41993715913) **SUCCESS**, 38/38. Runner [41993716068](https://github.com/c2melendez/precision-lab-plus/actions/runs/41993716068) **SUCCESS**, push-only.
+- RAT-03 y RAT-04 tienen tests de servicio/HTTP pero aún dependen de expected simbólico SymPy y no tienen oráculo numérico independiente; no se declaran aceptadas. Siguiente caso pendiente de Plus: **AS-RAT-03**.
+- No se declara paridad de interfaz con Lite. El bloqueo contractual EDCX-B6 VC-FE-45/EV-I-12 permanece sin cambios. Global certification **OPEN**.
+
+
+
+La siguiente acción de Algebra114 en Plus será reforzar AS-RAT-03 con un oráculo numérico independiente. La acción global de continuidad EDCX-B6 sigue bloqueada por separado en VC-FE-45.
