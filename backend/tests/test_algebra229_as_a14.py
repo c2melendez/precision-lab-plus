@@ -15,7 +15,7 @@ SOURCE_GZ = Path(__file__).resolve().parents[2] / "qa/certification/legacy_sourc
 def test_as_a14_source_row_is_exact():
     text = gzip.decompress(SOURCE_GZ.read_bytes()).decode("utf-8")
     source_row = next(line.strip() for line in text.splitlines() if line.startswith("| AS-A-14 |"))
-    expected_row = r"| AS-A-14 | N2 | `expandir` | `\\left(\\sqrt{2}+\\sqrt{3}\\right)^{2}` | `2 \\sqrt{6} + 5` |  |"
+    expected_row = r"| AS-A-14 | N2 | `expandir` | `\left(\sqrt{2}+\sqrt{3}\right)^{2}` | `2 \sqrt{6} + 5` |  |"
     assert source_row == expected_row
 
 
@@ -35,7 +35,6 @@ def test_as_a14_expand_service_http_exact_and_independent_numeric_oracle():
     assert sp.simplify(http_expr - symbolic_oracle) == 0
     assert "**2" not in payload["result_text"].replace(" ", "")
 
-    # Python math is independent from SymPy's symbolic simplifier.
     expected = 5 + 2 * math.sqrt(6)
     assert math.isclose(float(service.result_expr), expected, rel_tol=1e-12, abs_tol=1e-12)
     assert math.isclose(float(http_expr), expected, rel_tol=1e-12, abs_tol=1e-12)
