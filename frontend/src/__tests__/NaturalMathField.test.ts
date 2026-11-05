@@ -54,6 +54,13 @@ describe("latexToBackendSyntax", () => {
     );
     expect(converted).toMatch(/^abs\(x\)\s+["“]con["”]\s+x\s*=\s*-4$/);
   });
+  it("agrupa el valor absoluto cuando forma parte de una expresión compuesta", () => {
+    expect(latexToBackendSyntax(String.raw`\left\lvert x\right\rvert+x`)).toBe("(abs(x)+x)");
+  });
+
+  it("mantiene con/sustituciones fuera del grupo aritmético del valor absoluto", () => {
+    expect(latexToBackendSyntax(String.raw`\left\lvert x\right\rvert+x\ \text{con}\ x=-4`)).toBe('(abs(x)+x) "con" x=-4');
+  });
   it("una expresión vacía produce una cadena vacía", () => {
     expect(latexToBackendSyntax("")).toBe("");
     expect(latexToBackendSyntax("   ")).toBe("");

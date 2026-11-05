@@ -260,7 +260,23 @@ export function latexToBackendSyntax(latex: string): string {
   if (absoluteMatch) {
     const absolute = `abs(${latexToBackendSyntax(absoluteMatch[1])})`;
     const suffix = absoluteTrimmed.slice(absoluteMatch[0].length).trim();
-    return suffix ? `${absolute} ${latexToBackendSyntax(suffix)}` : absolute;
+    // Separate inline bindings before composing the arithmetic tail. A
+    // MathLive source such as |x|+x con x=-4 must become
+    // `(abs(x)+x) "con" x=-4`, not `abs(x) +x "con" x=-4`.
+    const bindingMarker = /\\text\s*\{\s*con\s*\}/i.exec(suffix);
+    const arithmeticSuffix = (bindingMarker
+      ? suffix.slice(0, bindingMarker.index)
+      : suffix).trim();
+    const bindingSuffix = bindingMarker
+      ? suffix.slice(bindingMarker.index).trim()
+      : "";
+    const arithmetic = arithmeticSuffix
+      ? `(${absolute}${latexToBackendSyntax(arithmeticSuffix)})`
+      : absolute;
+    const bindings = bindingSuffix
+      ? ` ${latexToBackendSyntax(bindingSuffix)}`
+      : "";
+    return `${arithmetic}${bindings}`;
   }
   const aggregate = rewriteFiniteAggregateLatex(latex);
   if (aggregate) return aggregate;
