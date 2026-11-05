@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 388,
+  "revision": 389,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
@@ -793,12 +793,34 @@
     "note": "Plus backend/service+HTTP only. RAT-03 and RAT-04 still have SymPy-based tests without independent numeric oracles; they are not accepted by this suite. No Lite UI parity claim. Preserve EDCX-B6 VC-FE-45 contract conflict and global OPEN."
   },
   "plus_algebra114_next_action": {
-    "id": "AS-RAT-03-ORACLE-AUDIT",
+    "id": "AS-RAT-04-ORACLE-AUDIT",
     "status": "READY",
     "previous_cases": [
       "AS-RAT-01",
-      "AS-RAT-02"
+      "AS-RAT-02",
+      "AS-RAT-03"
     ],
-    "action": "Strengthen backend/tests/test_algebra114_as_rat03.py with exact fixture, service+HTTP behavior and an independent math.sqrt oracle for sqrt(3)-sqrt(2). Do not use SymPy alone for numeric expected."
+    "action": "Strengthen backend/tests/test_algebra114_as_rat04.py with exact fixture, service+HTTP, and an independent math.cbrt(4)/2 oracle. Verify positivity and cube equals 1/2; do not use SymPy alone for numeric expected."
+  },
+  "plus_algebra114_as_rat03_r389": {
+    "status": "PASS_SCOPED",
+    "sha": "8371417c3b57135dd83ad9af4b502e4bb04a6c92",
+    "source_blob": "b30ca7fcec641334ce8128ca25bec542a9d04e79",
+    "test": "backend/tests/test_algebra114_as_rat03.py",
+    "test_blob": "9c234e4be63fcdac14723bf5125c963e3f8508e2",
+    "acceptance": "qa/certification/ALGEBRA114_AS_RAT_03_ACCEPTANCE_R389.md",
+    "ci_run": 41994877761,
+    "ci_status": "SUCCESS",
+    "cumulative_run": 41994877568,
+    "cumulative_status": "SUCCESS",
+    "cumulative_backend_summary": "2800 passed, 1 skipped, 10 xfailed",
+    "h1d_run": 41994877552,
+    "h1d_status": "SUCCESS",
+    "h1d_passed": 38,
+    "runner_run": 41994877571,
+    "runner_status": "SUCCESS_PUSH_ONLY",
+    "scope": "backend/service+HTTP only",
+    "oracle": "Python math.sqrt(2), math.sqrt(3); positivity and conjugate identity",
+    "note": "No UI parity claim. Global EDCX-B6 VC-FE-45 contract block is separate and remains unchanged. Global certification OPEN."
   }
 }

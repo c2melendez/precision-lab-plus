@@ -1,3 +1,15 @@
+# Actualización de certificación — 2026-11-05 UTC (r389)
+
+## Reconciliación bilateral — 2026-11-05 (r389): Plus RAT-03 y Lite RAT-07
+
+- Plus — Algebra114 AS-RAT-03: **PASS_SCOPED** en SHA `8371417c3b57135dd83ad9af4b502e4bb04a6c92`; test `backend/tests/test_algebra114_as_rat03.py`, blob `9c234e4be63fcdac14723bf5125c963e3f8508e2`; aceptación `ALGEBRA114_AS_RAT_03_ACCEPTANCE_R389.md`. Alcance backend/servicio HTTP; oráculo independiente math.sqrt.
+- CI [41994877761](https://github.com/c2melendez/precision-lab-plus/actions/runs/41994877761) y acumulativo [41994877568](https://github.com/c2melendez/precision-lab-plus/actions/runs/41994877568) SUCCESS; backend 2,800 passed, 1 skipped, 10 xfailed; H1d [41994877552](https://github.com/c2melendez/precision-lab-plus/actions/runs/41994877552) SUCCESS (38/38); Runner [41994877571](https://github.com/c2melendez/precision-lab-plus/actions/runs/41994877571) SUCCESS push-only.
+- Lite — Algebra114 AS-RAT-07: **PASS_SCOPED** en SHA `0f7daaeb73485465809c66e20ac03ea121a26d23`; acumulativo 41994849117 SUCCESS, H1d 41994848997 SUCCESS (22/22), Scientific UI 41994849059 SUCCESS (456). Aceptación `ALGEBRA114_AS_RAT_07_ACCEPTANCE_R398.md`.
+- Próxima fila Algebra114 Plus: **AS-RAT-04** (oráculo math.cbrt independiente pendiente). Próxima fila Lite: **AS-RAT-08**.
+- Plus conserva el bloqueo global EDCX-B6 VC-FE-45/EV-I-12 sin cambios; no hay paridad UI inferida. Global certification OPEN.
+
+
+
 ## Reconciliación Plus — 2026-11-05 (r388): Algebra114 AS-RAT-01, 02, 05 y 06
 
 - SHA técnico: `a4ab5b03cbde3d53789609823cbfb2314c5aea10`; fuente original `algebra114_source.md`, blob `b30ca7fcec641334ce8128ca25bec542a9d04e79`.
