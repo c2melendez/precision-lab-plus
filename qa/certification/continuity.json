@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "revision": 405,
+  "revision": 406,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "8232f3979cf128c1bd52c6de2bfde4e9296a5d77",
+  "technical_baseline_sha": "6b1bf9b9f731d6f6d36c16f33f09d1a9f2eb3238",
   "baseline_case": "ALGEBRA229-AS-A-16",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
@@ -511,7 +511,7 @@
     },
     "note": "Plus did not execute AS-EXP-09. No parity inferred. Preserve next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT unchanged."
   },
-  "updated_utc": "2026-11-05T13:58:23.251Z",
+  "updated_utc": "2026-11-05T14:02:41.113Z",
   "lite_companion_as_exp10_r371": {
     "status": "PASS_SCOPED_LITE_ONLY",
     "sha": "5a6662e03e413063f9e73ca1f4210b7a155da5ca",
@@ -954,7 +954,7 @@
     "id": "ALGEBRA229-AS-A-17-TEST-FIRST",
     "status": "WAIT",
     "previous_id": "ALGEBRA229-AS-A-16-TEST-FIRST",
-    "action": "Esperar y revisar gates del SHA Plus 8232f3979cf128c1bd52c6de2bfde4e9296a5d77 (cumulative 42039991777, H1d 42039991674, CI 42039991675, Runner 42039991673) y Lite b37502c5713bddabae6a022e6e1cb788ee72a87d (cumulative 42039943541, H1d 42039943721, Scientific UI 42039943566; CI 42039944052 audit failure, Runner 42039943836). Confirmar ejecución focal AS-A-17, registrar resultados bilaterales y después seleccionar el siguiente caso. EDCX-B6 VC-FE-45/EV-I-12 permanece BLOCKED; global OPEN."
+    "action": "Plus harness false negative corregido en SHA 6b1bf9b9f731d6f6d36c16f33f09d1a9f2eb3238 (CI anterior 42039991675 rechazó monomios x**5/y**5 válidos). Revisar nuevos gates Plus cumulative 42040844511, H1d 42040844847, CI 42040844459 y Runner 42040844455. Lite gates matemáticos A17 ya pasan en SHA b37502c5713bddabae6a022e6e1cb788ee72a87d: cumulative 42039943541, H1d 42039943721, Scientific UI 42039943566 SUCCESS; CI 42039944052 falla solo npm audit (4 moderadas); Runner 42039943836 SUCCESS. Confirmar focales Plus y bilateralidad, después continuar con la siguiente fila. EDCX-B6 VC-FE-45/EV-I-12 sigue BLOCKED; global OPEN."
   },
   "algebra229_as_a07_r394": {
     "status": "PASS_SCOPED_BILATERAL_CASE",
@@ -1519,5 +1519,23 @@
     "lite_ci_status": "FAILURE_NPM_AUDIT_4_MODERATE",
     "lite_runner_run": 42039943836,
     "lite_runner_status": "SUCCESS_PUSH_ONLY"
+  },
+  "algebra229_as_a17_harness_fix_r406": {
+    "status": "FIXED_WAIT_RERUN",
+    "initial_plus_sha": "8232f3979cf128c1bd52c6de2bfde4e9296a5d77",
+    "initial_ci_run": 42039991675,
+    "initial_ci_status": "FAILURE_HARNESS_ASSERTION",
+    "classification": "HARNESS_ORACLE_FALSE_NEGATIVE",
+    "failure": "Assertion `**5 not in result_text` incorrectly rejected valid expanded monomials x**5 and y**5; observed polynomial matched the expected binomial expansion.",
+    "corrected_plus_sha": "6b1bf9b9f731d6f6d36c16f33f09d1a9f2eb3238",
+    "test_blob": "ed9052343bec6a4347d3075933135e2839809bfd",
+    "new_cumulative_run": 42040844511,
+    "new_cumulative_status": "IN_PROGRESS",
+    "new_h1d_run": 42040844847,
+    "new_h1d_status": "IN_PROGRESS",
+    "new_ci_run": 42040844459,
+    "new_ci_status": "IN_PROGRESS",
+    "new_runner_run": 42040844455,
+    "new_runner_status": "QUEUED"
   }
 }
