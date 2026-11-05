@@ -1,3 +1,11 @@
+## 2026-11-05 UTC — r405: Algebra229 AS-A-16 PASS_SCOPED; AS-A-17 iniciado
+
+- A16 Plus SHA 3555ce2898b31eda626c95d0c89c59a99f4dba8b: cumulative 42038783860 SUCCESS (2 focales PASSED, 2800 backend, 88.88%), H1d 42038784134 SUCCESS (38), CI 42038784081 SUCCESS (2800 backend/1055 frontend), Runner 42038784013 push-only.
+- A16 Lite SHA 36b1c73d0673a05e2418cc3c6dc49952a7c729f9: cumulative 42038744006 SUCCESS (2 focales/2259), H1d 42038743676 SUCCESS (22), Scientific UI 42038744245 SUCCESS (456), CI 42038743893 FAILURE solo npm audit (4 moderate), Runner 42038743972 push-only.
+- A16 PASS_SCOPED bilateral. Acceptance file `ALGEBRA229_AS_A_16_ACCEPTANCE_2026-11-05.md`.
+- A17 test-first: Plus SHA 8232f3979cf128c1bd52c6de2bfde4e9296a5d77 (cumulative 42039991777, H1d 42039991674, CI 42039991675 queued, Runner 42039991673); Lite SHA b37502c5713bddabae6a022e6e1cb788ee72a87d (cumulative 42039943541, H1d 42039943721, Scientific UI 42039943566, CI 42039944052 audit failure, Runner 42039943836). Gates pendientes.
+- EDCX-B6 VC-FE-45/EV-I-12 continúa BLOCKED; certificación global OPEN.
+
 ## 2026-11-05 UTC — r404: Algebra229 AS-A-15 PASS_SCOPED; AS-A-16 iniciado
 
 - A15 Plus SHA 1f462162d74effb8f1a9a1c45271f99a6b3887eb: cumulative 42035518039 SUCCESS (skip=false; ambos focales PASSED; 2800 backend; 88.91%), H1d 42035518483 SUCCESS (38), CI 42035518143 SUCCESS (2800 backend/1055 frontend), Runner 42035518500 push-only.
