@@ -859,3 +859,17 @@ Compass P0 permanece en su propio backlog de integración/seguridad y no es cond
 - Lite aceptó AS-FAC-09 como PASS_SCOPED en SHA 537a84bbaa7538a33c0e5fa0c2ebb36485821c8f; acumulativo 41618685099 SUCCESS (2,259 passed; test focalizado ejecutado), H1d 41618685297 SUCCESS (22/22). Aceptación: Lite qa/certification/ALGEBRA114_AS_FAC_09_ACCEPTANCE_R380.md.
 - CI Lite 41618685195 falló en QA dependency audit hard gate; no se modificaron dependencias ni umbrales.
 - Plus no ejecutó AS-FAC-09; no se declara paridad. Se preserva la acción Plus BLOCKED: resolver versionadamente VC-FE-45 frente a EV-I-12. Global OPEN.
+
+
+## Reconciliación bilateral — 2026-11-05 (r381–r384; Lite-only)
+
+- Lite — Algebra114 AS-FAC-10: **PASS_SCOPED** en SHA `6312a16de6959f1f7c739a4b9c59274b77fab86e`; acumulativo [41619183893](https://github.com/c2melendez/precision-lab-lite/actions/runs/41619183893) SUCCESS y H1d [41619183741](https://github.com/c2melendez/precision-lab-lite/actions/runs/41619183741) SUCCESS. Aceptación: `ALGEBRA114_AS_FAC_10_ACCEPTANCE_R381.md`.
+- Lite — Algebra114 AS-FAC-11: **PASS_SCOPED** en SHA `0f8dcc3497d231cfbe6aad963d8102cbb4ab71e3`; acumulativo [41983335147](https://github.com/c2melendez/precision-lab-lite/actions/runs/41983335147) SUCCESS y H1d [41983335288](https://github.com/c2melendez/precision-lab-lite/actions/runs/41983335288) SUCCESS. Aceptación: `ALGEBRA114_AS_FAC_11_ACCEPTANCE_R382.md`.
+- Lite — Algebra114 AS-FAC-12: **PASS_SCOPED** en SHA `960cfb4abb8e1f0dfaed50a90d6cdf8d91f5d1a5`; acumulativo [41983612691](https://github.com/c2melendez/precision-lab-lite/actions/runs/41983612691) SUCCESS y H1d [41983612688](https://github.com/c2melendez/precision-lab-lite/actions/runs/41983612688) SUCCESS. Aceptación: `ALGEBRA114_AS_FAC_12_ACCEPTANCE_R383.md`.
+- Lite — Algebra114 AS-PF-01: **PASS_SCOPED** en SHA `070c5e9a5e36ef7cc0c75d525cbff56572046a89`; acumulativo [41984143490](https://github.com/c2melendez/precision-lab-lite/actions/runs/41984143490) SUCCESS y H1d [41984143650](https://github.com/c2melendez/precision-lab-lite/actions/runs/41984143650) SUCCESS. Aceptación: `ALGEBRA114_AS_PF_01_ACCEPTANCE_R384.md`.
+- CI Lite [41983335251](https://github.com/c2melendez/precision-lab-lite/actions/runs/41983335251), [41983612649](https://github.com/c2melendez/precision-lab-lite/actions/runs/41983612649) y [41984143529](https://github.com/c2melendez/precision-lab-lite/actions/runs/41984143529) permanece FAILURE en QA dependency audit hard gate (8 hallazgos moderados); no se modificó el umbral.
+- Plus no ejecutó estas filas: no se declara paridad. Su siguiente paso permanece **BLOCKED** en VC-FE-45 por conflicto contractual con EV-I-12. No se cambia el contrato real ni se acepta `asin(2)` complejo sin decisión versionada.
+- La certificación global sigue **OPEN**. Siguiente acción matemática Lite: AS-PF-02.
+
+
+El avance registrado es exclusivamente de Lite y no cambia la implementación ni el contrato de Plus. Próxima acción Lite: reforzar AS-PF-02 con oráculo aritmético independiente.

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 375,
+  "revision": 376,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
@@ -488,5 +488,50 @@
       "reason": "Lite npm audit 8 moderate findings"
     },
     "note": "Plus did not execute AS-FAC-01. No parity inferred. Preserve next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT unchanged."
+  },
+  "lite_companion_as_fac10_to_pf01_r381": {
+    "status": "PASS_SCOPED_LITE_ONLY",
+    "lite": [
+      {
+        "case": "AS-FAC-10",
+        "sha": "6312a16de6959f1f7c739a4b9c59274b77fab86e",
+        "test_blob": "27c70add37494f1163cf626af62c5b8adfb6a621",
+        "acceptance": "qa/certification/ALGEBRA114_AS_FAC_10_ACCEPTANCE_R381.md",
+        "cumulative_run": 41619183893,
+        "h1d_run": 41619183741
+      },
+      {
+        "case": "AS-FAC-11",
+        "sha": "0f8dcc3497d231cfbe6aad963d8102cbb4ab71e3",
+        "test_blob": "34b2bb856cefa6ce3547523ea66a8c59c4c2f5d3",
+        "acceptance": "qa/certification/ALGEBRA114_AS_FAC_11_ACCEPTANCE_R382.md",
+        "cumulative_run": 41983335147,
+        "h1d_run": 41983335288
+      },
+      {
+        "case": "AS-FAC-12",
+        "sha": "960cfb4abb8e1f0dfaed50a90d6cdf8d91f5d1a5",
+        "test_blob": "a2428ffe9aa6d9ad39e799c6f7b0580aaa05eea9",
+        "acceptance": "qa/certification/ALGEBRA114_AS_FAC_12_ACCEPTANCE_R383.md",
+        "cumulative_run": 41983612691,
+        "h1d_run": 41983612688
+      },
+      {
+        "case": "AS-PF-01",
+        "sha": "070c5e9a5e36ef7cc0c75d525cbff56572046a89",
+        "test_blob": "172f43277971982dfccae81838bd80d32d0a20d9",
+        "acceptance": "qa/certification/ALGEBRA114_AS_PF_01_ACCEPTANCE_R384.md",
+        "cumulative_run": 41984143490,
+        "h1d_run": 41984143650
+      }
+    ],
+    "ci_runs": [
+      41983335251,
+      41983612649,
+      41984143529
+    ],
+    "ci_status": "FAILURE",
+    "ci_reason": "QA dependency audit hard gate: 8 moderate findings; thresholds were not modified.",
+    "note": "Plus no ejecutó estas cuatro filas; no se afirma paridad ni se altera el contrato matemático. Mantener next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT frente a EV-I-12 sin cambios. Próxima acción matemática de Lite: ALGEBRA114-AS-PF-02-ORACLE-AUDIT. Global certification OPEN."
   }
 }
