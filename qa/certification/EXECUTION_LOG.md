@@ -1,3 +1,11 @@
+## 2026-11-05 UTC — r406: AS-A-17 falso negativo de harness corregido
+
+- Plus SHA inicial 8232f3979cf128c1bd52c6de2bfde4e9296a5d77, CI 42039991675 backend FAILURE por aserción `"**5" not in result_text`. La salida observada era el polinomio expandido correcto con términos (x^5,y^5); clasificación HARNESS/ORACLE, no producto.
+- Fix publicado en SHA 6b1bf9b9f731d6f6d36c16f33f09d1a9f2eb3238, test blob ed9052343bec6a4347d3075933135e2839809bfd; reemplaza check por `got != (2*x-y)**5` y `sp.expand(got) == got`.
+- Nuevas corridas Plus: cumulative 42040844511, H1d 42040844847, CI 42040844459, Runner 42040844455; pendientes al registrar.
+- Lite SHA b37502c5713bddabae6a022e6e1cb788ee72a87d: cumulative 42039943541 SUCCESS (2/2259), H1d 42039943721 SUCCESS (22), Scientific UI 42039943566 SUCCESS (456), CI 42039944052 FAILURE solo audit (4 moderate), Runner 42039943836 push-only.
+- A17 WAIT bilateral. A16 último PASS_SCOPED. EDCX-B6 VC-FE-45/EV-I-12 sigue BLOCKED; global OPEN.
+
 ## 2026-11-05 UTC — r405: Algebra229 AS-A-16 PASS_SCOPED; AS-A-17 iniciado
 
 - A16 Plus SHA 3555ce2898b31eda626c95d0c89c59a99f4dba8b: cumulative 42038783860 SUCCESS (2 focales PASSED, 2800 backend, 88.88%), H1d 42038784134 SUCCESS (38), CI 42038784081 SUCCESS (2800 backend/1055 frontend), Runner 42038784013 push-only.
