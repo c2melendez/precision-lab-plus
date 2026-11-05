@@ -112,6 +112,21 @@ describe("BasicMode", () => {
     });
   });
 
+  it("converts MathLive's quoted con marker to evaluate substitutions", async () => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), {
+      target: { value: '(abs(x)+x) "con" x=(-4)' },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
+    expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
+      expression: "(abs(x)+x)",
+      angle_unit: "rad",
+      substitutions: { x: "-4" },
+    });
+  });
+
   it("rejects text-only input locally without calling the API", () => {
     render(<BasicMode />);
     fireEvent.change(screen.getByLabelText("Expresión"), {

@@ -107,6 +107,10 @@ def _can_safely_reduce_numeric_expression(expr: sympy.Basic) -> bool:
     ``doit()`` on those can materialize enormous exact integers or symbolic forms.
     """
     safe_nodes = (sympy.Add, sympy.Mul, sympy.Pow, sympy.Abs, sympy.Piecewise)
+    # These constants are inert leaves in a bounded arithmetic tree. In
+    # particular, allowing I lets a small power such as I**2 reduce exactly
+    # without enabling arbitrary function evaluation.
+    safe_constants = (sympy.ImaginaryUnit, sympy.NumberSymbol)
     nodes = list(sympy.preorder_traversal(expr))
     if len(nodes) > 50:
         return False
@@ -115,6 +119,8 @@ def _can_safely_reduce_numeric_expression(expr: sympy.Basic) -> bool:
         if node.is_Number:
             if node.is_Integer and len(str(abs(int(node)))) > 64:
                 return False
+            continue
+        if isinstance(node, safe_constants):
             continue
         if not isinstance(node, safe_nodes):
             return False

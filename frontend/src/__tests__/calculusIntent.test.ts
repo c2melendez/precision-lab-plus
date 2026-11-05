@@ -69,6 +69,16 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
       });
     });
 
+    it("detecta integral indefinida cuando MathLive colapsa el diferencial a xdx", () => {
+      expect(detectCalculusIntent("\\int xdx")).toEqual({
+        kind: "integral",
+        variable: "x",
+        lowerBound: null,
+        upperBound: null,
+        innerLatex: "x",
+      });
+    });
+
     it("detecta integral definida con límites numéricos", () => {
       expect(detectCalculusIntent("\\int_{0}^{1} x^2\\,dx")).toEqual({
         kind: "integral",

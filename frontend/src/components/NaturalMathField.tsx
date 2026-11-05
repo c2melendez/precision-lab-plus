@@ -312,9 +312,12 @@ export function NaturalMathField({
     if (!el) return;
 
     function handleInput(): void {
-      if (el && el.getValue("latex-unstyled") !== latex) {
-        onLatexChange(el.getValue("latex-unstyled"));
-      }
+      if (!el) return;
+      // Do not compare against `latex` captured by this effect. The callback
+      // can outlive that render; after a later edit, clearing back to the
+      // initially captured value would otherwise be dropped and React would
+      // retain stale input in BasicMode.
+      onLatexChange(el.getValue("latex-unstyled"));
     }
 
     el.addEventListener("input", handleInput);

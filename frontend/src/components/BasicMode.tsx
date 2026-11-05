@@ -78,7 +78,9 @@ type InlineBindingParse = {
 };
 
 function parseInlineBindings(expression: string): InlineBindingParse {
-  const marker = /\s+con\s+/i.exec(expression);
+  // MathLive serializes \text{con} as a quoted string (e.g. `"con"`).
+  // Accept that serialization as well as the plain-text spelling.
+  const marker = /\s+(?:"con"|'con'|“con”|‘con’|con)\s+/i.exec(expression);
   if (!marker || marker.index === undefined) {
     return { expression, substitutions: {}, present: false };
   }

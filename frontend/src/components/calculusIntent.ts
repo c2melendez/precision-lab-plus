@@ -264,9 +264,34 @@ function getComputeEngine(): ComputeEngine {
   return ce;
 }
 
+function detectIndefiniteIntegralFromDifferential(
+  latex: string,
+): Extract<CalculusIntent, { kind: "integral" }> | null {
+  // MathLive may serialize \int x\,dx as \int xdx, which Compute Engine
+  // reads as a product instead of an Integrate expression. Recognize the
+  // terminal differential explicitly and send only the integrand onward.
+  const match = latex.match(
+    /^\\int(?![_^])\s*([\s\S]+?)\s*(?:\\[,;:!]\s*)?(?:\\mathrm\{d\}|d)\s*([a-zA-Z])\s*$/,
+  );
+  if (!match) return null;
+
+  const innerLatex = match[1].trim();
+  if (!innerLatex) return null;
+  return {
+    kind: "integral",
+    variable: match[2],
+    lowerBound: null,
+    upperBound: null,
+    innerLatex,
+  };
+}
+
 function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integral" }> | null {
   const trimmed = latex.trim();
   if (trimmed.length === 0) return null;
+
+  const indefinite = detectIndefiniteIntegralFromDifferential(trimmed);
+  if (indefinite) return indefinite;
 
   let expr;
   try {

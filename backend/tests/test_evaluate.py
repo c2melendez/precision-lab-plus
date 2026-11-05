@@ -214,6 +214,15 @@ def test_principal_complex_square_root_is_reduced_for_exact_display():
     assert body["result_approx"] is None
 
 
+def test_imaginary_unit_square_is_reduced_for_exact_display():
+    response = _evaluate(expression="i^2")
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_text"] == "-1"
+    assert body["result_latex"] == "-1"
+    assert body["result_approx"] == pytest.approx(-1.0)
+
+
 def test_evaluate_long_expression_returns_readable_500_character_error():
     expression = "1+" * 4999 + "11"
     response = _evaluate(expression=expression)
