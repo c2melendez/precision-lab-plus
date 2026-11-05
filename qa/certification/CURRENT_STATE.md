@@ -1,3 +1,16 @@
+## Reconciliación Plus — 2026-11-05 (r380): AS-PF-01..08
+
+- SHA técnico Plus: `a8dc4ee0f987caa3768c3184da6cd2890f91b653`; fuente original blob `b30ca7fcec641334ce8128ca25bec542a9d04e79`.
+- Acumulativo [41988031275](https://github.com/c2melendez/precision-lab-plus/actions/runs/41988031275) **SUCCESS**. PF-01..PF-08 aparecen explícitamente como PASSED; backend: 2800 passed, 1 skipped, 10 xfailed.
+- CI [41988031170](https://github.com/c2melendez/precision-lab-plus/actions/runs/41988031170) **SUCCESS**: backend 2800 passed y frontend SUCCESS.
+- H1d [41988031154](https://github.com/c2melendez/precision-lab-plus/actions/runs/41988031154) **SUCCESS**, 38 passed. Runner [41988031114](https://github.com/c2melendez/precision-lab-plus/actions/runs/41988031114) **SUCCESS**, push-only; no dispatch/persistencia certificado.
+- Plus — AS-PF-03: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_pf03.py`, blob `b3ddb122174ee893fc183a60a11e27e7f840e982`; fixture exacta de la matriz, verificación de servicio y HTTP, 8 integer substitutions with Python Fraction; verifies service and HTTP payload. Aceptación: `qa/certification/ALGEBRA114_AS_PF_03_ACCEPTANCE_R380.md`.
+- Plus — AS-PF-04: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_pf04.py`, blob `bd8924c88a46402eb9a6da454ab1417d7dc9ea97`; fixture exacta de la matriz, verificación de servicio y HTTP, 8 non-singular integer substitutions with Fraction; verifies service and HTTP payload. Aceptación: `qa/certification/ALGEBRA114_AS_PF_04_ACCEPTANCE_R381.md`.
+- Plus — AS-PF-05: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_pf05.py`, blob `9c4ca2f174e95794dd1dcf32b8bee69efbada0b5`; fixture exacta de la matriz, verificación de servicio y HTTP, 6 valid integer substitutions with Fraction; verifies original excluded points ±1 and service/HTTP results. Aceptación: `qa/certification/ALGEBRA114_AS_PF_05_ACCEPTANCE_R382.md`.
+- No se declara paridad UI global con Lite. VC-FE-45 permanece **BLOCKED** por conflicto contractual con EV-I-12; no se cambia esa decisión. Global certification **OPEN**.
+
+
+
 ## Reconciliación bilateral — 2026-11-05 (r387; Lite-only)
 
 - Lite — Algebra114 AS-PF-04: **PASS_SCOPED** en SHA `62b9afb1869c2b357d9b9bf01ae8a4f80474f848`; acumulativo [41987091228](https://github.com/c2melendez/precision-lab-lite/actions/runs/41987091228) SUCCESS (366 archivos, 2,259 passed; test focal explícito), H1d [41987091032](https://github.com/c2melendez/precision-lab-lite/actions/runs/41987091032) SUCCESS (22/22). Aceptación Lite: `ALGEBRA114_AS_PF_04_ACCEPTANCE_R387.md`.

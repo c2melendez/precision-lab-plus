@@ -912,3 +912,18 @@ El resultado AS-PF-03 es exclusivo de Lite. Plus conserva su bloqueo contractual
 
 
 El resultado AS-PF-04 es exclusivo de Lite. Plus conserva su bloqueo contractual VC-FE-45/EV-I-12. Siguiente acción de Lite: AS-PF-05.
+
+
+## Reconciliación Plus — 2026-11-05 (r380): AS-PF-01..08
+
+- SHA técnico Plus: `a8dc4ee0f987caa3768c3184da6cd2890f91b653`; fuente original blob `b30ca7fcec641334ce8128ca25bec542a9d04e79`.
+- Acumulativo [41988031275](https://github.com/c2melendez/precision-lab-plus/actions/runs/41988031275) **SUCCESS**. PF-01..PF-08 aparecen explícitamente como PASSED; backend: 2800 passed, 1 skipped, 10 xfailed.
+- CI [41988031170](https://github.com/c2melendez/precision-lab-plus/actions/runs/41988031170) **SUCCESS**: backend 2800 passed y frontend SUCCESS.
+- H1d [41988031154](https://github.com/c2melendez/precision-lab-plus/actions/runs/41988031154) **SUCCESS**, 38 passed. Runner [41988031114](https://github.com/c2melendez/precision-lab-plus/actions/runs/41988031114) **SUCCESS**, push-only; no dispatch/persistencia certificado.
+- Plus — AS-PF-03: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_pf03.py`, blob `b3ddb122174ee893fc183a60a11e27e7f840e982`; fixture exacta de la matriz, verificación de servicio y HTTP, 8 integer substitutions with Python Fraction; verifies service and HTTP payload. Aceptación: `qa/certification/ALGEBRA114_AS_PF_03_ACCEPTANCE_R380.md`.
+- Plus — AS-PF-04: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_pf04.py`, blob `bd8924c88a46402eb9a6da454ab1417d7dc9ea97`; fixture exacta de la matriz, verificación de servicio y HTTP, 8 non-singular integer substitutions with Fraction; verifies service and HTTP payload. Aceptación: `qa/certification/ALGEBRA114_AS_PF_04_ACCEPTANCE_R381.md`.
+- Plus — AS-PF-05: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_pf05.py`, blob `9c4ca2f174e95794dd1dcf32b8bee69efbada0b5`; fixture exacta de la matriz, verificación de servicio y HTTP, 6 valid integer substitutions with Fraction; verifies original excluded points ±1 and service/HTTP results. Aceptación: `qa/certification/ALGEBRA114_AS_PF_05_ACCEPTANCE_R382.md`.
+- No se declara paridad UI global con Lite. VC-FE-45 permanece **BLOCKED** por conflicto contractual con EV-I-12; no se cambia esa decisión. Global certification **OPEN**.
+
+
+

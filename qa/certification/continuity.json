@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 379,
+  "revision": 380,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
@@ -125,6 +125,21 @@
       "status": "BLOCKED",
       "kind": "contract_conflict",
       "detail": "La fila B6 VC-FE-45 pide asin(2) complejo con ± rama, mientras EV-I-12 congelado y backend/app/services/evaluate_service.py rechazan asin(2) en dominio real con DOMAIN_ERROR. No se relaja EV-I-12 ni se marca PASS. Requiere resolución contractual versionada o canal complejo explícito."
+    },
+    {
+      "id": "ALGEBRA114-AS-PF-03",
+      "status": "PASS_SCOPED",
+      "detail": "Plus-only PASS_SCOPED on SHA a8dc4ee0f987caa3768c3184da6cd2890f91b653; backend/tests/test_algebra114_as_pf03.py blob b3ddb122174ee893fc183a60a11e27e7f840e982; CI 41988031170 SUCCESS (backend 2800 passed, frontend success); cumulative 41988031275 SUCCESS (all eight AS-PF tests explicitly PASSED; backend 2800 passed, 1 skipped, 10 xfailed); H1d 41988031154 SUCCESS (38 passed); Runner 41988031114 SUCCESS push-only. Acceptance qa/certification/ALGEBRA114_AS_PF_03_ACCEPTANCE_R380.md."
+    },
+    {
+      "id": "ALGEBRA114-AS-PF-04",
+      "status": "PASS_SCOPED",
+      "detail": "Plus-only PASS_SCOPED on SHA a8dc4ee0f987caa3768c3184da6cd2890f91b653; backend/tests/test_algebra114_as_pf04.py blob bd8924c88a46402eb9a6da454ab1417d7dc9ea97; CI 41988031170 SUCCESS (backend 2800 passed, frontend success); cumulative 41988031275 SUCCESS (all eight AS-PF tests explicitly PASSED; backend 2800 passed, 1 skipped, 10 xfailed); H1d 41988031154 SUCCESS (38 passed); Runner 41988031114 SUCCESS push-only. Acceptance qa/certification/ALGEBRA114_AS_PF_04_ACCEPTANCE_R381.md."
+    },
+    {
+      "id": "ALGEBRA114-AS-PF-05",
+      "status": "PASS_SCOPED",
+      "detail": "Plus-only PASS_SCOPED on SHA a8dc4ee0f987caa3768c3184da6cd2890f91b653; backend/tests/test_algebra114_as_pf05.py blob 9c4ca2f174e95794dd1dcf32b8bee69efbada0b5; CI 41988031170 SUCCESS (backend 2800 passed, frontend success); cumulative 41988031275 SUCCESS (all eight AS-PF tests explicitly PASSED; backend 2800 passed, 1 skipped, 10 xfailed); H1d 41988031154 SUCCESS (38 passed); Runner 41988031114 SUCCESS push-only. Acceptance qa/certification/ALGEBRA114_AS_PF_05_ACCEPTANCE_R382.md."
     }
   ],
   "h2_en_sg_evidence_audit_r314": {
@@ -596,5 +611,52 @@
       }
     },
     "note": "Plus did not execute AS-PF-04; no parity claim. Preserve next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT against EV-I-12 unchanged. Next Lite row AS-PF-05. Global certification OPEN."
+  },
+  "plus_algebra114_as_pf_suite_r380": {
+    "status": "PASS_SCOPED",
+    "sha": "a8dc4ee0f987caa3768c3184da6cd2890f91b653",
+    "source_blob": "b30ca7fcec641334ce8128ca25bec542a9d04e79",
+    "test_inventory": [
+      "AS-PF-01",
+      "AS-PF-02",
+      "AS-PF-03",
+      "AS-PF-04",
+      "AS-PF-05",
+      "AS-PF-06",
+      "AS-PF-07",
+      "AS-PF-08"
+    ],
+    "cumulative_run": 41988031275,
+    "cumulative_backend_summary": "2800 passed, 1 skipped, 10 xfailed",
+    "ci_run": 41988031170,
+    "ci_backend_summary": "2800 passed",
+    "h1d_run": 41988031154,
+    "h1d_passed": 38,
+    "runner_run": 41988031114,
+    "runner_status": "SUCCESS_PUSH_ONLY",
+    "strengthened": [
+      {
+        "id": "AS-PF-03",
+        "test": "backend/tests/test_algebra114_as_pf03.py",
+        "blob": "b3ddb122174ee893fc183a60a11e27e7f840e982",
+        "acceptance": "qa/certification/ALGEBRA114_AS_PF_03_ACCEPTANCE_R380.md",
+        "independent_oracle": "8 integer substitutions with Python Fraction; verifies service and HTTP payload."
+      },
+      {
+        "id": "AS-PF-04",
+        "test": "backend/tests/test_algebra114_as_pf04.py",
+        "blob": "bd8924c88a46402eb9a6da454ab1417d7dc9ea97",
+        "acceptance": "qa/certification/ALGEBRA114_AS_PF_04_ACCEPTANCE_R381.md",
+        "independent_oracle": "8 non-singular integer substitutions with Fraction; verifies service and HTTP payload."
+      },
+      {
+        "id": "AS-PF-05",
+        "test": "backend/tests/test_algebra114_as_pf05.py",
+        "blob": "9c4ca2f174e95794dd1dcf32b8bee69efbada0b5",
+        "acceptance": "qa/certification/ALGEBRA114_AS_PF_05_ACCEPTANCE_R382.md",
+        "independent_oracle": "6 valid integer substitutions with Fraction; verifies original excluded points ±1 and service/HTTP results."
+      }
+    ],
+    "note": "All eight AS-PF backend tests explicitly PASSED in the cumulative log. The three strengthened tests also pass on this SHA. Do not infer Lite/Plus UI parity; preserve VC-FE-45 block."
   }
 }
