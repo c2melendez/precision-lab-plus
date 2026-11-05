@@ -1,3 +1,17 @@
+# Actualización de certificación — 2026-11-05 UTC (r391)
+
+## Plus — Algebra114 AS-RAT-07 PASS_SCOPED
+
+- AS-RAT-07 aceptada solo para Plus backend/servicio HTTP en SHA `da924df6cdb9a827c2b0ff061db9f1e0e8111167`; test `backend/tests/test_algebra114_as_rat07.py`, blob `ac1da7cd460faa1450a7a0f0172c659bcd2009fc`; aceptación `ALGEBRA114_AS_RAT_07_ACCEPTANCE_R391.md`.
+- Test: fila exacta; `simplify_expression` y `POST /api/v1/simplify`; oráculo independiente Python `math.sqrt` para forma original y denestada, positividad e identidad del cuadrado `2+sqrt(3)`.
+- CI [41999414498](https://github.com/c2melendez/precision-lab-plus/actions/runs/41999414498) **SUCCESS**; backend 2,800 passed, 1 skipped, 10 xfailed; auditoría, frontend typecheck/unit/parity/build y backend tests ejecutados.
+- Acumulativo [41999414506](https://github.com/c2melendez/precision-lab-plus/actions/runs/41999414506) **SUCCESS**; el log confirma el test focal RAT-07 como PASSED; backend 2,800 passed, 1 skipped, 10 xfailed.
+- H1d [41999414450](https://github.com/c2melendez/precision-lab-plus/actions/runs/41999414450) **SUCCESS**, 38/38. Runner [41999414341](https://github.com/c2melendez/precision-lab-plus/actions/runs/41999414341) **SUCCESS_PUSH_ONLY**; dispatch y persistencia omitidos.
+- El candidato `76123db5d0b4671e13875ac49ca602a49f1c4244` se descartó por escape duplicado en el fixture y no se utilizó como evidencia; el SHA corregido `da924df6cdb9a827c2b0ff061db9f1e0e8111167` es el único aceptado.
+- `technical_baseline_sha` se reconcilia al SHA probado. Próximo caso de Algebra114 Plus: **AS-RAT-08**. La acción global permanece **BLOCKED** en EDCX-B6 VC-FE-45 por conflicto contractual con EV-I-12; no modificar ese contrato.
+
+Global certification **OPEN**.
+
 # Actualización de certificación — 2026-11-05 UTC (r390)
 
 ## Plus — Algebra114 AS-RAT-04 PASS_SCOPED

@@ -986,3 +986,12 @@ La siguiente acción de Algebra114 en Plus será reforzar AS-RAT-03 con un orác
 - La fila exacta AS-RAT-04 se comprobó en `algebra114_source.md`. Servicio `simplify_expression` y HTTP `POST /api/v1/simplify`; oráculo independiente `math.cbrt(4.0)/2.0`, positividad e identidad del cubo `1/2` para ambas salidas.
 - Acumulativo [41995788254](https://github.com/c2melendez/precision-lab-plus/actions/runs/41995788254) SUCCESS; log focal RAT-04 PASSED; backend 2,800 passed, 1 skipped, 10 xfailed. CI [41995788422](https://github.com/c2melendez/precision-lab-plus/actions/runs/41995788422) SUCCESS. H1d [41995788274](https://github.com/c2melendez/precision-lab-plus/actions/runs/41995788274) SUCCESS, 38/38. Runner [41995788237](https://github.com/c2melendez/precision-lab-plus/actions/runs/41995788237) SUCCESS push-only; dispatch/persist skipped.
 - Aceptación limitada a Plus backend/servicio HTTP; no se infiere paridad UI. Siguiente caso Plus RAT-07. Se preserva EDCX-B6 VC-FE-45 BLOCKED frente a EV-I-12; global OPEN.
+
+
+## 2026-11-05 UTC — r391: Plus Algebra114 AS-RAT-07 PASS_SCOPED
+
+- SHA técnico `da924df6cdb9a827c2b0ff061db9f1e0e8111167`; test `backend/tests/test_algebra114_as_rat07.py`, blob `ac1da7cd460faa1450a7a0f0172c659bcd2009fc`; aceptación `ALGEBRA114_AS_RAT_07_ACCEPTANCE_R391.md`.
+- Fila exacta, servicio y HTTP. Oráculo independiente Python `math.sqrt` para original y denestada, positividad e identidad del cuadrado `2+sqrt(3)`.
+- CI [41999414498](https://github.com/c2melendez/precision-lab-plus/actions/runs/41999414498) SUCCESS, backend 2,800 passed; acumulativo [41999414506](https://github.com/c2melendez/precision-lab-plus/actions/runs/41999414506) SUCCESS, log focal RAT-07 PASSED; H1d [41999414450](https://github.com/c2melendez/precision-lab-plus/actions/runs/41999414450) SUCCESS (38/38); Runner [41999414341](https://github.com/c2melendez/precision-lab-plus/actions/runs/41999414341) SUCCESS push-only, dispatch/persist skipped.
+- Candidato previo `76123db5d0b4671e13875ac49ca602a49f1c4244` descartado por literal de fixture doblemente escapado; no se reutilizó. Únicamente se acepta el SHA corregido.
+- Siguiente Plus RAT-08. Se preserva EDCX-B6 VC-FE-45 BLOCKED frente a EV-I-12; global OPEN.
