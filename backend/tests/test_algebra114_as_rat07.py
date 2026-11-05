@@ -11,7 +11,7 @@ from app.services.algebra_service import simplify_expression
 
 def test_as_rat_07_nested_radical_denesting_service_http_independent_oracle():
     source = (Path(__file__).resolve().parents[2] / "qa/certification/algebra114_source.md").read_text()
-    expected_row = r"| AS-RAT-07 | N3 | \\(\\sqrt{2+\\sqrt{3}}\\) | \\(\\frac{\\sqrt{6}+\\sqrt{2}}{2}\\) |"
+    expected_row = r"| AS-RAT-07 | N3 | \(\sqrt{2+\sqrt{3}}\) | \(\frac{\sqrt{6}+\sqrt{2}}{2}\) |"
     assert expected_row.replace(" ", "") in source.replace(" ", "")
 
     original = "sqrt(2+sqrt(3))"
