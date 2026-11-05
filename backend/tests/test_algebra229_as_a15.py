@@ -15,7 +15,7 @@ SOURCE_GZ = Path(__file__).resolve().parents[2] / "qa/certification/legacy_sourc
 def test_as_a15_source_row_is_exact():
     text = gzip.decompress(SOURCE_GZ.read_bytes()).decode("utf-8")
     source_row = next(line.strip() for line in text.splitlines() if line.startswith("| AS-A-15 |"))
-    expected_row = r"| AS-A-15 | N3 | `expandir` | `\left(x+\frac{1}{x}\right)^{3}` | `x^{3} + 3 x + \frac{3}{x} + \frac{1}{x^{3}}` |  |"
+    expected_row = r"| AS-A-15 | N3 | `expandir` | `\left(x+\frac{1}{x}\right)^{3}` | `x^{3} + 3 x + \frac{3}{x} + \frac{1}{x^{3}}` | Exponentes negativos tras expandir. |"
     assert source_row == expected_row
 
 
