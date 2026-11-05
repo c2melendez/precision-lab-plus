@@ -1,31 +1,41 @@
-"""Algebra229 AS-A-14 original expand (sqrt(2)+sqrt(3))^2 over HTTP."""
-from pathlib import Path
+"""Algebra229 AS-A-14 radical-square expansion with independent numeric oracle."""
 import gzip
+import math
+from pathlib import Path
+
 import sympy as sp
 from fastapi.testclient import TestClient
+
 from app.main import app
+from app.services.algebra_service import expand_expression
 
 SOURCE_GZ = Path(__file__).resolve().parents[2] / "qa/certification/legacy_sources/matriz_algebra_simbolica.md.gz"
 
 
-def test_as_a14_source_row_present():
+def test_as_a14_source_row_is_exact():
     text = gzip.decompress(SOURCE_GZ.read_bytes()).decode("utf-8")
-    assert "| AS-A-14 | N2 |" in text
-    assert "\\left(\\sqrt{2}+\\sqrt{3}\\right)^{2}" in text
-    assert "2 \\sqrt{6} + 5" in text
+    source_row = next(line.strip() for line in text.splitlines() if line.startswith("| AS-A-14 |"))
+    expected_row = r"| AS-A-14 | N2 | `expandir` | `\\left(\\sqrt{2}+\\sqrt{3}\\right)^{2}` | `2 \\sqrt{6} + 5` |  |"
+    assert source_row == expected_row
 
 
-def test_as_a14_expand_radical_square_http():
+def test_as_a14_expand_service_http_exact_and_independent_numeric_oracle():
+    original = "(sqrt(2)+sqrt(3))^2"
+    symbolic_oracle = 5 + 2 * sp.sqrt(6)
+
+    service = expand_expression(original)
+    assert sp.simplify(service.result_expr - symbolic_oracle) == 0
+
     with TestClient(app) as client:
-        response = client.post(
-            "/api/v1/expand",
-            json={"expression": "(sqrt(2)+sqrt(3))^2"},
-        )
+        response = client.post("/api/v1/expand", json={"expression": original})
     assert response.status_code == 200, response.text
-    result = response.json()
-    assert result["success"] is True, result
-    oracle = 5 + 2 * sp.sqrt(6)
-    # equivalencia_simbolica exacta: la diferencia se simplifica a 0 (sin muestreo numérico).
-    assert sp.simplify(sp.sympify(result["result_text"]) - oracle) == 0
-    # y el resultado no conserva el cuadrado sin expandir
-    assert "**2" not in result["result_text"].replace(" ", "")
+    payload = response.json()
+    assert payload["success"] is True, payload
+    http_expr = sp.sympify(payload["result_text"])
+    assert sp.simplify(http_expr - symbolic_oracle) == 0
+    assert "**2" not in payload["result_text"].replace(" ", "")
+
+    # Python math is independent from SymPy's symbolic simplifier.
+    expected = 5 + 2 * math.sqrt(6)
+    assert math.isclose(float(service.result_expr), expected, rel_tol=1e-12, abs_tol=1e-12)
+    assert math.isclose(float(http_expr), expected, rel_tol=1e-12, abs_tol=1e-12)
