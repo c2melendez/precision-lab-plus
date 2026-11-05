@@ -1,3 +1,15 @@
+# Actualización de certificación — 2026-11-05 UTC (r394)
+
+## Algebra229 AS-A-07 — PASS_SCOPED bilateral
+
+- Plus SHA `c161cc4a9fb71274b89b3dfd6db83f5225f40bfb`; test `backend/tests/test_algebra229_as_a07.py`, blob `8b0327cccaa396df0840848a915871e811f5ecfb`; fila exacta, servicio+HTTP y siete muestras firmadas con aritmética Python independiente.
+- CI [42005026736](https://github.com/c2melendez/precision-lab-plus/actions/runs/42005026736) **SUCCESS**; frontend audit/typecheck/unit/parity/build y backend tests, 2,800 passed, 1 skipped, 10 xfailed.
+- Acumulativo [42005026806](https://github.com/c2melendez/precision-lab-plus/actions/runs/42005026806) **SUCCESS**; ambos tests focales PASSED y backend 2,800 passed, 1 skipped, 10 xfailed.
+- H1d [42005026732](https://github.com/c2melendez/precision-lab-plus/actions/runs/42005026732) **SUCCESS**, 38/38; Runner [42005026827](https://github.com/c2melendez/precision-lab-plus/actions/runs/42005026827) push-only SUCCESS.
+- Lite SHA `02e1fff40eb05e58946e2ec9fdc2ba1618821bd2`; cumulative 42004987491, H1d 42004987501 y Scientific UI 42004987667 **SUCCESS**; 366/2259 unit files/tests and 456 scientific UI. CI estándar 42004987602 sigue FAILURE por audit de 4 moderadas; umbral intacto.
+- A07 queda cerrada bilateralmente como PASS_SCOPED. Siguiente fila: **AS-A-08**. Global certification permanece **OPEN**.
+
+
 # Actualización de certificación — 2026-11-05 UTC (r393)
 
 ## Algebra229 AS-A-06 — PASS_SCOPED bilateral
