@@ -1,3 +1,9 @@
+## 2026-11-05 UTC — r396: Plus Algebra229 AS-A-09 PASS_SCOPED bilateral
+
+- Plus SHA `ebe7c74e1de56609f44fa05c23efc0433a26fd87`; test `backend/tests/test_algebra229_as_a09.py`, blob `c14ea7a72f86bc858761a56bcc4c06c40785b646`; CI 42008437911 SUCCESS (2,800 backend passed/1 skipped/10 XFAIL; 1,055 frontend), acumulativo 42008437780 SUCCESS con ambos tests focales PASSED y 2,800 passed/1 skipped/10 XFAIL; H1d 42008437774 SUCCESS (38/38); Runner 42008437689 push-only.
+- Lite SHA `5968d58708bda2b63fccf5c4deb70c96d1c7df81`; cumulative 42008399184, H1d 42008399193 y Scientific UI 42008399013 SUCCESS; CI estándar 42008399087 FAILURE por cuatro moderadas, umbral intacto. PR draft #62 con 15 checks PR SUCCESS, mergeable/CLEAN, pendiente de revisión humana.
+- A09 bilateral PASS_SCOPED. Siguiente A10. EDCX-B6 VC-FE-45/EV-I-12 sigue sin cambios; global OPEN.
+
 ## 2026-11-05 UTC — r395: Plus Algebra229 AS-A-08 PASS_SCOPED bilateral
 
 - Plus SHA `6a42292878494500c8d902cada0dadaa39e8d2ee`; test `backend/tests/test_algebra229_as_a08.py`, blob `5d95493a65876a9456515164995147c6ef6d3e59`; CI 42006654279 SUCCESS, acumulativo 42006654698 SUCCESS con ambos tests focales PASSED y 2,800 passed/1 skipped/10 XFAIL; H1d 42006653939 SUCCESS (38/38); Runner 42006654470 push-only.

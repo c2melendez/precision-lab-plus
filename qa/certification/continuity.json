@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 395,
+  "revision": 396,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "6a42292878494500c8d902cada0dadaa39e8d2ee",
-  "baseline_case": "ALGEBRA229-AS-A-08",
+  "technical_baseline_sha": "ebe7c74e1de56609f44fa05c23efc0433a26fd87",
+  "baseline_case": "ALGEBRA229-AS-A-09",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -244,7 +244,8 @@
     "qa/certification/ALGEBRA114_AS_RAT_08_ACCEPTANCE_R392.md",
     "qa/certification/ALGEBRA229_AS_A_06_ACCEPTANCE_R393.md",
     "qa/certification/ALGEBRA229_AS_A_07_ACCEPTANCE_R394.md",
-    "qa/certification/ALGEBRA229_AS_A_08_ACCEPTANCE_R395.md"
+    "qa/certification/ALGEBRA229_AS_A_08_ACCEPTANCE_R395.md",
+    "qa/certification/ALGEBRA229_AS_A_09_ACCEPTANCE_R396.md"
   ],
   "runner_certification_r360": {
     "status": "PASS_SCOPED_PUSH_ONLY",
@@ -506,7 +507,7 @@
     },
     "note": "Plus did not execute AS-EXP-09. No parity inferred. Preserve next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT unchanged."
   },
-  "updated_utc": "2026-11-05T10:08:45.377Z",
+  "updated_utc": "2026-11-05T11:47:37.761Z",
   "lite_companion_as_exp10_r371": {
     "status": "PASS_SCOPED_LITE_ONLY",
     "sha": "5a6662e03e413063f9e73ca1f4210b7a155da5ca",
@@ -946,10 +947,10 @@
     "note": "No full Algebra229 matrix or global certification claim."
   },
   "plus_algebra229_next_action": {
-    "id": "ALGEBRA229-AS-A-09-TEST-FIRST",
+    "id": "ALGEBRA229-AS-A-10-TEST-FIRST",
     "status": "READY",
-    "previous_id": "ALGEBRA229-AS-A-08-TEST-FIRST",
-    "action": "Test-first bilateral de AS-A-09: expandir (x+1)(x+2)(x+3)(x+4) → x^4+10x^3+35x^2+50x+24. Fortalecer tests/algebra229AsA09.audit.test.ts y backend/tests/test_algebra229_as_a09.py con fila fuente congelada exacta y ocho muestras firmadas usando Math.pow/Python integer arithmetic independientes. Gates: Lite cumulative+H1d+Scientific UI; Plus cumulative+H1d. Modificar producto solo si la prueba falla."
+    "previous_id": "ALGEBRA229-AS-A-09-TEST-FIRST",
+    "action": "Test-first bilateral de AS-A-10: expandir (x^2+x+1)^3 → x^6+3x^5+6x^4+7x^3+6x^2+3x+1. Fortalecer tests/algebra229AsA10.audit.test.ts y backend/tests/test_algebra229_as_a10.py con fila fuente congelada exacta y muestras firmadas usando aritmética entera independiente (Math.pow/Python integer arithmetic). Gates: Lite cumulative+H1d+Scientific UI; Plus cumulative+H1d. Modificar producto solo si la prueba falla."
   },
   "algebra229_as_a07_r394": {
     "status": "PASS_SCOPED_BILATERAL_CASE",
@@ -1021,5 +1022,54 @@
       "runner_status": "SUCCESS_PUSH_ONLY"
     },
     "note": "No full Algebra229 matrix or global certification claim. Lite standard CI dependency audit remains separately blocked."
+  },
+  "algebra229_as_a09_r396": {
+    "status": "PASS_SCOPED_BILATERAL_CASE",
+    "sha": "ebe7c74e1de56609f44fa05c23efc0433a26fd87",
+    "source_sha256": "8cd36ff08343f98f92abd83e2b162d565e0cbe5c59dc73f26b1c018f77d663c7",
+    "source_blob": "d216dc77cb1356ef29cb8c803cbff809450e0456",
+    "test": "backend/tests/test_algebra229_as_a09.py",
+    "test_blob": "c14ea7a72f86bc858761a56bcc4c06c40785b646",
+    "acceptance": "qa/certification/ALGEBRA229_AS_A_09_ACCEPTANCE_R396.md",
+    "ci_run": 42008437911,
+    "ci_status": "SUCCESS",
+    "ci_backend_summary": "2800 passed, 1 skipped, 10 xfailed",
+    "ci_frontend_summary": "150 files, 1055 passed",
+    "cumulative_run": 42008437780,
+    "cumulative_status": "SUCCESS",
+    "cumulative_focal_tests": [
+      "test_as_a09_source_row_is_exact PASSED",
+      "test_as_a09_expand_service_http_independent_arithmetic_oracle PASSED"
+    ],
+    "cumulative_backend_summary": "2800 passed, 1 skipped, 10 xfailed",
+    "h1d_run": 42008437774,
+    "h1d_status": "SUCCESS",
+    "h1d_passed": 38,
+    "runner_run": 42008437689,
+    "runner_status": "SUCCESS_PUSH_ONLY",
+    "scope": "Algebra229 AS-A-09 only; bilateral test-level acceptance",
+    "oracle": "Exact frozen source row, expand_expression + HTTP, eight signed integer values, independent Python integer arithmetic (x+1)(x+2)(x+3)(x+4).",
+    "lite": {
+      "sha": "5968d58708bda2b63fccf5c4deb70c96d1c7df81",
+      "test": "tests/algebra229AsA09.audit.test.ts",
+      "test_blob": "827145ee310d871e7b7a8cc362d1a7f8726f808a",
+      "cumulative_run": 42008399184,
+      "cumulative_status": "SUCCESS",
+      "cumulative_focal_tests": 2,
+      "typecheck": "SUCCESS",
+      "build_seconds": 4.68,
+      "h1d_run": 42008399193,
+      "h1d_status": "SUCCESS",
+      "h1d_passed": 22,
+      "scientific_ui_run": 42008399013,
+      "scientific_ui_status": "SUCCESS",
+      "scientific_ui_passed": 456,
+      "ci_run": 42008399087,
+      "ci_status": "FAILURE",
+      "ci_reason": "Four moderate npm audit advisories; threshold unchanged.",
+      "runner_run": 42008399129,
+      "runner_status": "SUCCESS_PUSH_ONLY"
+    },
+    "note": "No full Algebra229 matrix or global certification claim. Lite standard CI dependency audit remains separately blocked; PR #62 all pull_request checks green but still Draft pending human review/merge."
   }
 }
