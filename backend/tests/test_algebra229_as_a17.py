@@ -44,7 +44,9 @@ def test_as_a17_expand_service_http_and_independent_integer_oracle():
     assert result["success"] is True, result
     got = sp.sympify(result["result_text"])
     assert sp.expand(got - oracle) == 0
-    assert "**5" not in result["result_text"].replace(" ", "")
+    # x**5 and y**5 are valid expanded monomials; reject only the original binomial power.
+    assert got != (2 * x - y) ** 5
+    assert sp.expand(got) == got
 
     # Independent integer coefficients and native Python integer arithmetic, not SymPy.
     samples = ((-2, 1), (1, -3), (1, 1), (3, 2), (0, 2), (-1, -2), (2, -1))
