@@ -39,10 +39,21 @@ describe("latexToBackendSyntax", () => {
     expect(latexToBackendSyntax("3\\times4")).toBe("3 * 4");
   });
 
-  it("normaliza la plantilla real de valor absoluto al contrato abs() del backend", () => {
+  it("normaliza la plantilla de valor absoluto con barras verticales simples", () => {
     expect(latexToBackendSyntax("\\left|-3\\right|")).toBe("abs(-3)");
   });
 
+  it("normaliza el delimitador nativo \\lvert/\\rvert que serializa MathLive", () => {
+    expect(latexToBackendSyntax(String.raw`\left\lvert x\right\rvert`)).toBe("abs(x)");
+    expect(latexToBackendSyntax(String.raw`\lvert x\rvert`)).toBe("abs(x)");
+  });
+
+  it("conserva las sustituciones inline que siguen al valor absoluto nativo", () => {
+    const converted = latexToBackendSyntax(
+      String.raw`\left\lvert x\right\rvert\ \text{con}\ x=-4`,
+    );
+    expect(converted).toMatch(/^abs\(x\)\s+["“]con["”]\s+x\s*=\s*-4$/);
+  });
   it("una expresión vacía produce una cadena vacía", () => {
     expect(latexToBackendSyntax("")).toBe("");
     expect(latexToBackendSyntax("   ")).toBe("");

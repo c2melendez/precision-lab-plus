@@ -247,11 +247,21 @@ export function latexToBackendSyntax(latex: string): string {
   // absoluto, mientras que el backend sí expone abs(...). Normalizamos
   // explícitamente el contrato real del teclado antes de convertir.
   const absoluteTrimmed = latex.trim();
+  // MathLive 0.110 serializa el valor absoluto nativo como
+  // \left\lvert x\right\rvert (no como \left|x\right|).
+  // La forma puede ir seguida de \text{con} y sus sustituciones inline;
+  // por eso reconocemos el delimitador como prefijo y convertimos el resto
+  // por separado, en vez de exigir que el valor absoluto ocupe todo el campo.
   const absoluteMatch =
-    absoluteTrimmed.match(/^\\left\|(.*)\\right\|$/s) ??
-    absoluteTrimmed.match(/^\|(.*)\|$/s);
-  if (absoluteMatch) return `abs(${latexToBackendSyntax(absoluteMatch[1])})`;
-
+    absoluteTrimmed.match(/^\\left\\lvert([\s\S]*?)\\right\\rvert/s) ??
+    absoluteTrimmed.match(/^\\lvert([\s\S]*?)\\rvert/s) ??
+    absoluteTrimmed.match(/^\\left\|(.*?)\\right\|/s) ??
+    absoluteTrimmed.match(/^\|(.*?)\|/s);
+  if (absoluteMatch) {
+    const absolute = `abs(${latexToBackendSyntax(absoluteMatch[1])})`;
+    const suffix = absoluteTrimmed.slice(absoluteMatch[0].length).trim();
+    return suffix ? `${absolute} ${latexToBackendSyntax(suffix)}` : absolute;
+  }
   const aggregate = rewriteFiniteAggregateLatex(latex);
   if (aggregate) return aggregate;
   // MathLive may serialize ± as either \\pm or +-. Preserve its calculator
