@@ -15,7 +15,7 @@ Estado: **FIXTURE_PROMOTED**; sección A **AS-A-01..06 PASS_SCOPED bilateral** (
 
 ## Avance seccion A (expandir)
 
-AS-A-01..11 cerrados PASS_SCOPED bilateral (ver `CURRENT_STATE.md` / `EXECUTION_LOG_AS229_SECTION_A.md`).
+AS-A-01..13 cerrados PASS_SCOPED bilateral (ver `CURRENT_STATE.md` / `EXECUTION_LOG_AS229_SECTION_A.md`).
 
 ## Siguiente
 

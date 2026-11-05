@@ -1,3 +1,19 @@
+# Actualización de certificación — 2026-11-05 UTC (r400)
+
+## Algebra229 AS-A-13 — PASS_SCOPED bilateral
+
+- Plus SHA `c70632a8018f5acb5c8d184f3be66a3a9690d9bb`; test `backend/tests/test_algebra229_as_a13.py`, blob `646138a0f8965cb05053982b362ee39c73c4cea5`; fila exacta, servicio+HTTP y ocho pares enteros con aritmética Python independiente.
+- Plus acumulativo [42031691554](https://github.com/c2melendez/precision-lab-plus/actions/runs/42031691554) SUCCESS, `skip=false`, ambos tests focales PASSED, backend 2,800 passed / 1 skipped / 10 XFAIL, cobertura 88.93%. H1d [42031691537](https://github.com/c2melendez/precision-lab-plus/actions/runs/42031691537) SUCCESS (38/38); CI [42031691441](https://github.com/c2melendez/precision-lab-plus/actions/runs/42031691441) SUCCESS (2,800 backend / 1,055 frontend). Runner 42031691608 push-only.
+- Lite SHA `4ecf24a91918aab7350c9a40332f71bbf8e68a93`; cumulative 42031678745, H1d 42031678847 y Scientific UI 42031678747 SUCCESS. CI estándar 42031678783 FAILURE solo npm audit (4 moderadas); umbral intacto.
+- A13 queda cerrada bilateralmente como PASS_SCOPED. Siguiente fila: **AS-A-14**, `(sqrt(2)+sqrt(3))^2`. EDCX-B6 VC-FE-45/EV-I-12 continúa BLOCKED sin cambio; global OPEN.
+
+## Algebra229 AS-A-12 — PASS_SCOPED bilateral
+
+- Plus SHA `d354ee5a5aa024c77222f8862cd00eecdc1b514e`; test `backend/tests/test_algebra229_as_a12.py`, blob `0e88a17eb450499bffd75feffe6fb041d329cee6`; fila exacta, servicio+HTTP y ocho valores enteros con aritmética Python independiente.
+- Plus acumulativo [42026506521](https://github.com/c2melendez/precision-lab-plus/actions/runs/42026506521) SUCCESS, `skip=false`, backend 2,800 passed / 1 skipped / 10 XFAIL; frontend 1,055 passed. H1d [42026506511](https://github.com/c2melendez/precision-lab-plus/actions/runs/42026506511) SUCCESS (38/38); CI [42026506505](https://github.com/c2melendez/precision-lab-plus/actions/runs/42026506505) SUCCESS; Runner 42026506528 push-only.
+- Lite SHA `e5d41530b3bbee7ec07564004ed692d618e86bbd`; cumulative 42026503795, H1d 42026503173 y Scientific UI 42026503341 SUCCESS; CI 42026503150 FAILURE solo npm audit (4 moderadas).
+- A12 queda cerrada bilateralmente como PASS_SCOPED. Global OPEN.
+
 # Actualización de certificación — 2026-11-05 UTC (r398)
 
 ## Algebra229 AS-A-11 — PASS_SCOPED bilateral

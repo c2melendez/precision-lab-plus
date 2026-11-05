@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 398,
+  "revision": 400,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "8c7362c40afb6c3992ca956033870fd577034d8f",
-  "baseline_case": "ALGEBRA229-AS-A-11",
+  "technical_baseline_sha": "c70632a8018f5acb5c8d184f3be66a3a9690d9bb",
+  "baseline_case": "ALGEBRA229-AS-A-13",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -211,7 +211,7 @@
     "gap": [],
     "pending_execution": []
   },
-  "ledger_note": "r358: Plus-only EDCX-B6 evidence reconciled on exact SHA adbf5c3826480a015456c8f64257f866f23ca3c4. VC-FE-32..36 PASS_SCOPED (15 finite substitutions); VC-FE-37..41 PASS_SCOPED (six harness cases); inverse subset VC-FE-43,44,46,48,50,51,52 PASS_SCOPED (seven tests). CI 41134338836, cumulative 41134338772 (2798 passed, 1 skipped, 10 xfailed; 88.91% coverage), H1d 41134338840, Runner 41134338750 all SUCCESS on same SHA. Branch-cut rows 45,49,53 remain REVIEW; no universal identity proof, no bilateral acceptance, global OPEN. Next action is explicit branch convention review. r360 Runner reconciliation: Plus Certification Runner push run 41136660038 SUCCESS on SHA 218d682848a03a000930e2028f057563847381f3; canonical branch resolution, checkout, base SHA and fingerprint succeeded. Dispatch, wait, QA record, persistence and commit were SKIPPED. Lite counterpart 41138509571 SUCCESS on c8c29d820e5bd16ab4df8a528bcea9b4a72f8acc with the same push-only scope. This is PASS_SCOPED for push/no-dispatch, not certification of workflow_dispatch or Observer→Bridge E2E. Global OPEN. r373 bilateral note: Lite accepted Algebra114 AS-FAC-02 PASS_SCOPED on SHA 4a14dd0bd6c1797a5415b93ced37d53425d68908; cumulative 41615433227 SUCCESS, H1d 41615433418 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_02_ACCEPTANCE_R373.md. Plus did not execute AS-FAC-02; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41615433266 remains failed only at npm audit (8 moderate). Runner auth fix Lite 4a14dd0 and Runner 41615433272 SUCCESS. Global OPEN. r374 bilateral note: Lite accepted Algebra114 AS-FAC-03 PASS_SCOPED on SHA 5b665763f0b470d9c253a4bf46c56996fcd04667; cumulative 41616101242 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41616101231 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_03_ACCEPTANCE_R374.md. Plus did not execute AS-FAC-03; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41616101188 remains failed only at npm audit (8 moderate). Lite Runner 41616101369 SUCCESS. Global OPEN. r375 bilateral note: Lite accepted Algebra114 AS-FAC-04 PASS_SCOPED on SHA 5e3709adb0edeab0af39fff715044a19670b81f1; cumulative 41616409423 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41616409288 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_04_ACCEPTANCE_R375.md. Plus did not execute AS-FAC-04; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41616409340 remains failed only at npm audit (8 moderate). Lite Runner 41616409336 SUCCESS. Global OPEN. r376 bilateral note: Lite accepted Algebra114 AS-FAC-05 PASS_SCOPED on SHA d3ca5bcdceeaa2a4826e74340ce4b20424a590d1; cumulative 41616706336 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41616706384 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_05_ACCEPTANCE_R376.md. Plus did not execute AS-FAC-05; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41616706450 remains failed only at npm audit (8 moderate). Lite Runner 41616706347 SUCCESS. Global OPEN. r377 bilateral note: Lite accepted Algebra114 AS-FAC-06 PASS_SCOPED on SHA 867accddd1e8395e737b5d3c482d367ce2fda132; cumulative 41617198488 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41617198436 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_06_ACCEPTANCE_R377.md. Plus did not execute AS-FAC-06; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41617198393 remains failed only at npm audit (8 moderate). Lite Runner 41617198446 SUCCESS. Global OPEN. r378 bilateral note: Lite accepted Algebra114 AS-FAC-07 PASS_SCOPED on SHA a6f45dde0625abd807538791264799c9112648ed; cumulative 41617678117 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41617678044 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_07_ACCEPTANCE_R378.md. Plus did not execute AS-FAC-07; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41617678130 remains failed only at npm audit (8 moderate). Lite Runner 41617678059 SUCCESS. Global OPEN. r379 bilateral note: Lite accepted Algebra114 AS-FAC-08 PASS_SCOPED on SHA 11477e0571ae46cb5db60a508a949c647cbb2fb3; cumulative 41618207071 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41618207046 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_08_ACCEPTANCE_R379.md. Plus did not execute AS-FAC-08; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41618207057 failed at dependency audit hard gate. Lite Runner 41618207045 SUCCESS. Global OPEN. r380 bilateral note: Lite accepted Algebra114 AS-FAC-09 PASS_SCOPED on SHA 537a84bbaa7538a33c0e5fa0c2ebb36485821c8f; cumulative 41618685099 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41618685297 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_09_ACCEPTANCE_R380.md. Plus did not execute AS-FAC-09; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41618685195 failed at dependency audit hard gate. Lite Runner 41618685066 SUCCESS. Global OPEN.",
+  "ledger_note": "r358: Plus-only EDCX-B6 evidence reconciled on exact SHA adbf5c3826480a015456c8f64257f866f23ca3c4. VC-FE-32..36 PASS_SCOPED (15 finite substitutions); VC-FE-37..41 PASS_SCOPED (six harness cases); inverse subset VC-FE-43,44,46,48,50,51,52 PASS_SCOPED (seven tests). CI 41134338836, cumulative 41134338772 (2798 passed, 1 skipped, 10 xfailed; 88.91% coverage), H1d 41134338840, Runner 41134338750 all SUCCESS on same SHA. Branch-cut rows 45,49,53 remain REVIEW; no universal identity proof, no bilateral acceptance, global OPEN. Next action is explicit branch convention review. r360 Runner reconciliation: Plus Certification Runner push run 41136660038 SUCCESS on SHA 218d682848a03a000930e2028f057563847381f3; canonical branch resolution, checkout, base SHA and fingerprint succeeded. Dispatch, wait, QA record, persistence and commit were SKIPPED. Lite counterpart 41138509571 SUCCESS on c8c29d820e5bd16ab4df8a528bcea9b4a72f8acc with the same push-only scope. This is PASS_SCOPED for push/no-dispatch, not certification of workflow_dispatch or Observer→Bridge E2E. Global OPEN. r373 bilateral note: Lite accepted Algebra114 AS-FAC-02 PASS_SCOPED on SHA 4a14dd0bd6c1797a5415b93ced37d53425d68908; cumulative 41615433227 SUCCESS, H1d 41615433418 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_02_ACCEPTANCE_R373.md. Plus did not execute AS-FAC-02; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41615433266 remains failed only at npm audit (8 moderate). Runner auth fix Lite 4a14dd0 and Runner 41615433272 SUCCESS. Global OPEN. r374 bilateral note: Lite accepted Algebra114 AS-FAC-03 PASS_SCOPED on SHA 5b665763f0b470d9c253a4bf46c56996fcd04667; cumulative 41616101242 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41616101231 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_03_ACCEPTANCE_R374.md. Plus did not execute AS-FAC-03; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41616101188 remains failed only at npm audit (8 moderate). Lite Runner 41616101369 SUCCESS. Global OPEN. r375 bilateral note: Lite accepted Algebra114 AS-FAC-04 PASS_SCOPED on SHA 5e3709adb0edeab0af39fff715044a19670b81f1; cumulative 41616409423 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41616409288 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_04_ACCEPTANCE_R375.md. Plus did not execute AS-FAC-04; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41616409340 remains failed only at npm audit (8 moderate). Lite Runner 41616409336 SUCCESS. Global OPEN. r376 bilateral note: Lite accepted Algebra114 AS-FAC-05 PASS_SCOPED on SHA d3ca5bcdceeaa2a4826e74340ce4b20424a590d1; cumulative 41616706336 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41616706384 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_05_ACCEPTANCE_R376.md. Plus did not execute AS-FAC-05; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41616706450 remains failed only at npm audit (8 moderate). Lite Runner 41616706347 SUCCESS. Global OPEN. r377 bilateral note: Lite accepted Algebra114 AS-FAC-06 PASS_SCOPED on SHA 867accddd1e8395e737b5d3c482d367ce2fda132; cumulative 41617198488 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41617198436 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_06_ACCEPTANCE_R377.md. Plus did not execute AS-FAC-06; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41617198393 remains failed only at npm audit (8 moderate). Lite Runner 41617198446 SUCCESS. Global OPEN. r378 bilateral note: Lite accepted Algebra114 AS-FAC-07 PASS_SCOPED on SHA a6f45dde0625abd807538791264799c9112648ed; cumulative 41617678117 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41617678044 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_07_ACCEPTANCE_R378.md. Plus did not execute AS-FAC-07; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41617678130 remains failed only at npm audit (8 moderate). Lite Runner 41617678059 SUCCESS. Global OPEN. r379 bilateral note: Lite accepted Algebra114 AS-FAC-08 PASS_SCOPED on SHA 11477e0571ae46cb5db60a508a949c647cbb2fb3; cumulative 41618207071 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41618207046 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_08_ACCEPTANCE_R379.md. Plus did not execute AS-FAC-08; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41618207057 failed at dependency audit hard gate. Lite Runner 41618207045 SUCCESS. Global OPEN. r380 bilateral note: Lite accepted Algebra114 AS-FAC-09 PASS_SCOPED on SHA 537a84bbaa7538a33c0e5fa0c2ebb36485821c8f; cumulative 41618685099 SUCCESS (2259 passed, 8 expected fail, 34 TODO; test focalizado ejecutado), H1d 41618685297 SUCCESS (22/22), acceptance in Lite qa/certification/ALGEBRA114_AS_FAC_09_ACCEPTANCE_R380.md. Plus did not execute AS-FAC-09; no parity claim. Plus next_action remains BLOCKED at VC-FE-45 contract conflict against EV-I-12; no contract change. Lite CI 41618685195 failed at dependency audit hard gate. Lite Runner 41618685066 SUCCESS. Global OPEN. r399: Algebra229 AS-A-12 PASS_SCOPED bilateral. Plus d354ee5a5aa024c77222f8862cd00eecdc1b514e; cumulative 42026506521 SUCCESS skip=false (2800 backend), H1d 42026506511 SUCCESS (38), CI 42026506505 SUCCESS. Lite e5d41530b3bbee7ec07564004ed692d618e86bbd; cumulative 42026503795 SUCCESS skip=false (2259 passed), H1d 42026503173 SUCCESS (22), Scientific UI 42026503341 SUCCESS (456), CI 42026503150 FAILURE only npm audit (4 moderate). Next A13. Global OPEN. r400: Algebra229 AS-A-13 PASS_SCOPED bilateral. Plus c70632a8018f5acb5c8d184f3be66a3a9690d9bb; cumulative 42031691554 SUCCESS skip=false (both focal tests PASSED, 2800 backend, 88.93% coverage), H1d 42031691537 SUCCESS (38), CI 42031691441 SUCCESS (2800 backend/1055 frontend), Runner 42031691608 push-only. Lite 4ecf24a91918aab7350c9a40332f71bbf8e68a93; cumulative 42031678745 SUCCESS skip=false (2 focal tests), H1d 42031678847 SUCCESS (22), Scientific UI 42031678747 SUCCESS (456), CI 42031678783 FAILURE only npm audit (4 moderate), Runner 42031678838 push-only. Next A14. VC-FE-45 remains BLOCKED vs EV-I-12. Global OPEN.",
   "RESTORE_NOTE": "Compact continuity index retained. Historical full ledger parent at df1a7d7476ffe1bc0d43a421b39f9d4229dc9add.",
   "prose_only_paths": [
     "README.md",
@@ -509,7 +509,7 @@
     },
     "note": "Plus did not execute AS-EXP-09. No parity inferred. Preserve next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT unchanged."
   },
-  "updated_utc": "2026-11-05T12:21:20.635Z",
+  "updated_utc": "2026-11-05T13:07:49.657Z",
   "lite_companion_as_exp10_r371": {
     "status": "PASS_SCOPED_LITE_ONLY",
     "sha": "5a6662e03e413063f9e73ca1f4210b7a155da5ca",
@@ -949,10 +949,10 @@
     "note": "No full Algebra229 matrix or global certification claim."
   },
   "plus_algebra229_next_action": {
-    "id": "ALGEBRA229-AS-A-12-TEST-FIRST",
+    "id": "ALGEBRA229-AS-A-14-TEST-FIRST",
     "status": "READY",
-    "previous_id": "ALGEBRA229-AS-A-11-TEST-FIRST",
-    "action": "Test-first bilateral de AS-A-12: expandir (x^2-1)^2 → x^4-2x^2+1. Fortalecer tests/algebra229AsA12.audit.test.ts y backend/tests/test_algebra229_as_a12.py con fila fuente congelada exacta y muestras firmadas usando aritmética entera independiente (Math.pow/Python integer arithmetic). Gates: Lite cumulative+H1d+Scientific UI; Plus cumulative+H1d. Modificar producto solo si la prueba falla."
+    "previous_id": "ALGEBRA229-AS-A-13-TEST-FIRST",
+    "action": "Test-first bilateral de AS-A-14: expandir (sqrt(2)+sqrt(3))^2 → 5+2*sqrt(6). Fortalecer tests/algebra229AsA14.audit.test.ts y backend/tests/test_algebra229_as_a14.py con fila fuente congelada exacta, equivalencia simbólica exacta y oráculo numérico independiente Math.sqrt/Python math.sqrt. Gates: Lite cumulative+H1d+Scientific UI; Plus cumulative+H1d. Modificar producto solo si la prueba falla."
   },
   "algebra229_as_a07_r394": {
     "status": "PASS_SCOPED_BILATERAL_CASE",
@@ -1173,5 +1173,82 @@
       "runner_status": "SUCCESS_PUSH_ONLY"
     },
     "note": "No full Algebra229 matrix or global certification claim. Lite standard CI dependency audit remains separately blocked. Evidence was executed (skip=false), not reused. EDCX-B6 VC-FE-45 remains BLOCKED against EV-I-12."
+  },
+  "algebra229_as_a12_r399": {
+    "status": "PASS_SCOPED_BILATERAL_CASE",
+    "plus_sha": "d354ee5a5aa024c77222f8862cd00eecdc1b514e",
+    "plus_test": "backend/tests/test_algebra229_as_a12.py",
+    "plus_test_blob": "0e88a17eb450499bffd75feffe6fb041d329cee6",
+    "plus_cumulative_run": 42026506521,
+    "plus_cumulative_status": "SUCCESS",
+    "plus_cumulative_skip": false,
+    "plus_backend_summary": "2800 passed, 1 skipped, 10 xfailed",
+    "plus_h1d_run": 42026506511,
+    "plus_h1d_status": "SUCCESS",
+    "plus_h1d_passed": 38,
+    "plus_ci_run": 42026506505,
+    "plus_ci_status": "SUCCESS",
+    "plus_runner_run": 42026506528,
+    "plus_runner_status": "SUCCESS_PUSH_ONLY",
+    "lite_sha": "e5d41530b3bbee7ec07564004ed692d618e86bbd",
+    "lite_test": "tests/algebra229AsA12.audit.test.ts",
+    "lite_test_blob": "d4e7e5cb5d81115fd3edf886d7058c55db424a66",
+    "lite_cumulative_run": 42026503795,
+    "lite_cumulative_status": "SUCCESS",
+    "lite_cumulative_skip": false,
+    "lite_h1d_run": 42026503173,
+    "lite_h1d_status": "SUCCESS",
+    "lite_h1d_passed": 22,
+    "lite_scientific_run": 42026503341,
+    "lite_scientific_status": "SUCCESS",
+    "lite_scientific_passed": 456,
+    "lite_ci_run": 42026503150,
+    "lite_ci_status": "FAILURE_NPM_AUDIT_4_MODERATE",
+    "scope": "AS-A-12 only",
+    "oracle": "Exact frozen source row; eight signed integer samples; native arithmetic independent of CAS."
+  },
+  "algebra229_as_a13_r400": {
+    "status": "PASS_SCOPED_BILATERAL_CASE",
+    "plus_sha": "c70632a8018f5acb5c8d184f3be66a3a9690d9bb",
+    "plus_test": "backend/tests/test_algebra229_as_a13.py",
+    "plus_test_blob": "646138a0f8965cb05053982b362ee39c73c4cea5",
+    "plus_cumulative_run": 42031691554,
+    "plus_cumulative_status": "SUCCESS",
+    "plus_cumulative_skip": false,
+    "plus_cumulative_focal_tests": [
+      "test_as_a13_source_row_is_exact PASSED",
+      "test_as_a13_expand_service_http_independent_arithmetic_oracle PASSED"
+    ],
+    "plus_backend_summary": "2800 passed, 1 skipped, 10 xfailed",
+    "plus_coverage": "88.93%",
+    "plus_h1d_run": 42031691537,
+    "plus_h1d_status": "SUCCESS",
+    "plus_h1d_passed": 38,
+    "plus_ci_run": 42031691441,
+    "plus_ci_status": "SUCCESS",
+    "plus_ci_backend": "2800 passed",
+    "plus_ci_frontend": "1055 passed",
+    "plus_runner_run": 42031691608,
+    "plus_runner_status": "SUCCESS_PUSH_ONLY",
+    "lite_sha": "4ecf24a91918aab7350c9a40332f71bbf8e68a93",
+    "lite_test": "tests/algebra229AsA13.audit.test.ts",
+    "lite_test_blob": "31d469915bdffd6d00996aba27a524eab999bfef",
+    "lite_cumulative_run": 42031678745,
+    "lite_cumulative_status": "SUCCESS",
+    "lite_cumulative_skip": false,
+    "lite_cumulative_focal_tests": 2,
+    "lite_cumulative_passed": 2259,
+    "lite_h1d_run": 42031678847,
+    "lite_h1d_status": "SUCCESS",
+    "lite_h1d_passed": 22,
+    "lite_scientific_run": 42031678747,
+    "lite_scientific_status": "SUCCESS",
+    "lite_scientific_passed": 456,
+    "lite_ci_run": 42031678783,
+    "lite_ci_status": "FAILURE_NPM_AUDIT_4_MODERATE",
+    "lite_runner_run": 42031678838,
+    "lite_runner_status": "SUCCESS_PUSH_ONLY",
+    "scope": "AS-A-13 only",
+    "oracle": "Exact frozen source row; eight signed integer pairs; native arithmetic independent of CAS."
   }
 }

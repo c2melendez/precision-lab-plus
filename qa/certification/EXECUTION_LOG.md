@@ -1,3 +1,15 @@
+## 2026-11-05 UTC — r400: Plus Algebra229 AS-A-13 PASS_SCOPED bilateral
+
+- Plus SHA c70632a8018f5acb5c8d184f3be66a3a9690d9bb; cumulative 42031691554 SUCCESS (skip=false; ambos focales PASSED; 2800 backend; 88.93% coverage), H1d 42031691537 SUCCESS (38), CI 42031691441 SUCCESS (2800 backend/1055 frontend), Runner 42031691608 push-only.
+- Lite SHA 4ecf24a91918aab7350c9a40332f71bbf8e68a93; cumulative 42031678745 SUCCESS, H1d 42031678847 SUCCESS (22), Scientific UI 42031678747 SUCCESS (456); CI 42031678783 FAILURE solo audit (4 moderate), Runner 42031678838 push-only.
+- A13 bilateral PASS_SCOPED; siguiente A14. EDCX-B6 VC-FE-45/EV-I-12 permanece BLOCKED; global OPEN.
+
+## 2026-11-05 UTC — r399: Plus Algebra229 AS-A-12 PASS_SCOPED bilateral
+
+- Plus SHA d354ee5a5aa024c77222f8862cd00eecdc1b514e; cumulative 42026506521 SUCCESS (skip=false; 2800 backend/1055 frontend), H1d 42026506511 SUCCESS (38), CI 42026506505 SUCCESS, Runner 42026506528 push-only.
+- Lite SHA e5d41530b3bbee7ec07564004ed692d618e86bbd; cumulative 42026503795 SUCCESS, H1d 42026503173 SUCCESS (22), Scientific UI 42026503341 SUCCESS (456); CI 42026503150 FAILURE solo audit (4 moderate), Runner 42026503233 push-only.
+- A12 bilateral PASS_SCOPED; siguiente A13. EDCX-B6 VC-FE-45/EV-I-12 permanece BLOCKED; global OPEN.
+
 ## 2026-11-05 UTC — r398: Plus Algebra229 AS-A-11 PASS_SCOPED bilateral
 
 - Plus SHA `8c7362c40afb6c3992ca956033870fd577034d8f`; test `backend/tests/test_algebra229_as_a11.py`, blob `c7cc8bcb0736c1f0ba1774f3d6039debf48a9aae`; CI 42023819574 SUCCESS (2,800 backend passed/1 skipped/10 XFAIL; 1,055 frontend), acumulativo 42023819742 SUCCESS (`skip=false`, ambos tests focales PASSED); H1d 42023819511 SUCCESS (38/38); Runner 42023819548 push-only.
