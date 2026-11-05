@@ -927,3 +927,22 @@ El resultado AS-PF-04 es exclusivo de Lite. Plus conserva su bloqueo contractual
 
 
 
+
+
+## Reconciliación Plus — 2026-11-05 (r383–r387): Algebra114 AS-PF-01..08
+
+- SHA técnico probado: `e7f88498eb4520a968cd45a216a20ff43688a509`; fixture original `qa/certification/algebra114_source.md`, blob `b30ca7fcec641334ce8128ca25bec542a9d04e79`.
+- Acumulativo [41989977600](https://github.com/c2melendez/precision-lab-plus/actions/runs/41989977600) **SUCCESS**. El log muestra PF-01..PF-08 individualmente como PASSED; backend: **2800 passed, 1 skipped, 10 xfailed**.
+- CI [41989977569](https://github.com/c2melendez/precision-lab-plus/actions/runs/41989977569) **SUCCESS**: backend 2800 passed y frontend SUCCESS.
+- H1d [41989977542](https://github.com/c2melendez/precision-lab-plus/actions/runs/41989977542) **SUCCESS**, 38 passed. Runner [41989977594](https://github.com/c2melendez/precision-lab-plus/actions/runs/41989977594) **SUCCESS**, push-only; no certifica dispatch ni persistencia.
+- Plus — AS-PF-01: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_pf01.py`, blob `06b14beebcaec379036971feec704e336c21479c`; fila exacta, validación service+HTTP y eight integer substitutions, checked with Python fractions.Fraction against both the two simple-pole decomposition and original rational expression. Aceptación: `qa/certification/ALGEBRA114_AS_PF_01_ACCEPTANCE_R383.md`.
+- Plus — AS-PF-02: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_pf02.py`, blob `3127e2aa58f3f67d19bf633760c4797adcf461f8`; fila exacta, validación service+HTTP y eight non-singular integer substitutions with Fraction against repeated-pole decomposition and original rational expression. Aceptación: `qa/certification/ALGEBRA114_AS_PF_02_ACCEPTANCE_R384.md`.
+- Plus — AS-PF-06: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_pf06.py`, blob `84e1554c1e23602c20b9c10815ee742d84ddf022`; fila exacta, validación service+HTTP y seven integer substitutions with Fraction against both the decomposition and original rational function. Aceptación: `qa/certification/ALGEBRA114_AS_PF_06_ACCEPTANCE_R385.md`.
+- Plus — AS-PF-07: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_pf07.py`, blob `347cdce37403c61f914808f4b68a9c42c07039fc`; fila exacta, validación service+HTTP y seven integer substitutions with Fraction against both the two-term decomposition and original rational function. Aceptación: `qa/certification/ALGEBRA114_AS_PF_07_ACCEPTANCE_R386.md`.
+- Plus — AS-PF-08: **PASS_SCOPED**. Test `backend/tests/test_algebra114_as_pf08.py`, blob `9fb0f1e410535667c65aa6208d562ed23477566a`; fila exacta, validación service+HTTP y seven valid integer substitutions with Fraction; explicitly verifies the original denominator exclusions x=±1 after simplification. Aceptación: `qa/certification/ALGEBRA114_AS_PF_08_ACCEPTANCE_R387.md`.
+- PF-03..PF-05 también están reforzados y aceptados con oráculos `Fraction` (acceptance R380–R382). El conjunto PF-01..08 de Plus ya tiene oráculos aritméticos independientes de SymPy.
+- Esta aceptación se limita al backend/servicio HTTP de Plus; no afirma equivalencia de presentación UI con Lite.
+- `continuity.json.next_action` permanece **BLOCKED** en VC-FE-45 por el conflicto contractual con EV-I-12. No se debilita EV-I-12 ni se modifica esa decisión. Global certification **OPEN**.
+
+
+

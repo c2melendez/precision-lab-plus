@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 380,
+  "revision": 387,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
@@ -140,6 +140,31 @@
       "id": "ALGEBRA114-AS-PF-05",
       "status": "PASS_SCOPED",
       "detail": "Plus-only PASS_SCOPED on SHA a8dc4ee0f987caa3768c3184da6cd2890f91b653; backend/tests/test_algebra114_as_pf05.py blob 9c4ca2f174e95794dd1dcf32b8bee69efbada0b5; CI 41988031170 SUCCESS (backend 2800 passed, frontend success); cumulative 41988031275 SUCCESS (all eight AS-PF tests explicitly PASSED; backend 2800 passed, 1 skipped, 10 xfailed); H1d 41988031154 SUCCESS (38 passed); Runner 41988031114 SUCCESS push-only. Acceptance qa/certification/ALGEBRA114_AS_PF_05_ACCEPTANCE_R382.md."
+    },
+    {
+      "id": "ALGEBRA114-AS-PF-01",
+      "status": "PASS_SCOPED",
+      "detail": "Plus-only. SHA e7f88498eb4520a968cd45a216a20ff43688a509; backend/tests/test_algebra114_as_pf01.py blob 06b14beebcaec379036971feec704e336c21479c; CI 41989977569 SUCCESS (backend 2800 passed, frontend SUCCESS); cumulative 41989977600 SUCCESS (all PF-01..08 explicitly PASSED; backend 2800 passed, 1 skipped, 10 xfailed); H1d 41989977542 SUCCESS (38 passed); Runner 41989977594 SUCCESS push-only. Acceptance qa/certification/ALGEBRA114_AS_PF_01_ACCEPTANCE_R383.md."
+    },
+    {
+      "id": "ALGEBRA114-AS-PF-02",
+      "status": "PASS_SCOPED",
+      "detail": "Plus-only. SHA e7f88498eb4520a968cd45a216a20ff43688a509; backend/tests/test_algebra114_as_pf02.py blob 3127e2aa58f3f67d19bf633760c4797adcf461f8; CI 41989977569 SUCCESS (backend 2800 passed, frontend SUCCESS); cumulative 41989977600 SUCCESS (all PF-01..08 explicitly PASSED; backend 2800 passed, 1 skipped, 10 xfailed); H1d 41989977542 SUCCESS (38 passed); Runner 41989977594 SUCCESS push-only. Acceptance qa/certification/ALGEBRA114_AS_PF_02_ACCEPTANCE_R384.md."
+    },
+    {
+      "id": "ALGEBRA114-AS-PF-06",
+      "status": "PASS_SCOPED",
+      "detail": "Plus-only. SHA e7f88498eb4520a968cd45a216a20ff43688a509; backend/tests/test_algebra114_as_pf06.py blob 84e1554c1e23602c20b9c10815ee742d84ddf022; CI 41989977569 SUCCESS (backend 2800 passed, frontend SUCCESS); cumulative 41989977600 SUCCESS (all PF-01..08 explicitly PASSED; backend 2800 passed, 1 skipped, 10 xfailed); H1d 41989977542 SUCCESS (38 passed); Runner 41989977594 SUCCESS push-only. Acceptance qa/certification/ALGEBRA114_AS_PF_06_ACCEPTANCE_R385.md."
+    },
+    {
+      "id": "ALGEBRA114-AS-PF-07",
+      "status": "PASS_SCOPED",
+      "detail": "Plus-only. SHA e7f88498eb4520a968cd45a216a20ff43688a509; backend/tests/test_algebra114_as_pf07.py blob 347cdce37403c61f914808f4b68a9c42c07039fc; CI 41989977569 SUCCESS (backend 2800 passed, frontend SUCCESS); cumulative 41989977600 SUCCESS (all PF-01..08 explicitly PASSED; backend 2800 passed, 1 skipped, 10 xfailed); H1d 41989977542 SUCCESS (38 passed); Runner 41989977594 SUCCESS push-only. Acceptance qa/certification/ALGEBRA114_AS_PF_07_ACCEPTANCE_R386.md."
+    },
+    {
+      "id": "ALGEBRA114-AS-PF-08",
+      "status": "PASS_SCOPED",
+      "detail": "Plus-only. SHA e7f88498eb4520a968cd45a216a20ff43688a509; backend/tests/test_algebra114_as_pf08.py blob 9fb0f1e410535667c65aa6208d562ed23477566a; CI 41989977569 SUCCESS (backend 2800 passed, frontend SUCCESS); cumulative 41989977600 SUCCESS (all PF-01..08 explicitly PASSED; backend 2800 passed, 1 skipped, 10 xfailed); H1d 41989977542 SUCCESS (38 passed); Runner 41989977594 SUCCESS push-only. Acceptance qa/certification/ALGEBRA114_AS_PF_08_ACCEPTANCE_R387.md."
     }
   ],
   "h2_en_sg_evidence_audit_r314": {
@@ -658,5 +683,65 @@
       }
     ],
     "note": "All eight AS-PF backend tests explicitly PASSED in the cumulative log. The three strengthened tests also pass on this SHA. Do not infer Lite/Plus UI parity; preserve VC-FE-45 block."
+  },
+  "plus_algebra114_pf_full_fraction_oracle_suite_r387": {
+    "status": "PASS_SCOPED",
+    "sha": "e7f88498eb4520a968cd45a216a20ff43688a509",
+    "source_blob": "b30ca7fcec641334ce8128ca25bec542a9d04e79",
+    "ci_run": 41989977569,
+    "ci_status": "SUCCESS",
+    "ci_backend_summary": "2800 passed",
+    "cumulative_run": 41989977600,
+    "cumulative_status": "SUCCESS",
+    "cumulative_backend_summary": "2800 passed, 1 skipped, 10 xfailed",
+    "h1d_run": 41989977542,
+    "h1d_status": "SUCCESS",
+    "h1d_passed": 38,
+    "runner_run": 41989977594,
+    "runner_status": "SUCCESS_PUSH_ONLY",
+    "tests": [
+      {
+        "id": "AS-PF-01",
+        "path": "backend/tests/test_algebra114_as_pf01.py",
+        "blob": "06b14beebcaec379036971feec704e336c21479c"
+      },
+      {
+        "id": "AS-PF-02",
+        "path": "backend/tests/test_algebra114_as_pf02.py",
+        "blob": "3127e2aa58f3f67d19bf633760c4797adcf461f8"
+      },
+      {
+        "id": "AS-PF-03",
+        "path": "backend/tests/test_algebra114_as_pf03.py",
+        "blob": "b3ddb122174ee893fc183a60a11e27e7f840e982"
+      },
+      {
+        "id": "AS-PF-04",
+        "path": "backend/tests/test_algebra114_as_pf04.py",
+        "blob": "bd8924c88a46402eb9a6da454ab1417d7dc9ea97"
+      },
+      {
+        "id": "AS-PF-05",
+        "path": "backend/tests/test_algebra114_as_pf05.py",
+        "blob": "9c4ca2f174e95794dd1dcf32b8bee69efbada0b5"
+      },
+      {
+        "id": "AS-PF-06",
+        "path": "backend/tests/test_algebra114_as_pf06.py",
+        "blob": "84e1554c1e23602c20b9c10815ee742d84ddf022"
+      },
+      {
+        "id": "AS-PF-07",
+        "path": "backend/tests/test_algebra114_as_pf07.py",
+        "blob": "347cdce37403c61f914808f4b68a9c42c07039fc"
+      },
+      {
+        "id": "AS-PF-08",
+        "path": "backend/tests/test_algebra114_as_pf08.py",
+        "blob": "9fb0f1e410535667c65aa6208d562ed23477566a"
+      }
+    ],
+    "independent_oracle": "All eight backend tests now compare service and HTTP results to exact arithmetic using Python fractions.Fraction for non-singular integer sample points; original denominator exclusions are separately asserted for PF-05 and PF-08.",
+    "note": "This is Plus backend/service+HTTP certification only. Runner was push-only and does not certify workflow dispatch or persistence. Preserve the separate VC-FE-45 / EV-I-12 contract block; global certification remains OPEN."
   }
 }
