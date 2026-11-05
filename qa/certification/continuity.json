@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 377,
+  "revision": 378,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "adbf5c3826480a015456c8f64257f866f23ca3c4",
@@ -551,5 +551,28 @@
       "reason": "QA dependency audit hard gate; 8 moderate findings"
     },
     "note": "Plus did not execute AS-PF-02; no parity claim. Preserve next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT against EV-I-12 unchanged. Next Lite case AS-PF-03. Global certification OPEN."
+  },
+  "lite_companion_as_pf03_r386": {
+    "status": "PASS_SCOPED_LITE_ONLY",
+    "lite": {
+      "sha": "91f3cd4f97bf712b778d4a803a952a59e4dea7e4",
+      "test_blob": "bccfbd4e3460d36d8054f3e193943bc6d4db9e1b",
+      "acceptance": "qa/certification/ALGEBRA114_AS_PF_03_ACCEPTANCE_R386.md",
+      "cumulative_run": 41985243812,
+      "cumulative_status": "SUCCESS",
+      "h1d_run": 41985243959,
+      "h1d_status": "SUCCESS",
+      "scientific_ui_run": 41985243868,
+      "scientific_ui_status": "SUCCESS",
+      "scientific_ui_passed": 456,
+      "runner_run": 41985243862,
+      "runner_status": "SUCCESS_PUSH_ONLY",
+      "ci_run": {
+        "id": 41985243810,
+        "status": "FAILURE",
+        "reason": "QA dependency audit hard gate; 8 moderate findings"
+      }
+    },
+    "note": "Plus did not execute AS-PF-03; no parity claim. Preserve next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT against EV-I-12 unchanged. Next Lite row AS-PF-04. Global certification OPEN."
   }
 }
