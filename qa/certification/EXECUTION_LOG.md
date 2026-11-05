@@ -995,3 +995,11 @@ La siguiente acción de Algebra114 en Plus será reforzar AS-RAT-03 con un orác
 - CI [41999414498](https://github.com/c2melendez/precision-lab-plus/actions/runs/41999414498) SUCCESS, backend 2,800 passed; acumulativo [41999414506](https://github.com/c2melendez/precision-lab-plus/actions/runs/41999414506) SUCCESS, log focal RAT-07 PASSED; H1d [41999414450](https://github.com/c2melendez/precision-lab-plus/actions/runs/41999414450) SUCCESS (38/38); Runner [41999414341](https://github.com/c2melendez/precision-lab-plus/actions/runs/41999414341) SUCCESS push-only, dispatch/persist skipped.
 - Candidato previo `76123db5d0b4671e13875ac49ca602a49f1c4244` descartado por literal de fixture doblemente escapado; no se reutilizó. Únicamente se acepta el SHA corregido.
 - Siguiente Plus RAT-08. Se preserva EDCX-B6 VC-FE-45 BLOCKED frente a EV-I-12; global OPEN.
+
+
+## 2026-11-05 UTC — r392: Plus Algebra114 AS-RAT-08 PASS_SCOPED
+
+- SHA técnico `8f38520aea1a98099f2fc95909a0af94459476cf`; test `backend/tests/test_algebra114_as_rat08.py`, blob `136f9b0319bf7bd1363ee18f5fbe75d2c3a11ca4`; aceptación `ALGEBRA114_AS_RAT_08_ACCEPTANCE_R392.md`.
+- Fila congelada exacta; servicio y HTTP; Python math.sqrt independiente, positividad y cuadrado `5+2sqrt(6)`.
+- CI [42001054496](https://github.com/c2melendez/precision-lab-plus/actions/runs/42001054496) SUCCESS (frontend y backend; backend 2,800 passed); acumulativo [42001054497](https://github.com/c2melendez/precision-lab-plus/actions/runs/42001054497) SUCCESS, log focal RAT08 PASSED y backend 2,800 passed; H1d [42001054407](https://github.com/c2melendez/precision-lab-plus/actions/runs/42001054407) SUCCESS (38/38); Runner [42001054193](https://github.com/c2melendez/precision-lab-plus/actions/runs/42001054193) push-only (dispatch/persist omitidos).
+- Siguiente trabajo matemático bilateral Algebra229 AS-A-06. No se infiere paridad UI. VC-FE-45 permanece bloqueada frente a EV-I-12; global OPEN.

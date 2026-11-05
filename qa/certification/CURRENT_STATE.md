@@ -1,3 +1,22 @@
+# Actualización de certificación — 2026-11-05 UTC (r392)
+
+## Plus — Algebra114 AS-RAT-08 PASS_SCOPED
+
+- AS-RAT-08 aceptada exclusivamente para Plus backend/servicio HTTP sobre SHA `8f38520aea1a98099f2fc95909a0af94459476cf`; test `backend/tests/test_algebra114_as_rat08.py`, blob `136f9b0319bf7bd1363ee18f5fbe75d2c3a11ca4`; aceptación `ALGEBRA114_AS_RAT_08_ACCEPTANCE_R392.md`.
+- Fila exacta; servicio `simplify_expression` y POST `/api/v1/simplify`; oráculo numérico Python `math.sqrt` independiente de SymPy para `sqrt(5+2sqrt(6))` y `sqrt(3)+sqrt(2)`, positividad e identidad del cuadrado.
+- CI [42001054496](https://github.com/c2melendez/precision-lab-plus/actions/runs/42001054496) **SUCCESS**; frontend audit/typecheck/unit/parity/build y backend SUCCESS, 2,800 passed, 1 skipped, 10 xfailed.
+- Acumulativo [42001054497](https://github.com/c2melendez/precision-lab-plus/actions/runs/42001054497) **SUCCESS**; log confirma el test focal RAT-08 como PASSED; backend 2,800 passed, 1 skipped, 10 xfailed.
+- H1d [42001054407](https://github.com/c2melendez/precision-lab-plus/actions/runs/42001054407) **SUCCESS**, 38/38. Runner [42001054193](https://github.com/c2melendez/precision-lab-plus/actions/runs/42001054193) **SUCCESS_PUSH_ONLY**; dispatch/QA receipt/persist omitidos.
+- La siguiente tarea matemática bilateral es **Algebra229 AS-A-06**. `plus_algebra114_next_action` actualizado para reflejar esa acción y la evidencia pendiente de Lite SY-N-31.
+- El bloqueo contractual EDCX-B6 VC-FE-45 contra EV-I-12 sigue sin cambios. Global OPEN.
+
+## Continuidad Lite — Algebra229 AS-A-06
+
+- Lite técnico SHA `790c49034f88ef0b20ad76c0e49c41fbb3cbd763`; test `tests/algebra229AsA06.audit.test.ts`, blob `6ffb510661f5c88c1c5f553a188f3d8566d05e1b`; acumulativo 42001452228 SUCCESS (typecheck/unit/build), H1d 42001452201 SUCCESS (22/22). Scientific UI 42001452411 seguía in progress al corte; CI 42001452519 falló en el hard gate de auditoría (4 moderadas), sin alterar umbral.
+- La prueba de Lite ahora exige la fila congelada exacta; el oráculo numérico existente compara 8 ternas firmadas contra `(x+y+z)^2`. Cierre bilateral pendiente de SY-N-31 Lite y de los gates Plus.
+
+Global certification **OPEN**.
+
 # Actualización de certificación — 2026-11-05 UTC (r391)
 
 ## Plus — Algebra114 AS-RAT-07 PASS_SCOPED
