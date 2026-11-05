@@ -1,6 +1,6 @@
 # Algebra 229 — preparacion de matriz y trazabilidad
 
-Estado: **FIXTURE_PROMOTED**; sección A **AS-A-01..06 PASS_SCOPED bilateral** (casos individuales, tests unit/HTTP y gates por caso); matriz **NOT_EXECUTED** en bloque (no se certifican las 229 filas). Certificacion global **OPEN**.
+Estado: **FIXTURE_PROMOTED**; sección A **AS-A-01..15 PASS_SCOPED bilateral** (casos individuales, tests unit/HTTP y gates por caso); matriz **NOT_EXECUTED** en bloque (no se certifican las 229 filas). Certificacion global **OPEN**.
 
 ## Fuente y fixture
 
@@ -15,8 +15,8 @@ Estado: **FIXTURE_PROMOTED**; sección A **AS-A-01..06 PASS_SCOPED bilateral** (
 
 ## Avance seccion A (expandir)
 
-AS-A-01..13 cerrados PASS_SCOPED bilateral (ver `CURRENT_STATE.md` / `EXECUTION_LOG_AS229_SECTION_A.md`).
+AS-A-01..15 cerrados PASS_SCOPED bilateral (ver `CURRENT_STATE.md` / `EXECUTION_LOG_AS229_SECTION_A.md`).
 
 ## Siguiente
 
-`ALGEBRA229-AS-A-15-TEST-FIRST` — expandir `(x+1/x)^3` → `x^3+3*x+3/x+1/x^3` bilateral. Global OPEN.
+`ALGEBRA229-AS-A-16-TEST-FIRST` — expandir `(1+i)^4` → `-4` bilateral. Global OPEN.
