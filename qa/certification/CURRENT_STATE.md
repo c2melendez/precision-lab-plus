@@ -1,3 +1,18 @@
+# Actualización de certificación — 2026-11-05 UTC (r405)
+
+## Algebra229 AS-A-16 — PASS_SCOPED bilateral
+
+- Plus SHA `3555ce2898b31eda626c95d0c89c59a99f4dba8b`; test `backend/tests/test_algebra229_as_a16.py`, blob `d79aaffb29e31583a5ca877592242c4888f491a8`. Ambos tests focales PASSED: celdas fuente exactas y expansión de servicio+HTTP con oráculo independiente de enteros gaussianos. Acumulativo [42038783860](https://github.com/c2melendez/precision-lab-plus/actions/runs/42038783860) SUCCESS, 2,800 passed / 1 skipped / 10 xfailed, cobertura 88.88%; H1d [42038784134](https://github.com/c2melendez/precision-lab-plus/actions/runs/42038784134) SUCCESS (38/38); CI [42038784081](https://github.com/c2melendez/precision-lab-plus/actions/runs/42038784081) SUCCESS (2,800 backend / 1,055 frontend); Runner 42038784013 SUCCESS push-only.
+- Lite SHA `36b1c73d0673a05e2418cc3c6dc49952a7c729f9`; acumulativo [42038744006](https://github.com/c2melendez/precision-lab-lite/actions/runs/42038744006) SUCCESS (2 focales/2,259); H1d [42038743676](https://github.com/c2melendez/precision-lab-lite/actions/runs/42038743676) SUCCESS (22); Scientific UI [42038744245](https://github.com/c2melendez/precision-lab-lite/actions/runs/42038744245) SUCCESS (456); CI [42038743893](https://github.com/c2melendez/precision-lab-lite/actions/runs/42038743893) FAILURE solamente npm audit (4 moderadas); Runner 42038743972 SUCCESS push-only.
+- A16 queda **PASS_SCOPED bilateral**. La auditoría de dependencias Lite continúa como bloqueo separado.
+
+## Algebra229 AS-A-17 — TEST-FIRST / WAIT
+
+- Plus test `backend/tests/test_algebra229_as_a17.py` reforzado; commit técnico `8232f3979cf128c1bd52c6de2bfde4e9296a5d77`, blob `d7f9d67e77b9b5f37a2ddc91dd5231a206c55ad7`. Comprueba celdas exactas, servicio+HTTP y siete pares enteros con oráculo Python independiente basado en coeficientes.
+- Plus cumulative 42039991777, H1d 42039991674, CI 42039991675 (queued al último sondeo) y Runner 42039991673.
+- Lite SHA `b37502c5713bddabae6a022e6e1cb788ee72a87d`; cumulative 42039943541, H1d 42039943721, Scientific UI 42039943566, CI 42039944052 (audit failure) y Runner 42039943836.
+- A17 no está aprobado hasta concluir y revisar los gates. EDCX-B6 VC-FE-45/EV-I-12 continúa BLOCKED; certificación global OPEN.
+
 # Actualización de certificación — 2026-11-05 UTC (r404)
 
 ## Algebra229 AS-A-15 — PASS_SCOPED bilateral
