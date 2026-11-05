@@ -1,3 +1,11 @@
+## 2026-11-05 UTC — r393: Plus Algebra229 AS-A-06 PASS_SCOPED bilateral
+
+- Plus SHA `0b2f02e6507f50ea4072691c96d5270dfdb0827c`; test `backend/tests/test_algebra229_as_a06.py`, blob `2ec9c63c8f7eb4a522c65b173573369fbed34ada`; fila exacta, servicio+HTTP y ocho ternas firmadas con oráculo Python independiente.
+- CI 42002301382 y cumulative 42002301613 SUCCESS; H1d 42002301152 SUCCESS (38/38); Runner 42002301346 SUCCESS push-only. Pytest descubre `tests` completo; job logs individuales no estuvieron accesibles (404), no se cita línea focal no recuperada.
+- Lite SHA 790c49034f88ef0b20ad76c0e49c41fbb3cbd763; cumulative 42001452228, H1d 42001452201 y Scientific UI 42001452411 SUCCESS; CI 42001452519 FAILURE en audit de 4 moderadas.
+- A06 bilateral PASS_SCOPED. Siguiente AS-A-07 bilateral; no cambia EDCX-B6 VC-FE-45/EV-I-12; global OPEN.
+
+
 
 ## 2026-10-30 UTC — r360: reconciliación del Certification Runner (Plus)
 

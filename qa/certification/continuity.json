@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 392,
+  "revision": 393,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "8f38520aea1a98099f2fc95909a0af94459476cf",
-  "baseline_case": "ALGEBRA114-AS-RAT-08",
+  "technical_baseline_sha": "0b2f02e6507f50ea4072691c96d5270dfdb0827c",
+  "baseline_case": "ALGEBRA229-AS-A-06",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -241,7 +241,8 @@
     "qa/certification/continuity.json",
     "qa/certification/ALGEBRA114_AS_RAT_04_ACCEPTANCE_R390.md",
     "qa/certification/ALGEBRA114_AS_RAT_07_ACCEPTANCE_R391.md",
-    "qa/certification/ALGEBRA114_AS_RAT_08_ACCEPTANCE_R392.md"
+    "qa/certification/ALGEBRA114_AS_RAT_08_ACCEPTANCE_R392.md",
+    "qa/certification/ALGEBRA229_AS_A_06_ACCEPTANCE_R393.md"
   ],
   "runner_certification_r360": {
     "status": "PASS_SCOPED_PUSH_ONLY",
@@ -503,7 +504,7 @@
     },
     "note": "Plus did not execute AS-EXP-09. No parity inferred. Preserve next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT unchanged."
   },
-  "updated_utc": "2026-11-05T09:24:49.460Z",
+  "updated_utc": "2026-11-05T09:44:09.439Z",
   "lite_companion_as_exp10_r371": {
     "status": "PASS_SCOPED_LITE_ONLY",
     "sha": "5a6662e03e413063f9e73ca1f4210b7a155da5ca",
@@ -796,10 +797,10 @@
     "note": "Plus backend/service+HTTP only. RAT-03 and RAT-04 still have SymPy-based tests without independent numeric oracles; they are not accepted by this suite. No Lite UI parity claim. Preserve EDCX-B6 VC-FE-45 contract conflict and global OPEN."
   },
   "plus_algebra114_next_action": {
-    "id": "ALGEBRA229-AS-A-06-TEST-FIRST",
+    "id": "ALGEBRA229-AS-A-07-TEST-FIRST",
     "status": "READY",
-    "previous_id": "AS-RAT-08-ORACLE-AUDIT",
-    "action": "Complete the bilateral Algebra229 AS-A-06 case. Lite exact source-row check and independent numerical oracle are in CI on SHA 790c49034f88ef0b20ad76c0e49c41fbb3cbd763; wait for its SY-N-31. Strengthen backend/tests/test_algebra229_as_a06.py in Plus with the exact frozen source row, POST /api/v1/expand and independent Python numerical oracle over signed sample triples; then wait for cumulative+H1d. Close the bilateral case only after all required gates pass."
+    "previous_id": "ALGEBRA229-AS-A-06-TEST-FIRST",
+    "action": "Test-first de AS-A-07 en Plus: fortalecer backend/tests/test_algebra229_as_a07.py con la fila completa congelada, servicio expand_expression + POST /api/v1/expand y oráculo aritmético Python independiente de SymPy sobre x=[-2,-1,0,1,2,3,5] para (2x-3)^4. Gate Plus cumulative+H1d; conservar CI automático. No cambiar motor si la prueba pasa."
   },
   "plus_algebra114_as_rat03_r389": {
     "status": "PASS_SCOPED",
@@ -906,5 +907,46 @@
     "scope": "Plus backend/service HTTP only",
     "oracle": "Python math.sqrt independent from SymPy, service+HTTP values, positivity and squared identity 5+2sqrt(6)",
     "note": "No Lite UI parity claim. The next Algebra229 case is AS-A-06, to be handled in the matrix's bilateral one-case cycle. EDCX-B6 VC-FE-45 contract conflict with EV-I-12 remains separate and unresolved; global certification OPEN."
+  },
+  "algebra229_as_a06_r393": {
+    "status": "PASS_SCOPED_BILATERAL_CASE",
+    "sha": "0b2f02e6507f50ea4072691c96d5270dfdb0827c",
+    "source_sha256": "8cd36ff08343f98f92abd83e2b162d565e0cbe5c59dc73f26b1c018f77d663c7",
+    "test": "backend/tests/test_algebra229_as_a06.py",
+    "test_blob": "2ec9c63c8f7eb4a522c65b173573369fbed34ada",
+    "acceptance": "qa/certification/ALGEBRA229_AS_A_06_ACCEPTANCE_R393.md",
+    "ci_run": 42002301382,
+    "ci_status": "SUCCESS",
+    "ci_steps": [
+      "frontend QA dependency audit",
+      "frontend typecheck",
+      "frontend unit/parity",
+      "frontend production build",
+      "backend tests"
+    ],
+    "cumulative_run": 42002301613,
+    "cumulative_status": "SUCCESS",
+    "cumulative_steps": [
+      "fixture integrity",
+      "continuity guard regressions",
+      "frontend typecheck/unit/build",
+      "backend regression"
+    ],
+    "h1d_run": 42002301152,
+    "h1d_status": "SUCCESS",
+    "h1d_passed": 38,
+    "runner_run": 42002301346,
+    "runner_status": "SUCCESS_PUSH_ONLY",
+    "scope": "Algebra229 AS-A-06 only; bilateral test-level acceptance",
+    "oracle": "Eight signed triples; independent Python integer arithmetic (x+y+z)^2; exact frozen source row; service+HTTP.",
+    "test_discovery": "backend/pyproject.toml declares testpaths=['tests']; CI executes pytest -q and cumulative pytest -vv without a file selector. Individual job-log download returned 404, but complete backend test steps succeeded.",
+    "next_action": "ALGEBRA229-AS-A-07-TEST-FIRST",
+    "note": "No full Algebra229 matrix or global certification claim."
+  },
+  "plus_algebra229_next_action": {
+    "id": "ALGEBRA229-AS-A-07-TEST-FIRST",
+    "status": "READY",
+    "previous_id": "ALGEBRA229-AS-A-06-TEST-FIRST",
+    "action": "Test-first de AS-A-07 en Plus: fortalecer backend/tests/test_algebra229_as_a07.py con la fila completa congelada, servicio expand_expression + POST /api/v1/expand y oráculo aritmético Python independiente de SymPy sobre x=[-2,-1,0,1,2,3,5] para (2x-3)^4. Gate Plus cumulative+H1d; conservar CI automático. No cambiar motor si la prueba pasa."
   }
 }

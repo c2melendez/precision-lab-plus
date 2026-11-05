@@ -1,3 +1,14 @@
+# Actualización de certificación — 2026-11-05 UTC (r393)
+
+## Algebra229 AS-A-06 — PASS_SCOPED bilateral
+
+- Plus SHA técnico `0b2f02e6507f50ea4072691c96d5270dfdb0827c`; test `backend/tests/test_algebra229_as_a06.py`, blob `2ec9c63c8f7eb4a522c65b173573369fbed34ada`; servicio `expand_expression` + HTTP `POST /api/v1/expand`, fila exacta y ocho ternas con oráculo Python independiente.
+- CI [42002301382](https://github.com/c2melendez/precision-lab-plus/actions/runs/42002301382) y acumulativo [42002301613](https://github.com/c2melendez/precision-lab-plus/actions/runs/42002301613) SUCCESS; backend test jobs completos. H1d [42002301152](https://github.com/c2melendez/precision-lab-plus/actions/runs/42002301152) SUCCESS (38/38); Runner [42002301346](https://github.com/c2melendez/precision-lab-plus/actions/runs/42002301346) push-only.
+- La prueba backend pertenece a `testpaths=["tests"]`; CI corre `pytest -q` y acumulativo `pytest -vv` sin selector por archivo. La descarga de logs individuales respondió 404; las suites backend completas finalizaron correctamente.
+- Lite SHA técnico `790c49034f88ef0b20ad76c0e49c41fbb3cbd763`; acumulativo 42001452228, H1d 42001452201 y Scientific UI 42001452411 SUCCESS. CI 42001452519 sigue FAILURE por el hard gate de auditoría (4 moderadas).
+- A06 queda cerrado bilateralmente como PASS_SCOPED. Próxima fila: **AS-A-07**. El bloqueo global EDCX-B6 VC-FE-45/EV-I-12 permanece sin cambios; global OPEN.
+
+
 # Actualización de certificación — 2026-11-05 UTC (r392)
 
 ## Plus — Algebra114 AS-RAT-08 PASS_SCOPED

@@ -1,6 +1,6 @@
 # Algebra 229 — preparacion de matriz y trazabilidad
 
-Estado: **FIXTURE_PROMOTED**; sección A **AS-A-01..05 PASS_SCOPED** (unit/HTTP); matriz **NOT_EXECUTED** en bloque (2026-10-20). Certificacion global **OPEN**.
+Estado: **FIXTURE_PROMOTED**; sección A **AS-A-01..06 PASS_SCOPED bilateral** (casos individuales, tests unit/HTTP y gates por caso); matriz **NOT_EXECUTED** en bloque (no se certifican las 229 filas). Certificacion global **OPEN**.
 
 ## Fuente y fixture
 
@@ -15,8 +15,8 @@ Estado: **FIXTURE_PROMOTED**; sección A **AS-A-01..05 PASS_SCOPED** (unit/HTTP)
 
 ## Avance seccion A (expandir)
 
-AS-A-01..05 cerrados PASS_SCOPED bilateral (ver `CURRENT_STATE.md` / `EXECUTION_LOG_AS229_SECTION_A.md`).
+AS-A-01..06 cerrados PASS_SCOPED bilateral (ver `CURRENT_STATE.md` / `EXECUTION_LOG_AS229_SECTION_A.md`).
 
 ## Siguiente
 
-`ALGEBRA229-AS-A-06-TEST-FIRST` — expand `(x+y+z)^2` → `x^2+2xy+2xz+y^2+2yz+z^2` bilateral. Global OPEN.
+`ALGEBRA229-AS-A-07-TEST-FIRST` — expandir `(2x-3)^4` → `16x^4-96x^3+216x^2-216x+81` bilateral. Global OPEN.
