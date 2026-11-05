@@ -37,6 +37,14 @@ class UnsupportedInfiniteBoundsError(ValueError):
     """Límite `oo`/`-oo` en Fase 1 -> `ErrorCode.UNSUPPORTED_IN_PHASE_1`."""
 
 
+UNSUPPORTED_INTEGRAL_MESSAGE = "Sin forma elemental para esta integral."
+
+
+class UnsupportedIntegralError(ValueError):
+    """The integration engine left an unevaluated Integral expression."""
+
+
+
 _RULE_LABELS = {
     mi.PowerRule: "Integral de potencia",
     mi.ExpRule: "Integral de exponencial",
@@ -191,6 +199,8 @@ def integrate_expression(
     )
 
     if lower_bound is None and upper_bound is None:
+        if antiderivative.has(sympy.Integral):
+            raise UnsupportedIntegralError(UNSUPPORTED_INTEGRAL_MESSAGE)
         for index, step in enumerate(steps):
             step.index = index
         return IntegralResult(
@@ -200,6 +210,8 @@ def integrate_expression(
     lower_expr = _parse_bound(lower_bound)
     upper_expr = _parse_bound(upper_bound)
     reference = sympy.integrate(input_expr, (var_symbol, lower_expr, upper_expr))
+    if reference.has(sympy.Integral):
+        raise UnsupportedIntegralError(UNSUPPORTED_INTEGRAL_MESSAGE)
 
     can_use_ftc_steps = has_detailed_steps and not antiderivative.has(sympy.Integral)
     if can_use_ftc_steps:

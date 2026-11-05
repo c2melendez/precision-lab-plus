@@ -172,7 +172,7 @@ export default function App() {
           className={`mx-auto min-w-0 max-w-3xl flex-1 px-6 py-8 lg:max-w-5xl dt:max-w-[1440px] dt:px-10 ${mainBottomPadding} focus:outline-none`}
         >
           {lastErrorMessage && (
-            <p role="alert" className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <p role="status" aria-live="polite" className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
               {lastErrorMessage}
             </p>
           )}

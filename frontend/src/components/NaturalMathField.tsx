@@ -247,11 +247,37 @@ export function latexToBackendSyntax(latex: string): string {
   // absoluto, mientras que el backend sí expone abs(...). Normalizamos
   // explícitamente el contrato real del teclado antes de convertir.
   const absoluteTrimmed = latex.trim();
+  // MathLive 0.110 serializa el valor absoluto nativo como
+  // \left\lvert x\right\rvert (no como \left|x\right|).
+  // La forma puede ir seguida de \text{con} y sus sustituciones inline;
+  // por eso reconocemos el delimitador como prefijo y convertimos el resto
+  // por separado, en vez de exigir que el valor absoluto ocupe todo el campo.
   const absoluteMatch =
-    absoluteTrimmed.match(/^\\left\|(.*)\\right\|$/s) ??
-    absoluteTrimmed.match(/^\|(.*)\|$/s);
-  if (absoluteMatch) return `abs(${latexToBackendSyntax(absoluteMatch[1])})`;
-
+    absoluteTrimmed.match(/^\\left\\lvert([\s\S]*?)\\right\\rvert/s) ??
+    absoluteTrimmed.match(/^\\lvert([\s\S]*?)\\rvert/s) ??
+    absoluteTrimmed.match(/^\\left\|(.*?)\\right\|/s) ??
+    absoluteTrimmed.match(/^\|(.*?)\|/s);
+  if (absoluteMatch) {
+    const absolute = `abs(${latexToBackendSyntax(absoluteMatch[1])})`;
+    const suffix = absoluteTrimmed.slice(absoluteMatch[0].length).trim();
+    // Separate inline bindings before composing the arithmetic tail. A
+    // MathLive source such as |x|+x con x=-4 must become
+    // `(abs(x)+x) "con" x=-4`, not `abs(x) +x "con" x=-4`.
+    const bindingMarker = /\\text\s*\{\s*con\s*\}/i.exec(suffix);
+    const arithmeticSuffix = (bindingMarker
+      ? suffix.slice(0, bindingMarker.index)
+      : suffix).trim();
+    const bindingSuffix = bindingMarker
+      ? suffix.slice(bindingMarker.index).trim()
+      : "";
+    const arithmetic = arithmeticSuffix
+      ? `(${absolute}${latexToBackendSyntax(arithmeticSuffix)})`
+      : absolute;
+    const bindings = bindingSuffix
+      ? ` ${latexToBackendSyntax(bindingSuffix)}`
+      : "";
+    return `${arithmetic}${bindings}`;
+  }
   const aggregate = rewriteFiniteAggregateLatex(latex);
   if (aggregate) return aggregate;
   // MathLive may serialize ± as either \\pm or +-. Preserve its calculator
@@ -312,9 +338,12 @@ export function NaturalMathField({
     if (!el) return;
 
     function handleInput(): void {
-      if (el && el.getValue("latex-unstyled") !== latex) {
-        onLatexChange(el.getValue("latex-unstyled"));
-      }
+      if (!el) return;
+      // Do not compare against `latex` captured by this effect. The callback
+      // can outlive that render; after a later edit, clearing back to the
+      // initially captured value would otherwise be dropped and React would
+      // retain stale input in BasicMode.
+      onLatexChange(el.getValue("latex-unstyled"));
     }
 
     el.addEventListener("input", handleInput);

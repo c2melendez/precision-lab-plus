@@ -17,6 +17,7 @@ from typing import Dict, Optional
 
 import sympy
 from sympy import cos, cot, csc, pi, sec, sin, tan
+from sympy.core.numbers import ImaginaryUnit, NumberSymbol
 
 from app.services import parsing
 
@@ -100,6 +101,35 @@ def _apply_degree_conversion(expr: sympy.Expr) -> sympy.Expr:
     return expr.replace(_is_direct_trig, _convert)
 
 
+def _can_safely_reduce_numeric_expression(expr: sympy.Basic) -> bool:
+    """Allow exact reduction only for small arithmetic trees.
+
+    Deliberately exclude factorials, combinatorics and arbitrary special functions:
+    ``doit()`` on those can materialize enormous exact integers or symbolic forms.
+    """
+    safe_nodes = (sympy.Add, sympy.Mul, sympy.Pow, sympy.Abs, sympy.Piecewise)
+    # These constants are inert leaves in a bounded arithmetic tree. In
+    # particular, allowing I lets a small power such as I**2 reduce exactly
+    # without enabling arbitrary function evaluation.
+    safe_constants = (ImaginaryUnit, NumberSymbol)
+    nodes = list(sympy.preorder_traversal(expr))
+    if len(nodes) > 50:
+        return False
+
+    for node in nodes:
+        if node.is_Number:
+            if node.is_Integer and len(str(abs(int(node)))) > 64:
+                return False
+            continue
+        if isinstance(node, safe_constants):
+            continue
+        if not isinstance(node, safe_nodes):
+            return False
+        if node.is_Pow and node.args[1].is_Integer and abs(int(node.args[1])) > 64:
+            return False
+    return True
+
+
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
@@ -150,8 +180,18 @@ def evaluate(
         ):
             raise DomainErrorResult("El resultado no está definido en este dominio.")
 
+    # Reduce only small arithmetic trees before formatting so exact answers are
+    # displayed (2+3 -> 5, sqrt(-1) -> I). Special functions, factorials and
+    # combinatorics stay on the bounded evalf() path.
+    display_expr = expr
+    if _can_safely_reduce_numeric_expression(expr):
+        try:
+            display_expr = expr.doit(deep=True)
+        except (AttributeError, ZeroDivisionError, ValueError, OverflowError):
+            display_expr = expr
+
     try:
-        numeric_value = expr.evalf()
+        numeric_value = display_expr.evalf()
     except (AttributeError, ZeroDivisionError, ValueError, OverflowError) as exc:
         raise DomainErrorResult("El resultado no está definido en este dominio.") from exc
     needs_pole_check = (
@@ -172,4 +212,4 @@ def evaluate(
 
     approx = float(numeric_value) if numeric_value.is_real else None
 
-    return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=True, approx_value=approx)
+    return EvaluateResult(expr=display_expr, input_expr=input_expr, is_numeric=True, approx_value=approx)

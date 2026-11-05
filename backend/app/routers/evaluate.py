@@ -5,7 +5,7 @@ app/routers/evaluate.py — `POST /evaluate` (spec, secciones 3, 4, 5, 6, 7, 9).
 import time
 
 import sympy
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response
 
 from app.core.logging import log_request_event
 from app.schemas.requests import EvaluateRequest
@@ -35,8 +35,16 @@ def _error(request: Request, error_code: ErrorCode, message: str) -> MathRespons
 
 
 @router.post("/evaluate", response_model=MathResponse)
-async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
+async def evaluate(payload: EvaluateRequest, request: Request, response: Response) -> MathResponse:
     log_request_event(request.state.request_id, "evaluate_request", input_text=payload.expression)
+
+    if len(payload.expression) > 500:
+        response.status_code = 422
+        return _error(
+            request,
+            ErrorCode.VALIDATION_ERROR,
+            "Entrada demasiado larga: el máximo permitido es de 500 caracteres.",
+        )
 
     try:
         result = evaluate_service.evaluate(
