@@ -17,6 +17,7 @@ from typing import Dict, Optional
 
 import sympy
 from sympy import cos, cot, csc, pi, sec, sin, tan
+from sympy.core.numbers import ImaginaryUnit, NumberSymbol
 
 from app.services import parsing
 
@@ -110,7 +111,7 @@ def _can_safely_reduce_numeric_expression(expr: sympy.Basic) -> bool:
     # These constants are inert leaves in a bounded arithmetic tree. In
     # particular, allowing I lets a small power such as I**2 reduce exactly
     # without enabling arbitrary function evaluation.
-    safe_constants = (sympy.ImaginaryUnit, sympy.NumberSymbol)
+    safe_constants = (ImaginaryUnit, NumberSymbol)
     nodes = list(sympy.preorder_traversal(expr))
     if len(nodes) > 50:
         return False
