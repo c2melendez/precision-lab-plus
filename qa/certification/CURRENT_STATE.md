@@ -1,3 +1,13 @@
+# Actualización de certificación — 2026-11-05 UTC (r402)
+
+## Algebra229 AS-A-14 — PASS_SCOPED bilateral
+
+- Plus SHA `7795639d509258c4057fd74a9a8457b27186b374`; test `backend/tests/test_algebra229_as_a14.py`, blob `04a636857f9ba881f4853817d2d57684337def07`; fila fuente completa, servicio+HTTP, equivalencia simbólica y oráculo independiente `math.sqrt(6)`.
+- Plus acumulativo [42033653002](https://github.com/c2melendez/precision-lab-plus/actions/runs/42033653002) **SUCCESS**, `skip=false`, dos tests focales PASSED; backend 2,800 passed / 1 skipped / 10 xfailed, cobertura 88.93%. H1d [42033653154](https://github.com/c2melendez/precision-lab-plus/actions/runs/42033653154) **SUCCESS** (38/38). CI [42033652882](https://github.com/c2melendez/precision-lab-plus/actions/runs/42033652882) **SUCCESS** (backend 2,800; frontend 1,055). Runner 42033652920 push-only.
+- Lite SHA `f67f91fb58e7c175903f8c17aa86d0a6e2c6f6f0`; cumulative 42033618184, H1d 42033618189 y Scientific UI 42033618195 **SUCCESS**; CI 42033618277 **FAILURE** solo npm audit, cuatro moderadas (artifact 13416204822).
+- Los candidatos previos 14b369.../42033342352, 5f0fe.../42033463732 y 0de7cf.../42033498258 fallaron por escape/nota final incompleta del expected row; la fila fuente completa se verificó en los SHA finales. Sin cambios de producto.
+- A14 queda **PASS_SCOPED bilateral**. Siguiente fila: **AS-A-15**, `(x+1/x)^3`, con `x ≠ 0`. EDCX-B6 VC-FE-45/EV-I-12 sigue BLOCKED; global OPEN.
+
 # Actualización de certificación — 2026-11-05 UTC (r401)
 
 ## Algebra229 AS-A-14 — TEST-FIRST IMPLEMENTED / GATES IN PROGRESS
