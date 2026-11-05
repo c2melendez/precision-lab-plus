@@ -1,3 +1,14 @@
+# Actualización de certificación — 2026-11-05 UTC (r406)
+
+## Algebra229 AS-A-17 — TEST-FIRST / HARNESS CORRECTION / WAIT
+
+- Plus intento inicial SHA `8232f3979cf128c1bd52c6de2bfde4e9296a5d77`; CI [42039991675](https://github.com/c2melendez/precision-lab-plus/actions/runs/42039991675) backend FAILURE: `test_as_a17_expand_service_http_and_independent_integer_oracle` falló por la condición incorrecta `"**5" not in result_text`. El resultado observado fue el polinomio expandido correcto `32*x**5-80*x**4*y+80*x**3*y**2-40*x**2*y**3+10*x*y**4-y**5`; la condición prohibía monomios legítimos, no el binomio sin expandir.
+- Clasificación: **HARNESS/ORACLE false negative**, no fallo de producto. Servicio+HTTP y equivalencia simbólica ya habían pasado antes de esa aserción.
+- Corrección publicada en SHA `6b1bf9b9f731d6f6d36c16f33f09d1a9f2eb3238`; test `backend/tests/test_algebra229_as_a17.py`, blob `ed9052343bec6a4347d3075933135e2839809bfd`. La aserción ahora comprueba que el resultado no sea la potencia original `(2*x-y)**5` y que `sp.expand(got) == got`, preservando el oráculo entero de siete muestras.
+- Nuevos gates sobre el SHA corregido: cumulative [42040844511](https://github.com/c2melendez/precision-lab-plus/actions/runs/42040844511), H1d [42040844847](https://github.com/c2melendez/precision-lab-plus/actions/runs/42040844847), CI [42040844459](https://github.com/c2melendez/precision-lab-plus/actions/runs/42040844459), Runner [42040844455](https://github.com/c2melendez/precision-lab-plus/actions/runs/42040844455). Al actualizar este estado, los jobs todavía están en ejecución o cola.
+- Lite SHA `b37502c5713bddabae6a022e6e1cb788ee72a87d`: cumulative 42039943541 SUCCESS (2 focales/2,259), H1d 42039943721 SUCCESS (22), Scientific UI 42039943566 SUCCESS (456); CI 42039944052 FAILURE solo npm audit (4 moderadas); Runner 42039943836 SUCCESS push-only.
+- A17 permanece **WAIT**, no PASS_SCOPED bilateral. A16 es el último caso bilateral aprobado. EDCX-B6 VC-FE-45/EV-I-12 permanece BLOCKED; global OPEN.
+
 # Actualización de certificación — 2026-11-05 UTC (r405)
 
 ## Algebra229 AS-A-16 — PASS_SCOPED bilateral
