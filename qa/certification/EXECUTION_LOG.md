@@ -1,3 +1,11 @@
+## 2026-11-05 UTC — r404: Algebra229 AS-A-15 PASS_SCOPED; AS-A-16 iniciado
+
+- A15 Plus SHA 1f462162d74effb8f1a9a1c45271f99a6b3887eb: cumulative 42035518039 SUCCESS (skip=false; ambos focales PASSED; 2800 backend; 88.91%), H1d 42035518483 SUCCESS (38), CI 42035518143 SUCCESS (2800 backend/1055 frontend), Runner 42035518500 push-only.
+- A15 Lite SHA ea3d3901b97d3720e644c288cb66cffbceefdc24: cumulative 42035481349 SUCCESS (skip=false; 2 focales/2259), H1d 42035481377 SUCCESS (22), Scientific UI 42035481394 SUCCESS (456), CI 42035481443 FAILURE solo audit (4 moderate), Runner 42035481516 push-only.
+- A15 PASS_SCOPED bilateral. Acceptance file `ALGEBRA229_AS_A_15_ACCEPTANCE_2026-11-05.md`.
+- A16 test-first iniciado: Plus SHA 3555ce2898b31eda626c95d0c89c59a99f4dba8b (cumulative 42038783860, H1d 42038784134, CI 42038784081; Runner 42038784013); Lite SHA 36b1c73d0673a05e2418cc3c6dc49952a7c729f9 (cumulative 42038744006, H1d 42038743676, Scientific UI 42038744245; CI 42038743893 npm audit failure; Runner 42038743972). Gates observados en ejecución salvo auditoría Lite.
+- Siguiente obligatorio: terminar AS-A-16. EDCX-B6 VC-FE-45/EV-I-12 sigue BLOCKED; global OPEN.
+
 ## 2026-11-05 UTC — r403: Plus Algebra229 AS-A-15 TEST-FIRST / WAIT
 
 - Plus SHA 1f462162d74effb8f1a9a1c45271f99a6b3887eb; cumulative 42035518039 backend IN_PROGRESS/frontend SUCCESS; H1d 42035518483 SUCCESS (38); CI 42035518143 backend IN_PROGRESS/frontend SUCCESS; Runner 42035518500 push-only.
