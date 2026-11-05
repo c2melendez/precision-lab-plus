@@ -1,3 +1,13 @@
+# Actualización de certificación — 2026-11-05 UTC (r401)
+
+## Algebra229 AS-A-14 — TEST-FIRST IMPLEMENTED / GATES IN PROGRESS
+
+- Plus SHA `7795639d509258c4057fd74a9a8457b27186b374`; test `backend/tests/test_algebra229_as_a14.py`, blob `04a636857f9ba881f4853817d2d57684337def07`. Compara fila fuente completa (incluida la nota final), servicio+HTTP, equivalencia simbólica exacta y oráculo independiente `math.sqrt(6)`.
+- Plus cumulative [42033653002](https://github.com/c2melendez/precision-lab-plus/actions/runs/42033653002): backend IN_PROGRESS, frontend SUCCESS. H1d [42033653154](https://github.com/c2melendez/precision-lab-plus/actions/runs/42033653154) **SUCCESS** (38/38). CI [42033652882](https://github.com/c2melendez/precision-lab-plus/actions/runs/42033652882): frontend SUCCESS, backend IN_PROGRESS. Runner [42033652920](https://github.com/c2melendez/precision-lab-plus/actions/runs/42033652920) push-only.
+- Lite SHA `f67f91fb58e7c175903f8c17aa86d0a6e2c6f6f0`; cumulative [42033618184](https://github.com/c2melendez/precision-lab-lite/actions/runs/42033618184) SUCCESS (2 focales/2,259), H1d [42033618189](https://github.com/c2melendez/precision-lab-lite/actions/runs/42033618189) SUCCESS (22/22), Scientific UI [42033618195](https://github.com/c2melendez/precision-lab-lite/actions/runs/42033618195) SUCCESS (456/456). CI [42033618277](https://github.com/c2melendez/precision-lab-lite/actions/runs/42033618277) FAILURE solo npm audit, cuatro moderadas.
+- Los intentos previos con SHA 14b369... y 5f0fe... (Lite) y 0de7cf... (Plus) fallaron por expectativa de fila incompleta/doble escape, no por motor. El test actual usa la fila fuente exacta.
+- No se cambió producto. A14 permanece WAIT hasta confirmar cumulative/CI Plus. EDCX-B6 VC-FE-45/EV-I-12 permanece BLOCKED sin cambio; global OPEN.
+
 # Actualización de certificación — 2026-11-05 UTC (r400)
 
 ## Algebra229 AS-A-13 — PASS_SCOPED bilateral
