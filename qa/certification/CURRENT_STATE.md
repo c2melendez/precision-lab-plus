@@ -1,3 +1,13 @@
+# Actualización de certificación — 2026-11-05 UTC (r403)
+
+## Algebra229 AS-A-15 — TEST-FIRST IMPLEMENTED / GATES IN PROGRESS
+
+- Plus SHA `1f462162d74effb8f1a9a1c45271f99a6b3887eb`; test `backend/tests/test_algebra229_as_a15.py`, blob `f57231bd0e9625bcc7eeef2068d8e9260cb3298b`. Fila completa con nota `Exponentes negativos tras expandir.`, servicio+HTTP, equivalencia simbólica y siete muestras racionales no nulas con aritmética Python `Fraction`.
+- Plus cumulative [42035518039](https://github.com/c2melendez/precision-lab-plus/actions/runs/42035518039): backend IN_PROGRESS, frontend SUCCESS. H1d [42035518483](https://github.com/c2melendez/precision-lab-plus/actions/runs/42035518483) **SUCCESS** (38/38). CI [42035518143](https://github.com/c2melendez/precision-lab-plus/actions/runs/42035518143): backend IN_PROGRESS, frontend SUCCESS. Runner 42035518500 push-only.
+- Lite SHA `ea3d3901b97d3720e644c288cb66cffbceefdc24`; cumulative [42035481349](https://github.com/c2melendez/precision-lab-lite/actions/runs/42035481349) **SUCCESS** (2 focales/2,259), H1d [42035481377](https://github.com/c2melendez/precision-lab-lite/actions/runs/42035481377) **SUCCESS** (22/22), Scientific UI [42035481394](https://github.com/c2melendez/precision-lab-lite/actions/runs/42035481394) IN_PROGRESS; CI [42035481443](https://github.com/c2melendez/precision-lab-lite/actions/runs/42035481443) FAILURE solo npm audit (4 moderadas).
+- Candidato Lite `b0af74235f019474ec144b8a69fc8553a86dfa6d`, run 42035201681, falló solo porque faltaba la nota final de la fila; la expectativa completa ya está corregida en ambos repositorios.
+- A15 permanece WAIT. A14 último PASS_SCOPED bilateral. EDCX-B6 VC-FE-45/EV-I-12 continúa BLOCKED; global OPEN.
+
 # Actualización de certificación — 2026-11-05 UTC (r402)
 
 ## Algebra229 AS-A-14 — PASS_SCOPED bilateral

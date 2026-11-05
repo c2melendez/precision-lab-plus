@@ -1,3 +1,10 @@
+## 2026-11-05 UTC — r403: Plus Algebra229 AS-A-15 TEST-FIRST / WAIT
+
+- Plus SHA 1f462162d74effb8f1a9a1c45271f99a6b3887eb; cumulative 42035518039 backend IN_PROGRESS/frontend SUCCESS; H1d 42035518483 SUCCESS (38); CI 42035518143 backend IN_PROGRESS/frontend SUCCESS; Runner 42035518500 push-only.
+- Lite SHA ea3d3901b97d3720e644c288cb66cffbceefdc24; cumulative 42035481349 SUCCESS (2 focales/2259), H1d 42035481377 SUCCESS (22), Scientific UI 42035481394 IN_PROGRESS, CI 42035481443 FAILURE solo audit (4 moderate), Runner 42035481516 push-only.
+- Candidato previo Lite b0af74235f019474ec144b8a69fc8553a86dfa6d / run 42035201681 falló por expected row sin nota final; la expectativa actual incluye el texto exacto de la fuente. Sin cambios de producto.
+- A15 WAIT. A14 último PASS_SCOPED. EDCX-B6 VC-FE-45/EV-I-12 permanece BLOCKED; global OPEN.
+
 ## 2026-11-05 UTC — r402: Plus Algebra229 AS-A-14 PASS_SCOPED bilateral
 
 - Plus SHA 7795639d509258c4057fd74a9a8457b27186b374; cumulative 42033653002 SUCCESS (skip=false; 2 focales PASSED; 2800 backend; 88.93%), H1d 42033653154 SUCCESS (38), CI 42033652882 SUCCESS (2800 backend/1055 frontend), Runner 42033652920 push-only.

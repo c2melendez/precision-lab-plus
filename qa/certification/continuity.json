@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "revision": 402,
+  "revision": 403,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "db9184474788aca3f447b9b09ea97b188037079e",
+  "technical_baseline_sha": "1f462162d74effb8f1a9a1c45271f99a6b3887eb",
   "baseline_case": "ALGEBRA229-AS-A-14",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
@@ -509,7 +509,7 @@
     },
     "note": "Plus did not execute AS-EXP-09. No parity inferred. Preserve next_action EDCX-B6-VC-FE-45-CONTRACT-CONFLICT unchanged."
   },
-  "updated_utc": "2026-11-05T13:21:42.587Z",
+  "updated_utc": "2026-11-05T13:28:26.960Z",
   "lite_companion_as_exp10_r371": {
     "status": "PASS_SCOPED_LITE_ONLY",
     "sha": "5a6662e03e413063f9e73ca1f4210b7a155da5ca",
@@ -950,9 +950,9 @@
   },
   "plus_algebra229_next_action": {
     "id": "ALGEBRA229-AS-A-15-TEST-FIRST",
-    "status": "READY",
+    "status": "WAIT",
     "previous_id": "ALGEBRA229-AS-A-14-TEST-FIRST",
-    "action": "Test-first bilateral de AS-A-15: expandir (x+1/x)^3 → x^3+3x+3/x+1/x^3, con x≠0. Comparar la fila fuente exacta, igualdad simbólica, y siete valores racionales no nulos mediante aritmética independiente (JavaScript nativo en Lite; fractions/math en Plus). Gates: Lite cumulative+H1d+Scientific UI; Plus cumulative+H1d. Modificar producto solo si la prueba falla."
+    "action": "Esperar conclusión de cumulative 42035518039 y CI 42035518143 (backend en curso; frontend SUCCESS), leer logs y confirmar ambos tests AS-A-15. H1d 42035518483 SUCCESS (38/38). Lite cumulative 42035481349 SUCCESS (2 focales/2259), H1d 42035481377 SUCCESS (22), Scientific UI 42035481394 en curso. Después de aceptación bilateral, iniciar AS-A-16. EDCX-B6 VC-FE-45/EV-I-12 sigue BLOCKED y separado."
   },
   "algebra229_as_a07_r394": {
     "status": "PASS_SCOPED_BILATERAL_CASE",
@@ -1341,5 +1341,41 @@
     "lite_runner_status": "SUCCESS_PUSH_ONLY",
     "scope": "AS-A-14 only",
     "oracle": "Exact full frozen source row; exact symbolic equality; independent Math.sqrt/Python math.sqrt numeric oracle."
+  },
+  "algebra229_as_a15_pending_r403": {
+    "status": "IN_PROGRESS_WAIT",
+    "plus_sha": "1f462162d74effb8f1a9a1c45271f99a6b3887eb",
+    "plus_test": "backend/tests/test_algebra229_as_a15.py",
+    "plus_test_blob": "f57231bd0e9625bcc7eeef2068d8e9260cb3298b",
+    "plus_cumulative_run": 42035518039,
+    "plus_cumulative_status": "IN_PROGRESS_BACKEND_FRONTEND_SUCCESS",
+    "plus_h1d_run": 42035518483,
+    "plus_h1d_status": "SUCCESS",
+    "plus_h1d_passed": 38,
+    "plus_ci_run": 42035518143,
+    "plus_ci_status": "IN_PROGRESS_BACKEND_FRONTEND_SUCCESS",
+    "plus_runner_run": 42035518500,
+    "plus_runner_status": "SUCCESS_PUSH_ONLY",
+    "lite_sha": "ea3d3901b97d3720e644c288cb66cffbceefdc24",
+    "lite_test": "tests/algebra229AsA15.audit.test.ts",
+    "lite_test_blob": "73fbfefffdb2aad625df2676806fcd5aaaf8d8f0",
+    "lite_cumulative_run": 42035481349,
+    "lite_cumulative_status": "SUCCESS",
+    "lite_cumulative_focal_tests": 2,
+    "lite_cumulative_passed": 2259,
+    "lite_h1d_run": 42035481377,
+    "lite_h1d_status": "SUCCESS",
+    "lite_h1d_passed": 22,
+    "lite_scientific_run": 42035481394,
+    "lite_scientific_status": "IN_PROGRESS",
+    "lite_ci_run": 42035481443,
+    "lite_ci_status": "FAILURE_NPM_AUDIT_4_MODERATE",
+    "lite_runner_run": 42035481516,
+    "lite_runner_status": "SUCCESS_PUSH_ONLY",
+    "superseded_candidate": {
+      "sha": "b0af74235f019474ec144b8a69fc8553a86dfa6d",
+      "run": 42035201681,
+      "reason": "expected row omitted the exact final note 'Exponentes negativos tras expandir.'; numerical expansion test passed."
+    }
   }
 }
