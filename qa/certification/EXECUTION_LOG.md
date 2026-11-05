@@ -899,3 +899,16 @@ El avance es exclusivo de Lite y no modifica el motor ni el contrato de Plus. Si
 
 
 El resultado AS-PF-03 es exclusivo de Lite. Plus conserva su bloqueo contractual VC-FE-45/EV-I-12 sin cambios. Siguiente acción de Lite: AS-PF-04.
+
+
+## Reconciliación bilateral — 2026-11-05 (r387; Lite-only)
+
+- Lite — Algebra114 AS-PF-04: **PASS_SCOPED** en SHA `62b9afb1869c2b357d9b9bf01ae8a4f80474f848`; acumulativo [41987091228](https://github.com/c2melendez/precision-lab-lite/actions/runs/41987091228) SUCCESS (366 archivos, 2,259 passed; test focal explícito), H1d [41987091032](https://github.com/c2melendez/precision-lab-lite/actions/runs/41987091032) SUCCESS (22/22). Aceptación Lite: `ALGEBRA114_AS_PF_04_ACCEPTANCE_R387.md`.
+- Certification Runner [41987091131](https://github.com/c2melendez/precision-lab-lite/actions/runs/41987091131) SUCCESS push-only; no certifica dispatch ni persistencia. Scientific UI [41987091086](https://github.com/c2melendez/precision-lab-lite/actions/runs/41987091086) estaba IN_PROGRESS al aceptar la fila y es complementario.
+- CI Lite [41987091076](https://github.com/c2melendez/precision-lab-lite/actions/runs/41987091076) FAILURE en QA dependency audit hard gate (4 moderadas); no se cambió el umbral.
+- Plus no ejecutó AS-PF-04; no hay aceptación ni paridad Plus. Se mantiene **BLOCKED** en VC-FE-45 por conflicto de contrato con EV-I-12.
+- Global certification **OPEN**. Siguiente fila de la matriz Lite: AS-PF-05.
+
+
+
+El resultado AS-PF-04 es exclusivo de Lite. Plus conserva su bloqueo contractual VC-FE-45/EV-I-12. Siguiente acción de Lite: AS-PF-05.

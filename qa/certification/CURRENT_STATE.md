@@ -1,3 +1,13 @@
+## Reconciliación bilateral — 2026-11-05 (r387; Lite-only)
+
+- Lite — Algebra114 AS-PF-04: **PASS_SCOPED** en SHA `62b9afb1869c2b357d9b9bf01ae8a4f80474f848`; acumulativo [41987091228](https://github.com/c2melendez/precision-lab-lite/actions/runs/41987091228) SUCCESS (366 archivos, 2,259 passed; test focal explícito), H1d [41987091032](https://github.com/c2melendez/precision-lab-lite/actions/runs/41987091032) SUCCESS (22/22). Aceptación Lite: `ALGEBRA114_AS_PF_04_ACCEPTANCE_R387.md`.
+- Certification Runner [41987091131](https://github.com/c2melendez/precision-lab-lite/actions/runs/41987091131) SUCCESS push-only; no certifica dispatch ni persistencia. Scientific UI [41987091086](https://github.com/c2melendez/precision-lab-lite/actions/runs/41987091086) estaba IN_PROGRESS al aceptar la fila y es complementario.
+- CI Lite [41987091076](https://github.com/c2melendez/precision-lab-lite/actions/runs/41987091076) FAILURE en QA dependency audit hard gate (4 moderadas); no se cambió el umbral.
+- Plus no ejecutó AS-PF-04; no hay aceptación ni paridad Plus. Se mantiene **BLOCKED** en VC-FE-45 por conflicto de contrato con EV-I-12.
+- Global certification **OPEN**. Siguiente fila de la matriz Lite: AS-PF-05.
+
+
+
 ## Reconciliación bilateral — 2026-11-05 (r386; Lite-only)
 
 - Lite — Algebra114 AS-PF-03: **PASS_SCOPED** en SHA `91f3cd4f97bf712b778d4a803a952a59e4dea7e4`; acumulativo [41985243812](https://github.com/c2melendez/precision-lab-lite/actions/runs/41985243812) SUCCESS (366 archivos, 2259 passed; test focal explícito), H1d [41985243959](https://github.com/c2melendez/precision-lab-lite/actions/runs/41985243959) SUCCESS (22/22), Scientific UI [41985243868](https://github.com/c2melendez/precision-lab-lite/actions/runs/41985243868) SUCCESS (456 passed). Aceptación Lite: `ALGEBRA114_AS_PF_03_ACCEPTANCE_R386.md`.
