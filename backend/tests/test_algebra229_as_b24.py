@@ -71,8 +71,8 @@ def test_as_b24_source_row_has_seven_contract_cells():
         "AS-B-24",
         "N3",
         "`factorizar`",
-        "`factor(x^2-2) sobre ℝ`",
-        "`(x-sqrt(2))*(x+sqrt(2))`",
+        "`x^{2}-2\\ \\text{sobre }\\mathbb{R}`",
+        "`\\left(x - \\sqrt{2}\\right) \\left(x + \\sqrt{2}\\right)`",
     ], source_row
     assert "Con raíces permitidas" in cells[6], source_row
     assert cells[7:] == [""], source_row
