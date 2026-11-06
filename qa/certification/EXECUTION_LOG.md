@@ -1,3 +1,10 @@
+## 2026-11-06 UTC — r441: AS-B-26 Lite complete; Plus H1d PASS, backend gates WAIT
+
+- Lite SHA `26cc8cc69d32e4a5614dc9921a87030308f9cdd1`: Cumulative 42270957296 SUCCESS (focal 4/4; 366/366; 2,264 passed, 8 expected fail, 34 TODO); H1d 42270957306 SUCCESS (22/22); CI 42270957315 SUCCESS; Scientific UI 42270957389 SUCCESS (456/456 desktop/tablet/mobile).
+- Plus SHA corregido `4509e41570258a1f573f8992475433b1b05ef120`: H1d 42272022376 SUCCESS (38/38, log inspeccionado); Cumulative 42272022466 sigue IN_PROGRESS (backend job 128078715847); CI 42272022354 sigue IN_PROGRESS (backend job 128078716065); Runner 42272022361 SUCCESS.
+- Diagnóstico anterior: CI 42271188505 sobre SHA `ef97ca2a...` falló únicamente por dos backslashes esperados vs un backslash en la fila fuente. Corrección en raw strings publicada en `4509e415...`; ese run no se acredita.
+- La clasificación es error de test/oráculo de fixture; no hay fallo del producto/motor. Estado WAIT hasta los gates backend exact-SHA; global OPEN.
+
 ## 2026-11-06 UTC — r439: AS-B-26 test-first reforzado; WAIT gates exact-SHA
 
 - Lite SHA `26cc8cc69d32e4a5614dc9921a87030308f9cdd1`: Cumulative 42270957296 SUCCESS (focal 4/4, 366 archivos, 2,264 passed, 8 expected fail, 34 TODO; guard skip=false/no REUSE); H1d 42270957306 SUCCESS (22/22); CI 42270957315 SUCCESS. Scientific UI 42270957389 permanece IN_PROGRESS (job 128075078138).
