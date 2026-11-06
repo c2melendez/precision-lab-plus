@@ -66,7 +66,7 @@ def test_as_b24_source_row_has_seven_contract_cells():
     text = gzip.decompress(SOURCE_GZ.read_bytes()).decode("utf-8")
     source_row = next(line.strip() for line in text.splitlines() if line.startswith("| AS-B-24 |"))
     cells = [cell.strip() for cell in source_row.split("|")]
-    assert len(cells) == 9, source_row
+    assert len(cells) == 8, source_row
     assert cells[1:6] == [
         "AS-B-24",
         "N3",
@@ -75,7 +75,7 @@ def test_as_b24_source_row_has_seven_contract_cells():
         "`(x-sqrt(2))*(x+sqrt(2))`",
     ], source_row
     assert "Con raíces permitidas" in cells[6], source_row
-    assert cells[7:] == ["", ""], source_row
+    assert cells[7:] == [""], source_row
 
 
 def test_as_b24_factor_x2_minus_2_over_reals_http_exact_output():
