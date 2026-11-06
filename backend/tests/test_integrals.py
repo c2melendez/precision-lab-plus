@@ -49,8 +49,8 @@ def test_definite_integral_minimum_three_steps():
 
 
 def test_fallback_for_unmapped_rule_sin_of_sin():
-    # sin(sin(x)) no tiene antiderivada elemental (manualintegrate ->
-    # DontKnowRule) -> fallback completo a integrate() directo.
+    # manualintegrate y el fallback directo no encuentran una antiderivada
+    # cerrada; no se debe exponer Integral(sin(sin(x)), x) como un resultado.
     response = _integral("sin(sin(x))")
     body = response.json()
     assert body["success"] is False
