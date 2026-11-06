@@ -1,3 +1,25 @@
+# Actualización de certificación — 2026-11-06 UTC (r439)
+
+## Algebra229 AS-B-26 — WAIT (gates exact-SHA en curso)
+
+**Contrato:** `factorizar el entero 360` → `2^{3}\\cdot 3^{2}\\cdot 5` (N2). Los tests bilaterales ya están reforzados con fila fuente exacta, forma ASCII y oráculo independiente por división de prueba.
+
+### Estado de ejecución bilateral
+- Cumulative [42271188323](https://github.com/c2melendez/precision-lab-plus/actions/runs/42271188323) IN_PROGRESS; frontend unit/parity SUCCESS, backend job 128075870922 en regresión.
+- H1d [42271188301](https://github.com/c2melendez/precision-lab-plus/actions/runs/42271188301) SUCCESS; 38/38 Playwright.
+- CI [42271188505](https://github.com/c2melendez/precision-lab-plus/actions/runs/42271188505) IN_PROGRESS; frontend SUCCESS, backend job 128075871815 en ejecución.
+- Runner [42271188377](https://github.com/c2melendez/precision-lab-plus/actions/runs/42271188377) SUCCESS; fingerprint push-only.
+- Lite SHA técnico: `26cc8cc69d32e4a5614dc9921a87030308f9cdd1`.
+- Plus SHA técnico corregido: `ef97ca2a23324d2512f4f26585ad51f421d316ff`.
+- La corrida Plus sobre SHA `be31d726bdc0104a9f07fc5479a3325abd0c6f0d` es anterior a la corrección de escapes LaTeX como raw strings; no se acredita ni se reutiliza.
+
+### Decisión
+Estado **WAIT**: no relanzar gates equivalentes mientras estén activos. No hay evidencia suficiente para aceptación bilateral hasta que Lite Scientific UI y Plus Cumulative/CI completen, y se revisen los logs focales del SHA Plus corregido. Sin cambios de motor/producto; solo tests. Certificación global **OPEN**.
+
+**Siguiente:** cerrar/aceptar AS-B-26 solo con esos resultados; después avanzar a AS-B-27 (`factorizar 1001` → `7·11·13`).
+
+---
+
 # Actualización de certificación — 2026-11-06 UTC (r438)
 
 ## Algebra229 AS-B-25 — PASS_SCOPED bilateral (r438)
