@@ -97,6 +97,22 @@ describe("BasicMode", () => {
     });
   });
 
+  it("interpreta la notación inline con x=valor como substitutions en /evaluate", async () => {
+    render(<BasicMode />);
+    fireEvent.change(screen.getByLabelText("Expresión"), {
+      target: { value: "x+1\\ \\text{con}\\ x=3" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
+
+    await waitFor(() => expect(mockedCallApi).toHaveBeenCalled());
+
+    expect(mockedCallApi).toHaveBeenCalledWith("/evaluate", {
+      expression: "x+1",
+      angle_unit: "rad",
+      substitutions: { x: "3" },
+    });
+  });
+
   it("no llama a la API con una expresión vacía (payload inválido)", () => {
     render(<BasicMode />);
     fireEvent.submit(screen.getByRole("button", { name: "Evaluar" }).closest("form")!);
