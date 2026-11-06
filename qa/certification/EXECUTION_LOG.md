@@ -1,3 +1,9 @@
+## 2026-11-06 UTC — r420: AS-B-07 PASS_SCOPED bilateral
+
+- Plus SHA `2e3facb7d48f41902fc16c65090868a6708f2d00`: cumulative 42145947023 SUCCESS (ambos focales PASSED; 1,055 frontend/28 todo), H1d 42145946957 SUCCESS (38), CI 42145946946 SUCCESS (2,800 backend/1,055 frontend), Runner 42145946981 SUCCESS.
+- Lite SHA `63fbef834a1fdd7bf0c969c4a8ae0f41a84060be`: cumulative 42145939069 SUCCESS (guard `skip=false`, focal 2/2; 2,259 passed), H1d 42145939097 SUCCESS (22), Scientific UI 42145939299 SUCCESS (456), Runner 42145939287 SUCCESS; CI 42145939134 FAILURE solo npm audit (4 moderadas; artifact 13470057091), umbral intacto.
+- Test reforzado bilateral: fila exacta, cuatro factores `(x-1)(x+1)(x^2-x+1)(x^2+x+1)`, dos cuadráticos irreducibles (discriminante -3) y diez sustituciones enteras independientes. Sin cambio de producto. Siguiente AS-B-08 `x^4-5x^2+4`. Global OPEN.
+
 ## 2026-11-06 UTC — r419: AS-B-06 PASS_SCOPED bilateral
 
 - Plus SHA `ac6785822c2bb0b3fdff45fef12536d00b009c9e`: cumulative 42144769877 SUCCESS (ambos focales PASSED; 1,055 frontend/28 todo), H1d 42144769822 SUCCESS (38), CI 42144769863 SUCCESS (2,800 backend/1,055 frontend), Runner 42144769876 SUCCESS.
