@@ -1254,3 +1254,13 @@ AS-B-23, N2: `x^{2}-2` permanece inalterado e irreducible sobre ℚ. Los tests f
 - Resultado: gates aplicables completados sobre SHA exactos; tests ejecutados, no acreditados por REUSE. Solo cambios en tests; sin modificación del motor/producto. Global **OPEN**; los gaps SG28/H2/DIST, SECURITY-S25 y capacidades no relacionadas permanecen intactos.
 - Próximo bloque del orden de Algebra229: AS-B-24, `factor(x^2-2) sobre ℝ` → `(x-sqrt(2))*(x+sqrt(2))`; se deben validar siete celdas y añadir el oráculo independiente de diez muestras.
 
+
+## 2026-11-06 UTC (r435) — Algebra229 AS-B-24 IN_PROGRESS; Plus complete, Lite H1d pending
+
+AS-B-24, N3: factorizar `x^2-2` sobre `ℝ` devuelve `(x-sqrt(2))*(x+sqrt(2))`. Plus está completo para los gates del caso; la aceptación bilateral espera únicamente H1d Lite. Sin cambios de producto/motor.
+
+- Plus SHA `5d8d78f8e35d02830bfbce63c107fe5990904cd1`: [Cumulative 42221909462](https://github.com/c2melendez/precision-lab-plus/actions/runs/42221909462) SUCCESS (focal 3/3; backend 2,803 passed, 1 skipped, 10 xfailed); [H1d 42221909235](https://github.com/c2melendez/precision-lab-plus/actions/runs/42221909235) SUCCESS (38/38); [CI 42221909164](https://github.com/c2melendez/precision-lab-plus/actions/runs/42221909164) SUCCESS (frontend/backend, backend 2,803 passed, 1 skipped, 10 xfailed); [Runner 42221910347](https://github.com/c2melendez/precision-lab-plus/actions/runs/42221910347) SUCCESS push-only.
+- Lite SHA `2342cbd5ac2de6e9a7b1fbf42ddb9df4ee1f9c8d`: [Cumulative 42222060038](https://github.com/c2melendez/precision-lab-lite/actions/runs/42222060038) SUCCESS (focal 4/4; 366 archivos); [CI 42222060154](https://github.com/c2melendez/precision-lab-lite/actions/runs/42222060154) SUCCESS; [Scientific UI 42222060025](https://github.com/c2melendez/precision-lab-lite/actions/runs/42222060025) SUCCESS (456/456). [H1d 42222060032](https://github.com/c2melendez/precision-lab-lite/actions/runs/42222060032) IN_PROGRESS; job 127906273506 stuck at `Install Chromium`, test pending.
+- Test diagnosis: corrected exact fixture row delimiter/LaTeX escaping and literal `\sqrt{2}`. Earlier candidate failures came from these test expectations, not product code. Latest focal tests are green.
+- Decision: WAIT for Lite H1d. Do not set B24 PASS_SCOPED or begin B25 until this required gate concludes SUCCESS. Global **OPEN**; accepted baseline remains B23.
+

@@ -1,3 +1,26 @@
+# Actualización de certificación — 2026-11-06 UTC (r435)
+
+## Algebra229 AS-B-24 — IN_PROGRESS (Plus gates aprobados; pendiente H1d Lite)
+
+**Contrato:** `factor(x^2-2) sobre ℝ` → `(x-sqrt(2))*(x+sqrt(2))` (N3). Se conserva la distinción con AS-B-23, donde `x^2-2` permanece irreducible sobre ℚ.
+
+### Plus — SHA técnico `5d8d78f8e35d02830bfbce63c107fe5990904cd1`
+- Test `backend/tests/test_algebra229_as_b24.py`: 3/3 PASS; fila fuente exacta, endpoint HTTP `POST /api/v1/factor`, forma ASCII, equivalencia SymPy y oráculo AST independiente en diez muestras enteras.
+- Cumulative [42221909462](https://github.com/c2melendez/precision-lab-plus/actions/runs/42221909462) SUCCESS; frontend/backend SUCCESS; focal 3/3; backend 2,803 passed, 1 skipped, 10 xfailed.
+- H1d [42221909235](https://github.com/c2melendez/precision-lab-plus/actions/runs/42221909235) SUCCESS, 38/38 Playwright.
+- CI [42221909164](https://github.com/c2melendez/precision-lab-plus/actions/runs/42221909164) SUCCESS; frontend/backend SUCCESS; backend 2,803 passed, 1 skipped, 10 xfailed.
+- Runner [42221910347](https://github.com/c2melendez/precision-lab-plus/actions/runs/42221910347) SUCCESS, fingerprint push-only.
+
+### Evidencia bilateral de Lite (pendiente un gate)
+- SHA técnico `2342cbd5ac2de6e9a7b1fbf42ddb9df4ee1f9c8d`; test `tests/algebra229AsB24.audit.test.ts` 4/4 PASS en acumulativo y CI.
+- Cumulative [42222060038](https://github.com/c2melendez/precision-lab-lite/actions/runs/42222060038) SUCCESS (366/366 archivos); CI [42222060154](https://github.com/c2melendez/precision-lab-lite/actions/runs/42222060154) SUCCESS (366/366; focal 4/4); Scientific UI [42222060025](https://github.com/c2melendez/precision-lab-lite/actions/runs/42222060025) SUCCESS (456/456 desktop/tablet/mobile).
+- H1d [42222060032](https://github.com/c2melendez/precision-lab-lite/actions/runs/42222060032) **IN_PROGRESS**: job 127906273506 permanece en `Install Chromium`; la prueba H1d no ha comenzado.
+
+### Diagnóstico del harness y decisión
+Los intentos intermedios detectaron y corrigieron únicamente aserciones de la fila congelada: 8 posiciones delimitadas, entrada/salida LaTeX y texto literal `\sqrt{2}` con llaves. Los tests focales de los SHA finales pasan; no hubo cambio de motor/producto. La aceptación bilateral queda pendiente solo del H1d de Lite, que ya está activo. No despachar duplicado. Global **OPEN**.
+
+---
+
 # Actualización de certificación — 2026-11-06 UTC (r434)
 
 ## Algebra229 AS-B-23 — PASS_SCOPED bilateral (r434)
