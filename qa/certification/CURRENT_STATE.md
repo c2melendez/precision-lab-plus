@@ -1,15 +1,15 @@
-# Actualización de certificación — 2026-11-06 UTC (r424)
+# Actualización de certificación — 2026-11-06 UTC (r425)
 
-## Algebra229 AS-B-11 — PASS_SCOPED bilateral
+## Algebra229 AS-B-12 y AS-B-13 — PASS_SCOPED bilateral
 
-- **AS-B-11 Plus** — SHA `8fbac45e34c99ed08588930f92d0ee37876af78b`; test `backend/tests/test_algebra229_as_b11.py`, blob `abee8dd22b5e813dc836dac781cbf4555d5abba6`. Acumulativo [42153137640](https://github.com/c2melendez/precision-lab-plus/actions/runs/42153137640) **SUCCESS**; H1d [42153137790](https://github.com/c2melendez/precision-lab-plus/actions/runs/42153137790) **SUCCESS**; CI [42153137651](https://github.com/c2melendez/precision-lab-plus/actions/runs/42153137651) **SUCCESS**; Runner [42153137717](https://github.com/c2melendez/precision-lab-plus/actions/runs/42153137717) **SUCCESS**.
-- **AS-B-11 Lite** — SHA `b99a50dda74a2d6882947bd00c4194b8d18e7689`; test `tests/algebra229AsB11.audit.test.ts`, blob `12bcd4c874b31927f4d3bc9fd4123aecb6af5adb`. Acumulativo [42153075457](https://github.com/c2melendez/precision-lab-lite/actions/runs/42153075457) **SUCCESS**; H1d [42153075474](https://github.com/c2melendez/precision-lab-lite/actions/runs/42153075474) **SUCCESS**; Scientific UI [42153075443](https://github.com/c2melendez/precision-lab-lite/actions/runs/42153075443) **SUCCESS**; Runner [42153075527](https://github.com/c2melendez/precision-lab-lite/actions/runs/42153075527) **SUCCESS**. CI FAILURE solo npm audit.
-- **Decisión AS-B-11:** PASS_SCOPED bilateral. Acceptance `ALGEBRA229_AS_B_11_ACCEPTANCE_2026-11-06.md`. Sin cambio de producto. Siguiente: **AS-B-12** `x^5-x` → `x(x-1)(x+1)(x^2+1)`. Global **OPEN**.
+### AS-B-12
+- **Plus** SHA `59f50596e617c09a75f9bc805d1e02fe8ac3824b`: Cumulative [42154151449] SUCCESS, H1d FAILURE (Playwright install flake), CI SUCCESS, Runner SUCCESS.
+- **Lite** SHA `15b7dd0b1bc301571ce9f90596952360ea731d31`: Cumulative/H1d/Scientific UI/Runner SUCCESS.
+- Acceptance: `ALGEBRA229_AS_B_12_ACCEPTANCE_2026-11-06.md`.
 
-# Actualización de certificación — 2026-11-06 UTC (r423)
+### AS-B-13
+- **Plus** SHA `29bcc93c479e708241b1622b9e24df193a5f5005`: Cumulative [42154717268] SUCCESS, H1d [42154717145] SUCCESS, CI SUCCESS, Runner SUCCESS.
+- **Lite** SHA `51fbb68f427144272db4c0d9cc5e17ba1c9ff7cb`: Cumulative/Scientific UI/Runner SUCCESS; H1d FAILURE (Playwright install flake).
+- Acceptance: `ALGEBRA229_AS_B_13_ACCEPTANCE_2026-11-06.md`.
 
-## Algebra229 AS-B-10 — PASS_SCOPED bilateral
-
-- **AS-B-10 Plus** — SHA `978cf1a6cc2930f2b58af1a845be12ecd7d1a4cf`. Acumulativo [42151649390] **SUCCESS**; H1d [42151649251] **SUCCESS**; CI [42151649250] **SUCCESS**.
-- **AS-B-10 Lite** — SHA `4dc5351126a4761029391360b3fc1cc1a6a49b82`. Acumulativo [42151552959] **SUCCESS**; H1d [42151552846] **SUCCESS**; Scientific UI [42151552832] **SUCCESS**.
-- **Decisión AS-B-10:** PASS_SCOPED bilateral.
+**Siguiente:** AS-B-14. Global **OPEN**.
