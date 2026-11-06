@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 427,
+  "revision": 428,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "481cb08d99d95124d4e8528162fe787d89206244",
-  "baseline_case": "ALGEBRA229-AS-B-16",
+  "technical_baseline_sha": "5d3df39fbfb19bc209b47f5f5bedb02a7212c19a",
+  "baseline_case": "ALGEBRA229-AS-B-17",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -32,11 +32,11 @@
     }
   },
   "next_action": {
-    "id": "ALGEBRA229-AS-B-17-TEST-FIRST",
+    "id": "ALGEBRA229-AS-B-18-TEST-FIRST",
     "status": "READY",
-    "previous_id": "ALGEBRA229-AS-B-16-TEST-FIRST",
-    "action": "AS-B-17 a^3+b^3 -> (a+b)(a^2-ab+b^2). Test-first: verificar oráculo existente en Lite y Plus, reforzarlo si es débil, y obtener evidencia CI del mismo SHA antes de acceptance. Gates: Plus cumulative+H1d; Lite cumulative+H1d+Scientific UI.",
-    "updated_utc": "2026-11-06T09:50:00Z"
+    "previous_id": "ALGEBRA229-AS-B-17-TEST-FIRST",
+    "action": "AS-B-18 x^8-1 -> (x-1)(x+1)(x^2+1)(x^4+1). Test-first: verificar que el oráculo cumple el estándar de AS-B-16/17 (fila exacta y oráculo entero independiente), reforzarlo si es débil, y obtener evidencia CI del mismo SHA antes de acceptance. Gates: Plus cumulative+H1d; Lite cumulative+H1d+Scientific UI.",
+    "updated_utc": "2026-11-06T10:05:00Z"
   },
   "blockers": [],
   "prose_only_paths": [
