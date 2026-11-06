@@ -1,3 +1,31 @@
+# Actualización de certificación — 2026-11-06 UTC (r441)
+
+## Algebra229 AS-B-26 — WAIT (Plus gates de backend en curso)
+
+**Contrato:** `factorizar el entero 360` → `2^{3}\\cdot 3^{2}\\cdot 5` (N2). Tests reforzados con fila congelada exacta, salida ASCII y oráculo independiente de división de prueba.
+
+### Lite — SHA técnico `26cc8cc69d32e4a5614dc9921a87030308f9cdd1`
+- Cumulative [42270957296](https://github.com/c2melendez/precision-lab-lite/actions/runs/42270957296) SUCCESS; focal 4/4, 366/366 archivos, 2,264 passed, 8 expected fail y 34 TODO.
+- H1d [42270957306](https://github.com/c2melendez/precision-lab-lite/actions/runs/42270957306) SUCCESS; 22/22.
+- CI [42270957315](https://github.com/c2melendez/precision-lab-lite/actions/runs/42270957315) SUCCESS.
+- Scientific UI [42270957389](https://github.com/c2melendez/precision-lab-lite/actions/runs/42270957389) SUCCESS; 456/456 desktop/tablet/mobile.
+- Runner [42270957317](https://github.com/c2melendez/precision-lab-lite/actions/runs/42270957317) SUCCESS.
+
+### Plus — SHA técnico corregido `4509e41570258a1f573f8992475433b1b05ef120`
+- H1d [42272022376](https://github.com/c2melendez/precision-lab-plus/actions/runs/42272022376) SUCCESS; log confirma 38/38 Playwright.
+- Cumulative [42272022466](https://github.com/c2melendez/precision-lab-plus/actions/runs/42272022466) IN_PROGRESS; job backend 128078715847.
+- CI [42272022354](https://github.com/c2melendez/precision-lab-plus/actions/runs/42272022354) IN_PROGRESS; job backend 128078716065.
+- Runner [42272022361](https://github.com/c2melendez/precision-lab-plus/actions/runs/42272022361) SUCCESS.
+
+### Diagnóstico y decisión
+CI Plus del SHA anterior `ef97ca2a23324d2512f4f26585ad51f421d316ff` falló exclusivamente porque el oráculo de fila esperaba dos barras invertidas donde el fixture congelado contiene una. Se corrigieron las dos cadenas raw, sin cambio de motor/producto. La corrida fallida previa [42271188505](https://github.com/c2melendez/precision-lab-plus/actions/runs/42271188505) queda como diagnóstico y no como evidencia de aceptación. El SHA actual `4509e415...` usa gates nuevos.
+
+Estado **WAIT** hasta que Plus Cumulative y CI completen y se revisen sus logs focales. Certificación global **OPEN**; SG28/H2/DIST, SECURITY-S25 y gaps independientes siguen abiertos.
+
+**Siguiente:** cerrar AS-B-26 solo tras el backend Plus; después AS-B-27 (`factorizar 1001` → `7·11·13`).
+
+---
+
 # Actualización de certificación — 2026-11-06 UTC (r440)
 
 ## Algebra229 AS-B-26 — WAIT (Plus revalidación exact-SHA)
