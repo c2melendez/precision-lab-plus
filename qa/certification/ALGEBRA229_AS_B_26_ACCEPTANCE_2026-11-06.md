@@ -4,8 +4,8 @@
 
 ## Contrato congelado
 - AS-B-26, N2, `factorizar`.
-- Entrada original: `\\text{factorizar el entero }360`.
-- Salida original: `2^{3}\\cdot 3^{2}\\cdot 5`.
+- Entrada original: `\text{factorizar el entero }360`.
+- Salida original: `2^{3}\cdot 3^{2}\cdot 5`.
 - Forma ASCII esperada del motor: `2^3*3^2*5`.
 
 ## Pruebas y oráculos
@@ -32,4 +32,4 @@
 
 La aceptación es **PASS_SCOPED bilateral**. SG28/H2/DIST, SECURITY-S25 y los demás gaps independientes permanecen abiertos; global **OPEN**.
 
-Siguiente: AS-B-27, `\\text{factorizar el entero }1001` → `7\\cdot 11\\cdot 13` (N2). Global **OPEN**.
+Siguiente: AS-B-27, `\text{factorizar el entero }1001` → `7\cdot 11\cdot 13` (N2). Global **OPEN**.
