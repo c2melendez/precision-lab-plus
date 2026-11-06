@@ -41,6 +41,11 @@ describe("latexToBackendSyntax", () => {
 
   it("normaliza la plantilla real de valor absoluto al contrato abs() del backend", () => {
     expect(latexToBackendSyntax("\\left|-3\\right|")).toBe("abs(-3)");
+    expect(latexToBackendSyntax("\\left\\lvert x\\right\\rvert")).toBe("abs(x)");
+  });
+
+  it("conserva valor absoluto cuando aparece dentro de una expresión compuesta", () => {
+    expect(latexToBackendSyntax("\\left\\lvert x\\right\\rvert+x")).toBe("abs(x)+x");
   });
 
   it("una expresión vacía produce una cadena vacía", () => {
