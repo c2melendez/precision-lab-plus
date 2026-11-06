@@ -80,6 +80,7 @@ const KNOWN_MULTI_LETTER_FUNCTION_NAMES = [
   "nCr",
   "nPr",
   "var",
+  "abs",
   // P4 (spec v2 §5, Complejos) — mismo bug, mismo fix: sin esto "re(2+3i)"
   // llegaría al backend como "r e ( 2 + 3 i )" (variables sueltas).
   "re",
@@ -239,6 +240,18 @@ function rewriteFiniteAggregateAscii(ascii: string): string | null {
   return `${op === "sum" ? "sum" : "product"}(${body.trim()},${variable},${lower.trim()},${upper.trim()})`;
 }
 
+function rewriteAbsoluteValueLatex(latex: string): string {
+  return latex
+    .replace(
+      /\\left\\lvert\s*([\s\S]*?)\s*\\right\\rvert/g,
+      (_match, inner: string) => `\\mathrm{abs}\\left(${inner}\\right)`,
+    )
+    .replace(
+      /\\left\|\s*([\s\S]*?)\s*\\right\|/g,
+      (_match, inner: string) => `\\mathrm{abs}\\left(${inner}\\right)`,
+    );
+}
+
 export function latexToBackendSyntax(latex: string): string {
   if (latex.trim() === "") return "";
 
@@ -248,7 +261,7 @@ export function latexToBackendSyntax(latex: string): string {
   // explícitamente el contrato real del teclado antes de convertir.
   const absoluteTrimmed = latex.trim();
   const absoluteMatch =
-    absoluteTrimmed.match(/^\\left\|(.*)\\right\|$/s) ??
+    absoluteTrimmed.match(/^\\left(?:\\lvert|\|)(.*)\\right(?:\\rvert|\|)$/s) ??
     absoluteTrimmed.match(/^\|(.*)\|$/s);
   if (absoluteMatch) return `abs(${latexToBackendSyntax(absoluteMatch[1])})`;
 
@@ -262,7 +275,8 @@ export function latexToBackendSyntax(latex: string): string {
   // MathLive elimina un signo % literal durante la conversión ASCII.
   // Reescribimos porcentajes postfix simples a una fracción LaTeX antes
   // de convertir, conservando casos como 100+50% -> 100+50/100.
-  const latexWithPercent = latex.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
+  const latexWithAbsoluteValues = rewriteAbsoluteValueLatex(latex);
+  const latexWithPercent = latexWithAbsoluteValues.replace(/(-?\d+(?:\.\d+)?|[A-Za-z])%/g, "\\frac{$1}{100}");
   // MathLive puede descartar macros no estándar como \\csch/\\sech/\\coth
   // durante la conversión ASCII. Reescribimos las formas inversas en LaTeX
   // conocido antes de delegar al conversor, y luego collapseKnownFunctionNames
