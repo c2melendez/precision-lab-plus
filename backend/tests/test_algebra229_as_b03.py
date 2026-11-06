@@ -13,7 +13,7 @@ SOURCE_GZ = Path(__file__).resolve().parents[2] / "qa/certification/legacy_sourc
 
 def _independent_integer_eval(expression: str, x_value: int) -> int:
     """Evaluate a small integer polynomial using Python AST and native integer arithmetic."""
-    substituted = re.sub(r"\bx\b", str(x_value), expression)
+    substituted = re.sub(r"\bx\b", f"({x_value})", expression)
     root = ast.parse(substituted, mode="eval").body
 
     def visit(node):
