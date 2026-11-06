@@ -67,14 +67,14 @@ def test_as_b24_source_row_has_seven_contract_cells():
     source_row = next(line.strip() for line in text.splitlines() if line.startswith("| AS-B-24 |"))
     cells = [cell.strip() for cell in source_row.split("|")]
     assert len(cells) == 8, source_row
-    assert cells[1:6] == [
+    assert cells[1:7] == [
         "AS-B-24",
         "N3",
         "`factorizar`",
         "`x^{2}-2\\ \\text{sobre }\\mathbb{R}`",
         "`\\left(x - \\sqrt{2}\\right) \\left(x + \\sqrt{2}\\right)`",
+        r"Con raíces permitidas: `(x-\\sqrt{2})(x+\\sqrt{2})`.",
     ], source_row
-    assert "Con raíces permitidas" in cells[6], source_row
     assert cells[7:] == [""], source_row
 
 
