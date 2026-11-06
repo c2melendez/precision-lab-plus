@@ -64,7 +64,7 @@ def _parse_prime_powers(expression: str) -> list[tuple[int, int]]:
 
 def _independent_integer_eval(expression: str) -> int:
     """Evaluate a factor expression with a restricted AST, not SymPy."""
-    root = ast.parse(expression, mode="eval").body
+    root = ast.parse(expression.replace("^", "**"), mode="eval").body
 
     def visit(node):
         if isinstance(node, ast.Constant) and type(node.value) is int:
