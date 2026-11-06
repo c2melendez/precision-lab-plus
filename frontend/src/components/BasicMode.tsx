@@ -49,6 +49,7 @@ import { useLayoutModeStore } from "../store/useLayoutModeStore";
 import { CalculatorScreen } from "./CalculatorScreen";
 import { detectCalculusIntent, type CalculusIntent } from "./calculusIntent";
 import { latexToBackendSyntax } from "./NaturalMathField";
+import { extractInlineSubstitution } from "./inlineSubstitution";
 import { NaturalMathKeyboard } from "./NaturalMathKeyboard";
 import { KeyboardBasicPanel } from "./KeyboardBasicPanel";
 import { splitSystemLatex } from "./systemSplit";
@@ -310,6 +311,46 @@ export function BasicMode() {
     const calculusIntent = detectCalculusIntent(latex);
     if (calculusIntent) {
       await submitCalculus(calculusIntent);
+      return;
+    }
+
+    const inlineSubstitution = extractInlineSubstitution(latex);
+    if (inlineSubstitution) {
+      const expression = latexToBackendSyntax(inlineSubstitution.expressionLatex);
+      const value = latexToBackendSyntax(inlineSubstitution.valueLatex);
+      if (!expression || !value) {
+        setValidationError("La expresión y el valor de la sustitución deben tener contenido.");
+        return;
+      }
+
+      // Combina las filas avanzadas con el vínculo inline; el valor escrito
+      // junto a \text{con} prevalece si la variable aparece en ambos sitios.
+      const rowSubstitutions = Object.fromEntries(
+        substitutions
+          .filter((row) => row.name.trim() !== "")
+          .map((row) => [row.name.trim(), row.value]),
+      );
+      const substitutionsPayload = {
+        ...rowSubstitutions,
+        [inlineSubstitution.variable]: value,
+      };
+
+      setValidationError(null);
+      setLoading(true);
+      setErrorMessage(null);
+      try {
+        const result = await submitAndRecord(
+          "/evaluate",
+          { expression, angle_unit: angleUnit, substitutions: substitutionsPayload },
+          expression + " con " + inlineSubstitution.variable + "=" + value,
+        );
+        setLastResult(result);
+        if (!result.success) {
+          setErrorMessage(result.error_message ?? "Ocurrió un error.");
+        }
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
