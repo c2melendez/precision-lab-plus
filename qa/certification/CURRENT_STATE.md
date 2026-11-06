@@ -1,4 +1,13 @@
-# Actualización de certificación — 2026-11-06 UTC (r428)
+# Actualización de certificación — 2026-11-06 UTC (r429)
+
+## Algebra229 AS-B-18 — PASS_SCOPED bilateral (r429)
+
+- Plus HEAD técnico `1fab6d5507822c922288c63ba9454f7536d3aead` (test reforzado): Cumulative 42199349315 con focal 2/2 PASS; H1d 42199349400, CI 42199349335 y Runner 42199349956 SUCCESS.
+- Lite HEAD técnico `bb159a449f2d320d607b65503310bb8741cf16b2` (test reforzado): Cumulative 42199356489 con focal 2/2 PASS; H1d 42199356467, Scientific UI 42199356498, Runner 42199356546 y CI 42199356505 SUCCESS.
+- Acceptance: `ALGEBRA229_AS_B_18_ACCEPTANCE_2026-11-06.md`. Sin cambio de producto.
+- **Siguiente:** AS-B-19 `x^{2}y-xy^{2}` → `x y \left(x - y\right)`. Global **OPEN**.
+
+---
 
 ## Algebra229 AS-B-17 — PASS_SCOPED bilateral (r428)
 
@@ -25,4 +34,5 @@
 - Plus HEAD `8a0015f6803599449dffcc9a35b51428978335cc`: Cumulative/H1d/CI/Runner SUCCESS.
 - Lite HEAD `0f0d0296069d3a710d98f77f33d18a30a63b2420`: Cumulative/H1d/Scientific UI/Runner SUCCESS.
 - **Siguiente:** AS-B-16 `a^3-b^3` → `(a-b)(a^2+ab+b^2)`. Global **OPEN**.
+
 
