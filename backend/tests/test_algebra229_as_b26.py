@@ -79,8 +79,8 @@ def test_as_b26_source_row_has_all_frozen_contract_cells():
         "AS-B-26",
         "N2",
         "`factorizar`",
-        r"`\\text{factorizar el entero }360`",
-        r"`2^{3}\\cdot 3^{2}\\cdot 5`",
+        r"`\text{factorizar el entero }360`",
+        r"`2^{3}\cdot 3^{2}\cdot 5`",
         "",
     ], source_row
     assert cells[7:] == [""], source_row
