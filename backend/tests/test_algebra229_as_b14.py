@@ -49,7 +49,7 @@ def test_as_b14_source_row_has_exact_contract_cells():
         "`factorizar`",
         "`x^{4}+x^{2}+1`",
         "`\\left(x^{2} - x + 1\\right) \\left(x^{2} + x + 1\\right)`",
-        "",
+        "Se factoriza como diferencia de cuadrados en ℚ.",
         "",
     ]
 
@@ -62,7 +62,13 @@ def test_as_b14_factor_x4_x2_1_http_and_independent_integer_oracle():
     assert result["success"] is True, result
     assert result["operation"] == "factor", result
     assert result["request_id"], result
-    assert result["result_latex"] == "\\left(x^{2} - x + 1\\right) \\left(x^{2} + x + 1\\right)"
+    # Accept either factor order in latex
+    latex = result["result_latex"]
+    acceptable_latex = {
+        "\\left(x^{2} - x + 1\\right) \\left(x^{2} + x + 1\\right)",
+        "\\left(x^{2} + x + 1\\right) \\left(x^{2} - x + 1\\right)",
+    }
+    assert latex in acceptable_latex, latex
 
     got = sp.sympify(result["result_text"])
     x = sp.symbols("x")
