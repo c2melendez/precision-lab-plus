@@ -1,6 +1,9 @@
-"""Algebra229 AS-B-12 original factor x^5-x over HTTP."""
-from pathlib import Path
+"""Algebra229 AS-B-12 original factor x^5-x over Q, through HTTP."""
+import ast
 import gzip
+import re
+from pathlib import Path
+
 import sympy as sp
 from fastapi.testclient import TestClient
 from app.main import app
@@ -8,20 +11,69 @@ from app.main import app
 SOURCE_GZ = Path(__file__).resolve().parents[2] / "qa/certification/legacy_sources/matriz_algebra_simbolica.md.gz"
 
 
-def test_as_b12_source_row_present():
+def _independent_integer_eval(expression: str, x_val: int) -> int:
+    """Evaluate a small integer polynomial in x using Python AST only."""
+    substituted = re.sub(r"\bx\b", f"({x_val})", expression)
+    root = ast.parse(substituted, mode="eval").body
+
+    def visit(node):
+        if isinstance(node, ast.Constant) and type(node.value) is int:
+            return node.value
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.UAdd, ast.USub)):
+            value = visit(node.operand)
+            return value if isinstance(node.op, ast.UAdd) else -value
+        if isinstance(node, ast.BinOp):
+            left, right = visit(node.left), visit(node.right)
+            if isinstance(node.op, ast.Add):
+                return left + right
+            if isinstance(node.op, ast.Sub):
+                return left - right
+            if isinstance(node.op, ast.Mult):
+                return left * right
+            if isinstance(node.op, ast.Pow) and 0 <= right <= 8:
+                return left**right
+        raise AssertionError(f"Unsupported result expression node: {ast.dump(node)}")
+
+    value = visit(root)
+    assert type(value) is int
+    return value
+
+
+def test_as_b12_source_row_has_exact_contract_cells():
     text = gzip.decompress(SOURCE_GZ.read_bytes()).decode("utf-8")
-    assert "| AS-B-12 | N2 |" in text
-    assert "x \\left(x - 1\\right) \\left(x + 1\\right) \\left(x^{2} + 1\\right)" in text
+    source_row = next(line.strip() for line in text.splitlines() if line.startswith("| AS-B-12 |"))
+    cells = [cell.strip() for cell in source_row.split("|")]
+    assert cells[1:8] == [
+        "AS-B-12",
+        "N2",
+        "`factorizar`",
+        "`x^{5}-x`",
+        "`x \\left(x - 1\\right) \\left(x + 1\\right) \\left(x^{2} + 1\\right)`",
+        "",
+        "",
+    ]
 
 
-def test_as_b12_factor_x5_minus_x_http():
+def test_as_b12_factor_x5_minus_x_http_and_independent_integer_oracle():
     with TestClient(app) as client:
         response = client.post("/api/v1/factor", json={"expression": "x^5-x"})
     assert response.status_code == 200, response.text
     result = response.json()
     assert result["success"] is True, result
-    x = sp.symbols("x")
+    assert result["operation"] == "factor", result
+    assert result["request_id"], result
+    assert result["result_latex"] == "x \\left(x - 1\\right) \\left(x + 1\\right) \\left(x^{2} + 1\\right)"
+
     got = sp.sympify(result["result_text"])
-    assert sp.expand(got - (x**5 - x)) == 0
+    x = sp.symbols("x")
     assert isinstance(got, sp.Mul), result["result_text"]
     assert len(got.args) == 4, result["result_text"]
+    expanded_factors = {sp.expand(f) for f in got.args}
+    assert expanded_factors == {x, x - 1, x + 1, x**2 + 1}, result["result_text"]
+    assert sp.expand(got - (x**5 - x)) == 0
+
+    samples = [-3, -2, -1, 0, 1, 2, 3, 4, 5, -4]
+    for xv in samples:
+        actual = _independent_integer_eval(result["result_text"], xv)
+        expected = xv**5 - xv
+        assert actual == expected, (xv, result["result_text"], actual, expected)
