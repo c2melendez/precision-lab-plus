@@ -9,21 +9,21 @@
 - Forma ASCII esperada del motor: `2^3*3^2*5`.
 
 ## Pruebas y oráculos
-- Lite `tests/algebra229AsB26.audit.test.ts`: 4/4 PASS. Comprueba las ocho celdas de la fila congelada, forma ASCII exacta, factorización independiente por división de prueba (`[(2,3),(3,2),(5,1)]), verificando además que el producto sea 360) y equivalencia simbólica con 360.
 - Plus `backend/tests/test_algebra229_as_b26.py`: 3/3 PASS. Comprueba fila fuente exacta, endpoint HTTP `POST /api/v1/factor`, forma ASCII exacta, división de prueba independiente con bases primas/multiplicidades exactas y evaluación entera mediante AST restringido (sin `eval`).
+- Lite `tests/algebra229AsB26.audit.test.ts`: 4/4 PASS. Comprueba las ocho celdas de la fila congelada, forma ASCII exacta, factorización independiente por división de prueba (`[(2,3),(3,2),(5,1)]`, verificando además que el producto sea 360) y equivalencia simbólica con 360.
 
-## Evidencia Plus — SHA técnico `26cc8cc69d32e4a5614dc9921a87030308f9cdd1`
+## Evidencia Plus — SHA técnico corregido `4509e41570258a1f573f8992475433b1b05ef120`
+- Cumulative [42272022466](https://github.com/c2melendez/precision-lab-plus/actions/runs/42272022466) SUCCESS; guard `skip=false`, `evidence_run_id=""`; frontend/backend SUCCESS, focal 3/3 y backend 2,805 passed, 1 skipped, 10 xfailed.
+- H1d [42272022376](https://github.com/c2melendez/precision-lab-plus/actions/runs/42272022376) SUCCESS; 38/38 Playwright.
+- CI [42272022354](https://github.com/c2melendez/precision-lab-plus/actions/runs/42272022354) SUCCESS; frontend/backend SUCCESS, backend 2,805 passed, 1 skipped, 10 xfailed.
+- Runner [42272022361](https://github.com/c2melendez/precision-lab-plus/actions/runs/42272022361) SUCCESS; fingerprint push-only.
+
+## Evidencia Lite (par bilateral) — SHA técnico `26cc8cc69d32e4a5614dc9921a87030308f9cdd1`
 - Cumulative [42270957296](https://github.com/c2melendez/precision-lab-lite/actions/runs/42270957296) SUCCESS; guard `skip=false`, `evidence_run_id=""`; focal 4/4, 366/366 archivos, 2,264 passed, 8 expected fail, 34 TODO.
 - H1d [42270957306](https://github.com/c2melendez/precision-lab-lite/actions/runs/42270957306) SUCCESS; 22/22 Playwright.
 - CI [42270957315](https://github.com/c2melendez/precision-lab-lite/actions/runs/42270957315) SUCCESS; typecheck, suite y production build.
 - Scientific UI [42270957389](https://github.com/c2melendez/precision-lab-lite/actions/runs/42270957389) SUCCESS; 456/456 Playwright en desktop, tablet y mobile.
 - Runner [42270957317](https://github.com/c2melendez/precision-lab-lite/actions/runs/42270957317) SUCCESS; fingerprint push-only, no se contabiliza como gate adicional.
-
-## Evidencia Lite (par bilateral) — SHA técnico corregido `4509e41570258a1f573f8992475433b1b05ef120`
-- Cumulative [42272022466](https://github.com/c2melendez/precision-lab-plus/actions/runs/42272022466) SUCCESS; guard `skip=false`, `evidence_run_id=""`; frontend/backend SUCCESS, focal 3/3 y backend 2,805 passed, 1 skipped, 10 xfailed.
-- H1d [42272022376](https://github.com/c2melendez/precision-lab-plus/actions/runs/42272022376) SUCCESS; 38/38 Playwright.
-- CI [42272022354](https://github.com/c2melendez/precision-lab-plus/actions/runs/42272022354) SUCCESS; frontend/backend SUCCESS, backend 2,805 passed, 1 skipped, 10 xfailed.
-- Runner [42272022361](https://github.com/c2melendez/precision-lab-plus/actions/runs/42272022361) SUCCESS; fingerprint push-only.
 
 ## Diagnóstico de la primera revalidación Plus
 - CI [42271188505](https://github.com/c2melendez/precision-lab-plus/actions/runs/42271188505) sobre SHA `ef97ca2a23324d2512f4f26585ad51f421d316ff` falló exclusivamente porque el test esperaba dos barras invertidas en las celdas LaTeX mientras la matriz congelada contiene una.
