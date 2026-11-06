@@ -1,3 +1,12 @@
+## 2026-11-05 UTC — r407: AS-A-17 PASS_SCOPED bilateral; AS-B-01 oráculo reforzado
+
+- AS-A-17 Lite SHA `b37502c5713bddabae6a022e6e1cb788ee72a87d`: cumulative 42039943541 SUCCESS (guard false; 2 focales/2,259 passed), H1d 42039943721 SUCCESS (22), Scientific UI 42039943566 SUCCESS (456), Runner 42039943836 SUCCESS. CI 42039944052 FAILURE únicamente npm audit (4 moderadas).
+- AS-A-17 Plus SHA `6b1bf9b9f731d6f6d36c16f33f09d1a9f2eb3238`: cumulative 42040844511 SUCCESS (2 focales, 2,800 passed/1 skipped/10 xfailed, cobertura 88.93%), H1d 42040844847 SUCCESS (38), CI 42040844459 SUCCESS (2,800 backend/1,055 frontend), Runner 42040844455 SUCCESS.
+- Se clasificó y corrigió el falso negativo del harness Plus: la aserción sobre `**5` prohibía (x^5) e (y^5), aunque eran monomios válidos de la expansión. La corrección valida expansión real y siete pares enteros independientes. No hubo cambio de motor.
+- Decisión: AS-A-17 PASS_SCOPED bilateral. El hard gate npm audit Lite permanece separado y abierto.
+- AS-B-01 reforzado en Lite SHA `b26787342ab1bcd9edd7af8e723246306215be51`, blob `32982309677fe63e7e2db85f7e2fae62c4be3693`; Plus SHA `eb3a45c4b0ae68ff3d8da440b434c27098cf69c1`, blob `12aa538e77b63137ef92e47ede8f68506f6dbc71`. Se incorporó fila fuente completa y diez sustituciones con aritmética independiente del CAS.
+- Los workflows configuran push en la rama canónica y los paths incluyen los tests. La acción de consulta de runs por commit está limitada a PR; para los SHAs B01 devolvió vacío y no permite resolver pushes. No se infiere que Actions no corrió. B01 sigue REVIEW hasta obtener los runs push, jobs y logs exactos.
+- No se ha modificado `MANUAL_CAPABILITY_GAPS.md`: no surgió un nuevo gap de capacidad del producto. EDCX-B6 VC-FE-45/EV-I-12 y H2/SG28 distribuido conservan sus estados bloqueados.
 ## 2026-11-05 UTC — r406: AS-A-17 falso negativo de harness corregido
 
 - Plus SHA inicial 8232f3979cf128c1bd52c6de2bfde4e9296a5d77, CI 42039991675 backend FAILURE por aserción `"**5" not in result_text`. La salida observada era el polinomio expandido correcto con términos (x^5,y^5); clasificación HARNESS/ORACLE, no producto.
