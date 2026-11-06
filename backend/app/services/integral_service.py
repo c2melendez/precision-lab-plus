@@ -10,12 +10,14 @@ Regla no mapeada -> paso resumen de ese sub-árbol (`ReciprocalRule`,
 `ConstantRule`, `ArcsinRule`, etc. — no nombradas en la sección 8.4); si
 `manualintegrate` no encuentra NINGUNA técnica (`DontKnowRule`) -> fallback
 completo a `sympy.integrate()` directo, `has_detailed_steps: false` y
-warning explícito. `ConstantTimesRule`/`AlternativeRule`/`RewriteRule` se
+warning explícito. Si el fallback queda como `Integral(...)` sin resolver,
+se responde `UNSUPPORTED_OPERATION` con un aviso legible; no se presenta
+como resultado válido. Para integrales definidas, el valor acotado se evalúa
+independientemente y se rechaza solo si ese propio resultado permanece
+sin evaluar. `ConstantTimesRule`/`AlternativeRule`/`RewriteRule` se
 tratan como envoltorios transparentes (no son una "técnica" en sí, solo
 bookkeeping interno de SymPy) — se recorre a través de ellos sin generar un
-paso propio. Los fallbacks directos solo se aceptan cuando SymPy entrega una
-expresión cerrada; una Integral simbólica pendiente se informa como no
-resuelta, nunca como respuesta correcta.
+paso propio.
 """
 
 from dataclasses import dataclass
