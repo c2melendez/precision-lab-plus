@@ -58,7 +58,7 @@ def _is_prime_by_trial_division(value: int) -> bool:
 def _parse_prime_powers(expression: str) -> list[tuple[int, int]]:
     return [
         (int(base), int(exponent or "1"))
-        for base, exponent in re.findall(r"(\\d+)(?:\\^(\\d+))?", expression)
+        for base, exponent in re.findall(r"(\d+)(?:\^(\d+))?", expression)
     ]
 
 
@@ -91,8 +91,8 @@ def test_as_b28_source_row_matches_frozen_contract_cells():
         "AS-B-28",
         "N3",
         "`factorizar`",
-        r"`\\text{factorizar el entero }4294967297`",
-        r"`641\\cdot 6700417`",
+        r"`\text{factorizar el entero }4294967297`",
+        r"`641\cdot 6700417`",
         "",
     ], source_row
     assert cells[7] == "", source_row
@@ -100,12 +100,12 @@ def test_as_b28_source_row_matches_frozen_contract_cells():
 
 def test_as_b28_factor_4294967297_http_returns_exact_ascii_form():
     result = _factor_response()
-    assert re.sub(r"\\s+", "", result["result_text"]) == EXPECTED, result["result_text"]
+    assert re.sub(r"\s+", "", result["result_text"]) == EXPECTED, result["result_text"]
 
 
 def test_as_b28_independent_prime_oracle_verifies_factorization_and_product():
     result = _factor_response()
-    expression = re.sub(r"\\s+", "", result["result_text"])
+    expression = re.sub(r"\s+", "", result["result_text"])
     expected = _trial_division_factorization(ORIGINAL)
     actual = _parse_prime_powers(expression)
     assert expected == [(641, 1), (6700417, 1)]
