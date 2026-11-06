@@ -53,10 +53,21 @@ def test_fallback_for_unmapped_rule_sin_of_sin():
     # DontKnowRule) -> fallback completo a integrate() directo.
     response = _integral("sin(sin(x))")
     body = response.json()
-    assert body["success"] is True
-    assert body["has_detailed_steps"] is False
-    assert body["steps"] == []
-    assert any("directo de SymPy" in w for w in body["warnings"])
+    assert body["success"] is False
+    assert body["error_code"] == "UNSUPPORTED_OPERATION"
+    assert "Sin forma elemental" in body["error_message"]
+    assert body["result_text"] is None
+    assert body["result_latex"] is None
+
+
+def test_non_elementary_x_to_x_integral_is_explicitly_unsupported():
+    response = _integral("sin(x**x)")
+    body = response.json()
+    assert body["success"] is False
+    assert body["error_code"] == "UNSUPPORTED_OPERATION"
+    assert "Sin forma elemental" in body["error_message"]
+    assert body["result_text"] is None
+    assert body["result_latex"] is None
 
 
 def test_infinite_upper_bound_returns_exact_message():
