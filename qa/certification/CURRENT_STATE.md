@@ -9,6 +9,8 @@
 
 ---
 
+# Actualización de certificación — 2026-11-06 UTC (r430)
+
 ## Algebra229 AS-B-19 — PASS_SCOPED bilateral (r430)
 
 - Plus HEAD técnico `f5109b537005943738ad9797908bef340d23a5b6` (test reforzado): Cumulative 42202185841 con focal 2/2 PASS; H1d 42202185915, CI 42202185876 y Runner 42202185863 SUCCESS.
