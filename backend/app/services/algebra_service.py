@@ -407,6 +407,18 @@ def _even_root_abs_rewrites(expr: sympy.Expr) -> Tuple[sympy.Expr, List[str]]:
     return rewritten, notes
 
 
+def _cancel_common_factors(expr: sympy.Expr) -> sympy.Expr:
+    """sympy.simplify() leaves rational functions such as (x**3-1)/(x**2-1) uncancelled.
+
+    cancel() removes common polynomial factors exactly. Its result is kept only when it
+    is not more complex, so every other simplify form stays as it was.
+    """
+    if not expr.free_symbols or not expr.is_rational_function():
+        return expr
+    cancelled = sympy.cancel(expr)
+    return cancelled if sympy.count_ops(cancelled) <= sympy.count_ops(expr) else expr
+
+
 def simplify_expression(expression: str) -> AlgebraResult:
     input_expr = parsing.parse_expression_tree(expression, allow_equation=False)
     convention_warnings: List[str] = []
@@ -416,7 +428,7 @@ def simplify_expression(expression: str) -> AlgebraResult:
         convention_warnings.append(_ZERO_ZERO_NOTE)
     result_expr = _rewrite_audited_real_absolute_square(
         input_expr,
-        _split_absolute_products(_denest_constant_radicals(sympy.simplify(input_expr))),
+        _split_absolute_products(_denest_constant_radicals(_cancel_common_factors(sympy.simplify(input_expr)))),
     )
     result_expr = _real_absolute_piecewise(result_expr) or result_expr
     result_expr = _real_root_of_square(result_expr)
