@@ -20,7 +20,8 @@ from typing import Dict, Optional
 import sympy
 from sympy import cos, cot, csc, pi, sec, sin, tan
 
-from app.services import parsing
+from app.services import parsing, primality
+from app.services.ast_validator import ComplexityLimitError
 
 _DIRECT_TRIG_FUNCTIONS = (sin, cos, tan, sec, csc, cot)
 
@@ -44,6 +45,7 @@ class EvaluateResult:
     sum_bound: Optional[str] = None
     binomial_variable: Optional[str] = None
     permutation_alias: bool = False
+    text_result: Optional[str] = None
 
 
 def _validate_and_parse_substitutions(
@@ -249,6 +251,21 @@ def evaluate(
     angle_unit: str = "rad",
     substitutions: Optional[Dict[str, str]] = None,
 ) -> EvaluateResult:
+    # AS-B-30: the frozen matrix asks a yes/no primality question. Recognise
+    # only that exact bounded shape; everything else keeps the normal parser.
+    primality_value = primality.parse_primality_query(expression)
+    if primality_value is not None:
+        if primality_value > primality.MAX_PRIMALITY_VALUE:
+            raise ComplexityLimitError(
+                "El entero consultado excede el límite de primalidad de 64 bits."
+            )
+        return EvaluateResult(
+            expr=sympy.Integer(primality_value),
+            input_expr=sympy.Integer(primality_value),
+            is_numeric=True,
+            text_result=primality.answer_for(primality_value),
+        )
+
     # SY-S-11: bounded Spanish natural-language substitution form from the
     # official fixture. Accept only a single variable and one exact value;
     # the ordinary safe parser still evaluates the translated expression.

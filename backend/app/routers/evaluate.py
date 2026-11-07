@@ -27,6 +27,15 @@ def _sg28_ci_slow_evaluate(expression, angle_unit, substitutions):
 
 def _render_evaluate_presentation(result, source_expression=None):
     """Render in an independent, killable SG28 worker if isolation is on."""
+    text_result = getattr(result, "text_result", None)
+    if text_result is not None:
+        return {
+            "warnings": [],
+            "input_latex": None,
+            "result_latex": r"\text{" + text_result + "}",
+            "result_text": text_result,
+            "domain_conditions": [],
+        }
     warnings = []
     if getattr(result, "sum_bound", None) is not None:
         warnings.append(f"{result.sum_bound} debe ser un entero no negativo para esta suma simbólica.")
@@ -263,7 +272,11 @@ async def _evaluate_impl(payload: EvaluateRequest, request: Request, *, admissio
         success=True,
         operation=OperationType.EVALUATE,
         request_id=request.state.request_id,
-        result_type=ResultType.SCALAR,
+        result_type=(
+            ResultType.BOOLEAN
+            if getattr(result, "text_result", None) is not None
+            else ResultType.SCALAR
+        ),
         input_text=payload.expression,
         result_approx=result.approx_value,
         steps=[],
