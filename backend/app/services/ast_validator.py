@@ -123,7 +123,11 @@ def _bounded_integer_value(node: sympy.Basic, limit: int) -> int | None:
         if base is None or exponent is None:
             return None
         if exponent < 0:
-            return 1 if base in (1, -1) and (exponent % 2 == 0 or base == 1) else None
+            if base == 1:
+                return 1
+            if base == -1:
+                return -1 if abs(exponent) % 2 else 1
+            return None
         if exponent == 0:
             return 1
         if base in (0, 1):
