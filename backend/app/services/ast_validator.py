@@ -87,6 +87,71 @@ def validate_ast_safety(tree: sympy.Basic) -> None:
             raise ParseSecurityError(f"Función no reconocida: '{node.func.__name__}'.")
 
 
+def _bounded_integer_value(node: sympy.Basic, limit: int) -> int | None:
+    """Evalúa aritmética entera pequeña sin construir torres de potencias.
+
+    Devuelve None si no puede demostrar que el valor está dentro de `limit`.
+    Se usa para exponentes numéricos expresados como AST (p. ej. 10**10),
+    que no son `Integer` aunque representan un entero.
+    """
+    if node.is_Integer:
+        value = int(node)
+        return value if abs(value) <= limit else None
+
+    if node.is_Add:
+        values = [_bounded_integer_value(arg, limit) for arg in node.args]
+        if any(value is None for value in values):
+            return None
+        total = sum(value for value in values if value is not None)
+        return total if abs(total) <= limit else None
+
+    if node.is_Mul:
+        result = 1
+        for arg in node.args:
+            value = _bounded_integer_value(arg, limit)
+            if value is None:
+                return None
+            result *= value
+            if abs(result) > limit:
+                return None
+        return result
+
+    if node.is_Pow:
+        base_node, exponent_node = node.args
+        base = _bounded_integer_value(base_node, limit)
+        exponent = _bounded_integer_value(exponent_node, limit)
+        if base is None or exponent is None:
+            return None
+        if exponent < 0:
+            if base == 1:
+                return 1
+            if base == -1:
+                return -1 if abs(exponent) % 2 else 1
+            return None
+        if exponent == 0:
+            return 1
+        if base in (0, 1):
+            return base
+        if base == -1:
+            return -1 if exponent % 2 else 1
+        result = 1
+        factor = base
+        remaining = exponent
+        while remaining:
+            if remaining & 1:
+                result *= factor
+                if abs(result) > limit:
+                    return None
+            remaining >>= 1
+            if remaining:
+                factor *= factor
+                if abs(factor) > limit:
+                    factor = limit + 1
+        return result
+
+    return None
+
+
 def check_complexity_limits(expr: sympy.Basic) -> None:
     """Etapa 9 (sección 7): nodos ≤ 200, profundidad ≤ 30, dígitos máximos
     por entero literal ≤ 64, exponente entero absoluto máximo ≤ 10,000.
@@ -117,11 +182,19 @@ def check_complexity_limits(expr: sympy.Basic) -> None:
 
         if node.is_Pow:
             _base, exponent = node.args
-            if exponent.is_Integer and abs(int(exponent)) > MAX_ABS_INTEGER_EXPONENT:
-                raise ComplexityLimitError(
-                    f"Exponente entero fuera de rango (máx. "
-                    f"{MAX_ABS_INTEGER_EXPONENT} en valor absoluto): {exponent}."
+            # Las expresiones anidadas como 10**(10**10) tienen un exponente
+            # entero, aunque su nodo raíz no sea sympy.Integer. Evaluamos solo
+            # aritmética pequeña con un tope; si excede el rango o no puede
+            # acotarse sin expandirla, se rechaza antes de evalf/simplify.
+            if exponent.is_number and exponent.is_integer is True:
+                exponent_value = _bounded_integer_value(
+                    exponent, MAX_ABS_INTEGER_EXPONENT
                 )
+                if exponent_value is None or abs(exponent_value) > MAX_ABS_INTEGER_EXPONENT:
+                    raise ComplexityLimitError(
+                        f"Exponente entero fuera de rango (máx. "
+                        f"{MAX_ABS_INTEGER_EXPONENT} en valor absoluto): {exponent}."
+                    )
 
         for child in node.args:
             _walk(child, depth + 1, counters)

@@ -88,11 +88,29 @@ async def validation_exception_handler(
     get_logger().warning(
         f"request_id={_request_id(request)} event=validation_error errors={exc.errors()}"
     )
+    errors = exc.errors()
+    oversized = next(
+        (
+            error for error in errors
+            if error.get("type") == "string_too_long"
+            and isinstance(error.get("ctx", {}).get("max_length"), int)
+            and error.get("loc", ())[-1:] == ("expression",)
+        ),
+        None,
+    )
+    if oversized is not None:
+        limit = oversized["ctx"]["max_length"]
+        message = (
+            f"Entrada demasiado larga: el máximo permitido es de {limit} caracteres."
+        )
+    else:
+        message = "El payload enviado no cumple el schema esperado."
+
     return _error_response(
         request,
         ErrorCode.VALIDATION_ERROR,
         status.HTTP_422_UNPROCESSABLE_CONTENT,
-        "El payload enviado no cumple el schema esperado.",
+        message,
     )
 
 

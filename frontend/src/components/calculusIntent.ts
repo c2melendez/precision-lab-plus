@@ -264,9 +264,42 @@ function getComputeEngine(): ComputeEngine {
   return ce;
 }
 
+function detectSimpleIndefiniteIntegral(
+  latex: string,
+): Extract<CalculusIntent, { kind: "integral" }> | null {
+  // Fallback para integrales indefinidas cuyo diferencial simple (dx) hace
+  // que Compute Engine 0.58.0 no produzca el nodo MathJSON Integrate. Solo
+  // reconoce una envoltura integral completa con diferencial terminal:
+  //   \\int x\\,dx
+  //   \\int\\sin\\left(x^2\\right)dx
+  // No acepta límites en este fallback; esas formas siguen dependiendo de
+  // la extracción estructurada de Compute Engine.
+  const match = latex.trim().match(/^\\int(?!_)\s*(.+?)\s*(?:\\,\s*)?d\s*([A-Za-z])$/s);
+  if (!match) return null;
+  const innerLatex = match[1].trim();
+  const variable = match[2];
+  if (!innerLatex || /\\int/.test(innerLatex)) return null;
+  return {
+    kind: "integral",
+    variable,
+    lowerBound: null,
+    upperBound: null,
+    innerLatex,
+  };
+}
+
 function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integral" }> | null {
   const trimmed = latex.trim();
   if (trimmed.length === 0) return null;
+
+  // Reconocer primero las indefinidas simples desde el LaTeX original.
+  // Compute Engine 0.58.0 puede devolver un nodo Integrate incompleto
+  // para diferenciales como dx; en ese caso no se debe salir con null ni
+  // reemplazar el integrando por una serialización LaTeX normalizada.
+  // El fallback está anclado a la expresión completa y excluye límites,
+  // integrales anidadas y diferenciales no terminales.
+  const simpleIndefinite = detectSimpleIndefiniteIntegral(trimmed);
+  if (simpleIndefinite) return simpleIndefinite;
 
   let expr;
   try {
@@ -274,7 +307,9 @@ function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integra
   } catch {
     return null;
   }
-  if (!expr || !Array.isArray(expr.json) || expr.json[0] !== "Integrate") return null;
+  if (!expr || !Array.isArray(expr.json) || expr.json[0] !== "Integrate") {
+    return null;
+  }
 
   // ["Integrate", ["Function", ["Block", <cuerpo>], var], ["Limits", var, lowerOrNothing, upperOrNothing]]
   // Se navega solo por .json (no por .ops — la interfaz `Expression` de
