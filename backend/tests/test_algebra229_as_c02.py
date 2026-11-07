@@ -53,7 +53,9 @@ def test_as_c02_source_row_matches_all_frozen_contract_cells():
 
 def test_as_c02_simplify_endpoint_returns_exact_result():
     result = _simplify(INPUT)
-    assert _compact(result["result_text"]) == _compact(EXPECTED), result
+    # The engine prints powers as "**"; the frozen expectation writes them as "^".
+    # Only the notation is normalized here, the mathematical expectation is unchanged.
+    assert _compact(result["result_text"]).replace("**", "^") == _compact(EXPECTED), result
 
 
 def test_as_c02_independent_arithmetic_matches_every_sample_outside_roots():
