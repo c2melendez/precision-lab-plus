@@ -100,6 +100,51 @@ def _apply_degree_conversion(expr: sympy.Expr) -> sympy.Expr:
     return expr.replace(_is_direct_trig, _convert)
 
 
+def _safe_simplify_numeric(expr: sympy.Expr) -> sympy.Expr:
+    """Simplifica resultados numéricos exactos sin expandir enteros enormes.
+
+    Mantiene el AST y sus límites de complejidad como primera barrera. Esta
+    segunda cota evita que un `simplify()` convierta potencias permitidas,
+    pero gigantes, en enteros de miles de dígitos durante la serialización.
+    """
+    if not expr.is_number or sympy.count_ops(expr) > 50 or expr.has(sympy.factorial):
+        return expr
+
+    for node in sympy.preorder_traversal(expr):
+        if not isinstance(node, sympy.Pow):
+            continue
+        base, exponent = node.args
+        if exponent.is_Integer:
+            power = abs(int(exponent))
+            if base.is_Integer and abs(int(base)) > 1:
+                # Cota conservadora de dígitos para una potencia entera.
+                estimated_digits = len(str(abs(int(base)))) * power
+                if estimated_digits > 1000:
+                    return expr
+            elif power > 1000:
+                return expr
+        elif exponent.is_Rational:
+            numerator = abs(int(exponent.p))
+            denominator = int(exponent.q)
+            if numerator > 100 or denominator > 100:
+                return expr
+            if base.is_Integer and abs(int(base)) > 1:
+                estimated_digits = len(str(abs(int(base)))) * numerator / denominator
+                if estimated_digits > 1000:
+                    return expr
+        else:
+            return expr
+
+    try:
+        simplified = sympy.simplify(expr)
+    except (AttributeError, ZeroDivisionError, ValueError, OverflowError, TypeError):
+        return expr
+
+    if simplified.free_symbols or sympy.count_ops(simplified) > 100:
+        return expr
+    return simplified
+
+
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
@@ -121,6 +166,12 @@ def evaluate(
         return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=False)
 
     # Sin variables libres sin sustituir -> numérico (sección 6).
+    # La conversión desde el campo MathLive y el parser seguro conservan a
+    # veces operaciones en forma no evaluada (2+3, x^(1/3) con x=27). Se
+    # simplifica solo tras pasar el control AST y con una cota que evita
+    # materializar resultados enteros enormes.
+    expr = _safe_simplify_numeric(expr)
+
     # Fix (suite de regresión v1.1, caso E147: tan(pi/2) evaluate daba un
     # número finito gigante en vez de clasificarse como indefinido). El
     # parser preserva "pi/2" en forma exacta (Rational * pi, no un
