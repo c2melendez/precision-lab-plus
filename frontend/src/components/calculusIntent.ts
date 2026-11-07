@@ -292,14 +292,23 @@ function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integra
   const trimmed = latex.trim();
   if (trimmed.length === 0) return null;
 
+  // Reconocer primero las indefinidas simples desde el LaTeX original.
+  // Compute Engine 0.58.0 puede devolver un nodo Integrate incompleto
+  // para diferenciales como dx; en ese caso no se debe salir con null ni
+  // reemplazar el integrando por una serialización LaTeX normalizada.
+  // El fallback está anclado a la expresión completa y excluye límites,
+  // integrales anidadas y diferenciales no terminales.
+  const simpleIndefinite = detectSimpleIndefiniteIntegral(trimmed);
+  if (simpleIndefinite) return simpleIndefinite;
+
   let expr;
   try {
     expr = getComputeEngine().parse(trimmed);
   } catch {
-    return detectSimpleIndefiniteIntegral(trimmed);
+    return null;
   }
   if (!expr || !Array.isArray(expr.json) || expr.json[0] !== "Integrate") {
-    return detectSimpleIndefiniteIntegral(trimmed);
+    return null;
   }
 
   // ["Integrate", ["Function", ["Block", <cuerpo>], var], ["Limits", var, lowerOrNothing, upperOrNothing]]
