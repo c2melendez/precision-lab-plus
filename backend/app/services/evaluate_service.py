@@ -148,6 +148,34 @@ def _safe_simplify_numeric(expr: sympy.Expr) -> sympy.Expr:
     return simplified
 
 
+def _reject_real_inverse_hyperbolic_boundary_values(expr: sympy.Expr) -> None:
+    """Reject exact real boundary values where inverse hyperbolic functions diverge.
+
+    SymPy's unevaluated atanh(1) can be reduced incorrectly by the generic
+    simplify path in this application. Check these mathematical boundaries
+    on the parsed AST before any simplification:
+      atanh(±1), asech(0), acoth(±1).
+    """
+    boundary_values = {
+        sympy.atanh: {sympy.S.NegativeOne, sympy.S.One},
+        sympy.asech: {sympy.S.Zero},
+        sympy.acoth: {sympy.S.NegativeOne, sympy.S.One},
+    }
+    for node in sympy.preorder_traversal(expr):
+        invalid_arguments = boundary_values.get(node.func)
+        if invalid_arguments is None or len(node.args) != 1:
+            continue
+        argument = node.args[0]
+        if (
+            argument.is_number
+            and argument.is_real
+            and argument in invalid_arguments
+        ):
+            raise DomainErrorResult(
+                "El resultado no está definido en este dominio."
+            )
+
+
 def evaluate(
     expression: str,
     angle_unit: str = "rad",
@@ -169,6 +197,10 @@ def evaluate(
         return EvaluateResult(expr=expr, input_expr=input_expr, is_numeric=False)
 
     # Sin variables libres sin sustituir -> numérico (sección 6).
+    # Verificar primero fronteras reales de funciones hiperbólicas
+    # inversas; simplificar atanh(1) con SymPy puede borrar el polo.
+    _reject_real_inverse_hyperbolic_boundary_values(expr)
+
     # La conversión desde el campo MathLive y el parser seguro conservan a
     # veces operaciones en forma no evaluada (2+3, x^(1/3) con x=27). Se
     # simplifica solo tras pasar el control AST y con una cota que evita
