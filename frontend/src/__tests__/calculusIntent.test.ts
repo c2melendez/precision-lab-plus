@@ -80,7 +80,7 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
     });
 
     it("detecta integral indefinida simple aunque Compute Engine no reconozca dx", () => {
-      expect(detectCalculusIntent(String.raw`\\int x\\,dx`)).toEqual({
+      expect(detectCalculusIntent(String.raw`\int x\,dx`)).toEqual({
         kind: "integral",
         variable: "x",
         lowerBound: null,
@@ -90,12 +90,12 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
     });
 
     it("detecta integral indefinida de función con diferencial concatenado", () => {
-      expect(detectCalculusIntent(String.raw`\\int\\sin\\left(x^{x}\\right)dx`)).toEqual({
+      expect(detectCalculusIntent(String.raw`\int\sin\left(x^{x}\right)dx`)).toEqual({
         kind: "integral",
         variable: "x",
         lowerBound: null,
         upperBound: null,
-        innerLatex: String.raw`\\sin\\left(x^{x}\\right)`,
+        innerLatex: String.raw`\sin\left(x^{x}\right)`,
       });
     });
   });
