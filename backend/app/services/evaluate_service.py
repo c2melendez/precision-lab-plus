@@ -123,10 +123,13 @@ def _safe_simplify_numeric(expr: sympy.Expr) -> sympy.Expr:
                     return expr
             elif power > 1000:
                 return expr
-        elif exponent.is_Rational:
-            numerator = abs(int(exponent.p))
-            denominator = int(exponent.q)
-            if numerator > 100 or denominator > 100:
+        elif exponent.is_rational is True:
+            numerator_expr, denominator_expr = exponent.as_numer_denom()
+            if not numerator_expr.is_Integer or not denominator_expr.is_Integer:
+                return expr
+            numerator = abs(int(numerator_expr))
+            denominator = abs(int(denominator_expr))
+            if denominator == 0 or numerator > 100 or denominator > 100:
                 return expr
             if base.is_Integer and abs(int(base)) > 1:
                 estimated_digits = len(str(abs(int(base)))) * numerator / denominator
