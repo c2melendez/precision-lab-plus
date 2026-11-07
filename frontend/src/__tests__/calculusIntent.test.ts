@@ -98,6 +98,10 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
         innerLatex: String.raw`\sin\left(x^{x}\right)`,
       });
     });
+
+    it("no rebaja una integral definida con límites simbólicos a integral indefinida", () => {
+      expect(detectCalculusIntent(String.raw`\int_{a}^{b}x\,dx`)).toBeNull();
+    });
   });
 
   describe("límite (Compute Engine — finito e infinito; lateral queda fuera, ver cabecera)", () => {
