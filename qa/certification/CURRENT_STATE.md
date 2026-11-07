@@ -1,3 +1,17 @@
+# Actualización de certificación — 2026-11-07 UTC (r451)
+
+## Algebra229 AS-C-02 — PASS bilateral (cerrado)
+
+- Contrato N2: `simplificar` `\frac{x^{3}-1}{x^{2}-1}` → `\frac{x^{2} + x + 1}{x + 1}`, sin nota de dominio en la fila congelada. Expectativas congeladas sin cambios.
+- Corrección de producto: Plus cancela factores racionales comunes tras `sympy.simplify` (`_cancel_common_factors`); Lite reintenta con `simplify(expand(...))` y acepta solo cero o resultado sin denominador.
+- Ajuste de notación en el oráculo de Plus: el motor imprime potencias como `**`; la prueba normaliza `**` a `^` sin cambiar la expectativa matemática.
+- Lite SHA `610cfc2e37ac898412a483c0eb0437b9949e4fc1`: Cumulative 42335766429 SUCCESS (focal AS-C-02 4/4; backend 2,820 passed, 1 skipped, 10 xfailed), CI 42335766470 SUCCESS, H1d 42335766401 SUCCESS (38/38), Runner 42335766423 SUCCESS.
+- Guards revisados: `skip=false` y `evidence_run_id` vacío; sin REUSE.
+- Aceptación bilateral: `ALGEBRA229_AS_C_02_ACCEPTANCE_2026-11-07.md`. Baseline `ALGEBRA229-AS-C-02 PASS`; sección C en 2/23. Global **OPEN**; S25, SG28, H2 y DIST siguen abiertos.
+- **Siguiente:** AS-C-03, N2, `simplificar` — `\frac{x^{2}+3x+2}{x^{2}-x-2}` → `\frac{x + 2}{x - 2}`.
+
+---
+
 # Actualización de certificación - 2026-11-06 UTC (r450)
 
 ## Algebra229 AS-C-01 - PASS bilateral (cerrado; inicio de sección C)
