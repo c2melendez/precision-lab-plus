@@ -264,6 +264,30 @@ function getComputeEngine(): ComputeEngine {
   return ce;
 }
 
+function detectSimpleIndefiniteIntegral(
+  latex: string,
+): Extract<CalculusIntent, { kind: "integral" }> | null {
+  // Fallback para integrales indefinidas cuyo diferencial simple (dx) hace
+  // que Compute Engine 0.58.0 no produzca el nodo MathJSON Integrate. Solo
+  // reconoce una envoltura integral completa con diferencial terminal:
+  //   \\int x\\,dx
+  //   \\int\\sin\\left(x^2\\right)dx
+  // No acepta límites en este fallback; esas formas siguen dependiendo de
+  // la extracción estructurada de Compute Engine.
+  const match = latex.trim().match(/^\\\\int\\s*(.+?)\\s*(?:\\\\,\\s*)?d\\s*([A-Za-z])$/s);
+  if (!match) return null;
+  const innerLatex = match[1].trim();
+  const variable = match[2];
+  if (!innerLatex || /\\\\int|\\\\frac\\{d/i.test(innerLatex)) return null;
+  return {
+    kind: "integral",
+    variable,
+    lowerBound: null,
+    upperBound: null,
+    innerLatex,
+  };
+}
+
 function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integral" }> | null {
   const trimmed = latex.trim();
   if (trimmed.length === 0) return null;
@@ -272,9 +296,11 @@ function detectIntegral(latex: string): Extract<CalculusIntent, { kind: "integra
   try {
     expr = getComputeEngine().parse(trimmed);
   } catch {
-    return null;
+    return detectSimpleIndefiniteIntegral(trimmed);
   }
-  if (!expr || !Array.isArray(expr.json) || expr.json[0] !== "Integrate") return null;
+  if (!expr || !Array.isArray(expr.json) || expr.json[0] !== "Integrate") {
+    return detectSimpleIndefiniteIntegral(trimmed);
+  }
 
   // ["Integrate", ["Function", ["Block", <cuerpo>], var], ["Limits", var, lowerOrNothing, upperOrNothing]]
   // Se navega solo por .json (no por .ops — la interfaz `Expression` de
