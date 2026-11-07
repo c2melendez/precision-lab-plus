@@ -274,7 +274,7 @@ function detectSimpleIndefiniteIntegral(
   //   \\int\\sin\\left(x^2\\right)dx
   // No acepta límites en este fallback; esas formas siguen dependiendo de
   // la extracción estructurada de Compute Engine.
-  const match = latex.trim().match(/^\\int\s*(.+?)\s*(?:\\,\s*)?d\s*([A-Za-z])$/s);
+  const match = latex.trim().match(/^\\int(?!_)\s*(.+?)\s*(?:\\,\s*)?d\s*([A-Za-z])$/s);
   if (!match) return null;
   const innerLatex = match[1].trim();
   const variable = match[2];
