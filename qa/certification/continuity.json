@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 468,
+  "revision": 469,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "78103b975569799afade2c6c540cc45930bbcdc0",
-  "baseline_case": "ALGEBRA229-AS-C-19",
+  "technical_baseline_sha": "5ff8bd3e61c2c052091f4adb993033f19959c27c",
+  "baseline_case": "ALGEBRA229-AS-C-20",
   "baseline_status": "PASS",
   "global_certification": "OPEN",
   "gates": {
@@ -32,11 +32,11 @@
     }
   },
   "next_action": {
-    "id": "ALGEBRA229-AS-C-20-SOURCE-REVIEW",
-    "status": "REVIEW",
-    "previous_id": "ALGEBRA229-AS-C-19-VERIFY",
-    "action": "Recuperar desde la fuente congelada qa/certification/legacy_sources/matriz_algebra_simbolica.md.gz la fila completa AS-C-20, verificarla contra SHA-256 8cd36ff08343f98f92abd83e2b162d565e0cbe5c59dc73f26b1c018f77d663c7 y registrar input/expected/nota exactos antes de crear tests test-first bilaterales. No inferir el contrato ni avanzar a implementación hasta verificar la fuente.",
-    "updated_utc": "2026-11-08T19:13:46.382Z"
+    "id": "ALGEBRA229-AS-C-21-TEST-FIRST",
+    "status": "RUN",
+    "previous_id": "ALGEBRA229-AS-C-20-TEST-FIRST",
+    "action": "AS-C-21 N1 valor: lcm(48,180) -> 720; verificar todas las celdas congeladas en qa/certification/legacy_sources/matriz_algebra_simbolica.md.gz; crear pruebas test-first bilaterales sin cambiar motor hasta observar resultados.",
+    "updated_utc": "2026-11-08T19:28:09.747Z"
   },
   "blockers": [],
   "prose_only_paths": [
