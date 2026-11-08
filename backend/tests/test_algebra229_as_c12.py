@@ -61,13 +61,13 @@ def test_as_c12_independent_arithmetic_matches_every_sample_with_x_not_equal_y()
     for x, y in SAMPLES:
         expected = Fraction(x * x - y * y, (x - y) ** 2)
         assert expected == Fraction(x + y, x - y)
-        result = _evaluate(f"((x^2-y^2)/((x-y)^2)) con x={x}, y={y}")
+        result = _evaluate(f"((({x})^2-({y})^2))/((({x})-({y}))^2)")
         assert result["success"] is True, result
         assert Fraction(_canonical(result["result_text"])) == expected, (x, y, result)
 
 
 def test_as_c12_excluded_points_are_not_claimed_as_equivalent():
     for value in (3, -2):
-        result = _evaluate(f"((x^2-y^2)/((x-y)^2)) con x={value}, y={value}")
+        result = _evaluate(f"((({value})^2-({value})^2))/((({value})-({value}))^2)")
         assert result["success"] is False, result
         assert result["error_code"] == "DOMAIN_ERROR", result
