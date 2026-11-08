@@ -407,15 +407,40 @@ def _even_root_abs_rewrites(expr: sympy.Expr) -> Tuple[sympy.Expr, List[str]]:
     return rewritten, notes
 
 
+def _is_sum_of_fractions(expr: sympy.Expr) -> bool:
+    """True for a top-level sum whose every term carries a denominator.
+
+    Requiring all terms (not just one) keeps mixed forms such as ``x + 1/x``
+    exactly as before.
+    """
+    if not expr.is_Add:
+        return False
+    return all(
+        term.is_rational_function() and term.as_numer_denom()[1] != 1
+        for term in expr.args
+    )
+
+
+def _is_single_fraction_with_product_denominator(expr: sympy.Expr) -> bool:
+    if not expr.is_rational_function():
+        return False
+    _, denominator = expr.as_numer_denom()
+    return denominator != 1 and not denominator.is_Add
+
+
 def _cancel_common_factors(expr: sympy.Expr) -> sympy.Expr:
     """sympy.simplify() leaves rational functions such as (x**3-1)/(x**2-1) uncancelled.
 
     cancel() removes common polynomial factors exactly. Its result is kept only when it
-    is not more complex, so every other simplify form stays as it was.
+    is not more complex, so every other simplify form stays as it was. A sum made only
+    of fractions (for example ``a/b + b/a``) is combined over one denominator even when
+    the combined form has a few more operations, matching the frozen simplify contract.
     """
     if not expr.free_symbols or not expr.is_rational_function():
         return expr
     cancelled = sympy.cancel(expr)
+    if _is_sum_of_fractions(expr) and _is_single_fraction_with_product_denominator(cancelled):
+        return cancelled
     return cancelled if sympy.count_ops(cancelled) <= sympy.count_ops(expr) else expr
 
 
