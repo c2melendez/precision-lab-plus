@@ -1,3 +1,17 @@
+# Actualización de certificación — 2026-11-08 UTC (r462)
+
+## Algebra229 AS-C-13 — PASS bilateral (cerrado)
+
+- Contrato N2: `division` `\left(x^{3}+2x^{2}-x+3\right)\div(x-2)` → `q=x^{2} + 4 x + 7,\ r=17`. Cociente y resto; coincide con Ruffini. Expectativas congeladas sin cambios.
+- Plus y Lite no exponen un endpoint de división con formato `q=…, r=…`. La verificación usa Ruffini independiente en el test, la identidad exacta `x³+2x²−x+3 = (x−2)(x²+4x+7)+17`, y la equivalencia de la simplificación del motor con `q + 17/(x−2)`, más `DOMAIN_ERROR` en x=2.
+- Sin cambios de producto ni correcciones. Verificación de q y r por Ruffini independiente, identidad exacta y equivalencia de la simplificación con `q + 17/(x-2)`.
+- precision-lab-plus SHA `53e77e2`: focal AS-C-13 6/6; backend 2,866 passed, 1 skipped, 10 xfailed. Runs: CI 42480813523, Cumulative 42480813571, H1d 42480813452, Runner 42480813540, todos SUCCESS.
+- Guards revisados: `skip=false` y `evidence_run_id` vacío; sin REUSE.
+- Aceptación bilateral: `ALGEBRA229_AS_C_13_ACCEPTANCE_2026-11-08.md`. Baseline `ALGEBRA229-AS-C-13 PASS`; sección C en 13/23. Global **OPEN**; S25, SG28, H2 y DIST siguen abiertos.
+- **Siguiente:** AS-C-14, N2, `division` — `\left(x^{4}-1\right)\div\left(x^{2}+1\right)` → `q=x^{2} - 1,\ r=0`.
+
+---
+
 # Actualización de certificación — 2026-11-08 UTC (r461)
 
 ## Algebra229 AS-C-12 — PASS bilateral (cerrado)
