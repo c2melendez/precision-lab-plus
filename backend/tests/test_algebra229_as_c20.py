@@ -39,7 +39,7 @@ def test_as_c20_source_row_matches_all_frozen_contract_cells():
         "AS-C-20",
         "N1",
         "`valor`",
-        r"`\\gcd(48,180)`",
+        r"`\gcd(48,180)`",
         "`12`",
         "",
     ], source_row
