@@ -1,3 +1,17 @@
+# Actualización de certificación — 2026-11-08 UTC (r461)
+
+## Algebra229 AS-C-12 — PASS bilateral (cerrado)
+
+- Contrato N2: `simplificar` `\frac{x^{2}-y^{2}}{(x-y)^{2}}` → `\frac{x + y}{x - y}`, sin nota de dominio en la fila congelada. Expectativas congeladas sin cambios.
+- Test-first con oráculos aritméticos independientes, equivalencia simbólica y control de `DOMAIN_ERROR` en x=y.
+- Sin cambios de producto. Corrección de harness en el test (`287ac04`): la sustitución con `con x=…, y=…` no es válida en el endpoint; se usa sustitución numérica directa.
+- precision-lab-plus SHA `287ac04`: focal AS-C-12 4/4; backend 2,860 passed, 1 skipped, 10 xfailed. Runs: CI 42476728957, Cumulative 42476728949, H1d 42476729011, Runner 42476728965, todos SUCCESS.
+- Guards revisados: `skip=false` y `evidence_run_id` vacío; sin REUSE.
+- Aceptación bilateral: `ALGEBRA229_AS_C_12_ACCEPTANCE_2026-11-08.md`. Baseline `ALGEBRA229-AS-C-12 PASS`; sección C en 12/23. Global **OPEN**; S25, SG28, H2 y DIST siguen abiertos.
+- **Siguiente:** AS-C-13, N2, `division` — `\left(x^{3}+2x^{2}-x+3\right)\div(x-2)` → `q=x^{2} + 4 x + 7,\ r=17`.
+
+---
+
 # Actualización de certificación — 2026-11-08 UTC (r460)
 
 ## Algebra229 AS-C-11 — PASS bilateral (cerrado)
