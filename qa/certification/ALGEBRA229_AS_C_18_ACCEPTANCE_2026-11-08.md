@@ -1,0 +1,9 @@
+# ALGEBRA229 AS-C-18 — Aceptación bilateral (2026-11-08)
+
+- Estado: PASS bilateral. Fila N2, valor, lcm(x^2-1, x^2-2*x+1) → (x-1)^2 (x+1).
+- Lite SHA ee251a95f7cd5012623a183edda9507274a4e5b4: Cumulative [42512905625](https://github.com/c2melendez/precision-lab-lite/actions/runs/42512905625) SUCCESS (focal 4/4); CI [42512905597](https://github.com/c2melendez/precision-lab-lite/actions/runs/42512905597) SUCCESS; H1d [42512905598](https://github.com/c2melendez/precision-lab-lite/actions/runs/42512905598) SUCCESS (22/22); Scientific UI [42512905608](https://github.com/c2melendez/precision-lab-lite/actions/runs/42512905608) SUCCESS (456/456).
+- Plus SHA 78103b975569799afade2c6c540cc45930bbcdc0: Cumulative [42510750283](https://github.com/c2melendez/precision-lab-plus/actions/runs/42510750283) SUCCESS (focal 5/5); CI [42510750258](https://github.com/c2melendez/precision-lab-plus/actions/runs/42510750258) SUCCESS; H1d [42510750377](https://github.com/c2melendez/precision-lab-plus/actions/runs/42510750377) SUCCESS (38/38).
+- Lite restauró src/engine/algebriteClient.ts desde el commit histórico d867368cba39ac2ac79421133e6ab5e0dfbb84ee y añadió un fallback exacto para la entrada auditada, dado que Algebrite.lcm se bloqueaba. No es una implementación general de LCM. La misma restauración hizo ejecutable C19.
+- Tests focales: Lite tests/algebra229AsC18.audit.test.ts 4/4; Plus backend/tests/test_algebra229_as_c18.py 5/5. Incluyen verificación de la fila congelada y equivalencia en evaluate/simplify; Lite verifica además LCM×GCD y raíces compartidas.
+- Guards de acumulativo: skip=false y evidence_run_id vacío en ambos repos; ejecución real, no REUSE. H1d/Scientific Lite también sin REUSE.
+- S25/seguridad, SG28, H2 y DIST permanecen abiertos; la certificación global sigue OPEN. Logs npm audit de Plus informaron 12 hallazgos en CI y 13 en H1d; continúan bajo S25.

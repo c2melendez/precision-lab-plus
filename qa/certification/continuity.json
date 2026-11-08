@@ -1,24 +1,47 @@
 {
   "schema_version": 1,
-  "revision": 466,
+  "revision": 468,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "4a8727810d5dcc8c506f25d2a68d9a80edebb18c",
-  "baseline_case": "ALGEBRA229-AS-C-17",
+  "technical_baseline_sha": "78103b975569799afade2c6c540cc45930bbcdc0",
+  "baseline_case": "ALGEBRA229-AS-C-19",
   "baseline_status": "PASS",
   "global_certification": "OPEN",
   "gates": {
-    "cumulative": {"workflow": ".github/workflows/in625-cumulative-certification.yml", "inputs": ["*"], "acceptance_revision": "2026-10-16-continuity-v1"},
-    "h1d": {"workflow": ".github/workflows/in625-h1d-reentry.yml", "inputs": ["*"], "acceptance_revision": "2026-10-16-continuity-v1"},
-    "security": {"workflow": ".github/workflows/certification-dependency-gates.yml", "inputs": ["*"], "acceptance_revision": "2026-10-16-continuity-v1", "allow_reuse": false}
+    "cumulative": {
+      "workflow": ".github/workflows/in625-cumulative-certification.yml",
+      "inputs": [
+        "*"
+      ],
+      "acceptance_revision": "2026-10-16-continuity-v1"
+    },
+    "h1d": {
+      "workflow": ".github/workflows/in625-h1d-reentry.yml",
+      "inputs": [
+        "*"
+      ],
+      "acceptance_revision": "2026-10-16-continuity-v1"
+    },
+    "security": {
+      "workflow": ".github/workflows/certification-dependency-gates.yml",
+      "inputs": [
+        "*"
+      ],
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "allow_reuse": false
+    }
   },
   "next_action": {
-    "id": "ALGEBRA229-AS-C-18-TEST-FIRST",
-    "status": "RUN",
-    "previous_id": "ALGEBRA229-AS-C-17-TEST-FIRST",
-    "action": "AS-C-18 N2 valor: lcm(x^2-1, x^2-2x+1) -> (x-1)^2 (x+1). C-17 cerrado bilateral PASS. Seccion C en 17/23. Test-first publicado (Lite 404fc7c, Plus b5ad42c); verificar gates.",
-    "updated_utc": "2026-11-08T14:59:00Z"
+    "id": "ALGEBRA229-AS-C-20-SOURCE-REVIEW",
+    "status": "REVIEW",
+    "previous_id": "ALGEBRA229-AS-C-19-VERIFY",
+    "action": "Recuperar desde la fuente congelada qa/certification/legacy_sources/matriz_algebra_simbolica.md.gz la fila completa AS-C-20, verificarla contra SHA-256 8cd36ff08343f98f92abd83e2b162d565e0cbe5c59dc73f26b1c018f77d663c7 y registrar input/expected/nota exactos antes de crear tests test-first bilaterales. No inferir el contrato ni avanzar a implementación hasta verificar la fuente.",
+    "updated_utc": "2026-11-08T19:13:46.382Z"
   },
   "blockers": [],
-  "prose_only_paths": ["qa/certification/**", "**/*.md", "README.md"]
+  "prose_only_paths": [
+    "qa/certification/**",
+    "**/*.md",
+    "README.md"
+  ]
 }
