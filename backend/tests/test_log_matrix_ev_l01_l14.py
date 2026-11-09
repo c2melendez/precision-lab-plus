@@ -1,9 +1,9 @@
 """Trigonometry-adjacent matrix EV-L-01..14: logarithms over HTTP evaluate.
 
 Plus accepts `log(x, b)` for base-b logarithms and simplifies ratios exactly
-(log(8,4) = 3/2). EV-L-09 (product of two base-b logs) is not covered: the
-parser does not accept the `\\log_{2}(3)\\cdot...` spelling yet, tracked as an
-open item in both engines.
+(log(8,4) = 3/2). EV-L-09 is covered by test_ev_l_product_of_base_logs through
+both ASCII and literal LaTeX inputs; retain the exact symbolic result and
+numerical parity assertions in that test.
 """
 from pathlib import Path
 import gzip
