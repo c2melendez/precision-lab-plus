@@ -63,9 +63,11 @@ def test_ev_i09_principal_branch_inside_domain_is_unchanged():
     with TestClient(app) as client:
         sixth = _evaluate(client, "asin(sin(pi/6))")
         cosine = _evaluate(client, "acos(cos(2))")
+        cosine_outside = _evaluate(client, "acos(cos(4))")
         tangent = _evaluate(client, "atan(tan(2))")
     assert sp.simplify(_value(sixth) - sp.pi / 6) == 0, sixth
     assert sp.simplify(_value(cosine) - 2) == 0, cosine
+    assert sp.simplify(_value(cosine_outside) - (2 * sp.pi - 4)) == 0, cosine_outside
     assert sp.simplify(_value(tangent) - (2 - sp.pi)) == 0, tangent
 
 
@@ -74,9 +76,15 @@ def test_ev_i10_sin_acos_three_fifths_is_four_fifths():
         payload = _evaluate(client, "sin(acos(3/5))")
         negative = _evaluate(client, "sin(acos(-3/5))")
         companion = _evaluate(client, "cos(asin(3/5))")
+        tangent = _evaluate(client, "tan(asin(3/5))")
+        endpoint_one = _evaluate(client, "sin(acos(1))")
+        endpoint_zero = _evaluate(client, "sin(acos(0))")
     assert sp.simplify(_value(payload) - sp.Rational(4, 5)) == 0, payload
     assert sp.simplify(_value(negative) - sp.Rational(4, 5)) == 0, negative
     assert sp.simplify(_value(companion) - sp.Rational(4, 5)) == 0, companion
+    assert sp.simplify(_value(tangent) - sp.Rational(3, 4)) == 0, tangent
+    assert sp.simplify(_value(endpoint_one)) == 0, endpoint_one
+    assert sp.simplify(_value(endpoint_zero) - 1) == 0, endpoint_zero
     assert abs(payload["result_approx"] - 0.8) <= 5e-10, payload
 
 

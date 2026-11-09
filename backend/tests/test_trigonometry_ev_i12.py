@@ -34,7 +34,7 @@ def test_ev_i12_source_row_present_and_requires_clear_error():
 
 
 def test_ev_i12_out_of_domain_inputs_report_domain_error():
-    for expression in ("asin(2)", "acos(2)", "asin(-2)"):
+    for expression in ("asin(2)", "acos(2)", "asin(-2)", "acos(-1.5)"):
         with TestClient(app) as client:
             payload = _evaluate(client, expression)
         assert payload["success"] is False, (expression, payload)
