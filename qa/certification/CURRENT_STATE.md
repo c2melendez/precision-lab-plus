@@ -1,3 +1,20 @@
+# Actualización de certificación — 2026-11-09 UTC (r479; EC-D-03 PASS_SCOPED)
+
+## Trigonometría EC-D-03 — PASS_SCOPED bilateral
+
+- Contrato congelado: \(\tan x=\sqrt{3}\) → \(x=\frac{\pi}{3}+k\pi,\ k\in\mathbb{Z}\). La matriz exige la familia infinita completa.
+- Plus SHA verificado d02a3076b57d9bb2cd02d7c89e1bce3e176a9055; test backend/tests/test_trigonometry_ec_d03.py. POST /api/v1/solve devuelve una ImageSet sobre Integers.
+- Plus Cumulative 42712350673 SUCCESS (tests EC-D-03 2/2 explícitos; 2,927 passed, 1 skipped, 11 xfailed; guard skip=false, evidence_run_id vacío); CI 42712350706 SUCCESS; H1d 42712350501 SUCCESS (38/38, skip=false); Native Syntax and Recovery 42712350400 SUCCESS (52/52); Runner 42712350393 SUCCESS push-only.
+- La implementación Plus usa solveset y verifica simbólicamente el residuo de la familia al sustituir su expresión en la ecuación.
+- Aceptación: qa/certification/TRIG_EC_D_03_ACCEPTANCE_2026-11-09.md.
+- Alcance: familia completa \(x=\pi/3+k\pi,\ k\in\mathbb Z\) en radianes. La prueba HTTP usa ecuación ASCII; no certifica ingesta literal LaTeX ni UI específica del caso.
+- Plus Certification dependency and security gates 42712350624 sigue IN_PROGRESS en mutation/plus-backend-mutmut; tarea independiente.
+- Global **OPEN**; EV-D-01 /api/v1/evaluate permanece BLOCKED; EV-HI PASS_SCOPED; S25, SG28, H2 y DIST abiertos.
+
+**Siguiente:** TRIG-EC-D-04. Fila congelada: \(2\sin^{2}x-\sin x-1=0,\ x\in[0,2\pi)\) → \(x=\frac{\pi}{2},\ \frac{7\pi}{6},\ \frac{11\pi}{6}\). Fijar primero la prueba focal y demostrar el conjunto exacto de tres raíces en el intervalo; no inferir el contrato por el nombre del caso.
+
+---
+
 # Actualización de certificación — 2026-11-09 UTC (r478; EC-D-02 PASS_SCOPED)
 
 ## Trigonometría EC-D-02 — PASS_SCOPED bilateral
