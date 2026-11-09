@@ -94,4 +94,4 @@ def test_ev_hi_04_to_09_exact_forms_match_frozen_matrix():
             got = sp.sympify(
                 payload["result_text"].replace("^", "**"), locals=locals_map
             )
-            assert sp.simplify(sp.expand_func(got) - expected) == 0, (expression, payload)
+            assert sp.simplify(got.rewrite(sp.log) - expected) == 0, (expression, payload)
