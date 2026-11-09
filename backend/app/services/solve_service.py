@@ -73,6 +73,53 @@ def _to_equation_solution(value: sympy.Expr) -> EquationSolution:
     return EquationSolution(text=str(value), latex=sympy.latex(value), is_complex=bool(is_complex))
 
 
+def _direct_tangent_periodic_result(
+    eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Return the complete real ImageSet for the direct equation tan(x)=c.
+
+    This intentionally handles only a bare tan(variable) on one side and a
+    variable-independent right/left side, in radians. Other trig forms keep
+    their established solver path. A periodic family is never collapsed to
+    the principal arctangent branch.
+    """
+    if angle_unit != "rad":
+        return None
+    if eq.lhs != sympy.tan(var) and eq.rhs != sympy.tan(var):
+        return None
+    try:
+        family = sympy.solveset(eq.lhs - eq.rhs, var, domain=sympy.S.Reals)
+        if not isinstance(family, sympy.ImageSet) or family.base_set != sympy.S.Integers:
+            return None
+        parameter = family.lamda.variables[0]
+        residual = sympy.simplify((eq.lhs - eq.rhs).subs(var, family.lamda.expr))
+        if residual != 0:
+            return None
+
+        step = Step(
+            index=0,
+            title="Solución general por periodicidad",
+            description=(
+                "La tangente tiene período fundamental π. La ImageSet expresa "
+                "todas las soluciones reales mediante un parámetro entero."
+            ),
+            rule="TangentPeriodicity",
+            latex_before=sympy.latex(eq),
+            latex_after=sympy.latex(family),
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(family)],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def _absolute_value_equidistance_steps(
     eq: sympy.Eq, var: sympy.Symbol
 ) -> Optional[Tuple[List[Step], List[sympy.Expr]]]:
@@ -743,6 +790,10 @@ def solve_equation(
         return rational_result
 
     has_direct_trig = _equation_has_direct_trig_of_variable(eq, var)
+
+    tangent_family_result = _direct_tangent_periodic_result(eq, var, angle_unit, warnings)
+    if tangent_family_result is not None:
+        return tangent_family_result
 
     steps_and_solutions = _absolute_value_equidistance_steps(eq, var)
     if steps_and_solutions is None:
