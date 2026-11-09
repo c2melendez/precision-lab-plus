@@ -1,3 +1,16 @@
+## 2026-11-09 UTC — TRIG-EC-D-02 Plus PASS en su alcance; caso bilateral IN_PROGRESS
+
+- Fuente congelada: EC-D-02 = `2\cos x-1=0,quad xin[0,2pi)` → `x=\frac{pi}{3}, rac{5\pi}{3}`. Tres columnas en el gzip; no hay nota separada.
+- Test `backend/tests/test_trigonometry_ec_d02.py`: anclaje de fuente + `POST /api/v1/solve` (entrada ASCII); ambos tests PASSED explícitamente en Cumulative 42669733996.
+- Plus SHA probado `6a150e29bba160fd4f2cff92748dee0baccb35a2`: Cumulative 42669733996 SUCCESS (backend 2,925 passed, 1 skipped, 11 xfailed); CI 42669734319 SUCCESS (backend y frontend); H1d 42669734287 SUCCESS; Runner 42669734406 SUCCESS.
+- El endpoint probado no es `/api/v1/evaluate` y no certifica la ingesta literal LaTeX. No modificar el estado BLOCKED independiente de EV-D-01.
+- El cierre bilateral depende de Lite: el primer test matemático falló antes del último ajuste del motor; el último SHA Lite conocido `6ec2dc0abfd87ab0bb173911725b9dbe88a45520` no produjo jobs/check-runs en sus cinco workflows, por lo que su prueba queda sin resultado observable. No repetir estos gates Plus.
+- Estado: EC-D-02 IN_PROGRESS; sin acta de aceptación; global OPEN.
+
+**Siguiente:** esperar/diagnosticar ejecución real del focal Lite; después, solo si pasa, revisar los gates requeridos para aceptar bilateralmente.
+
+---
+
 ## 2026-11-09 UTC - S19 mutación Plus: gate completado, sin umbral aprobado (NO PASS)
 
 - Run `Certification dependency and security gates` 42566126964 sobre `fdbc87b5e3dc8d508b22188258b1845c1e9642c9`: completed success. Job `plus-backend-mutmut` 128993039789 success (alcance full; 05:14-05:38 UTC). Artefacto `s19-plus-backend-mutmut` ID 13652735653.
