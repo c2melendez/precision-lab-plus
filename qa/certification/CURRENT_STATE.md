@@ -1,3 +1,19 @@
+# Actualización de certificación — 2026-11-09 UTC (r478; EC-D-02 PASS_SCOPED)
+
+## Trigonometría EC-D-02 — PASS_SCOPED bilateral
+
+- Contrato congelado: \`2\cos x-1=0,\quad x\in[0,2\pi)\` → \`x=\frac{\pi}{3},\ \frac{5\pi}{3}\`. Tres columnas en la fuente; no hay nota separada.
+- Plus SHA técnico \`6a150e29bba160fd4f2cff92748dee0baccb35a2\`; test \`backend/tests/test_trigonometry_ec_d02.py\`, ambos tests PASSED explícitamente en Cumulative.
+- [Plus Cumulative 42669733996](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669733996) SUCCESS: focal 2/2; backend 2,925 passed, 1 skipped, 11 xfailed; guard \`skip=false\`, \`evidence_run_id=""\`.
+- [Plus CI 42669734319](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669734319) SUCCESS (backend/frontend); [H1d 42669734287](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669734287) SUCCESS, guard \`skip=false\`; [Runner 42669734406](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669734406) SUCCESS push-only.
+- La entrada de Plus fue ASCII en \`POST /api/v1/solve\`; no se certifica ingesta literal LaTeX ni \`/api/v1/evaluate\`.
+- Aceptación: \`qa/certification/TRIG_EC_D_02_ACCEPTANCE_2026-11-09.md\`.
+- Global **OPEN**; EV-D-01 /evaluate permanece BLOCKED; EV-HI PASS_SCOPED; S25, SG28, H2 y DIST abiertos.
+
+**Siguiente:** TRIG-EC-D-03; contrato de fuente \`tan x=\sqrt{3}\` → \`x=\frac{\pi}{3}+k\pi,\ k\in\mathbb{Z}\`. Se requiere una familia infinita, no dos soluciones de un período. Investigar representación paramétrica en ambos motores antes de ampliar los resolvers.
+
+---
+
 # Actualización de certificación — 2026-11-09 UTC (r477; EC-D-02 IN_PROGRESS)
 
 ## Trigonometría TRIG-EC-D-02 — IN_PROGRESS; espera de evidencia Lite
