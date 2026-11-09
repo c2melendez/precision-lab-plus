@@ -1,6 +1,6 @@
 ## 2026-11-09 UTC — TRIG-EC-D-02 Plus PASS en su alcance; caso bilateral IN_PROGRESS
 
-- Fuente congelada: EC-D-02 = `2\cos x-1=0,\quad x\in[0,2\pi)` → `x=\frac{pi}{3}, rac{5\pi}{3}`. Tres columnas en el gzip; no hay nota separada.
+- Fuente congelada: EC-D-02 = `2\cos x-1=0,\quad x\in[0,2\pi)` → `x=\frac{\pi}{3},\ \frac{5\pi}{3}`. Tres columnas en el gzip; no hay nota separada.
 - Test `backend/tests/test_trigonometry_ec_d02.py`: anclaje de fuente + `POST /api/v1/solve` (entrada ASCII); ambos tests PASSED explícitamente en Cumulative 42669733996.
 - Plus SHA probado `6a150e29bba160fd4f2cff92748dee0baccb35a2`: Cumulative 42669733996 SUCCESS (backend 2,925 passed, 1 skipped, 11 xfailed); CI 42669734319 SUCCESS (backend y frontend); H1d 42669734287 SUCCESS; Runner 42669734406 SUCCESS.
 - El endpoint probado no es `/api/v1/evaluate` y no certifica la ingesta literal LaTeX. No modificar el estado BLOCKED independiente de EV-D-01.
