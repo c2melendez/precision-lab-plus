@@ -55,9 +55,8 @@ def test_lm_d01_limit_endpoint_if_present():
             "/api/v1/limit",
             json={"expression": "sin(x)/x", "variable": "x", "point": "0", "direction": "both"},
         )
-    if response.status_code == 404:
-        return
     assert response.status_code == 200, response.text
     body = response.json()
-    value = body.get("value", body.get("result_text"))
-    assert value in (1, "1", 1.0) or body.get("success") is True, body
+    assert body.get("success") is True, body
+    assert body.get("result_text") == "1", body
+    assert body.get("result_latex") == "1", body
