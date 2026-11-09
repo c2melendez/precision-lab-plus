@@ -1,3 +1,19 @@
+# Actualización de certificación — 2026-11-09 UTC (r476)
+
+## Trigonometría EC-D-01 — PASS_SCOPED bilateral (soluciones exactas en [0, 2π))
+
+- Fila congelada: \`sin(x)=1/2\`, intervalo \`[0,2π)\`; raíces exactas esperadas \`π/6\` y \`5π/6\`. La prueba ancla el caso a la fila original de \`ejercicios_trigonometria.md.gz\`.
+- Alcance: ambas raíces exactas, pertenencia al intervalo y sustitución se verifican por los dos motores. Plus ejercita \`/api/v1/solve\` con \`sin(x)-1/2=0\`; no se afirma certificación de la ingesta literal idéntica en todos los endpoints.
+- Plus SHA técnico \`21a29a342034ed7b0427b62ca2fbbc67395cbca8\`; test \`backend/tests/test_trigonometry_ec_d01.py\` (anclaje del contrato + endpoint HTTP, 2/2 PASS).
+- Plus CI [42662156729](https://github.com/c2melendez/precision-lab-plus/actions/runs/42662156729) SUCCESS: backend 2,923 passed, 1 skipped, 11 xfailed; frontend 150 test files, 1,055 passed, 28 TODO.
+- Plus Cumulative [42662156740](https://github.com/c2melendez/precision-lab-plus/actions/runs/42662156740) SUCCESS: el log ejecutó explícitamente \`test_ec_d01_source_row_and_exact_oracle_are_frozen\` y \`test_ec_d01_http_solve_returns_both_exact_roots_in_interval\`; ambas PASSED. Backend 2,923 passed, 1 skipped, 11 xfailed; frontend 1,055 passed.
+- Plus H1d [42662156790](https://github.com/c2melendez/precision-lab-plus/actions/runs/42662156790) SUCCESS (38 pruebas); Runner [42662156997](https://github.com/c2melendez/precision-lab-plus/actions/runs/42662156997) SUCCESS.
+- Resultado **PASS_SCOPED** bilateral con Lite. No cambia el bloqueo separado EV-D-01 LaTeX en Plus \`/api/v1/evaluate\`; no se amplió el parser ni se certificó ese endpoint. EV-HI-01..12 sigue PASS_SCOPED. S25, SG28/H2 y DIST siguen abiertos; global **OPEN**.
+
+**Siguiente:** EC-D-02. Recuperar su fila exacta desde el gzip congelado y fijar el contrato antes de escribir pruebas.
+
+---
+
 # Actualización de certificación - 2026-11-09 UTC (r475)
 
 ## Trigonometría EV-D-01 - BLOCKED en Plus
