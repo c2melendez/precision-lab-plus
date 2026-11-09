@@ -1,3 +1,16 @@
+# Actualización de certificación — 2026-11-09 UTC (r477; EC-D-02 IN_PROGRESS)
+
+## Trigonometría TRIG-EC-D-02 — IN_PROGRESS; espera de evidencia Lite
+
+- Contrato recuperado directamente de `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz`: `2\cos x-1=0,quad xin[0,2pi)` → `x=\frac{pi}{3}, rac{5pi}{3}`. La fila original tiene tres columnas (ID, ejercicio, resultado esperado); no existe una columna de nota separada y no se inventa.
+- Test Plus creado: `backend/tests/test_trigonometry_ec_d02.py`; ancla la fila completa y verifica por `POST /api/v1/solve` las dos raíces exactas, intervalo y sustitución. La entrada HTTP usada es ASCII (`2*cos(x)-1=0`); esto no certifica ingesta literal LaTeX ni `/api/v1/evaluate`.
+- Plus SHA técnico probado `6a150e29bba160fd4f2cff92748dee0baccb35a2`: [Cumulative 42669733996](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669733996) SUCCESS; el log ejecutó los dos tests EC-D-02 y ambos PASSED. Backend: 2,925 passed, 1 skipped, 11 xfailed. [CI 42669734319](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669734319) SUCCESS (jobs backend y frontend); [H1d 42669734287](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669734287) SUCCESS; [Runner 42669734406](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669734406) SUCCESS.
+- Plus está PASS para el alcance probado, pero el caso bilateral permanece **IN_PROGRESS** hasta que Lite tenga evidencia real. No se emite PASS_SCOPED bilateral ni acta de aceptación. Baseline global permanece EC-D-01 PASS_SCOPED; certificación global **OPEN**.
+
+**Siguiente:** no repetir los gates verdes Plus mientras no cambie el árbol. Resolver la ejecución pre-job de GitHub Actions Lite, validar el test focal Lite y después completar la aceptación bilateral con el alcance de interfaces claramente delimitado. Mantener separado EV-D-01 `/api/v1/evaluate` y EV-HI PASS_SCOPED.
+
+---
+
 # Actualización de certificación — 2026-11-09 UTC (r476)
 
 ## Trigonometría EC-D-01 — PASS_SCOPED bilateral (soluciones exactas en [0, 2π))
