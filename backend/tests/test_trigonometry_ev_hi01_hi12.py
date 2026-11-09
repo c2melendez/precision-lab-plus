@@ -73,6 +73,7 @@ def test_ev_hi_10_to_12_composition_and_domain_errors():
     assert undefined["success"] is False and undefined["error_code"] == "DOMAIN_ERROR", undefined
     assert outside["success"] is False and outside["error_code"] == "DOMAIN_ERROR", outside
 
+
 def test_ev_hi_04_to_09_exact_forms_match_frozen_matrix():
     cases = [
         ("asinh(1)", sp.log(1 + sp.sqrt(2))),
@@ -94,4 +95,4 @@ def test_ev_hi_04_to_09_exact_forms_match_frozen_matrix():
             got = sp.sympify(
                 payload["result_text"].replace("^", "**"), locals=locals_map
             )
-            assert sp.simplify(got.rewrite(sp.log) - expected) == 0, (expression, payload)
+            assert sp.simplify(sp.expand_func(got) - expected) == 0, (expression, payload)
