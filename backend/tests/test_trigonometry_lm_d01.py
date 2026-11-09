@@ -5,6 +5,7 @@ Scope: source row + phase2 compute_limit (certified path for limits).
 out of this case's product scope and is not claimed here.
 """
 import gzip
+import math
 from pathlib import Path
 
 import sympy
@@ -40,8 +41,10 @@ def test_lm_d01_independent_samples_approach_1():
         assert response.status_code == 200, response.text
         body = response.json()
         assert body.get("success") is True, body
-        actual = float(str(body.get("result_text", "")).replace(" ", ""))
-        assert abs(actual - sympy.sin(x) / x) < 1e-12
+        actual = body.get("result_approx")
+        assert actual is not None, body
+        assert body.get("result_text"), body
+        assert abs(float(actual) - math.sin(x) / x) < 1e-12
         assert abs(actual - 1.0) < 0.02
 
 
