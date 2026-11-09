@@ -1,15 +1,13 @@
-# Actualización de certificación - 2026-11-09 UTC (r473)
+# Actualización de certificación - 2026-11-09 UTC (r474)
 
-## Trigonometría EV-HI-01..12 - PASS bilateral (cerrado)
+## Trigonometría EV-HI-01..12 - PASS_SCOPED (corregido desde PASS bilateral)
 
-- Contrato: matriz legacy `ejercicios_trigonometria.md.gz` (blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`), filas EV-HI-01..12.
-- Técnico final: `a8ddc0ad9838c6cffb3d932950d72bdafa7d0a48`. Cumulative 42555334429 SUCCESS; CI 42555334439 SUCCESS; H1d 42555334469 SUCCESS; Runner 42555334546 SUCCESS.
-- Test-first previo: `4ec0be2bcd32d432c947fc11aebc458598c3079f` con CI rojo (Cumulative 42552094129 y CI 42552094202 FAILURE).
-- Ajuste de literales Lite: EV-HI-07..09 alineados con la forma exacta de la matriz; valores numéricos sin cambios. Anotado en EXECUTION_LOG.
-- Aceptación: `TRIG_EV_HI_01_12_ACCEPTANCE_2026-11-09.md`.
+- Motivo: la auditoría de alcance no sostiene un PASS bilateral completo. Las entradas se probaron en ASCII y no se certificaron los literales LaTeX ni las formas exactas de la matriz.
+- Evidencia que se mantiene: Plus `a8ddc0ad9838c6cffb3d932950d72bdafa7d0a48` (Cumulative 42555334429 y CI 42555334439 SUCCESS; focal 4/4).
+- Límites y condiciones para volver a PASS: ver `TRIG_EV_HI_01_12_ACCEPTANCE_2026-11-09.md`, sección Alcance y límites.
 - No es cierre global: S25, SG28, H2 y DIST siguen abiertos.
 
-**Siguiente:** inventariar las familias EV-* de trigonometría que no tienen PASS bilateral vigente (D, H, I, L, M, T según la matriz), identificar el primer caso sin certificar y ejecutarlo test-first bilateral. No reutilizar PASS_SCOPED fuera de su alcance.
+**Siguiente:** cerrar EV-D-01 en Plus (ingesta LaTeX de `\left`, `\frac` y `\pi` en `/evaluate`), luego volver a EV-HI con literales LaTeX y formas exactas certificadas.
 
 ---
 
