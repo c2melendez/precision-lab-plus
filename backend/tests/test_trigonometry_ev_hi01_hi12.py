@@ -95,4 +95,20 @@ def test_ev_hi_04_to_09_exact_forms_match_frozen_matrix():
             got = sp.sympify(
                 payload["result_text"].replace("^", "**"), locals=locals_map
             )
-            assert sp.simplify(sp.expand_func(got) - expected) == 0, (expression, payload)
+            # SymPy versions in CI don't consistently expand inverse hyperbolic
+            # functions with expand_func/rewrite(log). Normalize these six
+            # frozen, numeric identities explicitly, then compare exactly.
+            exact_forms = {
+                (sp.asinh, (sp.Integer(1),)): sp.log(1 + sp.sqrt(2)),
+                (sp.acosh, (sp.Integer(2),)): sp.log(2 + sp.sqrt(3)),
+                (sp.atanh, (sp.Rational(1, 2),)): sp.log(3) / 2,
+                (sp.acsch, (sp.Integer(1),)): sp.log(1 + sp.sqrt(2)),
+                (sp.asech, (sp.Rational(1, 2),)): sp.log(2 + sp.sqrt(3)),
+                (sp.acoth, (sp.Integer(2),)): sp.log(3) / 2,
+            }
+            normalized = got.replace(
+                lambda node: isinstance(node, sp.Function)
+                and (node.func, node.args) in exact_forms,
+                lambda node: exact_forms[(node.func, node.args)],
+            )
+            assert sp.simplify(normalized - expected) == 0, (expression, payload)
