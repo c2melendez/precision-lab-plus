@@ -440,6 +440,20 @@ def normalize_unicode(text: str) -> str:
         r"(?<![A-Za-z0-9_])\\pi\s*(?:\\cdot\s*)?([A-Za-z])\s*\^\{([0-9]+)\}(?![A-Za-z0-9_])",
         r"pi*\1^\2", text,
     )
+    # EV-D-01 (literal LaTeX de matriz): subconjunto acotado para
+    # `\sin\left(\frac{\pi}{6}\right)`. Solo delimitadores ( ) [ ] ya
+    # pareados por validate_g3_structure, \pi, funciones trigonométricas
+    # directas y \frac con argumentos sin llaves anidadas. Cualquier otro
+    # comando sigue rechazado por el parser.
+    text = re.sub(r"\\left\s*([(\[])", r"\1", text)
+    text = re.sub(r"\\right\s*([)\]])", r"\1", text)
+    text = re.sub(r"\\(sin|cos|tan|csc|sec|cot)(?![A-Za-z])", r"\1", text)
+    text = re.sub(r"(?<![A-Za-z])\\pi(?![A-Za-z])", "pi", text)
+    text = re.sub(
+        r"\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}",
+        lambda m: f"(({m.group(1)})/({m.group(2)}))",
+        text,
+    )
     text = text.replace("π", "pi").replace("∞", "oo")
     # Normalize unambiguous arithmetic Unicode without changing identifier semantics.
     text = text.replace("×", "*").replace("÷", "/").replace("·", "*").replace("−", "-")
