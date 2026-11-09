@@ -72,3 +72,26 @@ def test_ev_hi_10_to_12_composition_and_domain_errors():
     assert sp.simplify(sp.sympify(composition["result_text"].replace("^", "**")) - 3) == 0, composition
     assert undefined["success"] is False and undefined["error_code"] == "DOMAIN_ERROR", undefined
     assert outside["success"] is False and outside["error_code"] == "DOMAIN_ERROR", outside
+
+def test_ev_hi_04_to_09_exact_forms_match_frozen_matrix():
+    cases = [
+        ("asinh(1)", sp.log(1 + sp.sqrt(2))),
+        ("acosh(2)", sp.log(2 + sp.sqrt(3))),
+        ("atanh(1/2)", sp.log(3) / 2),
+        ("acsch(1)", sp.log(1 + sp.sqrt(2))),
+        ("asech(1/2)", sp.log(2 + sp.sqrt(3))),
+        ("acoth(2)", sp.log(3) / 2),
+    ]
+    locals_map = {
+        "asinh": sp.asinh, "acosh": sp.acosh, "atanh": sp.atanh,
+        "acsch": sp.acsch, "asech": sp.asech, "acoth": sp.acoth,
+        "ln": sp.log,
+    }
+    with TestClient(app) as client:
+        for expression, expected in cases:
+            payload = _evaluate(client, expression)
+            assert payload["success"] is True, (expression, payload)
+            got = sp.sympify(
+                payload["result_text"].replace("^", "**"), locals=locals_map
+            )
+            assert sp.simplify(sp.expand_func(got) - expected) == 0, (expression, payload)
