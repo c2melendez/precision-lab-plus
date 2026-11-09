@@ -1,3 +1,11 @@
+## 2026-11-09 UTC - EV-D-01 BLOCKED en Plus; LaTeX fuera de alcance de certificación
+
+- Prueba de EV-D-01 en Plus: `/evaluate` rechaza `\sin\left(\frac{\pi}{6}\right)` (PARSE_ERROR por `\left`); `\sin(\pi/6)` y `\frac{\pi}{6}` tampoco se interpretan. La variante ASCII `sin(pi/6)` pasa.
+- Ingesta acotada probada en `331a379` (CI Cumulative 42564096686 SUCCESS; EV-D-01 HTTP PASSED; 2917 passed, 1 skipped, 10 xfailed). Se retira del producto certificado: `parsing.py` vuelve al estado de `cb4986d`.
+- Test EV-D-01 marcado `xfail(strict=True)` con razón BLOCKED.
+- Registro: EV-D-01 = BLOCKED en Plus. Lite EV-D-01 sin cambios.
+- EV-HI-01..12 se mantiene PASS_SCOPED; la limitación LaTeX de EV-D-01 se añade a su alcance.
+
 ## 2026-11-09 UTC - Corrección: EV-HI-01..12 pasa a PASS_SCOPED
 
 - Motivo: el PASS bilateral anterior excedía lo verificado. Los tests usan entradas ASCII; los literales LaTeX de la matriz y la forma exacta de los resultados no están certificados.

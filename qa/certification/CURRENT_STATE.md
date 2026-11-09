@@ -1,13 +1,23 @@
-# Actualización de certificación - 2026-11-09 UTC (r474)
+# Actualización de certificación - 2026-11-09 UTC (r475)
+
+## Trigonometría EV-D-01 - BLOCKED en Plus
+
+- Entrada: `\sin\left(\frac{\pi}{6}\right)` → `1/2` (matriz `ejercicios_trigonometria.md.gz`).
+- Plus `/api/v1/evaluate` rechaza esa entrada LaTeX (`\left` no reconocido; `\frac{\pi}{6}` y `\pi` no interpretados). La variante ASCII `sin(pi/6)` sí pasa.
+- Decisión: la ingesta LaTeX queda fuera del alcance de certificación por ahora. El parser certificado no incluye soporte LaTeX nuevo.
+- Test `tests/test_trigonometry_ev_d01_matrix_latex.py`: `xfail(strict=True)` con razón BLOCKED.
+- Lite: su test EV-D-01 (literal LaTeX → `1/2`) sigue en verde; el bloqueo es solo de Plus.
+- Referencia: la ingesta acotada existe en `331a379` (CI verde) y puede retomarse como trabajo separado.
 
 ## Trigonometría EV-HI-01..12 - PASS_SCOPED (corregido desde PASS bilateral)
 
 - Motivo: la auditoría de alcance no sostiene un PASS bilateral completo. Las entradas se probaron en ASCII y no se certificaron los literales LaTeX ni las formas exactas de la matriz.
+- Limitación de entrada encontrada en EV-D-01: Plus `/evaluate` no acepta literales LaTeX con `\left`, `\frac` o `\pi`; por eso EV-HI tampoco certifica entrada LaTeX en Plus.
 - Evidencia que se mantiene: Plus `a8ddc0ad9838c6cffb3d932950d72bdafa7d0a48` (Cumulative 42555334429 y CI 42555334439 SUCCESS; focal 4/4).
-- Límites y condiciones para volver a PASS: ver `TRIG_EV_HI_01_12_ACCEPTANCE_2026-11-09.md`, sección Alcance y límites.
+- Detalle: `TRIG_EV_HI_01_12_ACCEPTANCE_2026-11-09.md`.
 - No es cierre global: S25, SG28, H2 y DIST siguen abiertos.
 
-**Siguiente:** cerrar EV-D-01 en Plus (ingesta LaTeX de `\left`, `\frac` y `\pi` en `/evaluate`), luego volver a EV-HI con literales LaTeX y formas exactas certificadas.
+**Siguiente:** decidir si la ingesta LaTeX de `/evaluate` entra en un ciclo de certificación propio. Hasta entonces EV-D-01 queda BLOCKED en Plus.
 
 ---
 

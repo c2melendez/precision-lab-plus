@@ -17,6 +17,7 @@
 - No certificado todavía: los literales LaTeX de entrada de EV-HI en cada motor. Plus prueba entradas ASCII; Lite usa literales LaTeX solo como forma esperada de salida.
 - No certificado todavía: la forma exacta de cada resultado frente a la matriz. Lite compara valores numéricos dentro de 1e-6 en EV-HI-04..09, no la forma simbólica exacta.
 - Plus prueba `acsch`, `asech` y `acoth`; los alias `arcsch`, `arsech` y `arcoth` de la matriz no tienen test propio en Plus.
+- Limitación de entrada (hallada en EV-D-01): Plus `/evaluate` no acepta literales LaTeX con `\left`, `\frac` o `\pi`; la ingesta LaTeX queda fuera de certificación (EV-D-01 BLOCKED en Plus).
 - Para volver a PASS: certificar en ambos motores las entradas LaTeX y las formas exactas de EV-HI-01..12, con evidencia CI en el SHA final.
 
 - Verificación Plus: el alcance se limita a las entradas ASCII probadas en `test_trigonometry_ev_hi01_hi12.py`.
