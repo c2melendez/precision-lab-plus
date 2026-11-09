@@ -1,3 +1,12 @@
+## 2026-11-09 UTC - S19 mutación Plus: gate completado, sin umbral aprobado (NO PASS)
+
+- Run `Certification dependency and security gates` 42566126964 sobre `fdbc87b5e3dc8d508b22188258b1845c1e9642c9`: completed success. Job `plus-backend-mutmut` 128993039789 success (alcance full; 05:14-05:38 UTC). Artefacto `s19-plus-backend-mutmut` ID 13652735653.
+- Conteo del log de mutmut 3.8.0 (3,400 mutantes): 2,385 killed, 989 survived, 12 timeout, 14 no tests. Score killed/total = 70.15%.
+- Por módulo: `solve_service` 1,045 killed / 421 survived / 3 timeout; `parsing` 887 / 403 / 7 timeout / 6 no tests; `routers.evaluate` 421 / 96 / 2 timeout / 8 no tests; `ast_validator` 32 / 69.
+- Limitación del gate: `mutmut run` 3.8.0 solo sale con código distinto de cero en fallos de colección o de estadísticas. Por eso el job queda success con 989 supervivientes; el workflow no impone umbral de score.
+- Estado: S19 backend sigue sin aprobar. No hay umbral de score aprobado (`S19_BACKEND_MUTATION_REVIEW_R288.md`). No es comparable con el baseline normativo de 1,028 mutantes (57.39%) por cambio de inventario y alcance.
+- Siguiente: versionar el contrato de score y umbral antes de considerar S19 de nuevo; no declarar PASS sobre este run.
+
 ## 2026-11-09 UTC - EV-D-01 BLOCKED en Plus; LaTeX fuera de alcance de certificación
 
 - Prueba de EV-D-01 en Plus: `/evaluate` rechaza `\sin\left(\frac{\pi}{6}\right)` (PARSE_ERROR por `\left`); `\sin(\pi/6)` y `\frac{\pi}{6}` tampoco se interpretan. La variante ASCII `sin(pi/6)` pasa.
