@@ -1,3 +1,15 @@
+## 2026-11-09 UTC — TRIG-EC-D-02 PASS_SCOPED bilateral
+
+- Fuente blob \`3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb\`: EC-D-02 = \`2\cos x-1=0,\quad x\in[0,2\pi)\` → \`x=\frac{\pi}{3},\ \frac{5\pi}{3}\`. Tres columnas, sin nota separada.
+- Plus SHA probado \`6a150e29bba160fd4f2cff92748dee0baccb35a2\`: Cumulative 42669733996 SUCCESS (test focal 2/2 explícito; backend 2,925 passed, 1 skipped, 11 xfailed; guard skip=false, evidence_run_id vacío); CI 42669734319 SUCCESS; H1d 42669734287 SUCCESS (guard skip=false); Runner 42669734406 SUCCESS.
+- Sin cambios de motor en Plus; la entrada del endpoint fue ASCII (\`2*cos(x)-1=0\`) por \`POST /api/v1/solve\`.
+- Resultado **PASS_SCOPED** para las dos raíces exactas en \`[0,2π)\`, su sustitución y la fila original. No certifica entrada literal LaTeX ni \`/api/v1/evaluate\`.
+- Global OPEN; EV-D-01 Plus /evaluate sigue BLOCKED; EV-HI PASS_SCOPED; S25, SG28, H2 y DIST abiertos.
+
+**Siguiente:** TRIG-EC-D-03, cuya fila exige \`tan x=\sqrt{3}\` → \`x=\frac{\pi}{3}+k\pi,\ k\in\mathbb{Z}\`. Probar la familia periódica completa; no reducir a una lista finita de raíces en un período.
+
+---
+
 ## 2026-11-09 UTC — TRIG-EC-D-02 Plus PASS en su alcance; caso bilateral IN_PROGRESS
 
 - Fuente congelada: EC-D-02 = `2\cos x-1=0,\quad x\in[0,2\pi)` → `x=\frac{\pi}{3},\ \frac{5\pi}{3}`. Tres columnas en el gzip; no hay nota separada.
