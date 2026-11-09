@@ -490,6 +490,24 @@ def evaluate(
                             f"{inverse.__name__} no está definida fuera del dominio real [-1, 1]."
                         )
 
+    # EV-HI-12: la batería de trigonometría congelada exige un error claro de
+    # dominio real para arcosh de un argumento positivo menor que 1. EDCX-B6
+    # conserva sus ramas complejas scoped para acosh(0) y acosh(-1)
+    # (VC-FE-51/52), por lo que el guard se acota al intervalo (0, 1) y no se
+    # extiende a argumentos no positivos ya aceptados.
+    for node in sympy.preorder_traversal(expr):
+        if isinstance(node, sympy.acosh):
+            argument = node.args[0]
+            if argument.is_number and argument.is_real:
+                try:
+                    value = float(argument.evalf())
+                except (TypeError, ValueError):
+                    continue
+                if 0 < value < 1 - 1e-12:
+                    raise DomainErrorResult(
+                        "acosh no está definida fuera del dominio real [1, +∞)."
+                    )
+
     # Diagnose a zero denominator while the original power structure is
     # still available; evalf may collapse it to an uninformative zoo/nan.
     # The zero exponent is not negative: preserve the declared 0^0=1 convention.
