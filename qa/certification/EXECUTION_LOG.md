@@ -1,3 +1,15 @@
+## 2026-11-10 UTC — TRIG-EC-D-07 IN_PROGRESS; Plus backend pendiente, Lite focal PASS
+
+- Contrato congelado: `csc(x)=2`, `x∈[0,2π)` → `{π/6,5π/6}`; gzip blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`. Tres columnas; sin nota.
+- Plus test-only SHA `864c4cf68bb88e331b6df3b64a0ddb2354b047af`; test `backend/tests/test_trigonometry_ec_d07.py`. H1d 42748028455 SUCCESS y Runner 42748028867 SUCCESS. CI 42748028579 y Cumulative 42748028770: frontend SUCCESS, backend IN_PROGRESS al corte; logs aún no disponibles.
+- Lite SHA `3ad626602b3639310921ba6fd27952293732be39`: CI 42748347965 SUCCESS (focal 2/2; 400 archivos, 2,410 passed, 8 expected fail, 34 TODO); Cumulative 42748348152 SUCCESS (focal 2/2, skip=false/evidence_run_id vacío); H1d 42748347964 SUCCESS. Scientific UI 42748348035 IN_PROGRESS.
+- Lite primer intento `0bb1e92e...` mostró gap en el solver genérico; parser normaliza csc(x) como 1/sin(x). Helper focal publicado solo para el contrato congelado.
+- No acta ni PASS bilateral todavía. Baseline EC-D-06 PASS_SCOPED; global OPEN.
+
+**Siguiente:** verificar los dos tests y total backend Plus en CI/Cumulative; cerrar Scientific UI Lite. No repetir gates verdes ni dispatch manual.
+
+---
+
 ## 2026-11-10 UTC — TRIG-EC-D-06 PASS_SCOPED bilateral
 
 - Contrato congelado: \`sin(2x)=cos(x)\`, \`x∈[0,2π)\` → \`{π/6,π/2,5π/6,3π/2}\`; gzip blob \`3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb\`.
