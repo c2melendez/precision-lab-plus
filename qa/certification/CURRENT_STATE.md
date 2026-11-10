@@ -1,3 +1,20 @@
+# Actualización de certificación — 2026-11-10 UTC (r480; EC-D-04 IN_PROGRESS)
+
+## Trigonometría EC-D-04 — pruebas focales bilaterales PASS; gates finales pendientes
+
+- Contrato congelado desde \`qa/certification/legacy_sources/ejercicios_trigonometria.md.gz\`, blob \`3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb\`: \(2\sin^{2}x-\sin x-1=0,\ x\in[0,2\pi)\) → \(\{\frac{\pi}{2},\frac{7\pi}{6},\frac{11\pi}{6}\}\).
+- Plus SHA técnico verificado \`633ec35dc8de728c657cd00907328a2ff6f5c2eb\`; test \`backend/tests/test_trigonometry_ec_d04.py\`. Los tests de anclaje y endpoint \`POST /api/v1/solve\` pasan explícitamente en Cumulative. La entrada del endpoint es ASCII; se valida la fuente literal como fixture independiente.
+- Plus [Cumulative 42730138929](https://github.com/c2melendez/precision-lab-plus/actions/runs/42730138929) SUCCESS: \`test_ec_d04_source_row_and_exact_oracle_are_frozen\` y \`test_ec_d04_http_solve_returns_exact_three_roots_in_half_open_interval\` PASSED; backend 2,929 passed, 1 skipped, 11 xfailed. Guard \`skip=false\`, \`evidence_run_id=""\`.
+- Plus frontend Cumulative SUCCESS: 150 archivos, 1,055 passed, 28 TODO; typecheck y production build SUCCESS. [H1d 42730138616](https://github.com/c2melendez/precision-lab-plus/actions/runs/42730138616) SUCCESS, 38/38, guard skip=false y sin reutilización. [Native Syntax and Recovery 42730138595](https://github.com/c2melendez/precision-lab-plus/actions/runs/42730138595) SUCCESS, 52/52 desktop/tablet/mobile. [Runner 42730138951](https://github.com/c2melendez/precision-lab-plus/actions/runs/42730138951) SUCCESS push-only.
+- Plus [CI 42730138619](https://github.com/c2melendez/precision-lab-plus/actions/runs/42730138619) IN_PROGRESS al corte: frontend SUCCESS; backend tests todavía ejecutándose.
+- Implementación: \`_quadratic_sine_interval_result\` en \`backend/app/services/solve_service.py\` sustituye \(u=\sin x\), resuelve el polinomio cuadrático y normaliza ambas ramas a \([0,2\pi)\); verifica cada raíz en la ecuación original. El cambio es acotado a cuadráticos numéricos en \(\sin x\), sin funciones trigonométricas mezcladas ni argumentos transformados.
+- Alcance: la ecuación de cálculo se envía en ASCII. La matriz original se ancla, pero este caso no certifica ingesta literal LaTeX ni el endpoint \`/api/v1/evaluate\`.
+- Estado: **IN_PROGRESS**; no crear acta ni avanzar a EC-D-05 hasta que Plus CI 42730138619 concluya SUCCESS. Baseline EC-D-03 PASS_SCOPED; certificación global **OPEN**. El workflow Plus security/mutation 42730139009 es independiente y no es un gate de aceptación matemática de EC-D-04.
+
+**Siguiente:** verificar Plus CI 42730138619. Si SUCCESS, documentar PASS_SCOPED bilateral y avanzar a EC-D-05; si falla, diagnosticar backend CI sin repetir Cumulative/H1d/Native que ya están verdes.
+
+---
+
 # Actualización de certificación — 2026-11-09 UTC (r479; EC-D-03 PASS_SCOPED)
 
 ## Trigonometría EC-D-03 — PASS_SCOPED bilateral
