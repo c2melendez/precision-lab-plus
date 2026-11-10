@@ -1,3 +1,23 @@
+# Actualización de certificación — 2026-11-10 UTC (r483; EC-D-06 IN_PROGRESS)
+
+## Trigonometría TRIG-EC-D-06 — IN_PROGRESS; Plus en validación backend final
+
+- Fila congelada recuperada del gzip, blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`: `sin(2x)=cos(x)`, intervalo `[0,2π)`; resultado exacto `{π/6, π/2, 5π/6, 3π/2}`.
+- Test focal `backend/tests/test_trigonometry_ec_d06.py`: verifica fila exacta, POST `/api/v1/solve`, cuatro raíces exactas, sustitución en la ecuación original y pertenencia al intervalo.
+- Primer intento Plus SHA `7b038743f96afc782997e059f5b4215985e231e3`: CI backend falló porque la salida incluyó `-π/2` en lugar de `3π/2`; ese valor es equivalente trigonométricamente pero no es la representación dentro del intervalo congelado. El backend anterior tuvo 2,932 passed, 1 skipped, 11 xfailed.
+- Corrección de producto acotada en `backend/app/services/solve_service.py`: helper `_double_angle_sine_equals_cosine_interval_result` reconoce solo esta ecuación, factoriza por identidad de ángulo doble y calcula cada factor con `solveset` sobre `[0,2π)`. SHA técnico final `2a7ff0f2b243597ef6476e665b4a102dcfffdd85`.
+- Plus H1d [42746666095](https://github.com/c2melendez/precision-lab-plus/actions/runs/42746666095) SUCCESS (38/38; guard skip=false, evidence_run_id vacío); Native Syntax [42746666542](https://github.com/c2melendez/precision-lab-plus/actions/runs/42746666542) SUCCESS (52/52; guard skip=false, sin reutilización); Runner [42746666546](https://github.com/c2melendez/precision-lab-plus/actions/runs/42746666546) SUCCESS, push-only.
+- Plus CI [42746666105](https://github.com/c2melendez/precision-lab-plus/actions/runs/42746666105) y Cumulative [42746666257](https://github.com/c2melendez/precision-lab-plus/actions/runs/42746666257) tenían frontend SUCCESS, backend IN_PROGRESS al corte. No hay todavía prueba focal Plus final aprobada.
+- Gate de seguridad/mutación [42746666307](https://github.com/c2melendez/precision-lab-plus/actions/runs/42746666307) seguía en `plus-backend-mutmut`; se registra aparte del alcance matemático.
+
+## Estado bilateral
+
+Lite ya tiene EC-D-06 focal 2/2 y CI/Cumulative/H1d SUCCESS sobre SHA `2af7cefc...`; Scientific UI Lite [42746381589](https://github.com/c2melendez/precision-lab-lite/actions/runs/42746381589) seguía IN_PROGRESS al corte. **EC-D-06 no se acepta bilateralmente** hasta que Plus CI/Cumulative muestren los dos tests focales PASSED y cierre de éxito. Baseline aceptado EC-D-05 PASS_SCOPED; global OPEN.
+
+**Siguiente:** inspeccionar backend CI/Cumulative de Plus en SHA `2a7ff0f2...`, confirmar los dos tests EC-D-06 explícitos y sus conteos; luego verificar Scientific UI Lite. No repetir Lite Cumulative/CI/H1d ni Plus H1d/Native. No dispatch manual.
+
+---
+
 # Actualización de certificación — 2026-11-10 UTC (r482; EC-D-05 PASS_SCOPED)
 
 ## Trigonometría TRIG-EC-D-05 — PASS_SCOPED bilateral
