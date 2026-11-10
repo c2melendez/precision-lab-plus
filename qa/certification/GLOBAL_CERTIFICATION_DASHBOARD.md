@@ -1,3 +1,16 @@
+## 2026-11-10 UTC — r483: EC-D-06 IN_PROGRESS; Plus en validación backend
+
+**EC-D-06:** `sin(2x)=cos(x)`, `x∈[0,2π)` → `{π/6,π/2,5π/6,3π/2}`.
+
+- Plus SHA `2a7ff0f2b243597ef6476e665b4a102dcfffdd85`: H1d 42746666095 SUCCESS (38/38, skip=false); Native Syntax 42746666542 SUCCESS (52/52, skip=false); Runner 42746666546 SUCCESS push-only. CI 42746666105 y Cumulative 42746666257 tenían frontend SUCCESS y backend IN_PROGRESS al corte.
+- Primer CI Plus sobre el SHA de prueba-only devolvió `-π/2` en vez de `3π/2` para el intervalo; correction helper específico ya publicado en SHA final 2a7ff0f2.
+- Lite SHA `2af7cefc410d1b7cb2c15483f3affd3473b54a89`: Cumulative 42746381569 SUCCESS (focal 2/2, 2,408 passed); CI 42746381637 SUCCESS (399 archivos, 2,408 passed); H1d 42746381850 SUCCESS (22/22); Runner 42746381595 SUCCESS push-only. Scientific UI 42746381589 seguía IN_PROGRESS.
+- No PASS bilateral ni acta todavía. No repetir gates Lite verdes ni H1d/Native Plus. Global OPEN.
+
+**Siguiente:** cerrar CI/Cumulative backend Plus y verificar los dos tests focales; confirmar Scientific UI Lite. Después considerar PASS_SCOPED bilateral si todo está verde. Baseline EC-D-05 PASS_SCOPED; EV-D-01 Plus /api/v1/evaluate BLOCKED; EV-HI PASS_SCOPED; S25, SG28, H2 y DIST abiertos.
+
+---
+
 ## 2026-11-10 UTC — r482: Trigonometría EC-D-05 PASS_SCOPED bilateral
 
 **EC-D-05 — PASS_SCOPED bilateral.** `sin(x)+cos(x)=1`, `x∈[0,2π)`; conjunto exacto `{0,π/2}`.
