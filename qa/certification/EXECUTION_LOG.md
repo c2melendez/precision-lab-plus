@@ -1,3 +1,20 @@
+## 2026-11-10 UTC — TRIG-EC-D-04: Plus focal PASS; CI backend pendiente
+
+- Fuente congelada (blob \`3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb\`): \(2\sin^{2}x-\sin x-1=0,\ x\in[0,2\pi)\) → \(\{\pi/2,7\pi/6,11\pi/6\}\).
+- Test \`backend/tests/test_trigonometry_ec_d04.py\`: ambos tests PASSED explícitamente en Cumulative 42730138929:
+  - \`test_ec_d04_source_row_and_exact_oracle_are_frozen\`
+  - \`test_ec_d04_http_solve_returns_exact_three_roots_in_half_open_interval\`
+- Plus SHA \`633ec35dc8de728c657cd00907328a2ff6f5c2eb\`: Cumulative 42730138929 SUCCESS (backend 2,929 passed, 1 skipped, 11 xfailed; guard skip=false, evidence_run_id vacío); frontend 150 files, 1,055 passed, 28 TODO, typecheck/build SUCCESS.
+- Plus H1d 42730138616 SUCCESS (38/38; guard skip=false, sin REUSE); Native Syntax and Recovery 42730138595 SUCCESS (52/52, desktop/tablet/mobile); Runner 42730138951 SUCCESS push-only.
+- Plus CI 42730138619 permanece IN_PROGRESS: frontend SUCCESS y backend tests activos. No se emite aceptación aún.
+- El solver usa sustitución \(u=\sin x\), resuelve el cuadrático, construye ambas ramas del seno en \([0,2\pi)\), deduplica y verifica las tres raíces en la ecuación original. La entrada HTTP de cálculo es ASCII; no se certifica \`/api/v1/evaluate\` ni ingesta literal LaTeX.
+- Seguridad/mutación Plus 42730139009 es una revisión independiente (plus-backend-mutmut); no condiciona el alcance matemático de EC-D-04, igual que los pendientes globales S25/SG28/H2/DIST no se cierran por este caso.
+- Estado: EC-D-04 IN_PROGRESS; sin acta y sin puntero EC-D-05. Baseline EC-D-03 PASS_SCOPED; global OPEN.
+
+**Siguiente:** esperar la conclusión del backend de CI 42730138619 y revisar su log. No repetir el Cumulative, H1d ni Native Syntax ya verdes.
+
+---
+
 ## 2026-11-09 UTC — TRIG-EC-D-03 PASS_SCOPED bilateral
 
 - Fuente congelada: blob 3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb; EC-D-03 = \(\tan x=\sqrt{3}\) → \(x=\frac{\pi}{3}+k\pi,\ k\in\mathbb{Z}\). Se exige la familia infinita completa.
