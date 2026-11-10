@@ -1,3 +1,28 @@
+# Actualización de certificación — 2026-11-10 UTC (r481; EC-D-04 PASS_SCOPED)
+
+## Trigonometría EC-D-04 — PASS_SCOPED bilateral
+
+- Contrato congelado: \(2\sin^{2}x-\sin x-1=0,\ x\in[0,2\pi)\) → \(\{\frac{\pi}{2},\frac{7\pi}{6},\frac{11\pi}{6}\}\). Fuente qa/certification/legacy_sources/ejercicios_trigonometria.md.gz, blob 3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb.
+- Plus SHA 633ec35dc8de728c657cd00907328a2ff6f5c2eb; test backend/tests/test_trigonometry_ec_d04.py. Los tests de anclaje y POST /api/v1/solve PASSED explícitamente en Cumulative 42730138929.
+- Cumulative 42730138929 SUCCESS: backend 2,929 passed, 1 skipped, 11 xfailed; guard skip=false, evidence_run_id vacío. Frontend 150 archivos, 1,055 passed, 28 TODO; typecheck y build SUCCESS.
+- CI 42730138619 SUCCESS: backend 2,929 passed, 1 skipped, 11 xfailed; frontend 150 archivos, 1,055 passed; typecheck, auditoría y build SUCCESS.
+- H1d 42730138616 SUCCESS: 38/38, guard skip=false y sin reutilización.
+- Native Syntax and Recovery 42730138595 SUCCESS: 52/52 desktop/tablet/mobile; guard skip=false y evidence_run_id vacío.
+- Runner 42730138951 SUCCESS, push-only, sin dispatch manual.
+- Implementación acotada: _quadratic_sine_interval_result sustituye u=sin(x), resuelve el cuadrático numérico, genera ambas ramas, normaliza a [0,2π) y verifica cada resultado en la ecuación original.
+- Acta bilateral: qa/certification/TRIG_EC_D_04_ACCEPTANCE_2026-11-10.md.
+
+## Alcance y límites
+
+- Se certifica exactamente el conjunto de tres raíces reales dentro de [0,2π), no una familia general sobre toda la recta real.
+- La entrada de cálculo al endpoint es ASCII. La fila original se ancla como fixture, pero no se certifica ingesta literal LaTeX ni el endpoint /api/v1/evaluate.
+- Plus Certification dependency/security gates 42730139009 sigue IN_PROGRESS en plus-backend-mutmut; es independiente de la aceptación matemática de EC-D-04.
+- La certificación global sigue **OPEN**. EV-D-01 /api/v1/evaluate continúa BLOCKED; EV-HI PASS_SCOPED; S25, SG28, H2 y DIST siguen abiertos.
+
+**Siguiente:** TRIG-EC-D-05. Recuperar su fila original exacta del gzip congelado, fijar entrada/intervalo/salida y diseñar prueba focal bilateral antes de ampliar motores.
+
+---
+
 # Actualización de certificación — 2026-11-10 UTC (r480; EC-D-04 IN_PROGRESS)
 
 ## Trigonometría EC-D-04 — pruebas focales bilaterales PASS; gates finales pendientes
