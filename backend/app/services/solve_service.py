@@ -195,6 +195,66 @@ def _secant_minus_two_interval_result(
         return None
 
 
+def _sine_out_of_range_contradiction(
+    eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Reject sin(x)=c with real |c|>1, which has no real solution.
+
+    SymPy's generic solve path returns the complex branches asin(2) and
+    pi-asin(2) for sin(x)=2. The frozen EC-D-10 contract requires the empty
+    real solution set, so a linear equation in sin(x) whose constant value
+    falls outside [-1, 1] is classified as a contradiction. No other form is
+    intercepted.
+    """
+    if angle_unit != "rad":
+        return None
+    try:
+        difference = sympy.expand(eq.lhs - eq.rhs)
+        if difference.atoms(sympy.sin) != {sympy.sin(var)}:
+            return None
+        parameter = sympy.Symbol("_sine_range_parameter", real=True)
+        reduced = sympy.expand(difference.subs(sympy.sin(var), parameter))
+        if var in reduced.free_symbols:
+            return None
+        if reduced.has(sympy.cos, sympy.tan, sympy.sec, sympy.csc, sympy.cot):
+            return None
+
+        polynomial = sympy.Poly(reduced, parameter)
+        if polynomial.degree() != 1:
+            return None
+        coefficients = polynomial.all_coeffs()
+        if len(coefficients) != 2:
+            return None
+        slope, intercept = coefficients
+        if slope == 0:
+            return None
+        if not all(value.is_number and value.is_real is True for value in (slope, intercept)):
+            return None
+
+        constant = sympy.simplify(-intercept / slope)
+        if constant.is_real is not True:
+            return None
+        above = sympy.simplify(constant - 1)
+        below = sympy.simplify(constant + 1)
+        if above.is_positive is not True and below.is_negative is not True:
+            return None
+
+        step = Step(
+            index=0,
+            title="Seno fuera del rango real",
+            description=(
+                "La ecuación se reduce a sin(x)=c con |c|>1; como -1<=sin(x)<=1 "
+                "para todo x real, no existe solución real."
+            ),
+            rule="SineRangeContradiction",
+            latex_before=sympy.latex(eq),
+            latex_after=r"-1 \le \sin(x) \le 1 \;\Rightarrow\; \varnothing",
+        )
+        return SolveResult(eq, var, ResultType.CONTRADICTION, [], [step], True, warnings)
+    except Exception:
+        return None
+
+
 def _cotangent_equals_one_interval_result(
     eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
 ) -> Optional[SolveResult]:
@@ -1117,6 +1177,10 @@ def solve_equation(
     quadratic_sine_result = _quadratic_sine_interval_result(eq, var, angle_unit, warnings)
     if quadratic_sine_result is not None:
         return quadratic_sine_result
+
+    sine_range_result = _sine_out_of_range_contradiction(eq, var, angle_unit, warnings)
+    if sine_range_result is not None:
+        return sine_range_result
 
     steps_and_solutions = _absolute_value_equidistance_steps(eq, var)
     if steps_and_solutions is None:
