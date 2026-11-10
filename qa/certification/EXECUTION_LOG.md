@@ -11,6 +11,8 @@
 
 **Siguiente:** TRIG-EC-D-09. Recuperar la fila exacta de la matriz congelada y fijar el contrato antes de comenzar test-first. No repetir gates verdes de EC-D-01..08 ni hacer dispatch manual.
 
+- Seguimiento independiente al corte r487: workflow de dependencias/seguridad Plus 42755121617 sigue IN_PROGRESS en mutation/plus-backend-mutmut. Los jobs de validación de solicitud y seguridad backend ya finalizaron SUCCESS; la mutación es independiente del oráculo EC-D-08 y no altera su PASS_SCOPED.
+
 ---
 
 ## 2026-11-10 UTC — TRIG-EC-D-07 PASS_SCOPED bilateral
@@ -41,15 +43,15 @@
 
 ## 2026-11-10 UTC — TRIG-EC-D-06 PASS_SCOPED bilateral
 
-- Contrato congelado: \`sin(2x)=cos(x)\`, \`x∈[0,2π)\` → \`{π/6,π/2,5π/6,3π/2}\`; gzip blob \`3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb\`.
-- Lite SHA \`2af7cefc410d1b7cb2c15483f3affd3473b54a89\`: Cumulative 42746381569 SUCCESS (focal 2/2; 399 files, 2,408 passed, 8 expected fail, 34 TODO; guard skip=false/no REUSE); CI 42746381637 SUCCESS; H1d 42746381850 SUCCESS 22/22; Scientific UI 42746381589 SUCCESS 456/456; Runner 42746381595 SUCCESS push-only.
-- Plus SHA \`2a7ff0f2b243597ef6476e665b4a102dcfffdd85\`: Cumulative 42746666257 SUCCESS; log explícito: \`test_ec_d06_source_row_and_exact_oracle_are_frozen PASSED\` y \`test_ec_d06_http_solve_returns_exact_four_roots_in_half_open_interval PASSED\`; backend 2,933 passed, 1 skipped, 11 xfailed; guard skip=false/no REUSE. CI 42746666105 SUCCESS con backend 2,933 passed; H1d 42746666095 SUCCESS 38/38; Native Syntax 42746666542 SUCCESS 52/52; Runner 42746666546 SUCCESS push-only.
-- El test-first inicial Plus (SHA \`7b038743...\`) encontró una representación \`-π/2\` fuera del intervalo; el helper de \`solve_service.py\` normaliza el conjunto finito sobre \`[0,2π)\`. No usar el intento inicial como evidencia de aceptación.
-- Implementación Lite acotada a esta ecuación en \`trigonometricEquation.ts\` + \`algebra.ts\`; Plus acotada en \`solve_service.py\`. Ambos comprueban sustitución en la ecuación original.
-- Acta \`TRIG_EC_D_06_ACCEPTANCE_2026-11-10.md\`. Alcance: ecuación concreta/intervalo congelado; no ingesta literal LaTeX en \`/api/v1/evaluate\` ni generalización a toda \`R\`.
-- Seguridad/mutación Plus 42746666307 seguía IN_PROGRESS en \`plus-backend-mutmut\`, separada de este PASS_SCOPED. Global OPEN; EV-D-01 BLOCKED, EV-HI PASS_SCOPED, S25/SG28/H2/DIST abiertos.
+- Contrato congelado: `sin(2x)=cos(x)`, `x∈[0,2π)` → `{π/6,π/2,5π/6,3π/2}`; gzip blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`.
+- Lite SHA `2af7cefc410d1b7cb2c15483f3affd3473b54a89`: Cumulative 42746381569 SUCCESS (focal 2/2; 399 files, 2,408 passed, 8 expected fail, 34 TODO; guard skip=false/no REUSE); CI 42746381637 SUCCESS; H1d 42746381850 SUCCESS 22/22; Scientific UI 42746381589 SUCCESS 456/456; Runner 42746381595 SUCCESS push-only.
+- Plus SHA `2a7ff0f2b243597ef6476e665b4a102dcfffdd85`: Cumulative 42746666257 SUCCESS; log explícito: `test_ec_d06_source_row_and_exact_oracle_are_frozen PASSED` y `test_ec_d06_http_solve_returns_exact_four_roots_in_half_open_interval PASSED`; backend 2,933 passed, 1 skipped, 11 xfailed; guard skip=false/no REUSE. CI 42746666105 SUCCESS con backend 2,933 passed; H1d 42746666095 SUCCESS 38/38; Native Syntax 42746666542 SUCCESS 52/52; Runner 42746666546 SUCCESS push-only.
+- El test-first inicial Plus (SHA `7b038743...`) encontró una representación `-π/2` fuera del intervalo; el helper de `solve_service.py` normaliza el conjunto finito sobre `[0,2π)`. No usar el intento inicial como evidencia de aceptación.
+- Implementación Lite acotada a esta ecuación en `trigonometricEquation.ts` + `algebra.ts`; Plus acotada en `solve_service.py`. Ambos comprueban sustitución en la ecuación original.
+- Acta `TRIG_EC_D_06_ACCEPTANCE_2026-11-10.md`. Alcance: ecuación concreta/intervalo congelado; no ingesta literal LaTeX en `/api/v1/evaluate` ni generalización a toda `R`.
+- Seguridad/mutación Plus 42746666307 seguía IN_PROGRESS en `plus-backend-mutmut`, separada de este PASS_SCOPED. Global OPEN; EV-D-01 BLOCKED, EV-HI PASS_SCOPED, S25/SG28/H2/DIST abiertos.
 
-**Siguiente:** TRIG-EC-D-07; fila congelada \`csc(x)=2\`, \`x∈[0,2π)\` → \`{π/6,5π/6}\`. Recuperada del gzip, sin columna de nota. Test-first bilateral. No repetir EC-D-01..06.
+**Siguiente:** TRIG-EC-D-07; fila congelada `csc(x)=2`, `x∈[0,2π)` → `{π/6,5π/6}`. Recuperada del gzip, sin columna de nota. Test-first bilateral. No repetir EC-D-01..06.
 
 ---
 
@@ -98,14 +100,14 @@
 
 ## 2026-11-10 UTC — TRIG-EC-D-04: Plus focal PASS; CI backend pendiente
 
-- Fuente congelada (blob \`3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb\`): \(2\sin^{2}x-\sin x-1=0,\ x\in[0,2\pi)\) → \(\{\pi/2,7\pi/6,11\pi/6\}\).
-- Test \`backend/tests/test_trigonometry_ec_d04.py\`: ambos tests PASSED explícitamente en Cumulative 42730138929:
-  - \`test_ec_d04_source_row_and_exact_oracle_are_frozen\`
-  - \`test_ec_d04_http_solve_returns_exact_three_roots_in_half_open_interval\`
-- Plus SHA \`633ec35dc8de728c657cd00907328a2ff6f5c2eb\`: Cumulative 42730138929 SUCCESS (backend 2,929 passed, 1 skipped, 11 xfailed; guard skip=false, evidence_run_id vacío); frontend 150 files, 1,055 passed, 28 TODO, typecheck/build SUCCESS.
+- Fuente congelada (blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`): \(2\sin^{2}x-\sin x-1=0,\ x\in[0,2\pi)\) → \(\{\pi/2,7\pi/6,11\pi/6\}\).
+- Test `backend/tests/test_trigonometry_ec_d04.py`: ambos tests PASSED explícitamente en Cumulative 42730138929:
+  - `test_ec_d04_source_row_and_exact_oracle_are_frozen`
+  - `test_ec_d04_http_solve_returns_exact_three_roots_in_half_open_interval`
+- Plus SHA `633ec35dc8de728c657cd00907328a2ff6f5c2eb`: Cumulative 42730138929 SUCCESS (backend 2,929 passed, 1 skipped, 11 xfailed; guard skip=false, evidence_run_id vacío); frontend 150 files, 1,055 passed, 28 TODO, typecheck/build SUCCESS.
 - Plus H1d 42730138616 SUCCESS (38/38; guard skip=false, sin REUSE); Native Syntax and Recovery 42730138595 SUCCESS (52/52, desktop/tablet/mobile); Runner 42730138951 SUCCESS push-only.
 - Plus CI 42730138619 permanece IN_PROGRESS: frontend SUCCESS y backend tests activos. No se emite aceptación aún.
-- El solver usa sustitución \(u=\sin x\), resuelve el cuadrático, construye ambas ramas del seno en \([0,2\pi)\), deduplica y verifica las tres raíces en la ecuación original. La entrada HTTP de cálculo es ASCII; no se certifica \`/api/v1/evaluate\` ni ingesta literal LaTeX.
+- El solver usa sustitución \(u=\sin x\), resuelve el cuadrático, construye ambas ramas del seno en \([0,2\pi)\), deduplica y verifica las tres raíces en la ecuación original. La entrada HTTP de cálculo es ASCII; no se certifica `/api/v1/evaluate` ni ingesta literal LaTeX.
 - Seguridad/mutación Plus 42730139009 es una revisión independiente (plus-backend-mutmut); no condiciona el alcance matemático de EC-D-04, igual que los pendientes globales S25/SG28/H2/DIST no se cierran por este caso.
 - Estado: EC-D-04 IN_PROGRESS; sin acta y sin puntero EC-D-05. Baseline EC-D-03 PASS_SCOPED; global OPEN.
 
@@ -132,13 +134,13 @@
 
 ## 2026-11-09 UTC — TRIG-EC-D-02 PASS_SCOPED bilateral
 
-- Fuente blob \`3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb\`: EC-D-02 = \`2\cos x-1=0,\quad x\in[0,2\pi)\` → \`x=\frac{\pi}{3},\ \frac{5\pi}{3}\`. Tres columnas, sin nota separada.
-- Plus SHA probado \`6a150e29bba160fd4f2cff92748dee0baccb35a2\`: Cumulative 42669733996 SUCCESS (test focal 2/2 explícito; backend 2,925 passed, 1 skipped, 11 xfailed; guard skip=false, evidence_run_id vacío); CI 42669734319 SUCCESS; H1d 42669734287 SUCCESS (guard skip=false); Runner 42669734406 SUCCESS.
-- Sin cambios de motor en Plus; la entrada del endpoint fue ASCII (\`2*cos(x)-1=0\`) por \`POST /api/v1/solve\`.
-- Resultado **PASS_SCOPED** para las dos raíces exactas en \`[0,2π)\`, su sustitución y la fila original. No certifica entrada literal LaTeX ni \`/api/v1/evaluate\`.
+- Fuente blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`: EC-D-02 = `2\cos x-1=0,\quad x\in[0,2\pi)` → `x=\frac{\pi}{3},\ \frac{5\pi}{3}`. Tres columnas, sin nota separada.
+- Plus SHA probado `6a150e29bba160fd4f2cff92748dee0baccb35a2`: Cumulative 42669733996 SUCCESS (test focal 2/2 explícito; backend 2,925 passed, 1 skipped, 11 xfailed; guard skip=false, evidence_run_id vacío); CI 42669734319 SUCCESS; H1d 42669734287 SUCCESS (guard skip=false); Runner 42669734406 SUCCESS.
+- Sin cambios de motor en Plus; la entrada del endpoint fue ASCII (`2*cos(x)-1=0`) por `POST /api/v1/solve`.
+- Resultado **PASS_SCOPED** para las dos raíces exactas en `[0,2π)`, su sustitución y la fila original. No certifica entrada literal LaTeX ni `/api/v1/evaluate`.
 - Global OPEN; EV-D-01 Plus /evaluate sigue BLOCKED; EV-HI PASS_SCOPED; S25, SG28, H2 y DIST abiertos.
 
-**Siguiente:** TRIG-EC-D-03, cuya fila exige \`tan x=\sqrt{3}\` → \`x=\frac{\pi}{3}+k\pi,\ k\in\mathbb{Z}\`. Probar la familia periódica completa; no reducir a una lista finita de raíces en un período.
+**Siguiente:** TRIG-EC-D-03, cuya fila exige `tan x=\sqrt{3}` → `x=\frac{\pi}{3}+k\pi,\ k\in\mathbb{Z}`. Probar la familia periódica completa; no reducir a una lista finita de raíces en un período.
 
 ---
 
@@ -1739,9 +1741,9 @@ AS-B-25 (D22): `factor(x^2+1) sobre ℂ` -> `(x-i)*(x+i)` solo con sufijo explí
 
 ## 2026-11-09 UTC (r476) — Trigonometría EC-D-01 PASS_SCOPED
 
-- Fuente congelada: \`qa/certification/legacy_sources/ejercicios_trigonometria.md.gz\`; EC-D-01, \`sin(x)=1/2\`, intervalo \`[0,2π)\`, raíces \`π/6\` y \`5π/6\`.
-- Plus: SHA \`21a29a342034ed7b0427b62ca2fbbc67395cbca8\`. Test \`backend/tests/test_trigonometry_ec_d01.py\`, 2/2 PASS explícitos en Cumulative job 129316220114. CI 42662156729, Cumulative 42662156740, H1d 42662156790, Runner 42662156997 — SUCCESS. Backend 2,923 passed, 1 skipped, 11 xfailed; frontend 1,055 passed, 28 TODO.
-- Lite: SHA \`fab98e252e404c2564e69c8426e9d51e3b15af0d\`; test \`tests/trigonometryEcD01.audit.test.ts\`, 2/2 PASS. CI 42663515300, Cumulative 42663515427, H1d 42663515370, Runner 42663515272 — SUCCESS. Cumulative 394 test files, 2,398 passed, 8 expected fail, 34 TODO. Scientific UI 42663515384 permanecía IN_PROGRESS al corte en la verificación nativa desktop/tablet/mobile.
-- Alcance: las pruebas verifican raíces exactas, intervalo y sustitución; Plus usa ASCII en \`/api/v1/solve\`. No se altera ni se certifica la ingesta LaTeX de \`/api/v1/evaluate\`; EV-D-01 sigue BLOCKED en ese endpoint. EV-HI continúa PASS_SCOPED; no hay cierre global.
+- Fuente congelada: `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz`; EC-D-01, `sin(x)=1/2`, intervalo `[0,2π)`, raíces `π/6` y `5π/6`.
+- Plus: SHA `21a29a342034ed7b0427b62ca2fbbc67395cbca8`. Test `backend/tests/test_trigonometry_ec_d01.py`, 2/2 PASS explícitos en Cumulative job 129316220114. CI 42662156729, Cumulative 42662156740, H1d 42662156790, Runner 42662156997 — SUCCESS. Backend 2,923 passed, 1 skipped, 11 xfailed; frontend 1,055 passed, 28 TODO.
+- Lite: SHA `fab98e252e404c2564e69c8426e9d51e3b15af0d`; test `tests/trigonometryEcD01.audit.test.ts`, 2/2 PASS. CI 42663515300, Cumulative 42663515427, H1d 42663515370, Runner 42663515272 — SUCCESS. Cumulative 394 test files, 2,398 passed, 8 expected fail, 34 TODO. Scientific UI 42663515384 permanecía IN_PROGRESS al corte en la verificación nativa desktop/tablet/mobile.
+- Alcance: las pruebas verifican raíces exactas, intervalo y sustitución; Plus usa ASCII en `/api/v1/solve`. No se altera ni se certifica la ingesta LaTeX de `/api/v1/evaluate`; EV-D-01 sigue BLOCKED en ese endpoint. EV-HI continúa PASS_SCOPED; no hay cierre global.
 - Siguiente acción: EC-D-02; recuperar primero la fila exacta de la matriz gzip y luego test-first bilateral.
 
