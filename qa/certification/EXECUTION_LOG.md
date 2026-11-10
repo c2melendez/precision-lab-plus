@@ -1,3 +1,17 @@
+## 2026-11-10 UTC — TRIG-EC-D-06 IN_PROGRESS; corrección de rama de intervalo Plus pendiente de CI/Cumulative
+
+- Contrato: `sin(2x)=cos(x)`, `x∈[0,2π)` → `{π/6,π/2,5π/6,3π/2}`; fuente gzip blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`.
+- Test `backend/tests/test_trigonometry_ec_d06.py`: anclaje de fuente + POST `/api/v1/solve`; exige cuatro soluciones exactas y sustitución en original.
+- Test-only inicial SHA `7b038743f96afc782997e059f5b4215985e231e3`: CI backend encontró `-pi/2` donde el oráculo de intervalo exige `3*pi/2`; 2,932 passed, 1 skipped, 11 xfailed. No aceptar ese intento.
+- Helper de producto focal en `solve_service.py` calcula soluciones de `cos(x)=0` y `2sin(x)-1=0` usando `solveset` sobre el intervalo semiabierto; verifica los candidatos contra la ecuación original. SHA final Plus `2a7ff0f2b243597ef6476e665b4a102dcfffdd85`; corrección adicional de escapes LaTeX de salida.
+- Plus H1d 42746666095 SUCCESS 38/38, skip=false; Native Syntax 42746666542 SUCCESS 52/52, skip=false; Runner 42746666546 SUCCESS push-only. CI 42746666105 y Cumulative 42746666257 frontend SUCCESS, backend IN_PROGRESS al corte. Security/mutmut 42746666307 en `plus-backend-mutmut`, independiente.
+- Lite test 2/2 y gates principales verde en SHA `2af7cefc410d1b7cb2c15483f3affd3473b54a89`; Scientific UI 42746381589 IN_PROGRESS al corte.
+- No acta ni PASS bilateral; baseline EC-D-05 PASS_SCOPED; global OPEN.
+
+**Siguiente:** confirmar resultados de ambos backends Plus sobre SHA `2a7ff0f2...`; revisar que los dos tests del caso PASSED. Verificar Scientific UI Lite. No repetir gates ya verdes.
+
+---
+
 ## 2026-11-10 UTC — TRIG-EC-D-05 PASS_SCOPED bilateral
 
 - Fila congelada: EC-D-05, `sin x+cos x=1`, `x∈[0,2π)` → `{0,π/2}`; fuente gzip blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`.
