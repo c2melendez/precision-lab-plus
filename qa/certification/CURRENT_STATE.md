@@ -4,10 +4,12 @@
 
 - Fila congelada del gzip legacy (blob 3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb): \(\sec x=-2,\quad x\in[0,2\pi)\) → \(\{2\pi/3,4\pi/3\}\). La fila original tiene tres columnas (ID, ejercicio y resultado esperado); no existe una nota separada.
 - Oráculo: exactamente dos raíces distintas, ambas en el intervalo semiabierto y verificadas por sustitución en la ecuación secante original.
-- Lite SHA técnico \`b8c3ffcf7815c373c7f46849dc547d1cf1864de8\`. Test focal tests/trigonometryEcD08.audit.test.ts: 2/2 PASS en CI y Cumulative. CI 42754588522 SUCCESS; Cumulative 42754588411 SUCCESS (401 archivos, 2,412 passed, 8 expected fail, 34 TODO; skip=false, evidence_run_id vacío); H1d 42754588566 SUCCESS (22/22); Scientific UI 42754588396 SUCCESS (456/456 desktop/tablet/mobile); Runner 42754588787 SUCCESS push-only.
-- Plus SHA técnico \`fb430768589eabfb930b03790d135b879ddf9109\`. Test focal backend/tests/test_trigonometry_ec_d08.py: ambos tests PASSED explícitamente en Cumulative 42755121582. Backend 2,937 passed, 1 skipped, 11 xfailed; guard skip=false y evidence_run_id vacío. CI 42755121784 SUCCESS (backend y frontend); H1d 42755121628 SUCCESS (38/38); Native Syntax 42755121609 SUCCESS (26 desktop y 52 tablet/mobile); Runner 42755121603 SUCCESS push-only.
+- Lite SHA técnico `b8c3ffcf7815c373c7f46849dc547d1cf1864de8`. Test focal tests/trigonometryEcD08.audit.test.ts: 2/2 PASS en CI y Cumulative. CI 42754588522 SUCCESS; Cumulative 42754588411 SUCCESS (401 archivos, 2,412 passed, 8 expected fail, 34 TODO; skip=false, evidence_run_id vacío); H1d 42754588566 SUCCESS (22/22); Scientific UI 42754588396 SUCCESS (456/456 desktop/tablet/mobile); Runner 42754588787 SUCCESS push-only.
+- Plus SHA técnico `fb430768589eabfb930b03790d135b879ddf9109`. Test focal backend/tests/test_trigonometry_ec_d08.py: ambos tests PASSED explícitamente en Cumulative 42755121582. Backend 2,937 passed, 1 skipped, 11 xfailed; guard skip=false y evidence_run_id vacío. CI 42755121784 SUCCESS (backend y frontend); H1d 42755121628 SUCCESS (38/38); Native Syntax 42755121609 SUCCESS (26 desktop y 52 tablet/mobile); Runner 42755121603 SUCCESS push-only.
 - Lite utiliza un helper acotado para la forma parser-normalizada 1/cos(x)=-2; Plus resuelve la entrada sec(x)=-2 mediante un helper que resuelve cos(x)=-1/2 directamente en [0,2π). Ambos verifican las raíces en la ecuación recíproca original. No son resolvedores generales de secante.
 - Acta bilateral: qa/certification/TRIG_EC_D_08_ACCEPTANCE_2026-11-10.md en ambos repositorios.
+
+- Seguimiento independiente al corte r487: el workflow de dependencias/seguridad Plus 42755121617 continúa IN_PROGRESS únicamente en mutation/plus-backend-mutmut; no forma parte del oráculo matemático de EC-D-08 y no cambia su PASS_SCOPED.
 
 ## Estado y siguiente acción
 
@@ -62,20 +64,20 @@
 
 ## Trigonometría TRIG-EC-D-06 — PASS_SCOPED bilateral
 
-- Fila congelada: \`sin(2x)=cos(x)\`, \`x∈[0,2π)\` → \`{π/6, π/2, 5π/6, 3π/2}\`; gzip blob \`3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb\`. La fuente contiene tres columnas, sin nota independiente.
-- Lite SHA \`2af7cefc410d1b7cb2c15483f3affd3473b54a89\`: test \`tests/trigonometryEcD06.audit.test.ts\` 2/2; Cumulative 42746381569 SUCCESS (399 archivos, 2,408 passed, 8 expected fail, 34 TODO, skip=false, sin REUSE); CI 42746381637 SUCCESS (typecheck/audit/tests/build, mismos conteos); H1d 42746381850 SUCCESS (22/22, skip=false); Scientific UI 42746381589 SUCCESS (456/456 desktop/tablet/mobile, skip=false); Runner 42746381595 SUCCESS push-only.
-- Plus SHA \`2a7ff0f2b243597ef6476e665b4a102dcfffdd85\`: test \`backend/tests/test_trigonometry_ec_d06.py\` 2/2 PASS explícito en Cumulative 42746666257; backend 2,933 passed, 1 skipped, 11 xfailed, skip=false. CI 42746666105 SUCCESS (mismos conteos backend y frontend SUCCESS); H1d 42746666095 SUCCESS 38/38 (skip=false); Native Syntax 42746666542 SUCCESS 52/52 (skip=false); Runner 42746666546 SUCCESS push-only.
+- Fila congelada: `sin(2x)=cos(x)`, `x∈[0,2π)` → `{π/6, π/2, 5π/6, 3π/2}`; gzip blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`. La fuente contiene tres columnas, sin nota independiente.
+- Lite SHA `2af7cefc410d1b7cb2c15483f3affd3473b54a89`: test `tests/trigonometryEcD06.audit.test.ts` 2/2; Cumulative 42746381569 SUCCESS (399 archivos, 2,408 passed, 8 expected fail, 34 TODO, skip=false, sin REUSE); CI 42746381637 SUCCESS (typecheck/audit/tests/build, mismos conteos); H1d 42746381850 SUCCESS (22/22, skip=false); Scientific UI 42746381589 SUCCESS (456/456 desktop/tablet/mobile, skip=false); Runner 42746381595 SUCCESS push-only.
+- Plus SHA `2a7ff0f2b243597ef6476e665b4a102dcfffdd85`: test `backend/tests/test_trigonometry_ec_d06.py` 2/2 PASS explícito en Cumulative 42746666257; backend 2,933 passed, 1 skipped, 11 xfailed, skip=false. CI 42746666105 SUCCESS (mismos conteos backend y frontend SUCCESS); H1d 42746666095 SUCCESS 38/38 (skip=false); Native Syntax 42746666542 SUCCESS 52/52 (skip=false); Runner 42746666546 SUCCESS push-only.
 - Lite factoriza este caso concreto mediante identidad de ángulo doble; Plus normaliza las raíces al intervalo usando solveset sobre los factores. Cada candidato se sustituye en la ecuación original.
-- Acta bilateral: \`qa/certification/TRIG_EC_D_06_ACCEPTANCE_2026-11-10.md\`.
+- Acta bilateral: `qa/certification/TRIG_EC_D_06_ACCEPTANCE_2026-11-10.md`.
 
 ## Alcance y límites
 
-- PASS_SCOPED cubre solo la ecuación congelada y el conjunto exacto de cuatro raíces en \`[0,2π)\`; no generaliza a ecuaciones trigonométricas mixtas arbitrarias ni a familias sobre toda \`R\`.
-- Las entradas de cálculo son ASCII/forma normalizada. No se certifica aquí ingesta literal LaTeX en Plus \`/api/v1/evaluate\`.
-- Plus \`Certification dependency and security gates\` 42746666307 seguía ejecutando \`plus-backend-mutmut\`, independiente de la aceptación matemática EC-D-06.
-- Certificación global **OPEN**. EV-D-01 Plus \`/api/v1/evaluate\` BLOCKED; EV-HI PASS_SCOPED; S25, SG28, H2 y DIST abiertos.
+- PASS_SCOPED cubre solo la ecuación congelada y el conjunto exacto de cuatro raíces en `[0,2π)`; no generaliza a ecuaciones trigonométricas mixtas arbitrarias ni a familias sobre toda `R`.
+- Las entradas de cálculo son ASCII/forma normalizada. No se certifica aquí ingesta literal LaTeX en Plus `/api/v1/evaluate`.
+- Plus `Certification dependency and security gates` 42746666307 seguía ejecutando `plus-backend-mutmut`, independiente de la aceptación matemática EC-D-06.
+- Certificación global **OPEN**. EV-D-01 Plus `/api/v1/evaluate` BLOCKED; EV-HI PASS_SCOPED; S25, SG28, H2 y DIST abiertos.
 
-**Siguiente:** TRIG-EC-D-07, cuya fila congelada ya fue recuperada: \`csc(x)=2,\ x∈[0,2π)\` → \`{π/6,5π/6}\`. Fijar el contrato literal y continuar test-first bilateral. No repetir EC-D-01..06.
+**Siguiente:** TRIG-EC-D-07, cuya fila congelada ya fue recuperada: `csc(x)=2,\ x∈[0,2π)` → `{π/6,5π/6}`. Fijar el contrato literal y continuar test-first bilateral. No repetir EC-D-01..06.
 
 ---
 
@@ -149,13 +151,13 @@ Lite ya tiene EC-D-06 focal 2/2 y CI/Cumulative/H1d SUCCESS sobre SHA `2af7cefc.
 
 ## Trigonometría EC-D-04 — pruebas focales bilaterales PASS; gates finales pendientes
 
-- Contrato congelado desde \`qa/certification/legacy_sources/ejercicios_trigonometria.md.gz\`, blob \`3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb\`: \(2\sin^{2}x-\sin x-1=0,\ x\in[0,2\pi)\) → \(\{\frac{\pi}{2},\frac{7\pi}{6},\frac{11\pi}{6}\}\).
-- Plus SHA técnico verificado \`633ec35dc8de728c657cd00907328a2ff6f5c2eb\`; test \`backend/tests/test_trigonometry_ec_d04.py\`. Los tests de anclaje y endpoint \`POST /api/v1/solve\` pasan explícitamente en Cumulative. La entrada del endpoint es ASCII; se valida la fuente literal como fixture independiente.
-- Plus [Cumulative 42730138929](https://github.com/c2melendez/precision-lab-plus/actions/runs/42730138929) SUCCESS: \`test_ec_d04_source_row_and_exact_oracle_are_frozen\` y \`test_ec_d04_http_solve_returns_exact_three_roots_in_half_open_interval\` PASSED; backend 2,929 passed, 1 skipped, 11 xfailed. Guard \`skip=false\`, \`evidence_run_id=""\`.
+- Contrato congelado desde `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz`, blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`: \(2\sin^{2}x-\sin x-1=0,\ x\in[0,2\pi)\) → \(\{\frac{\pi}{2},\frac{7\pi}{6},\frac{11\pi}{6}\}\).
+- Plus SHA técnico verificado `633ec35dc8de728c657cd00907328a2ff6f5c2eb`; test `backend/tests/test_trigonometry_ec_d04.py`. Los tests de anclaje y endpoint `POST /api/v1/solve` pasan explícitamente en Cumulative. La entrada del endpoint es ASCII; se valida la fuente literal como fixture independiente.
+- Plus [Cumulative 42730138929](https://github.com/c2melendez/precision-lab-plus/actions/runs/42730138929) SUCCESS: `test_ec_d04_source_row_and_exact_oracle_are_frozen` y `test_ec_d04_http_solve_returns_exact_three_roots_in_half_open_interval` PASSED; backend 2,929 passed, 1 skipped, 11 xfailed. Guard `skip=false`, `evidence_run_id=""`.
 - Plus frontend Cumulative SUCCESS: 150 archivos, 1,055 passed, 28 TODO; typecheck y production build SUCCESS. [H1d 42730138616](https://github.com/c2melendez/precision-lab-plus/actions/runs/42730138616) SUCCESS, 38/38, guard skip=false y sin reutilización. [Native Syntax and Recovery 42730138595](https://github.com/c2melendez/precision-lab-plus/actions/runs/42730138595) SUCCESS, 52/52 desktop/tablet/mobile. [Runner 42730138951](https://github.com/c2melendez/precision-lab-plus/actions/runs/42730138951) SUCCESS push-only.
 - Plus [CI 42730138619](https://github.com/c2melendez/precision-lab-plus/actions/runs/42730138619) IN_PROGRESS al corte: frontend SUCCESS; backend tests todavía ejecutándose.
-- Implementación: \`_quadratic_sine_interval_result\` en \`backend/app/services/solve_service.py\` sustituye \(u=\sin x\), resuelve el polinomio cuadrático y normaliza ambas ramas a \([0,2\pi)\); verifica cada raíz en la ecuación original. El cambio es acotado a cuadráticos numéricos en \(\sin x\), sin funciones trigonométricas mezcladas ni argumentos transformados.
-- Alcance: la ecuación de cálculo se envía en ASCII. La matriz original se ancla, pero este caso no certifica ingesta literal LaTeX ni el endpoint \`/api/v1/evaluate\`.
+- Implementación: `_quadratic_sine_interval_result` en `backend/app/services/solve_service.py` sustituye \(u=\sin x\), resuelve el polinomio cuadrático y normaliza ambas ramas a \([0,2\pi)\); verifica cada raíz en la ecuación original. El cambio es acotado a cuadráticos numéricos en \(\sin x\), sin funciones trigonométricas mezcladas ni argumentos transformados.
+- Alcance: la ecuación de cálculo se envía en ASCII. La matriz original se ancla, pero este caso no certifica ingesta literal LaTeX ni el endpoint `/api/v1/evaluate`.
 - Estado: **IN_PROGRESS**; no crear acta ni avanzar a EC-D-05 hasta que Plus CI 42730138619 concluya SUCCESS. Baseline EC-D-03 PASS_SCOPED; certificación global **OPEN**. El workflow Plus security/mutation 42730139009 es independiente y no es un gate de aceptación matemática de EC-D-04.
 
 **Siguiente:** verificar Plus CI 42730138619. Si SUCCESS, documentar PASS_SCOPED bilateral y avanzar a EC-D-05; si falla, diagnosticar backend CI sin repetir Cumulative/H1d/Native que ya están verdes.
@@ -183,15 +185,15 @@ Lite ya tiene EC-D-06 focal 2/2 y CI/Cumulative/H1d SUCCESS sobre SHA `2af7cefc.
 
 ## Trigonometría EC-D-02 — PASS_SCOPED bilateral
 
-- Contrato congelado: \`2\cos x-1=0,\quad x\in[0,2\pi)\` → \`x=\frac{\pi}{3},\ \frac{5\pi}{3}\`. Tres columnas en la fuente; no hay nota separada.
-- Plus SHA técnico \`6a150e29bba160fd4f2cff92748dee0baccb35a2\`; test \`backend/tests/test_trigonometry_ec_d02.py\`, ambos tests PASSED explícitamente en Cumulative.
-- [Plus Cumulative 42669733996](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669733996) SUCCESS: focal 2/2; backend 2,925 passed, 1 skipped, 11 xfailed; guard \`skip=false\`, \`evidence_run_id=""\`.
-- [Plus CI 42669734319](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669734319) SUCCESS (backend/frontend); [H1d 42669734287](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669734287) SUCCESS, guard \`skip=false\`; [Runner 42669734406](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669734406) SUCCESS push-only.
-- La entrada de Plus fue ASCII en \`POST /api/v1/solve\`; no se certifica ingesta literal LaTeX ni \`/api/v1/evaluate\`.
-- Aceptación: \`qa/certification/TRIG_EC_D_02_ACCEPTANCE_2026-11-09.md\`.
+- Contrato congelado: `2\cos x-1=0,\quad x\in[0,2\pi)` → `x=\frac{\pi}{3},\ \frac{5\pi}{3}`. Tres columnas en la fuente; no hay nota separada.
+- Plus SHA técnico `6a150e29bba160fd4f2cff92748dee0baccb35a2`; test `backend/tests/test_trigonometry_ec_d02.py`, ambos tests PASSED explícitamente en Cumulative.
+- [Plus Cumulative 42669733996](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669733996) SUCCESS: focal 2/2; backend 2,925 passed, 1 skipped, 11 xfailed; guard `skip=false`, `evidence_run_id=""`.
+- [Plus CI 42669734319](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669734319) SUCCESS (backend/frontend); [H1d 42669734287](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669734287) SUCCESS, guard `skip=false`; [Runner 42669734406](https://github.com/c2melendez/precision-lab-plus/actions/runs/42669734406) SUCCESS push-only.
+- La entrada de Plus fue ASCII en `POST /api/v1/solve`; no se certifica ingesta literal LaTeX ni `/api/v1/evaluate`.
+- Aceptación: `qa/certification/TRIG_EC_D_02_ACCEPTANCE_2026-11-09.md`.
 - Global **OPEN**; EV-D-01 /evaluate permanece BLOCKED; EV-HI PASS_SCOPED; S25, SG28, H2 y DIST abiertos.
 
-**Siguiente:** TRIG-EC-D-03; contrato de fuente \`tan x=\sqrt{3}\` → \`x=\frac{\pi}{3}+k\pi,\ k\in\mathbb{Z}\`. Se requiere una familia infinita, no dos soluciones de un período. Investigar representación paramétrica en ambos motores antes de ampliar los resolvers.
+**Siguiente:** TRIG-EC-D-03; contrato de fuente `tan x=\sqrt{3}` → `x=\frac{\pi}{3}+k\pi,\ k\in\mathbb{Z}`. Se requiere una familia infinita, no dos soluciones de un período. Investigar representación paramétrica en ambos motores antes de ampliar los resolvers.
 
 ---
 
@@ -212,13 +214,13 @@ Lite ya tiene EC-D-06 focal 2/2 y CI/Cumulative/H1d SUCCESS sobre SHA `2af7cefc.
 
 ## Trigonometría EC-D-01 — PASS_SCOPED bilateral (soluciones exactas en [0, 2π))
 
-- Fila congelada: \`sin(x)=1/2\`, intervalo \`[0,2π)\`; raíces exactas esperadas \`π/6\` y \`5π/6\`. La prueba ancla el caso a la fila original de \`ejercicios_trigonometria.md.gz\`.
-- Alcance: ambas raíces exactas, pertenencia al intervalo y sustitución se verifican por los dos motores. Plus ejercita \`/api/v1/solve\` con \`sin(x)-1/2=0\`; no se afirma certificación de la ingesta literal idéntica en todos los endpoints.
-- Plus SHA técnico \`21a29a342034ed7b0427b62ca2fbbc67395cbca8\`; test \`backend/tests/test_trigonometry_ec_d01.py\` (anclaje del contrato + endpoint HTTP, 2/2 PASS).
+- Fila congelada: `sin(x)=1/2`, intervalo `[0,2π)`; raíces exactas esperadas `π/6` y `5π/6`. La prueba ancla el caso a la fila original de `ejercicios_trigonometria.md.gz`.
+- Alcance: ambas raíces exactas, pertenencia al intervalo y sustitución se verifican por los dos motores. Plus ejercita `/api/v1/solve` con `sin(x)-1/2=0`; no se afirma certificación de la ingesta literal idéntica en todos los endpoints.
+- Plus SHA técnico `21a29a342034ed7b0427b62ca2fbbc67395cbca8`; test `backend/tests/test_trigonometry_ec_d01.py` (anclaje del contrato + endpoint HTTP, 2/2 PASS).
 - Plus CI [42662156729](https://github.com/c2melendez/precision-lab-plus/actions/runs/42662156729) SUCCESS: backend 2,923 passed, 1 skipped, 11 xfailed; frontend 150 test files, 1,055 passed, 28 TODO.
-- Plus Cumulative [42662156740](https://github.com/c2melendez/precision-lab-plus/actions/runs/42662156740) SUCCESS: el log ejecutó explícitamente \`test_ec_d01_source_row_and_exact_oracle_are_frozen\` y \`test_ec_d01_http_solve_returns_both_exact_roots_in_interval\`; ambas PASSED. Backend 2,923 passed, 1 skipped, 11 xfailed; frontend 1,055 passed.
+- Plus Cumulative [42662156740](https://github.com/c2melendez/precision-lab-plus/actions/runs/42662156740) SUCCESS: el log ejecutó explícitamente `test_ec_d01_source_row_and_exact_oracle_are_frozen` y `test_ec_d01_http_solve_returns_both_exact_roots_in_interval`; ambas PASSED. Backend 2,923 passed, 1 skipped, 11 xfailed; frontend 1,055 passed.
 - Plus H1d [42662156790](https://github.com/c2melendez/precision-lab-plus/actions/runs/42662156790) SUCCESS (38 pruebas); Runner [42662156997](https://github.com/c2melendez/precision-lab-plus/actions/runs/42662156997) SUCCESS.
-- Resultado **PASS_SCOPED** bilateral con Lite. No cambia el bloqueo separado EV-D-01 LaTeX en Plus \`/api/v1/evaluate\`; no se amplió el parser ni se certificó ese endpoint. EV-HI-01..12 sigue PASS_SCOPED. S25, SG28/H2 y DIST siguen abiertos; global **OPEN**.
+- Resultado **PASS_SCOPED** bilateral con Lite. No cambia el bloqueo separado EV-D-01 LaTeX en Plus `/api/v1/evaluate`; no se amplió el parser ni se certificó ese endpoint. EV-HI-01..12 sigue PASS_SCOPED. S25, SG28/H2 y DIST siguen abiertos; global **OPEN**.
 
 **Siguiente:** EC-D-02. Recuperar su fila exacta desde el gzip congelado y fijar el contrato antes de escribir pruebas.
 
