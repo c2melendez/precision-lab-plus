@@ -195,6 +195,76 @@ def _secant_minus_two_interval_result(
         return None
 
 
+def _cotangent_equals_one_interval_result(
+    eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Solve only the frozen EC-D-09 equation cot(x)=1 on [0, 2*pi).
+
+    SymPy's generic solve path returns only the principal branch pi/4,
+    dropping the second period branch 5*pi/4. Resolve the equivalent
+    tangent equation tan(x)=1 directly over [0, 2*pi) and verify each
+    candidate in the original cotangent equation. No other cotangent
+    form is intercepted.
+    """
+    if angle_unit != "rad":
+        return None
+    try:
+        difference = sympy.simplify(eq.lhs - eq.rhs)
+        expected = sympy.cot(var) - 1
+        if sympy.simplify(difference - expected) != 0 and sympy.simplify(difference + expected) != 0:
+            return None
+
+        interval = sympy.Interval(0, 2 * sympy.pi, right_open=True)
+        tangent_roots = sympy.solveset(sympy.tan(var) - 1, var, domain=interval)
+        if not isinstance(tangent_roots, sympy.FiniteSet):
+            return None
+
+        solutions = sorted(
+            {
+                sympy.simplify(root)
+                for root in tangent_roots
+                if root.is_real is True
+                and sympy.simplify(root).is_nonnegative is True
+                and sympy.simplify(2 * sympy.pi - root).is_positive is True
+            },
+            key=lambda root: float(root.evalf()),
+        )
+        if len(solutions) != 2:
+            return None
+        if not all(sympy.simplify(difference.subs(var, root)) == 0 for root in solutions):
+            return None
+
+        latex_roots = (
+            r"\left\{"
+            + r",\ ".join(sympy.latex(root) for root in solutions)
+            + r"\right\}"
+        )
+        step = Step(
+            index=0,
+            title="Reducción de cotangente a tangente",
+            description=(
+                "Se usa cot(x)=1/tan(x) para x con sin(x)≠0, de modo que "
+                "tan(x)=1. Se resuelve la tangente directamente en [0, 2π), "
+                "se enumeran ambas ramas del período y se verifican ambas "
+                "raíces en la ecuación cotangente original."
+            ),
+            rule="CotangentReciprocalIdentity",
+            latex_before=sympy.latex(eq),
+            latex_after=latex_roots,
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(root) for root in solutions],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def _double_angle_sine_equals_cosine_interval_result(
     eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
 ) -> Optional[SolveResult]:
@@ -1035,6 +1105,10 @@ def solve_equation(
     secant_result = _secant_minus_two_interval_result(eq, var, angle_unit, warnings)
     if secant_result is not None:
         return secant_result
+
+    cotangent_result = _cotangent_equals_one_interval_result(eq, var, angle_unit, warnings)
+    if cotangent_result is not None:
+        return cotangent_result
 
     double_angle_result = _double_angle_sine_equals_cosine_interval_result(eq, var, angle_unit, warnings)
     if double_angle_result is not None:
