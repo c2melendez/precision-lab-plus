@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 479,
+  "revision": 480,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "d02a3076b57d9bb2cd02d7c89e1bce3e176a9055",
@@ -35,8 +35,8 @@
     "id": "TRIG-EC-D-04",
     "status": "RUN",
     "previous_id": "TRIG-EC-D-03",
-    "action": "EC-D-03 fue aceptado como PASS_SCOPED bilateral. Lite SHA d10a2cd2: CI 42712032373 SUCCESS (396 files, 2,402 passed); Cumulative 42712032384 SUCCESS (focal 2/2, guard skip=false, evidence_run_id vacío; 396 files, 2,402 passed); H1d 42712032789 SUCCESS (22/22, skip=false); Scientific UI 42712032408 SUCCESS (456/456 desktop/tablet/mobile); Runner 42712032501 SUCCESS push-only. Plus SHA d02a3076: Cumulative 42712350673 SUCCESS (ambos tests EC-D-03 PASSED explícitos; 2,927 passed, 1 skipped, 11 xfailed; guard skip=false y evidence_run_id vacío); CI 42712350706 SUCCESS; H1d 42712350501 SUCCESS (38 passed, skip=false); Native Syntax and Recovery 42712350400 SUCCESS (52 passed); Runner 42712350393 SUCCESS. Lite devuelve una familia paramétrica con k entero; Plus devuelve ImageSet sobre Integers y verifica simbólicamente el residuo. Próximo TRIG-EC-D-04: 2*sin^2(x)-sin(x)-1=0 en [0,2*pi) → pi/2, 7*pi/6, 11*pi/6. Recuperar y anclar la fila y continuar test-first bilateral; no inferir ni relajar el contrato. Plus Certification dependency/security gates 42712350624 sigue IN_PROGRESS en plus-backend-mutmut, independiente del cierre D03. Global OPEN; EV-D-01 /api/v1/evaluate sigue BLOCKED; EV-HI PASS_SCOPED; S25, SG28, H2 y DIST abiertos.",
-    "updated_utc": "2026-11-09T22:42:00Z"
+    "action": "EC-D-04: contrato congelado 2*sin^2(x)-sin(x)-1=0 en [0,2π) → π/2, 7π/6, 11π/6. Plus SHA 633ec35dc8de728c657cd00907328a2ff6f5c2eb; los tests test_ec_d04_source_row_and_exact_oracle_are_frozen y test_ec_d04_http_solve_returns_exact_three_roots_in_half_open_interval PASSED explícitamente en Cumulative 42730138929 SUCCESS (backend 2,929 passed, 1 skipped, 11 xfailed, guard skip=false, evidence_run_id vacío); frontend 1,055 passed, 28 TODO, typecheck/build SUCCESS. H1d 42730138616 SUCCESS (38/38, skip=false); Native Syntax 42730138595 SUCCESS (52/52); Runner 42730138951 SUCCESS. CI 42730138619 sigue IN_PROGRESS: frontend SUCCESS, backend tests activos. Próximo: verificar conclusión y logs de CI; luego PASS_SCOPED bilateral y siguiente EC-D-05. No repetir Cumulative/H1d/Native; seguridad/mutación es independiente. Mantener EC-D-04 IN_PROGRESS; baseline EC-D-03 PASS_SCOPED; global OPEN.",
+    "updated_utc": "2026-11-10T00:47:00Z"
   },
   "blockers": [],
   "prose_only_paths": [
