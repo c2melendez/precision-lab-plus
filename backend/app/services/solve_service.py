@@ -169,7 +169,7 @@ def _double_angle_sine_equals_cosine_interval_result(
         if not all(sympy.simplify(difference.subs(var, root)) == 0 for root in solutions):
             return None
 
-        latex_roots = r"\\left\\{" + r",\\ ".join(sympy.latex(root) for root in solutions) + r"\\right\\}"
+        latex_roots = r"\left\{" + r",\ ".join(sympy.latex(root) for root in solutions) + r"\right\}"
         step = Step(
             index=0,
             title="Factorización mediante ángulo doble",
