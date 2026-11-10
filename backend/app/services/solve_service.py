@@ -203,10 +203,12 @@ def _sine_out_of_range_contradiction(
     SymPy's generic solve path returns the complex branches asin(2) and
     pi-asin(2) for sin(x)=2. The frozen EC-D-10 contract requires the empty
     real solution set, so a linear equation in sin(x) whose constant value
-    falls outside [-1, 1] is classified as a contradiction. No other form is
-    intercepted.
+    falls outside [-1, 1] is classified as a contradiction. The bounded case
+    applies only to the real-domain variable x used by the frozen
+    trigonometry matrix; complex-domain solves (for example z) keep the
+    established generic path that returns the complex branches.
     """
-    if angle_unit != "rad":
+    if angle_unit != "rad" or var.name != "x":
         return None
     try:
         difference = sympy.expand(eq.lhs - eq.rhs)
