@@ -1,3 +1,23 @@
+# Actualización de certificación — 2026-11-10 UTC (r485; EC-D-07 IN_PROGRESS)
+
+## Trigonometría TRIG-EC-D-07 — test focal en validación backend
+
+- Fila congelada recuperada directamente del gzip, blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`: `\csc x=2,quad x\in[0,2\pi)` → `x=\frac{\pi}{6},\ \frac{5\pi}{6}`. La fila original tiene tres columnas (ID, ejercicio, resultado esperado); no hay nota separada.
+- Test focal `backend/tests/test_trigonometry_ec_d07.py`: anclaje de fuente, POST `/api/v1/solve`, dos raíces exactas, intervalo y sustitución recíproca.
+- SHA de prueba Plus `864c4cf68bb88e331b6df3b64a0ddb2354b047af`. No hay todavía cambio de producto Plus; se espera a comprobar si SymPy resuelve el caso sin modificación del motor.
+- Plus H1d [42748028455](https://github.com/c2melendez/precision-lab-plus/actions/runs/42748028455) SUCCESS; Runner [42748028867](https://github.com/c2melendez/precision-lab-plus/actions/runs/42748028867) SUCCESS.
+- Plus CI [42748028579](https://github.com/c2melendez/precision-lab-plus/actions/runs/42748028579) y Cumulative [42748028770](https://github.com/c2melendez/precision-lab-plus/actions/runs/42748028770) tenían frontend SUCCESS y backend IN_PROGRESS al corte. Logs backend aún no disponibles; no declarar PASS/FAIL focal hasta que terminen.
+
+## Estado bilateral
+
+- Lite SHA técnico final `3ad626602b3639310921ba6fd27952293732be39`: CI [42748347965](https://github.com/c2melendez/precision-lab-lite/actions/runs/42748347965) SUCCESS (EC-D-07 2/2; 400 archivos, 2,410 passed, 8 expected fail, 34 TODO); Cumulative [42748348152](https://github.com/c2melendez/precision-lab-lite/actions/runs/42748348152) SUCCESS (focal 2/2, skip=false/no REUSE, mismos conteos); H1d [42748347964](https://github.com/c2melendez/precision-lab-lite/actions/runs/42748347964) SUCCESS. Scientific UI [42748348035](https://github.com/c2melendez/precision-lab-lite/actions/runs/42748348035) seguía IN_PROGRESS.
+- Lite requirió helper acotado porque el parser convierte `csc(x)` en `1/sin(x)` y el solver genérico no encontraba soluciones. El helper reconoce solo `1/sin(x)=2`, reutiliza el solver directo de `sin(x)=1/2` y verifica en la ecuación recíproca original.
+- No emitir PASS_SCOPED bilateral ni acta hasta verificar Plus CI/Cumulative y completar el E2E complementario Lite.
+
+**Siguiente:** revisar los logs backend Plus para los dos tests EC-D-07 explícitos y el conteo total; comprobar Scientific UI Lite. Si Plus pasa por la ruta general, no añadir código de producto innecesario. No repetir Lite CI/Cumulative/H1d ni Plus H1d/Runner.
+
+---
+
 # Actualización de certificación — 2026-11-10 UTC (r484; EC-D-06 PASS_SCOPED)
 
 ## Trigonometría TRIG-EC-D-06 — PASS_SCOPED bilateral
