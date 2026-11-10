@@ -1,3 +1,19 @@
+## 2026-11-10 UTC — TRIG-EC-D-04 PASS_SCOPED bilateral
+
+- Contrato congelado: \(2\sin^{2}x-\sin x-1=0,\ x\in[0,2\pi)\) → \(\{\pi/2,7\pi/6,11\pi/6\}\). Fuente blob 3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb.
+- Test backend/tests/test_trigonometry_ec_d04.py: test_ec_d04_source_row_and_exact_oracle_are_frozen y test_ec_d04_http_solve_returns_exact_three_roots_in_half_open_interval PASSED explícitamente en Cumulative 42730138929.
+- Plus SHA 633ec35dc8de728c657cd00907328a2ff6f5c2eb. Cumulative SUCCESS: backend 2,929 passed, 1 skipped, 11 xfailed; guard skip=false, evidence_run_id vacío; frontend 1,055 passed, typecheck/build SUCCESS.
+- CI 42730138619 SUCCESS: backend 2,929 passed, 1 skipped, 11 xfailed; frontend 150 archivos, 1,055 passed, 28 TODO; typecheck/audit/build SUCCESS.
+- H1d 42730138616 SUCCESS (38/38, skip=false); Native Syntax and Recovery 42730138595 SUCCESS (52/52, skip=false, evidence_run_id vacío); Runner 42730138951 SUCCESS push-only.
+- Implementación: sustitución u=sin(x), resolución cuadrática, normalización de ambas ramas a [0,2π), deduplicación y sustitución en la ecuación original.
+- Entrada del endpoint POST /api/v1/solve en ASCII; no se certifica ingesta literal LaTeX ni Plus /api/v1/evaluate.
+- Acta qa/certification/TRIG_EC_D_04_ACCEPTANCE_2026-11-10.md. Resultado PASS_SCOPED; global OPEN.
+- Certification dependency/security gates 42730139009 permanece IN_PROGRESS en plus-backend-mutmut, independiente y no bloqueante para este caso.
+
+**Siguiente:** TRIG-EC-D-05; recuperar la fila literal del gzip y fijar el contrato completo antes del test-first bilateral. No inferir ni repetir EC-D-01..04.
+
+---
+
 ## 2026-11-10 UTC — TRIG-EC-D-04: Plus focal PASS; CI backend pendiente
 
 - Fuente congelada (blob \`3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb\`): \(2\sin^{2}x-\sin x-1=0,\ x\in[0,2\pi)\) → \(\{\pi/2,7\pi/6,11\pi/6\}\).
