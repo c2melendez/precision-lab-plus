@@ -120,6 +120,97 @@ def _direct_tangent_periodic_result(
         return None
 
 
+
+def _quadratic_sine_interval_result(
+    eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Solve a numeric quadratic P(sin(x)) on the frozen half-open period [0, 2*pi).
+
+    The substitution u=sin(x) is solved as a real quadratic. Each admissible
+    u root is mapped to both sine branches, normalized into [0, 2*pi), and
+    checked in the original equation. Mixed trig functions and other
+    polynomial degrees remain on the established solver path.
+    """
+    if angle_unit != "rad":
+        return None
+    try:
+        difference = sympy.expand(eq.lhs - eq.rhs)
+        if difference.atoms(sympy.sin) != {sympy.sin(var)}:
+            return None
+        parameter = sympy.Symbol("_sine_parameter", real=True)
+        reduced = sympy.expand(difference.subs(sympy.sin(var), parameter))
+        if var in reduced.free_symbols:
+            return None
+        if reduced.has(sympy.sin, sympy.cos, sympy.tan, sympy.sec, sympy.csc, sympy.cot):
+            return None
+
+        polynomial = sympy.Poly(reduced, parameter)
+        if polynomial.degree() != 2:
+            return None
+        if not all(coefficient.is_number and coefficient.is_real is True
+                   for coefficient in polynomial.all_coeffs()):
+            return None
+
+        parameter_roots = sympy.solve(polynomial.as_expr(), parameter)
+        if not parameter_roots or len(parameter_roots) > 2:
+            return None
+
+        candidates: List[sympy.Expr] = []
+        for parameter_root in parameter_roots:
+            parameter_root = sympy.simplify(parameter_root)
+            if parameter_root.is_real is not True:
+                continue
+            below = sympy.simplify(parameter_root + 1)
+            above = sympy.simplify(1 - parameter_root)
+            if below.is_negative is True or above.is_negative is True:
+                continue
+
+            principal = sympy.simplify(sympy.asin(parameter_root))
+            first = sympy.simplify(principal + 2 * sympy.pi) if principal.is_negative is True else principal
+            second = sympy.simplify(sympy.pi - principal)
+            for candidate in (first, second):
+                if candidate.is_real is not True:
+                    continue
+                if sympy.simplify(candidate).is_nonnegative is not True:
+                    continue
+                if sympy.simplify(2 * sympy.pi - candidate).is_positive is not True:
+                    continue
+                if not any(sympy.simplify(candidate - existing) == 0 for existing in candidates):
+                    candidates.append(sympy.simplify(candidate))
+
+        solutions = sorted(candidates, key=lambda value: float(value.evalf()))
+        if not solutions:
+            return SolveResult(eq, var, ResultType.CONTRADICTION, [], [], True, warnings)
+        if not all(sympy.simplify(difference.subs(var, root)) == 0 for root in solutions):
+            return None
+
+        latex_roots = r",\quad ".join(
+            sympy.latex(sympy.Eq(var, root)) for root in solutions
+        )
+        step = Step(
+            index=0,
+            title="Reducción cuadrática con u = sin(x)",
+            description=(
+                "Se resuelve el polinomio cuadrático en u=sin(x), se generan ambas ramas reales "
+                "del seno y se conservan las raíces distintas dentro de [0, 2π), verificadas "
+                "en la ecuación original."
+            ),
+            rule="QuadraticSineSubstitution",
+            latex_before=sympy.latex(eq),
+            latex_after=latex_roots,
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(root) for root in solutions],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
 def _absolute_value_equidistance_steps(
     eq: sympy.Eq, var: sympy.Symbol
 ) -> Optional[Tuple[List[Step], List[sympy.Expr]]]:
@@ -794,6 +885,10 @@ def solve_equation(
     tangent_family_result = _direct_tangent_periodic_result(eq, var, angle_unit, warnings)
     if tangent_family_result is not None:
         return tangent_family_result
+
+    quadratic_sine_result = _quadratic_sine_interval_result(eq, var, angle_unit, warnings)
+    if quadratic_sine_result is not None:
+        return quadratic_sine_result
 
     steps_and_solutions = _absolute_value_equidistance_steps(eq, var)
     if steps_and_solutions is None:
