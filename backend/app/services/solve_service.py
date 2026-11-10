@@ -122,6 +122,79 @@ def _direct_tangent_periodic_result(
 
 
 
+def _secant_minus_two_interval_result(
+    eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Solve only the frozen EC-D-08 equation sec(x)=-2 on [0, 2*pi).
+
+    SymPy's generic solve path may return -2*pi/3, which is coterminal with
+    4*pi/3 but outside the frozen half-open interval. Resolve the equivalent
+    cosine equation directly over [0, 2*pi), then verify candidates in the
+    original secant equation. No other secant form is intercepted.
+    """
+    if angle_unit != "rad":
+        return None
+    try:
+        difference = sympy.simplify(eq.lhs - eq.rhs)
+        expected = sympy.sec(var) + 2
+        if sympy.simplify(difference - expected) != 0 and sympy.simplify(difference + expected) != 0:
+            return None
+
+        interval = sympy.Interval(0, 2 * sympy.pi, right_open=True)
+        cosine_roots = sympy.solveset(
+            sympy.cos(var) + sympy.Rational(1, 2),
+            var,
+            domain=interval,
+        )
+        if not isinstance(cosine_roots, sympy.FiniteSet):
+            return None
+
+        solutions = sorted(
+            {
+                sympy.simplify(root)
+                for root in cosine_roots
+                if root.is_real is True
+                and sympy.simplify(root).is_nonnegative is True
+                and sympy.simplify(2 * sympy.pi - root).is_positive is True
+            },
+            key=lambda root: float(root.evalf()),
+        )
+        if len(solutions) != 2:
+            return None
+        if not all(sympy.simplify(difference.subs(var, root)) == 0 for root in solutions):
+            return None
+
+        latex_roots = (
+            r"\left\{"
+            + r",\ ".join(sympy.latex(root) for root in solutions)
+            + r"\right\}"
+        )
+        step = Step(
+            index=0,
+            title="Reducción de secante a coseno",
+            description=(
+                "Se usa sec(x)=1/cos(x), de modo que cos(x)=-1/2. "
+                "Se resuelve el coseno directamente en [0, 2π), se expresa "
+                "la segunda rama como 4π/3 (no como -2π/3) y se verifican "
+                "ambas raíces en la ecuación secante original."
+            ),
+            rule="SecantReciprocalIdentity",
+            latex_before=sympy.latex(eq),
+            latex_after=latex_roots,
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(root) for root in solutions],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def _double_angle_sine_equals_cosine_interval_result(
     eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
 ) -> Optional[SolveResult]:
@@ -958,6 +1031,10 @@ def solve_equation(
     tangent_family_result = _direct_tangent_periodic_result(eq, var, angle_unit, warnings)
     if tangent_family_result is not None:
         return tangent_family_result
+
+    secant_result = _secant_minus_two_interval_result(eq, var, angle_unit, warnings)
+    if secant_result is not None:
+        return secant_result
 
     double_angle_result = _double_angle_sine_equals_cosine_interval_result(eq, var, angle_unit, warnings)
     if double_angle_result is not None:
