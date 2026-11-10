@@ -121,6 +121,79 @@ def _direct_tangent_periodic_result(
 
 
 
+
+def _double_angle_sine_equals_cosine_interval_result(
+    eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Solve only the frozen EC-D-06 equation sin(2*x)=cos(x) on [0, 2*pi).
+
+    The double-angle identity gives cos(x)*(2*sin(x)-1)=0. Each factor is
+    solved over the half-open interval, the finite union is deduplicated,
+    and every candidate is verified against the original equation. This is
+    intentionally not a general mixed-trigonometric solver.
+    """
+    if angle_unit != "rad":
+        return None
+    try:
+        difference = sympy.simplify(eq.lhs - eq.rhs)
+        expected = sympy.sin(2 * var) - sympy.cos(var)
+        if sympy.simplify(difference - expected) != 0 and sympy.simplify(difference + expected) != 0:
+            return None
+
+        factorized = sympy.trigsimp(sympy.expand_trig(difference))
+        expected_factor = sympy.cos(var) * (2 * sympy.sin(var) - 1)
+        if (
+            sympy.simplify(factorized - expected_factor) != 0
+            and sympy.simplify(factorized + expected_factor) != 0
+        ):
+            return None
+
+        interval = sympy.Interval(0, 2 * sympy.pi, right_open=True)
+        cosine_roots = sympy.solveset(sympy.cos(var), var, domain=interval)
+        sine_roots = sympy.solveset(2 * sympy.sin(var) - 1, var, domain=interval)
+        if not isinstance(cosine_roots, sympy.FiniteSet) or not isinstance(sine_roots, sympy.FiniteSet):
+            return None
+
+        solutions = sorted(
+            {
+                sympy.simplify(root)
+                for root in cosine_roots.union(sine_roots)
+                if root.is_real is True
+                and sympy.simplify(root).is_nonnegative is True
+                and sympy.simplify(2 * sympy.pi - root).is_positive is True
+            },
+            key=lambda root: float(root.evalf()),
+        )
+        if len(solutions) != 4:
+            return None
+        if not all(sympy.simplify(difference.subs(var, root)) == 0 for root in solutions):
+            return None
+
+        latex_roots = r"\\left\\{" + r",\\ ".join(sympy.latex(root) for root in solutions) + r"\\right\\}"
+        step = Step(
+            index=0,
+            title="Factorización mediante ángulo doble",
+            description=(
+                "Se aplica sin(2x)=2sin(x)cos(x), obteniendo "
+                "cos(x)(2sin(x)-1)=0. Se resuelven ambos factores dentro "
+                "de [0, 2π) y se verifican las cuatro raíces en la ecuación original."
+            ),
+            rule="DoubleAngleFactorization",
+            latex_before=sympy.latex(eq),
+            latex_after=latex_roots,
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(root) for root in solutions],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
 def _quadratic_sine_interval_result(
     eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
 ) -> Optional[SolveResult]:
@@ -885,6 +958,10 @@ def solve_equation(
     tangent_family_result = _direct_tangent_periodic_result(eq, var, angle_unit, warnings)
     if tangent_family_result is not None:
         return tangent_family_result
+
+    double_angle_result = _double_angle_sine_equals_cosine_interval_result(eq, var, angle_unit, warnings)
+    if double_angle_result is not None:
+        return double_angle_result
 
     quadratic_sine_result = _quadratic_sine_interval_result(eq, var, angle_unit, warnings)
     if quadratic_sine_result is not None:
