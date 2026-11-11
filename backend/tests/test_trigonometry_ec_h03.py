@@ -18,8 +18,11 @@ def test_ec_h03_source_row_and_exact_logarithmic_root_are_frozen():
     source = gzip.decompress(SOURCE_GZ.read_bytes()).decode("utf-8")
     row = next((line for line in source.splitlines() if "| EC-H-03 |" in line), "")
     assert row
-    assert r"\sinh x=1" in row
-    assert r"x=\ln\left(1+\sqrt{2}\right)" in row
+    cells = [cell.strip() for cell in row.split("|") if cell.strip()]
+    assert len(cells) == 3, cells
+    assert cells[0] == "EC-H-03", cells
+    assert r"\sinh x=1" in cells[1]
+    assert r"x=\ln\left(1+\sqrt{2}\right)" in cells[2]
 
 
 def test_ec_h03_http_solve_returns_exactly_one_real_logarithmic_root():
