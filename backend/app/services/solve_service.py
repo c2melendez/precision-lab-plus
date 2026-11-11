@@ -1074,6 +1074,74 @@ def _rational_domain_result(
     )
 
 
+def _inverse_sine_out_of_range_contradiction(
+    eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Reject real asin(x)=c equations when c is outside the principal range.
+
+    The inverse sine returns real values only in [-pi/2, pi/2]. This scoped
+    recognizer accepts a linear equation containing exactly asin(var), checks
+    the real constant independently, and classifies out-of-range targets as
+    an empty real solution set. Other functions, variables/domains and
+    nonlinear forms stay on the established solver path.
+    """
+    if angle_unit != "rad" or var.name != "x":
+        return None
+    try:
+        difference = sympy.simplify(eq.lhs - eq.rhs)
+        inverse_sine = sympy.asin(var)
+        if difference.atoms(sympy.asin) != {inverse_sine}:
+            return None
+
+        parameter = sympy.Symbol("_inverse_sine_range_parameter", real=True)
+        reduced = sympy.expand(difference.xreplace({inverse_sine: parameter}))
+        if reduced.free_symbols != {parameter}:
+            return None
+        polynomial = sympy.Poly(reduced, parameter)
+        if polynomial.degree() != 1:
+            return None
+
+        slope, intercept = polynomial.all_coeffs()
+        if slope == 0 or not all(
+            value.is_number and value.is_real is True
+            for value in (slope, intercept)
+        ):
+            return None
+        constant = sympy.simplify(-intercept / slope)
+        if constant.is_number is not True or constant.is_real is not True:
+            return None
+
+        above_range = sympy.simplify(constant - sympy.pi / 2)
+        below_range = sympy.simplify(constant + sympy.pi / 2)
+        if above_range.is_positive is not True and below_range.is_negative is not True:
+            return None
+
+        step = Step(
+            index=0,
+            title="Arcoseno fuera del rango real",
+            description=(
+                "La rama principal real de arcsin solo toma valores en "
+                "[-π/2, π/2]. El objetivo "
+                f"{sympy.sstr(constant)} está fuera de ese intervalo, por lo que "
+                "la ecuación no tiene solución real."
+            ),
+            rule="InverseSineRangeContradiction",
+            latex_before=sympy.latex(eq),
+            latex_after=r"\varnothing",
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.CONTRADICTION,
+            [],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def _inverse_sine_equals_cosine_result(
     eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
 ) -> Optional[SolveResult]:
@@ -1335,6 +1403,12 @@ def solve_equation(
     sine_range_result = _sine_out_of_range_contradiction(eq, var, angle_unit, warnings)
     if sine_range_result is not None:
         return sine_range_result
+
+    inverse_sine_range_result = _inverse_sine_out_of_range_contradiction(
+        eq, var, angle_unit, warnings
+    )
+    if inverse_sine_range_result is not None:
+        return inverse_sine_range_result
 
     inverse_sine_cosine_result = _inverse_sine_equals_cosine_result(eq, var, angle_unit, warnings)
     if inverse_sine_cosine_result is not None:
