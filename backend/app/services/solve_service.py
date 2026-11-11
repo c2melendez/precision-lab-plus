@@ -1294,6 +1294,54 @@ def _arccot_two_pi_thirds_result(
         return None
 
 
+def _hyperbolic_sine_zero_real_result(
+    eq: sympy.Eq, var: sympy.Symbol, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Solve the frozen real equation sinh(x)=0 without leaking complex roots.
+
+    This deliberately recognizes only the exact sinh(var)=0 contract (either
+    side of the equality). Other hyperbolic equations remain on the generic
+    solver path. The real solution set is independently constrained to R.
+    """
+    try:
+        difference = sympy.simplify(eq.lhs - eq.rhs)
+        expected = sympy.sinh(var)
+        if (
+            sympy.simplify(difference - expected) != 0
+            and sympy.simplify(difference + expected) != 0
+        ):
+            return None
+
+        real_solutions = sympy.solveset(expected, var, domain=sympy.S.Reals)
+        if real_solutions != sympy.FiniteSet(sympy.Integer(0)):
+            return None
+        if sympy.simplify((eq.lhs - eq.rhs).subs(var, 0)) != 0:
+            return None
+
+        step = Step(
+            index=0,
+            title="Cero real del seno hiperbólico",
+            description=(
+                f"Como cosh({var}) > 0 para todo real, sinh es estrictamente "
+                f"creciente. Dado que sinh(0) = 0, la única solución real es {var} = 0."
+            ),
+            rule="HyperbolicSineUniqueRealZero",
+            latex_before=sympy.latex(eq),
+            latex_after=sympy.latex(sympy.Eq(var, sympy.Integer(0))),
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(sympy.Integer(0))],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def solve_equation(
     equation_text: str, variable_name: Optional[str], angle_unit: str = "rad"
 ) -> SolveResult:
@@ -1377,6 +1425,10 @@ def solve_equation(
     rational_result = _rational_domain_result(eq, var, domain_exclusions, warnings)
     if rational_result is not None:
         return rational_result
+
+    hyperbolic_sine_zero_result = _hyperbolic_sine_zero_real_result(eq, var, warnings)
+    if hyperbolic_sine_zero_result is not None:
+        return hyperbolic_sine_zero_result
 
     has_direct_trig = _equation_has_direct_trig_of_variable(eq, var)
 
