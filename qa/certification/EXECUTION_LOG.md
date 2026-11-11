@@ -1,3 +1,26 @@
+## 2026-11-11 UTC (r498) — TRIG-EC-H-02 PASS_SCOPED bilateral
+
+## Trigonometría TRIG-EC-H-02 - PASS_SCOPED bilateral
+
+- Fila congelada de la sección 2.C Hiperbólicas en el gzip legacy, blob 3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb: \cosh x=1 → x=0. Se conservaron las tres columnas; dominio real.
+- Contexto anterior EC-H-01: Lite 8fadbe2b con Cumulative 43104252007, CI 43104252061, H1d 43104252019 y Scientific UI 43104251968 — SUCCESS; focal 2/2. Plus f1dc6fd1 con Cumulative 43105331605, CI 43105331723, H1d 43105331596 y Native Syntax 43105331569 — SUCCESS; focal 2/2.
+- Plus test-first: commit 786dd65 añadió backend/tests/test_trigonometry_ec_h02.py; no se requirió cambio de producto: la whitelist de SymPy ya reconoce cosh y /api/v1/solve resuelve el caso. Las dos pruebas focales test_ec_h02_source_row_and_exact_real_root_are_frozen y test_ec_h02_http_solve_returns_exactly_one_real_root constan PASSED en el log del acumulativo.
+- Cumulative 43114382495 SUCCESS: 2.963 passed, 1 skipped, 11 xfailed, cobertura 88,47%. CI 43114382416 SUCCESS: backend 2.963 passed (88,47%) y frontend 1.055 passed; Typecheck y build ejecutados. H1d 43114382434 SUCCESS, 38/38. Runner 43114382448 SUCCESS, pero sus pasos de dispatch/persistencia fueron omitidos y no son pruebas.
+- S25 independiente: run 43105331705 terminó CANCELLED. Backend-security pasó; job plus-backend-mutmut 130807295419 recibió «The operation was canceled» durante mutmut. Se subió el artefacto parcial 13896396720 (11.225 bytes), sin mutation score final; la causa externa de la cancelación no está determinada por el log. S25 sigue OPEN y no se reejecuta con los mismos insumos.
+- Alcance: solo cosh(x)=1 con variable real x; no acredita un resolvedor hiperbólico general ni raíces complejas. Los casos posteriores de la sección 2.C siguen pendientes.
+
+## Estado y siguiente acción
+
+- Último caso aceptado: TRIG-EC-H-02 — PASS_SCOPED bilateral; EC-H-01 conserva PASS_SCOPED.
+- Siguiente acción única: TRIG-EC-H-03, \sinh x=1 → x=\ln(1+\sqrt{2}); recuperar directamente la fila del gzip y continuar test-first en ambos motores.
+- Global OPEN. EV-D-01 /api/v1/evaluate BLOCKED; EV-HI PASS_SCOPED; S25, SG28/H2 y DIST-01..08 permanecen abiertos. SG28_EVALUATE_ISOLATION sigue desactivada por defecto.
+- No repetir EC-H-01 ni gates verdes equivalentes; no hacer dispatch manual. SKIP/XFAIL/TODO no son PASS.
+
+
+- Baseline técnico registrado: 786dd65ab281f932f010383f6c60b123de0081af. El commit documental no se incluye en su propio índice.
+
+---
+
 ## 2026-11-11 UTC (r497) — TRIG-EC-I-09 PASS_SCOPED bilateral
 
 - Fila congelada: `\arcsin x=2` → sin solución real; gzip blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`. Los logs de los HEAD previos confirmaron el fallback sin solución algebraica en Lite y la clasificación `EQUATION_SOLUTIONS` incorrecta en Plus.
