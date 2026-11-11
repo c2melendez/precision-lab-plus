@@ -1,56 +1,12 @@
-## 2026-11-11 UTC - TRIG-EC-I-07 PASS_SCOPED bilateral
+## 2026-11-11 UTC (r497) — TRIG-EC-I-09 PASS_SCOPED bilateral
 
-- Contrato congelado: \(\operatorname{arcsec} x=\frac{\pi}{3}\) → \(x=2\) en la rama principal; gzip blob 3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb. Tres columnas; sin nota separada.
-- Lite test-first `5b0e501b`: CI 42962913097 y Cumulative 42962913015 FAILURE por hueco de producto. Corrección `3d74fb49`: `solveArcsecEqualsPiThirdsEquation`; el parser normaliza a `arccos(1/x)` y Algebrite no evalúa `arcsec`, así que la identidad se verifica con `arccos(1/2)=pi/3` y tolerancia de muestras `1e-4`. CI 42963305101 SUCCESS; Cumulative 42963305029 SUCCESS (focal 2/2; 416 archivos, 2,448 passed, 8 expected fail, 34 todo; skip=false/sin REUSE); H1d 42963305042 SUCCESS (22/22); Scientific UI 42963305033 SUCCESS (456/456); Runner 42963305152 SUCCESS push-only.
-- Plus SHA técnico `cb66602a`: sólo prueba `backend/tests/test_trigonometry_ec_i07.py`; sin cambio de producto porque `/api/v1/solve` ya resolvía `asec(x)=pi/3` con raíz exacta `2`. Cumulative 42962916532 SUCCESS (2,955 passed, 1 skipped, 11 xfailed; focal 2/2; skip=false/sin REUSE); CI 42962916200, H1d 42962916326 y Runner 42962916227 SUCCESS; Security 42961178959 (EC-I-06) con validación y seguridad SUCCESS, mutmut en curso al registrar.
-- Alcance: sólo `arcsec(x)=pi/3` en radianes con variable `x` en Lite y `asec(x)=pi/3` vía `/api/v1/solve` en Plus; no es un resolvedor general de arcosecantes inversas ni certifica la ingesta LaTeX de Plus `/api/v1/evaluate`.
-- Resultado: PASS_SCOPED bilateral. Global OPEN; EV-D-01 BLOCKED, EV-HI PASS_SCOPED; S25, SG28, H2 y DIST abiertos.
+- Fila congelada: `\arcsin x=2` → sin solución real; gzip blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`. Los logs de los HEAD previos confirmaron el fallback sin solución algebraica en Lite y la clasificación `EQUATION_SOLUTIONS` incorrecta en Plus.
+- Correcciones: Lite `6be7239fcd827433b9b90395ebc4cc61953056f4` (rango inverso de arcsin y propagación de contradicción); Plus `bce42289992d35b8ebac6d21d505906e69c000f5` (reconocedor SymPy acotado a objetivo real fuera de rango). No se alteraron oráculos, fixtures ni filtros CI.
+- Lite: Cumulative 43099223869, CI 43099223928, H1d 43099223905, Scientific UI 43099223847 y Runner 43099223832 — todos SUCCESS. Focal 2/2; typecheck/build; 2,452 passed, 8 expected fail, 34 TODO; Scientific UI 456/456.
+- Plus: Cumulative 43099243483, CI 43099243741, H1d 43099243513, Native Syntax 43099243422 y Runner 43099243486 — todos SUCCESS. Focal 2/2; backend 2,959 passed, 1 skipped, 11 xfailed; cobertura 88.50%.
+- Seguridad Plus 43099243580: validación, change-scope y backend-security SUCCESS; mutation backend job 130785403853 sigue IN_PROGRESS. S25 no se cierra.
+- Siguiente acción única: TRIG-EC-H-01, `\sinh x=0` → `x=0`, test-first bilateral; recuperar fila exacta de la sección 2.C del gzip.
 
-**Siguiente:** TRIG-EC-I-08 (\(\operatorname{arccsc} x=\frac{\pi}{6}\) → \(x=2\)); recuperar la fila exacta del gzip y escribir primero las pruebas focales. No repetir gates verdes de EC-I-01..07 ni hacer dispatch manual.
-
----
-
-## 2026-11-11 UTC - TRIG-EC-I-06 PASS_SCOPED bilateral
-
-- Contrato congelado: \(\operatorname{arccot} x=\frac{2\pi}{3}\) → \(x=-\frac{\sqrt{3}}{3}\) en la rama principal \((0,\pi)\); gzip blob 3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb. Tres columnas; sin nota separada.
-- Lite test-first `76695ab8`: CI 42960472337 y Cumulative 42960472418 FAILURE por hueco de producto. Corrección `edfc5034`: `solveArccotTwoPiThirdsEquation`; el parser normaliza a `pi/2-arctan(x)` y Algebrite no evalúa `arccot`, así que la identidad se verifica con `pi/2-atan(x)`. CI 42960956690 SUCCESS; Cumulative 42960956673 SUCCESS (focal 2/2, regresión 3/3; 415 archivos, 2,446 passed, 8 expected fail, 34 todo; skip=false/sin REUSE); H1d 42960956871 SUCCESS (22/22); Scientific UI 42960956696 SUCCESS (456/456); Runner 42960956968 SUCCESS push-only.
-- Plus test-first `9a6dedcf`: `result_data` vacío para `acot(x)=2*pi/3`; CI 42960474932 FAILURE. Corrección `28465525`: helper `_arccot_two_pi_thirds_result`; se documenta que `acot` de SymPy usa la rama \((-π/2,\pi/2)\) para negativos y se verifica con \(\pi/2-\arctan(x)\). Cumulative 42961178858 SUCCESS (2,953 passed, 1 skipped, 11 xfailed; focal 2/2; skip=false/sin REUSE); CI 42961178836, H1d 42961178835, Native Syntax 42961178768 y Runner 42961178811 SUCCESS; Security 42961178959 con validación y seguridad SUCCESS, mutmut en curso al registrar.
-- Alcance: sólo `arccot(x)=2*pi/3` en radianes con variable `x`; no es un resolvedor general de arcotangentes inversas ni certifica la ingesta LaTeX de Plus `/api/v1/evaluate`.
-- Resultado: PASS_SCOPED bilateral. Global OPEN; EV-D-01 BLOCKED, EV-HI PASS_SCOPED; S25, SG28, H2 y DIST abiertos.
-
-**Siguiente:** TRIG-EC-I-07 (\(\operatorname{arcsec} x=\frac{\pi}{3}\) → \(x=2\)); recuperar la fila exacta del gzip y escribir primero las pruebas focales. No repetir gates verdes de EC-I-01..06 ni hacer dispatch manual.
-
----
-
-## 2026-11-11 UTC - TRIG-EC-I-05 PASS_SCOPED bilateral
-
-- Contrato congelado: \(\arctan x+\arctan(2x)=\frac{\pi}{4}\) → \(x=\frac{\sqrt{17}-3}{4}\), descartando \(\frac{-3-\sqrt{17}}{4}\); gzip blob 3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb. Tres columnas; sin nota separada.
-- Lite test-first `3e4ec259`: fallo de producto en Cumulative 42952105658. Los intentos `22e7d1fd` y `d60ccad1` siguieron en FAILURE: el helper ya reconocía la ecuación, pero comparaba el `float()` truncado de Algebrite (`0.046478...`) con tolerancia `1e-9`, por debajo del error de truncamiento (~5e-7). El diagnóstico temporal `88d5f438` registró las formas del parser y los valores; se eliminó después.
-- Corrección final Lite `d837434e`: tolerancia de muestras `1e-4` en `solveArctanSumQuarterPiEquation`. CI 42959213697 SUCCESS; Cumulative 42959213535 SUCCESS (focal 2/2, regresión 3/3; 413 archivos, 2,441 passed, 8 expected fail, 34 todo; skip=false/sin REUSE); H1d 42959213530 SUCCESS (22/22); Scientific UI 42959213568 SUCCESS (456/456); Runner 42959213608 SUCCESS push-only.
-- Plus test-first `3782aae6`: CI 42952108168 y Cumulative 42952108029 FAILURE, `success: False`. Corrección `3daa9f2d`: helper `_arctan_sum_quarter_pi_result` antes del camino genérico de SymPy. Cumulative 42953170568 SUCCESS (2951 passed, 1 skipped, 11 xfailed; tests focales 2/2 PASSED; skip=false/sin REUSE); CI 42953170611, H1d 42953170622, Native Syntax 42953170572 y Runner 42953170442 SUCCESS; Security 42953170861 SUCCESS con mutmut.
-- Alcance: sólo `arctan(x)+arctan(2x)=pi/4` en radianes con variable `x`; Lite cubre además la suma invertida y el rechazo de `pi/2`. No es un resolvedor general de sumas de arcotangentes ni certifica la ingesta LaTeX de Plus `/api/v1/evaluate`.
-- Resultado: PASS_SCOPED bilateral. Global OPEN; EV-D-01 BLOCKED, EV-HI PASS_SCOPED; S25, SG28, H2 y DIST abiertos.
-
-**Siguiente:** TRIG-EC-I-06 (\(\operatorname{arccot} x=\frac{2\pi}{3}\) → \(x=-\frac{\sqrt{3}}{3}\)); recuperar la fila exacta del gzip y escribir primero las pruebas focales. No repetir gates verdes de EC-I-01..05 ni hacer dispatch manual.
-
----
-
-## 2026-11-11 UTC - TRIG-EC-I-04 PASS_SCOPED bilateral
-
-- Contrato congelado: \(\arcsin x=\arccos x\) → \(x=\frac{\sqrt{2}}{2}\); gzip blob 3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb. Tres columnas; sin nota separada.
-- Plus test-first `backend/tests/test_trigonometry_ec_i04.py` (commit `92ad6a315`): falló en `/api/v1/solve` con `asin(x)=acos(x)`, `success: False`. CI https://github.com/c2melendez/precision-lab-plus/actions/runs/42946135416 FAILURE. Clasificado como producto.
-- Corrección en `0c269122b` (`backend/app/services/solve_service.py`): helper `_inverse_sine_equals_cosine_result` antes del camino genérico de SymPy. Cumulative https://github.com/c2melendez/precision-lab-plus/actions/runs/42947360512 SUCCESS (2949 passed, EC-I-04 2/2); CI https://github.com/c2melendez/precision-lab-plus/actions/runs/42947360649 SUCCESS; H1d https://github.com/c2melendez/precision-lab-plus/actions/runs/42947360563 SUCCESS.
-- Lite SHA técnico `3b1483a745cff6de4bbbd28c5718765b75b43df6`: el primer intento (`0cd7bc71a`) falló por producto y se corrigió. Cumulative https://github.com/c2melendez/precision-lab-lite/actions/runs/42947355901 SUCCESS (2436 passed).
-- Seguridad Plus: https://github.com/c2melendez/precision-lab-plus/actions/runs/42947360677 con jobs de seguridad SUCCESS; mutación pendiente al registrar.
-- Siguiente acción: TRIG-EC-I-05; recuperar primero la fila exacta de la matriz gzip y luego test-first bilateral.
-
-## 2026-11-11 UTC — TRIG-EC-I-03 PASS_SCOPED bilateral
-
-- Contrato congelado: \(\arctan x=\frac{\pi}{4}\) → \(x=1\); gzip blob 3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb. Tres columnas; sin nota separada.
-- Plus test-first `backend/tests/test_trigonometry_ec_i03.py` (commit `167fa2f05`): PASS sin cambio de producto. Cumulative 42930769666 SUCCESS (2947 passed, EC-I-03 2/2); CI 42930769742 y H1d 42930769513 SUCCESS.
-- Lite SHA técnico `238b1e8d1fb9b8fc1745044ebca8c72db4f4915a`: el primer intento de Lite (`11b0038f2`) falló por producto y se corrigió con `solveInverseTangentEquation`. Cumulative 42931990398 SUCCESS (2431 passed).
-- Alcance: solo `arctan(x)=π/4` en radianes con variable `x`. No es un resolvedor general de arctan.
-- Siguiente acción: TRIG-EC-I-04; recuperar primero la fila exacta de la matriz gzip y luego test-first bilateral.
 
 ## 2026-11-10 UTC — TRIG-EC-I-02 PASS_SCOPED bilateral
 
