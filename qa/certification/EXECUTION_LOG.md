@@ -1,3 +1,12 @@
+## 2026-11-11 UTC — TRIG-EC-I-04 PASS_SCOPED bilateral
+
+- Contrato congelado: \(\arcsin x=\arccos x\) → \(x=\frac{\sqrt{2}}{2}\); gzip blob 3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb. Tres columnas; sin nota separada.
+- Plus test-first `backend/tests/test_trigonometry_ec_i04.py` (commit `92ad6a315`): falló en `/api/v1/solve` con `asin(x)=acos(x)`, `success: False`. CI https://github.com/c2melendez/precision-lab-plus/actions/runs/42946135416 FAILURE. Clasificado como producto.
+- Corrección en `0c269122b` (`backend/app/services/solve_service.py`): helper `_inverse_sine_equals_cosine_result` antes del camino genérico de SymPy. Cumulative https://github.com/c2melendez/precision-lab-plus/actions/runs/42947360512 SUCCESS (2949 passed, EC-I-04 2/2); CI https://github.com/c2melendez/precision-lab-plus/actions/runs/42947360649 SUCCESS; H1d https://github.com/c2melendez/precision-lab-plus/actions/runs/42947360563 SUCCESS.
+- Lite SHA técnico `3b1483a745cff6de4bbbd28c5718765b75b43df6`: el primer intento (`0cd7bc71a`) falló por producto y se corrigió. Cumulative https://github.com/c2melendez/precision-lab-lite/actions/runs/42947355901 SUCCESS (2436 passed).
+- Seguridad Plus: https://github.com/c2melendez/precision-lab-plus/actions/runs/42947360677 con jobs de seguridad SUCCESS; mutación pendiente al registrar.
+- Siguiente acción: TRIG-EC-I-05; recuperar primero la fila exacta de la matriz gzip y luego test-first bilateral.
+
 ## 2026-11-11 UTC — TRIG-EC-I-03 PASS_SCOPED bilateral
 
 - Contrato congelado: \(\arctan x=\frac{\pi}{4}\) → \(x=1\); gzip blob 3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb. Tres columnas; sin nota separada.
