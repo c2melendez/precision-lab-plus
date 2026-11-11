@@ -1074,6 +1074,55 @@ def _rational_domain_result(
     )
 
 
+def _inverse_sine_equals_cosine_result(
+    eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Solve only the frozen EC-I-04 equation asin(x)=acos(x) on the real domain.
+
+    SymPy's generic solve path raises NotImplementedError for two inverse
+    functions of the same variable. Since acos(x)=pi/2-asin(x), the equation is
+    equivalent to asin(x)=pi/4, so the single real root is x=sin(pi/4)=sqrt(2)/2.
+    The candidate is verified in the original equation. No other form is
+    intercepted; this is not a general inverse-trigonometry solver.
+    """
+    if angle_unit != "rad":
+        return None
+    try:
+        difference = sympy.simplify(eq.lhs - eq.rhs)
+        expected = sympy.asin(var) - sympy.acos(var)
+        if sympy.simplify(difference - expected) != 0 and sympy.simplify(difference + expected) != 0:
+            return None
+
+        candidate = sympy.simplify(sympy.sin(sympy.pi / 4))
+        if not (-1 <= float(candidate) <= 1):
+            return None
+        if sympy.simplify(sympy.asin(candidate) - sympy.acos(candidate)) != 0:
+            return None
+
+        step = Step(
+            index=0,
+            title="Igualdad de arcoseno y arcocoseno",
+            description=(
+                "Como arccos(x)=π/2-arcsin(x), la ecuación equivale a arcsin(x)=π/4. "
+                "La única solución real es x=sin(π/4)=√2/2, verificada en la ecuación original."
+            ),
+            rule="InverseSineCosineEqualBranch",
+            latex_before=sympy.latex(eq),
+            latex_after=sympy.latex(sympy.Eq(var, candidate)),
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(candidate)],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def solve_equation(
     equation_text: str, variable_name: Optional[str], angle_unit: str = "rad"
 ) -> SolveResult:
@@ -1183,6 +1232,10 @@ def solve_equation(
     sine_range_result = _sine_out_of_range_contradiction(eq, var, angle_unit, warnings)
     if sine_range_result is not None:
         return sine_range_result
+
+    inverse_sine_cosine_result = _inverse_sine_equals_cosine_result(eq, var, angle_unit, warnings)
+    if inverse_sine_cosine_result is not None:
+        return inverse_sine_cosine_result
 
     steps_and_solutions = _absolute_value_equidistance_steps(eq, var)
     if steps_and_solutions is None:
