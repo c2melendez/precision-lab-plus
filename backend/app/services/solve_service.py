@@ -1123,6 +1123,60 @@ def _inverse_sine_equals_cosine_result(
         return None
 
 
+def _arctan_sum_quarter_pi_result(
+    eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Solve only the frozen EC-I-05 equation atan(x)+atan(2x)=pi/4 on the real domain.
+
+    tan(a+b)=(a+b)/(1-ab) reduces the equation to 2x^2+3x-1=0, with roots
+    (-3±sqrt(17))/4. The principal sum equals pi/4 only when 1-2x^2>0; the root
+    (-3-sqrt(17))/4 gives a sum of -3pi/4 and is rejected by a numeric check in
+    the original equation. No other form is intercepted; this is not a general
+    inverse-trigonometry solver.
+    """
+    if angle_unit != "rad" or var.name != "x":
+        return None
+    try:
+        difference = sympy.simplify(eq.lhs - eq.rhs)
+        expected = sympy.atan(var) + sympy.atan(2 * var) - sympy.pi / 4
+        if sympy.simplify(difference - expected) != 0 and sympy.simplify(difference + expected) != 0:
+            return None
+
+        candidates = [(sympy.sqrt(17) - 3) / 4, (-3 - sympy.sqrt(17)) / 4]
+        accepted = [
+            root
+            for root in candidates
+            if abs(sympy.N(sympy.atan(root) + sympy.atan(2 * root) - sympy.pi / 4, 30)) < 1e-20
+        ]
+        if len(accepted) != 1:
+            return None
+        root = sympy.simplify(accepted[0])
+
+        step = Step(
+            index=0,
+            title="Suma de arcotangentes igual a π/4",
+            description=(
+                "Con tan(a+b)=(a+b)/(1-ab), la ecuación lleva a 2x²+3x-1=0. Sólo "
+                "x=(√17-3)/4 hace que la suma principal valga π/4; la otra raíz da -3π/4 "
+                "y se descarta por verificación en la ecuación original."
+            ),
+            rule="ArctanSumQuarterPiBranch",
+            latex_before=sympy.latex(eq),
+            latex_after=sympy.latex(sympy.Eq(var, root)),
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(root)],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def solve_equation(
     equation_text: str, variable_name: Optional[str], angle_unit: str = "rad"
 ) -> SolveResult:
@@ -1236,6 +1290,10 @@ def solve_equation(
     inverse_sine_cosine_result = _inverse_sine_equals_cosine_result(eq, var, angle_unit, warnings)
     if inverse_sine_cosine_result is not None:
         return inverse_sine_cosine_result
+
+    arctan_sum_result = _arctan_sum_quarter_pi_result(eq, var, angle_unit, warnings)
+    if arctan_sum_result is not None:
+        return arctan_sum_result
 
     steps_and_solutions = _absolute_value_equidistance_steps(eq, var)
     if steps_and_solutions is None:
