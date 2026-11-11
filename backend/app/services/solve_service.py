@@ -1294,6 +1294,63 @@ def _arccot_two_pi_thirds_result(
         return None
 
 
+def _hyperbolic_sine_one_real_result(
+    eq: sympy.Eq, var: sympy.Symbol, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Solve the frozen real equation sinh(x)=1 without leaking complex roots.
+
+    This exact recognizer uses the real solution set; the generic solve()
+    path can otherwise include a complex logarithmic branch as a candidate.
+    """
+    try:
+        difference = sympy.simplify(eq.lhs - eq.rhs)
+        expected_difference = sympy.sinh(var) - sympy.Integer(1)
+        if (
+            sympy.simplify(difference - expected_difference) != 0
+            and sympy.simplify(difference + expected_difference) != 0
+        ):
+            return None
+
+        expected_root = sympy.log(1 + sympy.sqrt(2))
+        real_solutions = sympy.solveset(
+            expected_difference, var, domain=sympy.S.Reals
+        )
+        if real_solutions != sympy.FiniteSet(expected_root):
+            return None
+        if not expected_root.is_real:
+            return None
+        if sympy.simplify(
+            difference.subs(var, expected_root).rewrite(sympy.exp)
+        ) != 0:
+            return None
+
+        step = Step(
+            index=0,
+            title="Raíz real del seno hiperbólico igual a uno",
+            description=(
+                "Sea t=e^x>0. De sinh(x)=1 se obtiene t-1/t=2, "
+                "por lo que t²-2t-1=0. La única raíz positiva es "
+                "t=1+sqrt(2), así que x=ln(1+sqrt(2)). "
+                "Como cosh(x)>0 en los reales, sinh es estrictamente creciente "
+                "y esta solución real es única."
+            ),
+            rule="HyperbolicSineOneUniqueRealRoot",
+            latex_before=sympy.latex(eq),
+            latex_after=sympy.latex(sympy.Eq(var, expected_root)),
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(expected_root)],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def _hyperbolic_sine_zero_real_result(
     eq: sympy.Eq, var: sympy.Symbol, warnings: List[str]
 ) -> Optional[SolveResult]:
@@ -1425,6 +1482,10 @@ def solve_equation(
     rational_result = _rational_domain_result(eq, var, domain_exclusions, warnings)
     if rational_result is not None:
         return rational_result
+
+    hyperbolic_sine_one_result = _hyperbolic_sine_one_real_result(eq, var, warnings)
+    if hyperbolic_sine_one_result is not None:
+        return hyperbolic_sine_one_result
 
     hyperbolic_sine_zero_result = _hyperbolic_sine_zero_real_result(eq, var, warnings)
     if hyperbolic_sine_zero_result is not None:

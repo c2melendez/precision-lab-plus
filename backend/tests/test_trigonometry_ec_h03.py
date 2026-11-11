@@ -39,4 +39,4 @@ def test_ec_h03_http_solve_returns_exactly_one_real_logarithmic_root():
     assert len(actual) == 1, body
     assert sp.simplify(actual[0] - expected) == 0
     assert actual[0].is_real is True
-    assert sp.simplify(sp.sinh(actual[0]) - 1) == 0
+    assert sp.simplify(sp.sinh(actual[0]).rewrite(sp.exp) - 1) == 0
