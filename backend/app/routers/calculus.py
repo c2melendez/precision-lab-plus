@@ -115,12 +115,19 @@ async def integral(payload: IntegralRequest, request: Request) -> MathResponse:
     except integral_service.UnsupportedInfiniteBoundsError as exc:
         return _error(request, OperationType.INTEGRAL, ErrorCode.UNSUPPORTED_IN_PHASE_1, str(exc))
 
-    warnings = list(result.warnings)
+    # Non-elementary integrals: SymPy leaves an unevaluated Integral.
+    # Map to UNSUPPORTED_OPERATION so E2E (SY-X-12) and the public contract
+    # receive success=false instead of a success response containing ∫.
+    display_expr = result.definite_value if result.is_definite else result.antiderivative
+    if display_expr is not None and display_expr.has(sympy.Integral):
+        return _error(
+            request,
+            OperationType.INTEGRAL,
+            ErrorCode.UNSUPPORTED_OPERATION,
+            "Sin forma elemental: la integral no tiene antiderivada elemental.",
+        )
 
-    if result.is_definite:
-        display_expr = result.definite_value
-    else:
-        display_expr = result.antiderivative
+    warnings = list(result.warnings)
 
     result_latex = _safe_latex(display_expr)
     if result_latex is None:
