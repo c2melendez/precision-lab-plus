@@ -35,5 +35,8 @@ def test_ec_i06_http_solve_returns_exactly_one_root_on_the_principal_branch():
     actual = [sp.simplify(sp.sympify(item["text"])) for item in body["result_data"]]
     assert len(actual) == 1
     assert sp.simplify(actual[0] - (-sp.sqrt(3) / 3)) == 0
-    residual = sp.N(sp.acot(actual[0]) - 2 * sp.pi / 3, 30)
+    # SymPy's acot uses the (-pi/2, pi/2) branch for negative arguments; the
+    # frozen matrix uses the conventional principal arccot in (0, pi), so the
+    # residual is checked with arccot(x)=pi/2-atan(x).
+    residual = sp.N(sp.pi / 2 - sp.atan(actual[0]) - 2 * sp.pi / 3, 30)
     assert abs(residual) < 1e-12

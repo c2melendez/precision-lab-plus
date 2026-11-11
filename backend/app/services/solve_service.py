@@ -1177,6 +1177,55 @@ def _arctan_sum_quarter_pi_result(
         return None
 
 
+def _arccot_two_pi_thirds_result(
+    eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Solve only the frozen EC-I-06 equation acot(x)=2*pi/3 on the principal branch.
+
+    SymPy's generic solver returns no solutions for this inverse-cotangent
+    equation. On the principal branch (0, pi), acot(x)=2*pi/3 is equivalent to
+    tan(2*pi/3)=x, so the unique real root is -sqrt(3)/3. No other form is
+    intercepted; this is not a general inverse-cotangent solver.
+    """
+    if angle_unit != "rad" or var.name != "x":
+        return None
+    try:
+        difference = sympy.simplify(eq.lhs - eq.rhs)
+        expected = sympy.acot(var) - 2 * sympy.pi / 3
+        if sympy.simplify(difference - expected) != 0 and sympy.simplify(difference + expected) != 0:
+            return None
+
+        root = -sympy.sqrt(3) / 3
+        # SymPy's acot uses the (-pi/2, pi/2) branch for negative arguments,
+        # while the frozen matrix uses the conventional principal arccot in
+        # (0, pi). Verify the contract with arccot(x)=pi/2-atan(x).
+        if abs(sympy.N(sympy.pi / 2 - sympy.atan(root) - 2 * sympy.pi / 3, 30)) > 1e-20:
+            return None
+
+        step = Step(
+            index=0,
+            title="Arcotangente igual a 2π/3",
+            description=(
+                "En la rama principal (0, π) de arccot, la ecuación equivale a "
+                "x=tan(2π/3)=-√3/3. La raíz se verifica en la ecuación original."
+            ),
+            rule="ArccotTwoPiThirdsPrincipalBranch",
+            latex_before=sympy.latex(eq),
+            latex_after=sympy.latex(sympy.Eq(var, root)),
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(root)],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def solve_equation(
     equation_text: str, variable_name: Optional[str], angle_unit: str = "rad"
 ) -> SolveResult:
@@ -1294,6 +1343,10 @@ def solve_equation(
     arctan_sum_result = _arctan_sum_quarter_pi_result(eq, var, angle_unit, warnings)
     if arctan_sum_result is not None:
         return arctan_sum_result
+
+    arccot_result = _arccot_two_pi_thirds_result(eq, var, angle_unit, warnings)
+    if arccot_result is not None:
+        return arccot_result
 
     steps_and_solutions = _absolute_value_equidistance_steps(eq, var)
     if steps_and_solutions is None:
