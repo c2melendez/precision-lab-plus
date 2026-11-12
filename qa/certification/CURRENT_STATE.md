@@ -2,34 +2,47 @@
 
 ## Trigonometría hiperbólica — EC-H-03 y EC-H-04 PASS_SCOPED bilateral
 
-Se reconciliaron los índices r498 con los árboles completos y la evidencia real de Actions. El SHA técnico Plus actual es `ba20c5c6382ed91f730cb3f86324b98a14be5099`; el baseline anterior quedó superado.
+Se reconciliaron los índices r498 con árboles completos y evidencia de Actions. HEAD técnico Lite: \`d74ee60d6add511353397d58a0de6f06e211e0a3\`; HEAD técnico Plus: \`ba20c5c6382ed91f730cb3f86324b98a14be5099\`. Estos son SHA de producto, no los commits documentales r499.
 
 ### EC-H-03 — PASS_SCOPED bilateral
 
-Fila exacta de `legacy_sources/ejercicios_trigonometria.md.gz` (blob `3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb`), sección 2.C, tres columnas: `\sinh x=1` → `x=\ln\left(1+\sqrt{2}\right)`.
+Fila congelada de \`qa/certification/legacy_sources/ejercicios_trigonometria.md.gz\`, blob \`3a41b0c2e0d79f2eef48e4684dc1324689d0a0fb\`, sección 2.C, tres columnas: \`sinh x=1\` → \`x=ln(1+sqrt(2))\`.
 
-En Plus, `_hyperbolic_sine_one_real_result` en `backend/app/services/solve_service.py` limita la búsqueda a `solveset(..., domain=S.Reals)`, exige exactamente `log(1+sqrt(2))), comprueba realidad y sustitución, y devuelve una solución mediante `/api/v1/solve`. La prueba `backend/tests/test_trigonometry_ec_h03.py` valida la fila congelada y el contrato HTTP; ambos tests PASSED. Corrección de producto en commit `7906e9649f7f035a7344bb7ec8e374264c92c864`.
+- Lite: \`hyperbolicSineOneStep\` acotado en \`src/engine/stepEngine/algebra.ts\`; \`tests/trigonometryEcH03.audit.test.ts\` 2/2 (fila congelada, raíz exacta y sustitución con oráculo numérico independiente). Commit de producto \`834aca7a7dd6831a024b83b7b00bcf90a07b36cb\`.
+- Plus: \`_hyperbolic_sine_one_real_result\` en \`backend/app/services/solve_service.py\` limita con \`solveset\` sobre los reales, exige la única raíz \`log(1+sqrt(2))\) y comprueba sustitución. \`backend/tests/test_trigonometry_ec_h03.py\` 2/2, incluida la ruta POST \`/api/v1/solve\`. Commit correctivo \`7906e9649f7f035a7344bb7ec8e374264c92c864\`.
 
 ### EC-H-04 — PASS_SCOPED bilateral
 
-Fila exacta de la misma matriz, tres columnas: `\cosh x=2` → `x=\pm\ln\left(2+\sqrt{3}\right)`.
+Fila congelada de la misma matriz, tres columnas: \`cosh x=2\` → \`x=±ln(2+sqrt(3))\`.
 
-Plus no requirió cambio de producto: la ruta SymPy existente resuelve ambas raíces. `backend/tests/test_trigonometry_ec_h04.py` ancla las tres celdas y exige por POST `/api/v1/solve` exactamente dos raíces reales opuestas y sustitución exacta en ambas; los dos tests PASSED.
+- Lite: \`hyperbolicCosineTwoStep\` estrictamente acotado a la igualdad y su reversa; \`tests/trigonometryEcH04.audit.test.ts\` 2/2, dos raíces exactas, simetría y sustitución en ambas. Commit técnico \`d74ee60d6add511353397d58a0de6f06e211e0a3\`.
+- Plus: sin cambio de producto; SymPy ya resolvía el caso. \`backend/tests/test_trigonometry_ec_h04.py\` 2/2, dos raíces reales opuestas y sustitución exacta en ambas.
 
-### Evidencia por SHA, jobs y pasos
+### Evidencia ejecutada, sin REUSE
 
-- Cumulative [43123843906](https://github.com/c2melendez/precision-lab-plus/actions/runs/43123843906) SUCCESS en HEAD `ba20c5c6382ed91f730cb3f86324b98a14be5099`: backend y frontend SUCCESS; guard backend `skip=false`, `evidence_run_id=""`; H-03 fuente+HTTP 2/2 y H-04 fuente+HTTP 2/2 aparecen expresamente PASSED. Backend 2.967 passed, 1 skipped, 11 xfailed y 1 warning.
-- CI [43123843827](https://github.com/c2melendez/precision-lab-plus/actions/runs/43123843827) SUCCESS en el mismo HEAD: backend 2.967 passed; frontend, Typecheck, tests/paridad y build SUCCESS.
-- H1d [43123843854](https://github.com/c2melendez/precision-lab-plus/actions/runs/43123843854) SUCCESS: 38/38.
-- Native Syntax [43118563367](https://github.com/c2melendez/precision-lab-plus/actions/runs/43118563367) SUCCESS en el SHA del cambio de producto H-03 `7906e9649f7f035a7344bb7ec8e374264c92c864`: guard `skip=false`, sin REUSE; 26 desktop y 52 tablet/mobile. La comparación de ese SHA con el HEAD actual muestra únicamente dos cambios posteriores de tests backend (`test_trigonometry_ec_h03.py` y `test_trigonometry_ec_h04.py`), fuera del filtro nativo; el código de producto evaluado no cambió.
-- S25 [43118563326](https://github.com/c2melendez/precision-lab-plus/actions/runs/43118563326): `security/backend-security` SUCCESS (24 tests), pero job `mutation/plus-backend-mutmut` `130853024064` CANCELLED, sin score final verificable. Los jobs SKIPPED no cuentan como PASS. S25 permanece OPEN; no repetir la misma mutación sin cambio de dependencia, advisory o precondición.
+**Lite — SHA técnico \`d74ee60d6add511353397d58a0de6f06e211e0a3\`:**
+- Cumulative [43124501324](https://github.com/c2melendez/precision-lab-lite/actions/runs/43124501324) SUCCESS; guard \`skip=false\`, \`evidence_run_id=""\); H-03 2/2 y H-04 2/2; 422 archivos, 2.460 passed, 8 expected fail, 34 todo.
+- CI [43124501360](https://github.com/c2melendez/precision-lab-lite/actions/runs/43124501360) SUCCESS; typecheck, suite/paridad y build ejecutados.
+- H1d [43124501337](https://github.com/c2melendez/precision-lab-lite/actions/runs/43124501337) SUCCESS, 22/22.
+- Scientific UI [43124501411](https://github.com/c2melendez/precision-lab-lite/actions/runs/43124501411) SUCCESS, 456/456 desktop/tablet/mobile Chromium; guard \`skip=false\`.
+
+**Plus — SHA técnico \`ba20c5c6382ed91f730cb3f86324b98a14be5099\`:**
+- Cumulative [43123843906](https://github.com/c2melendez/precision-lab-plus/actions/runs/43123843906) SUCCESS; backend y frontend SUCCESS; guard backend \`skip=false\`, \`evidence_run_id=""\); H-03 fuente+HTTP 2/2 y H-04 fuente+HTTP 2/2; backend 2.967 passed, 1 skipped, 11 xfailed, 1 warning.
+- CI [43123843827](https://github.com/c2melendez/precision-lab-plus/actions/runs/43123843827) SUCCESS; backend 2.967 passed y frontend/typecheck/tests/build SUCCESS.
+- H1d [43123843854](https://github.com/c2melendez/precision-lab-plus/actions/runs/43123843854) SUCCESS, 38/38.
+- Native Syntax [43118563367](https://github.com/c2melendez/precision-lab-plus/actions/runs/43118563367) SUCCESS sobre el SHA de producto \`7906e9649f7f035a7344bb7ec8e374264c92c864\`; guard \`skip=false\`, 26 desktop y 52 tablet/mobile. Los dos commits posteriores solo modificaron tests backend fuera del filtro Native; el código de producto evaluado no cambió.
+
+**S25 independiente:** campaña [43118563326](https://github.com/c2melendez/precision-lab-plus/actions/runs/43118563326) CANCELLED. \`security/backend-security\` pasó (24 tests), pero \`plus-backend-mutmut\` job \`130853024064\` fue CANCELLED y no hay score final verificable. SKIPPED no es PASS. S25 sigue OPEN; no repetir la misma mutación con precondiciones idénticas.
 
 ### Estado y siguiente acción
 
-- EC-H-03 y EC-H-04 quedan **PASS_SCOPED** exclusivamente para sus ecuaciones congeladas y dominio real; no acreditan un resolvedor hiperbólico general.
-- Último caso aceptado: **TRIG-EC-H-04**. Siguiente acción única: **TRIG-EC-H-05**, `\tanh x=\frac{1}{2}` → `x=\frac{1}{2}\ln 3`. Recuperar la fila original; aún no existen tests focales H-05. Añadir primero tests fuente+HTTP en Plus y tests fuente+motor en Lite; exigir raíz real única y sustitución exacta en `tanh(x)=1/2`, e inspeccionar parser/aliases antes de cambiar producto.
-- Ejecutar una vez CI/acumulativo y H1d; Native Syntax y seguridad solo si los paths reales activan sus filtros. Si cambia Plus `solve_service.py`, revisar S25 como gate dinámico; no relanzar su misma mutación cancelada sin una precondición/advisory/dependencia distinta.
-- Global **OPEN**. EV-D-01 `/api/v1/evaluate` BLOCKED; EV-HI PASS_SCOPED; S25 OPEN; SG28/H2 OPEN; DIST-01..08 BLOCKED. `SG28_EVALUATE_ISOLATION` permanece desactivada por defecto. SKIP/XFAIL/TODO no son PASS; no se hizo dispatch manual.
+- Último caso aceptado: **TRIG-EC-H-04 — PASS_SCOPED bilateral**. H-03/H-04 solo certifican las ecuaciones congeladas en dominio real; no acreditan un resolvedor hiperbólico general.
+- **Siguiente acción única: TRIG-EC-H-05**, fila congelada \`tanh x=1/2\` → \`x=(1/2)ln(3)\`. Recuperar/anclar las tres columnas; tests H-05 aún no existen. Implementar primero tests focales en Lite y Plus; inspeccionar parser/aliases; exigir exactamente una raíz real y sustitución exacta en la ecuación original. Cambiar solo el motor que falle.
+- Ejecutar una vez los gates pertinentes después de cambios técnicos. Plus Native Syntax y seguridad solo se ejecutan si los paths modificados satisfacen sus filtros; si cambia \`solve_service.py\`, revisar S25 como gate dinámico, sin repetir la misma mutación cancelada salvo cambio de dependencia/advisory/precondición.
+- Global **OPEN**. EV-D-01 \`/api/v1/evaluate\` BLOCKED; EV-HI PASS_SCOPED; S25 OPEN; SG28/H2 OPEN; DIST-01..08 BLOCKED. \`SG28_EVALUATE_ISOLATION\` desactivada por defecto.
+- No hubo dispatch manual. SKIPPED/XFAIL/TODO no son PASS.
+
+---
 
 ---
 
