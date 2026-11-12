@@ -1,21 +1,28 @@
 """Narrow real-domain hyperbolic range contradiction helpers for frozen EC-H contracts."""
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, List, Optional
 
 import sympy
 
 from app.schemas.responses import ResultType, Step
-from app.services.solve_service import SolveResult
+
+if TYPE_CHECKING:
+    from app.services.solve_service import SolveResult
 
 
 def hyperbolic_tangent_out_of_range_contradiction(
     eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
-) -> Optional[SolveResult]:
+):
     """Reject tanh(x)=c with real |c|>=1, which has no real solution.
 
     For real x, |tanh(x)| < 1. The frozen EC-H-10 contract requires the empty
     real solution set for tanh(x)=2; the generic SymPy path returns complex
     artanh branches instead.
     """
+    # Local import avoids circular dependency with solve_service.
+    from app.services.solve_service import SolveResult
+
     if var.name != "x":
         return None
     try:
