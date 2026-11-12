@@ -1399,6 +1399,66 @@ def _hyperbolic_sine_zero_real_result(
         return None
 
 
+def _hyperbolic_tangent_half_real_result(
+    eq: sympy.Eq, var: sympy.Symbol, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Solve only frozen EC-H-05 tanh(x)=1/2 on the real domain.
+
+    The generic SymPy solver also returns complex periodic branches. This
+    contract is explicitly real-domain, so constrain solveset to R, require
+    exactly one real root, and verify it in the original equation.
+    """
+    try:
+        difference = sympy.simplify(eq.lhs - eq.rhs)
+        expected = sympy.tanh(var) - sympy.Rational(1, 2)
+        if (
+            sympy.simplify(difference - expected) != 0
+            and sympy.simplify(difference + expected) != 0
+        ):
+            return None
+
+        real_solutions = sympy.solveset(
+            sympy.tanh(var) - sympy.Rational(1, 2),
+            var,
+            domain=sympy.S.Reals,
+        )
+        if not isinstance(real_solutions, sympy.FiniteSet) or len(real_solutions) != 1:
+            return None
+        root = sympy.simplify(next(iter(real_solutions)))
+        if root.is_real is not True:
+            return None
+        substitution = sympy.simplify(
+            (eq.lhs - eq.rhs).subs(var, root).rewrite(sympy.exp)
+        )
+        if substitution != 0:
+            return None
+
+        step = Step(
+            index=0,
+            title="Raíz real única de la tangente hiperbólica",
+            description=(
+                "Sea t=e^x>0. De tanh(x)=(t²-1)/(t²+1)=1/2 se obtiene "
+                "t²=3; por positividad t=√3 y x=ln(√3)=ln(3)/2. "
+                "Como tanh'(x)=sech²(x)>0 en R, esta raíz es la única real. "
+                "La sustitución exacta en la ecuación original da cero."
+            ),
+            rule="HyperbolicTangentHalfUniqueReal",
+            latex_before=sympy.latex(eq),
+            latex_after=sympy.latex(sympy.Eq(var, root)),
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(root)],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def solve_equation(
     equation_text: str, variable_name: Optional[str], angle_unit: str = "rad"
 ) -> SolveResult:
@@ -1482,6 +1542,10 @@ def solve_equation(
     rational_result = _rational_domain_result(eq, var, domain_exclusions, warnings)
     if rational_result is not None:
         return rational_result
+
+    hyperbolic_tangent_half_result = _hyperbolic_tangent_half_real_result(eq, var, warnings)
+    if hyperbolic_tangent_half_result is not None:
+        return hyperbolic_tangent_half_result
 
     hyperbolic_sine_one_result = _hyperbolic_sine_one_real_result(eq, var, warnings)
     if hyperbolic_sine_one_result is not None:
