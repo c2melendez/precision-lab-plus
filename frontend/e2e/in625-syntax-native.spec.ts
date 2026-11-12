@@ -22,7 +22,14 @@ async function enter(field: Locator, source: string) {
     (element as HTMLElement & { value: string }).value)).toBe(source);
 }
 
-async function evaluate(page: Page, field: Locator, source: string, expected: number, backendExpression = source) {
+async function evaluate(
+  page: Page,
+  field: Locator,
+  source: string,
+  expected: number,
+  backendExpression = source,
+  substitutions?: Record<string, string>,
+) {
   await enter(field, source);
   const responsePromise = page.waitForResponse((response) => {
     if (response.request().method() !== "POST") return false;
@@ -43,7 +50,13 @@ async function evaluate(page: Page, field: Locator, source: string, expected: nu
   await evalButton.click();
   const response = await responsePromise;
   expect(response.status()).toBe(200);
-  expect(response.request().postDataJSON().expression).toBe(backendExpression);
+  const requestBody = response.request().postDataJSON();
+  expect(requestBody.expression).toBe(backendExpression);
+  if (substitutions) {
+    expect(requestBody.substitutions).toEqual(substitutions);
+  } else {
+    expect(requestBody.substitutions).toBeUndefined();
+  }
   const body = await response.json();
   expect(body.success).toBe(true);
   expect(body.result_approx).toBe(expected);
@@ -71,12 +84,12 @@ test("SY-R-13 native original cube-root binding, controls and HTTP reentry", asy
   const canonical = fixture("SY-R-13");
   expect(canonical).toBe(String.raw`\sqrt[3]{x}\ \text{con}\ x=27`);
   const controls = [
-    { source: canonical, expected: 3, backend: "((x)**(1/(3))) con x=(27)" },
-    { source: String.raw`\sqrt[3]{x}\ \text{con}\ x=8`, expected: 2, backend: "((x)**(1/(3))) con x=(8)" },
-    { source: String.raw`\sqrt[3]{y}\ \text{con}\ y=64`, expected: 4, backend: "((y)**(1/(3))) con y=(64)" },
+    { source: canonical, expected: 3, backend: "(x)**(1/(3))", substitutions: { x: "27" } },
+    { source: String.raw`\sqrt[3]{x}\ \text{con}\ x=8`, expected: 2, backend: "(x)**(1/(3))", substitutions: { x: "8" } },
+    { source: String.raw`\sqrt[3]{y}\ \text{con}\ y=64`, expected: 4, backend: "(y)**(1/(3))", substitutions: { y: "64" } },
   ];
-  for (const { source, expected, backend } of controls) {
-    const first = await evaluate(page, field, source, expected, backend);
+  for (const { source, expected, backend, substitutions } of controls) {
+    const first = await evaluate(page, field, source, expected, backend, substitutions);
     const second = await evaluate(page, field, first.reentry, expected);
     expect(second.requestId).not.toBe(first.requestId);
     evidence.push({ source, expected, ...first }, { source: first.reentry, expected, ...second });
@@ -108,15 +121,13 @@ test("SY-R-14 native original absolute value, signed controls and HTTP reentry",
   const canonical = fixture("SY-R-14");
   expect(canonical).toBe(String.raw`\left\lvert x\right\rvert\ \text{con}\ x=-4`);
   const controls = [
-    // The existing typed-bars UI resolves the declared scalar, retaining abs
-    // for real backend evaluation. The input itself remains the full fixture.
-    { source: canonical, expected: 4, backend: "abs(-4)" },
-    { source: String.raw`\left\lvert x\right\rvert+x\ \text{con}\ x=-4`, expected: 0, backend: "(abs(x)+x) con x=(-4)" },
-    { source: String.raw`\left\lvert x\right\rvert+x\ \text{con}\ x=4`, expected: 8, backend: "(abs(x)+x) con x=(4)" },
-    { source: String.raw`\left\lvert y\right\rvert\ \text{con}\ y=-7`, expected: 7, backend: "abs(-7)" },
+    { source: canonical, expected: 4, backend: "abs(x)", substitutions: { x: "-4" } },
+    { source: String.raw`\left\lvert x\right\rvert+x\ \text{con}\ x=-4`, expected: 0, backend: "abs(x)+x", substitutions: { x: "-4" } },
+    { source: String.raw`\left\lvert x\right\rvert+x\ \text{con}\ x=4`, expected: 8, backend: "abs(x)+x", substitutions: { x: "4" } },
+    { source: String.raw`\left\lvert y\right\rvert\ \text{con}\ y=-7`, expected: 7, backend: "abs(y)", substitutions: { y: "-7" } },
   ];
-  for (const { source, expected, backend } of controls) {
-    const first = await evaluate(page, field, source, expected, backend);
+  for (const { source, expected, backend, substitutions } of controls) {
+    const first = await evaluate(page, field, source, expected, backend, substitutions);
     const second = await evaluate(page, field, first.reentry, expected);
     expect(second.requestId).not.toBe(first.requestId);
     evidence.push({ source, expected, ...first }, { source: first.reentry, expected, ...second });

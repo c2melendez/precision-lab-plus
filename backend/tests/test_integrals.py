@@ -49,14 +49,35 @@ def test_definite_integral_minimum_three_steps():
 
 
 def test_fallback_for_unmapped_rule_sin_of_sin():
-    # sin(sin(x)) no tiene antiderivada elemental (manualintegrate ->
-    # DontKnowRule) -> fallback completo a integrate() directo.
+    # manualintegrate y el fallback directo no encuentran una antiderivada
+    # cerrada; no se debe exponer Integral(sin(sin(x)), x) como un resultado.
     response = _integral("sin(sin(x))")
     body = response.json()
-    assert body["success"] is True
-    assert body["has_detailed_steps"] is False
-    assert body["steps"] == []
-    assert any("directo de SymPy" in w for w in body["warnings"])
+    assert body["success"] is False
+    assert body["error_code"] == "UNSUPPORTED_OPERATION"
+    assert "Sin forma elemental" in body["error_message"]
+    assert body["result_text"] is None
+    assert body["result_latex"] is None
+
+
+def test_non_elementary_x_to_x_integral_is_explicitly_unsupported():
+    response = _integral("sin(x**x)")
+    body = response.json()
+    assert body["success"] is False
+    assert body["error_code"] == "UNSUPPORTED_OPERATION"
+    assert "Sin forma elemental" in body["error_message"]
+    assert body["result_text"] is None
+    assert body["result_latex"] is None
+
+
+def test_non_elementary_definite_integral_is_explicitly_unsupported():
+    response = _integral("sin(sin(x))", lower_bound="0", upper_bound="1")
+    body = response.json()
+    assert body["success"] is False
+    assert body["error_code"] == "UNSUPPORTED_OPERATION"
+    assert "Sin forma elemental" in body["error_message"]
+    assert body["result_text"] is None
+    assert body["result_latex"] is None
 
 
 def test_infinite_upper_bound_returns_exact_message():

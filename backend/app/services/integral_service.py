@@ -10,7 +10,11 @@ Regla no mapeada -> paso resumen de ese sub-árbol (`ReciprocalRule`,
 `ConstantRule`, `ArcsinRule`, etc. — no nombradas en la sección 8.4); si
 `manualintegrate` no encuentra NINGUNA técnica (`DontKnowRule`) -> fallback
 completo a `sympy.integrate()` directo, `has_detailed_steps: false` y
-warning explícito. `ConstantTimesRule`/`AlternativeRule`/`RewriteRule` se
+warning explícito. Si el fallback queda como `Integral(...)` sin resolver,
+se responde `UNSUPPORTED_OPERATION` con un aviso legible; no se presenta
+como resultado válido. Para integrales definidas, el valor acotado se evalúa
+independientemente y se rechaza solo si ese propio resultado permanece
+sin evaluar. `ConstantTimesRule`/`AlternativeRule`/`RewriteRule` se
 tratan como envoltorios transparentes (no son una "técnica" en sí, solo
 bookkeeping interno de SymPy) — se recorre a través de ellos sin generar un
 paso propio.
@@ -27,6 +31,9 @@ from app.services import parsing
 from app.services.step_verification import verify_step_equivalence
 
 UNSUPPORTED_INFINITE_BOUNDS_MESSAGE = "Los límites infinitos no están disponibles en esta fase."
+UNSUPPORTED_INDEFINITE_INTEGRAL_MESSAGE = (
+    "Sin forma elemental: no se encontró una antiderivada cerrada para esta expresión."
+)
 # Nota de la sección 5, aplicada literalmente: este mensaje NO debe mencionar
 # /integral/improper como alternativa — ese endpoint también responde
 # UNSUPPORTED_IN_PHASE_1 (sección 2), así que prometerlo sería peor que no
@@ -35,6 +42,10 @@ UNSUPPORTED_INFINITE_BOUNDS_MESSAGE = "Los límites infinitos no están disponib
 
 class UnsupportedInfiniteBoundsError(ValueError):
     """Límite `oo`/`-oo` en Fase 1 -> `ErrorCode.UNSUPPORTED_IN_PHASE_1`."""
+
+
+class UnsupportedIntegralError(ValueError):
+    """Integral sintácticamente válida sin un resultado cerrado -> UNSUPPORTED_OPERATION."""
 
 
 _RULE_LABELS = {
@@ -191,6 +202,8 @@ def integrate_expression(
     )
 
     if lower_bound is None and upper_bound is None:
+        if antiderivative.has(sympy.Integral):
+            raise UnsupportedIntegralError(UNSUPPORTED_INDEFINITE_INTEGRAL_MESSAGE)
         for index, step in enumerate(steps):
             step.index = index
         return IntegralResult(
@@ -200,6 +213,8 @@ def integrate_expression(
     lower_expr = _parse_bound(lower_bound)
     upper_expr = _parse_bound(upper_bound)
     reference = sympy.integrate(input_expr, (var_symbol, lower_expr, upper_expr))
+    if reference.has(sympy.Integral):
+        raise UnsupportedIntegralError(UNSUPPORTED_INDEFINITE_INTEGRAL_MESSAGE)
 
     can_use_ftc_steps = has_detailed_steps and not antiderivative.has(sympy.Integral)
     if can_use_ftc_steps:

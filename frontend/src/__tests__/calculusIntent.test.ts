@@ -78,6 +78,30 @@ describe("detectCalculusIntent (Fase 2 — fusión de modos, proyecto con backen
         innerLatex: "x^2",
       });
     });
+
+    it("detecta integral indefinida simple aunque Compute Engine no reconozca dx", () => {
+      expect(detectCalculusIntent(String.raw`\int x\,dx`)).toEqual({
+        kind: "integral",
+        variable: "x",
+        lowerBound: null,
+        upperBound: null,
+        innerLatex: "x",
+      });
+    });
+
+    it("detecta integral indefinida de función con diferencial concatenado", () => {
+      expect(detectCalculusIntent(String.raw`\int\sin\left(x^{x}\right)dx`)).toEqual({
+        kind: "integral",
+        variable: "x",
+        lowerBound: null,
+        upperBound: null,
+        innerLatex: String.raw`\sin\left(x^{x}\right)`,
+      });
+    });
+
+    it("no rebaja una integral definida con límites simbólicos a integral indefinida", () => {
+      expect(detectCalculusIntent(String.raw`\int_{a}^{b}x\,dx`)).toBeNull();
+    });
   });
 
   describe("límite (Compute Engine — finito e infinito; lateral queda fuera, ver cabecera)", () => {

@@ -342,7 +342,7 @@ curl -X POST http://localhost:8000/api/v1/integral/improper \
 | `/expand` | Nunca — un paso resumen siempre | Siempre (o `COMPLEXITY_LIMIT` si excede nodos) |
 | `/factor` | Si reconoce diferencia de cuadrados, factor común o trinomio, y verifica | Si no reconoce el patrón, o la verificación no da `VERIFIED` |
 | `/derivative` | Si el árbol de reglas se ensambla y verifica contra `sympy.diff()`, y no excede ~30 pasos/tiempo | Si colapsa por presupuesto, o la verificación falla |
-| `/integral` | Si `manualintegrate` mapea alguna regla y verifica | Si `DontKnowRule` (sin técnica) o la verificación falla |
+| `/integral` | Si `manualintegrate` mapea alguna regla y verifica | Si el fallback directo produce una expresión cerrada, devuelve resultado sin pasos; si queda una `Integral` simbólica sin evaluar (indefinida o definida), devuelve `UNSUPPORTED_OPERATION` |
 | `/solve` | Ecuaciones lineales y cuadráticas, si verifica | Identity/contradiction, grado ≥3, no polinómicas, o verificación fallida |
 | `/matrix/operations` | Hasta 4x4, si verifica | 5x5/6x6, o verificación fallida |
 | `/matrix/determinant` | Hasta 4x4, si verifica | 5x5/6x6, o verificación fallida |

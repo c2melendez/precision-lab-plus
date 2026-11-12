@@ -215,6 +215,33 @@ def test_complexity_limit_huge_exponent():
     assert body["error_code"] == "COMPLEXITY_LIMIT"
 
 
+def test_complexity_limit_nested_integer_exponent_tower():
+    response = _evaluate(expression="10^10^10")
+    body = response.json()
+    assert body["success"] is False
+    assert body["error_code"] == "COMPLEXITY_LIMIT"
+    assert body["result_text"] is None
+    assert body["result_latex"] is None
+
+
+def test_numeric_expression_returns_simplified_exact_result():
+    response = _evaluate(expression="2+3")
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_text"] == "5"
+    assert body["result_latex"] == "5"
+    assert body["result_approx"] == pytest.approx(5.0)
+
+
+def test_numeric_substitution_simplifies_exact_rational_root():
+    response = _evaluate(expression="x**(1/3)", substitutions={"x": "27"})
+    body = response.json()
+    assert body["success"] is True
+    assert body["result_text"] == "3"
+    assert body["result_latex"] == "3"
+    assert body["result_approx"] == pytest.approx(3.0)
+
+
 # ---------------------------------------------------------------------------
 # substitutions no numéricas -> VALIDATION_ERROR
 # ---------------------------------------------------------------------------
