@@ -1,14 +1,11 @@
 """Narrow real-domain hyperbolic range contradiction helpers for frozen EC-H contracts."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 import sympy
 
 from app.schemas.responses import ResultType, Step
-
-if TYPE_CHECKING:
-    from app.services.solve_service import SolveResult
 
 
 def hyperbolic_tangent_out_of_range_contradiction(
@@ -20,7 +17,6 @@ def hyperbolic_tangent_out_of_range_contradiction(
     real solution set for tanh(x)=2; the generic SymPy path returns complex
     artanh branches instead.
     """
-    # Local import avoids circular dependency with solve_service.
     from app.services.solve_service import SolveResult
 
     if var.name != "x":
@@ -64,3 +60,37 @@ def hyperbolic_tangent_out_of_range_contradiction(
         return SolveResult(eq, var, ResultType.CONTRADICTION, [], [step], True, warnings)
     except Exception:
         return None
+
+
+def install_tanh_range_hook() -> None:
+    """Wrap solve_equation so EC-H-10 is classified before the generic path."""
+    from app.services import solve_service
+    from app.services import parsing
+
+    if getattr(solve_service, "_tanh_range_hook_installed", False):
+        return
+
+    original = solve_service.solve_equation
+
+    def wrapped(equation_text: str, variable_name=None, angle_unit: str = "rad"):
+        try:
+            eq = parsing.parse_expression_tree(equation_text, allow_equation=True)
+            free_symbols = sorted(eq.free_symbols, key=lambda s: s.name)
+            if free_symbols and variable_name:
+                var = next((s for s in free_symbols if s.name == variable_name), free_symbols[0])
+            elif free_symbols:
+                var = free_symbols[0]
+            else:
+                var = None
+            if var is not None:
+                hit = hyperbolic_tangent_out_of_range_contradiction(
+                    eq, var, angle_unit, []
+                )
+                if hit is not None:
+                    return hit
+        except Exception:
+            pass
+        return original(equation_text, variable_name, angle_unit)
+
+    solve_service.solve_equation = wrapped
+    solve_service._tanh_range_hook_installed = True
