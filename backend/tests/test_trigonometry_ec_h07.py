@@ -43,5 +43,10 @@ def test_ec_h07_http_solve_returns_exactly_one_real_zero_root():
     assert actual[0].is_real is True
     assert sp.simplify(sp.sinh(2 * actual[0]) - sp.sinh(actual[0])) == 0
 
-    # Unique real root: sinh(2x)-sinh(x)=sinh(x)*(2*cosh(x)-1), with 2*cosh(x)-1>0.
-    assert sp.solve(sp.sinh(2 * sp.Symbol("t")) - sp.sinh(sp.Symbol("t")), sp.Symbol("t"), domain=sp.S.Reals) == [0]
+    # Independent uniqueness oracle over the real domain:
+    # sinh(2x)-sinh(x)=sinh(x)*(2*cosh(x)-1) and 2*cosh(x)-1>0 for all real x,
+    # so only sinh(x)=0 remains. solveset enforces the domain (solve does not).
+    t = sp.Symbol("t")
+    difference = sp.sinh(2 * t) - sp.sinh(t)
+    assert sp.simplify(difference - sp.sinh(t) * (2 * sp.cosh(t) - 1)) == 0
+    assert sp.solveset(difference, t, domain=sp.S.Reals) == sp.FiniteSet(0)
