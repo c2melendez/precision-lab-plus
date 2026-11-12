@@ -1,3 +1,9 @@
+## 2026-11-12 — SG28 local Plus verificado; H2 distribuido sigue bloqueado
+- La nota histórica EN-SG-28 que describía solo timeout/AbortController y falta de evidencia servidor queda superada para Plus en el alcance local: backend run 42555334631/job 128959658629, 70 passed, 1 warning; workflow input files iguales al HEAD actual por comparación de árboles completos.
+- E2E Plus run 42329898027/job 128273772961: 21/21 Chromium PASS, 7 por desktop/tablet/mobile. Incluye cancelación HTTP real, recolección del mismo PID del worker tras Stop, navegación/cierre de pestaña y recuperación.
+- Estado Plus local: PASS_SCOPED. No extrapolar a Lite ni a despliegue distribuido. H2 permanece OPEN: la admisión actual es por proceso Python y las pruebas del coordinador SQLite/mTLS son desechables/locales, no una autoridad multi-host. DIST-01..08 siguen BLOCKED hasta definir lease/renewal/deadline/fencing y validar coordinador autenticado en hosts independientes.
+- SG28_EVALUATE_ISOLATION sigue off por defecto. No se activa en Render/producción ni se infiere su configuración allí. Las notas SG28 históricas más abajo se conservan como cronología; esta entrada corrige su estado de evidencia Plus.
+
 # Manual / Capability Gaps
 
 Estos puntos NO deben marcarse automáticamente como fallo del producto mientras el runner no pueda reproducir fielmente la capacidad requerida.

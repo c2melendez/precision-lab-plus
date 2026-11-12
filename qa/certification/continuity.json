@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 500,
+  "revision": 501,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "9fa169337ab2e34aaafd9ab951f6b6d5960c8a0c",
-  "baseline_case": "TRIG-EC-H-04",
+  "technical_baseline_sha": "a37f323bdeb57b8d279c9e78ffd0099b157e338d",
+  "baseline_case": "TRIG-EC-H-05",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-EC-H-05",
-    "status": "WAIT",
-    "previous_id": "TRIG-EC-H-04",
-    "action": "Wait for current exact-SHA evidence. Lite is complete: Cumulative 43158656711, CI 43158656667, H1d 43158656700, Scientific UI 43158656732. Plus test-first SHA 08d3a5f failed real-domain cardinality because generic solve returned a complex periodic branch. Correction at 9fa169337ab2e34aaafd9ab951f6b6d5960c8a0c is under current Actions: Cumulative 43159677068, CI 43159676989, H1d 43159676958, Native Syntax 43159677114, Security 43159677161. Inspect final jobs, steps and logs without repeating active runs. Close H-05 only if focal tests and applicable gates pass on corrected Plus SHA; then start source-anchored H-06 cosh(x)+sinh(x)=2 -> x=ln(2)."
+    "id": "TRIG-EC-H-06",
+    "status": "RUN",
+    "previous_id": "TRIG-EC-H-05",
+    "action": "Start bilateral test-first for the frozen source row cosh(x)+sinh(x)=2 -> x=ln(2). Add exact three-column source anchors and one-real-root/original-substitution tests in Lite and Plus; push tests, inspect the automatically triggered exact-SHA gates, and implement only a product gap proven by the failing tests. Keep global OPEN and S25 dynamic review pending; do not repeat or relaunch the still-active S25 mutmut run 43161276374."
   },
   "blockers": [],
   "prose_only_paths": [
@@ -45,5 +45,5 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-12T05:14:30Z"
+  "updated_utc": "2026-11-12T05:50:15Z"
 }
