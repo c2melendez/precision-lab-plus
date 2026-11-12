@@ -190,7 +190,7 @@ jobs:
     # The 2026-11-12 run reached the 40-minute hard limit at 2,970/5,049 mutants
     # without producing reports. Extend only the execution ceiling; keep scope,
     # tool pin, mutation set and all acceptance thresholds unchanged.
-    timeout-minutes: 120
+    timeout-minutes: 340
     defaults:
       run:
         working-directory: backend
