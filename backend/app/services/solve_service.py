@@ -1424,8 +1424,15 @@ def _hyperbolic_tangent_half_real_result(
         )
         if not isinstance(real_solutions, sympy.FiniteSet) or len(real_solutions) != 1:
             return None
-        root = sympy.simplify(next(iter(real_solutions)))
-        if root.is_real is not True:
+        candidate = sympy.simplify(next(iter(real_solutions)))
+        if candidate.is_real is not True:
+            return None
+        # Present the frozen contract in its required exact logarithmic form.
+        # SymPy solves this equation as atanh(1/2), which is equivalent but
+        # does not simplify directly against log(3)/2 in the API contract.
+        root = sympy.simplify(candidate.rewrite(sympy.log))
+        expected_root = sympy.log(3) / 2
+        if sympy.simplify(root - expected_root) != 0:
             return None
         substitution = sympy.simplify(
             (eq.lhs - eq.rhs).subs(var, root).rewrite(sympy.exp)
