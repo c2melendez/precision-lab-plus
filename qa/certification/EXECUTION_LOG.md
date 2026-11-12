@@ -1,3 +1,11 @@
+## 2026-11-12 UTC — r500: EC-H-05 WAIT bilateral
+
+- Plus test-first \`08d3a5f24f63b6d3f9883ecb35057679e5556719\`; CI [43158346360](https://github.com/c2melendez/precision-lab-plus/actions/runs/43158346360) falló solo en el oráculo focal de cardinalidad: el solver genérico devolvió \`log(3)/2 + I*pi\` y \`log(3)/2\`, frente al contrato real único.
+- Corrección acotada en \`backend/app/services/solve_service.py\`, SHA actual \`9fa169337ab2e34aaafd9ab951f6b6d5960c8a0c\`: \`solveset(..., domain=S.Reals)\`, exige singleton, \`is_real\` y sustitución exacta.
+- Push actual activó Cumulative [43159677068](https://github.com/c2melendez/precision-lab-plus/actions/runs/43159677068), CI [43159676989](https://github.com/c2melendez/precision-lab-plus/actions/runs/43159676989), H1d [43159676958](https://github.com/c2melendez/precision-lab-plus/actions/runs/43159676958), Native Syntax [43159677114](https://github.com/c2melendez/precision-lab-plus/actions/runs/43159677114) y security [43159677161](https://github.com/c2melendez/precision-lab-plus/actions/runs/43159677161). Al corte r500: Cumulative/CI/H1d/Native IN_PROGRESS; security QUEUED. No declarar resultado.
+- H1d [43158346511](https://github.com/c2melendez/precision-lab-plus/actions/runs/43158346511) SUCCESS sobre el SHA test-only; no acredita la corrección.
+- La revisión S25 es dinámica por cambio efectivo de \`solve_service.py\`; no volver a repetir una misma mutación cancelada sin cambio de dependencia/advisory/precondición. No hubo dispatch manual.
+
 ## 2026-11-12 UTC — r499: TRIG-EC-H-03 y EC-H-04 PASS_SCOPED bilateral; siguiente EC-H-05
 
 La reconciliación de los HEAD contra el baseline r498 mostró árboles completos y cambios técnicos acotados a las implementaciones/tests H-03 y H-04. Se revisaron los logs por evento push, SHA, job y pasos; los gates acumulativos no reutilizaron evidencia.
