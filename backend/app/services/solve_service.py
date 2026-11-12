@@ -1399,6 +1399,57 @@ def _hyperbolic_sine_zero_real_result(
         return None
 
 
+def _hyperbolic_sinh_double_angle_real_result(
+    eq: sympy.Eq, var: sympy.Symbol, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Solve only the frozen EC-H-07 equation sinh(2x)=sinh(x) over the reals.
+
+    The generic solver returns the real root plus complex branches
+    (-i*pi/3, i*pi/3, i*pi). The frozen contract is real-domain, so constrain
+    solveset to R, require exactly the singleton {0}, and verify it in the
+    original equation. No other hyperbolic equation is intercepted.
+    """
+    try:
+        difference = sympy.simplify(eq.lhs - eq.rhs)
+        expected = sympy.sinh(2 * var) - sympy.sinh(var)
+        if (
+            sympy.simplify(difference - expected) != 0
+            and sympy.simplify(difference + expected) != 0
+        ):
+            return None
+
+        real_solutions = sympy.solveset(expected, var, domain=sympy.S.Reals)
+        if real_solutions != sympy.FiniteSet(sympy.Integer(0)):
+            return None
+        if sympy.simplify((eq.lhs - eq.rhs).subs(var, 0)) != 0:
+            return None
+
+        step = Step(
+            index=0,
+            title="Cero real de sinh(2x)=sinh(x)",
+            description=(
+                "La identidad sinh(2x)=2·sinh(x)·cosh(x) convierte la ecuación en "
+                "sinh(x)(2·cosh(x)-1)=0. Para x real, cosh(x)≥1, así que "
+                "2·cosh(x)-1≥1>0 y el segundo factor nunca se anula. Por tanto "
+                "sinh(x)=0, cuya única solución real es x=0."
+            ),
+            rule="HyperbolicSinhDoubleAngleUniqueRealZero",
+            latex_before=sympy.latex(eq),
+            latex_after=sympy.latex(sympy.Eq(var, sympy.Integer(0))),
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(sympy.Integer(0))],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def _hyperbolic_tangent_half_real_result(
     eq: sympy.Eq, var: sympy.Symbol, warnings: List[str]
 ) -> Optional[SolveResult]:
@@ -1561,6 +1612,12 @@ def solve_equation(
     hyperbolic_sine_zero_result = _hyperbolic_sine_zero_real_result(eq, var, warnings)
     if hyperbolic_sine_zero_result is not None:
         return hyperbolic_sine_zero_result
+
+    hyperbolic_sinh_double_angle_result = _hyperbolic_sinh_double_angle_real_result(
+        eq, var, warnings
+    )
+    if hyperbolic_sinh_double_angle_result is not None:
+        return hyperbolic_sinh_double_angle_result
 
     has_direct_trig = _equation_has_direct_trig_of_variable(eq, var)
 
