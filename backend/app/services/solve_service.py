@@ -1074,6 +1074,58 @@ def _rational_domain_result(
     )
 
 
+def _hyperbolic_cosine_below_one_contradiction(
+    eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Reject cosh(x)=c with real c<1, which has no real solution.
+
+    For real x, cosh(x) >= 1 with equality only at x=0. The frozen EC-H-09
+    contract requires the empty real solution set for cosh(x)=1/2; the generic
+    SymPy path returns complex logarithmic branches instead.
+    """
+    if var.name != "x":
+        return None
+    try:
+        difference = sympy.expand(eq.lhs - eq.rhs)
+        if difference.atoms(sympy.cosh) != {sympy.cosh(var)}:
+            return None
+        parameter = sympy.Symbol("_cosh_range_parameter", real=True)
+        reduced = sympy.expand(difference.subs(sympy.cosh(var), parameter))
+        if var in reduced.free_symbols:
+            return None
+        polynomial = sympy.Poly(reduced, parameter)
+        if polynomial.degree() != 1:
+            return None
+        coefficients = polynomial.all_coeffs()
+        if len(coefficients) != 2:
+            return None
+        slope, intercept = coefficients
+        if slope == 0:
+            return None
+        if not all(value.is_number and value.is_real is True for value in (slope, intercept)):
+            return None
+        constant = sympy.simplify(-intercept / slope)
+        if constant.is_real is not True:
+            return None
+        if sympy.simplify(constant - 1).is_negative is not True:
+            return None
+
+        step = Step(
+            index=0,
+            title="Coseno hiperbólico fuera del rango real",
+            description=(
+                "Para x real, cosh(x)>=1 con igualdad solo en x=0; como el valor "
+                "de la ecuación es menor que 1, no existe solución real."
+            ),
+            rule="HyperbolicCosineRangeContradiction",
+            latex_before=sympy.latex(eq),
+            latex_after=r"\cosh(x) \ge 1 \;\Rightarrow\; \varnothing",
+        )
+        return SolveResult(eq, var, ResultType.CONTRADICTION, [], [step], True, warnings)
+    except Exception:
+        return None
+
+
 def _inverse_sine_out_of_range_contradiction(
     eq: sympy.Eq, var: sympy.Symbol, angle_unit: str, warnings: List[str]
 ) -> Optional[SolveResult]:
@@ -1644,6 +1696,10 @@ def solve_equation(
     sine_range_result = _sine_out_of_range_contradiction(eq, var, angle_unit, warnings)
     if sine_range_result is not None:
         return sine_range_result
+
+    cosh_range_result = _hyperbolic_cosine_below_one_contradiction(eq, var, angle_unit, warnings)
+    if cosh_range_result is not None:
+        return cosh_range_result
 
     inverse_sine_range_result = _inverse_sine_out_of_range_contradiction(
         eq, var, angle_unit, warnings
