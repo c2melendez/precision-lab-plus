@@ -1,3 +1,10 @@
+## 2026-11-12 UTC — r499: TRIG-EC-H-03 y EC-H-04 PASS_SCOPED bilateral; siguiente EC-H-05
+
+Plus HEAD técnico `ba20c5c6382ed91f730cb3f86324b98a14be5099`: [43123843906](https://github.com/c2melendez/precision-lab-plus/actions/runs/43123843906) Cumulative SUCCESS (backend 2.967 passed, 1 skipped, 11 xfailed; los cuatro tests H-03/H-04 PASSED explícitamente; ambos jobs SUCCESS y guard skip=false/no REUSE); [43123843827](https://github.com/c2melendez/precision-lab-plus/actions/runs/43123843827) CI SUCCESS (backend 2.967 passed y frontend/typecheck/tests/build SUCCESS); [43123843854](https://github.com/c2melendez/precision-lab-plus/actions/runs/43123843854) H1d SUCCESS (38/38). Native Syntax [43118563367](https://github.com/c2melendez/precision-lab-plus/actions/runs/43118563367) SUCCESS sobre el SHA del cambio de producto `7906e9649f7f035a7344bb7ec8e374264c92c864`, 26 desktop + 52 tablet/mobile, guard skip=false; los dos commits posteriores solo tocaron tests backend fuera del filtro nativo.
+Fila congelada H-03: `sinh(x)=1` → `ln(1+sqrt(2))`; H-04: `cosh(x)=2` → `±ln(2+sqrt(3))`. Ambas filas tienen tres columnas. H-03 prueba solución real única por solveset + sustitución exacta vía HTTP; H-04 prueba dos raíces reales, opuestas, y sustitución exacta. H-04 no requirió cambio de producto.
+S25 [43118563326](https://github.com/c2melendez/precision-lab-plus/actions/runs/43118563326): backend-security SUCCESS (24 tests), mutation `plus-backend-mutmut` job `130853024064` CANCELLED sin score final verificable; conservar S25 OPEN y no reintentar con insumos/precondiciones idénticas. Global OPEN; EV-D-01 BLOCKED, EV-HI PASS_SCOPED, SG28/H2 OPEN y DIST-01..08 BLOCKED.
+Siguiente único: **TRIG-EC-H-05**, fila congelada `tanh(x)=1/2` → `x=(1/2)ln(3)`; test-first bilateral, raíz real única y sustitución exacta.
+
 ## 2026-11-11 UTC (r498) — TRIG-EC-H-02 PASS_SCOPED bilateral
 
 ## Trigonometría TRIG-EC-H-02 - PASS_SCOPED bilateral

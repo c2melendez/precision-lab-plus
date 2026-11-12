@@ -1,3 +1,13 @@
+## 2026-11-12 UTC — r499: TRIG-EC-H-03/H-04 PASS_SCOPED bilateral; siguiente EC-H-05
+
+- EC-H-03: `sinh(x)=1` → `ln(1+sqrt(2))). Plus `/api/v1/solve`, raíz real única, sustitución exacta; dos tests focales PASSED.
+- EC-H-04: `cosh(x)=2` → `±ln(2+sqrt(3))). Plus `/api/v1/solve`, dos raíces reales opuestas y sustitución exacta para ambas; dos tests focales PASSED.
+- Plus HEAD `ba20c5c6382ed91f730cb3f86324b98a14be5099`: Cumulative [43123843906](https://github.com/c2melendez/precision-lab-plus/actions/runs/43123843906) SUCCESS (2.967 passed/1 skipped/11 xfailed), CI [43123843827](https://github.com/c2melendez/precision-lab-plus/actions/runs/43123843827) SUCCESS, H1d [43123843854](https://github.com/c2melendez/precision-lab-plus/actions/runs/43123843854) SUCCESS (38/38). Native Syntax [43118563367](https://github.com/c2melendez/precision-lab-plus/actions/runs/43118563367) SUCCESS en SHA de código `7906e9649f7f035a7344bb7ec8e374264c92c864` (26 desktop, 52 tablet/mobile); solo hay tests backend posteriores fuera del filtro Native.
+- **Siguiente:** EC-H-05 `tanh(x)=1/2` → `x=(1/2)ln(3)`, test-first bilateral con ancla a la fila congelada.
+- S25 permanece OPEN: campaña [43118563326](https://github.com/c2melendez/precision-lab-plus/actions/runs/43118563326) CANCELLED durante `plus-backend-mutmut`, sin score final; backend-security 24 tests SUCCESS. EV-D-01 BLOCKED; EV-HI PASS_SCOPED; SG28/H2 OPEN; DIST-01..08 BLOCKED. Certificación global **OPEN**.
+
+---
+
 ## 2026-11-10 UTC — r487: EC-D-08 PASS_SCOPED bilateral; siguiente EC-D-09
 
 **Contrato congelado:** \(\sec x=-2,\ x\in[0,2\pi)\) → \(\{2\pi/3,4\pi/3\}\). Fila del gzip con tres columnas; no hay nota separada.
