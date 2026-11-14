@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 526,
+  "revision": 527,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
   "baseline_case": "TRIG-IN-D-05",
-  "baseline_status": "RECONCILE",
+  "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-IN-D-05",
-    "previous_id": "TRIG-IN-D-04",
-    "status": "RECONCILE",
-    "action": "Reconstruir observaciones y huellas reales del HEAD y gates de ambos motores; revisar evidencia del fix aa1f2821 y reconciliar cierre IN-D-05 antes de iniciar IN-D-06."
+    "id": "TRIG-IN-D-06",
+    "previous_id": "TRIG-IN-D-05",
+    "status": "RUN",
+    "action": "Test-first bilateral de sin(x)cos(x)>0 en [0,2*pi), dos intervalos abiertos; congelar fuente, verificar extremos y signos, corregir brechas demostradas y revisar gates push. No avanzar a IN-D-07."
   },
   "blockers": [
     {
@@ -73,18 +73,18 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-14T22:42:13.828Z",
+  "updated_utc": "2026-11-14T23:46:00.754Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": null,
-      "head_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
-      "decision": "REVIEW",
-      "reason": "Run referido en r525; validar checkout, jobs, logs y huella real antes de REUSE.",
+      "input_fingerprint": "68f270284a2adc8240f098a48cc5cd11224a665c20860f42b8838a47fdc9e261",
+      "head_sha": "d920bac953eb1942332952dc0e045462c96ccfb5",
+      "decision": "REUSE",
+      "reason": "Evidencia ejecutada revisada con insumos idénticos; no ejecución nueva",
       "run_id": 43647668540,
       "evidence_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
-      "logs_reviewed": false,
-      "evidence_executed": false,
+      "logs_reviewed": true,
+      "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
       "jobs": [
         {
@@ -101,18 +101,18 @@
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "f3722215c3398dfab4f276b9212e0cb05001da6bf2b735367c2e36fb485b3c9a",
-      "head_sha": "a8e7d5c7b77b4c28e4efc242153988c3b545f123",
-      "decision": "REVIEW",
-      "reason": "Índice r525 incompleto; observación histórica preservada, requiere reconciliación de HEAD, huella y aceptación.",
-      "run_id": 43637618190,
-      "evidence_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
+      "input_fingerprint": "c290078782e262b4c222ea0a3612f9145742633681cc318ff560826c8362e5ad",
+      "head_sha": "d920bac953eb1942332952dc0e045462c96ccfb5",
+      "decision": "REUSE",
+      "reason": "Evidencia ejecutada revisada con insumos idénticos",
+      "run_id": 43647668555,
+      "evidence_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
       "jobs": [
         {
-          "id": 132577801068,
+          "id": 132608950102,
           "name": "h1d",
           "conclusion": "success"
         }
@@ -120,119 +120,71 @@
     },
     "security": {
       "gate": "security",
-      "input_fingerprint": "93532e4695b4d6425ca2964526d22a074117f3eda12a96b30005ba89e0325216",
-      "head_sha": "a8e7d5c7b77b4c28e4efc242153988c3b545f123",
-      "decision": "REVIEW",
-      "reason": "Índice r525 incompleto; observación histórica preservada, requiere reconciliación de HEAD, huella y aceptación.",
-      "run_id": 43637618276,
-      "evidence_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
+      "input_fingerprint": "25bcf99062a14c580b26c35c6c44f455cb366dfc92031bda170b38a8889e6947",
+      "head_sha": "d920bac953eb1942332952dc0e045462c96ccfb5",
+      "decision": "WAIT",
+      "reason": "Campaña equivalente existente en curso; evaluar por perfil",
+      "run_id": 43647668563,
+      "evidence_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
       "logs_reviewed": false,
-      "evidence_executed": false,
-      "acceptance_revision": "2026-10-16-continuity-v1",
-      "jobs": [
-        {
-          "id": 132577801131,
-          "name": "audit-request",
-          "conclusion": "success"
-        },
-        {
-          "id": 132577876135,
-          "name": "mutation / validate-request",
-          "conclusion": "success"
-        },
-        {
-          "id": 132577876243,
-          "name": "security / validate-request",
-          "conclusion": "success"
-        },
-        {
-          "id": 132577896661,
-          "name": "security / backend-security",
-          "conclusion": null
-        },
-        {
-          "id": 132577897843,
-          "name": "security / frontend-audit",
-          "conclusion": "skipped"
-        },
-        {
-          "id": 132577910664,
-          "name": "mutation / change-scope",
-          "conclusion": "success"
-        },
-        {
-          "id": 132577946517,
-          "name": "mutation / plus-backend-mutmut",
-          "conclusion": null
-        },
-        {
-          "id": 132577948185,
-          "name": "mutation / plus-frontend-stryker",
-          "conclusion": "skipped"
-        },
-        {
-          "id": 132577948506,
-          "name": "mutation / lite-frontend-stryker",
-          "conclusion": "skipped"
-        }
-      ]
+      "evidence_executed": false
     }
   },
   "previous_accepted": {
-    "id": "TRIG-IN-D-04",
+    "id": "TRIG-IN-D-05",
     "status": "PASS_SCOPED",
     "evidence": {
       "cumulative": {
         "gate": "cumulative",
-        "input_fingerprint": "4fa53936adb985ad2222d320db4687dc133906e1f4a2fcdbd614fda9e46d5054",
-        "head_sha": "c1e6e8eac3ed712fe3b8c4f30df75deb23ebe535",
+        "input_fingerprint": "68f270284a2adc8240f098a48cc5cd11224a665c20860f42b8838a47fdc9e261",
+        "head_sha": "d920bac953eb1942332952dc0e045462c96ccfb5",
         "decision": "REUSE",
-        "reason": "Diferencia HEAD limitada a prosa e índice excluidos; configuración de gate idéntica; evidencia ejecutada revisada.",
-        "run_id": 43623011267,
-        "evidence_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
+        "reason": "Evidencia ejecutada revisada con insumos idénticos; no ejecución nueva",
+        "run_id": 43647668540,
+        "evidence_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
         "logs_reviewed": true,
         "evidence_executed": true,
+        "acceptance_revision": "2026-10-16-continuity-v1",
         "jobs": [
           {
-            "id": 132532633477,
-            "name": "frontend",
+            "id": 132608950017,
+            "name": "backend",
             "conclusion": "success"
           },
           {
-            "id": 132532633718,
-            "name": "backend",
+            "id": 132608950218,
+            "name": "frontend",
             "conclusion": "success"
           }
-        ],
-        "acceptance_revision": "2026-10-16-continuity-v1"
+        ]
       },
       "h1d": {
         "gate": "h1d",
-        "input_fingerprint": "b71afb30ef306e227752d20f69a449072adee29440a3c604a1dc0064445d8808",
-        "head_sha": "c1e6e8eac3ed712fe3b8c4f30df75deb23ebe535",
+        "input_fingerprint": "c290078782e262b4c222ea0a3612f9145742633681cc318ff560826c8362e5ad",
+        "head_sha": "d920bac953eb1942332952dc0e045462c96ccfb5",
         "decision": "REUSE",
-        "reason": "Diferencia HEAD limitada a prosa e índice excluidos; configuración de gate idéntica; evidencia ejecutada revisada.",
-        "run_id": 43623011311,
-        "evidence_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
+        "reason": "Evidencia ejecutada revisada con insumos idénticos",
+        "run_id": 43647668555,
+        "evidence_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
         "logs_reviewed": true,
         "evidence_executed": true,
+        "acceptance_revision": "2026-10-16-continuity-v1",
         "jobs": [
           {
-            "id": 132532633417,
+            "id": 132608950102,
             "name": "h1d",
             "conclusion": "success"
           }
-        ],
-        "acceptance_revision": "2026-10-16-continuity-v1"
+        ]
       },
       "security": {
         "gate": "security",
-        "input_fingerprint": "d2f25964191d383c20ded277e2772c91775e231e3dc4bbe066969d36e04cbd13",
-        "head_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
+        "input_fingerprint": "25bcf99062a14c580b26c35c6c44f455cb366dfc92031bda170b38a8889e6947",
+        "head_sha": "d920bac953eb1942332952dc0e045462c96ccfb5",
         "decision": "WAIT",
-        "reason": "equivalent inputs already queued/running; inspect existing run",
-        "run_id": 43623011306,
-        "evidence_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
+        "reason": "Campaña equivalente existente en curso; evaluar por perfil",
+        "run_id": 43647668563,
+        "evidence_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
         "logs_reviewed": false,
         "evidence_executed": false
       }
