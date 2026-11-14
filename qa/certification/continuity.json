@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 510,
+  "revision": 511,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "8adf1fd7b82c8cc0413c2ddd1fc1707ee7f46f7e",
   "baseline_case": "TRIG-IN-D-01",
-  "baseline_status": "VERIFYING_CI",
+  "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-IN-D-01",
-    "status": "WAIT",
-    "previous_id": "TRIG-EC-HI-08",
-    "action": "Completar corrección local del núcleo LaTeX Lite y validar/publicar con compare-and-swap. Revisar CI automática de ambos productos antes de cierre bilateral; luego IN-D-02. No redispatch equivalente."
+    "id": "TRIG-IN-D-02",
+    "previous_id": "TRIG-IN-D-01",
+    "status": "RUN",
+    "action": "Completar validación local y publicar test-first bilateral: cos(x)<=0 en [0,2*pi) -> [pi/2,3*pi/2]. Lite corrige solo el fallo polinómico reproducido; Plus test-only. Verificar gates automáticos por SHA y no cerrar con pruebas locales."
   },
   "blockers": [
     {
@@ -64,35 +64,46 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-14T02:40:36.947Z",
-  "observed_runs": [
-    {
-      "id": 43547189950,
-      "path": ".github/workflows/ci.yml",
-      "sha": "8adf1fd7b82c8cc0413c2ddd1fc1707ee7f46f7e",
-      "status": "in_progress",
-      "conclusion": null
+  "updated_utc": "2026-11-14T02:59:27.486Z",
+  "evidence": {
+    "cumulative": {
+      "decision": "REUSE",
+      "run_id": 43547189971,
+      "evidence_sha": "8adf1fd7b82c8cc0413c2ddd1fc1707ee7f46f7e",
+      "input_fingerprint": "467063244890667016fa1d109ff9f4c9b7d2399915b57f16edb3dcd44c8b8818",
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "logs_reviewed": true,
+      "evidence_executed": true,
+      "jobs": [
+        {
+          "id": 132301139614,
+          "name": "frontend",
+          "conclusion": "success"
+        },
+        {
+          "id": 132301139865,
+          "name": "backend",
+          "conclusion": "success"
+        }
+      ],
+      "scope": "Servicio/HTTP normalizado del período contractual; no respuesta periódica global"
     },
-    {
-      "id": 43547189971,
-      "path": ".github/workflows/in625-cumulative-certification.yml",
-      "sha": "8adf1fd7b82c8cc0413c2ddd1fc1707ee7f46f7e",
-      "status": "in_progress",
-      "conclusion": null
-    },
-    {
-      "id": 43547189955,
-      "path": ".github/workflows/certification-runner.yml",
-      "sha": "8adf1fd7b82c8cc0413c2ddd1fc1707ee7f46f7e",
-      "status": "completed",
-      "conclusion": "success"
-    },
-    {
-      "id": 43547190003,
-      "path": ".github/workflows/in625-h1d-reentry.yml",
-      "sha": "8adf1fd7b82c8cc0413c2ddd1fc1707ee7f46f7e",
-      "status": "completed",
-      "conclusion": "success"
+    "h1d": {
+      "decision": "REUSE",
+      "run_id": 43547190003,
+      "evidence_sha": "8adf1fd7b82c8cc0413c2ddd1fc1707ee7f46f7e",
+      "input_fingerprint": "06d98d82cd9182c36200fc5ef800920c8d45cb64ae111c422f280fbfe504101a",
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "logs_reviewed": true,
+      "evidence_executed": true,
+      "jobs": [
+        {
+          "id": 132301139765,
+          "name": "h1d",
+          "conclusion": "success"
+        }
+      ],
+      "scope": "Servicio/HTTP normalizado del período contractual; no respuesta periódica global"
     }
-  ]
+  }
 }
