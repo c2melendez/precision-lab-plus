@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 520,
+  "revision": 521,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
@@ -73,43 +73,109 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-14T20:29:34.886Z",
+  "updated_utc": "2026-11-14T20:32:30.373Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
       "input_fingerprint": "15210e85a3a9e30dd44f31fd7ecaeea8e1d5dd1ce445c4027c6cb2ebfa6b98aa",
-      "head_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
+      "head_sha": "a8e7d5c7b77b4c28e4efc242153988c3b545f123",
       "decision": "WAIT",
       "reason": "equivalent inputs already queued/running; inspect existing run",
       "run_id": 43637618246,
       "evidence_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
       "logs_reviewed": false,
       "evidence_executed": false,
-      "acceptance_revision": "2026-10-16-continuity-v1"
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "jobs": [
+        {
+          "id": 132577800977,
+          "name": "backend",
+          "conclusion": null
+        },
+        {
+          "id": 132577801567,
+          "name": "frontend",
+          "conclusion": null
+        }
+      ]
     },
     "h1d": {
       "gate": "h1d",
       "input_fingerprint": "f3722215c3398dfab4f276b9212e0cb05001da6bf2b735367c2e36fb485b3c9a",
-      "head_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
-      "decision": "WAIT",
-      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "head_sha": "a8e7d5c7b77b4c28e4efc242153988c3b545f123",
+      "decision": "REUSE",
+      "reason": "prior reviewed evidence covers identical gate inputs; not a new execution or global certification",
       "run_id": 43637618190,
       "evidence_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
-      "logs_reviewed": false,
-      "evidence_executed": false,
-      "acceptance_revision": "2026-10-16-continuity-v1"
+      "logs_reviewed": true,
+      "evidence_executed": true,
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "jobs": [
+        {
+          "id": 132577801068,
+          "name": "h1d",
+          "conclusion": "success"
+        }
+      ]
     },
     "security": {
       "gate": "security",
       "input_fingerprint": "93532e4695b4d6425ca2964526d22a074117f3eda12a96b30005ba89e0325216",
-      "head_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
+      "head_sha": "a8e7d5c7b77b4c28e4efc242153988c3b545f123",
       "decision": "WAIT",
       "reason": "equivalent inputs already queued/running; inspect existing run",
       "run_id": 43637618276,
       "evidence_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
       "logs_reviewed": false,
       "evidence_executed": false,
-      "acceptance_revision": "2026-10-16-continuity-v1"
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "jobs": [
+        {
+          "id": 132577801131,
+          "name": "audit-request",
+          "conclusion": "success"
+        },
+        {
+          "id": 132577876135,
+          "name": "mutation / validate-request",
+          "conclusion": "success"
+        },
+        {
+          "id": 132577876243,
+          "name": "security / validate-request",
+          "conclusion": "success"
+        },
+        {
+          "id": 132577896661,
+          "name": "security / backend-security",
+          "conclusion": null
+        },
+        {
+          "id": 132577897843,
+          "name": "security / frontend-audit",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 132577910664,
+          "name": "mutation / change-scope",
+          "conclusion": "success"
+        },
+        {
+          "id": 132577946517,
+          "name": "mutation / plus-backend-mutmut",
+          "conclusion": null
+        },
+        {
+          "id": 132577948185,
+          "name": "mutation / plus-frontend-stryker",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 132577948506,
+          "name": "mutation / lite-frontend-stryker",
+          "conclusion": "skipped"
+        }
+      ]
     }
   },
   "previous_accepted": {
@@ -185,7 +251,6 @@
         {
           "id": 132577801440,
           "name": "certification-cycle",
-          "status": "completed",
           "conclusion": "success"
         }
       ],
@@ -205,7 +270,6 @@
         {
           "id": 132577801046,
           "name": "syntax-native",
-          "status": "in_progress",
           "conclusion": null
         }
       ],
@@ -225,33 +289,11 @@
         {
           "id": 132577801082,
           "name": "backend",
-          "status": "in_progress",
           "conclusion": null
         },
         {
           "id": 132577801384,
           "name": "frontend",
-          "status": "in_progress",
-          "conclusion": null
-        }
-      ],
-      "logs_reviewed": false,
-      "evidence_executed": false,
-      "acceptance_revision": "2026-10-16-continuity-v1"
-    },
-    {
-      "id": 43637618190,
-      "path": ".github/workflows/in625-h1d-reentry.yml",
-      "head_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
-      "status": "in_progress",
-      "conclusion": null,
-      "created_at": "2026-11-14T20:27:51Z",
-      "run_attempt": 1,
-      "jobs": [
-        {
-          "id": 132577801068,
-          "name": "h1d",
-          "status": "in_progress",
           "conclusion": null
         }
       ],
@@ -271,13 +313,11 @@
         {
           "id": 132577800977,
           "name": "backend",
-          "status": "in_progress",
           "conclusion": null
         },
         {
           "id": 132577801567,
           "name": "frontend",
-          "status": "in_progress",
           "conclusion": null
         }
       ],
@@ -297,60 +337,70 @@
         {
           "id": 132577801131,
           "name": "audit-request",
-          "status": "completed",
           "conclusion": "success"
         },
         {
           "id": 132577876135,
           "name": "mutation / validate-request",
-          "status": "completed",
           "conclusion": "success"
         },
         {
           "id": 132577876243,
           "name": "security / validate-request",
-          "status": "completed",
           "conclusion": "success"
         },
         {
           "id": 132577896661,
           "name": "security / backend-security",
-          "status": "in_progress",
           "conclusion": null
         },
         {
           "id": 132577897843,
           "name": "security / frontend-audit",
-          "status": "completed",
           "conclusion": "skipped"
         },
         {
           "id": 132577910664,
           "name": "mutation / change-scope",
-          "status": "completed",
           "conclusion": "success"
         },
         {
           "id": 132577946517,
           "name": "mutation / plus-backend-mutmut",
-          "status": "in_progress",
           "conclusion": null
         },
         {
           "id": 132577948185,
           "name": "mutation / plus-frontend-stryker",
-          "status": "completed",
           "conclusion": "skipped"
         },
         {
           "id": 132577948506,
           "name": "mutation / lite-frontend-stryker",
-          "status": "completed",
           "conclusion": "skipped"
         }
       ],
       "logs_reviewed": false,
       "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
+    },
+    {
+      "id": 43637618190,
+      "path": ".github/workflows/in625-h1d-reentry.yml",
+      "head_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-14T20:27:51Z",
+      "run_attempt": 1,
+      "jobs": [
+        {
+          "id": 132577801068,
+          "name": "h1d",
+          "conclusion": "success"
+        }
+      ],
+      "logs_reviewed": true,
+      "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1"
     }
   ]
