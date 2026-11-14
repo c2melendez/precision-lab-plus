@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 517,
+  "revision": 518,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
@@ -34,8 +34,8 @@
   "next_action": {
     "id": "TRIG-IN-D-04",
     "previous_id": "TRIG-IN-D-03",
-    "status": "WAIT",
-    "action": "Revisar CI/Cumulative/H1d y Scientific Lite/Native Plus del SHA IN-D-04, jobs/pasos/logs; corregir fallos confirmados y cerrar solo con evidencia funcional bilateral. Seguridad se revisa por perfil, sin repetir equivalentes. Después IN-D-05."
+    "status": "REVIEW",
+    "action": "Reconciliar huellas del HEAD, CI y criterios de aceptación bilateral IN-D-04 con evidencia terminada; cerrar PASS_SCOPED si corresponde y luego iniciar IN-D-05. Seguridad independiente sin duplicar campaña."
   },
   "blockers": [
     {
@@ -67,29 +67,50 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-14T17:50:07.901Z",
+  "updated_utc": "2026-11-14T18:47:21.935Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
       "input_fingerprint": "4fa53936adb985ad2222d320db4687dc133906e1f4a2fcdbd614fda9e46d5054",
       "head_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
-      "decision": "WAIT",
-      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "decision": "REVIEW",
+      "reason": "Pruebas ejecutadas y logs revisados; falta reconciliar huellas de HEAD y aceptación de cierre.",
       "run_id": 43623011267,
       "evidence_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
-      "logs_reviewed": false,
-      "evidence_executed": false
+      "logs_reviewed": true,
+      "evidence_executed": true,
+      "jobs": [
+        {
+          "id": 132532633477,
+          "name": "frontend",
+          "conclusion": "success"
+        },
+        {
+          "id": 132532633718,
+          "name": "backend",
+          "conclusion": "success"
+        }
+      ],
+      "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "h1d": {
       "gate": "h1d",
       "input_fingerprint": "b71afb30ef306e227752d20f69a449072adee29440a3c604a1dc0064445d8808",
       "head_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
-      "decision": "WAIT",
-      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "decision": "REVIEW",
+      "reason": "Pruebas ejecutadas; falta reconciliar huella y aceptación.",
       "run_id": 43623011311,
       "evidence_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
-      "logs_reviewed": false,
-      "evidence_executed": false
+      "logs_reviewed": true,
+      "evidence_executed": true,
+      "jobs": [
+        {
+          "id": 132532633417,
+          "name": "h1d",
+          "conclusion": "success"
+        }
+      ],
+      "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "security": {
       "gate": "security",
