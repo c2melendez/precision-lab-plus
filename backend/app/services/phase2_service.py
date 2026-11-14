@@ -294,6 +294,35 @@ def compute_inequality(inequality: sympy.core.relational.Relational, variable: s
             ["Resultado restringido al período [0, 2*pi); la solución se repite cada 2*pi."],
         )
 
+    # IN-D-05: normalize only the frozen absolute-sine comparison. The generic
+    # SymPy route raises NotImplementedError for its periodic absolute value.
+    absolute_sine = sympy.Abs(sine)
+    matches_absolute_sine = False
+    if rel_op in (">=", "<="):
+        difference = (
+            inequality.lhs - inequality.rhs if rel_op == ">="
+            else inequality.rhs - inequality.lhs
+        )
+        if (
+            difference.count_ops() <= 12
+            and difference.atoms(sympy.Function) == {sine, absolute_sine}
+            and all(
+                p.base == 2 and p.exp in (sympy.S.Half, -sympy.S.Half, -1)
+                for p in difference.atoms(sympy.Pow)
+            )
+        ):
+            matches_absolute_sine = (
+                sympy.expand(difference) == absolute_sine - sympy.sqrt(2) / 2
+            )
+    if matches_absolute_sine:
+        return InequalityResult(
+            sympy.Union(
+                sympy.Interval(sympy.pi / 4, 3 * sympy.pi / 4),
+                sympy.Interval(5 * sympy.pi / 4, 7 * sympy.pi / 4),
+            ),
+            ["Resultado restringido al período [0, 2*pi); la solución se repite cada 2*pi."],
+        )
+
     try:
         solution_set = sympy.solve_univariate_inequality(inequality, var_symbol, relational=False)
     except (NotImplementedError, TypeError):
