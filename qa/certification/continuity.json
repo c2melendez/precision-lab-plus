@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 511,
+  "revision": 512,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "8adf1fd7b82c8cc0413c2ddd1fc1707ee7f46f7e",
-  "baseline_case": "TRIG-IN-D-01",
-  "baseline_status": "PASS_SCOPED",
+  "technical_baseline_sha": "0575e1dce1af03ac5e46348ad5c47ac36a266ab7",
+  "baseline_case": "TRIG-IN-D-02",
+  "baseline_status": "VERIFYING_CI",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -34,8 +34,8 @@
   "next_action": {
     "id": "TRIG-IN-D-02",
     "previous_id": "TRIG-IN-D-01",
-    "status": "RUN",
-    "action": "Completar validación local y publicar test-first bilateral: cos(x)<=0 en [0,2*pi) -> [pi/2,3*pi/2]. Lite corrige solo el fallo polinómico reproducido; Plus test-only. Verificar gates automáticos por SHA y no cerrar con pruebas locales."
+    "status": "WAIT",
+    "action": "Inspeccionar corridas push existentes de IN-D-02, revisar jobs/pasos/logs y corregir solo fallos confirmados. Cerrar bilateralmente antes de IN-D-03. No redispatch equivalente ni contar Runner/SKIP/TODO/XFAIL como PASS."
   },
   "blockers": [
     {
@@ -64,46 +64,127 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-14T02:59:27.486Z",
+  "updated_utc": "2026-11-14T03:03:57.283Z",
   "evidence": {
     "cumulative": {
-      "decision": "REUSE",
-      "run_id": 43547189971,
-      "evidence_sha": "8adf1fd7b82c8cc0413c2ddd1fc1707ee7f46f7e",
-      "input_fingerprint": "467063244890667016fa1d109ff9f4c9b7d2399915b57f16edb3dcd44c8b8818",
-      "acceptance_revision": "2026-10-16-continuity-v1",
-      "logs_reviewed": true,
-      "evidence_executed": true,
-      "jobs": [
-        {
-          "id": 132301139614,
-          "name": "frontend",
-          "conclusion": "success"
-        },
-        {
-          "id": 132301139865,
-          "name": "backend",
-          "conclusion": "success"
-        }
-      ],
-      "scope": "Servicio/HTTP normalizado del período contractual; no respuesta periódica global"
+      "gate": "cumulative",
+      "input_fingerprint": "e0f1f3b6d41c2fdbd3b37f1bf7a6f60c97bc05c026270993f8aaf3eb45ab5add",
+      "head_sha": "0575e1dce1af03ac5e46348ad5c47ac36a266ab7",
+      "decision": "WAIT",
+      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "run_id": 43549522414,
+      "evidence_sha": "0575e1dce1af03ac5e46348ad5c47ac36a266ab7",
+      "logs_reviewed": false,
+      "evidence_executed": false
     },
     "h1d": {
-      "decision": "REUSE",
-      "run_id": 43547190003,
-      "evidence_sha": "8adf1fd7b82c8cc0413c2ddd1fc1707ee7f46f7e",
-      "input_fingerprint": "06d98d82cd9182c36200fc5ef800920c8d45cb64ae111c422f280fbfe504101a",
-      "acceptance_revision": "2026-10-16-continuity-v1",
-      "logs_reviewed": true,
-      "evidence_executed": true,
-      "jobs": [
-        {
-          "id": 132301139765,
-          "name": "h1d",
-          "conclusion": "success"
-        }
-      ],
-      "scope": "Servicio/HTTP normalizado del período contractual; no respuesta periódica global"
+      "gate": "h1d",
+      "input_fingerprint": "c1f4919d4d604cc189adda1eb0521d9194c96ca96bf8ec8cb717dee1dbe62644",
+      "head_sha": "0575e1dce1af03ac5e46348ad5c47ac36a266ab7",
+      "decision": "WAIT",
+      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "run_id": 43549522371,
+      "evidence_sha": "0575e1dce1af03ac5e46348ad5c47ac36a266ab7",
+      "logs_reviewed": false,
+      "evidence_executed": false
+    },
+    "security": {
+      "gate": "security",
+      "input_fingerprint": "00d22b21d937310350125b9b41a05b7a9336183e08f367f16ad69e8c842ac8cf",
+      "head_sha": "0575e1dce1af03ac5e46348ad5c47ac36a266ab7",
+      "decision": "REVIEW",
+      "reason": "Dynamic external evidence and independent S25 blocker require profile/precondition review; do not dispatch from an incomplete recent-run window."
     }
-  }
+  },
+  "previous_accepted": {
+    "id": "TRIG-IN-D-01",
+    "status": "PASS_SCOPED",
+    "evidence": {
+      "cumulative": {
+        "decision": "REUSE",
+        "run_id": 43547189971,
+        "evidence_sha": "8adf1fd7b82c8cc0413c2ddd1fc1707ee7f46f7e",
+        "input_fingerprint": "467063244890667016fa1d109ff9f4c9b7d2399915b57f16edb3dcd44c8b8818",
+        "acceptance_revision": "2026-10-16-continuity-v1",
+        "logs_reviewed": true,
+        "evidence_executed": true,
+        "jobs": [
+          {
+            "id": 132301139614,
+            "name": "frontend",
+            "conclusion": "success"
+          },
+          {
+            "id": 132301139865,
+            "name": "backend",
+            "conclusion": "success"
+          }
+        ],
+        "scope": "Servicio/HTTP normalizado del período contractual; no respuesta periódica global"
+      },
+      "h1d": {
+        "decision": "REUSE",
+        "run_id": 43547190003,
+        "evidence_sha": "8adf1fd7b82c8cc0413c2ddd1fc1707ee7f46f7e",
+        "input_fingerprint": "06d98d82cd9182c36200fc5ef800920c8d45cb64ae111c422f280fbfe504101a",
+        "acceptance_revision": "2026-10-16-continuity-v1",
+        "logs_reviewed": true,
+        "evidence_executed": true,
+        "jobs": [
+          {
+            "id": 132301139765,
+            "name": "h1d",
+            "conclusion": "success"
+          }
+        ],
+        "scope": "Servicio/HTTP normalizado del período contractual; no respuesta periódica global"
+      }
+    }
+  },
+  "observed_runs": [
+    {
+      "id": 43549522414,
+      "path": ".github/workflows/in625-cumulative-certification.yml",
+      "head_sha": "0575e1dce1af03ac5e46348ad5c47ac36a266ab7",
+      "status": "in_progress",
+      "conclusion": null,
+      "created_at": "2026-11-14T03:02:37Z",
+      "run_attempt": 1,
+      "logs_reviewed": false,
+      "evidence_executed": false
+    },
+    {
+      "id": 43549522371,
+      "path": ".github/workflows/in625-h1d-reentry.yml",
+      "head_sha": "0575e1dce1af03ac5e46348ad5c47ac36a266ab7",
+      "status": "in_progress",
+      "conclusion": null,
+      "created_at": "2026-11-14T03:02:37Z",
+      "run_attempt": 1,
+      "logs_reviewed": false,
+      "evidence_executed": false
+    },
+    {
+      "id": 43549522361,
+      "path": ".github/workflows/ci.yml",
+      "head_sha": "0575e1dce1af03ac5e46348ad5c47ac36a266ab7",
+      "status": "in_progress",
+      "conclusion": null,
+      "created_at": "2026-11-14T03:02:37Z",
+      "run_attempt": 1,
+      "logs_reviewed": false,
+      "evidence_executed": false
+    },
+    {
+      "id": 43549522350,
+      "path": ".github/workflows/certification-runner.yml",
+      "head_sha": "0575e1dce1af03ac5e46348ad5c47ac36a266ab7",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-14T03:02:37Z",
+      "run_attempt": 1,
+      "logs_reviewed": false,
+      "evidence_executed": false
+    }
+  ]
 }
