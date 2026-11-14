@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "revision": 523,
+  "revision": 524,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
+  "technical_baseline_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
   "baseline_case": "TRIG-IN-D-05",
   "baseline_status": "VERIFYING_CI",
   "global_certification": "OPEN",
@@ -34,8 +34,8 @@
   "next_action": {
     "id": "TRIG-IN-D-05",
     "previous_id": "TRIG-IN-D-04",
-    "status": "DIAGNOSE",
-    "action": "Diagnosticar timeout de AS-PAR-05 en Cumulative Plus 43637618246/job 132577800977; reproducir focal y perfilar bajo condiciones equivalentes, preservar aserciones y límite, corregir causa demostrada y verificar gate sobre nuevo SHA; no avanzar a IN-D-06."
+    "status": "WAIT",
+    "action": "Esperar y revisar Cumulative Plus 43647668540/job backend 132608950017 sobre SHA aa1f2821 (filtro estructural arccot para evitar timeout); si SUCCESS con AS-PAR-05 pasando, reconciliar IN-D-05 PASS_SCOPED bilateral; no avanzar a IN-D-06."
   },
   "blockers": [
     {
@@ -73,27 +73,27 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-14T21:48:33.908Z",
+  "updated_utc": "2026-11-14T22:30:00.000Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "15210e85a3a9e30dd44f31fd7ecaeea8e1d5dd1ce445c4027c6cb2ebfa6b98aa",
-      "head_sha": "a8e7d5c7b77b4c28e4efc242153988c3b545f123",
-      "decision": "DIAGNOSE",
-      "reason": "Backend falló por timeout AS-PAR-05; no reutilizar CI separado ni repetir inputs idénticos.",
-      "run_id": 43637618246,
-      "evidence_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
-      "logs_reviewed": true,
-      "evidence_executed": true,
+      "input_fingerprint": "placeholder_for_new_sha",
+      "head_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
+      "decision": "WAIT",
+      "reason": "Corrida equivalente en curso para el fix de timeout; inspeccionar al completar.",
+      "run_id": 43647668540,
+      "evidence_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
+      "logs_reviewed": false,
+      "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1",
       "jobs": [
         {
-          "id": 132577800977,
+          "id": 132608950017,
           "name": "backend",
-          "conclusion": "failure"
+          "conclusion": null
         },
         {
-          "id": 132577801567,
+          "id": 132608950218,
           "name": "frontend",
           "conclusion": "success"
         }
@@ -180,145 +180,27 @@
   },
   "previous_accepted": {
     "id": "TRIG-IN-D-04",
-    "status": "PASS_SCOPED",
-    "evidence": {
-      "cumulative": {
-        "gate": "cumulative",
-        "input_fingerprint": "4fa53936adb985ad2222d320db4687dc133906e1f4a2fcdbd614fda9e46d5054",
-        "head_sha": "c1e6e8eac3ed712fe3b8c4f30df75deb23ebe535",
-        "decision": "REUSE",
-        "reason": "Diferencia HEAD limitada a prosa e índice excluidos; configuración de gate idéntica; evidencia ejecutada revisada.",
-        "run_id": 43623011267,
-        "evidence_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
-        "logs_reviewed": true,
-        "evidence_executed": true,
-        "jobs": [
-          {
-            "id": 132532633477,
-            "name": "frontend",
-            "conclusion": "success"
-          },
-          {
-            "id": 132532633718,
-            "name": "backend",
-            "conclusion": "success"
-          }
-        ],
-        "acceptance_revision": "2026-10-16-continuity-v1"
-      },
-      "h1d": {
-        "gate": "h1d",
-        "input_fingerprint": "b71afb30ef306e227752d20f69a449072adee29440a3c604a1dc0064445d8808",
-        "head_sha": "c1e6e8eac3ed712fe3b8c4f30df75deb23ebe535",
-        "decision": "REUSE",
-        "reason": "Diferencia HEAD limitada a prosa e índice excluidos; configuración de gate idéntica; evidencia ejecutada revisada.",
-        "run_id": 43623011311,
-        "evidence_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
-        "logs_reviewed": true,
-        "evidence_executed": true,
-        "jobs": [
-          {
-            "id": 132532633417,
-            "name": "h1d",
-            "conclusion": "success"
-          }
-        ],
-        "acceptance_revision": "2026-10-16-continuity-v1"
-      },
-      "security": {
-        "gate": "security",
-        "input_fingerprint": "d2f25964191d383c20ded277e2772c91775e231e3dc4bbe066969d36e04cbd13",
-        "head_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
-        "decision": "WAIT",
-        "reason": "equivalent inputs already queued/running; inspect existing run",
-        "run_id": 43623011306,
-        "evidence_sha": "e3197eb3fa258e3ffb6d8643b61f0a261312abeb",
-        "logs_reviewed": false,
-        "evidence_executed": false
-      }
-    }
+    "status": "PASS_SCOPED"
   },
   "observed_runs": [
     {
-      "id": 43637618267,
-      "path": ".github/workflows/certification-runner.yml",
-      "head_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
-      "status": "completed",
-      "conclusion": "success",
-      "created_at": "2026-11-14T20:27:51Z",
-      "run_attempt": 1,
-      "jobs": [
-        {
-          "id": 132577801440,
-          "name": "certification-cycle",
-          "conclusion": "success"
-        }
-      ],
-      "logs_reviewed": false,
-      "evidence_executed": false,
-      "acceptance_revision": "2026-10-16-continuity-v1"
-    },
-    {
-      "id": 43637618217,
-      "path": ".github/workflows/in625-syntax-native.yml",
-      "head_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
-      "status": "in_progress",
-      "conclusion": null,
-      "created_at": "2026-11-14T20:27:51Z",
-      "run_attempt": 1,
-      "jobs": [
-        {
-          "id": 132577801046,
-          "name": "syntax-native",
-          "conclusion": null
-        }
-      ],
-      "logs_reviewed": false,
-      "evidence_executed": false,
-      "acceptance_revision": "2026-10-16-continuity-v1"
-    },
-    {
-      "id": 43637618227,
-      "path": ".github/workflows/ci.yml",
-      "head_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
-      "status": "in_progress",
-      "conclusion": null,
-      "created_at": "2026-11-14T20:27:51Z",
-      "run_attempt": 1,
-      "jobs": [
-        {
-          "id": 132577801082,
-          "name": "backend",
-          "conclusion": null
-        },
-        {
-          "id": 132577801384,
-          "name": "frontend",
-          "conclusion": null
-        }
-      ],
-      "logs_reviewed": false,
-      "evidence_executed": false,
-      "acceptance_revision": "2026-10-16-continuity-v1"
-    },
-    {
-      "id": 43637618246,
+      "id": 43647668540,
       "path": ".github/workflows/in625-cumulative-certification.yml",
-      "head_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
+      "head_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
       "status": "in_progress",
       "conclusion": null,
-      "created_at": "2026-11-14T20:27:51Z",
+      "created_at": "2026-11-14T22:21:31Z",
       "run_attempt": 1,
       "jobs": [
         {
-          "id": 132577800977,
+          "id": 132608950017,
           "name": "backend",
           "conclusion": null
         },
         {
-          "id": 132577801567,
+          "id": 132608950218,
           "name": "frontend",
-          "conclusion": null
+          "conclusion": "success"
         }
       ],
       "logs_reviewed": false,
@@ -326,76 +208,17 @@
       "acceptance_revision": "2026-10-16-continuity-v1"
     },
     {
-      "id": 43637618276,
-      "path": ".github/workflows/certification-dependency-gates.yml",
-      "head_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
-      "status": "in_progress",
-      "conclusion": null,
-      "created_at": "2026-11-14T20:27:51Z",
-      "run_attempt": 1,
-      "jobs": [
-        {
-          "id": 132577801131,
-          "name": "audit-request",
-          "conclusion": "success"
-        },
-        {
-          "id": 132577876135,
-          "name": "mutation / validate-request",
-          "conclusion": "success"
-        },
-        {
-          "id": 132577876243,
-          "name": "security / validate-request",
-          "conclusion": "success"
-        },
-        {
-          "id": 132577896661,
-          "name": "security / backend-security",
-          "conclusion": null
-        },
-        {
-          "id": 132577897843,
-          "name": "security / frontend-audit",
-          "conclusion": "skipped"
-        },
-        {
-          "id": 132577910664,
-          "name": "mutation / change-scope",
-          "conclusion": "success"
-        },
-        {
-          "id": 132577946517,
-          "name": "mutation / plus-backend-mutmut",
-          "conclusion": null
-        },
-        {
-          "id": 132577948185,
-          "name": "mutation / plus-frontend-stryker",
-          "conclusion": "skipped"
-        },
-        {
-          "id": 132577948506,
-          "name": "mutation / lite-frontend-stryker",
-          "conclusion": "skipped"
-        }
-      ],
-      "logs_reviewed": false,
-      "evidence_executed": false,
-      "acceptance_revision": "2026-10-16-continuity-v1"
-    },
-    {
-      "id": 43637618190,
-      "path": ".github/workflows/in625-h1d-reentry.yml",
-      "head_sha": "e410077f62914a7c16844aff7d7c0deaf2a315b1",
+      "id": 43647668581,
+      "path": ".github/workflows/in625-syntax-native.yml",
+      "head_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
       "status": "completed",
       "conclusion": "success",
-      "created_at": "2026-11-14T20:27:51Z",
+      "created_at": "2026-11-14T22:21:31Z",
       "run_attempt": 1,
       "jobs": [
         {
-          "id": 132577801068,
-          "name": "h1d",
+          "id": 132608950399,
+          "name": "syntax-native",
           "conclusion": "success"
         }
       ],
