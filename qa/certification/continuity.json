@@ -65,18 +65,31 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-14T17:32:13.257Z",
+  "updated_utc": "2026-11-14T17:33:20.535Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
       "input_fingerprint": "59e620eb8b88aea81572c0f64404da0b817dce51e6c809f726000ae87161d0d8",
       "head_sha": "c0605101d99a1bc4d8203cb544ac0a1c5641238c",
-      "decision": "WAIT",
-      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "decision": "REVIEW",
+      "reason": "Ejecución terminada y logs consultados; pendiente reconciliar huella HEAD y aceptación antes de REUSE o cierre.",
       "run_id": 43559502095,
       "evidence_sha": "c0605101d99a1bc4d8203cb544ac0a1c5641238c",
-      "logs_reviewed": false,
-      "evidence_executed": false
+      "logs_reviewed": true,
+      "evidence_executed": true,
+      "jobs": [
+        {
+          "id": 132339787080,
+          "name": "backend",
+          "conclusion": "success"
+        },
+        {
+          "id": 132339787382,
+          "name": "frontend",
+          "conclusion": "success"
+        }
+      ],
+      "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "h1d": {
       "gate": "h1d",
@@ -101,8 +114,8 @@
       "gate": "security",
       "input_fingerprint": "3a4eae1f864ebd21b04b3d091bbea6846ba42e6faa817df541f49176fb557b54",
       "head_sha": "c0605101d99a1bc4d8203cb544ac0a1c5641238c",
-      "decision": "WAIT",
-      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "decision": "REVIEW",
+      "reason": "Campaña terminada; evaluar informe de mutación y aceptación por perfil. Jobs frontend omitidos no son PASS.",
       "run_id": 43559502112,
       "evidence_sha": "c0605101d99a1bc4d8203cb544ac0a1c5641238c",
       "logs_reviewed": false,
@@ -172,13 +185,13 @@
       "head_sha": "c0605101d99a1bc4d8203cb544ac0a1c5641238c",
       "created_at": "2026-11-14T05:01:45Z",
       "run_attempt": 1,
-      "status": "in_progress",
-      "conclusion": null,
+      "status": "completed",
+      "conclusion": "success",
       "jobs": [
         {
           "id": 132339787080,
           "name": "backend",
-          "conclusion": null
+          "conclusion": "success"
         },
         {
           "id": 132339787382,
@@ -186,8 +199,8 @@
           "conclusion": "success"
         }
       ],
-      "logs_reviewed": false,
-      "evidence_executed": false,
+      "logs_reviewed": true,
+      "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1"
     },
     {
@@ -196,18 +209,18 @@
       "head_sha": "c0605101d99a1bc4d8203cb544ac0a1c5641238c",
       "created_at": "2026-11-14T05:01:45Z",
       "run_attempt": 1,
-      "status": "in_progress",
-      "conclusion": null,
+      "status": "completed",
+      "conclusion": "success",
       "jobs": [
         {
           "id": 132339787036,
           "name": "frontend",
-          "conclusion": null
+          "conclusion": "success"
         },
         {
           "id": 132339787358,
           "name": "backend",
-          "conclusion": null
+          "conclusion": "success"
         }
       ],
       "logs_reviewed": false,
@@ -220,17 +233,17 @@
       "head_sha": "c0605101d99a1bc4d8203cb544ac0a1c5641238c",
       "created_at": "2026-11-14T05:01:45Z",
       "run_attempt": 1,
-      "status": "in_progress",
-      "conclusion": null,
+      "status": "completed",
+      "conclusion": "success",
       "jobs": [
         {
           "id": 132339787175,
           "name": "syntax-native",
-          "conclusion": null
+          "conclusion": "success"
         }
       ],
-      "logs_reviewed": false,
-      "evidence_executed": false,
+      "logs_reviewed": true,
+      "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1"
     },
     {
