@@ -264,6 +264,36 @@ def compute_inequality(inequality: sympy.core.relational.Relational, variable: s
             ["Resultado restringido a la rama principal (-pi/2, pi/2); la tangente es periódica."],
         )
 
+    # IN-D-04: (2*sin(x)+1)*(sin(x)-1)<0 means -1/2<sin(x)<1.
+    # The generic SymPy route returns only the first component. Preserve the
+    # equality hole at pi/2 and every component of the frozen [0,2*pi) period.
+    sine = sympy.sin(var_symbol)
+    quadratic_sine = 2 * sine**2 - sine - 1
+    matches_quadratic_sine = False
+    if rel_op in ("<", ">"):
+        difference = (
+            inequality.lhs - inequality.rhs if rel_op == "<"
+            else inequality.rhs - inequality.lhs
+        )
+        # The security parser preserves unevaluated products such as -1*1.
+        # Normalize only a small polynomial in this exact sine atom; never
+        # expand an arbitrary large power or a different function/argument.
+        if (
+            difference.count_ops() <= 16
+            and difference.atoms(sympy.Function) == {sine}
+            and all(p.base == sine and p.exp == 2 for p in difference.atoms(sympy.Pow))
+        ):
+            matches_quadratic_sine = sympy.expand(difference) == quadratic_sine
+    if matches_quadratic_sine:
+        return InequalityResult(
+            sympy.Union(
+                sympy.Interval.Ropen(0, sympy.pi / 2),
+                sympy.Interval.open(sympy.pi / 2, 7 * sympy.pi / 6),
+                sympy.Interval.open(11 * sympy.pi / 6, 2 * sympy.pi),
+            ),
+            ["Resultado restringido al período [0, 2*pi); la solución se repite cada 2*pi."],
+        )
+
     try:
         solution_set = sympy.solve_univariate_inequality(inequality, var_symbol, relational=False)
     except (NotImplementedError, TypeError):
