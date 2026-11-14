@@ -1,3 +1,13 @@
+# r525 — IN-D-05: Cumulative Plus SUCCESS tras fix de timeout; cierre bilateral
+
+Global OPEN; IN-D-05 se cierra PASS_SCOPED. Fix técnico aa1f2821bb2d4df92dc94db0848a67141f4fb76a (early structural filter in _arccot_two_pi_thirds_result) resolvió el timeout. Cumulative 43647668540 terminó SUCCESS: backend job 132608950017 3031 passed, 1 skipped, 11 xfailed (AS-PAR-05 pasó en 39.24s); frontend SUCCESS. Native 43647668581 SUCCESS. Lite mantiene evidencia SUCCESS previa (Cumulative 43637613663 etc.).
+
+No se relajó oráculo ni límite. S25, SG28/DIST y EV-D-01 siguen BLOCKED.
+
+Siguiente acción única: iniciar IN-D-06 según protocolo; no reabrir IN-D-05.
+
+---
+
 # r524 — Native SUCCESS; Cumulative WAIT para verificación del fix de timeout AS-PAR-05
 
 Global OPEN; IN-D-05 no se cierra. Fix técnico aa1f2821bb2d4df92dc94db0848a67141f4fb76a: early structural filter in arccot handler to avoid CI timeout on unrelated equations. Native Syntax 43647668581 SUCCESS (26 desktop, 52 tablet/móvil).
