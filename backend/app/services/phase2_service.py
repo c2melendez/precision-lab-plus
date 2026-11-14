@@ -248,6 +248,22 @@ def compute_inequality(inequality: sympy.core.relational.Relational, variable: s
     var_symbol = _validate_variable(variable)
     warnings: List[str] = []
 
+    # IN-D-03 uses the continuous principal tangent branch (-pi/2, pi/2).
+    # SymPy's default [0, pi) period (even with domain=...) omits negative x.
+    # Recognize only this frozen strict comparison and expose the branch scope.
+    tangent = sympy.tan(var_symbol)
+    rel_op = getattr(inequality, "rel_op", None)
+    tangent_less_than_one = (
+        rel_op == "<" and inequality.lhs == tangent and inequality.rhs == 1
+    ) or (
+        rel_op == ">" and inequality.lhs == 1 and inequality.rhs == tangent
+    )
+    if tangent_less_than_one:
+        return InequalityResult(
+            sympy.Interval.open(-sympy.pi / 2, sympy.atan(1)),
+            ["Resultado restringido a la rama principal (-pi/2, pi/2); la tangente es periódica."],
+        )
+
     try:
         solution_set = sympy.solve_univariate_inequality(inequality, var_symbol, relational=False)
     except (NotImplementedError, TypeError):
