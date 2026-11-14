@@ -151,6 +151,16 @@ ALLOWED_FUNCTIONS = {
     "asech": asech,
     "acsch": acsch,
     "acoth": acoth,
+    # Paridad con la matriz congelada 2.D (EC-HI-*): la fuente escribe las
+    # inversas hiperbólicas con prefijo "ar-" (\operatorname{arcosh} x=0,
+    # \operatorname{artanh} x=\ln 2, ...), que Lite ya acepta. Se registran
+    # como alias de las mismas funciones de SymPy; sin reescritura adicional.
+    "arsinh": asinh,
+    "arcosh": acosh,
+    "artanh": atanh,
+    "arsech": asech,
+    "arcsch": acsch,
+    "arcoth": acoth,
     "sqrt": sqrt,
     # Fix (suite de regresión v1.1, caso E107): "cbrt" no estaba
     # registrada — "cbrt(27)" quedaba sin reconocer como función

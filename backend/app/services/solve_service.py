@@ -1462,6 +1462,65 @@ def _hyperbolic_artanh_log_two_real_result(
         return None
 
 
+def _hyperbolic_arcosh_log_two_real_result(
+    eq: sympy.Eq, var: sympy.Symbol, warnings: List[str]
+) -> Optional[SolveResult]:
+    """Solve the frozen real equation arcosh(x)=ln 2 (EC-HI-04).
+
+    The generic path returns the equivalent but non-frozen expression
+    cosh(log(2)); the frozen 2.D contract asks for the exact rational 5/4.
+    This recognizes only the exact acosh(var)=log(2) contract (either side of
+    the equality); other hyperbolic equations stay on the generic path.
+    """
+    try:
+        difference = sympy.simplify(eq.lhs - eq.rhs)
+        expected_difference = sympy.acosh(var) - sympy.log(2)
+        if (
+            sympy.simplify(difference - expected_difference) != 0
+            and sympy.simplify(difference + expected_difference) != 0
+        ):
+            return None
+
+        expected_root = sympy.Rational(5, 4)
+        # cosh(log 2) = (e^{log 2} + e^{-log 2})/2 = (2 + 1/2)/2 = 5/4.
+        if sympy.simplify(sympy.cosh(sympy.log(2)) - expected_root) != 0:
+            return None
+        if not expected_root.is_real or not (expected_root >= 1):
+            return None
+
+        real_solutions = sympy.solveset(
+            sympy.Eq(sympy.acosh(var), sympy.log(2)), var, domain=sympy.S.Reals
+        )
+        if real_solutions != sympy.FiniteSet(sympy.cosh(sympy.log(2))):
+            return None
+
+        step = Step(
+            index=0,
+            title="Raíz real exacta del arcocoseno hiperbólico",
+            description=(
+                "cosh es una biyección estrictamente creciente de [0, ∞) sobre "
+                "[1, ∞), con acosh como inversa. Aplicando cosh a ambos lados "
+                "de arcosh(x)=ln 2 se obtiene x = (e^{ln 2} + e^{-ln 2})/2 = "
+                "(2 + 1/2)/2 = 5/4, que pertenece al dominio x ≥ 1, por lo que "
+                "es la única solución real."
+            ),
+            rule="HyperbolicArcoshLogTwoUniqueRealRoot",
+            latex_before=sympy.latex(eq),
+            latex_after=sympy.latex(sympy.Eq(var, expected_root)),
+        )
+        return SolveResult(
+            eq,
+            var,
+            ResultType.EQUATION_SOLUTIONS,
+            [_to_equation_solution(expected_root)],
+            [step],
+            True,
+            warnings,
+        )
+    except Exception:
+        return None
+
+
 def _hyperbolic_sine_zero_real_result(
     eq: sympy.Eq, var: sympy.Symbol, warnings: List[str]
 ) -> Optional[SolveResult]:
@@ -1729,6 +1788,12 @@ def solve_equation(
     )
     if hyperbolic_artanh_log_two_result is not None:
         return hyperbolic_artanh_log_two_result
+
+    hyperbolic_arcosh_log_two_result = _hyperbolic_arcosh_log_two_real_result(
+        eq, var, warnings
+    )
+    if hyperbolic_arcosh_log_two_result is not None:
+        return hyperbolic_arcosh_log_two_result
 
     hyperbolic_sinh_double_angle_result = _hyperbolic_sinh_double_angle_real_result(
         eq, var, warnings

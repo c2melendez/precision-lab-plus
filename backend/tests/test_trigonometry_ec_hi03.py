@@ -35,7 +35,7 @@ def test_ec_hi03_source_row_and_exact_root_are_frozen():
 
 
 def test_ec_hi03_service_returns_exactly_three_fifths():
-    result = solve_equation("atanh(x)=ln(2)", "x")
+    result = solve_equation("artanh(x)=ln(2)", "x")
     assert result.result_type == ResultType.EQUATION_SOLUTIONS
     assert len(result.solutions) == 1, result.solutions
     assert result.solutions[0].text.replace(" ", "") == "3/5", result.solutions[0].text
