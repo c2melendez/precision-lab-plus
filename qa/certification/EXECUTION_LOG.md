@@ -1,3 +1,9 @@
+## r544 — IN-D-08: reconciliación de mutación con la corrida 43691200778
+
+Plus SHA 5f10389c4ec0217d1007aa22b5219c34ba91f0b9; job plus-backend-mutmut 132742142853 con éxito a las 10:09 UTC. Artefacto 14157018061 con resultados idénticos a 43684691979: 5.836 mutantes; 2.498 eliminados; 3.312 sobrevivientes; 12 timeout; 14 sin pruebas.
+
+r535 citó esa corrida cuando seguía en curso; su componente de mutación queda REVIEW, igual que r543. IN-D-08 no se cierra: componentes funcionales PASS_SCOPED; mutación backend REVIEW. S19 backend REVIEW; global OPEN; bloqueos S25, SG28/DIST y EV-D-01 sin cambios. Lite no se modificó.
+
 ## r543 — IN-D-08: mutación backend 43684691979 registrada como REVIEW
 
 Plus SHA a2bb123f2babfc8c4e8df725f3b00806af606061; job plus-backend-mutmut 132722665975 con código 0 y sin umbral de score en backend. Totales: 5.836 mutantes; 2.498 eliminados; 3.312 sobrevivientes; 14 sin pruebas; 12 timeout (42,80 % eliminados; línea base 57,39 % con 1.028 mutantes).
