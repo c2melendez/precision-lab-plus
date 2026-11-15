@@ -1,3 +1,11 @@
+# r548 — IN-I-03 PASS_SCOPED funcional; iniciar IN-I-04
+
+IN-I-03: Lite parser/motor y Plus servicio/HTTP (incluido literal fuente); E2E visual dedicado no acreditado. Lite SHA 63793b3a5ee263653835527462c4395172dc8b48: acumulativo 43710610622 (2582 passed, 8 expected fail, 34 TODO), H1d 43710610635 (22), Scientific 43710610666 (456). Plus SHA f9222b115fb2ed8bba46245cc7d8d3ecdea52b84: acumulativo 43725643080/backend 132846861090 (3082 passed, 1 skipped, 11 xfailed; literal y controles PASS), frontend 132846860774 (1055 passed, 28 TODO); H1d 43725643065 (38), Native 43725643032 (26 desktop, 52 tablet/móvil). Jobs y logs revisados. Seguridad 43725643047/job 132846991188 y mutación previa 43715315873/job 132815595041 siguen en curso; frontend omitido no es PASS. S19 REVIEW, S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN.
+
+Siguiente acción única: IN-I-04 arctan(2x)>=π/4, solución [1/2,∞); test-first bilateral y controles, sin duplicar gates de seguridad.
+
+---
+
 # r547 — Canal HTTP literal IN-I-03 corregido; gates pendientes
 
 Plus SHA técnico f9222b115fb2ed8bba46245cc7d8d3ecdea52b84: la forma fuente `\\arctan x<1` se normaliza con reconocimiento acotado y sigue pasando validaciones de seguridad. Test-first: el canal HTTP fallaba con PARSE_ERROR; ahora pruebas de literal y entradas malformadas pasan junto a parser/seguridad: 273 pruebas locales. No implica E2E visual. Push acumulativo 43725643080, H1d 43725643065, Native 43725643032, CI 43725643052 y seguridad 43725643047 en cola al registrar. Mutación previa 43715315873/job 132815595041 sigue en curso; se conserva y la corrida nueva tiene código distinto. S19 REVIEW, S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN.
