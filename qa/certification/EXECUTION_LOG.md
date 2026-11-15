@@ -1,3 +1,7 @@
+## r535 — IN-D-08 PASS_SCOPED bilateral
+
+Gates funcionales ejecutados y logs revisados según CURRENT_STATE r535. Plus seguridad 43691200778 aún en curso; perfiles omitidos no son PASS. Alcance literal completo y E2E dedicado no acreditados. Siguiente acción IN-D-09; global OPEN y bloqueos conservados.
+
 ## r534 — IN-D-08: advertencia de período Plus
 
 SHA 5f10389c4ec0217d1007aa22b5219c34ba91f0b9. Test-first dos fallos por advertencia ausente, corrección y 41 pruebas locales aprobadas. CI 43691200754; acumulativo 43691200764; H1d 43691200749; Native 43691200755; seguridad 43691200778: WAIT pendiente de logs. Global OPEN; bloqueos preservados.
