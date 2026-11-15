@@ -963,6 +963,13 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     source_arctan = re.fullmatch(r"\s*\\arctan\s+([A-Za-z])\s*<\s*1\s*", text)
     if source_arctan:
         text = f"atan({source_arctan.group(1)})<1"
+    # IN-I-04 source uses a scaled variable and a LaTeX relation/fraction.
+    # Normalize only this bounded form; retain the normal validation pipeline.
+    scaled_arctan = re.fullmatch(
+        r"\s*\\arctan\(\s*2\s*([A-Za-z])\s*\)\s*\\ge\s*\\frac\{\\pi\}\{4\}\s*", text
+    )
+    if scaled_arctan:
+        text = f"atan(2*{scaled_arctan.group(1)})>=pi/4"
     normalized = normalize_unicode(text)
 
     found_operator = None
