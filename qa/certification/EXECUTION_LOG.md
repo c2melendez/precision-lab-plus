@@ -1,3 +1,7 @@
+## r545 — S19: pruebas dirigidas sin modificar harness
+
+SHA ecfc786d8caf30aad82e83828902eaf10b029505; 456 pruebas locales aprobadas en la selección existente. Push acumulativo 43715315872, H1d 43715315847, seguridad/mutación 43715315873, CI 43715315835 pendientes. S19 REVIEW; global OPEN. Se preserva la revisión r543-r544 y los bloqueos.
+
 ## r544 — IN-D-08: reconciliación de mutación con la corrida 43691200778
 
 Plus SHA 5f10389c4ec0217d1007aa22b5219c34ba91f0b9; job plus-backend-mutmut 132742142853 con éxito a las 10:09 UTC. Artefacto 14157018061 con resultados idénticos a 43684691979: 5.836 mutantes; 2.498 eliminados; 3.312 sobrevivientes; 12 timeout; 14 sin pruebas.

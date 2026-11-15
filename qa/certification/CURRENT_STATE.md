@@ -1,3 +1,11 @@
+# r545 — S19: pruebas dirigidas publicadas; mutación pendiente
+
+Plus SHA técnico ecfc786d8caf30aad82e83828902eaf10b029505. Se añadieron pruebas en el archivo ya incluido en la selección de mutación: agregados finitos, índices/límites inválidos, normalización matemática y rechazo de ecuaciones fuera de solve. Selección existente completa: 456 pruebas locales aprobadas. No se cambian el harness, los mutantes ni umbrales; el impacto en el score aún no está verificado. Push acumulativo 43715315872, H1d 43715315847, seguridad/mutación 43715315873 y CI 43715315835 estaban en curso o cola. Mantener S19 REVIEW; no contar jobs omitidos como PASS. IN-I-03: funcional Lite acumulativo 43710610622 (2582 passed, 8 expected fail, 34 TODO), H1d 43710610635 (22), scientific 43710610666 (456); Plus acumulativo 43710615660/backend 132801135773 (3066 passed, 1 skipped, 11 xfailed) y frontend (1055 passed, 28 TODO), H1d 43710615637 (38). Falta reconciliar formalmente alcance literal y el nuevo SHA de Plus. Global OPEN; S25, SG28/DIST y EV-D-01 BLOCKED.
+
+Siguiente acción única: revisar el reporte y los gates del SHA técnico, comparar sobrevivientes y timeouts con 43684691979, mantener REVIEW mientras falte aceptación y reconciliar la evidencia funcional de IN-I-03.
+
+---
+
 # r544 — IN-D-08: reconciliación de mutación con la corrida 43691200778
 
 Plus SHA verificado: 5f10389c4ec0217d1007aa22b5219c34ba91f0b9. Corrida 43691200778 (push); job plus-backend-mutmut 132742142853 completado con éxito a las 10:09 UTC; artefacto s19-plus-backend-mutmut 14157018061, digest SHA-256 b2cb0c1b27154bf309636dd3440cb94fefce0ccccdcf3c7e41eb741cd5ee17ee.
