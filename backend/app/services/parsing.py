@@ -981,6 +981,10 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     )
     if source_arccot:
         text = f"acot({source_arccot.group(1)})<pi/4"
+    # IN-I-07: accept only the complete matrix literal, retaining validation.
+    source_arcsin_affine = re.fullmatch(r"\s*\\arcsin\(\s*2\s*([A-Za-z])\s*-\s*1\s*\)\s*\\ge\s*0\s*", text)
+    if source_arcsin_affine:
+        text = f"asin(2*{source_arcsin_affine.group(1)}-1)>=0"
     normalized = normalize_unicode(text)
 
     found_operator = None
