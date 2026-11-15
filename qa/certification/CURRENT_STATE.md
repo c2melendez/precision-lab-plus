@@ -1,3 +1,21 @@
+# r543 — Mutación backend 43684691979 registrada como REVIEW
+
+Plus SHA de la corrida de seguridad: a2bb123f2babfc8c4e8df725f3b00806af606061 (job plus-backend-mutmut 132722665975, artefacto s19-plus-backend-mutmut 14153208898). Estado: REVIEW, no PASS. El job terminó con código 0, pero el backend no tiene umbral de score, así que ese código no acredita calidad de mutación.
+
+Totales leídos del log del job: 5.836 mutantes; 2.498 eliminados (42,80 %); 3.312 sobrevivientes; 14 sin pruebas; 12 timeout. Línea base estable (qa/s19/BASELINE_MUTATION.md): 1.028 mutantes, 590 eliminados (57,39 %). El score bajó 14,6 puntos. Otros componentes de la corrida: pip-audit sin vulnerabilidades; Bandit sin hallazgos de severidad alta; pruebas de seguridad aprobadas; auditoría frontend con 13 avisos (11 moderados, 2 bajos), pendientes de evaluación según la política.
+
+Causas identificadas:
+1. Crecimiento del código fuera del harness. Desde 7568020 solve_service suma +1.841 líneas, parsing +293, evaluate +238 y ast_validator +43. 2.389 sobrevivientes están en 30 funciones de solve_service añadidas después de la línea base; evaluate (92) y parsing (23) también tienen sobrevivientes en funciones nuevas.
+2. El harness no cambió en lo que mide: mismos cinco módulos (only_mutate), mismos cuatro archivos de prueba seleccionados, mutmut 3.8.0. Los cambios del workflow son ceilings de timeout y clasificación de alcance. Los archivos seleccionados crecieron (test_solve 9→78, test_parsing 21→41, test_evaluate 25→51 pruebas), pero ninguno contiene pruebas de hiperbólicas; esas viven en otros archivos fuera de la selección.
+3. Sin caída en código estable. Funciones sin cambio AST desde la línea base mantienen sus sobrevivientes: _quadratic_steps 74→74, _linear_steps 31→31, _to_equation_solution 6→6, validate_ast_safety 3→3, _expand_sqrt_tokens 39→37; parse_inequality_tree baja de 52 a 1.
+4. Brechas reales en funciones modificadas: solve_equation 25→244; normalize_unicode 7→104; parse_expression_tree 11→52; check_complexity_limits 15→66; _parse_side 9→29; _try_parse_finite_aggregate 83→98.
+
+Decisión: REVIEW. No se acepta el score degradado ni se cierra S19 backend. Global OPEN; S25, SG28/DIST y EV-D-01 BLOCKED sin cambios. La entrada r535 (IN-D-08 PASS_SCOPED) citó la corrida 43691200778 como en curso; no verifiqué su resultado en esta revisión, y su componente de mutación debe reconciliarse con este REVIEW antes de cualquier cierre.
+
+Siguiente acción: evaluar los 13 avisos de auditoría frontend según la política y decidir cómo tratar las seis brechas de la causa 4 (pruebas dirigidas, sin cambiar umbrales ni mutantes). Ampliar la selección de pruebas de mutmut cambia el harness y requiere autorización explícita.
+
+---
+
 # r542 — IN-I-03 publicado; verificación CI pendiente
 
 Lite SHA 63793b3a5ee263653835527462c4395172dc8b48; Plus SHA 4575c8f13578cd9b45216e1c0567669b6d747df5. Test-first: Lite no resolvía arctan(x)<1; se implementó x<tan(1), frontera estricta en radianes y fallback preservado. Plus ya resolvía el caso y recibió tests de fuente, servicio y HTTP. Local: Lite 79 pruebas y build aprobados; Plus 58 pruebas aprobadas. Push Lite acumulativo 43710610622, H1d 43710610635, Scientific 43710610666, CI 43710610689; Plus acumulativo 43710615660, H1d 43710615637, CI 43710615647: en curso al registrar. Seguridad 43695734343 terminó por runner shutdown sin reporte final; no repetir bloqueo idéntico. Global OPEN; S25, SG28/DIST y EV-D-01 BLOCKED.
