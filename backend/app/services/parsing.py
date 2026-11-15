@@ -958,6 +958,11 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     solo cambia qué operador separa los dos lados (`<,>,<=,>=` en vez de
     `=`) y qué tipo de `Relational` de SymPy se construye al final."""
     validate_length(text)
+    # IN-I-03 source: accept the single-variable literal without broadening
+    # the LaTeX grammar; the normalized form still passes every safety check.
+    source_arctan = re.fullmatch(r"\s*\\arctan\s+([A-Za-z])\s*<\s*1\s*", text)
+    if source_arctan:
+        text = f"atan({source_arctan.group(1)})<1"
     normalized = normalize_unicode(text)
 
     found_operator = None
