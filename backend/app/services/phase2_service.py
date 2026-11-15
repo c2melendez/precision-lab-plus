@@ -323,6 +323,21 @@ def compute_inequality(inequality: sympy.core.relational.Relational, variable: s
             ["Resultado restringido al período [0, 2*pi); la solución se repite cada 2*pi."],
         )
 
+    # IN-D-06: SymPy returns only one positive component for this product.
+    # Recognize a small exact comparison only; retain the generic fallback.
+    cosine = sympy.cos(var_symbol)
+    if rel_op in (">", "<"):
+        difference = inequality.lhs - inequality.rhs if rel_op == ">" else inequality.rhs - inequality.lhs
+        if (difference.count_ops() <= 12
+                and difference.atoms(sympy.Function) == {sine, cosine}
+                and not difference.atoms(sympy.Pow)
+                and sympy.expand(difference) == sine * cosine):
+            return InequalityResult(
+                sympy.Union(sympy.Interval.open(0, sympy.pi / 2),
+                            sympy.Interval.open(sympy.pi, 3 * sympy.pi / 2)),
+                ["Resultado restringido al período [0, 2*pi); la solución se repite cada pi."],
+            )
+
     try:
         solution_set = sympy.solve_univariate_inequality(inequality, var_symbol, relational=False)
     except (NotImplementedError, TypeError):
