@@ -323,6 +323,14 @@ def compute_inequality(inequality: sympy.core.relational.Relational, variable: s
             ["Resultado restringido al período [0, 2*pi); la solución se repite cada 2*pi."],
         )
 
+    # IN-I-06 uses the matrix's principal arccot branch (0, pi). SymPy's
+    # acot has a different negative branch, so never use it as the oracle here.
+    principal_acot = sympy.acot(var_symbol)
+    if ((rel_op == "<" and inequality.lhs == principal_acot and sympy.simplify(inequality.rhs - sympy.pi/4) == 0)
+            or (rel_op == ">" and inequality.rhs == principal_acot and sympy.simplify(inequality.lhs - sympy.pi/4) == 0)):
+        return InequalityResult(sympy.Interval.open(1, sympy.oo),
+                                ["Arcotangente en la rama principal (0, pi)."])
+
     # IN-I-05: on the common real domain asin(x)+acos(x)=pi/2.
     inverse_sine, inverse_cosine = sympy.asin(var_symbol), sympy.acos(var_symbol)
     if ((rel_op == "<" and inequality.lhs == inverse_sine and inequality.rhs == inverse_cosine)

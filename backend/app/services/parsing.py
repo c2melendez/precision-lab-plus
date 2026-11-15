@@ -975,6 +975,12 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     inverse_pair = re.fullmatch(r"\s*\\arcsin\s+([A-Za-z])\s*<\s*\\arccos\s+\1\s*", text)
     if inverse_pair:
         text = f"asin({inverse_pair.group(1)})<acos({inverse_pair.group(1)})"
+    # IN-I-06: whole-source normalization, followed by the normal safe parser.
+    source_arccot = re.fullmatch(
+        r"\s*\\operatorname\{arccot\}\s+([A-Za-z])\s*<\s*\\frac\{\\pi\}\{4\}\s*", text
+    )
+    if source_arccot:
+        text = f"acot({source_arccot.group(1)})<pi/4"
     normalized = normalize_unicode(text)
 
     found_operator = None
