@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 546,
+  "revision": 547,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "ecfc786d8caf30aad82e83828902eaf10b029505",
-  "baseline_case": "SECURITY-S19-TARGETED",
+  "technical_baseline_sha": "f9222b115fb2ed8bba46245cc7d8d3ecdea52b84",
+  "baseline_case": "TRIG-IN-I-03-LITERAL",
   "baseline_status": "WAIT",
   "global_certification": "OPEN",
   "gates": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "SECURITY-S19-TARGETED",
-    "previous_id": "TRIG-IN-I-03",
+    "id": "TRIG-IN-I-03-LITERAL",
+    "previous_id": "SECURITY-S19-TARGETED",
     "status": "WAIT",
-    "action": "Esperar reporte de mutación 43715315873 y comparar sobrevivientes y timeouts con 43684691979; luego corregir canal literal IN-I-03 en Plus sin duplicar gates."
+    "action": "Revisar gates y logs del SHA técnico y el resultado de mutación anterior 43715315873; no duplicar corridas, mantener S19 REVIEW y evaluar alcance literal."
   },
   "blockers": [
     {
@@ -73,56 +73,40 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-15T13:42:16.229Z",
+  "updated_utc": "2026-11-15T14:41:09.421Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "a13600dbfb68c6661ffc2e38393ac0e6db53e70dcbeab052dcf4555e96960a25",
-      "head_sha": "ecfc786d8caf30aad82e83828902eaf10b029505",
-      "evidence_sha": "ecfc786d8caf30aad82e83828902eaf10b029505",
-      "run_id": 43715315872,
-      "decision": "REUSE",
-      "reason": "Jobs y logs ejecutados en SHA técnico revisados; cambios posteriores documentales.",
-      "logs_reviewed": true,
-      "evidence_executed": true,
-      "acceptance_revision": "2026-10-16-continuity-v1",
-      "jobs": [
-        {
-          "id": 132815467653,
-          "conclusion": "success"
-        },
-        {
-          "id": 132815467936,
-          "conclusion": "success"
-        }
-      ]
+      "input_fingerprint": "ff85f272be2fd02d7d94ed3f5a82e6ef4acb6f6ed5f87b0a1cd7fcf878894c76",
+      "head_sha": "f9222b115fb2ed8bba46245cc7d8d3ecdea52b84",
+      "evidence_sha": "f9222b115fb2ed8bba46245cc7d8d3ecdea52b84",
+      "run_id": 43725643080,
+      "decision": "WAIT",
+      "reason": "Corrida push iniciada; revisar jobs y logs.",
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "92a0f97d938911bc7927745946fd02896e082916de4f7e11eca432faef903cb7",
-      "head_sha": "ecfc786d8caf30aad82e83828902eaf10b029505",
-      "evidence_sha": "ecfc786d8caf30aad82e83828902eaf10b029505",
-      "run_id": 43715315847,
-      "decision": "REUSE",
-      "reason": "Jobs y logs ejecutados en SHA técnico revisados; cambios posteriores documentales.",
-      "logs_reviewed": true,
-      "evidence_executed": true,
-      "acceptance_revision": "2026-10-16-continuity-v1",
-      "jobs": [
-        {
-          "id": 132815467784,
-          "conclusion": "success"
-        }
-      ]
+      "input_fingerprint": "86ac45cf165518ffbd165dba727679863f6ec68eeb7fb768fbc962949fc0cd01",
+      "head_sha": "f9222b115fb2ed8bba46245cc7d8d3ecdea52b84",
+      "evidence_sha": "f9222b115fb2ed8bba46245cc7d8d3ecdea52b84",
+      "run_id": 43725643065,
+      "decision": "WAIT",
+      "reason": "Corrida push iniciada; revisar jobs y logs.",
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "security": {
       "gate": "security",
-      "input_fingerprint": "091d8b9f57a6af3d5e257f1449fc9f28a1176405911d20c3f09b0c18de94c3f9",
-      "head_sha": "ecfc786d8caf30aad82e83828902eaf10b029505",
-      "evidence_sha": "ecfc786d8caf30aad82e83828902eaf10b029505",
-      "run_id": 43715315873,
+      "input_fingerprint": "c778b8fd1d30cebb8da5ccf110a59a276a89da7850e9152e125f56cffbd8fce9",
+      "head_sha": "f9222b115fb2ed8bba46245cc7d8d3ecdea52b84",
+      "evidence_sha": "f9222b115fb2ed8bba46245cc7d8d3ecdea52b84",
+      "run_id": 43725643047,
       "decision": "WAIT",
-      "reason": "Backend mutmut 132815595041 en curso; frontend omitido no es PASS.",
+      "reason": "Corrida push iniciada; revisar jobs y logs.",
       "logs_reviewed": false,
       "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1"
@@ -350,5 +334,12 @@
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1"
     }
-  ]
+  ],
+  "pending_s19_prior": {
+    "run_id": 43715315873,
+    "job_id": 132815595041,
+    "evidence_sha": "ecfc786d8caf30aad82e83828902eaf10b029505",
+    "status": "in_progress",
+    "reason": "Esperar reporte y comparar con 43684691979; la corrida nueva usa código distinto."
+  }
 }

@@ -1,3 +1,11 @@
+# r547 — Canal HTTP literal IN-I-03 corregido; gates pendientes
+
+Plus SHA técnico f9222b115fb2ed8bba46245cc7d8d3ecdea52b84: la forma fuente `\\arctan x<1` se normaliza con reconocimiento acotado y sigue pasando validaciones de seguridad. Test-first: el canal HTTP fallaba con PARSE_ERROR; ahora pruebas de literal y entradas malformadas pasan junto a parser/seguridad: 273 pruebas locales. No implica E2E visual. Push acumulativo 43725643080, H1d 43725643065, Native 43725643032, CI 43725643052 y seguridad 43725643047 en cola al registrar. Mutación previa 43715315873/job 132815595041 sigue en curso; se conserva y la corrida nueva tiene código distinto. S19 REVIEW, S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN.
+
+Siguiente acción: revisar jobs/logs del SHA técnico y comparar reporte de mutación previa 43715315873 con 43684691979; no duplicar corridas ni cerrar sin evidencia.
+
+---
+
 # r546 — Gates funcionales revisados; canal literal IN-I-03 pendiente
 
 Plus SHA ecfc786d8caf30aad82e83828902eaf10b029505: acumulativo 43715315872/backend 132815467936 (3078 passed, 1 skipped, 11 xfailed) y frontend 132815467653 (1055 passed, 28 TODO), H1d 43715315847 (38): pasos y logs revisados. Seguridad 43715315873: backend seguridad pasó, frontend omitido; mutación backend 132815595041 aún en curso, informe no disponible; WAIT sin duplicar. S19 permanece REVIEW.
