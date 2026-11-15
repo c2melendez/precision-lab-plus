@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 552,
+  "revision": 553,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
-  "baseline_case": "TRIG-IN-I-04-LITERAL",
-  "baseline_status": "PASS_SCOPED",
+  "technical_baseline_sha": "c092d7a5824545422de4052cd6cc3aa7d76a38f8",
+  "baseline_case": "TRIG-IN-I-05",
+  "baseline_status": "WAIT",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -34,8 +34,8 @@
   "next_action": {
     "id": "TRIG-IN-I-05",
     "previous_id": "TRIG-IN-I-04",
-    "status": "RUN",
-    "action": "Test-first bilateral arcsin(x)<arccos(x); solución [-1,sqrt(2)/2). Congelar fuente, dominio y frontera estricta, paridad y gates; conservar S19 REVIEW."
+    "status": "WAIT",
+    "action": "Revisar gates push y logs del SHA técnico; confirmar dominio, paridad y alcance literal de IN-I-05; revisar S19 sin duplicar corridas."
   },
   "blockers": [
     {
@@ -73,56 +73,40 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-15T17:43:41.781Z",
+  "updated_utc": "2026-11-15T17:46:30.099Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "0edc1b888ac5c6958203798f81036d1d23a8b499eaf2ae12c3f6a2bcb606eb4e",
-      "head_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
-      "evidence_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
-      "run_id": 43737435007,
-      "decision": "REUSE",
-      "reason": "Jobs, pasos y logs ejecutados y revisados; cambios posteriores documentales.",
-      "logs_reviewed": true,
-      "evidence_executed": true,
-      "acceptance_revision": "2026-10-16-continuity-v1",
-      "jobs": [
-        {
-          "id": 132883029556,
-          "conclusion": "success"
-        },
-        {
-          "id": 132883029784,
-          "conclusion": "success"
-        }
-      ]
+      "input_fingerprint": "a1488653ba0f2be12af4988daa4dac3c6a2ac337c881c25301c4550054ff8d89",
+      "head_sha": "c092d7a5824545422de4052cd6cc3aa7d76a38f8",
+      "evidence_sha": "c092d7a5824545422de4052cd6cc3aa7d76a38f8",
+      "decision": "WAIT",
+      "reason": "Corrida push existente en curso; revisar logs.",
+      "run_id": 43742896982,
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "4f33527899255594c56b40614ddb3b2d204dbb47170a6624ae7ac2d9b6df6150",
-      "head_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
-      "evidence_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
-      "run_id": 43737435025,
-      "decision": "REUSE",
-      "reason": "Jobs, pasos y logs ejecutados y revisados; cambios posteriores documentales.",
-      "logs_reviewed": true,
-      "evidence_executed": true,
-      "acceptance_revision": "2026-10-16-continuity-v1",
-      "jobs": [
-        {
-          "id": 132883029716,
-          "conclusion": "success"
-        }
-      ]
+      "input_fingerprint": "3436dc9a05c634b55672418484538f0fcd0545ce8de981ce037e451761d23f42",
+      "head_sha": "c092d7a5824545422de4052cd6cc3aa7d76a38f8",
+      "evidence_sha": "c092d7a5824545422de4052cd6cc3aa7d76a38f8",
+      "decision": "WAIT",
+      "reason": "Corrida push existente en curso; revisar logs.",
+      "run_id": 43742897062,
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "security": {
       "gate": "security",
-      "input_fingerprint": "46512e07212b51006ca01c0c54abf7907a3ed153ed3c9d861c2076c50dbe048b",
-      "head_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
-      "evidence_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
-      "run_id": 43737435043,
+      "input_fingerprint": "4d28d8b0d2006c655c5ee6afe8a4498df671ceac271d5c57e17ec96317753adb",
+      "head_sha": "c092d7a5824545422de4052cd6cc3aa7d76a38f8",
+      "evidence_sha": "c092d7a5824545422de4052cd6cc3aa7d76a38f8",
       "decision": "WAIT",
-      "reason": "Backend mutmut 132883173911 en curso; perfiles omitidos no son PASS.",
+      "reason": "Corrida push existente en curso; revisar logs.",
+      "run_id": 43742897037,
       "logs_reviewed": false,
       "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1"
