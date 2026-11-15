@@ -1,3 +1,17 @@
+# r544 — IN-D-08: reconciliación de mutación con la corrida 43691200778
+
+Plus SHA verificado: 5f10389c4ec0217d1007aa22b5219c34ba91f0b9. Corrida 43691200778 (push); job plus-backend-mutmut 132742142853 completado con éxito a las 10:09 UTC; artefacto s19-plus-backend-mutmut 14157018061, digest SHA-256 b2cb0c1b27154bf309636dd3440cb94fefce0ccccdcf3c7e41eb741cd5ee17ee.
+
+Verificación: mutmut-results.txt, mutmut-survived.txt, mutmut-timeout.txt y mutmut-exit-code.txt son idénticos byte a byte a los de la corrida 43684691979 (5.836 mutantes; 2.498 eliminados, 42,80 %; 3.312 sobrevivientes; 12 timeout; 14 sin pruebas). El cambio entre a2bb123f y 5f10389c (phase2_service.py y pruebas de IN-D-08) no toca los siete módulos mutados del workflow, así que el resultado idéntico es coherente. El backend sigue sin umbral de score.
+
+Reconciliación: r535 (IN-D-08 PASS_SCOPED bilateral) citó la corrida 43691200778 mientras seguía en curso. Su componente de mutación no estaba verificado entonces, y la frase «jobs, pasos y logs revisados» no cubría ese job. Se corrige: el componente de mutación backend de IN-D-08 queda REVIEW, con la misma evidencia que r543. Los gates funcionales citados en r535 no cambian; frontend-audit y stryker de esa corrida están omitidos, no son PASS.
+
+Decisión: IN-D-08 no se cierra. Sus componentes funcionales siguen PASS_SCOPED; la mutación backend queda REVIEW. El cierre requiere resolver ese REVIEW o aceptarlo explícitamente con justificación. S19 backend sigue REVIEW. Global OPEN; S25, SG28/DIST y EV-D-01 BLOCKED. Lite no se modificó.
+
+Siguiente acción: decidir entre pruebas dirigidas para las seis brechas de r543 o aceptación explícita con justificación; luego evaluar los 13 avisos de auditoría frontend.
+
+---
+
 # r543 — Mutación backend 43684691979 registrada como REVIEW
 
 Plus SHA de la corrida de seguridad: a2bb123f2babfc8c4e8df725f3b00806af606061 (job plus-backend-mutmut 132722665975, artefacto s19-plus-backend-mutmut 14153208898). Estado: REVIEW, no PASS. El job terminó con código 0, pero el backend no tiene umbral de score, así que ese código no acredita calidad de mutación.
