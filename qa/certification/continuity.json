@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 529,
+  "revision": 530,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "8df73ce327b4effe0b325410f0d23c58e57bc146",
-  "baseline_case": "TRIG-IN-D-06",
-  "baseline_status": "PASS_SCOPED",
+  "technical_baseline_sha": "308a40821b500478a317f2e2aa1c234d8fae402e",
+  "baseline_case": "TRIG-IN-D-07",
+  "baseline_status": "VERIFYING_CI",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -34,8 +34,8 @@
   "next_action": {
     "id": "TRIG-IN-D-07",
     "previous_id": "TRIG-IN-D-06",
-    "status": "RUN",
-    "action": "Test-first bilateral sec(x)>2 en (-pi/2,pi/2), dos intervalos abiertos; congelar fuente, probar polos, signos y extremos, corregir brechas demostradas y verificar gates push. No avanzar a IN-D-08."
+    "status": "WAIT",
+    "action": "Revisar jobs/pasos/logs de corridas push existentes de IN-D-07 y corregir fallos confirmados; cerrar solo con evidencia bilateral pertinente. Después IN-D-08; seguridad independiente."
   },
   "blockers": [
     {
@@ -73,105 +73,105 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-15T01:42:50.109Z",
+  "updated_utc": "2026-11-15T01:49:08.998Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "68460482da9ba58b9a77cf48ceae6ceaf9da99e2a9cc2ca34790c432f7d9c69e",
-      "head_sha": "350455819328b8ce65c332e65f5d2849119f60bf",
-      "decision": "REUSE",
-      "reason": "Insumos idénticos; evidencia ejecutada y revisada",
-      "run_id": 43659684445,
-      "evidence_sha": "8df73ce327b4effe0b325410f0d23c58e57bc146",
-      "logs_reviewed": true,
-      "evidence_executed": true,
+      "input_fingerprint": "06d9f49c44dec5a5ef8c9b04e853ed146ff7345bb92c8a69047e9cbc08ab4408",
+      "head_sha": "308a40821b500478a317f2e2aa1c234d8fae402e",
+      "decision": "WAIT",
+      "reason": "Corrida equivalente en curso; no duplicar",
+      "run_id": 43664684548,
+      "evidence_sha": "308a40821b500478a317f2e2aa1c234d8fae402e",
+      "logs_reviewed": false,
+      "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1",
       "jobs": [
         {
-          "id": 132645981142,
-          "name": "frontend",
-          "conclusion": "success"
+          "id": 132661336785,
+          "name": "backend",
+          "conclusion": null
         },
         {
-          "id": 132645981323,
-          "name": "backend",
+          "id": 132661337055,
+          "name": "frontend",
           "conclusion": "success"
         }
       ]
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "5a830b7f59a2ca02daa5387208ad9e0e5eb62463625bc8615420c42875b58629",
-      "head_sha": "350455819328b8ce65c332e65f5d2849119f60bf",
-      "decision": "REUSE",
-      "reason": "Insumos idénticos; evidencia ejecutada y revisada",
-      "run_id": 43659684432,
-      "evidence_sha": "8df73ce327b4effe0b325410f0d23c58e57bc146",
-      "logs_reviewed": true,
-      "evidence_executed": true,
-      "acceptance_revision": "2026-10-16-continuity-v1",
-      "jobs": [
-        {
-          "id": 132645981205,
-          "name": "h1d",
-          "conclusion": "success"
-        }
-      ]
-    },
-    "security": {
-      "gate": "security",
-      "input_fingerprint": "f520a51c81abd0ad3df7b5260fd206f9ab2634150c8cec2df3878a56eace4c3d",
-      "head_sha": "8df73ce327b4effe0b325410f0d23c58e57bc146",
+      "input_fingerprint": "527968fd1e222a3a412b05611ff18e1ced2e5eabe0d17c11cedc8651297fc47d",
+      "head_sha": "308a40821b500478a317f2e2aa1c234d8fae402e",
       "decision": "WAIT",
       "reason": "Corrida equivalente en curso; no duplicar",
-      "run_id": 43659684440,
-      "evidence_sha": "8df73ce327b4effe0b325410f0d23c58e57bc146",
+      "run_id": 43664684521,
+      "evidence_sha": "308a40821b500478a317f2e2aa1c234d8fae402e",
       "logs_reviewed": false,
       "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1",
       "jobs": [
         {
-          "id": 132645981265,
+          "id": 132661336789,
+          "name": "h1d",
+          "conclusion": null
+        }
+      ]
+    },
+    "security": {
+      "gate": "security",
+      "input_fingerprint": "12db4d929eae7698869b71f1c87728101db08be515ce9867e4c7325b0f183a0d",
+      "head_sha": "308a40821b500478a317f2e2aa1c234d8fae402e",
+      "decision": "WAIT",
+      "reason": "Corrida equivalente en curso; no duplicar",
+      "run_id": 43664684565,
+      "evidence_sha": "308a40821b500478a317f2e2aa1c234d8fae402e",
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "jobs": [
+        {
+          "id": 132661336959,
           "name": "audit-request",
           "conclusion": "success"
         },
         {
-          "id": 132646038569,
+          "id": 132661384029,
           "name": "mutation / validate-request",
           "conclusion": "success"
         },
         {
-          "id": 132646038627,
+          "id": 132661384056,
           "name": "security / validate-request",
           "conclusion": "success"
         },
         {
-          "id": 132646063059,
+          "id": 132661402955,
           "name": "mutation / change-scope",
           "conclusion": "success"
         },
         {
-          "id": 132646067401,
+          "id": 132661404807,
           "name": "security / backend-security",
           "conclusion": "success"
         },
         {
-          "id": 132646068528,
+          "id": 132661406362,
           "name": "security / frontend-audit",
           "conclusion": "skipped"
         },
         {
-          "id": 132646086855,
+          "id": 132661426597,
           "name": "mutation / plus-backend-mutmut",
           "conclusion": null
         },
         {
-          "id": 132646088020,
+          "id": 132661427395,
           "name": "mutation / plus-frontend-stryker",
           "conclusion": "skipped"
         },
         {
-          "id": 132646088469,
+          "id": 132661427738,
           "name": "mutation / lite-frontend-stryker",
           "conclusion": "skipped"
         }
