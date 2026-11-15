@@ -1,3 +1,11 @@
+# r552 — IN-I-04 PASS_SCOPED funcional; iniciar IN-I-05
+
+IN-I-04: Lite parser/motor y Plus servicio/HTTP, incluido literal fuente; E2E visual dedicado no acreditado. Lite SHA ae784152e808fbe5e8139e8406c6431bdeb7526e: acumulativo 43731839741 (2588 passed, 8 expected fail, 34 TODO), H1d 43731839781 (22), Scientific 43731839744 (456). Plus SHA 259bc52312a2ea6516d23c13af9773ac21b62353: acumulativo 43737435007/backend 132883029784 (3120 passed, 1 skipped, 11 xfailed; literal y controles PASS), frontend 132883029556 (1055 passed, 28 TODO), H1d 43737435025 (38), Native 43737435068 (26 desktop, 52 tablet/móvil). Jobs y logs revisados; omisiones no son PASS. Seguridad 43737435043/job 132883173911 y 43736559614/job 132880470180 siguen en curso sobre SHA distintos. S19 REVIEW, S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN.
+
+Siguiente acción única: IN-I-05 arcsin(x)<arccos(x), solución [-1,√2/2); test-first bilateral, dominio y frontera estricta, sin duplicar gates de seguridad.
+
+---
+
 # r551 — Canal HTTP literal IN-I-04 corregido; gates pendientes
 
 Plus SHA técnico 259bc52312a2ea6516d23c13af9773ac21b62353: la entrada fuente `\\arctan(2x)\\ge\\frac{\\pi}{4}` se normaliza con reconocimiento acotado y sigue por las validaciones de seguridad. Test-first: el HTTP literal fallaba con PARSE_ERROR; 281 pruebas locales de parser, seguridad y filas IN-I-03/04 aprobaron tras la corrección, incluidos controles de entrada insegura. No acredita E2E visual. Push acumulativo 43737435007, H1d 43737435025, Native 43737435068, CI 43737435042, seguridad 43737435043 en curso. La mutación anterior 43736559614 usa otro SHA y continúa; no duplicar ni cancelar. S19 REVIEW, S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN.
