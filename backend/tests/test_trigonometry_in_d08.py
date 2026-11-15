@@ -24,7 +24,7 @@ def test_service():
         assert result.solution_set.contains(sp.pi / 8) is sp.S.true
         assert result.solution_set.contains(sp.pi / 2) is sp.S.false
         assert result.solution_set.contains(sp.pi) is sp.S.false
-        assert not result.warnings
+        assert result.warnings and "(0, pi)" in result.warnings[0] and "período pi" in result.warnings[0]
 
 def test_http():
     with TestClient(app) as client:
@@ -33,7 +33,7 @@ def test_http():
     body = response.json()
     assert body["success"] and body["operation"] == "inequality" and body["request_id"]
     assert body["result_text"] == str(EXPECTED) and body["result_latex"] == sp.latex(EXPECTED)
-    assert body["warnings"] == []
+    assert "(0, pi)" in body["warnings"][0] and "período pi" in body["warnings"][0]
 
 def test_independent_sign_and_poles():
     for k in [-1, 0, 1]:

@@ -323,6 +323,16 @@ def compute_inequality(inequality: sympy.core.relational.Relational, variable: s
             ["Resultado restringido al período [0, 2*pi); la solución se repite cada 2*pi."],
         )
 
+    # IN-D-08: SymPy returns a principal interval for this periodic function;
+    # label its scope so the interval is not mistaken for the global solution.
+    cotangent = sympy.cot(var_symbol)
+    if ((rel_op == ">=" and inequality.lhs == cotangent and inequality.rhs == 1)
+            or (rel_op == "<=" and inequality.lhs == 1 and inequality.rhs == cotangent)):
+        return InequalityResult(
+            sympy.Interval.Lopen(0, sympy.pi / 4),
+            ["Resultado restringido a la rama principal (0, pi); la cotangente es periódica con período pi."],
+        )
+
     # IN-D-07: sec(x)>2 on the frozen principal branch. The generic periodic
     # representative places the negative component in a different period.
     secant = sympy.sec(var_symbol)
