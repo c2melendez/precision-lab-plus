@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 557,
+  "revision": 558,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
   "baseline_case": "TRIG-IN-I-07",
-  "baseline_status": "WAIT",
+  "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-IN-I-07",
-    "previous_id": "TRIG-IN-I-06",
-    "status": "WAIT",
-    "action": "Revisar jobs y logs del SHA técnico y mutación pendiente; luego continuar la siguiente fila."
+    "id": "TRIG-NEXT-GROUP",
+    "previous_id": "TRIG-IN-I-07",
+    "status": "IDENTIFY",
+    "action": "Identificar siguiente grupo contractual tras IN-I-07, última fila IN-I, e iniciar test-first bilateral; revisar mutación pendiente."
   },
   "blockers": [
     {
@@ -73,31 +73,45 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-15T22:41:46.258Z",
+  "updated_utc": "2026-11-15T23:43:12.919Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "44862b0fb79117ed77e0e61b26bd0468290c5995f712eddd6ebcd21b0fc64641",
-      "head_sha": "ee98260b1a492b7c2490b39e74c016889d003358",
-      "evidence_sha": "ee98260b1a492b7c2490b39e74c016889d003358",
+      "head_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
+      "evidence_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
       "decision": "REVIEW",
-      "reason": "El SHA técnico avanzó; reconciliar huella y evidencia antes de reutilizar.",
-      "run_id": 43754118546,
+      "reason": "Jobs ejecutados y logs revisados; recalcular huella actual antes de REUSE.",
+      "run_id": 43770667769,
       "logs_reviewed": true,
       "evidence_executed": true,
-      "acceptance_revision": "2026-10-16-continuity-v1"
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "jobs": [
+        {
+          "id": 132985634338,
+          "conclusion": "success"
+        },
+        {
+          "id": 132985634573,
+          "conclusion": "success"
+        }
+      ]
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "851b5b50b3b7f0b39a178b4ef1cdc400821b455412b9180f7d20cd9b6af088bb",
-      "head_sha": "ee98260b1a492b7c2490b39e74c016889d003358",
-      "evidence_sha": "ee98260b1a492b7c2490b39e74c016889d003358",
+      "head_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
+      "evidence_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
       "decision": "REVIEW",
-      "reason": "El SHA técnico avanzó; reconciliar huella y evidencia antes de reutilizar.",
-      "run_id": 43754118547,
+      "reason": "Jobs ejecutados y logs revisados; recalcular huella actual antes de REUSE.",
+      "run_id": 43770667753,
       "logs_reviewed": true,
       "evidence_executed": true,
-      "acceptance_revision": "2026-10-16-continuity-v1"
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "jobs": [
+        {
+          "id": 132985634093,
+          "conclusion": "success"
+        }
+      ]
     },
     "security": {
       "gate": "security",
@@ -168,6 +182,7 @@
       43770667820,
       43770667786,
       43770667767
-    ]
+    ],
+    "status": "functional_pass_scoped"
   }
 }
