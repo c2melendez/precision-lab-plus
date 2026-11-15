@@ -2,6 +2,7 @@
 import gzip
 from pathlib import Path
 import sympy as sp
+import pytest
 from unittest.mock import patch
 from fastapi.testclient import TestClient
 from app.main import app
@@ -31,6 +32,19 @@ def test_http():
     body = response.json()
     assert body["success"] and body["operation"] == "inequality" and body["request_id"]
     assert body["result_text"] == str(EXPECTED) and body["result_latex"] == sp.latex(EXPECTED)
+
+def test_source_literal_http():
+    with TestClient(app) as client:
+        response = client.post("/api/v1/inequality", json={"inequality":r"\arcsin x<\arccos x", "variable":"x"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"], body
+    assert body["result_text"] == str(EXPECTED) and body["result_latex"] == sp.latex(EXPECTED)
+
+@pytest.mark.parametrize("text", [r"\arcsin x<\arccos x;open(1)", r"\arcsin x<\arccos x=1", r"\arcsin __import__(x)<\arccos x"])
+def test_literal_path_rejects_unsafe_input(text):
+    with pytest.raises((ValueError, TypeError)):
+        parse_inequality_tree(text)
 
 def test_boundary():
     assert sp.asin(sp.sqrt(2)/2) == sp.acos(sp.sqrt(2)/2) == sp.pi/4

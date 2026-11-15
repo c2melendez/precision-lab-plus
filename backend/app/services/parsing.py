@@ -970,6 +970,11 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     )
     if scaled_arctan:
         text = f"atan(2*{scaled_arctan.group(1)})>=pi/4"
+    # IN-I-05: the source compares inverse functions of the same variable.
+    # Match the whole bounded literal and retain the normal validation pipeline.
+    inverse_pair = re.fullmatch(r"\s*\\arcsin\s+([A-Za-z])\s*<\s*\\arccos\s+\1\s*", text)
+    if inverse_pair:
+        text = f"asin({inverse_pair.group(1)})<acos({inverse_pair.group(1)})"
     normalized = normalize_unicode(text)
 
     found_operator = None
