@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 541,
+  "revision": 542,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "b141e34275bb1f965cfabeda4ea7e978b636853f",
-  "baseline_case": "TRIG-IN-I-02",
-  "baseline_status": "PASS_SCOPED",
+  "technical_baseline_sha": "4575c8f13578cd9b45216e1c0567669b6d747df5",
+  "baseline_case": "TRIG-IN-I-03",
+  "baseline_status": "WAIT",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -34,8 +34,8 @@
   "next_action": {
     "id": "TRIG-IN-I-03",
     "previous_id": "TRIG-IN-I-02",
-    "status": "RUN",
-    "action": "Test-first bilateral arctan(x)<1; solución (-∞,tan(1)). Congelar fuente, validar frontera estricta, valores y gates."
+    "status": "WAIT",
+    "action": "Revisar gates push y logs del SHA técnico; confirmar paridad y alcance literal de IN-I-03 sin duplicar corridas."
   },
   "blockers": [
     {
@@ -73,53 +73,37 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-15T11:45:36.657Z",
+  "updated_utc": "2026-11-15T11:48:19.172Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "20bf39df9e7741373123c7ece86d0ebae0511820307afa38d15345fd2b29554f",
-      "head_sha": "b141e34275bb1f965cfabeda4ea7e978b636853f",
-      "evidence_sha": "b141e34275bb1f965cfabeda4ea7e978b636853f",
-      "decision": "REUSE",
-      "reason": "Jobs, pasos y logs ejecutados y revisados; cambios posteriores documentales.",
-      "run_id": 43705883021,
-      "logs_reviewed": true,
-      "evidence_executed": true,
-      "acceptance_revision": "2026-10-16-continuity-v1",
-      "jobs": [
-        {
-          "id": 132786730866,
-          "conclusion": "success"
-        },
-        {
-          "id": 132786731076,
-          "conclusion": "success"
-        }
-      ]
+      "input_fingerprint": "32573d90d77dd29815802868519d6e28ba39aafa5f3d0538193aed20c20a64a1",
+      "head_sha": "4575c8f13578cd9b45216e1c0567669b6d747df5",
+      "evidence_sha": "4575c8f13578cd9b45216e1c0567669b6d747df5",
+      "decision": "WAIT",
+      "reason": "Corrida push existente en curso; revisar logs.",
+      "run_id": 43710615660,
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "57a8687f6950cc0803126642e2817594e665fde5efbd22351e851326052f37d0",
-      "head_sha": "b141e34275bb1f965cfabeda4ea7e978b636853f",
-      "evidence_sha": "b141e34275bb1f965cfabeda4ea7e978b636853f",
-      "decision": "REUSE",
-      "reason": "Jobs, pasos y logs ejecutados y revisados; cambios posteriores documentales.",
-      "run_id": 43705883049,
-      "logs_reviewed": true,
-      "evidence_executed": true,
-      "acceptance_revision": "2026-10-16-continuity-v1",
-      "jobs": [
-        {
-          "id": 132786730958,
-          "conclusion": "success"
-        }
-      ]
+      "input_fingerprint": "1d20bbfa6d4299e7a2f2770eb87e907e928ed6a4888ecd901fd6c375c9c5e0b5",
+      "head_sha": "4575c8f13578cd9b45216e1c0567669b6d747df5",
+      "evidence_sha": "4575c8f13578cd9b45216e1c0567669b6d747df5",
+      "decision": "WAIT",
+      "reason": "Corrida push existente en curso; revisar logs.",
+      "run_id": 43710615637,
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "security": {
       "gate": "security",
-      "input_fingerprint": "8306a2d644c36be58778bed0efaa94be6eb8f95b7cb55a067ac1d9b73c0d326d",
-      "head_sha": "b141e34275bb1f965cfabeda4ea7e978b636853f",
-      "evidence_sha": "b141e34275bb1f965cfabeda4ea7e978b636853f",
+      "input_fingerprint": "758412328597dc23313dbffa0208e89fbca208f684eef6b8ceb59771f0800ec4",
+      "head_sha": "4575c8f13578cd9b45216e1c0567669b6d747df5",
+      "evidence_sha": "4575c8f13578cd9b45216e1c0567669b6d747df5",
       "decision": "REVIEW",
       "reason": "Seguridad dinámica requiere revisión.",
       "logs_reviewed": false,
