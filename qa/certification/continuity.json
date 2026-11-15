@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 527,
+  "revision": 528,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
-  "baseline_case": "TRIG-IN-D-05",
-  "baseline_status": "PASS_SCOPED",
+  "technical_baseline_sha": "8df73ce327b4effe0b325410f0d23c58e57bc146",
+  "baseline_case": "TRIG-IN-D-06",
+  "baseline_status": "VERIFYING_CI",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -34,8 +34,8 @@
   "next_action": {
     "id": "TRIG-IN-D-06",
     "previous_id": "TRIG-IN-D-05",
-    "status": "RUN",
-    "action": "Test-first bilateral de sin(x)cos(x)>0 en [0,2*pi), dos intervalos abiertos; congelar fuente, verificar extremos y signos, corregir brechas demostradas y revisar gates push. No avanzar a IN-D-07."
+    "status": "WAIT",
+    "action": "Revisar jobs/pasos/logs de las corridas push existentes del SHA técnico IN-D-06; corregir fallos confirmados y cerrar solo con evidencia bilateral pertinente. Después IN-D-07; seguridad independiente."
   },
   "blockers": [
     {
@@ -73,61 +73,109 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-14T23:46:00.754Z",
+  "updated_utc": "2026-11-15T00:46:18.341Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "68f270284a2adc8240f098a48cc5cd11224a665c20860f42b8838a47fdc9e261",
-      "head_sha": "d920bac953eb1942332952dc0e045462c96ccfb5",
-      "decision": "REUSE",
-      "reason": "Evidencia ejecutada revisada con insumos idénticos; no ejecución nueva",
-      "run_id": 43647668540,
-      "evidence_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
-      "logs_reviewed": true,
-      "evidence_executed": true,
+      "input_fingerprint": "68460482da9ba58b9a77cf48ceae6ceaf9da99e2a9cc2ca34790c432f7d9c69e",
+      "head_sha": "8df73ce327b4effe0b325410f0d23c58e57bc146",
+      "decision": "WAIT",
+      "reason": "Corrida equivalente en curso; no duplicar",
+      "run_id": 43659684445,
+      "evidence_sha": "8df73ce327b4effe0b325410f0d23c58e57bc146",
+      "logs_reviewed": false,
+      "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1",
       "jobs": [
         {
-          "id": 132608950017,
-          "name": "backend",
-          "conclusion": "success"
+          "id": 132645981142,
+          "name": "frontend",
+          "conclusion": null
         },
         {
-          "id": 132608950218,
-          "name": "frontend",
-          "conclusion": "success"
+          "id": 132645981323,
+          "name": "backend",
+          "conclusion": null
         }
       ]
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "c290078782e262b4c222ea0a3612f9145742633681cc318ff560826c8362e5ad",
-      "head_sha": "d920bac953eb1942332952dc0e045462c96ccfb5",
-      "decision": "REUSE",
-      "reason": "Evidencia ejecutada revisada con insumos idénticos",
-      "run_id": 43647668555,
-      "evidence_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
-      "logs_reviewed": true,
-      "evidence_executed": true,
+      "input_fingerprint": "5a830b7f59a2ca02daa5387208ad9e0e5eb62463625bc8615420c42875b58629",
+      "head_sha": "8df73ce327b4effe0b325410f0d23c58e57bc146",
+      "decision": "WAIT",
+      "reason": "Corrida equivalente en curso; no duplicar",
+      "run_id": 43659684432,
+      "evidence_sha": "8df73ce327b4effe0b325410f0d23c58e57bc146",
+      "logs_reviewed": false,
+      "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1",
       "jobs": [
         {
-          "id": 132608950102,
+          "id": 132645981205,
           "name": "h1d",
-          "conclusion": "success"
+          "conclusion": null
         }
       ]
     },
     "security": {
       "gate": "security",
-      "input_fingerprint": "25bcf99062a14c580b26c35c6c44f455cb366dfc92031bda170b38a8889e6947",
-      "head_sha": "d920bac953eb1942332952dc0e045462c96ccfb5",
+      "input_fingerprint": "f520a51c81abd0ad3df7b5260fd206f9ab2634150c8cec2df3878a56eace4c3d",
+      "head_sha": "8df73ce327b4effe0b325410f0d23c58e57bc146",
       "decision": "WAIT",
-      "reason": "Campaña equivalente existente en curso; evaluar por perfil",
-      "run_id": 43647668563,
-      "evidence_sha": "aa1f2821bb2d4df92dc94db0848a67141f4fb76a",
+      "reason": "Corrida equivalente en curso; no duplicar",
+      "run_id": 43659684440,
+      "evidence_sha": "8df73ce327b4effe0b325410f0d23c58e57bc146",
       "logs_reviewed": false,
-      "evidence_executed": false
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "jobs": [
+        {
+          "id": 132645981265,
+          "name": "audit-request",
+          "conclusion": "success"
+        },
+        {
+          "id": 132646038569,
+          "name": "mutation / validate-request",
+          "conclusion": "success"
+        },
+        {
+          "id": 132646038627,
+          "name": "security / validate-request",
+          "conclusion": "success"
+        },
+        {
+          "id": 132646063059,
+          "name": "mutation / change-scope",
+          "conclusion": "success"
+        },
+        {
+          "id": 132646067401,
+          "name": "security / backend-security",
+          "conclusion": "success"
+        },
+        {
+          "id": 132646068528,
+          "name": "security / frontend-audit",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 132646086855,
+          "name": "mutation / plus-backend-mutmut",
+          "conclusion": null
+        },
+        {
+          "id": 132646088020,
+          "name": "mutation / plus-frontend-stryker",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 132646088469,
+          "name": "mutation / lite-frontend-stryker",
+          "conclusion": "skipped"
+        }
+      ]
     }
   },
   "previous_accepted": {
