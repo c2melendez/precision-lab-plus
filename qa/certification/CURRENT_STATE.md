@@ -1,3 +1,13 @@
+# r546 — Gates funcionales revisados; canal literal IN-I-03 pendiente
+
+Plus SHA ecfc786d8caf30aad82e83828902eaf10b029505: acumulativo 43715315872/backend 132815467936 (3078 passed, 1 skipped, 11 xfailed) y frontend 132815467653 (1055 passed, 28 TODO), H1d 43715315847 (38): pasos y logs revisados. Seguridad 43715315873: backend seguridad pasó, frontend omitido; mutación backend 132815595041 aún en curso, informe no disponible; WAIT sin duplicar. S19 permanece REVIEW.
+
+Diagnóstico independiente local en SHA ecfc786: POST /api/v1/inequality con literal fuente `\\arctan x<1` devuelve success=false, PARSE_ERROR; `atan(x)<1` devuelve el intervalo correcto. La prueba cubre el canal HTTP directo, no demuestra la interfaz visual. IN-I-03 queda funcionalmente aprobado solo para formas normalizadas; el canal literal permanece pendiente. No se declara cierre completo. S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN.
+
+Siguiente acción: esperar y revisar reporte de mutación 43715315873; después corregir y verificar el canal HTTP literal IN-I-03, sin duplicar gates en curso.
+
+---
+
 # r545 — S19: pruebas dirigidas publicadas; mutación pendiente
 
 Plus SHA técnico ecfc786d8caf30aad82e83828902eaf10b029505. Se añadieron pruebas en el archivo ya incluido en la selección de mutación: agregados finitos, índices/límites inválidos, normalización matemática y rechazo de ecuaciones fuera de solve. Selección existente completa: 456 pruebas locales aprobadas. No se cambian el harness, los mutantes ni umbrales; el impacto en el score aún no está verificado. Push acumulativo 43715315872, H1d 43715315847, seguridad/mutación 43715315873 y CI 43715315835 estaban en curso o cola. Mantener S19 REVIEW; no contar jobs omitidos como PASS. IN-I-03: funcional Lite acumulativo 43710610622 (2582 passed, 8 expected fail, 34 TODO), H1d 43710610635 (22), scientific 43710610666 (456); Plus acumulativo 43710615660/backend 132801135773 (3066 passed, 1 skipped, 11 xfailed) y frontend (1055 passed, 28 TODO), H1d 43710615637 (38). Falta reconciliar formalmente alcance literal y el nuevo SHA de Plus. Global OPEN; S25, SG28/DIST y EV-D-01 BLOCKED.

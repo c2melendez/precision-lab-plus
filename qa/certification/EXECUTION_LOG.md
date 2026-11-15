@@ -1,3 +1,7 @@
+## r546 — Gates Plus y diagnóstico literal IN-I-03
+
+SHA ecfc786d8caf30aad82e83828902eaf10b029505: acumulativo y H1d ejecutados y revisados, según CURRENT_STATE. Mutación 43715315873/job 132815595041 en curso, sin informe. HTTP local: literal `\\arctan x<1` produce PARSE_ERROR; forma normalizada `atan(x)<1` produce intervalo correcto. Canal literal pendiente; S19 REVIEW y global OPEN.
+
 ## r545 — S19: pruebas dirigidas sin modificar harness
 
 SHA ecfc786d8caf30aad82e83828902eaf10b029505; 456 pruebas locales aprobadas en la selección existente. Push acumulativo 43715315872, H1d 43715315847, seguridad/mutación 43715315873, CI 43715315835 pendientes. S19 REVIEW; global OPEN. Se preserva la revisión r543-r544 y los bloqueos.
