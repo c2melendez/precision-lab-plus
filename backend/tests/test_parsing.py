@@ -8,6 +8,48 @@ import sympy
 
 from app.services import ast_validator, parsing
 
+
+@pytest.mark.parametrize("source, expected", [
+    ("sum(i,i,1,4)", sympy.Integer(10)),
+    ("product(i,i,1,4)", sympy.Integer(24)),
+    ("sum(i,i,1,n)", sympy.Symbol("n") * (sympy.Symbol("n") + 1) / 2),
+])
+def test_s19_finite_aggregate_uses_bound_index_and_exact_result(source, expected):
+    assert sympy.simplify(parsing.parse_expression_tree(source) - expected) == 0
+
+
+@pytest.mark.parametrize("source", [
+    "sum(i,i,1)",
+    "sum(i,1,1,3)",
+    "sum(i,i,1,2.5)",
+    "product(i,i,1,n)",
+])
+def test_s19_finite_aggregate_rejects_invalid_bounds_and_index(source):
+    with pytest.raises(parsing.ParseSecurityError):
+        parsing.parse_expression_tree(source)
+
+
+def test_s19_finite_aggregate_limits_excessive_iteration():
+    with pytest.raises(ast_validator.ComplexityLimitError):
+        parsing.parse_expression_tree("sum(i,i,0,10001)")
+
+
+@pytest.mark.parametrize("source, expected", [
+    ("１２＋３", sympy.Integer(15)),
+    (r"\frac{2}{3}", sympy.Rational(2, 3)),
+    ("5−2×3", sympy.Integer(-1)),
+])
+def test_s19_normalization_preserves_exact_mathematical_meaning(source, expected):
+    assert sympy.simplify(parsing.parse_expression_tree(source) - expected) == 0
+
+
+def test_s19_equation_requires_explicit_solve_mode():
+    with pytest.raises(parsing.ParseSecurityError):
+        parsing.parse_expression_tree("2=3")
+    equation = parsing.parse_expression_tree("2=3", allow_equation=True)
+    assert isinstance(equation, sympy.Equality)
+    assert equation.lhs == 2 and equation.rhs == 3
+
 # ---------------------------------------------------------------------------
 # Etapa 2: normalización Unicode
 # ---------------------------------------------------------------------------
