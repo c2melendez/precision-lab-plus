@@ -1,3 +1,11 @@
+# r551 — Canal HTTP literal IN-I-04 corregido; gates pendientes
+
+Plus SHA técnico 259bc52312a2ea6516d23c13af9773ac21b62353: la entrada fuente `\\arctan(2x)\\ge\\frac{\\pi}{4}` se normaliza con reconocimiento acotado y sigue por las validaciones de seguridad. Test-first: el HTTP literal fallaba con PARSE_ERROR; 281 pruebas locales de parser, seguridad y filas IN-I-03/04 aprobaron tras la corrección, incluidos controles de entrada insegura. No acredita E2E visual. Push acumulativo 43737435007, H1d 43737435025, Native 43737435068, CI 43737435042, seguridad 43737435043 en curso. La mutación anterior 43736559614 usa otro SHA y continúa; no duplicar ni cancelar. S19 REVIEW, S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN.
+
+Siguiente acción: revisar jobs/logs del SHA técnico y reporte de mutación 43736559614; no declarar cierre sin evidencia.
+
+---
+
 # r550 — Reconciliación S19: nuevo SHA técnico; gates en curso
 
 HEAD técnico 97c35059f373826858754d3016ad4cd1799a237f añade pruebas dirigidas en backend/tests/test_solve.py. Push acumulativo 43736559606 y seguridad/mutación 43736559614 en curso; H1d 43736559582/job 132880342531 ejecutó 38 pruebas aprobadas. CI 43736559554 en curso. No repetir gates.

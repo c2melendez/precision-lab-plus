@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 550,
+  "revision": 551,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "97c35059f373826858754d3016ad4cd1799a237f",
-  "baseline_case": "SECURITY-S19-TARGETED-SOLVE",
+  "technical_baseline_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
+  "baseline_case": "TRIG-IN-I-04-LITERAL",
   "baseline_status": "WAIT",
   "global_certification": "OPEN",
   "gates": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "SECURITY-S19-TARGETED-SOLVE",
-    "previous_id": "TRIG-IN-I-04",
+    "id": "TRIG-IN-I-04-LITERAL",
+    "previous_id": "SECURITY-S19-TARGETED-SOLVE",
     "status": "WAIT",
-    "action": "Revisar acumulativo 43736559606 y mutación 43736559614 del SHA técnico; preservar S19 REVIEW, reconciliar IN-I-04 sin duplicar corridas y continuar trabajo independiente."
+    "action": "Revisar CI, acumulativo, H1d, Native y seguridad del SHA técnico y el informe de mutación 43736559614; no duplicar gates."
   },
   "blockers": [
     {
@@ -73,46 +73,40 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-15T16:46:19.661Z",
+  "updated_utc": "2026-11-15T16:48:02.523Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "cbaf27e046f882a0240907302ebe536e254eae3a3d4d7e469c32fa4ff4d4e531",
-      "head_sha": "97c35059f373826858754d3016ad4cd1799a237f",
-      "evidence_sha": "97c35059f373826858754d3016ad4cd1799a237f",
-      "run_id": 43736559606,
+      "input_fingerprint": "0edc1b888ac5c6958203798f81036d1d23a8b499eaf2ae12c3f6a2bcb606eb4e",
+      "head_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
+      "evidence_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
+      "run_id": 43737435007,
       "decision": "WAIT",
-      "reason": "Corrida existente en curso; revisar jobs y logs.",
+      "reason": "Corrida push existente en curso; revisar jobs y logs.",
       "logs_reviewed": false,
       "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "8b25dc238cf1991824bd27d39a7407f6cd1473eed5a0e13e020a6bef5b253a3a",
-      "head_sha": "97c35059f373826858754d3016ad4cd1799a237f",
-      "evidence_sha": "97c35059f373826858754d3016ad4cd1799a237f",
-      "run_id": 43736559582,
-      "decision": "REUSE",
-      "reason": "Job y log ejecutados y revisados.",
-      "logs_reviewed": true,
-      "evidence_executed": true,
-      "acceptance_revision": "2026-10-16-continuity-v1",
-      "jobs": [
-        {
-          "id": 132880342531,
-          "conclusion": "success"
-        }
-      ]
+      "input_fingerprint": "4f33527899255594c56b40614ddb3b2d204dbb47170a6624ae7ac2d9b6df6150",
+      "head_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
+      "evidence_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
+      "run_id": 43737435025,
+      "decision": "WAIT",
+      "reason": "Corrida push existente en curso; revisar jobs y logs.",
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "security": {
       "gate": "security",
-      "input_fingerprint": "a38da93fe2f8605e0171b217ea81bafc988917287583b221e1a53d74a0d3de1d",
-      "head_sha": "97c35059f373826858754d3016ad4cd1799a237f",
-      "evidence_sha": "97c35059f373826858754d3016ad4cd1799a237f",
-      "run_id": 43736559614,
+      "input_fingerprint": "46512e07212b51006ca01c0c54abf7907a3ed153ed3c9d861c2076c50dbe048b",
+      "head_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
+      "evidence_sha": "259bc52312a2ea6516d23c13af9773ac21b62353",
+      "run_id": 43737435043,
       "decision": "WAIT",
-      "reason": "Corrida existente en curso; revisar jobs y logs.",
+      "reason": "Corrida push existente en curso; revisar jobs y logs.",
       "logs_reviewed": false,
       "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1"
@@ -357,5 +351,11 @@
     "status": "completed",
     "conclusion": "failure",
     "reason": "Runner shutdown; reporte omitido."
+  },
+  "pending_s19_solve": {
+    "run_id": 43736559614,
+    "evidence_sha": "97c35059f373826858754d3016ad4cd1799a237f",
+    "status": "in_progress",
+    "reason": "Pruebas dirigidas en solve; revisar resultado e informe."
   }
 }
