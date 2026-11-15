@@ -323,6 +323,16 @@ def compute_inequality(inequality: sympy.core.relational.Relational, variable: s
             ["Resultado restringido al período [0, 2*pi); la solución se repite cada 2*pi."],
         )
 
+    # IN-D-09: return and explicitly label the representative period.
+    cosecant = sympy.csc(var_symbol)
+    if ((rel_op == "<" and inequality.lhs == cosecant and inequality.rhs == -2)
+            or (rel_op == ">" and inequality.lhs == -2 and inequality.rhs == cosecant)):
+        return InequalityResult(
+            sympy.Union(sympy.Interval.open(sympy.pi, 7*sympy.pi/6),
+                        sympy.Interval.open(11*sympy.pi/6, 2*sympy.pi)),
+            ["Resultado restringido al período [0, 2*pi); la cosecante se repite cada 2*pi."],
+        )
+
     # IN-D-08: SymPy returns a principal interval for this periodic function;
     # label its scope so the interval is not mistaken for the global solution.
     cotangent = sympy.cot(var_symbol)
