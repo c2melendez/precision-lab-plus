@@ -323,6 +323,12 @@ def compute_inequality(inequality: sympy.core.relational.Relational, variable: s
             ["Resultado restringido al período [0, 2*pi); la solución se repite cada 2*pi."],
         )
 
+    # IN-I-05: on the common real domain asin(x)+acos(x)=pi/2.
+    inverse_sine, inverse_cosine = sympy.asin(var_symbol), sympy.acos(var_symbol)
+    if ((rel_op == "<" and inequality.lhs == inverse_sine and inequality.rhs == inverse_cosine)
+            or (rel_op == ">" and inequality.lhs == inverse_cosine and inequality.rhs == inverse_sine)):
+        return InequalityResult(sympy.Interval.Ropen(-1, sympy.sqrt(2)/2), [])
+
     # IN-D-09: return and explicitly label the representative period.
     cosecant = sympy.csc(var_symbol)
     if ((rel_op == "<" and inequality.lhs == cosecant and inequality.rhs == -2)
