@@ -1,3 +1,7 @@
+## r550 — Reconciliación S19 y evidencia IN-I-04
+
+SHA técnico 97c35059f373826858754d3016ad4cd1799a237f, pruebas dirigidas añadidas en paralelo. Gates 43736559606 y 43736559614 en curso; H1d 43736559582: 38 aprobadas. Corrida 43725643047 terminó por runner shutdown sin reporte; log 43715315873/job 132815595041 no disponible 404, sin artefactos. S19 REVIEW; global OPEN.
+
 ## r549 — IN-I-04: publicación bilateral y gates pendientes
 
 Lite ae784152e808fbe5e8139e8406c6431bdeb7526e; Plus 85bd8f500cc82b983b51c3a4e6712fd230e77e79. Test-first y pruebas locales aprobadas; corridas automáticas registradas en CURRENT_STATE. WAIT hasta revisar logs; S19 REVIEW y bloqueos preservados.

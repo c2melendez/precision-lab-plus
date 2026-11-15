@@ -1,3 +1,15 @@
+# r550 — Reconciliación S19: nuevo SHA técnico; gates en curso
+
+HEAD técnico 97c35059f373826858754d3016ad4cd1799a237f añade pruebas dirigidas en backend/tests/test_solve.py. Push acumulativo 43736559606 y seguridad/mutación 43736559614 en curso; H1d 43736559582/job 132880342531 ejecutó 38 pruebas aprobadas. CI 43736559554 en curso. No repetir gates.
+
+IN-I-04 SHA previo Plus 85bd8f500cc82b983b51c3a4e6712fd230e77e79: acumulativo 43731842899/backend 132865800703 (3086 passed, 1 skipped, 11 xfailed) y frontend 132865800906 (1055 passed, 28 TODO); H1d 43731842898 (38). Lite ae784152e808fbe5e8139e8406c6431bdeb7526e: acumulativo 43731839741 (2588 passed, 8 expected fail, 34 TODO), H1d 43731839781 (22), Scientific 43731839744 (456). Evidencia funcional anterior revisada; nuevo SHA Plus pendiente de gates antes de cierre.
+
+Seguridad: 43725643047/job 132846991188 terminó con runner shutdown, sin reporte. 43715315873/job 132815595041 finalizó failure, pero el log responde 404 BlobNotFound y la corrida no tiene artefactos; causa no determinada, no PASS. S19 REVIEW, S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN.
+
+Siguiente acción única: revisar acumulativo y mutación 43736559606/43736559614, conservar S19 REVIEW y reconciliar IN-I-04 sin duplicar corridas.
+
+---
+
 # r549 — IN-I-04 publicado; verificación CI pendiente
 
 Lite SHA ae784152e808fbe5e8139e8406c6431bdeb7526e; Plus SHA 85bd8f500cc82b983b51c3a4e6712fd230e77e79. Test-first: Lite no resolvía arctan(2x)>=π/4; se implementó [1/2,∞), igualdad incluida, fallback preservado. Plus ya resolvía el caso y recibió tests de fuente, servicio y HTTP. Local: Lite 85 pruebas y build aprobados; Plus 66 pruebas aprobadas. Push Lite acumulativo 43731839741, H1d 43731839781, Scientific 43731839744, CI 43731839734; Plus acumulativo 43731842899, H1d 43731842898, CI 43731842944: en curso o cola al registrar. Seguridad Plus 43715315873/job 132815595041 y 43725643047/job 132846991188 en curso sobre SHA distintos; S19 REVIEW, no duplicar. S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN.
