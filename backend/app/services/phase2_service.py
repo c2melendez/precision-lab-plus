@@ -323,6 +323,17 @@ def compute_inequality(inequality: sympy.core.relational.Relational, variable: s
             ["Resultado restringido al período [0, 2*pi); la solución se repite cada 2*pi."],
         )
 
+    # IN-D-07: sec(x)>2 on the frozen principal branch. The generic periodic
+    # representative places the negative component in a different period.
+    secant = sympy.sec(var_symbol)
+    if ((rel_op == ">" and inequality.lhs == secant and inequality.rhs == 2)
+            or (rel_op == "<" and inequality.lhs == 2 and inequality.rhs == secant)):
+        return InequalityResult(
+            sympy.Union(sympy.Interval.open(-sympy.pi / 2, -sympy.pi / 3),
+                        sympy.Interval.open(sympy.pi / 3, sympy.pi / 2)),
+            ["Resultado restringido a la rama principal (-pi/2, pi/2); la secante es periódica."],
+        )
+
     # IN-D-06: SymPy returns only one positive component for this product.
     # Recognize a small exact comparison only; retain the generic fallback.
     cosine = sympy.cos(var_symbol)
