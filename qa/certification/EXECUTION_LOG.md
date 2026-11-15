@@ -1,3 +1,13 @@
+## r543 — IN-D-08: mutación backend 43684691979 registrada como REVIEW
+
+Plus SHA a2bb123f2babfc8c4e8df725f3b00806af606061; job plus-backend-mutmut 132722665975 con código 0 y sin umbral de score en backend. Totales: 5.836 mutantes; 2.498 eliminados; 3.312 sobrevivientes; 14 sin pruebas; 12 timeout (42,80 % eliminados; línea base 57,39 % con 1.028 mutantes).
+
+Por módulo (eliminados / sobrevivientes): solve_service 1.158 / 2.744 (3 timeout); parsing 887 / 403 (6 sin pruebas, 7 timeout); evaluate 421 / 96 (8 sin pruebas, 2 timeout); ast_validator 32 / 69. Los eliminados se contaron desde las líneas de progreso del log; sobrevivientes, sin pruebas y timeout coinciden con el artefacto.
+
+Causas: crecimiento del código (30 funciones nuevas de solve_service concentran 2.389 sobrevivientes); harness sin cambios de medición (mismos módulos, selección de pruebas y pin de mutmut); sin caída en funciones sin cambio AST (p. ej. _quadratic_steps 74→74, _linear_steps 31→31). Brechas reales en funciones modificadas: solve_equation 25→244, normalize_unicode 7→104, parse_expression_tree 11→52, check_complexity_limits 15→66, _parse_side 9→29, _try_parse_finite_aggregate 83→98.
+
+Estado: REVIEW, no PASS. No cierra S19 backend ni IN-D-08 global; la certificación global sigue OPEN. Pendiente: evaluar 13 avisos de auditoría frontend según la política y tratar las brechas con pruebas dirigidas.
+
 ## r542 — IN-I-03: publicación bilateral y gates pendientes
 
 Lite 63793b3a5ee263653835527462c4395172dc8b48; Plus 4575c8f13578cd9b45216e1c0567669b6d747df5. Test-first y pruebas locales aprobadas; corridas automáticas registradas en CURRENT_STATE. WAIT hasta revisar logs; bloqueos preservados.
