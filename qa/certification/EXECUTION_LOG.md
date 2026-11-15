@@ -1,3 +1,7 @@
+## r534 — IN-D-08: advertencia de período Plus
+
+SHA 5f10389c4ec0217d1007aa22b5219c34ba91f0b9. Test-first dos fallos por advertencia ausente, corrección y 41 pruebas locales aprobadas. CI 43691200754; acumulativo 43691200764; H1d 43691200749; Native 43691200755; seguridad 43691200778: WAIT pendiente de logs. Global OPEN; bloqueos preservados.
+
 ## r533 — Reconciliación IN-D-08
 
 SHA técnico a2bb123f2babfc8c4e8df725f3b00806af606061; acumulativo y H1d ejecutados y revisados, conforme a CURRENT_STATE r532. Seguridad Plus 43684691979 en curso; no es PASS global. Índice reconciliado; siguiente acción REVIEW del alcance literal y paridad IN-D-08. No se altera el estado de los bloqueos.

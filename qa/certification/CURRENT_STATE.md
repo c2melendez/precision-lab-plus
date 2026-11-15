@@ -1,3 +1,11 @@
+# r534 — IN-D-08: advertencia de período publicada; gates en curso
+
+Plus SHA técnico 5f10389c4ec0217d1007aa22b5219c34ba91f0b9: la solución principal de cot(x)>=1 se identifica como restringida a (0,π), con período π. Test-first: dos fallos por advertencia ausente; corrección y 41 pruebas locales trigonométricas aprobadas. Push CI 43691200754, acumulativo 43691200764, H1d 43691200749, Native 43691200755 y seguridad 43691200778, en cola o curso al registrar. No duplicar; revisar pasos y logs antes de aceptar. Seguridad previa 43684691979 también seguía en curso. Lite conserva evidencia r533. Global OPEN; S25, SG28/DIST, EV-D-01 BLOCKED.
+
+Siguiente acción: revisar corridas del SHA técnico, reconciliar resultados y verificar alcance literal y paridad antes de cerrar IN-D-08.
+
+---
+
 # r533 — Reconciliación IN-D-08; revisión pendiente
 
 El índice registra el SHA técnico a2bb123f2babfc8c4e8df725f3b00806af606061 y huellas de los gates ejecutados; solo CURRENT_STATE.md difiere entre ese commit técnico y el HEAD anterior. La corrida Plus de seguridad 43684691979 continúa en curso; sus perfiles no se declaran globalmente aprobados. S25, SG28/DIST y EV-D-01 permanecen BLOCKED; certificación global OPEN. Siguiente acción: revisar alcance literal y paridad IN-D-08 y finalizar evaluación de seguridad sin duplicar corridas.
