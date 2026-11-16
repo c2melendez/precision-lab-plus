@@ -985,6 +985,10 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     source_arcsin_affine = re.fullmatch(r"\s*\\arcsin\(\s*2\s*([A-Za-z])\s*-\s*1\s*\)\s*\\ge\s*0\s*", text)
     if source_arcsin_affine:
         text = f"asin(2*{source_arcsin_affine.group(1)}-1)>=0"
+    # IN-H-01: the matrix uses a bare LaTeX function argument.
+    source_sinh_positive = re.fullmatch(r"\s*\\sinh\s+([A-Za-z])\s*>\s*0\s*", text)
+    if source_sinh_positive:
+        text = f"sinh({source_sinh_positive.group(1)})>0"
     normalized = normalize_unicode(text)
 
     found_operator = None
