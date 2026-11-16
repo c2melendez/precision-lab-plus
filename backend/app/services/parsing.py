@@ -989,6 +989,10 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     source_sinh_positive = re.fullmatch(r"\s*\\sinh\s+([A-Za-z])\s*>\s*0\s*", text)
     if source_sinh_positive:
         text = f"sinh({source_sinh_positive.group(1)})>0"
+    # IN-H-02: normalize the whole frozen literal through the safe parser.
+    source_cosh = re.fullmatch(r"\s*\\cosh\s+([A-Za-z])\s*<\s*2\s*", text)
+    if source_cosh:
+        text = f"cosh({source_cosh.group(1)})<2"
     normalized = normalize_unicode(text)
 
     found_operator = None
