@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 561,
+  "revision": 562,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "15dda34414755cc665564ec5ca88e3ef9723e066",
   "baseline_case": "TRIG-IN-H-02",
-  "baseline_status": "WAIT",
+  "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-IN-H-02",
-    "previous_id": "TRIG-IN-H-01",
-    "status": "WAIT",
-    "action": "Revisar jobs y logs del SHA técnico y mutaciones pendientes; verificar límites, equivalencia y literal."
+    "id": "TRIG-IN-H-03",
+    "previous_id": "TRIG-IN-H-02",
+    "status": "IDENTIFY",
+    "action": "Test-first bilateral tanh(x)<=1/2, frontera ln(3)/2 incluida y canal literal; revisar mutación pendiente."
   },
   "blockers": [
     {
@@ -73,25 +73,24 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-16T00:49:13.022Z",
+  "updated_utc": "2026-11-16T01:41:23.886Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "dc44c3f7f1ab75f05c1a83c1927a1997b621db59b86d709cb83262865440aa1a",
-      "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "head_sha": "15dda34414755cc665564ec5ca88e3ef9723e066",
       "decision": "REVIEW",
-      "reason": "SHA técnico nuevo; recalcular huella y revisar CI antes de reutilizar.",
-      "run_id": 43778578000,
-      "evidence_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "reason": "Jobs y logs revisados; verificar huella para reutilización.",
+      "run_id": 43782570937,
+      "evidence_sha": "15dda34414755cc665564ec5ca88e3ef9723e066",
       "logs_reviewed": true,
       "evidence_executed": true,
       "jobs": [
         {
-          "id": 133010389891,
+          "id": 133022865516,
           "conclusion": "success"
         },
         {
-          "id": 133010390166,
+          "id": 133022865750,
           "conclusion": "success"
         }
       ],
@@ -99,17 +98,16 @@
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "625a4640c4f3b74acc27d8b823c12c06c0d7e01e1badc42d77a5fc6b002df65d",
-      "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "head_sha": "15dda34414755cc665564ec5ca88e3ef9723e066",
       "decision": "REVIEW",
-      "reason": "SHA técnico nuevo; recalcular huella y revisar CI antes de reutilizar.",
-      "run_id": 43778578045,
-      "evidence_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "reason": "Jobs y logs revisados; verificar huella para reutilización.",
+      "run_id": 43782570995,
+      "evidence_sha": "15dda34414755cc665564ec5ca88e3ef9723e066",
       "logs_reviewed": true,
       "evidence_executed": true,
       "jobs": [
         {
-          "id": 133010389998,
+          "id": 133022865295,
           "conclusion": "success"
         }
       ],
