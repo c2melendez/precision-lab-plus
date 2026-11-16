@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 559,
+  "revision": 560,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
   "baseline_case": "TRIG-IN-H-01",
-  "baseline_status": "VERIFYING_CI",
+  "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-IN-H-01",
-    "previous_id": "TRIG-IN-I-07",
-    "status": "WAIT",
-    "action": "Revisar las corridas push existentes del SHA técnico IN-H-01 y comprobar los jobs, pasos, logs y huellas. Resolver fallos confirmados, cerrar el alcance funcional bilateral cuando se complete la evidencia y continuar con IN-H-02."
+    "id": "TRIG-IN-H-02",
+    "previous_id": "TRIG-IN-H-01",
+    "status": "IDENTIFY",
+    "action": "Test-first bilateral cosh(x)<2: fuente literal, límites estrictos y fallback; revisar mutación pendiente sin duplicar."
   },
   "blockers": [
     {
@@ -73,27 +73,25 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-16T00:11:14.003Z",
+  "updated_utc": "2026-11-16T00:47:20.544Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
       "input_fingerprint": "dc44c3f7f1ab75f05c1a83c1927a1997b621db59b86d709cb83262865440aa1a",
       "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
-      "decision": "WAIT",
-      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "decision": "REVIEW",
+      "reason": "Jobs y logs ejecutados revisados; verificar huella para reutilización.",
       "run_id": 43778578000,
       "evidence_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
-      "logs_reviewed": false,
-      "evidence_executed": false,
+      "logs_reviewed": true,
+      "evidence_executed": true,
       "jobs": [
         {
           "id": 133010389891,
-          "name": "backend",
-          "conclusion": null
+          "conclusion": "success"
         },
         {
           "id": 133010390166,
-          "name": "frontend",
           "conclusion": "success"
         }
       ],
@@ -103,17 +101,16 @@
       "gate": "h1d",
       "input_fingerprint": "625a4640c4f3b74acc27d8b823c12c06c0d7e01e1badc42d77a5fc6b002df65d",
       "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
-      "decision": "WAIT",
-      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "decision": "REVIEW",
+      "reason": "Jobs y logs ejecutados revisados; verificar huella para reutilización.",
       "run_id": 43778578045,
       "evidence_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
-      "logs_reviewed": false,
-      "evidence_executed": false,
+      "logs_reviewed": true,
+      "evidence_executed": true,
       "jobs": [
         {
           "id": 133010389998,
-          "name": "h1d",
-          "conclusion": null
+          "conclusion": "success"
         }
       ],
       "acceptance_revision": "2026-10-16-continuity-v1"
