@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 558,
+  "revision": 559,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
-  "baseline_case": "TRIG-IN-I-07",
-  "baseline_status": "PASS_SCOPED",
+  "technical_baseline_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+  "baseline_case": "TRIG-IN-H-01",
+  "baseline_status": "VERIFYING_CI",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-NEXT-GROUP",
+    "id": "TRIG-IN-H-01",
     "previous_id": "TRIG-IN-I-07",
-    "status": "IDENTIFY",
-    "action": "Identificar siguiente grupo contractual tras IN-I-07, última fila IN-I, e iniciar test-first bilateral; revisar mutación pendiente."
+    "status": "WAIT",
+    "action": "Revisar las corridas push existentes del SHA técnico IN-H-01 y comprobar los jobs, pasos, logs y huellas. Resolver fallos confirmados, cerrar el alcance funcional bilateral cuando se complete la evidencia y continuar con IN-H-02."
   },
   "blockers": [
     {
@@ -73,70 +73,165 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-15T23:43:12.919Z",
+  "updated_utc": "2026-11-16T00:11:14.003Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "head_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
-      "evidence_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
-      "decision": "REVIEW",
-      "reason": "Jobs ejecutados y logs revisados; recalcular huella actual antes de REUSE.",
-      "run_id": 43770667769,
-      "logs_reviewed": true,
-      "evidence_executed": true,
-      "acceptance_revision": "2026-10-16-continuity-v1",
+      "input_fingerprint": "dc44c3f7f1ab75f05c1a83c1927a1997b621db59b86d709cb83262865440aa1a",
+      "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "decision": "WAIT",
+      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "run_id": 43778578000,
+      "evidence_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "logs_reviewed": false,
+      "evidence_executed": false,
       "jobs": [
         {
-          "id": 132985634338,
-          "conclusion": "success"
+          "id": 133010389891,
+          "name": "backend",
+          "conclusion": null
         },
         {
-          "id": 132985634573,
+          "id": 133010390166,
+          "name": "frontend",
           "conclusion": "success"
         }
-      ]
+      ],
+      "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "h1d": {
       "gate": "h1d",
-      "head_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
-      "evidence_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
-      "decision": "REVIEW",
-      "reason": "Jobs ejecutados y logs revisados; recalcular huella actual antes de REUSE.",
-      "run_id": 43770667753,
-      "logs_reviewed": true,
-      "evidence_executed": true,
-      "acceptance_revision": "2026-10-16-continuity-v1",
+      "input_fingerprint": "625a4640c4f3b74acc27d8b823c12c06c0d7e01e1badc42d77a5fc6b002df65d",
+      "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "decision": "WAIT",
+      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "run_id": 43778578045,
+      "evidence_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "logs_reviewed": false,
+      "evidence_executed": false,
       "jobs": [
         {
-          "id": 132985634093,
-          "conclusion": "success"
+          "id": 133010389998,
+          "name": "h1d",
+          "conclusion": null
         }
-      ]
+      ],
+      "acceptance_revision": "2026-10-16-continuity-v1"
     },
     "security": {
       "gate": "security",
-      "input_fingerprint": "52d82fd980f34ea5474bad2628950d1ff5c048cb58cd17a638a384d6dc6c77ca",
-      "head_sha": "ee98260b1a492b7c2490b39e74c016889d003358",
-      "evidence_sha": "ee98260b1a492b7c2490b39e74c016889d003358",
-      "decision": "REVIEW",
-      "reason": "El SHA técnico avanzó; reconciliar huella y evidencia antes de reutilizar.",
-      "run_id": 43754118559,
+      "input_fingerprint": "de20bfaa18881a103e7898e46794603425723b320d844f8ebe3c6a16728bb925",
+      "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "decision": "WAIT",
+      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "run_id": 43778578058,
+      "evidence_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
       "logs_reviewed": false,
       "evidence_executed": false,
+      "jobs": [
+        {
+          "id": 133010390314,
+          "name": "audit-request",
+          "conclusion": "success"
+        },
+        {
+          "id": 133010480195,
+          "name": "mutation / validate-request",
+          "conclusion": "success"
+        },
+        {
+          "id": 133010480241,
+          "name": "security / validate-request",
+          "conclusion": "success"
+        },
+        {
+          "id": 133010509373,
+          "name": "security / backend-security",
+          "conclusion": "success"
+        },
+        {
+          "id": 133010511063,
+          "name": "security / frontend-audit",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 133010513165,
+          "name": "mutation / change-scope",
+          "conclusion": "success"
+        },
+        {
+          "id": 133010546339,
+          "name": "mutation / plus-backend-mutmut",
+          "conclusion": null
+        },
+        {
+          "id": 133010548190,
+          "name": "mutation / plus-frontend-stryker",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 133010548369,
+          "name": "mutation / lite-frontend-stryker",
+          "conclusion": "skipped"
+        }
+      ],
       "acceptance_revision": "2026-10-16-continuity-v1"
     }
   },
   "previous_accepted": {
-    "id": "TRIG-IN-I-06",
+    "id": "TRIG-IN-I-07",
     "status": "PASS_SCOPED",
-    "note": "Funcional bilateral; literal HTTP Plus verificado; no acredita E2E visual dedicado.",
+    "technical_baseline_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
     "evidence": {
       "cumulative": {
         "gate": "cumulative",
-        "run_id": 43754118546,
-        "decision": "REUSE",
+        "head_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
+        "evidence_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
+        "decision": "REVIEW",
+        "reason": "Jobs ejecutados y logs revisados; recalcular huella actual antes de REUSE.",
+        "run_id": 43770667769,
         "logs_reviewed": true,
-        "evidence_executed": true
+        "evidence_executed": true,
+        "acceptance_revision": "2026-10-16-continuity-v1",
+        "jobs": [
+          {
+            "id": 132985634338,
+            "conclusion": "success"
+          },
+          {
+            "id": 132985634573,
+            "conclusion": "success"
+          }
+        ]
+      },
+      "h1d": {
+        "gate": "h1d",
+        "head_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
+        "evidence_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
+        "decision": "REVIEW",
+        "reason": "Jobs ejecutados y logs revisados; recalcular huella actual antes de REUSE.",
+        "run_id": 43770667753,
+        "logs_reviewed": true,
+        "evidence_executed": true,
+        "acceptance_revision": "2026-10-16-continuity-v1",
+        "jobs": [
+          {
+            "id": 132985634093,
+            "conclusion": "success"
+          }
+        ]
+      },
+      "security": {
+        "gate": "security",
+        "input_fingerprint": "52d82fd980f34ea5474bad2628950d1ff5c048cb58cd17a638a384d6dc6c77ca",
+        "head_sha": "ee98260b1a492b7c2490b39e74c016889d003358",
+        "evidence_sha": "ee98260b1a492b7c2490b39e74c016889d003358",
+        "decision": "REVIEW",
+        "reason": "El SHA técnico avanzó; reconciliar huella y evidencia antes de reutilizar.",
+        "run_id": 43754118559,
+        "logs_reviewed": false,
+        "evidence_executed": false,
+        "acceptance_revision": "2026-10-16-continuity-v1"
       }
     }
   },
@@ -174,15 +269,170 @@
     "evidence_sha": "dcd749bb05793d2fbecef8562ade7fb04739b630",
     "status": "in_progress"
   },
-  "pending_i07": {
-    "head_sha": "318c779ce597d0f02ca3a3eeca19f990bfdcec51",
-    "runs": [
-      43770667769,
-      43770667753,
-      43770667820,
-      43770667786,
-      43770667767
-    ],
-    "status": "functional_pass_scoped"
-  }
+  "observed_runs": [
+    {
+      "id": 43778578098,
+      "path": ".github/workflows/certification-runner.yml",
+      "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-16T00:08:19Z",
+      "run_attempt": 1,
+      "jobs": [
+        {
+          "id": 133010390448,
+          "name": "certification-cycle",
+          "conclusion": "success"
+        }
+      ],
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
+    },
+    {
+      "id": 43778578031,
+      "path": ".github/workflows/in625-syntax-native.yml",
+      "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "status": "in_progress",
+      "conclusion": null,
+      "created_at": "2026-11-16T00:08:19Z",
+      "run_attempt": 1,
+      "jobs": [
+        {
+          "id": 133010390106,
+          "name": "syntax-native",
+          "conclusion": null
+        }
+      ],
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
+    },
+    {
+      "id": 43778578045,
+      "path": ".github/workflows/in625-h1d-reentry.yml",
+      "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "status": "in_progress",
+      "conclusion": null,
+      "created_at": "2026-11-16T00:08:19Z",
+      "run_attempt": 1,
+      "jobs": [
+        {
+          "id": 133010389998,
+          "name": "h1d",
+          "conclusion": null
+        }
+      ],
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
+    },
+    {
+      "id": 43778578085,
+      "path": ".github/workflows/ci.yml",
+      "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "status": "in_progress",
+      "conclusion": null,
+      "created_at": "2026-11-16T00:08:19Z",
+      "run_attempt": 1,
+      "jobs": [
+        {
+          "id": 133010390027,
+          "name": "backend",
+          "conclusion": null
+        },
+        {
+          "id": 133010390429,
+          "name": "frontend",
+          "conclusion": null
+        }
+      ],
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
+    },
+    {
+      "id": 43778578000,
+      "path": ".github/workflows/in625-cumulative-certification.yml",
+      "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "status": "in_progress",
+      "conclusion": null,
+      "created_at": "2026-11-16T00:08:19Z",
+      "run_attempt": 1,
+      "jobs": [
+        {
+          "id": 133010389891,
+          "name": "backend",
+          "conclusion": null
+        },
+        {
+          "id": 133010390166,
+          "name": "frontend",
+          "conclusion": "success"
+        }
+      ],
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
+    },
+    {
+      "id": 43778578058,
+      "path": ".github/workflows/certification-dependency-gates.yml",
+      "head_sha": "5451deb23aedf68c5d7b8b3df9f4228352460bf1",
+      "status": "in_progress",
+      "conclusion": null,
+      "created_at": "2026-11-16T00:08:19Z",
+      "run_attempt": 1,
+      "jobs": [
+        {
+          "id": 133010390314,
+          "name": "audit-request",
+          "conclusion": "success"
+        },
+        {
+          "id": 133010480195,
+          "name": "mutation / validate-request",
+          "conclusion": "success"
+        },
+        {
+          "id": 133010480241,
+          "name": "security / validate-request",
+          "conclusion": "success"
+        },
+        {
+          "id": 133010509373,
+          "name": "security / backend-security",
+          "conclusion": "success"
+        },
+        {
+          "id": 133010511063,
+          "name": "security / frontend-audit",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 133010513165,
+          "name": "mutation / change-scope",
+          "conclusion": "success"
+        },
+        {
+          "id": 133010546339,
+          "name": "mutation / plus-backend-mutmut",
+          "conclusion": null
+        },
+        {
+          "id": 133010548190,
+          "name": "mutation / plus-frontend-stryker",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 133010548369,
+          "name": "mutation / lite-frontend-stryker",
+          "conclusion": "skipped"
+        }
+      ],
+      "logs_reviewed": false,
+      "evidence_executed": false,
+      "acceptance_revision": "2026-10-16-continuity-v1"
+    }
+  ]
 }
