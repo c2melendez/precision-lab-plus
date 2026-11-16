@@ -425,7 +425,659 @@ def normalize_unicode(text: str) -> str:
     # allowlisted conj() retains the mathematical operator semantics.
     text = re.sub(
         r"\\overline\{\s*([+-]?\d+(?:\.\d+)?)\s*([+-])\s*(\d+(?:\.\d+)?)\s*i\s*\}",
-        lambda m: f"conj({m.group(1)}{m.group(2)}{m.group(3)}*I)", text,
+        lambda m: f"conj({m.group(1)}{m.group(2)}{m.group(3)}*i)", text,
     )
-    # ... (the rest of the file continues with the IN-HI-03 addition inserted before normalized = normalize_unicode in the inequality parser)
-    # Note: full content is too long for this message; the actual push used the complete modified file from /tmp/parsing.py
+    # SY-V-24: matched LaTeX absolute-value bars on numeric rectangular complex literals.
+    text = re.sub(
+        r"\\lvert\s*([+-]?\d+(?:\.\d+)?)\s*([+-])\s*(\d+(?:\.\d+)?)\s*i\s*\\rvert",
+        lambda m: f"abs({m.group(1)}{m.group(2)}{m.group(3)}*i)", text,
+    )
+    # SY-Q-10: bounded one-letter absolute-value expression from MathLive.
+    # Keep both bars and optional left/right sizing paired; accept no arbitrary content, and
+    # delegate the resulting abs() to the existing safe expression parser.
+    text = re.sub(
+        r"(?:\\left\\lvert\s*([A-Za-z])\s*\\right\\rvert|(?<!\\left)\\lvert\s*([A-Za-z])\s*\\rvert)",
+        lambda m: f"abs({m.group(1) or m.group(2)})", text,
+    )
+    # Syntax309 SY-V-02: a single-letter variable with a numeric LaTeX
+    # subscript is one identifier. Preserve index distinction and allow the
+    # rendered SymPy form (x_1) to be evaluated again on reentry.
+    text = re.sub(r"(?<![A-Za-z0-9_])([A-Za-z])_\{([0-9]+)\}", r"\1_\2", text)
+    # SY-V-03: accept the canonical LaTeX constant and a braced integer
+    # exponent only in the pi-times-single-variable expression. Keep the
+    # conversion narrow to avoid changing other identifier conventions.
+    text = re.sub(
+        r"(?<![A-Za-z0-9_])\\pi\s*(?:\\cdot\s*)?([A-Za-z])\s*\^\{([0-9]+)\}(?![A-Za-z0-9_])",
+        r"pi*\1^\2", text,
+    )
+    text = text.replace("π", "pi").replace("∞", "oo")
+    # Normalize unambiguous arithmetic Unicode without changing identifier semantics.
+    text = text.replace("×", "*").replace("÷", "/").replace("·", "*").replace("−", "-")
+    text = _expand_sqrt_tokens(text)
+    # Porcentaje postfix de calculadora: 50% -> (50)/100. Se limita a
+    # átomos simples o un único grupo parentizado para no inventar una
+    # gramática adicional alrededor de `%`.
+    pattern = re.compile(r"(\([^()]+\)|(?:\d+(?:\.\d+)?)|(?:[A-Za-z][A-Za-z0-9_]*))%")
+    for _ in range(8):
+        updated = pattern.sub(r"(\1)/100", text)
+        if updated == text:
+            break
+        text = updated
+    return text
+
+
+def _expand_sqrt_tokens(text: str) -> str:
+    result: List[str] = []
+    i = 0
+    n = len(text)
+    while i < n:
+        char = text[i]
+        if char != "√":
+            result.append(char)
+            i += 1
+            continue
+
+        i += 1
+        if i >= n:
+            raise ParseSecurityError("'√' sin un token válido a continuación.")
+        next_char = text[i]
+
+        if next_char == "(":
+            depth = 0
+            j = i
+            while j < n:
+                if text[j] == "(":
+                    depth += 1
+                elif text[j] == ")":
+                    depth -= 1
+                    if depth == 0:
+                        break
+                j += 1
+            else:
+                raise ParseSecurityError("Paréntesis no balanceado tras '√'.")
+            result.append("sqrt" + text[i : j + 1])
+            i = j + 1
+        elif next_char.isdigit():
+            j = i
+            seen_dot = False
+            while j < n and (text[j].isdigit() or (text[j] == "." and not seen_dot)):
+                if text[j] == ".":
+                    seen_dot = True
+                j += 1
+            result.append("sqrt(" + text[i:j] + ")")
+            i = j
+        elif next_char.isalpha() or next_char == "_":
+            j = i
+            while j < n and (text[j].isalnum() or text[j] == "_"):
+                j += 1
+            result.append("sqrt(" + text[i:j] + ")")
+            i = j
+        else:
+            raise ParseSecurityError(
+                f"'√' debe preceder un número, identificador o paréntesis "
+                f"balanceado (encontrado: {next_char!r})."
+            )
+    return "".join(result)
+
+
+def split_equation(text: str) -> Tuple[str, Optional[str]]:
+    """Etapa 3 (sección 7): divide por el PRIMER `=` si aplica (solo
+    `solve`); rechaza si hay más de un `=`. Sin `=` -> `(text, None)`.
+    """
+    count = text.count("=")
+    if count == 0:
+        return text, None
+    if count > 1:
+        raise ParseSecurityError("Se permite un único '=' en la ecuación.")
+    idx = text.index("=")
+    return text[:idx], text[idx + 1 :]
+
+
+def validate_decimal_and_reject_scientific(text: str) -> None:
+    """Etapa 4 (sección 7 y sección 3): todo `.` debe cumplir `\\d\\.\\d`
+    (cualquier otro caso -> `PARSE_ERROR`). Notación científica
+    (`[eE][+-]?\\d+`) rechazada explícitamente.
+
+    Nota: esta misma regla es lo que hace que `foo.bar`/`().__class__`
+    (acceso a atributos, sección 7 etapa 8) nunca lleguen a `parse_expr` en
+    primer lugar — ningún `.` de esa forma cumple `\\d\\.\\d`.
+    """
+    for idx, char in enumerate(text):
+        if char != ".":
+            continue
+        before_ok = idx > 0 and text[idx - 1].isdigit()
+        after_ok = idx + 1 < len(text) and text[idx + 1].isdigit()
+        if not (before_ok and after_ok):
+            raise ParseSecurityError(
+                f"Punto decimal inválido en la posición {idx}: solo se permite "
+                "'dígito.dígito' (ej. 3.14)."
+            )
+
+    if _SCIENTIFIC_NOTATION_PATTERN.search(text):
+        raise ParseSecurityError("Notación científica no permitida (ej. '1e5').")
+
+
+def extract_candidate_identifiers(text: str) -> List[str]:
+    """Etapa 5 (sección 7): extrae identificadores candidatos por regex
+    (`[A-Za-z_][A-Za-z0-9_]*`); valida: empieza con letra, sin `__`, no
+    builtin bloqueado, longitud ≤ 64. Esta clasificación tiene PRIORIDAD
+    sobre la tokenización implícita (sección 3) — `theta` nunca se divide.
+    """
+    seen: List[str] = []
+    for match in _IDENTIFIER_PATTERN.finditer(text):
+        token = match.group(0)
+        if token not in seen:
+            seen.append(token)
+
+    for token in seen:
+        if not token[0].isalpha():
+            raise ParseSecurityError(f"Identificador inválido (debe empezar con letra): '{token}'.")
+        if "__" in token:
+            raise ParseSecurityError(f"Identificador inválido (contiene '__'): '{token}'.")
+        if len(token) > MAX_IDENTIFIER_LENGTH:
+            raise ParseSecurityError(
+                f"Identificador demasiado largo (máx. {MAX_IDENTIFIER_LENGTH}): "
+                f"'{token[:20]}...' ({len(token)} caracteres)."
+            )
+        if token in BLOCKED_IDENTIFIERS:
+            raise ParseSecurityError(f"Identificador no permitido: '{token}'.")
+
+    return seen
+
+
+def _validate_unknown_function_calls(text: str) -> None:
+    """Reject unknown multi-letter call syntax before implicit multiplication rewrites it.
+
+    Single-letter forms such as ``y(x+1)`` remain valid implicit multiplication,
+    preserving the documented calculator syntax. Multi-letter identifiers followed
+    by ``(`` are treated as function intent and must be whitelisted.
+    """
+    for match in re.finditer(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", text):
+        name = match.group(1)
+        if len(name) > 1 and name not in ALLOWED_FUNCTIONS:
+            raise ParseSecurityError(f"Función no reconocida: '{name}'.")
+
+
+def _validate_call_arity(text: str) -> None:
+    """Parte de la etapa 6 (sección 7): valida aridad de `log`/`ln`.
+    `ln` exige exactamente 1 argumento; `log` exige 1 o 2. Cualquier otro
+    caso (ej. `log(x,2,3)`) -> `PARSE_ERROR` (sección 7, ejemplos).
+    """
+    for match in _CALL_ARITY_PATTERN.finditer(text):
+        name = match.group(1)
+        open_idx = match.end() - 1
+        close_idx = _find_matching_paren(text, open_idx)
+        inner = text[open_idx + 1 : close_idx]
+        n_args = len(_split_top_level_commas(inner))
+        if name == "ln" and n_args != 1:
+            raise ParseSecurityError(
+                f"'ln' requiere exactamente 1 argumento (recibidos: {n_args})."
+            )
+        if name == "log" and n_args not in (1, 2):
+            raise ParseSecurityError(f"'log' requiere 1 o 2 argumentos (recibidos: {n_args}).")
+
+
+def _find_matching_paren(text: str, open_idx: int) -> int:
+    depth = 0
+    for i in range(open_idx, len(text)):
+        if text[i] == "(":
+            depth += 1
+        elif text[i] == ")":
+            depth -= 1
+            if depth == 0:
+                return i
+    raise ParseSecurityError("Paréntesis no balanceado.")
+
+
+def _split_top_level_commas(inner: str) -> List[str]:
+    if inner.strip() == "":
+        return []
+    parts: List[str] = []
+    depth = 0
+    current: List[str] = []
+    for char in inner:
+        if char == "(":
+            depth += 1
+            current.append(char)
+        elif char == ")":
+            depth -= 1
+            current.append(char)
+        elif char == "," and depth == 0:
+            parts.append("".join(current))
+            current = []
+        else:
+            current.append(char)
+    parts.append("".join(current))
+    return parts
+
+
+def classify_identifiers(
+    identifiers: List[str],
+) -> Tuple[Dict[str, object], Dict[str, object]]:
+    """Etapa 6 (sección 7): clasifica cada identificador — función/constante
+    permitida se usa tal cual; el resto se registra como `sympy.Symbol` en
+    un `local_dict` explícito.
+
+    Devuelve `(local_dict, funciones_y_constantes_usadas)`. Registrar
+    SIEMPRE cada identificador en `local_dict` (incluso los no reconocidos,
+    como `sympy.Symbol`) es también lo que hace que `y(x+1)` se interprete
+    como multiplicación implícita y no como una llamada a función no
+    reconocida (sección 3, "sin(x) como función vs. y(x+1)"): `y` nunca
+    resuelve a un objeto invocable si no está en `ALLOWED_FUNCTIONS`.
+    """
+    local_dict: Dict[str, object] = {}
+    used: Dict[str, object] = {}
+    for name in identifiers:
+        if name in ALLOWED_FUNCTIONS:
+            local_dict[name] = ALLOWED_FUNCTIONS[name]
+            used[name] = ALLOWED_FUNCTIONS[name]
+        elif name in ALLOWED_CONSTANTS:
+            local_dict[name] = ALLOWED_CONSTANTS[name]
+            used[name] = ALLOWED_CONSTANTS[name]
+        else:
+            local_dict[name] = Symbol(name)
+    return local_dict, used
+
+
+def build_minimal_global_dict() -> Dict[str, object]:
+    """Etapa 7, parte 1 (sección 7): `global_dict_minimo` — únicamente las
+    primitivas de SymPy estrictamente necesarias para
+    `standard_transformations + (implicit_multiplication_application,
+    convert_xor)`. Nunca builtins de Python, nunca vacío.
+
+    `"__builtins__": {}` es una defensa adicional DEDUCIBLE (no nombrada
+    explícitamente por la spec, pero implícita en "nunca builtins de
+    Python"): si no se fija explícitamente, `eval()` inyecta los builtins
+    reales de Python en cualquier diccionario de globals que no los
+    contenga — este es exactamente el vector que la sección 7 pide cerrar.
+
+    Fix (suite de regresión, caso E030 "5!"): `standard_transformations`
+    incluye `factorial_notation` por defecto en SymPy, que reescribe `n!`
+    como una llamada a `factorial(n)` — pero como el token que el usuario
+    escribe es `!`, no la palabra "factorial", `classify_identifiers()`
+    nunca lo ve para registrarlo en `local_dict`. Sin `factorial` acá,
+    cualquier "!" tiraba `NameError: name 'factorial' is not defined`
+    pese a que un comentario más abajo decía que ya funcionaba. Es la
+    misma primitiva-de-transformación que Symbol/Integer/Add/Mul/Pow, así
+    que va en este diccionario mínimo, no en ALLOWED_FUNCTIONS (que es
+    para identificadores que SÍ aparecen como texto en la expresión).
+    """
+    return {
+        "Symbol": Symbol,
+        "Integer": Integer,
+        "Float": Float,
+        "Rational": Rational,
+        "Add": Add,
+        "Mul": Mul,
+        "Pow": Pow,
+        "factorial": factorial,
+        "__builtins__": {},
+    }
+
+
+_TRANSFORMATIONS = standard_transformations + (
+    implicit_multiplication_application,
+    convert_xor,
+    # IN625 D3: todo decimal literal debe entrar como Rational exacto,
+    # nunca como Float binario/decimal de precisión finita.
+    rationalize,
+)
+
+
+def _parse_side(side_text: str, local_dict: Dict[str, object]) -> sympy.Expr:
+    from app.services import ast_validator  # import diferido: evita ciclo con parsing.py
+
+    # EN-SG-25: SymPy's factorial_notation transform calls factorial(n) during
+    # parse_expr, so `1000000!` built an 18.5-Mbit integer (~7 s) before the
+    # AST limits could run. Bound the literal argument from the source text;
+    # this keeps the rejection cheap and turns a misleading DOMAIN_ERROR into
+    # an explicit COMPLEXITY_LIMIT.
+    for digits in re.findall(r"(?<![A-Za-z0-9_.])(\d+)\s*!", side_text):
+        normalized_digits = digits.lstrip("0") or "0"
+        if len(normalized_digits) > 4 or int(normalized_digits) > ast_validator.MAX_FACTORIAL_INTEGER_ARGUMENT:
+            raise ast_validator.ComplexityLimitError(
+                "Factorial fuera de rango (máx. "
+                f"{ast_validator.MAX_FACTORIAL_INTEGER_ARGUMENT}): {digits}."
+            )
+
+    global_dict = build_minimal_global_dict()
+
+    try:
+        with warnings.catch_warnings():
+            # Suprime el SymPyDeprecationWarning de "Tuple dentro de Mul"
+            # que SymPy emite al construir (no al evaluar) expresiones como
+            # "foo()"/"Integral(x,x)" — ya se capturan como
+            # ParseSecurityError vía BLOCKED_NODE_TYPES en
+            # ast_validator.validate_ast_safety, este warning es ruido.
+            warnings.simplefilter("ignore")
+            expr = parse_expr(
+                side_text,
+                local_dict=local_dict,
+                global_dict=global_dict,
+                evaluate=False,
+                transformations=_TRANSFORMATIONS,
+            )
+    except ParseSecurityError:
+        raise
+    except Exception as exc:
+        raise ParseSecurityError("No se pudo interpretar la expresión.") from exc
+
+    ast_validator.validate_ast_safety(expr)
+    ast_validator.check_complexity_limits(expr)
+    return expr
+
+
+def permutation_alias_args(text: str) -> Optional[Tuple[int, int]]:
+    """Bounded bare P(n,r), never a globally reserved user-function name."""
+    match = re.fullmatch(r"\s*P\(\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*\)\s*", text)
+    if match is None:
+        return None
+    if len(match.group(1).lstrip("+-")) > 3 or len(match.group(2).lstrip("+-")) > 3:
+        raise ParseSecurityError("Permutaciones: se requiere 0 <= r <= n <= 170, con enteros.")
+    n, r = map(int, match.groups())
+    if not (0 <= r <= n <= 170):
+        raise ParseSecurityError("Permutaciones: se requiere 0 <= r <= n <= 170, con enteros.")
+    return n, r
+
+
+def symbolic_pair_binomial_variable(text: str) -> Optional[str]:
+    """Ordinary combinations nCr(symbol,2), distinct from generalized real binomials."""
+    m = re.fullmatch(r"\s*nCr\(\s*([A-Za-z])\s*,\s*2\s*\)\s*", text)
+    if m is None or m.group(1) in ALLOWED_CONSTANTS:
+        return None
+    return m.group(1)
+
+
+def symbolic_identity_sum_bound(text: str) -> Optional[str]:
+    """Recognize the bounded closed-form family; never parse arbitrary Sum ASTs."""
+    m = re.fullmatch(
+        r"\s*sum\(\s*\(?\s*([A-Za-z])\s*\)?\s*,\s*\1\s*,\s*1\s*,\s*([A-Za-z])\s*\)\s*",
+        text,
+    )
+    if not m:
+        return None
+    index, upper = m.groups()
+    if index == upper or upper in ALLOWED_CONSTANTS:
+        return None
+    return upper
+
+
+def _try_parse_finite_aggregate(text: str) -> Optional[sympy.Basic]:
+    """Parse calculator ``sum``/``product`` without allowing raw Sum/Product AST input.
+
+    The keyboard emits the whole construct as ``sum(body,index,lo,hi)`` or
+    ``product(body,index,lo,hi)``. The index is forced to a Symbol even for
+    ``i`` (normally the imaginary constant in the calculator).
+    """
+    m = re.fullmatch(r"(sum|product)\((.*)\)", text.strip(), re.S)
+    if not m:
+        return None
+    args = _split_top_level_commas(m.group(2))
+    if len(args) != 4:
+        raise ParseSecurityError(f"'{m.group(1)}' requiere cuerpo, índice, inicio y fin.")
+    body_text, index_name, lower_text, upper_text = [a.strip() for a in args]
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", index_name):
+        raise ParseSecurityError("Índice inválido en suma/productoria.")
+    index = sympy.Symbol(index_name)
+    ids = extract_candidate_identifiers(body_text)
+    local_dict, _ = classify_identifiers(ids)
+    local_dict[index_name] = index
+    body = _parse_side(body_text, local_dict)
+    lower = parse_expression_tree(lower_text, allow_equation=False)
+    upper = parse_expression_tree(upper_text, allow_equation=False)
+    if (symbolic_identity_sum_bound(text) is not None
+            and body == index and lower == 1 and upper.is_Symbol):
+        # Exact polynomial identity on the declared nonnegative-integer domain.
+        # No symbolic iteration and no relaxation of the finite-range guard.
+        value = upper * (upper + 1) / 2
+        from app.services import ast_validator
+        ast_validator.check_complexity_limits(value)
+        return value
+    if not (lower.is_Integer and upper.is_Integer):
+        raise ParseSecurityError("Los límites de suma/productoria deben ser enteros.")
+    if abs(int(upper) - int(lower)) > 10_000:
+        from app.services.ast_validator import ComplexityLimitError
+        raise ComplexityLimitError("El rango de suma/productoria excede 10,000 términos.")
+    value = sympy.summation(body, (index, lower, upper)) if m.group(1) == "sum" else sympy.product(body, (index, lower, upper))
+    from app.services import ast_validator
+    ast_validator.check_complexity_limits(value)
+    return value
+
+
+def parse_expression_tree(text: str, *, allow_equation: bool = False) -> sympy.Basic:
+    """Etapa 7, parte 2 (sección 7): orquesta las etapas 1-9.
+
+    Devuelve un `sympy.Expr` si `allow_equation=False`, o un `sympy.Eq` si
+    `allow_equation=True` (lado derecho implícito `0` si no había `=`,
+    sección 3: "sin `=` -> se asume `= 0`").
+    """
+    # SY-X-20: supplementary-plane pictographs are not calculator tokens.
+    # Reject before SymPy's implicit multiplication can reinterpret the source.
+    # Keep Unicode mathematics from the BMP (π, √, ∞, etc.) on its existing path.
+    if any(0x1F000 <= ord(ch) <= 0x1FAFF for ch in text):
+        raise ParseSecurityError("Carácter no válido en la expresión matemática.")
+    # Preserve source at API layer; decode bounded conjugate before G3 macro guard.
+    text = normalize_unicode(text) if ("\\overline" in text or "\\lvert" in text) else text
+    validate_g3_structure(text)
+    validate_length(text)
+    normalized = normalize_unicode(text)
+    # SY-N-01: normalize a leading-dot decimal only at a numeric boundary.
+    # Preserve attribute-access rejection (foo.bar, __class__, etc.).
+    normalized = re.sub(r"(?<![A-Za-z0-9_.])\.(?=\d)", "0.", normalized)
+    # SY-N-02: a trailing decimal point is the same exact integer (5. -> 5).
+    # Refuse to normalize an attribute suffix such as 5.__class__ or 5.foo.
+    normalized = re.sub(r"(?<=\d)\.(?![A-Za-z0-9_.])", ".0", normalized)
+    # SY-N-03: remove redundant leading zeros from an entire integer token.
+    # Do not rewrite identifier contents or fragments of scientific notation.
+    if re.fullmatch(r"0+[0-9]+", normalized.strip()):
+        normalized = str(int(normalized.strip()))
+    # Syntax309 SY-P-24/25: standalone mathematical letter juxtaposition
+    # denotes multiplication, not one multi-letter variable. Restrict to
+    # these canonical whole expressions to preserve named identifiers elsewhere.
+    if normalized.strip() in ("xy", "xyz"):
+        normalized = "*".join(normalized.strip())
+
+    if not allow_equation:
+        permutation = permutation_alias_args(normalized)
+        if permutation is not None:
+            value = FallingFactorial(*permutation)
+            from app.services import ast_validator
+            ast_validator.check_complexity_limits(value)
+            return value
+        aggregate = _try_parse_finite_aggregate(normalized)
+        if aggregate is not None:
+            return aggregate
+
+    if allow_equation:
+        lhs_text, rhs_text = split_equation(normalized)
+        validate_length(lhs_text)
+        if rhs_text is None:
+            rhs_text = "0"
+        else:
+            validate_length(rhs_text)
+    else:
+        if "=" in normalized:
+            # No explícito en la spec para endpoints no-`solve` — decisión
+            # DEDUCIBLE: un '=' fuera de `solve` no tiene interpretación
+            # válida como expresión (sección 7, etapa 3, "solo solve").
+            raise ParseSecurityError(
+                "No se esperaba '=' en una expresión (solo 'solve' admite ecuaciones)."
+            )
+        lhs_text, rhs_text = normalized, None
+
+    _validate_unknown_function_calls(normalized)
+    _validate_call_arity(normalized)
+
+    sides = [lhs_text] if rhs_text is None else [lhs_text, rhs_text]
+    for side in sides:
+        validate_decimal_and_reject_scientific(side)
+
+    all_identifiers: List[str] = []
+    for side in sides:
+        for identifier in extract_candidate_identifiers(side):
+            if identifier not in all_identifiers:
+                all_identifiers.append(identifier)
+
+    local_dict, _used = classify_identifiers(all_identifiers)
+
+    lhs_expr = _parse_side(lhs_text, local_dict)
+    if not allow_equation:
+        return lhs_expr
+
+    rhs_expr = _parse_side(rhs_text, local_dict)
+    # Preserve both sides so the solver can classify degenerate identities/contradictions after simplification.
+    return sympy.Eq(lhs_expr, rhs_expr, evaluate=False)
+
+
+_INEQUALITY_OPERATORS = ["<=", ">=", "<", ">"]  # orden importa: <= antes que <
+
+
+
+def parse_chained_inequalities(
+    text: str,
+) -> Optional[List[sympy.core.relational.Relational]]:
+    """Parsea exactamente dos comparaciones encadenadas, p. ej. 3<x<7.
+    Devuelve None para una desigualdad simple, preservando el contrato
+    existente de parse_inequality_tree()."""
+    validate_length(text)
+    normalized = normalize_unicode(text).replace(" ", "")
+    match = re.fullmatch(r"(.+?)(<=|>=|<|>)([A-Za-z])((?:<=|>=|<|>))(.+)", normalized)
+    if not match:
+        return None
+    left, op1, middle, op2, right = match.groups()
+    if not left or not right:
+        return None
+    return [
+        parse_inequality_tree(f"{left}{op1}{middle}"),
+        parse_inequality_tree(f"{middle}{op2}{right}"),
+    ]
+
+def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
+    """`/inequality` (spec, `InequalityRequest`). Reutiliza toda la
+    infraestructura de seguridad de `parse_expression_tree` (etapas 1-9):
+    solo cambia qué operador separa los dos lados (`<,>,<=,>=` en vez de
+    `=`) y qué tipo de `Relational` de SymPy se construye al final."""
+    validate_length(text)
+    # IN-I-03 source: accept the single-variable literal without broadening
+    # the LaTeX grammar; the normalized form still passes every safety check.
+    source_arctan = re.fullmatch(r"\s*\\arctan\s+([A-Za-z])\s*<\s*1\s*", text)
+    if source_arctan:
+        text = f"atan({source_arctan.group(1)})<1"
+    # IN-I-04 source uses a scaled variable and a LaTeX relation/fraction.
+    # Normalize only this bounded form; retain the normal validation pipeline.
+    scaled_arctan = re.fullmatch(
+        r"\s*\\arctan\(\s*2\s*([A-Za-z])\s*\)\s*\\ge\s*\\frac\{\\pi\}\{4\}\s*", text
+    )
+    if scaled_arctan:
+        text = f"atan(2*{scaled_arctan.group(1)})>=pi/4"
+    # IN-I-05: the source compares inverse functions of the same variable.
+    # Match the whole bounded literal and retain the normal validation pipeline.
+    inverse_pair = re.fullmatch(r"\s*\\arcsin\s+([A-Za-z])\s*<\s*\\arccos\s+\1\s*", text)
+    if inverse_pair:
+        text = f"asin({inverse_pair.group(1)})<acos({inverse_pair.group(1)})"
+    # IN-I-06: whole-source normalization, followed by the normal safe parser.
+    source_arccot = re.fullmatch(
+        r"\s*\\operatorname\{arccot\}\s+([A-Za-z])\s*<\s*\\frac\{\\pi\}\{4\}\s*", text
+    )
+    if source_arccot:
+        text = f"acot({source_arccot.group(1)})<pi/4"
+    # IN-I-07: accept only the complete matrix literal, retaining validation.
+    source_arcsin_affine = re.fullmatch(r"\s*\\arcsin\(\s*2\s*([A-Za-z])\s*-\s*1\s*\)\s*\\ge\s*0\s*", text)
+    if source_arcsin_affine:
+        text = f"asin(2*{source_arcsin_affine.group(1)}-1)>=0"
+    # IN-H-01: the matrix uses a bare LaTeX function argument.
+    source_sinh_positive = re.fullmatch(r"\s*\\sinh\s+([A-Za-z])\s*>\s*0\s*", text)
+    if source_sinh_positive:
+        text = f"sinh({source_sinh_positive.group(1)})>0"
+    # IN-H-02: normalize the whole frozen literal through the safe parser.
+    source_cosh = re.fullmatch(r"\s*\\cosh\s+([A-Za-z])\s*<\s*2\s*", text)
+    if source_cosh:
+        text = f"cosh({source_cosh.group(1)})<2"
+    # IN-H-03: normalize only the complete literal and retain validation.
+    source_tanh = re.fullmatch(r"\s*\\tanh\s+([A-Za-z])\s*\\le\s*\\frac\{1\}\{2\}\s*", text)
+    if source_tanh:
+        text = f"tanh({source_tanh.group(1)})<=1/2"
+    # IN-H-04: normalize the complete literal before usual validation.
+    source_sinh_negative = re.fullmatch(r"\s*\\sinh\s+([A-Za-z])\s*<\s*-1\s*", text)
+    if source_sinh_negative:
+        text = f"sinh({source_sinh_negative.group(1)})<-1"
+    # IN-H-05: accept the whole literal with a shared single variable only.
+    source_hyperbolic_product = re.fullmatch(r"\s*\\sinh\s+([A-Za-z])\s*\\cosh\s+\1\s*>\s*0\s*", text)
+    if source_hyperbolic_product:
+        variable = source_hyperbolic_product.group(1)
+        text = f"sinh({variable})*cosh({variable})>0"
+    # IN-H-06: normalize the complete matrix literal before validation.
+    source_doubled_cosh = re.fullmatch(
+        r"\s*\\cosh\(\s*2\s*([A-Za-z])\s*\)\s*\\le\s*3\s*", text
+    )
+    if source_doubled_cosh:
+        text = f"cosh(2*{source_doubled_cosh.group(1)})<=3"
+    # IN-H-07 source literal, normalized before the safety pipeline.
+    source_sech = re.fullmatch(r"\s*\\operatorname\{sech\}\s+([A-Za-z])\s*>\s*\\frac\{1\}\{2\}\s*", text)
+    if source_sech:
+        text = f"sech({source_sech.group(1)})>1/2"
+    # IN-H-08: source literal follows the regular validation pipeline.
+    source_cosh_minimum = re.fullmatch(r"\s*\\cosh\s+([A-Za-z])\s*\\ge\s*1\s*", text)
+    if source_cosh_minimum:
+        text = f"cosh({source_cosh_minimum.group(1)})>=1"
+    # IN-H-09 source literal still follows the full validation pipeline.
+    source_cosh_below_minimum = re.fullmatch(r"\s*\\cosh\s+([A-Za-z])\s*<\s*1\s*", text)
+    if source_cosh_below_minimum:
+        text = f"cosh({source_cosh_below_minimum.group(1)})<1"
+    # IN-HI-01: bounded source normalization before all parser checks.
+    source_arsinh = re.fullmatch(r"\s*\\operatorname\{arsinh\}\s+([A-Za-z])\s*>\s*1\s*", text)
+    if source_arsinh:
+        text = f"asinh({source_arsinh.group(1)})>1"
+    # IN-HI-02: bounded source normalization before all parser checks.
+    source_arsinh_nonpositive = re.fullmatch(r"\s*\\operatorname\{arsinh\}\s+([A-Za-z])\s*\\le\s*0\s*", text)
+    if source_arsinh_nonpositive:
+        text = f"asinh({source_arsinh_nonpositive.group(1)})<=0"
+    # IN-HI-03: bounded source normalization before all parser checks.
+    source_arcosh = re.fullmatch(r"\s*\\operatorname\{arcosh\}\s+([A-Za-z])\s*<\s*1\s*", text)
+    if source_arcosh:
+        text = f"acosh({source_arcosh.group(1)})<1"
+    normalized = normalize_unicode(text)
+
+    found_operator = None
+    for operator in _INEQUALITY_OPERATORS:
+        if operator in normalized:
+            found_operator = operator
+            break
+    if found_operator is None:
+        raise ParseSecurityError(
+            "Se esperaba un operador de desigualdad (<, >, <=, >=) en la expresión."
+        )
+    if normalized.count(found_operator) > 1:
+        raise ParseSecurityError(
+            f"Se permite un único operador de desigualdad ('{found_operator}')."
+        )
+
+    idx = normalized.index(found_operator)
+    lhs_text = normalized[:idx]
+    rhs_text = normalized[idx + len(found_operator) :]
+    validate_length(lhs_text)
+    validate_length(rhs_text)
+
+    _validate_unknown_function_calls(normalized)
+    _validate_call_arity(normalized)
+
+    for side in (lhs_text, rhs_text):
+        validate_decimal_and_reject_scientific(side)
+
+    all_identifiers: List[str] = []
+    for side in (lhs_text, rhs_text):
+        for identifier in extract_candidate_identifiers(side):
+            if identifier not in all_identifiers:
+                all_identifiers.append(identifier)
+
+    local_dict, _used = classify_identifiers(all_identifiers)
+    lhs_expr = _parse_side(lhs_text, local_dict)
+    rhs_expr = _parse_side(rhs_text, local_dict)
+
+    relational_by_operator = {
+        "<": sympy.Lt,
+        ">": sympy.Gt,
+        "<=": sympy.Le,
+        ">=": sympy.Ge,
+    }
+    return relational_by_operator[found_operator](lhs_expr, rhs_expr)
