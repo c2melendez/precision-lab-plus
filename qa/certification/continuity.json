@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 566,
+  "revision": 567,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
-  "baseline_case": "TRIG-IN-H-06",
-  "baseline_status": "VERIFYING_CI",
+  "technical_baseline_sha": "a822b2607a24b809925a9ce197d5787643727ba6",
+  "baseline_case": "TRIG-IN-H-07",
+  "baseline_status": "WAIT",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-IN-H-06",
-    "previous_id": "TRIG-IN-H-05",
+    "id": "TRIG-IN-H-07",
+    "previous_id": "TRIG-IN-H-06",
     "status": "WAIT",
-    "action": "Revisar jobs, pasos, logs y huellas de las corridas push existentes del SHA técnico. Cerrar IN-H-06 con evidencia funcional bilateral y continuar IN-H-07. Revisar mutación por separado."
+    "action": "Revisar jobs y logs del SHA técnico, literal y frontera estricta, y mutación pendiente."
   },
   "blockers": [
     {
@@ -73,14 +73,14 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-16T05:40:54.644Z",
+  "updated_utc": "2026-11-16T06:40:50.270Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
       "input_fingerprint": "c63020f938ded95b0b79cc3a04659392021da70adcf6c2e00ee1e85a3de2abe0",
       "head_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
-      "decision": "WAIT",
-      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "decision": "REVIEW",
+      "reason": "SHA técnico nuevo; recalcular huella y revisar CI.",
       "run_id": 43811603346,
       "evidence_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
       "logs_reviewed": false,
@@ -105,8 +105,8 @@
       "gate": "h1d",
       "input_fingerprint": "a8e60b3e46b8dac7e52a05def753c707af8d4f68604c86877ae5335a3a31663b",
       "head_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
-      "decision": "WAIT",
-      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "decision": "REVIEW",
+      "reason": "SHA técnico nuevo; recalcular huella y revisar CI.",
       "run_id": 43811603264,
       "evidence_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
       "logs_reviewed": false,
@@ -125,8 +125,8 @@
       "gate": "security",
       "input_fingerprint": "6470c8da1541948fb4bec225f7a8da6a046703d85eccf0030201904b4a0dc4f2",
       "head_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
-      "decision": "WAIT",
-      "reason": "equivalent inputs already queued/running; inspect existing run",
+      "decision": "REVIEW",
+      "reason": "SHA técnico nuevo; recalcular huella y revisar CI.",
       "run_id": 43811603254,
       "evidence_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
       "logs_reviewed": false,
@@ -734,6 +734,15 @@
       43800343210,
       43800343189,
       43800343177
+    ]
+  },
+  "pending_h07": {
+    "head_sha": "a822b2607a24b809925a9ce197d5787643727ba6",
+    "runs": [
+      43818357382,
+      43818357389,
+      43818357353,
+      43818357345
     ]
   }
 }
