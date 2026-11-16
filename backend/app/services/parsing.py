@@ -1001,6 +1001,11 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     source_sinh_negative = re.fullmatch(r"\s*\\sinh\s+([A-Za-z])\s*<\s*-1\s*", text)
     if source_sinh_negative:
         text = f"sinh({source_sinh_negative.group(1)})<-1"
+    # IN-H-05: accept the whole literal with a shared single variable only.
+    source_hyperbolic_product = re.fullmatch(r"\s*\\sinh\s+([A-Za-z])\s*\\cosh\s+\1\s*>\s*0\s*", text)
+    if source_hyperbolic_product:
+        variable = source_hyperbolic_product.group(1)
+        text = f"sinh({variable})*cosh({variable})>0"
     normalized = normalize_unicode(text)
 
     found_operator = None
