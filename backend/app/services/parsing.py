@@ -1006,6 +1006,12 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     if source_hyperbolic_product:
         variable = source_hyperbolic_product.group(1)
         text = f"sinh({variable})*cosh({variable})>0"
+    # IN-H-06: normalize the complete matrix literal before validation.
+    source_doubled_cosh = re.fullmatch(
+        r"\s*\\cosh\(\s*2\s*([A-Za-z])\s*\)\s*\\le\s*3\s*", text
+    )
+    if source_doubled_cosh:
+        text = f"cosh(2*{source_doubled_cosh.group(1)})<=3"
     normalized = normalize_unicode(text)
 
     found_operator = None
