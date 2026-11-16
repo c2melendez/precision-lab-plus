@@ -1020,6 +1020,10 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     source_cosh_minimum = re.fullmatch(r"\s*\\cosh\s+([A-Za-z])\s*\\ge\s*1\s*", text)
     if source_cosh_minimum:
         text = f"cosh({source_cosh_minimum.group(1)})>=1"
+    # IN-H-09 source literal still follows the full validation pipeline.
+    source_cosh_below_minimum = re.fullmatch(r"\s*\\cosh\s+([A-Za-z])\s*<\s*1\s*", text)
+    if source_cosh_below_minimum:
+        text = f"cosh({source_cosh_below_minimum.group(1)})<1"
     normalized = normalize_unicode(text)
 
     found_operator = None
