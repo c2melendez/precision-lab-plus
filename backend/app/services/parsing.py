@@ -1024,6 +1024,10 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     source_cosh_below_minimum = re.fullmatch(r"\s*\\cosh\s+([A-Za-z])\s*<\s*1\s*", text)
     if source_cosh_below_minimum:
         text = f"cosh({source_cosh_below_minimum.group(1)})<1"
+    # IN-HI-01: bounded source normalization before all parser checks.
+    source_arsinh = re.fullmatch(r"\s*\\operatorname\{arsinh\}\s+([A-Za-z])\s*>\s*1\s*", text)
+    if source_arsinh:
+        text = f"asinh({source_arsinh.group(1)})>1"
     normalized = normalize_unicode(text)
 
     found_operator = None
