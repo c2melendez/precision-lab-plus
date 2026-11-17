@@ -1,3 +1,13 @@
+# r573 — IN-HI-03 verificado funcionalmente; reconciliación pendiente
+
+IN-HI-03: Lite commit técnico 16c177ade1b87ee2794b7c6b6027a8ad2572a9b0; acumulativo 43860683028/job 133276373543 ejecutó 2650 pruebas aprobadas, incluyendo cuatro IN-HI-03; H1d 43860683081/job 133276373424 ejecutó 22 y Scientific 43860683089/job 133276373578 ejecutó 456. Plus commit técnico b809bcda7d915a236880111083208297c65ae73f restaura parser y prueba completos; acumulativo 43982415777/backend 133701954947 ejecutó 3177 aprobadas, 1 skipped y 11 xfailed, incluidas fuente, servicio y literal HTTP IN-HI-03; frontend 133701955461 aprobó 1055. H1d 43982415757/job 133701954988 aprobó 38; Native 43982415765/job 133701954960 aprobó 26 escritorio y 52 tablet/móvil. Logs revisados; evidencia funcional acotada, no E2E visual específico de la fila ni certificación global.
+
+Plus seguridad 43982415736 backend-security job 133702174807 success, frontend-audit skipped y mutación job 133702222452 en curso al consultar. No duplicar. S19 REVIEW; S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN.
+
+Siguiente acción: reconciliar continuity.json con HEAD técnico y huellas actuales, revisar mutación existente y después IN-HI-04, sin repetir gates vigentes. El índice anterior sigue desactualizado; no usarlo como evidencia ya reconciliada.
+
+---
+
 # r571 — IN-HI-01 verificado; IN-HI-02 publicado
 
 IN-HI-01 PASS_SCOPED funcional: Lite 05ce233b23c20edd7be7b9a80c4205ab2bc3204a acumulativo 43845723004/job 133225273947 2642 aprobadas, 8 expected fail, 34 TODO, cuatro pruebas IN-HI-01; H1d 43845723032/job 133225273412 22 y Scientific 43845723206/job 133225274034 456. Plus a0d00726fd8a373f93dc71b1befaf60f58bfb2d9 acumulativo 43845733017/backend 133225308247 3171 aprobadas, 1 skipped, 11 xfailed, fuente, servicio y literal HTTP IN-HI-01 PASS; frontend 133225308785 1055 y 28 TODO; H1d 43845732998/job 133225307853 38 y Native 43845733125/job 133225309057 26/52. Jobs y logs revisados; no acredita E2E visual específico.
