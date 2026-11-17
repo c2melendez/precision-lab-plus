@@ -9,13 +9,13 @@ from app.services.phase2_service import compute_limit
 def test_source():
     s = gzip.decompress((Path(__file__).resolve().parents[2]/'qa/certification/legacy_sources/ejercicios_trigonometria.md.gz').read_bytes()).decode()
     row=next(line for line in s.splitlines() if '| LM-D-03 |' in line)
-    assert r'\\lim_{x\\to 0}\\frac{\\tan x}{x}' in row
-    assert '1' in row
+    assert r'\lim_{x\to 0}\frac{\tan x}{x}' in row
+    assert '`1`' in row
 
 
-def test_exact_service_and_two_sides():
+def test_service_and_sides():
     for direction in ('both','left','right'):
-        assert compute_limit('tan(x)/x','x','0',direction).value == 1
+        assert compute_limit('tan(x)/x','x','0',direction).value == sp.Integer(1)
 
 
 def test_http_limit():
