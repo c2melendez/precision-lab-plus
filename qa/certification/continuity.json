@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "revision": 571,
+  "revision": 573,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "1a1b4284dc968aa5cf59f6df0256bbd462fd810d",
-  "baseline_case": "TRIG-IN-HI-02",
-  "baseline_status": "WAIT",
+  "technical_baseline_sha": "b809bcda7d915a236880111083208297c65ae73f",
+  "baseline_case": "TRIG-IN-HI-03",
+  "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
     "cumulative": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-IN-HI-02",
-    "previous_id": "TRIG-IN-HI-01",
-    "status": "WAIT",
-    "action": "Revisar jobs y logs del SHA técnico, literal y frontera incluida, y mutación pendiente."
+    "id": "TRIG-IN-HI-04",
+    "previous_id": "TRIG-IN-HI-03",
+    "status": "READY",
+    "action": "Implementar y validar bilateralmente arcosh(x)>=0 con dominio [1,infinito); conservar bloqueos y no duplicar mutación."
   },
   "blockers": [
     {
@@ -73,121 +73,62 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-16T11:11:54.542Z",
+  "updated_utc": "2026-11-17T04:46:43.287558Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "c63020f938ded95b0b79cc3a04659392021da70adcf6c2e00ee1e85a3de2abe0",
-      "head_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
-      "decision": "REVIEW",
-      "reason": "SHA técnico nuevo; recalcular huella y revisar CI.",
-      "run_id": 43811603346,
-      "evidence_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
-      "logs_reviewed": false,
-      "evidence_executed": false,
+      "input_fingerprint": "976d86a0ee87e37a61f7168c34c45a4a6048aaa910c22c9a2e4205a8173a1de1",
+      "head_sha": "b7999a1e1eb9041afaeb5e87f7b74918ae177757",
+      "decision": "REUSE",
+      "reason": "Logs y ejecución revisados para insumos equivalentes; alcance funcional acotado.",
+      "logs_reviewed": true,
+      "evidence_executed": true,
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "run_id": 43982415777,
+      "evidence_sha": "b809bcda7d915a236880111083208297c65ae73f",
       "jobs": [
         {
-          "id": 133114268345,
-          "name": "backend",
-          "status": "in_progress",
-          "conclusion": null
+          "id": 133701954947,
+          "status": "completed",
+          "conclusion": "success"
         },
         {
-          "id": 133114268509,
-          "name": "frontend",
+          "id": 133701955461,
           "status": "completed",
           "conclusion": "success"
         }
-      ],
-      "acceptance_revision": "2026-10-16-continuity-v1"
+      ]
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "a8e60b3e46b8dac7e52a05def753c707af8d4f68604c86877ae5335a3a31663b",
-      "head_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
-      "decision": "REVIEW",
-      "reason": "SHA técnico nuevo; recalcular huella y revisar CI.",
-      "run_id": 43811603264,
-      "evidence_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
-      "logs_reviewed": false,
-      "evidence_executed": false,
+      "input_fingerprint": "9e2ec6891bac7ce551d156e957c465eb854e0ab7ace2abf9e3e0ae13b7f0fb4d",
+      "head_sha": "b7999a1e1eb9041afaeb5e87f7b74918ae177757",
+      "decision": "REUSE",
+      "reason": "Logs y ejecución revisados para insumos equivalentes; alcance funcional acotado.",
+      "logs_reviewed": true,
+      "evidence_executed": true,
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "run_id": 43982415757,
+      "evidence_sha": "b809bcda7d915a236880111083208297c65ae73f",
       "jobs": [
         {
-          "id": 133114267910,
-          "name": "h1d",
-          "status": "in_progress",
-          "conclusion": null
+          "id": 133701954988,
+          "status": "completed",
+          "conclusion": "success"
         }
-      ],
-      "acceptance_revision": "2026-10-16-continuity-v1"
+      ]
     },
     "security": {
       "gate": "security",
-      "input_fingerprint": "6470c8da1541948fb4bec225f7a8da6a046703d85eccf0030201904b4a0dc4f2",
-      "head_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
-      "decision": "REVIEW",
-      "reason": "SHA técnico nuevo; recalcular huella y revisar CI.",
-      "run_id": 43811603254,
-      "evidence_sha": "7065c1392267e50e26b6fb467d9fb065cc01df95",
+      "input_fingerprint": "7a141a61f949ff65fa8d2de943847f5c24f2dd362e23fd816d1ff93df410bb06",
+      "head_sha": "b7999a1e1eb9041afaeb5e87f7b74918ae177757",
+      "decision": "WAIT",
+      "reason": "Mutación existente en curso; frontend-audit omitido, seguridad dinámica no reutilizada.",
       "logs_reviewed": false,
       "evidence_executed": false,
-      "jobs": [
-        {
-          "id": 133114267972,
-          "name": "audit-request",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "id": 133114366212,
-          "name": "security / validate-request",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "id": 133114366224,
-          "name": "mutation / validate-request",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "id": 133114394845,
-          "name": "mutation / change-scope",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "id": 133114399868,
-          "name": "security / backend-security",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "id": 133114402284,
-          "name": "security / frontend-audit",
-          "status": "completed",
-          "conclusion": "skipped"
-        },
-        {
-          "id": 133114440176,
-          "name": "mutation / plus-backend-mutmut",
-          "status": "in_progress",
-          "conclusion": null
-        },
-        {
-          "id": 133114441355,
-          "name": "mutation / plus-frontend-stryker",
-          "status": "completed",
-          "conclusion": "skipped"
-        },
-        {
-          "id": 133114441659,
-          "name": "mutation / lite-frontend-stryker",
-          "status": "completed",
-          "conclusion": "skipped"
-        }
-      ],
-      "acceptance_revision": "2026-10-16-continuity-v1"
+      "acceptance_revision": "2026-10-16-continuity-v1",
+      "run_id": 43982415736,
+      "evidence_sha": "b809bcda7d915a236880111083208297c65ae73f"
     }
   },
   "previous_accepted": {
