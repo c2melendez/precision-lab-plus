@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 573,
+  "revision": 574,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "b809bcda7d915a236880111083208297c65ae73f",
-  "baseline_case": "TRIG-IN-HI-03",
+  "technical_baseline_sha": "44077dde98a845d504f2f118477c704ff01708d4",
+  "baseline_case": "TRIG-IN-HI-04",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-IN-HI-04",
-    "previous_id": "TRIG-IN-HI-03",
+    "id": "TRIG-IN-HI-05",
+    "previous_id": "TRIG-IN-HI-04",
     "status": "READY",
-    "action": "Implementar y validar bilateralmente arcosh(x)>=0 con dominio [1,infinito); conservar bloqueos y no duplicar mutación."
+    "action": "Implementar y validar bilateralmente artanh(x)>=ln(3)/2 en [1/2,1); conservar bloqueos y no duplicar mutación."
   },
   "blockers": [
     {
@@ -73,27 +73,27 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-17T04:46:43.287558Z",
+  "updated_utc": "2026-11-17T08:46:31.514496Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "976d86a0ee87e37a61f7168c34c45a4a6048aaa910c22c9a2e4205a8173a1de1",
-      "head_sha": "b7999a1e1eb9041afaeb5e87f7b74918ae177757",
+      "input_fingerprint": "eb0f83ac145944ea02cce24a4327e67d2db1afd68cdf4ad342ec913db0207478",
+      "head_sha": "0f985c9a385cfbf11b30b8f5be4b90a65f3e38b6",
       "decision": "REUSE",
       "reason": "Logs y ejecución revisados para insumos equivalentes; alcance funcional acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 43982415777,
-      "evidence_sha": "b809bcda7d915a236880111083208297c65ae73f",
+      "run_id": 44019601726,
+      "evidence_sha": "44077dde98a845d504f2f118477c704ff01708d4",
       "jobs": [
         {
-          "id": 133701954947,
+          "id": 133825643859,
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "id": 133701955461,
+          "id": 133825644253,
           "status": "completed",
           "conclusion": "success"
         }
@@ -101,18 +101,18 @@
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "9e2ec6891bac7ce551d156e957c465eb854e0ab7ace2abf9e3e0ae13b7f0fb4d",
-      "head_sha": "b7999a1e1eb9041afaeb5e87f7b74918ae177757",
+      "input_fingerprint": "8c8dcb231935ee340330166d52bffd9f99ac6503849e63762490d7795a1f13be",
+      "head_sha": "0f985c9a385cfbf11b30b8f5be4b90a65f3e38b6",
       "decision": "REUSE",
       "reason": "Logs y ejecución revisados para insumos equivalentes; alcance funcional acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 43982415757,
-      "evidence_sha": "b809bcda7d915a236880111083208297c65ae73f",
+      "run_id": 44019601966,
+      "evidence_sha": "44077dde98a845d504f2f118477c704ff01708d4",
       "jobs": [
         {
-          "id": 133701954988,
+          "id": 133825644034,
           "status": "completed",
           "conclusion": "success"
         }
@@ -120,15 +120,15 @@
     },
     "security": {
       "gate": "security",
-      "input_fingerprint": "7a141a61f949ff65fa8d2de943847f5c24f2dd362e23fd816d1ff93df410bb06",
-      "head_sha": "b7999a1e1eb9041afaeb5e87f7b74918ae177757",
+      "input_fingerprint": "1e4b61c6bd122b29aaa20d2693814c70c09e819c76eaf0963dea3171e28ecdc2",
+      "head_sha": "0f985c9a385cfbf11b30b8f5be4b90a65f3e38b6",
       "decision": "WAIT",
-      "reason": "Mutación existente en curso; frontend-audit omitido, seguridad dinámica no reutilizada.",
+      "reason": "Mutación existente en curso; frontend-audit omitido y seguridad dinámica no reutilizada.",
       "logs_reviewed": false,
       "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 43982415736,
-      "evidence_sha": "b809bcda7d915a236880111083208297c65ae73f"
+      "run_id": 44019601763,
+      "evidence_sha": "44077dde98a845d504f2f118477c704ff01708d4"
     }
   },
   "previous_accepted": {
