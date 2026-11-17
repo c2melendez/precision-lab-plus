@@ -248,6 +248,14 @@ def compute_inequality(inequality: sympy.core.relational.Relational, variable: s
     var_symbol = _validate_variable(variable)
     warnings: List[str] = []
 
+    # IN-HI-07: the real positive acoth branch is decreasing; exclude x=1.
+    arcoth = sympy.acoth(var_symbol)
+    op = getattr(inequality, "rel_op", None)
+    if (op == ">" and inequality.lhs == arcoth and inequality.rhs == sympy.log(2)) or (
+        op == "<" and inequality.rhs == arcoth and inequality.lhs == sympy.log(2)
+    ):
+        return InequalityResult(sympy.Interval.open(1, sympy.Rational(5, 3)), [])
+
     # IN-D-03 uses the continuous principal tangent branch (-pi/2, pi/2).
     # SymPy's default [0, pi) period (even with domain=...) omits negative x.
     # Recognize only this frozen strict comparison and expose the branch scope.

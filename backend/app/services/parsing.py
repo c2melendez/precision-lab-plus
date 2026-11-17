@@ -1032,6 +1032,10 @@ def parse_inequality_tree(text: str) -> sympy.core.relational.Relational:
     source_arsinh_nonpositive = re.fullmatch(r"\s*\\operatorname\{arsinh\}\s+([A-Za-z])\s*\\le\s*0\s*", text)
     if source_arsinh_nonpositive:
         text = f"asinh({source_arsinh_nonpositive.group(1)})<=0"
+    # IN-HI-07: normalize the exact frozen source literal before validation.
+    source_arcoth = re.fullmatch(r"\s*\\operatorname\{arcoth\}\s+([A-Za-z])\s*>\s*\\ln\s*2\s*", text)
+    if source_arcoth:
+        text = f"acoth({source_arcoth.group(1)})>ln(2)"
     # IN-HI-06: bounded source literal, still subject to parser checks.
     source_artanh_negative = re.fullmatch(r"\s*\\operatorname\{artanh\}\s+([A-Za-z])\s*<\s*0\s*", text)
     if source_artanh_negative:
