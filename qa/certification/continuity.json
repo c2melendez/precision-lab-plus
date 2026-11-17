@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 576,
+  "revision": 577,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "d58019fbdffca8b7f3cf1ba37837204f4626f861",
-  "baseline_case": "TRIG-IN-HI-05",
+  "technical_baseline_sha": "e120bdae7c0dcd957c40ae9f951652195f54f705",
+  "baseline_case": "TRIG-IN-HI-06",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-IN-HI-06",
-    "previous_id": "TRIG-IN-HI-05",
+    "id": "TRIG-IN-HI-07",
+    "previous_id": "TRIG-IN-HI-06",
     "status": "READY",
-    "action": "Implementar y validar bilateralmente artanh(x)<0 en (-1,0); conservar bloqueos y no duplicar mutación."
+    "action": "Implementar y validar bilateralmente arcoth(x)>ln(2) en (1,5/3), conservar bloqueos y no duplicar mutación."
   },
   "blockers": [
     {
@@ -73,27 +73,27 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-17T13:50:29.610940Z",
+  "updated_utc": "2026-11-17T16:41:13.730927Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "adf75fbfbe27ea6f04f120f012a027c6ba8cee1c121e3b8720a252b8d56f559f",
-      "head_sha": "072d957f09cb1905febce354236b24bbb8c3ec19",
+      "input_fingerprint": "79f65e78202e717cf206440593e886c0f19675ad8c292bf4f5d102b04142f9e7",
+      "head_sha": "7c65bf0e02afab88280822e77571ca05d20a25da",
       "decision": "REUSE",
       "reason": "Logs y ejecución revisados para insumos equivalentes; alcance funcional acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 44066925384,
-      "evidence_sha": "d58019fbdffca8b7f3cf1ba37837204f4626f861",
+      "run_id": 44096876770,
+      "evidence_sha": "e120bdae7c0dcd957c40ae9f951652195f54f705",
       "jobs": [
         {
-          "id": 133982884066,
+          "id": 134086212603,
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "id": 133982884868,
+          "id": 134086213035,
           "status": "completed",
           "conclusion": "success"
         }
@@ -101,18 +101,18 @@
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "fa08b045793775e2a28a1b15f8f42045ecb7c99854aced600989b2627bcae2e4",
-      "head_sha": "072d957f09cb1905febce354236b24bbb8c3ec19",
+      "input_fingerprint": "54913df5a3a1a7012d3f4562e356df6524a9af42b87e43d1830c52b423bdfa32",
+      "head_sha": "7c65bf0e02afab88280822e77571ca05d20a25da",
       "decision": "REUSE",
       "reason": "Logs y ejecución revisados para insumos equivalentes; alcance funcional acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 44066925541,
-      "evidence_sha": "d58019fbdffca8b7f3cf1ba37837204f4626f861",
+      "run_id": 44096876753,
+      "evidence_sha": "e120bdae7c0dcd957c40ae9f951652195f54f705",
       "jobs": [
         {
-          "id": 133982885007,
+          "id": 134086212028,
           "status": "completed",
           "conclusion": "success"
         }
@@ -120,15 +120,15 @@
     },
     "security": {
       "gate": "security",
-      "input_fingerprint": "c167a0a0e0bfba60d94e56d590e21d231e5a156d6f7cfd44c3806b3e9906feec",
-      "head_sha": "072d957f09cb1905febce354236b24bbb8c3ec19",
-      "decision": "REVIEW",
-      "reason": "Seguridad dinámica no reutilizada; mutación anterior en curso y frontend-audit omitido.",
+      "input_fingerprint": "f9238f1ebf3d87b89ac9db8b43971452648d803fa9eca6902c013e57e7fd5149",
+      "head_sha": "7c65bf0e02afab88280822e77571ca05d20a25da",
+      "decision": "WAIT",
+      "reason": "Mutación existente en curso; frontend-audit omitido y seguridad dinámica no reutilizada.",
       "logs_reviewed": false,
       "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 44049734970,
-      "evidence_sha": "ef91a53fadb0798ad45d987facfb9c8ba267e199"
+      "run_id": 44096876802,
+      "evidence_sha": "e120bdae7c0dcd957c40ae9f951652195f54f705"
     }
   },
   "previous_accepted": {
