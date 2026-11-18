@@ -2,6 +2,7 @@
 app/routers/evaluate.py — `POST /evaluate` (spec, secciones 3, 4, 5, 6, 7, 9).
 """
 
+import re
 import time
 
 import sympy
@@ -16,6 +17,43 @@ from app.services.ast_validator import ComplexityLimitError
 router = APIRouter(tags=["evaluate"])
 
 _MAX_RESULT_LATEX_LENGTH = 10_000
+_MAX_DISPLAY_SIMPLIFY_POWER_EXPONENT = 200
+
+
+def _display_expression(result, source_expression: str):
+    """Return a bounded, canonical presentation without changing evaluation.
+
+    Numeric ASTs are parsed with evaluate=False to preserve input structure.
+    Simplify small numeric results for the UI (2+3 -> 5), but retain large
+    powers verbatim and avoid a known expensive decimal-exp presentation path.
+    """
+    expr = result.expr
+    if not result.is_numeric:
+        return expr
+
+    try:
+        decimal_exponential = (
+            source_expression is not None
+            and re.search(
+                r"(?<![A-Za-z0-9_.])\d+\.\d+(?![A-Za-z0-9_])",
+                source_expression,
+            )
+            and expr.has(sympy.exp)
+            and result.approx_value is not None
+        )
+        if decimal_exponential:
+            return sympy.Float(result.approx_value)
+
+        for node in sympy.preorder_traversal(expr):
+            if not node.is_Pow or not node.exp.is_number:
+                continue
+            exponent = node.exp if node.exp.is_Integer else sympy.simplify(node.exp)
+            if exponent.is_Integer and abs(int(exponent)) > _MAX_DISPLAY_SIMPLIFY_POWER_EXPONENT:
+                return expr
+
+        return sympy.simplify(expr)
+    except Exception:
+        return expr
 
 
 def _duration_ms(request: Request) -> float:
@@ -61,8 +99,9 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
         )
 
     warnings = []
+    display_expr = _display_expression(result, payload.expression)
     try:
-        result_latex = sympy.latex(result.expr)
+        result_latex = sympy.latex(display_expr)
     except ValueError:
         # Un entero cuya magnitud excede el límite de conversión int->str de
         # Python (`sys.set_int_max_str_digits`) puede surgir incluso dentro
@@ -82,7 +121,7 @@ async def evaluate(payload: EvaluateRequest, request: Request) -> MathResponse:
             result_latex = None
             warnings.append("Resultado LaTeX omitido: excede los 10,000 caracteres (sección 4).")
         try:
-            result_text = str(result.expr)
+            result_text = str(display_expr)
         except ValueError:
             result_text = "(resultado numérico demasiado grande para mostrarse)"
 
