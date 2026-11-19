@@ -9,8 +9,8 @@ from app.services.phase2_service import compute_limit
 def test_source():
     s = gzip.decompress((Path(__file__).resolve().parents[2]/'qa/certification/legacy_sources/ejercicios_trigonometria.md.gz').read_bytes()).decode()
     row=next(line for line in s.splitlines() if '| LM-D-04 |' in line)
-    assert r'\\lim_{x\\to 0}\\frac{\\sin 3x}{\\sin 5x}' in row
-    assert r'\\frac{3}{5}' in row
+    assert r'\lim_{x\to 0}\frac{\sin 3x}{\sin 5x}' in row
+    assert r'\frac{3}{5}' in row
 
 
 def test_service_and_sides():
