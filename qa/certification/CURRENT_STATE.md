@@ -1,3 +1,13 @@
+# r587 — LM-D-04 Plus cumulative success; CI backend still in progress
+
+Plus SHA 55ba933dcff3dd1836f0e03f01d7c649c80093ed (fix: correct raw string escaping in LM-D-04 source assertion): H1d 44638623816/job 135963558038 success (38 tests passed). Certification Runner 44638625517 success. Cumulative 44638623948 both jobs success (backend 135963557914, frontend 135963558200). CI 44638625038 frontend success, backend in_progress. Classification: harness (source assertion escaping). Awaiting CI backend completion to confirm full PASS_SCOPED.
+
+Lite 304515c8b9536327f0e5a267875776c0369c0979: all gates SUCCESS (Cumulative 44638506529, H1d 44638506297, Scientific 44638506458, CI 44638506888, Runner 44638506841). PASS_SCOPED funcional for LM-D-04.
+
+S19 REVIEW; S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN. Siguiente acción: WAIT for Plus CI backend on 55ba933; on success reconcile continuity.json and advance matrix. Do not duplicate runs.
+
+---
+
 # r586 — LM-D-04 Plus H1d success on raw string fix; cumulative/CI in progress
 
 Plus SHA 55ba933dcff3dd1836f0e03f01d7c649c80093ed (fix: correct raw string escaping in LM-D-04 source assertion): H1d 44638623816/job 135963558038 success (38 tests passed). Certification Runner 44638625517 success. Cumulative 44638623948 frontend success, backend in_progress. CI 44638625038 frontend success, backend in_progress. Classification: harness (source assertion escaping). Awaiting backend completion to confirm PASS_SCOPED.
