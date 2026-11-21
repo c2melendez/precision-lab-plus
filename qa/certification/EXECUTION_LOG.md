@@ -2767,3 +2767,12 @@ AS-B-25 (D22): `factor(x^2+1) sobre ℂ` -> `(x-i)*(x+i)` solo con sufijo explí
 - Alcance: las pruebas verifican raíces exactas, intervalo y sustitución; Plus usa ASCII en `/api/v1/solve`. No se altera ni se certifica la ingesta LaTeX de `/api/v1/evaluate`; EV-D-01 sigue BLOCKED en ese endpoint. EV-HI continúa PASS_SCOPED; no hay cierre global.
 - Siguiente acción: EC-D-02; recuperar primero la fila exacta de la matriz gzip y luego test-first bilateral.
 
+
+# r594 — LM-D-07 evidencia funcional bilateral verificada
+
+Lite 9eda9e25fedc3216ad7e2e7ec8ac26d295be147a: acumulativo 44877376791/job 136764951590: 2698 PASS, 8 expected fail, 34 TODO, cinco pruebas LM-D-07; H1d 44877376794: 22 PASS; Scientific 44877376833: 456 PASS. Plus f891c28724d0f1c5ea7b64e3bb9ceb1a941b6236: acumulativo 44877379711/backend 136764962060: 3207 PASS, 1 skipped, 11 xfail, tres pruebas LM-D-07; frontend 136764961865: 1055 PASS, 28 TODO; H1d 44877379707: 38 PASS. Logs y ejecución verificados. PASS_SCOPED funcional, sin afirmar E2E visual específico ni certificación global.
+
+S19 REVIEW; S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN. Siguiente: TRIG-LM-D-08, reproducir fila congelada y agregar regresión bilateral.
+
+---
+
