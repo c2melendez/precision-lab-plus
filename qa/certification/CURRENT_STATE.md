@@ -1,3 +1,13 @@
+# r590 — LM-D-05 Lite all gates SUCCESS; Plus H1d SUCCESS, cumulative/CI in progress
+
+Plus SHA dd9cdc648a5eaef029f9043146df5ee1928f8216: test coverage for (tan(x)-sin(x))/x**3 = 1/2 (SymPy exact). Certification Runner 44843820156 SUCCESS. H1d 44843820212 SUCCESS. Cumulative 44843820180 in_progress, CI 44843820149 in_progress. Local tests 3/3 PASS. Classification: harness/test. Awaiting remaining gates to confirm PASS_SCOPED.
+
+Lite SHA 07192dc9509584cba3971cfc6e889a966edfa984: special-case symbolic for (tan(x)-sin(x))/x^3 = 1/2. All gates SUCCESS (Runner, Cumulative, H1d, Scientific, CI). Classification: product. PASS_SCOPED funcional for Lite.
+
+S19 REVIEW; S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN. Siguiente acción: WAIT for Plus cumulative/CI on dd9cdc6; on success reconcile continuity.json and advance to LM-D-06. Do not duplicate runs.
+
+---
+
 # r589 — LM-D-05 test published; gates in progress on dd9cdc6
 
 Plus SHA dd9cdc648a5eaef029f9043146df5ee1928f8216: test coverage for (tan(x)-sin(x))/x**3 = 1/2 (SymPy exact). Certification Runner 44843820156 SUCCESS. Cumulative 44843820180 in_progress, H1d 44843820212 in_progress, CI 44843820149 queued/in_progress. Local tests 3/3 PASS. Classification: harness/test. Awaiting completion to confirm PASS_SCOPED.
