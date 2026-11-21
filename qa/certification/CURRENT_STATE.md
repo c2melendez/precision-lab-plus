@@ -1,3 +1,11 @@
+# r593 — LM-D-06 evidencia funcional bilateral verificada
+
+Lite fc3e13b32576b3cd997e398bc2eb2d9a4793fa53: acumulativo 44867478378/job 136734279808: 2693 PASS, 8 expected fail, 34 TODO; 5 pruebas LM-D-06 ejecutadas. H1d 44867478393: 22 PASS; Scientific 44867478438: 456 PASS. Plus 971027da5583150575dd4a129ab784d41dc60271: acumulativo 44862898486/backend 136720033105: 3204 PASS, 1 skipped, 11 xfail, tres pruebas LM-D-06 ejecutadas; frontend 136720033284: 1055 PASS, 28 TODO. H1d 44862898447: 38 PASS. Logs revisados, evidencia ejecutada; PASS_SCOPED funcional, no E2E visual específico ni certificación global.
+
+S19 REVIEW; S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN. Siguiente acción: TRIG-LM-D-07, verificar la fila congelada, reproducir y agregar regresión bilateral sin duplicar corridas.
+
+---
+
 # r592 — LM-D-05 Plus CI success; PASS_SCOPED bilateral confirmed
 
 Plus SHA dd9cdc648a5eaef029f9043146df5ee1928f8216: test coverage for (tan(x)-sin(x))/x**3 = 1/2 (SymPy exact). Certification Runner 44843820156 SUCCESS. H1d 44843820212 SUCCESS. Cumulative 44843820180 SUCCESS. CI 44843820149 completed success (backend and frontend jobs succeeded; frontend annotation exit code 1 non-blocking). Local tests 3/3 PASS. Classification: harness/test. PASS_SCOPED funcional bilateral for LM-D-05 (Lite already confirmed on 07192dc9).
