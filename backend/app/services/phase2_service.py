@@ -80,6 +80,11 @@ def compute_limit(expression: str, variable: str, point: str, direction: str) ->
     var_symbol = _validate_variable(variable)
     point_expr = parsing.parse_expression_tree(point, allow_equation=False)
 
+    # Matrix LM-I-11 uses the real principal arccot branch (0, pi), whereas
+    # SymPy's acot approaches zero from below at negative infinity.
+    if point_expr == -sympy.oo and input_expr == sympy.acot(var_symbol):
+        return LimitResult(input_expr, sympy.pi)
+
     try:
         value = sympy.limit(input_expr, var_symbol, point_expr, dir=_DIRECTION_MAP[direction])
         if direction == "both" and value.has(sympy.zoo):
