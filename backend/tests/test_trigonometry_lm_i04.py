@@ -9,8 +9,8 @@ from app.services.phase2_service import compute_limit
 def test_original_row():
     text = gzip.decompress((Path(__file__).resolve().parents[2] / 'qa/certification/legacy_sources/ejercicios_trigonometria.md.gz').read_bytes()).decode()
     row = next(line for line in text.splitlines() if '| LM-I-04 |' in line)
-    assert r'\\lim_{x\\to 0}\\frac{x-\\arctan x}{x^{3}}' in row
-    assert r'\\frac{1}{3}' in row
+    assert r'\lim_{x\to 0}\frac{x-\arctan x}{x^{3}}' in row
+    assert r'\frac{1}{3}' in row
 
 
 def test_service_sides():
