@@ -1,3 +1,13 @@
+# r603 — LM-I-03 evidencia funcional bilateral verificada
+
+Lite c4e2f35bf68d04989a731f56d9a96954500d3c78: special-case symbolic for arcsin(3*x)/arctan(2*x) = 3/2. Scientific UI E2E 44968070170 SUCCESS. Other gates SUCCESS. Classification: product. PASS_SCOPED funcional for Lite.
+
+Plus bfaa8b13842f3dfd845f63bb8c04ea544cc1bd24: test coverage for asin(3*x)/atan(2*x) = 3/2 (SymPy exact, HTTP, sides). Certification Runner SUCCESS. H1d SUCCESS. Cumulative 44968073812 SUCCESS. CI 44968073743 completed success (backend and frontend jobs succeeded; frontend annotation exit code 1 non-blocking). Classification: harness/test. PASS_SCOPED funcional bilateral for LM-I-03.
+
+S19 REVIEW; S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN. Siguiente: TRIG-LM-I-04, anclar fila congelada, reproducir y agregar regresión bilateral. Do not duplicate runs.
+
+---
+
 # r602 — LM-I-02 evidencia funcional bilateral verificada
 
 Lite 4e6e8af2acbf46e5041fce18d1f3af250dcb075c: acumulativo 44957993270/job 137010262355: 2729 PASS, 8 expected fail, 34 TODO, cuatro pruebas LM-I-02; H1d 44957993266: 22 PASS; Scientific 44957993300: 456 PASS. Plus 425aca92ced04bef34f88089fc4e8b3e29ee2b0f: acumulativo 44957997426/backend 137010274909: 3231 PASS, 1 skipped, 11 xfail, tres pruebas LM-I-02; frontend 137010275056: 1055 PASS, 28 TODO; H1d 44957997427: 38 PASS. Logs y ejecución verificados. PASS_SCOPED funcional; sin afirmar E2E visual ni ejecución literal completa.
