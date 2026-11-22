@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 624,
+  "revision": 625,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "b0d051461d1a08922f1474dc7e0617c55807f907",
-  "baseline_case": "TRIG-LM-HI-01",
+  "technical_baseline_sha": "f9444ccfed1a202f7ba72cb57986ec5aae795539",
+  "baseline_case": "TRIG-LM-HI-02",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-LM-HI-02",
-    "previous_id": "TRIG-LM-HI-01",
+    "id": "TRIG-LM-HI-03",
+    "previous_id": "TRIG-LM-HI-02",
     "status": "READY",
-    "action": "Anclar fila LM-HI-02; verificar límite artanh(x)/x en cero y regresiones bilaterales."
+    "action": "Anclar fila LM-HI-03; verificar límite (artanh(x)-x)/x³ en cero y regresiones bilaterales."
   },
   "blockers": [
     {
@@ -73,27 +73,27 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-22T22:48:11.816054+00:00",
+  "updated_utc": "2026-11-22T23:40:16.428359+00:00",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "4c4cd1a954270652f0fb4eece3182420f333e2ae1fae6e2e31bc0a15acf73b19",
-      "head_sha": "b0d051461d1a08922f1474dc7e0617c55807f907",
+      "input_fingerprint": "d96b1de2f1114857eb4841d82ad4e399a95efa10b0a267e7973ac51253dade46",
+      "head_sha": "f9444ccfed1a202f7ba72cb57986ec5aae795539",
       "decision": "REUSE",
       "reason": "Ejecución y logs revisados en SHA técnico; alcance funcional acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45073553372,
-      "evidence_sha": "b0d051461d1a08922f1474dc7e0617c55807f907",
+      "run_id": 45079862334,
+      "evidence_sha": "f9444ccfed1a202f7ba72cb57986ec5aae795539",
       "jobs": [
         {
-          "id": 137365678335,
+          "id": 137385354547,
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "id": 137365678543,
+          "id": 137385354798,
           "status": "completed",
           "conclusion": "success"
         }
@@ -101,18 +101,18 @@
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "1de9c9afc47afd230e72a6e6c7ce2193e803a2c6b05b1b3fd073f14f3c45e160",
-      "head_sha": "b0d051461d1a08922f1474dc7e0617c55807f907",
+      "input_fingerprint": "20310e4d3eeed2ad95e54bf4ebf625698410a7efd39bfbcb425a673a47f63ca1",
+      "head_sha": "f9444ccfed1a202f7ba72cb57986ec5aae795539",
       "decision": "REUSE",
       "reason": "Ejecución y logs revisados en SHA técnico; alcance funcional acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45073553446,
-      "evidence_sha": "b0d051461d1a08922f1474dc7e0617c55807f907",
+      "run_id": 45079862271,
+      "evidence_sha": "f9444ccfed1a202f7ba72cb57986ec5aae795539",
       "jobs": [
         {
-          "id": 137365678375,
+          "id": 137385354389,
           "status": "completed",
           "conclusion": "success"
         }
