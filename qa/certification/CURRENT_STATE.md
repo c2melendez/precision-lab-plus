@@ -1,3 +1,7 @@
+## Lote 80-01: verificación en curso — 2026-11-23 UTC
+
+SHA técnico `ac143bfb6d748517ae29160059a42307dd427a1c`; acumulativo [45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129) en curso. Plus: publicados 22 casos DV-H-01..12 y DV-HI-01..10, servicio y HTTP 44/44 locales; falta CI y paridad Lite. No declarar PASS hasta revisar CI y canales aplicables. Conservar bloqueos globales.
+
 ## DV-I-04..06 y lote 80 — 2026-11-23 UTC
 
 PASS_SCOPED de DV-I-04..06 para las pruebas ejecutadas; SHA técnico `b0a809798bcceccab221cde1ad29f1a4cc605b8f`; cumulative: run 45185775213, jobs [137730854334, 137730854772], h1d: run 45185775093, jobs [137730852051]. Los canales no cubiertos continúan pendientes. Preparado BATCH_80_01.md con 80 IDs; la asignación no acredita ejecución. Certificación global OPEN y bloqueos conservados.

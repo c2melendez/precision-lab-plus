@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 637,
+  "revision": 638,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
   "technical_baseline_sha": "b0a809798bcceccab221cde1ad29f1a4cc605b8f",
@@ -33,9 +33,8 @@
   },
   "next_action": {
     "id": "TRIG-BATCH-80-01",
-    "previous_id": "TRIG-DV-I-06",
     "status": "IN_PROGRESS",
-    "action": "Reconciliar y ejecutar lote de 80 casos identificado en BATCH_80_01.md; revisar entradas, oráculos, dominios, canales y CI por producto."
+    "action": "Revisar runs de las correcciones DV-I-07..12 y del lote DV-H/DV-HI; completar paridad Lite, dominios y tablero sin duplicar CI."
   },
   "blockers": [
     {
@@ -73,7 +72,7 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-23T13:58:10.411700+00:00",
+  "updated_utc": "2026-11-23T15:08:46.952940+00:00",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
@@ -768,5 +767,11 @@
     "acceptance_reviewed": false,
     "certification_pass": false,
     "recorded_at": "2026-11-23T01:00:40+00:00"
+  },
+  "pending_batch_80": {
+    "head_sha": "ac143bfb6d748517ae29160059a42307dd427a1c",
+    "cumulative_run_id": 45201649129,
+    "status": "IN_PROGRESS",
+    "logs_reviewed": false
   }
 }

@@ -7,34 +7,34 @@ Fuente congelada `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz
 | DV-I-04 | PASS_SCOPED | `backend/tests/test_trigonometry_dv_i04_i06.py`; acumulativo [45185775213](https://github.com/c2melendez/precision-lab-plus/actions/runs/45185775213); SHA `b0a809798bcceccab221cde1ad29f1a4cc605b8f`; UI específica pendiente. |
 | DV-I-05 | PASS_SCOPED | `backend/tests/test_trigonometry_dv_i04_i06.py`; acumulativo [45185775213](https://github.com/c2melendez/precision-lab-plus/actions/runs/45185775213); SHA `b0a809798bcceccab221cde1ad29f1a4cc605b8f`; UI específica pendiente. |
 | DV-I-06 | PASS_SCOPED | `backend/tests/test_trigonometry_dv_i04_i06.py`; acumulativo [45185775213](https://github.com/c2melendez/precision-lab-plus/actions/runs/45185775213); SHA `b0a809798bcceccab221cde1ad29f1a4cc605b8f`; UI específica pendiente. |
-| DV-I-07 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-I-08 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-I-09 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-I-10 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-I-11 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-I-12 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-H-01 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-H-02 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-H-03 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-H-04 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-H-05 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-H-06 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-H-07 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-H-08 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-H-09 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-H-10 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-H-11 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-H-12 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-HI-01 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-HI-02 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-HI-03 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-HI-04 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-HI-05 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-HI-06 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-HI-07 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-HI-08 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-HI-09 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| DV-HI-10 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
+| DV-I-07 | EN_CURSO | Servicio y API aprobados en CI anterior; paridad Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-I-08 | EN_CURSO | Servicio y API aprobados en CI anterior; paridad Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-I-09 | EN_CURSO | Servicio y API aprobados en CI anterior; paridad Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-I-10 | EN_CURSO | Servicio y API aprobados en CI anterior; paridad Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-I-11 | EN_CURSO | Servicio y API aprobados en CI anterior; paridad Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-I-12 | EN_CURSO | Servicio y API aprobados en CI anterior; paridad Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-H-01 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-H-02 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-H-03 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-H-04 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-H-05 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-H-06 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-H-07 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-H-08 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-H-09 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-H-10 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-H-11 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-H-12 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-HI-01 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-HI-02 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-HI-03 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-HI-04 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-HI-05 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-HI-06 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-HI-07 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-HI-08 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-HI-09 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
+| DV-HI-10 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
 | IT-D-01 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
 | IT-D-02 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
 | IT-D-03 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
