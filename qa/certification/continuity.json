@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 631,
+  "revision": 632,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "c1f6c06578912e033d8c0f07100c4cf0aa286bd8",
-  "baseline_case": "TRIG-LM-HI-08",
+  "technical_baseline_sha": "d56a2b09bd954823babe10b2ace9b99f3b86c08e",
+  "baseline_case": "TRIG-DV-D-01",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-DV-D-01",
-    "previous_id": "TRIG-LM-HI-08",
+    "id": "TRIG-DV-D-02",
+    "previous_id": "TRIG-DV-D-01",
     "status": "READY",
-    "action": "Revisar cobertura y certificar derivada de sin(x) en Lite y Plus conforme a la matriz."
+    "action": "Verificar derivadas trigonométricas directas siguientes con oráculos independientes y paridad."
   },
   "blockers": [
     {
@@ -73,27 +73,27 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-23T07:43:56.864816+00:00",
+  "updated_utc": "2026-11-23T08:43:26.921494+00:00",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "beb30eb9314ea31fe7941804a15234514563b0bab6b335e039f7b67967d8cbf8",
-      "head_sha": "c1f6c06578912e033d8c0f07100c4cf0aa286bd8",
+      "input_fingerprint": "933a0110b45cd75b4967da51796be8bdac303d3105c038ad3f2f791a8a1e6a55",
+      "head_sha": "d56a2b09bd954823babe10b2ace9b99f3b86c08e",
       "decision": "REUSE",
       "reason": "Ejecución y registros revisados; alcance acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45125896787,
-      "evidence_sha": "c1f6c06578912e033d8c0f07100c4cf0aa286bd8",
+      "run_id": 45133378139,
+      "evidence_sha": "d56a2b09bd954823babe10b2ace9b99f3b86c08e",
       "jobs": [
         {
-          "id": 137530028950,
+          "id": 137553798299,
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "id": 137530029307,
+          "id": 137553798597,
           "status": "completed",
           "conclusion": "success"
         }
@@ -101,18 +101,18 @@
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "dd621c8aca01d280a9cd0cfaf28cea392a0c7cac97bc303a48cc2f6a223b74c1",
-      "head_sha": "c1f6c06578912e033d8c0f07100c4cf0aa286bd8",
+      "input_fingerprint": "bbafbd65d98901918079d0a5ef997fa65e4124b4e0536d53d6e949389b058e11",
+      "head_sha": "d56a2b09bd954823babe10b2ace9b99f3b86c08e",
       "decision": "REUSE",
       "reason": "Ejecución y registros revisados; alcance acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45125896740,
-      "evidence_sha": "c1f6c06578912e033d8c0f07100c4cf0aa286bd8",
+      "run_id": 45133378088,
+      "evidence_sha": "d56a2b09bd954823babe10b2ace9b99f3b86c08e",
       "jobs": [
         {
-          "id": 137530028874,
+          "id": 137553798203,
           "status": "completed",
           "conclusion": "success"
         }
