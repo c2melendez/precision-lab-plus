@@ -100,3 +100,20 @@ def test_csch_squared_primitive_preserves_pole():
     result = integrate_expression('csch(x)^2', 'x').antiderivative
     assert result.subs(x, 0).is_finite is False
     assert sp.simplify(sp.diff(result, x) - sp.csch(x)**2) == 0
+
+INVERSE_HYPERBOLIC_CASES = [
+ ('IT-HI-01','asinh(x)',lambda x:math.asinh(x),[-2,-.5,.5,2]),
+ pytest.param('IT-HI-02','acosh(x)',lambda x:math.acosh(x),[1.2,1.5,2,3],marks=pytest.mark.xfail(reason='integral remains unresolved',strict=True)),
+ ('IT-HI-03','atanh(x)',lambda x:math.atanh(x),[-.8,-.3,.3,.8]),
+ pytest.param('IT-HI-04','acoth(x)',lambda x:math.atanh(1/x),[-3,-2,2,3],marks=pytest.mark.xfail(reason='negative real logarithm branch requires review',strict=True)),
+]
+
+@pytest.mark.parametrize('case,expression,oracle,points', INVERSE_HYPERBOLIC_CASES)
+def test_inverse_hyperbolic_integral(case, expression, oracle, points):
+    assert any(f'| {case} |' in row for row in MATRIX.splitlines())
+    result = integrate_expression(expression, 'x')
+    assert not result.antiderivative.has(sp.Integral)
+    f = sp.lambdify(sp.Symbol('x'), result.antiderivative, modules='math')
+    for x in points:
+        h = 1e-6
+        assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case,x)
