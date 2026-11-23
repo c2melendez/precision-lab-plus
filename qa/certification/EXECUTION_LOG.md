@@ -1,3 +1,9 @@
+## TR324 IT-H-05/06: primitivas implementadas — 2026-11-23 UTC
+
+Plus SHA técnico `aa448cf689082cde391f548ec823c776f37616a7` implementa integrales de sech²(x) y csch²(x); prueba numérica en dos ramas y comprobación simbólica del polo en cero. Suite local: 37 PASS, 9 XFAIL; no hay cierres completos hasta CI, Lite, canales y dominios. Acumulativo previo [45265450360](https://github.com/c2melendez/precision-lab-plus/actions/runs/45265450360) SUCCESS para SHA anterior, no acredita el nuevo. S25, SG28/DIST y EV-D-01 se conservan.
+
+Siguiente: verificar CI nuevo, continuar correcciones de ramas reales y primitivas pendientes, paridad Lite y resto del lote de 80.
+
 ## TR324 IT-H-01..16: auditoría parcial — 2026-11-23 UTC
 
 Plus SHA técnico `60bc9c506f374f15cead746b9034b04d39633e60`: 16 integrales hiperbólicas con diferencias centrales contra oráculos independientes; 11 PASS parciales, 5 XFAIL estrictos. IT-H-05/06 permanecen sin resolver; IT-H-04/08/13 requieren revisión de representación y rama real. Suite acumulada local 34 PASS y 11 XFAIL; no son cierres completos. Pendientes CI, fuente literal, Lite, HTTP y dominios. S25, SG28/DIST y EV-D-01 conservados.
