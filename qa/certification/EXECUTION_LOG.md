@@ -3163,3 +3163,9 @@ SHA técnico `e35680eac1e12e67f0836c1e39b08e0950d858dc`; cumulative: run 4516743
 
 Nueva política operativa añadida a EXECUTION_PROTOCOL.md. Meta 80 casos; 60 orientativo; exige tablero por caso, oráculos independientes, trazabilidad bilateral y deduplicación CI. No cambia estados ni certifica filas; reconstruir evidencia pendiente antes de declarar PASS. Mantener bloqueos vigentes.
 
+
+
+## DV-I-04..06 y lote 80 — 2026-11-23 UTC
+
+PASS_SCOPED de DV-I-04..06 para las pruebas ejecutadas; SHA técnico `b0a809798bcceccab221cde1ad29f1a4cc605b8f`; cumulative: run 45185775213, jobs [137730854334, 137730854772], h1d: run 45185775093, jobs [137730852051]. Los canales no cubiertos continúan pendientes. Preparado BATCH_80_01.md con 80 IDs; la asignación no acredita ejecución. Certificación global OPEN y bloqueos conservados.
+
