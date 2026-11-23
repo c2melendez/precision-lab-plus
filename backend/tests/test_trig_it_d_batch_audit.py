@@ -64,3 +64,33 @@ def test_inverse_antiderivative_numeric(case, expression, oracle, points):
     for x in points:
         h = 1e-6
         assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x)
+
+HYPERBOLIC_CASES = [
+ ('IT-H-01','sinh(x)',lambda x:math.sinh(x)),
+ ('IT-H-02','cosh(x)',lambda x:math.cosh(x)),
+ ('IT-H-03','tanh(x)',lambda x:math.tanh(x)),
+ pytest.param('IT-H-04','coth(x)',lambda x:1/math.tanh(x),marks=pytest.mark.xfail(reason='logarithm real branch requires review',strict=True)),
+ pytest.param('IT-H-05','sech(x)^2',lambda x:1/math.cosh(x)**2,marks=pytest.mark.xfail(reason='antiderivative unresolved',strict=True)),
+ pytest.param('IT-H-06','csch(x)^2',lambda x:1/math.sinh(x)**2,marks=pytest.mark.xfail(reason='antiderivative unresolved',strict=True)),
+ ('IT-H-07','sech(x)',lambda x:1/math.cosh(x)),
+ pytest.param('IT-H-08','csch(x)',lambda x:1/math.sinh(x),marks=pytest.mark.xfail(reason='negative real logarithm branch',strict=True)),
+ ('IT-H-09','sech(x)*tanh(x)',lambda x:math.tanh(x)/math.cosh(x)),
+ ('IT-H-10','csch(x)*coth(x)',lambda x:math.cosh(x)/math.sinh(x)**2),
+ ('IT-H-11','sinh(x)^2',lambda x:math.sinh(x)**2),
+ ('IT-H-12','cosh(x)^2',lambda x:math.cosh(x)**2),
+ pytest.param('IT-H-13','tanh(x)^2',lambda x:math.tanh(x)**2,marks=pytest.mark.xfail(reason='complex logarithmic form requires real-branch review',strict=True)),
+ ('IT-H-14','x*sinh(x)',lambda x:x*math.sinh(x)),
+ ('IT-H-15','sinh(x)*cosh(x)',lambda x:math.sinh(x)*math.cosh(x)),
+ ('IT-H-16','exp(x)*cosh(x)',lambda x:math.exp(x)*math.cosh(x)),
+]
+
+@pytest.mark.parametrize('case,expression,oracle', HYPERBOLIC_CASES)
+def test_hyperbolic_antiderivative_numeric(case, expression, oracle):
+    row = next(line for line in MATRIX.splitlines() if f'| {case} |' in line)
+    assert len(row.split('|')) >= 4
+    result = integrate_expression(expression, 'x')
+    assert not result.antiderivative.has(sp.Integral)
+    f = sp.lambdify(sp.Symbol('x'), result.antiderivative, modules='math')
+    for x in (-1.1,-.6,.6,1.1):
+        h = 1e-6
+        assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x)
