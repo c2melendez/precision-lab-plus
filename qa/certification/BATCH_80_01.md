@@ -76,22 +76,22 @@ Fuente congelada `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz
 | IT-I-09 | EN_CURSO | Plus: PASS local numérico parcial; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
 | IT-I-10 | EN_CURSO | Plus: PASS local numérico parcial; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
 | IT-I-11 | EN_CURSO | Plus: PASS local numérico parcial; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
-| IT-H-01 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-02 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-03 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-04 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-05 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-06 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-07 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-08 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-09 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-10 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-11 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-12 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-13 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-14 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-15 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-H-16 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
+| IT-H-01 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-02 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-03 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-04 | REVIEW | Plus: XFAIL rama real requiere revisión; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-05 | BLOCKED | Plus: XFAIL integral no resuelta; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-06 | BLOCKED | Plus: XFAIL integral no resuelta; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-07 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-08 | REVIEW | Plus: XFAIL rama real requiere revisión; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-09 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-10 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-11 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-12 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-13 | REVIEW | Plus: XFAIL rama real requiere revisión; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-14 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-15 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
+| IT-H-16 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
 | IT-HI-01 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
 | IT-HI-02 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
 | IT-HI-03 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |

@@ -1,3 +1,9 @@
+## TR324 IT-H-01..16: auditoría parcial — 2026-11-23 UTC
+
+Plus SHA técnico `60bc9c506f374f15cead746b9034b04d39633e60`: 16 integrales hiperbólicas con diferencias centrales contra oráculos independientes; 11 PASS parciales, 5 XFAIL estrictos. IT-H-05/06 permanecen sin resolver; IT-H-04/08/13 requieren revisión de representación y rama real. Suite acumulada local 34 PASS y 11 XFAIL; no son cierres completos. Pendientes CI, fuente literal, Lite, HTTP y dominios. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: verificar CI del SHA nuevo, corregir primitivas no resueltas y revisar ramas reales, completar el lote bilateral.
+
 ## TR324 IT-I-01..11: auditoría parcial — 2026-11-23 UTC
 
 Plus SHA técnico `4d5b586920fd8886613d2fcb68314457fd138760`: derivación numérica de primitivas de servicio; sumado a IT-D, 23 PASS y 6 XFAIL estrictos locales. En IT-I, ocho PASS parciales; IT-I-04 diferencia de rama arccot negativa REQUIERE REVISIÓN CONTRACTUAL, IT-I-05 y 06 permanecen sin resolver. Ningún cierre completo: faltan CI, anclaje literal, Lite, HTTP y criterios pendientes. Los XFAIL no son PASS. S25, SG28/DIST y EV-D-01 conservados.
