@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "Revisar CI Plus SHA 1d1fefef05d5f590db97d472b838393543356057 y resolver IT-D-08, IT-D-10, IT-D-14 sin relajar dominios; continuar cobertura bilateral del lote."
+    "action": "Revisar CI SHA 4d5b586920fd8886613d2fcb68314457fd138760; corregir IT-I-05/06 y revisar rama IT-I-04; continuar IT-D y cobertura bilateral."
   },
   "blockers": [
     {
@@ -799,6 +799,16 @@
       "IT-D-10",
       "IT-D-14"
     ],
-    "plus_it_d_ci_status": "WAIT"
+    "plus_it_d_ci_status": "WAIT",
+    "plus_it_i_sha": "4d5b586920fd8886613d2fcb68314457fd138760",
+    "plus_it_i_local_pass": 8,
+    "plus_it_i_review": [
+      "IT-I-04"
+    ],
+    "plus_it_i_blocked": [
+      "IT-I-05",
+      "IT-I-06"
+    ],
+    "plus_it_i_ci_status": "WAIT"
   }
 }

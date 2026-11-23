@@ -1,3 +1,9 @@
+## TR324 IT-I-01..11: auditoría parcial — 2026-11-23 UTC
+
+Plus SHA técnico `4d5b586920fd8886613d2fcb68314457fd138760`: derivación numérica de primitivas de servicio; sumado a IT-D, 23 PASS y 6 XFAIL estrictos locales. En IT-I, ocho PASS parciales; IT-I-04 diferencia de rama arccot negativa REQUIERE REVISIÓN CONTRACTUAL, IT-I-05 y 06 permanecen sin resolver. Ningún cierre completo: faltan CI, anclaje literal, Lite, HTTP y criterios pendientes. Los XFAIL no son PASS. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: verificar CI y corregir primitivas no resueltas y ramas reales, completando el lote bilateral.
+
 ## TR324 IT-D-01..18: auditoría parcial — 2026-11-23 UTC
 
 Plus SHA técnico `1d1fefef05d5f590db97d472b838393543356057`: prueba de derivación numérica de primitivas del servicio en cuatro puntos interiores; 15 PASS locales y 3 XFAIL estrictos: IT-D-08 e IT-D-10 en rama real negativa y IT-D-14 por representación con logaritmos complejos. No son cierres completos; falta anclaje literal completo, inspección del contrato de ramas, corrección, Lite, HTTP y CI. Próximo: verificar corridas push y resolver los tres casos con dominio y regresiones sin duplicar gates. Conservar S25, SG28/DIST y EV-D-01.

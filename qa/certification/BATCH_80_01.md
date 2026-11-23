@@ -65,17 +65,17 @@ Fuente congelada `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz
 | IT-D-16 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
 | IT-D-17 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
 | IT-D-18 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
-| IT-I-01 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-I-02 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-I-03 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-I-04 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-I-05 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-I-06 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-I-07 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-I-08 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-I-09 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-I-10 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-I-11 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
+| IT-I-01 | EN_CURSO | Plus: PASS local numérico parcial; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
+| IT-I-02 | EN_CURSO | Plus: PASS local numérico parcial; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
+| IT-I-03 | EN_CURSO | Plus: PASS local numérico parcial; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
+| IT-I-04 | REVIEW | Plus: XFAIL diferencia de rama; revisar contrato; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
+| IT-I-05 | BLOCKED | Plus: XFAIL integral no resuelta; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
+| IT-I-06 | BLOCKED | Plus: XFAIL integral no resuelta; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
+| IT-I-07 | EN_CURSO | Plus: PASS local numérico parcial; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
+| IT-I-08 | EN_CURSO | Plus: PASS local numérico parcial; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
+| IT-I-09 | EN_CURSO | Plus: PASS local numérico parcial; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
+| IT-I-10 | EN_CURSO | Plus: PASS local numérico parcial; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
+| IT-I-11 | EN_CURSO | Plus: PASS local numérico parcial; prueba `backend/tests/test_trig_it_d_batch_audit.py`, SHA `4d5b586920fd8886613d2fcb68314457fd138760`; CI, Lite, entrada literal y HTTP pendientes. |
 | IT-H-01 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
 | IT-H-02 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
 | IT-H-03 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
