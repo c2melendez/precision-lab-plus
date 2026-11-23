@@ -3097,3 +3097,9 @@ S19 REVIEW; S25, SG28/DIST y EV-D-01 BLOCKED; global OPEN. Siguiente: TRIG-LM-HI
 - Classification: `GATE_WORKFLOW_SUCCESS_LOG_AND_ACCEPTANCE_REVIEW_REQUIRED`. Jobs/steps snapshot stored in `qa/certification/runner/45090826406.json`.
 - This is execution telemetry, not acceptance. Logs, required-step execution, fingerprint, channel, oracle and acceptance revision still require review.
 - No objective/blocker was closed and `continuity.json.next_action` was deliberately left unchanged.
+
+
+## LM-HI-04: PASS_SCOPED (2026-11-23 UTC)
+
+SHA técnico `4b3ab36ce306b31d0dc43a61ed8baef25703ea99`; acumulativo [45090525097](https://github.com/c2melendez/precision-lab-plus/actions/runs/45090525097), jobs 137418797415 y 137418797652; H1d [45090525161](https://github.com/c2melendez/precision-lab-plus/actions/runs/45090525161), job 137418797115. Registros ejecutados y revisados: 3303 backend, 1055 frontend y 38 H1d aprobados; 1 omitido y 11 xfail en backend. Próximo: LM-HI-05. Certificación global OPEN; bloqueos conservados.
+
