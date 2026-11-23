@@ -1,3 +1,7 @@
+## Política de lotes de 80 casos — 2026-11-23 UTC
+
+Nueva política operativa añadida a EXECUTION_PROTOCOL.md. Meta 80 casos; 60 orientativo; exige tablero por caso, oráculos independientes, trazabilidad bilateral y deduplicación CI. No cambia estados ni certifica filas; reconstruir evidencia pendiente antes de declarar PASS. Mantener bloqueos vigentes.
+
 ## DV-I-01..03 — PASS_SCOPED (2026-11-23 UTC)
 
 SHA técnico `e35680eac1e12e67f0836c1e39b08e0950d858dc`; cumulative: run 45167434013, jobs [137667917157, 137667917560], h1d: run 45167434021, jobs [137667917409]. Registros revisados. Siguiente: DV-I-04. Certificación global OPEN; bloqueos conservados.
