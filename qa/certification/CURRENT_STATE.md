@@ -1,3 +1,18 @@
+
+<!-- certification-runner:latest:start -->
+## Última observación de certification-runner (registro automático)
+
+- Registrado UTC: 2026-11-23T00:57:45+00:00
+- Repositorio / gate: `c2melendez/precision-lab-plus` / `cumulative`
+- SHA base del checkout probado: `4b3ab36ce306b31d0dc43a61ed8baef25703ea99`
+- Runner: [`45090818090`](https://github.com/c2melendez/precision-lab-plus/actions/runs/45090818090)
+- Workflow de gate: [`45090525097`](https://github.com/c2melendez/precision-lab-plus/actions/runs/45090525097)
+- Estado/conclusión observados: `completed` / `success`
+- Clasificación automática: `GATE_WORKFLOW_SUCCESS_LOG_AND_ACCEPTANCE_REVIEW_REQUIRED`
+- **No equivale a PASS de certificación.** Revisar jobs, pasos, logs, huella, canal, oráculo y revisión de aceptación antes de aceptar o reutilizar evidencia.
+- Este registro no modifica `next_action` ni cierra bloqueos; la siguiente tarea canónica sigue siendo la de `continuity.json` hasta una reconciliación explícita.
+<!-- certification-runner:latest:end -->
+
 ## Actualización LM-HI-03 — 2026-11-23 UTC
 
 PASS_SCOPED en `e0c665e9d8e542be63479698c3ecd7e902ab108b`. Evidencia ejecutada y registros revisados: cumulative: run 45084613972, jobs [137400278281, 137400278547], h1d: run 45084613968, jobs [137400278432]. Próximo caso: TRIG-LM-HI-04. La certificación global permanece OPEN; se conservan los bloqueos existentes.
