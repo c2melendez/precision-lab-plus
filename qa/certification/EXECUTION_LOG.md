@@ -1,3 +1,9 @@
+## TR324 IT-HI-01..04: auditoría parcial — 2026-11-23 UTC
+
+Plus SHA `56524b2c5b48c592c9f4b41c13474f99e46c2575`: oráculo de diferencias centrales en puntos interiores; IT-HI-01/03 PASS local parcial, IT-HI-02 XFAIL integral no resuelta, IT-HI-04 XFAIL rama real negativa. Suite local 39 PASS, 11 XFAIL. No cierre: CI, Lite, fuente literal y canales pendientes. CI anterior [45275613063](https://github.com/c2melendez/precision-lab-plus/actions/runs/45275613063) SUCCESS para SHA anterior; seguridad sigue en curso. Conservar S25, SG28/DIST y EV-D-01.
+
+Siguiente: revisar CI del nuevo SHA, corregir integral sin resolver y verificar rama real, ampliar lote y paridad Lite.
+
 ## TR324 IT-H-05/06: primitivas implementadas — 2026-11-23 UTC
 
 Plus SHA técnico `aa448cf689082cde391f548ec823c776f37616a7` implementa integrales de sech²(x) y csch²(x); prueba numérica en dos ramas y comprobación simbólica del polo en cero. Suite local: 37 PASS, 9 XFAIL; no hay cierres completos hasta CI, Lite, canales y dominios. Acumulativo previo [45265450360](https://github.com/c2melendez/precision-lab-plus/actions/runs/45265450360) SUCCESS para SHA anterior, no acredita el nuevo. S25, SG28/DIST y EV-D-01 se conservan.

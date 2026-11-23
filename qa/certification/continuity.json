@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "Verificar CI SHA aa448cf689082cde391f548ec823c776f37616a7, corregir ramas reales y restantes primitivas, completar paridad Lite y lote."
+    "action": "Revisar CI SHA 56524b2c5b48c592c9f4b41c13474f99e46c2575; corregir IT-HI-02 y revisar rama IT-HI-04; completar paridad Lite y lote."
   },
   "blockers": [
     {
@@ -820,6 +820,8 @@
     "plus_it_h_blocked": [],
     "plus_it_h_ci_status": "WAIT",
     "plus_it_h_fix_sha": "aa448cf689082cde391f548ec823c776f37616a7",
-    "plus_it_h_fix_ci_status": "WAIT"
+    "plus_it_h_fix_ci_status": "WAIT",
+    "plus_it_hi_sha": "56524b2c5b48c592c9f4b41c13474f99e46c2575",
+    "plus_it_hi_ci_status": "WAIT"
   }
 }
