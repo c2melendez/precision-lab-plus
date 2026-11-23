@@ -12,6 +12,8 @@ Fuente congelada `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz
 
 > Lite: CI acumulativo 45217595942 revisado y aprobado para DV-H-01..12 en el alcance probado; paridad integral, dominio y UI pendientes.
 
+> Lite: anclaje de entrada y resultados DV-H-01..12 verificado por CI 45228151225; dominios, canales y paridad completa pendientes.
+
 | ID | Estado | Evidencia y alcance / pendiente |
 |---|---|---|
 | DV-I-04 | PASS_SCOPED | `backend/tests/test_trigonometry_dv_i04_i06.py`; acumulativo [45185775213](https://github.com/c2melendez/precision-lab-plus/actions/runs/45185775213); SHA `b0a809798bcceccab221cde1ad29f1a4cc605b8f`; UI específica pendiente. |
