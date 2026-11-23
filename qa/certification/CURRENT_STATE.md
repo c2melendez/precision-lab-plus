@@ -1,3 +1,7 @@
+## DV-I-01..03 — PASS_SCOPED (2026-11-23 UTC)
+
+SHA técnico `e35680eac1e12e67f0836c1e39b08e0950d858dc`; cumulative: run 45167434013, jobs [137667917157, 137667917560], h1d: run 45167434021, jobs [137667917409]. Registros revisados. Siguiente: DV-I-04. Certificación global OPEN; bloqueos conservados.
+
 ## DV-D-11..14 — PASS_SCOPED (2026-11-23 UTC)
 
 SHA técnico `15bdf50f531e8f184dc42530f0ef70852aa97cba`; cumulative: run 45158494957, jobs [137637478771, 137637479183], h1d: run 45158494842, jobs [137637478474]. Registros revisados. Siguiente: DV-I-01. Certificación global OPEN; bloqueos conservados.
