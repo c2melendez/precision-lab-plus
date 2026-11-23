@@ -1,3 +1,7 @@
+## Actualización LM-HI-03 — 2026-11-23 UTC
+
+PASS_SCOPED en `e0c665e9d8e542be63479698c3ecd7e902ab108b`. Evidencia ejecutada y registros revisados: cumulative: run 45084613972, jobs [137400278281, 137400278547], h1d: run 45084613968, jobs [137400278432]. Próximo caso: TRIG-LM-HI-04. La certificación global permanece OPEN; se conservan los bloqueos existentes.
+
 # r625 — TRIG-LM-HI-02 evidencia funcional bilateral verificada
 
 Lite 54d2c35915970223de7c14c10d81d13bc7fbc8b9: acumulativo 45079857725/job 137385340269: 2788 PASS, 8 expected fail, 34 TODO, incluidas dos pruebas LM-HI-02; H1d 45079857733/job 137385340478: 22 PASS; científico 45079857715/job 137385340409: 456 PASS.
