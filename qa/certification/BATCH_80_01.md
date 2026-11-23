@@ -2,6 +2,8 @@
 
 Fuente congelada `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz`; SHA-256 descomprimido `8d3904fd1c53f8af694caf66171b99caf821ca5d94dfbef8677d73b7a76054f7`. Snapshot del producto `b0a809798bcceccab221cde1ad29f1a4cc605b8f`. Los estados se refieren únicamente a este producto. La selección consta de 80 IDs consecutivos a partir de DV-I-04. REVIEW significa evidencia histórica aún no reconciliada; no presume ausencia de cobertura ni PASS. PASS_SCOPED no acredita UI específica ni cierre global.
 
+> Acumulativo 45201649129 SUCCESS: backend job 137786433124, 3439 aprobadas, 1 omitida y 11 xfail; frontend job 137786432680 SUCCESS. DV-H-01..12 y DV-HI-01..10 con pruebas de servicio y HTTP; faltan extremos, dominio, paridad Lite y UI; no son cierres completos.
+
 | ID | Estado | Evidencia y alcance / pendiente |
 |---|---|---|
 | DV-I-04 | PASS_SCOPED | `backend/tests/test_trigonometry_dv_i04_i06.py`; acumulativo [45185775213](https://github.com/c2melendez/precision-lab-plus/actions/runs/45185775213); SHA `b0a809798bcceccab221cde1ad29f1a4cc605b8f`; UI específica pendiente. |

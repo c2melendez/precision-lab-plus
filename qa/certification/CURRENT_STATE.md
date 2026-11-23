@@ -1,3 +1,9 @@
+## Reconciliación de acumulativos — 2026-11-23 UTC
+
+Acumulativo 45201649129 SUCCESS: backend job 137786433124, 3439 aprobadas, 1 omitida y 11 xfail; frontend job 137786432680 SUCCESS. DV-H-01..12 y DV-HI-01..10 con pruebas de servicio y HTTP; faltan extremos, dominio, paridad Lite y UI; no son cierres completos. S25, SG28/DIST y EV-D-01 permanecen bloqueados; certificación global abierta.
+
+Siguiente: Completar pruebas de extremos y dominio para DV-H-01..12 y DV-HI-01..10 y paridad Lite; reconciliar resultados del SHA técnico nuevo de Lite, sin repetir gates verdes.
+
 ## Lote 80-01: verificación en curso — 2026-11-23 UTC
 
 SHA técnico `ac143bfb6d748517ae29160059a42307dd427a1c`; acumulativo [45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129) en curso. Plus: publicados 22 casos DV-H-01..12 y DV-HI-01..10, servicio y HTTP 44/44 locales; falta CI y paridad Lite. No declarar PASS hasta revisar CI y canales aplicables. Conservar bloqueos globales.

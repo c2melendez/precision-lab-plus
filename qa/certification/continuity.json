@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "Revisar runs de las correcciones DV-I-07..12 y del lote DV-H/DV-HI; completar paridad Lite, dominios y tablero sin duplicar CI."
+    "action": "Completar pruebas de extremos y dominio para DV-H-01..12 y DV-HI-01..10 y paridad Lite; reconciliar resultados del SHA técnico nuevo de Lite, sin repetir gates verdes."
   },
   "blockers": [
     {
@@ -771,7 +771,9 @@
   "pending_batch_80": {
     "head_sha": "ac143bfb6d748517ae29160059a42307dd427a1c",
     "cumulative_run_id": 45201649129,
-    "status": "IN_PROGRESS",
-    "logs_reviewed": false
+    "status": "PARTIAL_VERIFIED",
+    "logs_reviewed": true,
+    "verified_run_sha": "ac143bfb6d748517ae29160059a42307dd427a1c",
+    "verified_run_id": 45201649129
   }
 }
