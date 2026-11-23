@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "repo": "c2melendez/precision-lab-plus",
+  "canonical_branch": "qa/syntax-audit-in625-a1",
+  "base_sha": "df946963283f80ed78f88b154fce7d9e8f4b88f0",
+  "gate": "h1d",
+  "gate_workflow": ".github/workflows/in625-h1d-reentry.yml",
+  "decision": "DISPATCHED",
+  "runner_run_id": "45090826406",
+  "runner_run_url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/45090826406",
+  "dispatched_run_id": "45091830115",
+  "dispatched_run_url": "https://github.com/c2melendez/precision-lab-plus/actions/runs/45091830115",
+  "dispatched_status": "completed",
+  "dispatched_conclusion": "success",
+  "recorded_at": "2026-11-23T01:00:39+00:00",
+  "gate_jobs": [
+    {
+      "name": "h1d",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Reuse only verified evidence for this checkout",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install backend dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install frontend dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install Playwright test runner",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install Chromium",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run IN625 H1d reentry",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "execution_classification": "GATE_WORKFLOW_SUCCESS_LOG_AND_ACCEPTANCE_REVIEW_REQUIRED",
+  "acceptance_reviewed": false,
+  "certification_pass": false,
+  "documentation_recorded_at": "2026-11-23T01:00:40+00:00"
+}
