@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 634,
+  "revision": 635,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "a39fccc1e8913673dbfd5a5d9dc2329ef3571e52",
-  "baseline_case": "TRIG-DV-D-07..10",
+  "technical_baseline_sha": "15bdf50f531e8f184dc42530f0ef70852aa97cba",
+  "baseline_case": "TRIG-DV-D-11..14",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-DV-D-11",
-    "previous_id": "TRIG-DV-D-10",
+    "id": "TRIG-DV-I-01",
+    "previous_id": "TRIG-DV-D-14",
     "status": "READY",
-    "action": "Verificar derivadas trigonométricas directas restantes y sus dominios."
+    "action": "Verificar derivadas trigonométricas inversas y sus dominios."
   },
   "blockers": [
     {
@@ -73,27 +73,27 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-23T10:40:39.538829+00:00",
+  "updated_utc": "2026-11-23T11:39:58.604145+00:00",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "31226fbfef512c66ed8e7e024f9f1e987c1d64345a298043646a1384fcdab3b8",
-      "head_sha": "a39fccc1e8913673dbfd5a5d9dc2329ef3571e52",
+      "input_fingerprint": "eb4a5d3bffdc124c1f0ef649a71738d5f28c9e6c2a6acfdcb4d9fd6e6f8cdda5",
+      "head_sha": "15bdf50f531e8f184dc42530f0ef70852aa97cba",
       "decision": "REUSE",
       "reason": "Ejecución y registros revisados; alcance acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45149263679,
-      "evidence_sha": "a39fccc1e8913673dbfd5a5d9dc2329ef3571e52",
+      "run_id": 45158494957,
+      "evidence_sha": "15bdf50f531e8f184dc42530f0ef70852aa97cba",
       "jobs": [
         {
-          "id": 137606190565,
+          "id": 137637478771,
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "id": 137606190974,
+          "id": 137637479183,
           "status": "completed",
           "conclusion": "success"
         }
@@ -101,18 +101,18 @@
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "f2c35fb515cffd0639a74baf09733c5f43f73ecc21490e0820cb6089825c7247",
-      "head_sha": "a39fccc1e8913673dbfd5a5d9dc2329ef3571e52",
+      "input_fingerprint": "7ad1dd0cb4697da0a0e439f3e10bf32248b8ed598f6f34f70bc60372143f953f",
+      "head_sha": "15bdf50f531e8f184dc42530f0ef70852aa97cba",
       "decision": "REUSE",
       "reason": "Ejecución y registros revisados; alcance acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45149263666,
-      "evidence_sha": "a39fccc1e8913673dbfd5a5d9dc2329ef3571e52",
+      "run_id": 45158494842,
+      "evidence_sha": "15bdf50f531e8f184dc42530f0ef70852aa97cba",
       "jobs": [
         {
-          "id": 137606190682,
+          "id": 137637478474,
           "status": "completed",
           "conclusion": "success"
         }
