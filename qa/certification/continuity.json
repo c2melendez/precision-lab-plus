@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 630,
+  "revision": 631,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "505d779367a41280698e23bb405539f23e927333",
-  "baseline_case": "TRIG-LM-HI-07",
+  "technical_baseline_sha": "c1f6c06578912e033d8c0f07100c4cf0aa286bd8",
+  "baseline_case": "TRIG-LM-HI-08",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -32,10 +32,10 @@
     }
   },
   "next_action": {
-    "id": "TRIG-LM-HI-08",
-    "previous_id": "TRIG-LM-HI-07",
+    "id": "TRIG-DV-D-01",
+    "previous_id": "TRIG-LM-HI-08",
     "status": "READY",
-    "action": "Verificar límite de arcoth(x) cuando x tiende a infinito."
+    "action": "Revisar cobertura y certificar derivada de sin(x) en Lite y Plus conforme a la matriz."
   },
   "blockers": [
     {
@@ -73,27 +73,27 @@
     "qa/certification/EXECUTION_LOG.md",
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
   ],
-  "updated_utc": "2026-11-23T06:40:58.415396+00:00",
+  "updated_utc": "2026-11-23T07:43:56.864816+00:00",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "cd8f7c709ca7eb77b76c661f7e65085a032a1304239f55fee06ccc4839c08dac",
-      "head_sha": "505d779367a41280698e23bb405539f23e927333",
+      "input_fingerprint": "beb30eb9314ea31fe7941804a15234514563b0bab6b335e039f7b67967d8cbf8",
+      "head_sha": "c1f6c06578912e033d8c0f07100c4cf0aa286bd8",
       "decision": "REUSE",
       "reason": "Ejecución y registros revisados; alcance acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45119554249,
-      "evidence_sha": "505d779367a41280698e23bb405539f23e927333",
+      "run_id": 45125896787,
+      "evidence_sha": "c1f6c06578912e033d8c0f07100c4cf0aa286bd8",
       "jobs": [
         {
-          "id": 137509945641,
+          "id": 137530028950,
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "id": 137509945945,
+          "id": 137530029307,
           "status": "completed",
           "conclusion": "success"
         }
@@ -101,18 +101,18 @@
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "f782001fbc939da243a5e77cca5ced72922b98402ff98d1e1fa2cc5acf6b6ca5",
-      "head_sha": "505d779367a41280698e23bb405539f23e927333",
+      "input_fingerprint": "dd621c8aca01d280a9cd0cfaf28cea392a0c7cac97bc303a48cc2f6a223b74c1",
+      "head_sha": "c1f6c06578912e033d8c0f07100c4cf0aa286bd8",
       "decision": "REUSE",
       "reason": "Ejecución y registros revisados; alcance acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45119554116,
-      "evidence_sha": "505d779367a41280698e23bb405539f23e927333",
+      "run_id": 45125896740,
+      "evidence_sha": "c1f6c06578912e033d8c0f07100c4cf0aa286bd8",
       "jobs": [
         {
-          "id": 137509945396,
+          "id": 137530028874,
           "status": "completed",
           "conclusion": "success"
         }
