@@ -1,3 +1,7 @@
+## TR324 IT-D-01..18: auditoría parcial — 2026-11-23 UTC
+
+Plus SHA técnico `1d1fefef05d5f590db97d472b838393543356057`: prueba de derivación numérica de primitivas del servicio en cuatro puntos interiores; 15 PASS locales y 3 XFAIL estrictos: IT-D-08 e IT-D-10 en rama real negativa y IT-D-14 por representación con logaritmos complejos. No son cierres completos; falta anclaje literal completo, inspección del contrato de ramas, corrección, Lite, HTTP y CI. Próximo: verificar corridas push y resolver los tres casos con dominio y regresiones sin duplicar gates. Conservar S25, SG28/DIST y EV-D-01.
+
 ## DV-H-01..12: anclaje de entrada y CI — 2026-11-23 UTC
 
 Lite SHA técnico `7fdadaf9289eb1ccf911884900ad80d79311daaf`: entradas y resultados de las 12 filas anclados a la fuente en `tests/trigonometryDvHBatch.audit.test.ts`, con oráculo numérico en puntos interiores. [Acumulativo 45228151225](https://github.com/c2melendez/precision-lab-lite/actions/runs/45228151225), job 137880145675: pruebas ejecutadas, 2870 PASS, 8 expected fail y 34 TODO. Pendientes: verificar canal literal completo, dominios, extremos, UI y paridad; no declarar cierre. S25, SG28/DIST y EV-D-01 continúan bloqueados.

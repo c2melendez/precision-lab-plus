@@ -47,24 +47,24 @@ Fuente congelada `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz
 | DV-HI-08 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
 | DV-HI-09 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
 | DV-HI-10 | EN_CURSO | Servicio y HTTP 44/44 locales para el conjunto de 22 casos; CI en curso; Lite pendiente; SHA `ac143bfb6d748517ae29160059a42307dd427a1c`, [run 45201649129](https://github.com/c2melendez/precision-lab-plus/actions/runs/45201649129). |
-| IT-D-01 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-02 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-03 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-04 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-05 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-06 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-07 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-08 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-09 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-10 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-11 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-12 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-13 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-14 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-15 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-16 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-17 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
-| IT-D-18 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
+| IT-D-01 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-02 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-03 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-04 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-05 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-06 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-07 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-08 | FAIL | Plus: prueba numérica local servicio XFAIL estricto por rama logarítmica real; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-09 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-10 | FAIL | Plus: prueba numérica local servicio XFAIL estricto por rama logarítmica real; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-11 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-12 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-13 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-14 | FAIL | Plus: prueba numérica local servicio XFAIL estricto por rama logarítmica real; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-15 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-16 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-17 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
+| IT-D-18 | EN_CURSO | Plus: prueba numérica local servicio PASS parcial en cuatro puntos; SHA `1d1fefef05d5f590db97d472b838393543356057`; CI, canal literal, Lite y aceptación integral pendientes. |
 | IT-I-01 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
 | IT-I-02 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |
 | IT-I-03 | REVIEW | Reconciliar prueba, oráculo, canal y evidencia en GitHub. |

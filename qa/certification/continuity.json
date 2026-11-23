@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "Ampliar el lote a 80 casos y verificar entradas literales, dominios, extremos, estabilidad y canales de DV-H/DV-HI sin duplicar CI."
+    "action": "Revisar CI Plus SHA 1d1fefef05d5f590db97d472b838393543356057 y resolver IT-D-08, IT-D-10, IT-D-14 sin relajar dominios; continuar cobertura bilateral del lote."
   },
   "blockers": [
     {
@@ -791,6 +791,14 @@
     "lite_input_anchor_sha": "7fdadaf9289eb1ccf911884900ad80d79311daaf",
     "lite_input_anchor_run_id": 45228151225,
     "lite_input_anchor_status": "SUCCESS",
-    "lite_input_anchor_logs_reviewed": true
+    "lite_input_anchor_logs_reviewed": true,
+    "plus_it_d_sha": "1d1fefef05d5f590db97d472b838393543356057",
+    "plus_it_d_local_pass": 15,
+    "plus_it_d_local_xfail": [
+      "IT-D-08",
+      "IT-D-10",
+      "IT-D-14"
+    ],
+    "plus_it_d_ci_status": "WAIT"
   }
 }
