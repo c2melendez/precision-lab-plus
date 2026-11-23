@@ -1,3 +1,9 @@
+## TR324: derivadas hiperbólicas inversas — 2026-11-23 UTC
+
+Lite devolvía derivadas sin resolver como SYMBOLIC para DV-HI-01..10. El commit técnico `649c068f9d4d41f9a8a1bb07b2c7cb484f802a44` rechaza expresamente el resultado no resuelto con UNSUPPORTED_OPERATION; 29 pruebas focales y typecheck locales aprobados. Esto no implementa las derivadas: los 10 casos siguen bloqueados en Lite hasta una solución matemática con dominio y paridad. Acumulativo previo Lite [45210932463](https://github.com/c2melendez/precision-lab-lite/actions/runs/45210932463), job 137819215611, SUCCESS con 2847 PASS, 8 expected fail y pruebas DV-I-07..12 ejecutadas; no demuestra el nuevo SHA. Verificar CI del nuevo SHA sin duplicarlo. Plus conserva evidencia parcial de servicio y HTTP, no cierre bilateral. S25, SG28/DIST y EV-D-01 permanecen bloqueados; certificación global abierta.
+
+Siguiente: implementar y verificar derivación hiperbólica inversa real con dominios y reglas de cadena, completar paridad DV-H/DV-HI y reconciliar gates del nuevo SHA.
+
 ## Reconciliación de acumulativos — 2026-11-23 UTC
 
 Acumulativo 45201649129 SUCCESS: backend job 137786433124, 3439 aprobadas, 1 omitida y 11 xfail; frontend job 137786432680 SUCCESS. DV-H-01..12 y DV-HI-01..10 con pruebas de servicio y HTTP; faltan extremos, dominio, paridad Lite y UI; no son cierres completos. S25, SG28/DIST y EV-D-01 permanecen bloqueados; certificación global abierta.

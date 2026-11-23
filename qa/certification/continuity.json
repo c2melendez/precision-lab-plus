@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "Completar pruebas de extremos y dominio para DV-H-01..12 y DV-HI-01..10 y paridad Lite; reconciliar resultados del SHA técnico nuevo de Lite, sin repetir gates verdes."
+    "action": "Implementar derivadas hiperbólicas inversas con dominio y regla de cadena para DV-HI-01..10, completar paridad Lite y verificar CI del commit 649c068f9d4d41f9a8a1bb07b2c7cb484f802a44 sin duplicar corridas."
   },
   "blockers": [
     {
@@ -774,6 +774,11 @@
     "status": "PARTIAL_VERIFIED",
     "logs_reviewed": true,
     "verified_run_sha": "ac143bfb6d748517ae29160059a42307dd427a1c",
-    "verified_run_id": 45201649129
+    "verified_run_id": 45201649129,
+    "unresolved_inverse_hyperbolic_cases": "DV-HI-01..10",
+    "lite_protection_sha": "649c068f9d4d41f9a8a1bb07b2c7cb484f802a44",
+    "lite_previous_cumulative_run_id": 45210932463,
+    "lite_previous_cumulative_logs_reviewed": true,
+    "latest_lite_ci_status": "WAIT"
   }
 }
