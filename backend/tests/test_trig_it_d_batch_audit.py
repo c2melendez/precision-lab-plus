@@ -39,3 +39,28 @@ def test_antiderivative_numeric(case, expression, oracle):
         h = 1e-6
         numerical = (f(x+h)-f(x-h))/(2*h)
         assert numerical == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x)
+
+INVERSE_CASES = [
+ ('IT-I-01','asin(x)', lambda x:math.asin(x), [-.8,-.3,.3,.8]),
+ ('IT-I-02','acos(x)', lambda x:math.acos(x), [-.8,-.3,.3,.8]),
+ ('IT-I-03','atan(x)', lambda x:math.atan(x), [-.8,-.3,.3,.8]),
+ pytest.param('IT-I-04','acot(x)', lambda x:math.atan2(1,x), [-.8,-.3,.3,.8], marks=pytest.mark.xfail(reason='negative arccot branch differs; contract review required',strict=True)),
+ pytest.param('IT-I-05','asec(x)', lambda x:math.acos(1/x), [1.2,1.5,2,3], marks=pytest.mark.xfail(reason='integral remains unresolved',strict=True)),
+ pytest.param('IT-I-06','acsc(x)', lambda x:math.asin(1/x), [1.2,1.5,2,3], marks=pytest.mark.xfail(reason='integral remains unresolved',strict=True)),
+ ('IT-I-07','x*atan(x)', lambda x:x*math.atan(x), [-.8,-.3,.3,.8]),
+ ('IT-I-08','asin(x)/sqrt(1-x^2)', lambda x:math.asin(x)/math.sqrt(1-x*x), [-.8,-.3,.3,.8]),
+ ('IT-I-09','1/(1+x^2)', lambda x:1/(1+x*x), [-.8,-.3,.3,.8]),
+ ('IT-I-10','1/sqrt(1-x^2)', lambda x:1/math.sqrt(1-x*x), [-.8,-.3,.3,.8]),
+ ('IT-I-11','1/(x*sqrt(x^2-1))', lambda x:1/(x*math.sqrt(x*x-1)), [1.2,1.5,2,3]),
+]
+
+@pytest.mark.parametrize('case,expression,oracle,points', INVERSE_CASES)
+def test_inverse_antiderivative_numeric(case, expression, oracle, points):
+    row = next(line for line in MATRIX.splitlines() if f'| {case} |' in line)
+    assert len(row.split('|')) >= 4
+    result = integrate_expression(expression, 'x')
+    assert not result.antiderivative.has(sp.Integral)
+    f = sp.lambdify(sp.Symbol('x'), result.antiderivative, modules='math')
+    for x in points:
+        h = 1e-6
+        assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x)
