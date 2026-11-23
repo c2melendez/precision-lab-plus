@@ -1,3 +1,7 @@
+## LM-HI-07 — PASS_SCOPED (2026-11-23 UTC)
+
+SHA técnico `505d779367a41280698e23bb405539f23e927333`; cumulative: run 45119554249, jobs [137509945641, 137509945945], h1d: run 45119554116, jobs [137509945396]. Registros revisados. Siguiente: LM-HI-08. Certificación global OPEN; bloqueos conservados.
+
 ## LM-HI-06 — PASS_SCOPED (2026-11-23 UTC)
 
 SHA técnico `4674f4440ef5eb1fc575a2b2b84236e5263da946`; cumulative: run 45113926730, jobs [137492291793, 137492291504], h1d: run 45113926726, jobs [137492291488]. Registros revisados. Siguiente: LM-HI-07. Certificación global OPEN; bloqueos conservados.
