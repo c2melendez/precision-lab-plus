@@ -6,6 +6,8 @@ Fuente congelada `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz
 
 > Lite: DV-HI-01..10 bloqueados por derivadas inversas sin resolver; la protección del commit 649c068 evita reportar un resultado falso. Paridad bilateral pendiente.
 
+> Lite: implementación para DV-HI-01..10 publicada en 7cbbed39; pruebas locales en puntos interiores, CI en curso y paridad completa pendiente.
+
 | ID | Estado | Evidencia y alcance / pendiente |
 |---|---|---|
 | DV-I-04 | PASS_SCOPED | `backend/tests/test_trigonometry_dv_i04_i06.py`; acumulativo [45185775213](https://github.com/c2melendez/precision-lab-plus/actions/runs/45185775213); SHA `b0a809798bcceccab221cde1ad29f1a4cc605b8f`; UI específica pendiente. |
