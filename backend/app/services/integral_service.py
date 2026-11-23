@@ -147,6 +147,12 @@ def _parse_bound(raw_bound: str) -> sympy.Expr:
 
 
 def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
+    # These elementary hyperbolic primitives are not covered by the current
+    # manual integration rules. Their singularities remain those of the input.
+    if input_expr == sympy.sech(var_symbol) ** 2:
+        return sympy.tanh(var_symbol), [], False, []
+    if input_expr == sympy.csch(var_symbol) ** 2:
+        return -sympy.coth(var_symbol), [], False, []
     rule = mi.integral_steps(input_expr, var_symbol)
 
     if isinstance(rule, mi.DontKnowRule):

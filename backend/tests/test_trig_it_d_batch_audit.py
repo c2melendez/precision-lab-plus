@@ -70,8 +70,8 @@ HYPERBOLIC_CASES = [
  ('IT-H-02','cosh(x)',lambda x:math.cosh(x)),
  ('IT-H-03','tanh(x)',lambda x:math.tanh(x)),
  pytest.param('IT-H-04','coth(x)',lambda x:1/math.tanh(x),marks=pytest.mark.xfail(reason='logarithm real branch requires review',strict=True)),
- pytest.param('IT-H-05','sech(x)^2',lambda x:1/math.cosh(x)**2,marks=pytest.mark.xfail(reason='antiderivative unresolved',strict=True)),
- pytest.param('IT-H-06','csch(x)^2',lambda x:1/math.sinh(x)**2,marks=pytest.mark.xfail(reason='antiderivative unresolved',strict=True)),
+ ('IT-H-05','sech(x)^2',lambda x:1/math.cosh(x)**2),
+ ('IT-H-06','csch(x)^2',lambda x:1/math.sinh(x)**2),
  ('IT-H-07','sech(x)',lambda x:1/math.cosh(x)),
  pytest.param('IT-H-08','csch(x)',lambda x:1/math.sinh(x),marks=pytest.mark.xfail(reason='negative real logarithm branch',strict=True)),
  ('IT-H-09','sech(x)*tanh(x)',lambda x:math.tanh(x)/math.cosh(x)),
@@ -94,3 +94,9 @@ def test_hyperbolic_antiderivative_numeric(case, expression, oracle):
     for x in (-1.1,-.6,.6,1.1):
         h = 1e-6
         assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x)
+
+def test_csch_squared_primitive_preserves_pole():
+    x = sp.Symbol('x')
+    result = integrate_expression('csch(x)^2', 'x').antiderivative
+    assert result.subs(x, 0).is_finite is False
+    assert sp.simplify(sp.diff(result, x) - sp.csch(x)**2) == 0
