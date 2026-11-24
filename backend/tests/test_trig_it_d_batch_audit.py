@@ -101,6 +101,16 @@ def test_csch_squared_primitive_preserves_pole():
     assert result.subs(x, 0).is_finite is False
     assert sp.simplify(sp.diff(result, x) - sp.csch(x)**2) == 0
 
+@pytest.mark.parametrize('expression,lower,upper,oracle', [
+    ('sech(x)^2', '-1', '1', lambda: 2*math.tanh(1)),
+    ('csch(x)^2', '1', '2', lambda: 1/math.tanh(1)-1/math.tanh(2)),
+    ('csch(x)^2', '-2', '-1', lambda: 1/math.tanh(1)-1/math.tanh(2)),
+])
+def test_reciprocal_hyperbolic_definite_integrals(expression, lower, upper, oracle):
+    result = integrate_expression(expression, 'x', lower, upper)
+    assert result.is_definite
+    assert float(sp.N(result.definite_value, 15)) == pytest.approx(oracle(), rel=1e-10, abs=1e-10)
+
 INVERSE_HYPERBOLIC_CASES = [
  ('IT-HI-01','asinh(x)',lambda x:math.asinh(x),[-2,-.5,.5,2]),
  ('IT-HI-02','acosh(x)',lambda x:math.acosh(x),[1.2,1.5,2,3]),
