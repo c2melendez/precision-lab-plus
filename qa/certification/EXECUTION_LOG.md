@@ -1,3 +1,7 @@
+## 2026-11-24 — reconciliación CI TR324
+
+Evidencia por ID añadida a BATCH_80_01.md para 49 filas; ver CURRENT_STATE.md. No se ejecutaron nuevas corridas ni se declararon cierres. Se conservan los bloqueos contractuales.
+
 ## TR324 integrales: canal HTTP — 2026-11-24 UTC
 
 Plus SHA `5c1471e343b86372120edf3e486a809b0a84ee09`: 55 casos parametrizados por HTTP, 43 PASS parciales y 12 XFAIL locales; 49 corresponden al lote 80-01 y seis IT-HI-05..10 son adicionales. Se verifica respuesta y derivada numérica de primitiva, no ejecución literal de la fuente ni todos los dominios. CI nuevo pendiente; acumulativo previo [45420899583](https://github.com/c2melendez/precision-lab-plus/actions/runs/45420899583) SUCCESS en SHA anterior. Ningún cierre completo nuevo. S25, SG28/DIST y EV-D-01 conservados.

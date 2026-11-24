@@ -96,3 +96,63 @@ Fuente congelada `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz
 | IT-HI-02 | EN_CURSO | Plus: extremo x=1 probado localmente; SHA `83a393597da753e1a3119e2a95d1cc265bd94e86`; CI, Lite, canales y dominio completo pendientes. HTTP parcial local: SHA `5c1471e343b86372120edf3e486a809b0a84ee09`; CI pendiente. |
 | IT-HI-03 | EN_CURSO | Plus: PASS parcial local en puntos interiores; SHA `56524b2c5b48c592c9f4b41c13474f99e46c2575`; CI, Lite, fuente literal y HTTP pendientes. HTTP parcial local: SHA `5c1471e343b86372120edf3e486a809b0a84ee09`; CI pendiente. |
 | IT-HI-04 | REVIEW | Plus: XFAIL rama real negativa; SHA `56524b2c5b48c592c9f4b41c13474f99e46c2575`; CI, Lite, fuente literal y HTTP pendientes. HTTP parcial local: SHA `5c1471e343b86372120edf3e486a809b0a84ee09`; CI pendiente. |
+
+## Reconciliación CI por caso — 2026-11-24
+
+Resultados de pruebas existentes; no constituyen PASS contractual. La información siguiente actualiza las menciones históricas de CI pendiente; no modifica ni borra el historial. Fuente y hash arriba. Falta verificar entrada literal, dominios completos y otros canales.
+
+Plus `5c1471e343b86372120edf3e486a809b0a84ee09`, [acumulativo 45455272441](https://github.com/c2melendez/precision-lab-plus/actions/runs/45455272441), job backend 138662901260; `backend/tests/test_trig_it_d_batch_audit.py`, HTTP y derivación numérica en puntos interiores; no acredita entrada literal ni dominio completo.
+
+| Caso | Resultado acotado ejecutado |
+|---|---|
+| IT-D-01 | PASS parcial |
+| IT-D-02 | PASS parcial |
+| IT-D-03 | PASS parcial |
+| IT-D-04 | PASS parcial |
+| IT-D-05 | PASS parcial |
+| IT-D-06 | PASS parcial |
+| IT-D-07 | PASS parcial |
+| IT-D-08 | XFAIL |
+| IT-D-09 | PASS parcial |
+| IT-D-10 | XFAIL |
+| IT-D-11 | PASS parcial |
+| IT-D-12 | PASS parcial |
+| IT-D-13 | PASS parcial |
+| IT-D-14 | XFAIL |
+| IT-D-15 | PASS parcial |
+| IT-D-16 | PASS parcial |
+| IT-D-17 | PASS parcial |
+| IT-D-18 | PASS parcial |
+| IT-H-01 | PASS parcial |
+| IT-H-02 | PASS parcial |
+| IT-H-03 | PASS parcial |
+| IT-H-04 | XFAIL |
+| IT-H-05 | PASS parcial |
+| IT-H-06 | PASS parcial |
+| IT-H-07 | PASS parcial |
+| IT-H-08 | XFAIL |
+| IT-H-09 | PASS parcial |
+| IT-H-10 | PASS parcial |
+| IT-H-11 | PASS parcial |
+| IT-H-12 | PASS parcial |
+| IT-H-13 | XFAIL |
+| IT-H-14 | PASS parcial |
+| IT-H-15 | PASS parcial |
+| IT-H-16 | PASS parcial |
+| IT-I-01 | PASS parcial |
+| IT-I-02 | PASS parcial |
+| IT-I-03 | PASS parcial |
+| IT-I-04 | XFAIL |
+| IT-I-05 | XFAIL |
+| IT-I-06 | XFAIL |
+| IT-I-07 | PASS parcial |
+| IT-I-08 | PASS parcial |
+| IT-I-09 | PASS parcial |
+| IT-I-10 | PASS parcial |
+| IT-I-11 | PASS parcial |
+| IT-HI-01 | PASS parcial |
+| IT-HI-02 | PASS parcial |
+| IT-HI-03 | PASS parcial |
+| IT-HI-04 | XFAIL |
+
+XFAIL permanece FAIL o pendiente de resolución; PASS parcial no es cierre. S25, SG28/DIST y EV-D-01 permanecen abiertos.

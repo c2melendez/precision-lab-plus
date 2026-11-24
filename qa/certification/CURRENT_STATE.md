@@ -1,3 +1,9 @@
+## Reconciliación de evidencia TR324 — 2026-11-24 UTC
+
+Se revisó el log del acumulativo [45455272441](https://github.com/c2melendez/precision-lab-plus/actions/runs/45455272441), job 138662901260, SHA técnico `5c1471e343b86372120edf3e486a809b0a84ee09`; 55 resultados HTTP en total, 49 presentes en el lote y 6 fuera. Los resultados por ID y sus límites constan en BATCH_80_01.md. No se acreditan cierres completos; S25, SG28/DIST y EV-D-01 permanecen bloqueados.
+
+Siguiente: resolver XFAIL de integrales y completar canal literal, dominios y paridad; no repetir las corridas revisadas sin cambios en insumos.
+
 ## TR324 integrales: canal HTTP — 2026-11-24 UTC
 
 Plus SHA `5c1471e343b86372120edf3e486a809b0a84ee09`: 55 casos parametrizados por HTTP, 43 PASS parciales y 12 XFAIL locales; 49 corresponden al lote 80-01 y seis IT-HI-05..10 son adicionales. Se verifica respuesta y derivada numérica de primitiva, no ejecución literal de la fuente ni todos los dominios. CI nuevo pendiente; acumulativo previo [45420899583](https://github.com/c2melendez/precision-lab-plus/actions/runs/45420899583) SUCCESS en SHA anterior. Ningún cierre completo nuevo. S25, SG28/DIST y EV-D-01 conservados.
