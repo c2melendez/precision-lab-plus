@@ -1,3 +1,9 @@
+## TR324 IT-HI-08: alcance de coincidencia — 2026-11-24 UTC
+
+Plus SHA `f5ea89e4faa3de721ad2688d3922cfa4ee3623c2` elimina simplificación general para identificar el integrando especial y usa su forma fuente normalizada. Suite focal local: 63 PASS, 12 XFAIL, incluidas semillas 1,3,8 y puntos complejos. Acumulativo previo [45371084032](https://github.com/c2melendez/precision-lab-plus/actions/runs/45371084032) SUCCESS en SHA anterior; CI nuevo pendiente, no acredita cierre. Persisten pruebas de cortes, literal, Lite y bloqueos S25, SG28/DIST, EV-D-01.
+
+Siguiente: revisar CI nuevo, equivalencias de entrada, cortes de rama, paridad Lite y ampliar lote.
+
 ## TR324 IT-HI-08: coincidencia del parser corregida — 2026-11-24 UTC
 
 El supuesto arreglo 0133ea8 no se activaba: el parser conserva 1*1 sin evaluar y la igualdad estructural fallaba. Plus SHA `821efb82789997eb76afc4b6283582c308080998` reconoce equivalencia para expresiones pequeñas; se verificaron semillas 1,3,8, x>1 y puntos complejos en ambos semiplanos, 63 PASS y 12 XFAIL locales. El [acumulativo 45361472176](https://github.com/c2melendez/precision-lab-plus/actions/runs/45361472176) SUCCESS para SHA previo no demuestra el arreglo; CI nuevo pendiente. No acredita todos los cortes, dominios ni Lite. S25, SG28/DIST y EV-D-01 conservados.
