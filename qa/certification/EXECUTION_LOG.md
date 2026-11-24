@@ -1,3 +1,9 @@
+## TR324 integrales: canal HTTP — 2026-11-24 UTC
+
+Plus SHA `5c1471e343b86372120edf3e486a809b0a84ee09`: 55 casos parametrizados por HTTP, 43 PASS parciales y 12 XFAIL locales; 49 corresponden al lote 80-01 y seis IT-HI-05..10 son adicionales. Se verifica respuesta y derivada numérica de primitiva, no ejecución literal de la fuente ni todos los dominios. CI nuevo pendiente; acumulativo previo [45420899583](https://github.com/c2melendez/precision-lab-plus/actions/runs/45420899583) SUCCESS en SHA anterior. Ningún cierre completo nuevo. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: revisar CI nuevo, resolver XFAIL, verificar entradas literales y paridad Lite.
+
 ## TR324 55 integrales: dos tamaños de paso — 2026-11-24 UTC
 
 Plus SHA `806220493ae59d73330c0cf9159d76c81d8b27b6`: pruebas numéricas con pasos 1e-5 y 1e-6 para 55 filas de integrales (IT-D 18, IT-I 11, IT-H 16, IT-HI 10); 43 filas pasan esta comprobación local y 12 conservan XFAIL, que pueden detenerse antes de completar muestras. Seis filas IT-HI-05..10 están fuera del lote 80-01. Suite focal 64 PASS, 12 XFAIL incluyendo otras pruebas. Acumulativo previo [45409771352](https://github.com/c2melendez/precision-lab-plus/actions/runs/45409771352) SUCCESS en SHA previo; CI nuevo pendiente. No se declaran cierres: faltan Lite, dominios y canales. S25, SG28/DIST y EV-D-01 conservados.
