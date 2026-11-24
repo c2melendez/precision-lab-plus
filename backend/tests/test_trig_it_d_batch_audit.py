@@ -39,9 +39,9 @@ def test_antiderivative_numeric(case, expression, oracle):
     assert not result.antiderivative.has(sp.Integral)
     f = sp.lambdify(sp.Symbol('x'), result.antiderivative, modules='math')
     for x in (-1.3, -1.1, -0.6, -0.2, 0.2, 0.6, 1.1, 1.3):
-        h = 1e-6
-        numerical = (f(x+h)-f(x-h))/(2*h)
-        assert numerical == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x)
+        for h in (1e-5, 1e-6):
+            numerical = (f(x+h)-f(x-h))/(2*h)
+            assert numerical == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x, h)
 
 INVERSE_CASES = [
  ('IT-I-01','asin(x)', lambda x:math.asin(x), [-.8,-.3,.3,.8]),
@@ -65,8 +65,8 @@ def test_inverse_antiderivative_numeric(case, expression, oracle, points):
     assert not result.antiderivative.has(sp.Integral)
     f = sp.lambdify(sp.Symbol('x'), result.antiderivative, modules='math')
     for x in points:
-        h = 1e-6
-        assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x)
+        for h in (1e-5, 1e-6):
+            assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x, h)
 
 HYPERBOLIC_CASES = [
  ('IT-H-01','sinh(x)',lambda x:math.sinh(x)),
@@ -95,8 +95,8 @@ def test_hyperbolic_antiderivative_numeric(case, expression, oracle):
     assert not result.antiderivative.has(sp.Integral)
     f = sp.lambdify(sp.Symbol('x'), result.antiderivative, modules='math')
     for x in (-1.3,-1.1,-.6,-.2,.2,.6,1.1,1.3):
-        h = 1e-6
-        assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x)
+        for h in (1e-5, 1e-6):
+            assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x, h)
 
 def test_csch_squared_primitive_preserves_pole():
     x = sp.Symbol('x')
@@ -160,8 +160,8 @@ def test_inverse_hyperbolic_integral(case, expression, oracle, points):
     assert not result.antiderivative.has(sp.Integral)
     f = sp.lambdify(sp.Symbol('x'), result.antiderivative, modules='math')
     for x in points:
-        h = 1e-6
-        assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case,x)
+        for h in (1e-5, 1e-6):
+            assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case,x,h)
 
 @pytest.mark.parametrize('expression, endpoint, expected', [
     ('acosh(x)', 1, 0),
