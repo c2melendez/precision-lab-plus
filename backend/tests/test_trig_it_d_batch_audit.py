@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 import pytest
 import sympy as sp
+from fastapi.testclient import TestClient
+from app.main import app
 from app.services.integral_service import integrate_expression
 
 MATRIX = gzip.decompress((Path(__file__).resolve().parents[2] / 'qa/certification/legacy_sources/ejercicios_trigonometria.md.gz').read_bytes()).decode()
@@ -188,6 +190,33 @@ for expression in ('1/sqrt(x^2-1)', '(x^2-1)^(-1/2)', '1/sqrt(x*x-1)'):
     env = {**os.environ, 'PYTHONHASHSEED': seed}
     result = subprocess.run([sys.executable, '-c', script], env=env, capture_output=True, text=True, timeout=30)
     assert result.returncode == 0, result.stderr
+
+@pytest.mark.parametrize('case,expression,oracle', CASES + HYPERBOLIC_CASES)
+def test_integral_http_numeric(case, expression, oracle):
+    with TestClient(app) as client:
+        response = client.post('/api/v1/integral', json={'expression': expression, 'variable': 'x'})
+    assert response.status_code == 200
+    body = response.json()
+    assert body['success'] is True and body['result_text'].endswith('+ C')
+    primitive = sp.sympify(body['result_text'].removesuffix('+ C').strip())
+    f = sp.lambdify(sp.Symbol('x'), primitive, modules='math')
+    for point in (-.6,.6):
+        h = 1e-6
+        assert (f(point+h)-f(point-h))/(2*h) == pytest.approx(oracle(point), rel=1e-6, abs=1e-6), case
+
+@pytest.mark.parametrize('case,expression,oracle,points', INVERSE_CASES + INVERSE_HYPERBOLIC_CASES)
+def test_inverse_integral_http_numeric(case, expression, oracle, points):
+    with TestClient(app) as client:
+        response = client.post('/api/v1/integral', json={'expression': expression, 'variable': 'x'})
+    assert response.status_code == 200
+    body = response.json()
+    assert body['success'] is True and body['result_text'].endswith('+ C')
+    primitive = sp.sympify(body['result_text'].removesuffix('+ C').strip())
+    assert not primitive.has(sp.Integral)
+    f = sp.lambdify(sp.Symbol('x'), primitive, modules='math')
+    for point in points:
+        h = 1e-6
+        assert (f(point+h)-f(point-h))/(2*h) == pytest.approx(oracle(point), rel=1e-6, abs=1e-6), case
 
 def test_inverse_sqrt_primitive_uses_selected_variable():
     y = sp.Symbol('y')
