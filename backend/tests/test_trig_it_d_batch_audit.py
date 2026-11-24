@@ -106,6 +106,12 @@ INVERSE_HYPERBOLIC_CASES = [
  pytest.param('IT-HI-02','acosh(x)',lambda x:math.acosh(x),[1.2,1.5,2,3],marks=pytest.mark.xfail(reason='integral remains unresolved',strict=True)),
  ('IT-HI-03','atanh(x)',lambda x:math.atanh(x),[-.8,-.3,.3,.8]),
  pytest.param('IT-HI-04','acoth(x)',lambda x:math.atanh(1/x),[-3,-2,2,3],marks=pytest.mark.xfail(reason='negative real logarithm branch requires review',strict=True)),
+ pytest.param('IT-HI-05','asech(x)',lambda x:math.acosh(1/x),[.1,.3,.6,.9],marks=pytest.mark.xfail(reason='integral unresolved',strict=True)),
+ pytest.param('IT-HI-06','acsch(x)',lambda x:math.asinh(1/x),[.2,.5,1,2],marks=pytest.mark.xfail(reason='integral unresolved',strict=True)),
+ ('IT-HI-07','1/sqrt(x^2+1)',lambda x:1/math.sqrt(x*x+1),[-2,-.5,.5,2]),
+ ('IT-HI-08','1/sqrt(x^2-1)',lambda x:1/math.sqrt(x*x-1),[1.2,1.5,2,3]),
+ pytest.param('IT-HI-09','1/(1-x^2)',lambda x:1/(1-x*x),[-.8,-.3,.3,.8],marks=pytest.mark.xfail(reason='complex logarithmic representation requires real-branch review',strict=True)),
+ ('IT-HI-10','x*asinh(x)',lambda x:x*math.asinh(x),[-2,-.5,.5,2]),
 ]
 
 @pytest.mark.parametrize('case,expression,oracle,points', INVERSE_HYPERBOLIC_CASES)
