@@ -1,3 +1,9 @@
+## TR324 55 integrales: dos tamaños de paso — 2026-11-24 UTC
+
+Plus SHA `806220493ae59d73330c0cf9159d76c81d8b27b6`: pruebas numéricas con pasos 1e-5 y 1e-6 para 55 filas de integrales (IT-D 18, IT-I 11, IT-H 16, IT-HI 10); 43 filas pasan esta comprobación local y 12 conservan XFAIL, que pueden detenerse antes de completar muestras. Seis filas IT-HI-05..10 están fuera del lote 80-01. Suite focal 64 PASS, 12 XFAIL incluyendo otras pruebas. Acumulativo previo [45409771352](https://github.com/c2melendez/precision-lab-plus/actions/runs/45409771352) SUCCESS en SHA previo; CI nuevo pendiente. No se declaran cierres: faltan Lite, dominios y canales. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: revisar CI SHA nuevo, corregir XFAIL, cubrir canales y paridad Lite sin duplicar gates.
+
 ## TR324 IT-D-01..18 / IT-H-01..16: muestreo interior — 2026-11-24 UTC
 
 Plus SHA `61a8275aa5afdc40bb583fa707973ba8251acb95`: se amplió el muestreo de cuatro a ocho puntos interiores para 34 filas de integrales; 28 pasan esta comprobación local y seis conservan XFAIL estrictos (se detienen al fallar). Suite local total 64 PASS, 12 XFAIL; no equivale a 34 cierres. Acumulativo previo [45399405380](https://github.com/c2melendez/precision-lab-plus/actions/runs/45399405380) SUCCESS en SHA anterior; CI nuevo pendiente. Lite, literal, dominios y canales pendientes. S25, SG28/DIST y EV-D-01 conservados.
