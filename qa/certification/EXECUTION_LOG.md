@@ -1,3 +1,9 @@
+## TR324 IT-H-06: integral definida no resuelta — 2026-11-24 UTC
+
+Plus SHA `7b7e2739b982c52992cbe9fbc419212ada2319df` añade advertencia cuando una integral definida permanece sin resolver y no se ha verificado convergencia. Prueba de csch² entre -1 y 1 conserva expresión no resuelta, sin atribuir resultado finito; suite local 60 PASS y 12 XFAIL. CI del nuevo SHA pendiente. El fallo de IT-HI-08 en acumulativo [45330496969](https://github.com/c2melendez/precision-lab-plus/actions/runs/45330496969) continúa sin causa confirmada: no se ha declarado corregido. S25, SG28/DIST y EV-D-01 se conservan.
+
+Siguiente: diagnosticar IT-HI-08 con dependencias y orden de CI, revisar CI nuevo, verificar canales y paridad Lite.
+
 ## TR324 IT-HI-08: fallo acumulativo — 2026-11-24 UTC
 
 [Acumulativo 45330496969](https://github.com/c2melendez/precision-lab-plus/actions/runs/45330496969), SHA `f80f16325c290753185d491a5b1bda1262c2cea8`, backend job 138230277943: 1 FAIL, 3497 PASS, 1 SKIP y 23 XFAIL. IT-HI-08: la evaluación lambdify produjo None al restar puntos x>1. En ejecución local aislada SymPy 1.13.3 devuelve Piecewise((acosh(x), Abs(x**2)>1),(-I*asin(x), True)); la discrepancia de entorno/estado aún no está diagnosticada. No se declara producto ni harness como causa confirmada; no relajar oráculos ni repetir el mismo gate sin corrección. Seguridad y bloqueos S25, SG28/DIST, EV-D-01 permanecen vigentes.

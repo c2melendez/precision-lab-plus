@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "DIAGNOSE IT-HI-08: reproducir fallo None de acumulativo 45330496969 bajo dependencias y orden CI, capturar primitiva, corregir causa y verificar."
+    "action": "Diagnosticar IT-HI-08 en condiciones CI y revisar CI SHA 7b7e2739b982c52992cbe9fbc419212ada2319df; verificar dominios y paridad Lite."
   },
   "blockers": [
     {
@@ -838,6 +838,8 @@
     "plus_it_h_definite_ci": "FAIL",
     "plus_it_hi08_failure_run": 45330496969,
     "plus_it_hi08_failure_job": 138230277943,
-    "plus_it_hi08_failure_status": "DIAGNOSE"
+    "plus_it_hi08_failure_status": "DIAGNOSE",
+    "plus_unresolved_definite_sha": "7b7e2739b982c52992cbe9fbc419212ada2319df",
+    "plus_unresolved_definite_ci": "WAIT"
   }
 }
