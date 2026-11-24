@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "Revisar CI SHA 0133ea8db65df074ae0ae204f9e331d9bc388628, verificar cortes y paridad Lite IT-HI-08 y continuar lote."
+    "action": "Revisar CI SHA 821efb82789997eb76afc4b6283582c308080998, coste de simplificación, cortes de rama y paridad Lite IT-HI-08."
   },
   "blockers": [
     {
@@ -842,7 +842,7 @@
     "plus_unresolved_definite_sha": "7b7e2739b982c52992cbe9fbc419212ada2319df",
     "plus_unresolved_definite_ci": "WAIT",
     "plus_it_hi08_reproducer": "PYTHONHASHSEED=3: Piecewise missing x>1 branch",
-    "plus_it_hi08_fix_sha": "0133ea8db65df074ae0ae204f9e331d9bc388628",
+    "plus_it_hi08_fix_sha": "821efb82789997eb76afc4b6283582c308080998",
     "plus_it_hi08_fix_ci": "WAIT"
   }
 }

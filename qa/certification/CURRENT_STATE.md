@@ -1,3 +1,9 @@
+## TR324 IT-HI-08: coincidencia del parser corregida — 2026-11-24 UTC
+
+El supuesto arreglo 0133ea8 no se activaba: el parser conserva 1*1 sin evaluar y la igualdad estructural fallaba. Plus SHA `821efb82789997eb76afc4b6283582c308080998` reconoce equivalencia para expresiones pequeñas; se verificaron semillas 1,3,8, x>1 y puntos complejos en ambos semiplanos, 63 PASS y 12 XFAIL locales. El [acumulativo 45361472176](https://github.com/c2melendez/precision-lab-plus/actions/runs/45361472176) SUCCESS para SHA previo no demuestra el arreglo; CI nuevo pendiente. No acredita todos los cortes, dominios ni Lite. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: revisar CI del SHA nuevo, límites de coste de simplificación, cortes de rama y paridad Lite; continuar lote.
+
 ## TR324 IT-HI-08: corrección multisemilla — 2026-11-24 UTC
 
 Plus SHA `0133ea8db65df074ae0ae204f9e331d9bc388628`: primitiva logarítmica para el integrando exacto 1/sqrt(x²-1), evitando Piecewise incompleto dependiente de hash. Pruebas locales con semillas 1,3,8 incluyen puntos x>1 y un punto complejo; suite local 63 PASS, 12 XFAIL. No demuestra todas las ramas complejas ni canales. CI pendiente; fallo previo [45330496969](https://github.com/c2melendez/precision-lab-plus/actions/runs/45330496969) reproducido con semilla 3. S25, SG28/DIST y EV-D-01 conservados.
