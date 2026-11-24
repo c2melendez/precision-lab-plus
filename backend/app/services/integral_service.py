@@ -150,9 +150,10 @@ def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
     # SymPy's manual integration may return an incomplete Piecewise for this
     # exact integrand depending on hash order. This principal-branch primitive
     # differentiates to the original expression wherever both are defined.
-    candidate = 1 / sympy.sqrt(var_symbol ** 2 - 1)
-    if (sympy.count_ops(input_expr) <= 8 and input_expr.has(sympy.Pow)
-            and sympy.simplify(input_expr - candidate) == 0):
+    # Limit the override to the parsed source shape; do not simplify every
+    # unrelated integrand just to identify this special case.
+    source_shape = str(input_expr).replace(' ', '').replace('-1*1', '-1')
+    if source_shape == f'1/sqrt({var_symbol}**2-1)':
         return sympy.log(var_symbol + sympy.sqrt(var_symbol ** 2 - 1)), [], False, []
     # These elementary hyperbolic primitives are not covered by the current
     # manual integration rules. Their singularities remain those of the input.
