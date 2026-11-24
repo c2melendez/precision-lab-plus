@@ -1,3 +1,9 @@
+## TR324 IT-HI-08: muestras cercanas a cortes — 2026-11-24 UTC
+
+Plus SHA `515224af3584bd232fb88c194a307ad1d611da61`: regresión multisemilla con muestras complejas próximas a ±1 y al eje imaginario, y prueba para variable y; suite focal local 64 PASS, 12 XFAIL. Acumulativo previo [45389771319](https://github.com/c2melendez/precision-lab-plus/actions/runs/45389771319) SUCCESS para SHA anterior; CI nuevo pendiente. Las muestras no prueban todos los cortes; Lite, fuente literal y dominios completos pendientes. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: verificar CI SHA nuevo y continuar cobertura bilateral y demás filas del lote.
+
 ## TR324 IT-HI-08: formas equivalentes — 2026-11-24 UTC
 
 Plus SHA `5b7c3a8e66343b9e5652db9fc3f10d169b2b40a4`: reconoce tres formas del integrando sin simplificación general; pruebas locales con semillas 1/3/8, puntos reales y complejos, 63 PASS y 12 XFAIL en suite focal. Acumulativo previo [45380427449](https://github.com/c2melendez/precision-lab-plus/actions/runs/45380427449), backend job 138397716257 SUCCESS y regresión multisemilla ejecutada para SHA previo. CI nuevo pendiente; no acredita todos los cortes, entrada literal ni paridad Lite. S25, SG28/DIST y EV-D-01 conservados.
