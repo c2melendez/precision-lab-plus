@@ -103,7 +103,7 @@ def test_csch_squared_primitive_preserves_pole():
 
 INVERSE_HYPERBOLIC_CASES = [
  ('IT-HI-01','asinh(x)',lambda x:math.asinh(x),[-2,-.5,.5,2]),
- pytest.param('IT-HI-02','acosh(x)',lambda x:math.acosh(x),[1.2,1.5,2,3],marks=pytest.mark.xfail(reason='integral remains unresolved',strict=True)),
+ ('IT-HI-02','acosh(x)',lambda x:math.acosh(x),[1.2,1.5,2,3]),
  ('IT-HI-03','atanh(x)',lambda x:math.atanh(x),[-.8,-.3,.3,.8]),
  pytest.param('IT-HI-04','acoth(x)',lambda x:math.atanh(1/x),[-3,-2,2,3],marks=pytest.mark.xfail(reason='negative real logarithm branch requires review',strict=True)),
  pytest.param('IT-HI-05','asech(x)',lambda x:math.acosh(1/x),[.1,.3,.6,.9],marks=pytest.mark.xfail(reason='integral unresolved',strict=True)),
