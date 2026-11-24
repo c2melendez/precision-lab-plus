@@ -1,3 +1,9 @@
+## TR324 IT-D-01..18 / IT-H-01..16: muestreo interior — 2026-11-24 UTC
+
+Plus SHA `61a8275aa5afdc40bb583fa707973ba8251acb95`: se amplió el muestreo de cuatro a ocho puntos interiores para 34 filas de integrales; 28 pasan esta comprobación local y seis conservan XFAIL estrictos (se detienen al fallar). Suite local total 64 PASS, 12 XFAIL; no equivale a 34 cierres. Acumulativo previo [45399405380](https://github.com/c2melendez/precision-lab-plus/actions/runs/45399405380) SUCCESS en SHA anterior; CI nuevo pendiente. Lite, literal, dominios y canales pendientes. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: revisar CI nuevo, corregir XFAIL y completar cobertura bilateral y restante del lote.
+
 ## TR324 IT-HI-08: muestras cercanas a cortes — 2026-11-24 UTC
 
 Plus SHA `515224af3584bd232fb88c194a307ad1d611da61`: regresión multisemilla con muestras complejas próximas a ±1 y al eje imaginario, y prueba para variable y; suite focal local 64 PASS, 12 XFAIL. Acumulativo previo [45389771319](https://github.com/c2melendez/precision-lab-plus/actions/runs/45389771319) SUCCESS para SHA anterior; CI nuevo pendiente. Las muestras no prueban todos los cortes; Lite, fuente literal y dominios completos pendientes. S25, SG28/DIST y EV-D-01 conservados.
