@@ -1,3 +1,9 @@
+## TR324 IT-HI-05: primitiva implementada — 2026-11-23 UTC
+
+Plus SHA `81bbd3b567a86a498b93b5a17b5852fee3404d5e`: primitiva de asech(x), prueba numérica local en 0<x<1; suite local 44 PASS, 12 XFAIL. CI nuevo, paridad Lite, canales, frontera y dominio complejo pendientes; no es cierre. Acumulativo anterior [45301954625](https://github.com/c2melendez/precision-lab-plus/actions/runs/45301954625) SUCCESS en SHA previo; seguridad sigue en curso. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: verificar CI nuevo, frontera y dominio; resolver demás XFAIL y ampliar cobertura bilateral.
+
 ## TR324 IT-HI-02: primitiva implementada — 2026-11-23 UTC
 
 Plus SHA `0caf35a8f5286c079c0b08f5812fe3b7064a9191`: primitiva de acosh, probada numéricamente en cuatro puntos x>1; suite local 43 PASS y 13 XFAIL. CI nuevo pendiente; falta validar borde, canales, Lite y dominio completo. Acumulativo previo [45293871972](https://github.com/c2melendez/precision-lab-plus/actions/runs/45293871972) SUCCESS para SHA anterior. Conservar S25, SG28/DIST y EV-D-01.
