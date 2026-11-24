@@ -1,6 +1,9 @@
 """TR324 IT-D: numeric differentiation of service antiderivatives."""
 import gzip
 import math
+import os
+import subprocess
+import sys
 from pathlib import Path
 import pytest
 import sympy as sp
@@ -167,3 +170,18 @@ def test_inverse_hyperbolic_integral(case, expression, oracle, points):
 def test_inverse_hyperbolic_primitive_endpoint(expression, endpoint, expected):
     result = integrate_expression(expression, 'x').antiderivative
     assert sp.simplify(result.subs(sp.Symbol('x'), endpoint) - expected) == 0
+
+@pytest.mark.parametrize('seed', ['1', '3', '8'])
+def test_inverse_sqrt_primitive_is_stable_across_hash_seeds(seed):
+    script = """import sympy as s
+from app.services.integral_service import integrate_expression
+x=s.Symbol('x')
+r=integrate_expression('1/sqrt(x^2-1)','x').antiderivative
+for point in (1.2, 2, 2+1j):
+    got=complex(s.N(s.diff(r,x).subs(x,point), 15))
+    expected=complex(s.N((1/s.sqrt(x*x-1)).subs(x,point), 15))
+    assert abs(got-expected) < 1e-10, (point, got, expected, r)
+"""
+    env = {**os.environ, 'PYTHONHASHSEED': seed}
+    result = subprocess.run([sys.executable, '-c', script], env=env, capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stderr

@@ -147,6 +147,11 @@ def _parse_bound(raw_bound: str) -> sympy.Expr:
 
 
 def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
+    # SymPy's manual integration may return an incomplete Piecewise for this
+    # exact integrand depending on hash order. This principal-branch primitive
+    # differentiates to the original expression wherever both are defined.
+    if input_expr == 1 / sympy.sqrt(var_symbol ** 2 - 1):
+        return sympy.log(var_symbol + sympy.sqrt(var_symbol ** 2 - 1)), [], False, []
     # These elementary hyperbolic primitives are not covered by the current
     # manual integration rules. Their singularities remain those of the input.
     if input_expr == sympy.sech(var_symbol) ** 2:
