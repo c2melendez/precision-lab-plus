@@ -178,7 +178,9 @@ from app.services.integral_service import integrate_expression
 x=s.Symbol('x')
 for expression in ('1/sqrt(x^2-1)', '(x^2-1)^(-1/2)', '1/sqrt(x*x-1)'):
     r=integrate_expression(expression,'x').antiderivative
-    for point in (1.2, 2, 2+1j, 2-1j, -2+1j, -2-1j):
+    for point in (1.001+0.0001j, 1.001-0.0001j, -1.001+0.0001j,
+                  -1.001-0.0001j, 0.0001j, -0.0001j,
+                  1.2, 2, 2+1j, 2-1j, -2+1j, -2-1j):
         got=complex(s.N(s.diff(r,x).subs(x,point), 15))
         expected=complex(s.N((1/s.sqrt(x*x-1)).subs(x,point), 15))
         assert abs(got-expected) < 1e-10, (expression, point, got, expected, r)
@@ -186,3 +188,9 @@ for expression in ('1/sqrt(x^2-1)', '(x^2-1)^(-1/2)', '1/sqrt(x*x-1)'):
     env = {**os.environ, 'PYTHONHASHSEED': seed}
     result = subprocess.run([sys.executable, '-c', script], env=env, capture_output=True, text=True, timeout=30)
     assert result.returncode == 0, result.stderr
+
+def test_inverse_sqrt_primitive_uses_selected_variable():
+    y = sp.Symbol('y')
+    result = integrate_expression('1/sqrt(y^2-1)', 'y').antiderivative
+    assert not result.has(sp.Integral)
+    assert float(sp.N(sp.diff(result, y).subs(y, 2), 15)) == pytest.approx(1/math.sqrt(3), rel=1e-12)
