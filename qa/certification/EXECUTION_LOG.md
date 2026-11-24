@@ -1,3 +1,9 @@
+## TR324 IT-HI-01..10: fuente anclada — 2026-11-23 UTC
+
+Plus SHA `2febf88736d1c42424e2d77944d6b2558ace1756`: entradas y resultados de diez filas contrastados con matriz congelada; suite local 54 PASS y 12 XFAIL. Las aserciones de fuente no prueban ejecución literal. Acumulativo anterior [45309384775](https://github.com/c2melendez/precision-lab-plus/actions/runs/45309384775) SUCCESS para SHA anterior. CI nuevo pendiente. IT-HI-05 y otras filas no pertenecen al lote 80-01, no atribuibles al cierre de ese lote. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: verificar CI del SHA nuevo, canales y dominios, corregir XFAIL, completar paridad Lite y lote de 80.
+
 ## TR324 IT-HI-05: primitiva implementada — 2026-11-23 UTC
 
 Plus SHA `81bbd3b567a86a498b93b5a17b5852fee3404d5e`: primitiva de asech(x), prueba numérica local en 0<x<1; suite local 44 PASS, 12 XFAIL. CI nuevo, paridad Lite, canales, frontera y dominio complejo pendientes; no es cierre. Acumulativo anterior [45301954625](https://github.com/c2melendez/precision-lab-plus/actions/runs/45301954625) SUCCESS en SHA previo; seguridad sigue en curso. S25, SG28/DIST y EV-D-01 conservados.
