@@ -153,7 +153,12 @@ def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
     # Limit the override to the parsed source shape; do not simplify every
     # unrelated integrand just to identify this special case.
     source_shape = str(input_expr).replace(' ', '').replace('-1*1', '-1')
-    if source_shape == f'1/sqrt({var_symbol}**2-1)':
+    equivalent_shapes = {
+        f'1/sqrt({var_symbol}**2-1)',
+        f'1/sqrt({var_symbol}*{var_symbol}-1)',
+        f'({var_symbol}**2-1)**(-1/2)',
+    }
+    if source_shape in equivalent_shapes:
         return sympy.log(var_symbol + sympy.sqrt(var_symbol ** 2 - 1)), [], False, []
     # These elementary hyperbolic primitives are not covered by the current
     # manual integration rules. Their singularities remain those of the input.
