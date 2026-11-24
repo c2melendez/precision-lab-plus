@@ -38,7 +38,7 @@ def test_antiderivative_numeric(case, expression, oracle):
     result = integrate_expression(expression, 'x')
     assert not result.antiderivative.has(sp.Integral)
     f = sp.lambdify(sp.Symbol('x'), result.antiderivative, modules='math')
-    for x in (-1.1, -0.6, 0.6, 1.1):
+    for x in (-1.3, -1.1, -0.6, -0.2, 0.2, 0.6, 1.1, 1.3):
         h = 1e-6
         numerical = (f(x+h)-f(x-h))/(2*h)
         assert numerical == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x)
@@ -94,7 +94,7 @@ def test_hyperbolic_antiderivative_numeric(case, expression, oracle):
     result = integrate_expression(expression, 'x')
     assert not result.antiderivative.has(sp.Integral)
     f = sp.lambdify(sp.Symbol('x'), result.antiderivative, modules='math')
-    for x in (-1.1,-.6,.6,1.1):
+    for x in (-1.3,-1.1,-.6,-.2,.2,.6,1.1,1.3):
         h = 1e-6
         assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case, x)
 
