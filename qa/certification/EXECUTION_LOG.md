@@ -1,3 +1,9 @@
+## TR324 IT-HI-08: variación reproducida — 2026-11-24 UTC
+
+Para `integrate_expression('1/sqrt(x^2-1)','x')` con SymPy 1.13.3: proceso local `PYTHONHASHSEED=3` devuelve `Piecewise((log(x + sqrt(x**2 - 1)), (x > -1) & (x < 1)))`; al evaluar x=1.5, lambdify devuelve None. Con semillas 1,2,4,5,6,7,8 devuelve `Piecewise((acosh(x), Abs(x**2) > 1), (-I*asin(x), True))` y valor finito para 1.5. Reproducción confirma resultado de servicio dependiente del hash y sin rama para la zona real x>1; causa interna exacta y corrección de ramas complejas aún no determinadas. Acumulativo [45330496969](https://github.com/c2melendez/precision-lab-plus/actions/runs/45330496969) falló para SHA f80f163; el posterior [45344987869](https://github.com/c2melendez/precision-lab-plus/actions/runs/45344987869) terminó SUCCESS en SHA 7b7e273, pero no elimina la variación reproducida. No repetir corridas idénticas; corregir y probar ambas ramas y semillas. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: diseñar solución con semántica real y compleja, prueba negativa y reproducción multisemilla de IT-HI-08; continuar trabajo bilateral independiente.
+
 ## TR324 IT-H-06: integral definida no resuelta — 2026-11-24 UTC
 
 Plus SHA `7b7e2739b982c52992cbe9fbc419212ada2319df` añade advertencia cuando una integral definida permanece sin resolver y no se ha verificado convergencia. Prueba de csch² entre -1 y 1 conserva expresión no resuelta, sin atribuir resultado finito; suite local 60 PASS y 12 XFAIL. CI del nuevo SHA pendiente. El fallo de IT-HI-08 en acumulativo [45330496969](https://github.com/c2melendez/precision-lab-plus/actions/runs/45330496969) continúa sin causa confirmada: no se ha declarado corregido. S25, SG28/DIST y EV-D-01 se conservan.

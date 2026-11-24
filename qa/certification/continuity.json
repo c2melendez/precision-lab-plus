@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "Diagnosticar IT-HI-08 en condiciones CI y revisar CI SHA 7b7e2739b982c52992cbe9fbc419212ada2319df; verificar dominios y paridad Lite."
+    "action": "Corregir variación de IT-HI-08 reproducida con PYTHONHASHSEED=3, preservar ramas reales y complejas y añadir regresión multisemilla; continuar paridad Lite."
   },
   "blockers": [
     {
@@ -835,11 +835,12 @@
     "plus_it_hi_endpoints_sha": "83a393597da753e1a3119e2a95d1cc265bd94e86",
     "plus_it_hi_endpoints_ci": "WAIT",
     "plus_it_h_definite_sha": "f80f16325c290753185d491a5b1bda1262c2cea8",
-    "plus_it_h_definite_ci": "FAIL",
+    "plus_it_h_definite_ci": "SUCCESS_BUT_IT_HI08_NONDETERMINISTIC",
     "plus_it_hi08_failure_run": 45330496969,
     "plus_it_hi08_failure_job": 138230277943,
-    "plus_it_hi08_failure_status": "DIAGNOSE",
+    "plus_it_hi08_failure_status": "REPRODUCED",
     "plus_unresolved_definite_sha": "7b7e2739b982c52992cbe9fbc419212ada2319df",
-    "plus_unresolved_definite_ci": "WAIT"
+    "plus_unresolved_definite_ci": "WAIT",
+    "plus_it_hi08_reproducer": "PYTHONHASHSEED=3: Piecewise missing x>1 branch"
   }
 }
