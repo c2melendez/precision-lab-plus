@@ -1,3 +1,9 @@
+## TR324 IT-H-05/06: integrales definidas — 2026-11-23 UTC
+
+Plus SHA `f80f16325c290753185d491a5b1bda1262c2cea8`: pruebas locales de integrales definidas de sech² en [-1,1] y csch² en [1,2] y [-2,-1], con oráculos independientes; suite local 59 PASS, 12 XFAIL. CI de este SHA pendiente. No comprueba intervalo que cruce el polo, UI ni Lite y no acredita cierre. Acumulativo anterior [45323679318](https://github.com/c2melendez/precision-lab-plus/actions/runs/45323679318) SUCCESS para SHA anterior. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: revisar CI nuevo, comprobar comportamiento al cruzar singularidades, completar dominios, canales y paridad Lite.
+
 ## TR324 IT-HI-02/05: extremos — 2026-11-23 UTC
 
 Plus SHA `83a393597da753e1a3119e2a95d1cc265bd94e86`: verificadas localmente las primitivas de acosh y asech en x=1; IT-HI-06 sigue XFAIL sin resolver y requiere examen de ambas ramas reales y dominio complejo. Suite local 56 PASS, 12 XFAIL. CI nuevo pendiente; acumulativo previo [45316670746](https://github.com/c2melendez/precision-lab-plus/actions/runs/45316670746) SUCCESS para SHA previo, no acredita el nuevo. No cierre: faltan CI, Lite, canales y dominios completos. S25, SG28/DIST y EV-D-01 conservados.

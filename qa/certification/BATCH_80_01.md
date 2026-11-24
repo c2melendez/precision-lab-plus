@@ -80,8 +80,8 @@ Fuente congelada `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz
 | IT-H-02 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
 | IT-H-03 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
 | IT-H-04 | REVIEW | Plus: XFAIL rama real requiere revisión; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
-| IT-H-05 | EN_CURSO | Plus: primitiva implementada, prueba numérica local y polo de csch² comprobado; SHA `aa448cf689082cde391f548ec823c776f37616a7`; CI, Lite y canales pendientes. |
-| IT-H-06 | EN_CURSO | Plus: primitiva implementada, prueba numérica local y polo de csch² comprobado; SHA `aa448cf689082cde391f548ec823c776f37616a7`; CI, Lite y canales pendientes. |
+| IT-H-05 | EN_CURSO | Plus: integrales definidas probadas en intervalos interiores, SHA `f80f16325c290753185d491a5b1bda1262c2cea8`, CI pendiente; cruce de polo, Lite y canales pendientes. |
+| IT-H-06 | EN_CURSO | Plus: integrales definidas probadas en intervalos interiores, SHA `f80f16325c290753185d491a5b1bda1262c2cea8`, CI pendiente; cruce de polo, Lite y canales pendientes. |
 | IT-H-07 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
 | IT-H-08 | REVIEW | Plus: XFAIL rama real requiere revisión; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
 | IT-H-09 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
