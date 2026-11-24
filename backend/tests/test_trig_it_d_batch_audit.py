@@ -114,6 +114,26 @@ INVERSE_HYPERBOLIC_CASES = [
  ('IT-HI-10','x*asinh(x)',lambda x:x*math.asinh(x),[-2,-.5,.5,2]),
 ]
 
+INVERSE_HYPERBOLIC_SOURCE = {
+ 'IT-HI-01': (r'\operatorname{arsinh} x', r'x\operatorname{arsinh} x-\sqrt{x^{2}+1}+C'),
+ 'IT-HI-02': (r'\operatorname{arcosh} x', r'x\operatorname{arcosh} x-\sqrt{x^{2}-1}+C'),
+ 'IT-HI-03': (r'\operatorname{artanh} x', r'x\operatorname{artanh} x+\frac{1}{2}\ln\left(1-x^{2}\right)+C'),
+ 'IT-HI-04': (r'\operatorname{arcoth} x', r'x\operatorname{arcoth} x+\frac{1}{2}\ln\left(x^{2}-1\right)+C'),
+ 'IT-HI-05': (r'\operatorname{arsech} x', r'x\operatorname{arsech} x+\arcsin x+C'),
+ 'IT-HI-06': (r'\operatorname{arcsch} x', r'x\operatorname{arcsch} x+\operatorname{arsinh} x+C'),
+ 'IT-HI-07': (r'\frac{dx}{\sqrt{x^{2}+1}}', r'\operatorname{arsinh} x+C'),
+ 'IT-HI-08': (r'\frac{dx}{\sqrt{x^{2}-1}}', r'\operatorname{arcosh} x+C'),
+ 'IT-HI-09': (r'\frac{dx}{1-x^{2}}', r'\operatorname{artanh} x+C'),
+ 'IT-HI-10': (r'x\operatorname{arsinh} x', r'\frac{2x^{2}+1}{4}\operatorname{arsinh} x-\frac{x\sqrt{x^{2}+1}}{4}+C'),
+}
+
+@pytest.mark.parametrize('case,expected', list(INVERSE_HYPERBOLIC_SOURCE.items()))
+def test_inverse_hyperbolic_source_anchor(case, expected):
+    row = next(line for line in MATRIX.splitlines() if f'| {case} |' in line)
+    fields = row.split('|')
+    assert expected[0] in fields[2]
+    assert expected[1] in fields[3]
+
 @pytest.mark.parametrize('case,expression,oracle,points', INVERSE_HYPERBOLIC_CASES)
 def test_inverse_hyperbolic_integral(case, expression, oracle, points):
     assert any(f'| {case} |' in row for row in MATRIX.splitlines())
