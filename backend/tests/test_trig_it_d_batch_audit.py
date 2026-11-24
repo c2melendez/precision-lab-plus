@@ -107,7 +107,7 @@ INVERSE_HYPERBOLIC_CASES = [
  ('IT-HI-03','atanh(x)',lambda x:math.atanh(x),[-.8,-.3,.3,.8]),
  pytest.param('IT-HI-04','acoth(x)',lambda x:math.atanh(1/x),[-3,-2,2,3],marks=pytest.mark.xfail(reason='negative real logarithm branch requires review',strict=True)),
  ('IT-HI-05','asech(x)',lambda x:math.acosh(1/x),[.1,.3,.6,.9]),
- pytest.param('IT-HI-06','acsch(x)',lambda x:math.asinh(1/x),[.2,.5,1,2],marks=pytest.mark.xfail(reason='integral unresolved',strict=True)),
+ pytest.param('IT-HI-06','acsch(x)',lambda x:math.asinh(1/x),[-2,-1,-.5,-.2,.2,.5,1,2],marks=pytest.mark.xfail(reason='integral unresolved; both real branches require verification',strict=True)),
  ('IT-HI-07','1/sqrt(x^2+1)',lambda x:1/math.sqrt(x*x+1),[-2,-.5,.5,2]),
  ('IT-HI-08','1/sqrt(x^2-1)',lambda x:1/math.sqrt(x*x-1),[1.2,1.5,2,3]),
  pytest.param('IT-HI-09','1/(1-x^2)',lambda x:1/(1-x*x),[-.8,-.3,.3,.8],marks=pytest.mark.xfail(reason='complex logarithmic representation requires real-branch review',strict=True)),
@@ -143,3 +143,11 @@ def test_inverse_hyperbolic_integral(case, expression, oracle, points):
     for x in points:
         h = 1e-6
         assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case,x)
+
+@pytest.mark.parametrize('expression, endpoint, expected', [
+    ('acosh(x)', 1, 0),
+    ('asech(x)', 1, sp.pi/2),
+])
+def test_inverse_hyperbolic_primitive_endpoint(expression, endpoint, expected):
+    result = integrate_expression(expression, 'x').antiderivative
+    assert sp.simplify(result.subs(sp.Symbol('x'), endpoint) - expected) == 0
