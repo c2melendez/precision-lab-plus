@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "Revisar CI SHA f80f16325c290753185d491a5b1bda1262c2cea8, verificar cruce de polo y paridad Lite y continuar lote."
+    "action": "DIAGNOSE IT-HI-08: reproducir fallo None de acumulativo 45330496969 bajo dependencias y orden CI, capturar primitiva, corregir causa y verificar."
   },
   "blockers": [
     {
@@ -835,6 +835,9 @@
     "plus_it_hi_endpoints_sha": "83a393597da753e1a3119e2a95d1cc265bd94e86",
     "plus_it_hi_endpoints_ci": "WAIT",
     "plus_it_h_definite_sha": "f80f16325c290753185d491a5b1bda1262c2cea8",
-    "plus_it_h_definite_ci": "WAIT"
+    "plus_it_h_definite_ci": "FAIL",
+    "plus_it_hi08_failure_run": 45330496969,
+    "plus_it_hi08_failure_job": 138230277943,
+    "plus_it_hi08_failure_status": "DIAGNOSE"
   }
 }

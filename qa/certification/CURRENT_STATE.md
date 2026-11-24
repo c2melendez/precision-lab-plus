@@ -1,3 +1,9 @@
+## TR324 IT-HI-08: fallo acumulativo — 2026-11-24 UTC
+
+[Acumulativo 45330496969](https://github.com/c2melendez/precision-lab-plus/actions/runs/45330496969), SHA `f80f16325c290753185d491a5b1bda1262c2cea8`, backend job 138230277943: 1 FAIL, 3497 PASS, 1 SKIP y 23 XFAIL. IT-HI-08: la evaluación lambdify produjo None al restar puntos x>1. En ejecución local aislada SymPy 1.13.3 devuelve Piecewise((acosh(x), Abs(x**2)>1),(-I*asin(x), True)); la discrepancia de entorno/estado aún no está diagnosticada. No se declara producto ni harness como causa confirmada; no relajar oráculos ni repetir el mismo gate sin corrección. Seguridad y bloqueos S25, SG28/DIST, EV-D-01 permanecen vigentes.
+
+Siguiente: reproducir IT-HI-08 bajo dependencias y orden de CI, capturar primitiva y condiciones, corregir la capa confirmada y verificar test focal antes del acumulativo.
+
 ## TR324 IT-H-05/06: integrales definidas — 2026-11-23 UTC
 
 Plus SHA `f80f16325c290753185d491a5b1bda1262c2cea8`: pruebas locales de integrales definidas de sech² en [-1,1] y csch² en [1,2] y [-2,-1], con oráculos independientes; suite local 59 PASS, 12 XFAIL. CI de este SHA pendiente. No comprueba intervalo que cruce el polo, UI ni Lite y no acredita cierre. Acumulativo anterior [45323679318](https://github.com/c2melendez/precision-lab-plus/actions/runs/45323679318) SUCCESS para SHA anterior. S25, SG28/DIST y EV-D-01 conservados.
