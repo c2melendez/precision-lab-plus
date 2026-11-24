@@ -253,4 +253,7 @@ def integrate_expression(
                 input_expr, antiderivative, all_steps, True, warnings, True, definite_value
             )
 
-    return IntegralResult(input_expr, antiderivative, [], False, [], True, reference)
+    reference_warnings = []
+    if reference.has(sympy.Integral):
+        reference_warnings.append("La integral definida permanece sin resolver; no se ha verificado su convergencia.")
+    return IntegralResult(input_expr, antiderivative, [], False, reference_warnings, True, reference)

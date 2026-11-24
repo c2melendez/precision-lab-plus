@@ -101,6 +101,12 @@ def test_csch_squared_primitive_preserves_pole():
     assert result.subs(x, 0).is_finite is False
     assert sp.simplify(sp.diff(result, x) - sp.csch(x)**2) == 0
 
+def test_csch_squared_crossing_pole_is_not_reported_as_resolved():
+    result = integrate_expression('csch(x)^2', 'x', '-1', '1')
+    assert result.definite_value.has(sp.Integral) or result.definite_value.is_finite is False
+    if result.definite_value.has(sp.Integral):
+        assert any('sin resolver' in warning for warning in result.warnings)
+
 @pytest.mark.parametrize('expression,lower,upper,oracle', [
     ('sech(x)^2', '-1', '1', lambda: 2*math.tanh(1)),
     ('csch(x)^2', '1', '2', lambda: 1/math.tanh(1)-1/math.tanh(2)),
