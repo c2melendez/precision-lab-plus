@@ -177,7 +177,7 @@ def test_inverse_sqrt_primitive_is_stable_across_hash_seeds(seed):
 from app.services.integral_service import integrate_expression
 x=s.Symbol('x')
 r=integrate_expression('1/sqrt(x^2-1)','x').antiderivative
-for point in (1.2, 2, 2+1j):
+for point in (1.2, 2, 2+1j, 2-1j, -2+1j, -2-1j):
     got=complex(s.N(s.diff(r,x).subs(x,point), 15))
     expected=complex(s.N((1/s.sqrt(x*x-1)).subs(x,point), 15))
     assert abs(got-expected) < 1e-10, (point, got, expected, r)
