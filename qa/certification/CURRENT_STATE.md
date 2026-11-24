@@ -1,3 +1,9 @@
+## TR324 IT-HI-02/05: extremos — 2026-11-23 UTC
+
+Plus SHA `83a393597da753e1a3119e2a95d1cc265bd94e86`: verificadas localmente las primitivas de acosh y asech en x=1; IT-HI-06 sigue XFAIL sin resolver y requiere examen de ambas ramas reales y dominio complejo. Suite local 56 PASS, 12 XFAIL. CI nuevo pendiente; acumulativo previo [45316670746](https://github.com/c2melendez/precision-lab-plus/actions/runs/45316670746) SUCCESS para SHA previo, no acredita el nuevo. No cierre: faltan CI, Lite, canales y dominios completos. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: revisar CI nuevo, resolver IT-HI-06 con contrato complejo correcto, ampliar lote y paridad Lite.
+
 ## TR324 IT-HI-01..10: fuente anclada — 2026-11-23 UTC
 
 Plus SHA `2febf88736d1c42424e2d77944d6b2558ace1756`: entradas y resultados de diez filas contrastados con matriz congelada; suite local 54 PASS y 12 XFAIL. Las aserciones de fuente no prueban ejecución literal. Acumulativo anterior [45309384775](https://github.com/c2melendez/precision-lab-plus/actions/runs/45309384775) SUCCESS para SHA anterior. CI nuevo pendiente. IT-HI-05 y otras filas no pertenecen al lote 80-01, no atribuibles al cierre de ese lote. S25, SG28/DIST y EV-D-01 conservados.

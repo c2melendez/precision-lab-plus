@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "Revisar CI SHA 2febf88736d1c42424e2d77944d6b2558ace1756 y completar canales, dominios, correcciones XFAIL y paridad Lite."
+    "action": "Revisar CI SHA 83a393597da753e1a3119e2a95d1cc265bd94e86; resolver IT-HI-06 respetando ramas reales y complejas y completar paridad Lite."
   },
   "blockers": [
     {
@@ -831,6 +831,8 @@
     "plus_it_hi05_fix_sha": "81bbd3b567a86a498b93b5a17b5852fee3404d5e",
     "plus_it_hi05_fix_ci": "WAIT",
     "plus_it_hi_anchor_sha": "2febf88736d1c42424e2d77944d6b2558ace1756",
-    "plus_it_hi_anchor_ci": "WAIT"
+    "plus_it_hi_anchor_ci": "WAIT",
+    "plus_it_hi_endpoints_sha": "83a393597da753e1a3119e2a95d1cc265bd94e86",
+    "plus_it_hi_endpoints_ci": "WAIT"
   }
 }

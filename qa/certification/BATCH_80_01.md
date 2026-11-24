@@ -93,6 +93,6 @@ Fuente congelada `qa/certification/legacy_sources/ejercicios_trigonometria.md.gz
 | IT-H-15 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
 | IT-H-16 | EN_CURSO | Plus: PASS local numérico parcial; SHA `60bc9c506f374f15cead746b9034b04d39633e60`; CI, Lite, fuente literal y HTTP pendientes. |
 | IT-HI-01 | EN_CURSO | Plus: PASS parcial local en puntos interiores; SHA `56524b2c5b48c592c9f4b41c13474f99e46c2575`; CI, Lite, fuente literal y HTTP pendientes. |
-| IT-HI-02 | EN_CURSO | Plus: primitiva acosh implementada, prueba numérica en x>1 PASS local, SHA `0caf35a8f5286c079c0b08f5812fe3b7064a9191`; CI, Lite, frontera y canales pendientes. |
+| IT-HI-02 | EN_CURSO | Plus: extremo x=1 probado localmente; SHA `83a393597da753e1a3119e2a95d1cc265bd94e86`; CI, Lite, canales y dominio completo pendientes. |
 | IT-HI-03 | EN_CURSO | Plus: PASS parcial local en puntos interiores; SHA `56524b2c5b48c592c9f4b41c13474f99e46c2575`; CI, Lite, fuente literal y HTTP pendientes. |
 | IT-HI-04 | REVIEW | Plus: XFAIL rama real negativa; SHA `56524b2c5b48c592c9f4b41c13474f99e46c2575`; CI, Lite, fuente literal y HTTP pendientes. |
