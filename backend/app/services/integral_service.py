@@ -156,6 +156,9 @@ def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
     if input_expr == sympy.acosh(var_symbol):
         # Principal real branch: x >= 1; the derivative exists for x > 1.
         return var_symbol * sympy.acosh(var_symbol) - sympy.sqrt(var_symbol - 1) * sympy.sqrt(var_symbol + 1), [], False, []
+    if input_expr == sympy.asech(var_symbol):
+        # Principal real branch: 0 < x <= 1.
+        return var_symbol * sympy.asech(var_symbol) + sympy.asin(var_symbol), [], False, []
     rule = mi.integral_steps(input_expr, var_symbol)
 
     if isinstance(rule, mi.DontKnowRule):
