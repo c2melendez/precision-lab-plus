@@ -1,3 +1,9 @@
+## TR324 IT-HI-08: formas equivalentes — 2026-11-24 UTC
+
+Plus SHA `5b7c3a8e66343b9e5652db9fc3f10d169b2b40a4`: reconoce tres formas del integrando sin simplificación general; pruebas locales con semillas 1/3/8, puntos reales y complejos, 63 PASS y 12 XFAIL en suite focal. Acumulativo previo [45380427449](https://github.com/c2melendez/precision-lab-plus/actions/runs/45380427449), backend job 138397716257 SUCCESS y regresión multisemilla ejecutada para SHA previo. CI nuevo pendiente; no acredita todos los cortes, entrada literal ni paridad Lite. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: revisar CI nuevo, ampliar entradas y cortes y verificar paridad Lite; continuar lote.
+
 ## TR324 IT-HI-08: alcance de coincidencia — 2026-11-24 UTC
 
 Plus SHA `f5ea89e4faa3de721ad2688d3922cfa4ee3623c2` elimina simplificación general para identificar el integrando especial y usa su forma fuente normalizada. Suite focal local: 63 PASS, 12 XFAIL, incluidas semillas 1,3,8 y puntos complejos. Acumulativo previo [45371084032](https://github.com/c2melendez/precision-lab-plus/actions/runs/45371084032) SUCCESS en SHA anterior; CI nuevo pendiente, no acredita cierre. Persisten pruebas de cortes, literal, Lite y bloqueos S25, SG28/DIST, EV-D-01.
