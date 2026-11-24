@@ -1,3 +1,9 @@
+## TR324 IT-HI-08: corrección multisemilla — 2026-11-24 UTC
+
+Plus SHA `0133ea8db65df074ae0ae204f9e331d9bc388628`: primitiva logarítmica para el integrando exacto 1/sqrt(x²-1), evitando Piecewise incompleto dependiente de hash. Pruebas locales con semillas 1,3,8 incluyen puntos x>1 y un punto complejo; suite local 63 PASS, 12 XFAIL. No demuestra todas las ramas complejas ni canales. CI pendiente; fallo previo [45330496969](https://github.com/c2melendez/precision-lab-plus/actions/runs/45330496969) reproducido con semilla 3. S25, SG28/DIST y EV-D-01 conservados.
+
+Siguiente: revisar CI del SHA nuevo, estudiar cortes de rama y paridad Lite, continuar lote de 80.
+
 ## TR324 IT-HI-08: variación reproducida — 2026-11-24 UTC
 
 Para `integrate_expression('1/sqrt(x^2-1)','x')` con SymPy 1.13.3: proceso local `PYTHONHASHSEED=3` devuelve `Piecewise((log(x + sqrt(x**2 - 1)), (x > -1) & (x < 1)))`; al evaluar x=1.5, lambdify devuelve None. Con semillas 1,2,4,5,6,7,8 devuelve `Piecewise((acosh(x), Abs(x**2) > 1), (-I*asin(x), True))` y valor finito para 1.5. Reproducción confirma resultado de servicio dependiente del hash y sin rama para la zona real x>1; causa interna exacta y corrección de ramas complejas aún no determinadas. Acumulativo [45330496969](https://github.com/c2melendez/precision-lab-plus/actions/runs/45330496969) falló para SHA f80f163; el posterior [45344987869](https://github.com/c2melendez/precision-lab-plus/actions/runs/45344987869) terminó SUCCESS en SHA 7b7e273, pero no elimina la variación reproducida. No repetir corridas idénticas; corregir y probar ambas ramas y semillas. S25, SG28/DIST y EV-D-01 conservados.

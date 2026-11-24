@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "Corregir variación de IT-HI-08 reproducida con PYTHONHASHSEED=3, preservar ramas reales y complejas y añadir regresión multisemilla; continuar paridad Lite."
+    "action": "Revisar CI SHA 0133ea8db65df074ae0ae204f9e331d9bc388628, verificar cortes y paridad Lite IT-HI-08 y continuar lote."
   },
   "blockers": [
     {
@@ -838,9 +838,11 @@
     "plus_it_h_definite_ci": "SUCCESS_BUT_IT_HI08_NONDETERMINISTIC",
     "plus_it_hi08_failure_run": 45330496969,
     "plus_it_hi08_failure_job": 138230277943,
-    "plus_it_hi08_failure_status": "REPRODUCED",
+    "plus_it_hi08_failure_status": "FIX_PENDING_CI",
     "plus_unresolved_definite_sha": "7b7e2739b982c52992cbe9fbc419212ada2319df",
     "plus_unresolved_definite_ci": "WAIT",
-    "plus_it_hi08_reproducer": "PYTHONHASHSEED=3: Piecewise missing x>1 branch"
+    "plus_it_hi08_reproducer": "PYTHONHASHSEED=3: Piecewise missing x>1 branch",
+    "plus_it_hi08_fix_sha": "0133ea8db65df074ae0ae204f9e331d9bc388628",
+    "plus_it_hi08_fix_ci": "WAIT"
   }
 }
