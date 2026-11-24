@@ -1,3 +1,9 @@
+## TR324 IT-HI-05..10: auditoría parcial — 2026-11-23 UTC
+
+Plus SHA `5f201b664e29fba7a41c799c5db71e4354564f42`: IT-HI-07/08/10 PASS numérico local parcial, IT-HI-05/06 XFAIL integral no resuelta y IT-HI-09 XFAIL representación logarítmica real requiere revisión. Suite local 42 PASS, 14 XFAIL. CI pendiente para este SHA; CI anterior 45285156578 SUCCESS. Estas filas exceden el lote 80-01 si no figuran en el tablero y no cuentan como cerradas. Conservar S25, SG28/DIST y EV-D-01.
+
+Siguiente: verificar CI, corregir primitivas no resueltas y ramas, ampliar paridad Lite y cobertura por caso.
+
 ## TR324 IT-HI-01..04: auditoría parcial — 2026-11-23 UTC
 
 Plus SHA `56524b2c5b48c592c9f4b41c13474f99e46c2575`: oráculo de diferencias centrales en puntos interiores; IT-HI-01/03 PASS local parcial, IT-HI-02 XFAIL integral no resuelta, IT-HI-04 XFAIL rama real negativa. Suite local 39 PASS, 11 XFAIL. No cierre: CI, Lite, fuente literal y canales pendientes. CI anterior [45275613063](https://github.com/c2melendez/precision-lab-plus/actions/runs/45275613063) SUCCESS para SHA anterior; seguridad sigue en curso. Conservar S25, SG28/DIST y EV-D-01.
