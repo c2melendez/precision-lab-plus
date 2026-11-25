@@ -1,3 +1,7 @@
+## 2026-11-25 — evidencia CI Plus para potencias recíprocas
+
+SHA técnico `5897cdc4e341d98aa410029187d760b731461c6c`: [acumulativo 45639907561](https://github.com/c2melendez/precision-lab-plus/actions/runs/45639907561), backend job 139295361150 SUCCESS, log revisado: 3560 PASS, 1 SKIP, 35 XFAIL y 1 advertencia; ejecutó 14 pruebas `test_trig_definite_nonfinite_regression.py`, incluidas las 6 nuevas. Frontend job 139295361558 SUCCESS; H1d y CI reportan SUCCESS. Los controles cubren polos de 1/x² y 1/x³ y dos intervalos finitos; no acreditan convergencia general ni nuevos cierres de matriz. El gate de seguridad 45582006420 fue CANCELLED; S25 sigue BLOCKED. SG28/DIST y EV-D-01 permanecen BLOCKED; certificación global OPEN. Siguiente: resolver estabilidad IT-HI-01/10 preservando ramas complejas y ampliar evidencia por caso hacia meta de 80; no repetir gates aprobados con insumos idénticos.
+
 ## 2026-11-25 — paridad parcial para polos de potencias recíprocas
 
 Lite `b16665e621dac4e3e4850d902d997d024e3ade43`: [acumulativo 45629401854](https://github.com/c2melendez/precision-lab-lite/actions/runs/45629401854), job 139258227146 SUCCESS, log revisado: 3034 PASS, 15 XFAIL, 34 TODO, con 9 pruebas de `definiteIntegralInversePower` ejecutadas.
