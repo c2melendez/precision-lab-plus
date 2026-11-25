@@ -237,7 +237,7 @@ SHA `0000dbfcb0006e26d198f979fd2ee393bba41f1e`, `tests/trigonometryItDDefinitePo
 
 ## IT-D-08/14: respuestas no finitas Plus
 
-SHA Plus `c2d66e7124ce7f2bbc652009e610293f30044ab4`: pruebas HTTP locales de cot y sec³ que retornaban nan/oo ahora devuelven DOMAIN_ERROR; intervalos finitos conservan success. [CI 45582006410](https://github.com/c2melendez/precision-lab-plus/actions/runs/45582006410) en curso. Quedan pendientes singularidades que produzcan resultados finitos, formas equivalentes y canales completos; no hay PASS contractual.
+SHA Plus `c2d66e7124ce7f2bbc652009e610293f30044ab4`: pruebas HTTP locales de cot y sec³ que retornaban nan/oo ahora devuelven DOMAIN_ERROR; intervalos finitos conservan success. [CI 45582006410](https://github.com/c2melendez/precision-lab-plus/actions/runs/45582006410) completó SUCCESS (backend job 139094132064: 3554 passed, 1 skipped, 35 xfailed; frontend job 139094131945: 1055 passed, 28 todo). Quedan pendientes singularidades que produzcan resultados finitos, formas equivalentes y canales completos; no hay PASS contractual.
 
 
 ## Reconciliación de evidencia HTTP Plus del lote original (25-11-2026)

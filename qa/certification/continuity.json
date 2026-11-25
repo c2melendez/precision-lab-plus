@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 638,
+  "revision": 639,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "b0a809798bcceccab221cde1ad29f1a4cc605b8f",
-  "baseline_case": "TRIG-DV-I-04..06",
+  "technical_baseline_sha": "c2d66e7124ce7f2bbc652009e610293f30044ab4",
+  "baseline_case": "TRIG-DEFINITE-NONFINITE-REJECTION",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "Revisar CI SHA 5c1471e343b86372120edf3e486a809b0a84ee09; resolver XFAIL y completar literal, dominios y paridad Lite."
+    "action": "Paridad de guardas de integral definida no finita en Lite con Plus (DOMAIN_ERROR), y estabilidad num\u00e9rica IT-HI-01/10 preservando ramas complejas."
   },
   "blockers": [
     {
@@ -43,7 +43,7 @@
       "run_id": 43538686314,
       "job_id": 132273991849,
       "classification": "ACCEPTANCE_REVIEW",
-      "exit_condition": "Evaluar informe ya producido y criterios de aceptación por perfil; supervivientes/timeouts y jobs omitidos no son PASS. Conservar el shutdown histórico sin relanzar inputs idénticos.",
+      "exit_condition": "Evaluar informe ya producido y criterios de aceptaci\u00f3n por perfil; supervivientes/timeouts y jobs omitidos no son PASS. Conservar el shutdown hist\u00f3rico sin relanzar inputs id\u00e9nticos.",
       "current_run_id": 43637618276,
       "review_report_run_id": 43559502112,
       "review_report_job_id": 132339909267,
@@ -57,7 +57,7 @@
     {
       "id": "H2-SG28-DIST-01..08",
       "status": "BLOCKED",
-      "exit_condition": "Evidencia contractual multinodo real; aislamiento desactivado por defecto, sin activación en producción."
+      "exit_condition": "Evidencia contractual multinodo real; aislamiento desactivado por defecto, sin activaci\u00f3n en producci\u00f3n."
     },
     {
       "id": "EV-D-01",
@@ -70,29 +70,30 @@
     "qa/certification/README.md",
     "qa/certification/CURRENT_STATE.md",
     "qa/certification/EXECUTION_LOG.md",
-    "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md"
+    "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md",
+    "qa/certification/BATCH_80_01.md"
   ],
-  "updated_utc": "2026-11-23T15:08:46.952940+00:00",
+  "updated_utc": "2026-11-25T11:07:12.285312+00:00",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "5f232635fb5dbea8e96b3a47e1671332e5d8f22ea0e06839addbe99434d0474b",
-      "head_sha": "b0a809798bcceccab221cde1ad29f1a4cc605b8f",
+      "input_fingerprint": "a77095ce80bd302c2073b4a52a51edb70ebb10af799ca393dfec0f2f1e5cffe3",
+      "head_sha": "c2d66e7124ce7f2bbc652009e610293f30044ab4",
+      "evidence_sha": "c2d66e7124ce7f2bbc652009e610293f30044ab4",
       "decision": "REUSE",
-      "reason": "Ejecución y registros revisados; alcance acotado.",
+      "reason": "Ejecuci\u00f3n y registros revisados; alcance acotado (3554 passed, 1 skipped, 35 xfailed; frontend 1055 passed).",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45185775213,
-      "evidence_sha": "b0a809798bcceccab221cde1ad29f1a4cc605b8f",
+      "run_id": 45582006410,
       "jobs": [
         {
-          "id": 137730854334,
+          "id": 139094132064,
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "id": 137730854772,
+          "id": 139094131945,
           "status": "completed",
           "conclusion": "success"
         }
@@ -100,18 +101,18 @@
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "88d1ce1f2cb79c6e3865d7f4dec1a62a9856eefb24dcee2178c6d3fab82a8725",
-      "head_sha": "b0a809798bcceccab221cde1ad29f1a4cc605b8f",
+      "input_fingerprint": "da68567ff8a6e0546ac981ed17a6a3925f34fc93ccf2cf9c207cb6310ab8fa8b",
+      "head_sha": "c2d66e7124ce7f2bbc652009e610293f30044ab4",
+      "evidence_sha": "c2d66e7124ce7f2bbc652009e610293f30044ab4",
       "decision": "REUSE",
-      "reason": "Ejecución y registros revisados; alcance acotado.",
+      "reason": "Ejecuci\u00f3n y registros revisados; alcance acotado.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45185775093,
-      "evidence_sha": "b0a809798bcceccab221cde1ad29f1a4cc605b8f",
+      "run_id": 45582006239,
       "jobs": [
         {
-          "id": 137730852051,
+          "id": 139094131149,
           "status": "completed",
           "conclusion": "success"
         }
@@ -122,7 +123,7 @@
       "input_fingerprint": "42dae767ccddbc2342121e29b3d2f59dbb3670e33fc6d802e44a129fc7bd84da",
       "head_sha": "9ff400f503beae1fd3c567a42c1a64191e4c2481",
       "decision": "REVIEW",
-      "reason": "Advisories externos requieren revisión actual.",
+      "reason": "Advisories externos requieren revisi\u00f3n actual.",
       "logs_reviewed": false,
       "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1",
@@ -775,7 +776,7 @@
     "logs_reviewed": true,
     "verified_run_sha": "ac143bfb6d748517ae29160059a42307dd427a1c",
     "verified_run_id": 45201649129,
-    "unresolved_inverse_hyperbolic_cases": "DV-HI-01..10: implementación pendiente de certificación",
+    "unresolved_inverse_hyperbolic_cases": "DV-HI-01..10: implementaci\u00f3n pendiente de certificaci\u00f3n",
     "lite_protection_sha": "649c068f9d4d41f9a8a1bb07b2c7cb484f802a44",
     "lite_previous_cumulative_run_id": 45210932463,
     "lite_previous_cumulative_logs_reviewed": true,
@@ -859,6 +860,13 @@
     "plus_integral_http_lot_cases": 49,
     "plus_integral_http_pass": 43,
     "plus_integral_http_xfail": 12,
-    "plus_integral_http_ci": "WAIT"
+    "plus_integral_http_ci": "WAIT",
+    "plus_nonfinite_integral_sha": "c2d66e7124ce7f2bbc652009e610293f30044ab4",
+    "plus_nonfinite_integral_run_id": 45582006410,
+    "plus_nonfinite_integral_status": "SUCCESS",
+    "plus_nonfinite_integral_logs_reviewed": true,
+    "plus_http_80_cases_reconciled": true,
+    "plus_http_80_pass": 70,
+    "plus_http_80_xfail": 10
   }
 }
