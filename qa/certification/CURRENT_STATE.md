@@ -1,3 +1,9 @@
+## TR324 IT-HI-01/10: regresión de estabilidad — 2026-11-25 UTC
+
+Lite SHA técnico `721cad1b3935fc14289c5675cedad26c33eb32b2` amplía `tests/trigonometryItHIBatch.audit.test.ts`: pruebas independientes de primitivas para x=+1e8 pasan; para x=-1e8 ambas devuelven infinito y son XFAIL estricto por cancelación. Prueba focal 26 PASS, 2 XFAIL; no se ha corregido el producto. [Acumulativo 45565408211](https://github.com/c2melendez/precision-lab-lite/actions/runs/45565408211) en curso. IT-HI-01/10 siguen FAIL de estabilidad; falta encontrar representación estable que preserve ramas complejas, y validar literalidad, dominios y paridad. S25, SG28/DIST y EV-D-01 siguen bloqueados.
+
+Lite [acumulativo 45563389626](https://github.com/c2melendez/precision-lab-lite/actions/runs/45563389626), job 139032242023, SHA `a60650d74653530abd362bf6781c0a4b355a5c9c`: 2998 PASS, 15 XFAIL, 34 TODO, incluidas 10 pruebas del canal literal. La cobertura de ese canal no cierra la matriz. Siguiente: revisar CI 45565408211 y corregir estabilidad sin modificar ramas complejas.
+
 ## TR324 IT-HI-02 y estabilidad IT-HI-01 — 2026-11-25 UTC
 
 Lite SHA técnico `39b1cd185716b4f4e50eda0c99447d25340b3bd5` agrega primitiva específica para acosh (IT-HI-02) usando raíces separadas; pruebas locales IT-HI e IT-D: 44 PASS y 2 XFAIL, incluyendo derivación y diferencias finitas en puntos interiores, x/y. [Acumulativo 45557928390](https://github.com/c2melendez/precision-lab-lite/actions/runs/45557928390) en curso. Falta validación de ramas complejas, extremos y canal literal; no se declara cierre.
