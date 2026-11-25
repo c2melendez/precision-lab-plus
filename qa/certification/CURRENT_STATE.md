@@ -1,3 +1,7 @@
+## 2026-11-25 — Plus controles de integral impropia
+
+SHA técnico `c3f0f528e6e8a58ab729d67474ab52003fec5bc4`: 6 pruebas HTTP locales PASS (4 polos interiores divergentes y 2 controles convergentes, uno con singularidad integrable), 1 advertencia de dependencia; [acumulativo 45699808846](https://github.com/c2melendez/precision-lab-plus/actions/runs/45699808846) en cola. No son IDs nuevos de matriz ni prueba de convergencia general. Siguiente: revisar logs del CI sin duplicarlo; abordar IT-HI-01/10 y cobertura por caso. S25, SG28/DIST y EV-D-01 permanecen bloqueados.
+
 ## 2026-11-25 — CI Plus verificado para formas equivalentes
 
 Plus SHA técnico `ea4222d7d803dc3088131f4211b84c771b95c366`: [acumulativo 45680944720](https://github.com/c2melendez/precision-lab-plus/actions/runs/45680944720), backend job 139440992937 SUCCESS con logs revisados: 3572 PASS, 1 SKIP, 35 XFAIL, 1 advertencia; 12 pruebas HTTP `test_reciprocal_square_equivalence.py` ejecutadas. Frontend job 139440993402 SUCCESS. Cubre cuatro representaciones de 1/x², extremos invertidos y un intervalo seguro; no certifica convergencia general. Lite: [acumulativo 45661127323](https://github.com/c2melendez/precision-lab-lite/actions/runs/45661127323), SHA `58e369e5ec84c571bf540af591df90770819e5fe`, evidencia anteriormente revisada. No son 80 IDs nuevos ni cierre de matriz. Siguiente: IT-HI-01/10, paridad de ramas complejas y evidencia por caso; conservar S25, SG28/DIST y EV-D-01 BLOCKED.
