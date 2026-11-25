@@ -1,3 +1,7 @@
+## 2026-11-25 — CI Plus: integrales impropias
+
+SHA técnico Plus `c3f0f528e6e8a58ab729d67474ab52003fec5bc4`: [acumulativo 45699808846](https://github.com/c2melendez/precision-lab-plus/actions/runs/45699808846), backend job 139506627225 SUCCESS, log revisado: 3578 PASS, 1 SKIP, 35 XFAIL, 1 advertencia; se ejecutaron seis pruebas HTTP `test_improper_integral_domains.py`. Frontend job 139506626602 SUCCESS. Se cubren cuatro polos interiores divergentes y dos controles convergentes, incluida una singularidad integrable; no se acredita convergencia general ni 80 IDs nuevos. Siguiente: estabilidad IT-HI-01/10 preservando ramas complejas, y ampliar evidencia por caso sin duplicar gates. S25, SG28/DIST y EV-D-01 siguen BLOCKED; global OPEN.
+
 ## 2026-11-25 — Plus controles de integral impropia
 
 SHA técnico `c3f0f528e6e8a58ab729d67474ab52003fec5bc4`: 6 pruebas HTTP locales PASS (4 polos interiores divergentes y 2 controles convergentes, uno con singularidad integrable), 1 advertencia de dependencia; [acumulativo 45699808846](https://github.com/c2melendez/precision-lab-plus/actions/runs/45699808846) en cola. No son IDs nuevos de matriz ni prueba de convergencia general. Siguiente: revisar logs del CI sin duplicarlo; abordar IT-HI-01/10 y cobertura por caso. S25, SG28/DIST y EV-D-01 permanecen bloqueados.
