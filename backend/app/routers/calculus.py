@@ -126,6 +126,14 @@ async def integral(payload: IntegralRequest, request: Request) -> MathResponse:
             "Sin forma elemental identificada; la integral permanece sin resolver.",
         )
 
+    # A divergent or indeterminate definite integral is not a successful
+    # scalar answer. Do not confuse it with an unresolved symbolic Integral.
+    if result.is_definite and result.definite_value in (sympy.nan, sympy.oo, -sympy.oo, sympy.zoo):
+        return _error(
+            request, OperationType.INTEGRAL, ErrorCode.DOMAIN_ERROR,
+            "La integral definida no tiene un valor finito determinado.",
+        )
+
     warnings = list(result.warnings)
 
     if result.is_definite:
