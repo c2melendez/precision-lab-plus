@@ -6,6 +6,8 @@ from app.main import app
 @pytest.mark.parametrize('expression,lower,upper',[
  ('cot(x)','-1','1'),('cot(x)','0','1'),('cot(x)','1','-1'),
  ('sec(x)^3','1','2'),('sec(x)^3','2','1'),
+ ('1/x^2','-1','1'),('1/x^2','1','-1'),('1/x^2','0','1'),
+ ('1/x^3','-1','1'),
 ])
 def test_divergent_integral_is_not_a_success(expression,lower,upper):
  with TestClient(app) as client:
@@ -17,6 +19,7 @@ def test_divergent_integral_is_not_a_success(expression,lower,upper):
 @pytest.mark.parametrize('expression,lower,upper,expected',[
  ('cot(x)','1','2',math.log(abs(math.sin(2)))-math.log(abs(math.sin(1)))),
  ('sec(x)^3','0','1',(1/math.cos(1)*math.tan(1)+math.log(1/math.cos(1)+math.tan(1)))/2),
+ ('1/x^2','1','2',0.5),('1/x^2','2','1',-0.5),
 ])
 def test_valid_finite_integral_remains_successful(expression,lower,upper,expected):
  with TestClient(app) as client:
