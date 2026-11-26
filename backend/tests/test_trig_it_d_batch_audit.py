@@ -165,6 +165,22 @@ def test_inverse_hyperbolic_integral(case, expression, oracle, points):
         for h in (1e-5, 1e-6):
             assert (f(x+h)-f(x-h))/(2*h) == pytest.approx(oracle(x), rel=1e-6, abs=1e-6), (case,x,h)
 
+@pytest.mark.parametrize('expression,oracle', [
+    ('asinh(x)', lambda x: x*math.asinh(x)-math.hypot(x,1)),
+    ('x*asinh(x)', lambda x: ((2*x*x+1)*math.asinh(x)-x*math.hypot(x,1))/4),
+])
+def test_inverse_hyperbolic_primitive_is_stable_at_large_arguments(expression, oracle):
+    # TR324 IT-HI-01/10 parity anchor: Lite previously lost all significant
+    # digits because log(x+sqrt(x^2+1)) cancels for large negative x. SymPy's
+    # native asinh form must stay finite and accurate on both real branches.
+    result = integrate_expression(expression, 'x').antiderivative
+    assert not result.has(sp.Integral)
+    f = sp.lambdify(sp.Symbol('x'), result, modules='math')
+    for x in (-1e8, -1e6, 1e6, 1e8):
+        value = f(x)
+        assert math.isfinite(value), (expression, x, value)
+        assert value == pytest.approx(oracle(x), rel=1e-9), (expression, x)
+
 @pytest.mark.parametrize('expression, endpoint, expected', [
     ('acosh(x)', 1, 0),
     ('asech(x)', 1, sp.pi/2),
