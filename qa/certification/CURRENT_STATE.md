@@ -1,3 +1,7 @@
+## 2026-11-26 — TR324 IT-HI-01/10 estabilidad y paridad en Plus
+
+SHA técnico Plus `f3ac7f29efb6907d51e2c16fdd083fafbc145020`: prueba de paridad para las primitivas de `asinh(x)` y `x*asinh(x)` a grandes argumentos (`±1e6` y `±1e8`) en `backend/tests/test_trig_it_d_batch_audit.py`. SymPy opera nativamente con funciones simbólicas analíticas sin artefactos de distribución en derivadas complejas. [Acumulativo 45731223450](https://github.com/c2melendez/precision-lab-plus/actions/runs/45731223450) completó SUCCESS, backend job 139613416223 log revisado: 3580 passed, 1 skipped, 35 xfailed, 1 warning (1459.36s), frontend job 139613416651 SUCCESS. CI 45731223415, Certification Runner 45731223431 y H1d 45731223845 todos SUCCESS. Lite resolvió la regresión compleja en `8b130c1ed3abc2935dbf4d910649c006b0d1c445` (3056 PASS, 13 XFAIL, gate acumulativo 45737280683 verificado). Estado PASS_SCOPED para IT-HI-01 y IT-HI-10 en motor; faltan canales completos de UI, parsing literal de matriz y paridad bilateral total. S25, SG28/DIST y EV-D-01 permanecen BLOCKED; certificación global OPEN. Siguiente: avanzar en los siguientes casos de la matriz TR324 (IT-HI-02/03/05/06 y canales UI/literal).
+
 ## 2026-11-25 — TR324 IT-HI-04 canal literal
 
 Lite `1541136f276e854cab2cc57a12b1a07ba1a446c2`: [acumulativo 45717635630](https://github.com/c2melendez/precision-lab-lite/actions/runs/45717635630) SUCCESS, job 139567686333 log revisado: 3044 PASS, 15 XFAIL, 34 TODO; ejecutada suite IT-HI.

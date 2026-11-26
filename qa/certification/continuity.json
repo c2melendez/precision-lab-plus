@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 639,
+  "revision": 640,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "c2d66e7124ce7f2bbc652009e610293f30044ab4",
-  "baseline_case": "TRIG-DEFINITE-NONFINITE-REJECTION",
+  "technical_baseline_sha": "f3ac7f29efb6907d51e2c16fdd083fafbc145020",
+  "baseline_case": "TRIG-IT-HI-01-10-STABILITY-PARITY",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -34,7 +34,7 @@
   "next_action": {
     "id": "TRIG-BATCH-80-01",
     "status": "IN_PROGRESS",
-    "action": "Paridad de guardas de integral definida no finita en Lite con Plus (DOMAIN_ERROR), y estabilidad num\u00e9rica IT-HI-01/10 preservando ramas complejas."
+    "action": "Avanzar en siguientes casos de TR324 (IT-HI-02/03/05/06 y canales UI/literal hacia la meta del lote de 80)."
   },
   "blockers": [
     {
@@ -73,27 +73,27 @@
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md",
     "qa/certification/BATCH_80_01.md"
   ],
-  "updated_utc": "2026-11-25T11:07:12.285312+00:00",
+  "updated_utc": "2026-11-26T01:45:57.555595+00:00",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "a77095ce80bd302c2073b4a52a51edb70ebb10af799ca393dfec0f2f1e5cffe3",
-      "head_sha": "c2d66e7124ce7f2bbc652009e610293f30044ab4",
-      "evidence_sha": "c2d66e7124ce7f2bbc652009e610293f30044ab4",
+      "input_fingerprint": "verified-f3ac7f29efb6907d51e2c16fdd083fafbc145020",
+      "head_sha": "f3ac7f29efb6907d51e2c16fdd083fafbc145020",
+      "evidence_sha": "f3ac7f29efb6907d51e2c16fdd083fafbc145020",
       "decision": "REUSE",
-      "reason": "Ejecuci\u00f3n y registros revisados; alcance acotado (3554 passed, 1 skipped, 35 xfailed; frontend 1055 passed).",
+      "reason": "Ejecuci\u00f3n y registros revisados; alcance acotado (3580 passed, 1 skipped, 35 xfailed).",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45582006410,
+      "run_id": 45731223450,
       "jobs": [
         {
-          "id": 139094132064,
+          "id": 139613416223,
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "id": 139094131945,
+          "id": 139613416651,
           "status": "completed",
           "conclusion": "success"
         }

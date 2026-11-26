@@ -219,6 +219,10 @@ SHA `17f66fcb7f6f61d58c35e93095de408cf537f80e`; `tests/trigonometryItHIBatch.aud
 | IT-HI-09 | Resultado parcial interior |
 | IT-HI-10 | BLOCKED: integral no implementada; UNSUPPORTED_OPERATION |
 
+## TR324 IT-HI-01/10: estabilidad de asinh en Plus y paridad con Lite
+
+SHA técnico Plus `f3ac7f29efb6907d51e2c16fdd083fafbc145020`: fija la estabilidad de primitivas de `asinh(x)` y `x*asinh(x)` frente a cancelaciones en argumentos grandes (`±1e6` y `±1e8`) en `test_trig_it_d_batch_audit.py`. [Acumulativo 45731223450](https://github.com/c2melendez/precision-lab-plus/actions/runs/45731223450) completó SUCCESS (backend job 139613416223: 3580 passed, 1 skipped, 35 xfailed, 1 warning; frontend job 139613416651: SUCCESS). Lite emparejó estabilidad y resolvió ramas complejas en `8b130c1ed3abc2935dbf4d910649c006b0d1c445` (CI acumulativo 45737280683 SUCCESS: 3056 PASS). Ambas implementaciones conservan PASS_SCOPED. S25, SG28/DIST y EV-D-01 permanecen BLOCKED; certificación global OPEN.
+
 ## TR324 IT-HI-01/03/10: Lite en verificación
 
 Las tres filas tienen primitivas para formas específicas en `94e8ac22e7608ee79ba6ad0d4bfdc93496b1c320`, comprobadas localmente con derivada y diferencias finitas en puntos interiores; [CI 45550227135](https://github.com/c2melendez/precision-lab-lite/actions/runs/45550227135) en curso. IT-HI-10 es adicional al lote. No son PASS contractual: faltan ramas, dominios, literalidad y UI.
