@@ -6,6 +6,7 @@ from pathlib import Path
 import gzip
 import re
 
+import pytest
 import sympy as sp
 from fastapi.testclient import TestClient
 
@@ -52,17 +53,24 @@ def test_ev_i_source_rows_present():
     assert "\\cos(\\arctan 2)" in _matrix_row("EV-I-11")
 
 
-def test_ev_i_01_to_06_values():
+@pytest.mark.parametrize("case_id,expression,literal,expected", CASES)
+def test_inverse_value(case_id, expression, literal, expected):
+    assert literal in _matrix_row(case_id)
     with TestClient(app) as client:
-        for case_id, expression, _latex, expected in CASES:
-            payload = _evaluate(client, expression)
-            assert sp.simplify(_value(payload) - expected) == 0, (case_id, payload)
+        payload = _evaluate(client, expression)
+    assert sp.simplify(_value(payload) - expected) == 0, (case_id, payload)
 
 
-def test_ev_i_08_acot_zero_and_ev_i_11_cos_atan_two():
+def test_ev_i_08_acot_zero():
+    assert _matrix_row("EV-I-08")
     with TestClient(app) as client:
         acot_zero = _evaluate(client, "acot(0)")
-        cos_atan = _evaluate(client, "cos(atan(2))")
     assert sp.simplify(_value(acot_zero) - sp.pi / 2) == 0, acot_zero
+
+
+def test_ev_i_11_cos_atan_two():
+    assert _matrix_row("EV-I-11")
+    with TestClient(app) as client:
+        cos_atan = _evaluate(client, "cos(atan(2))")
     got = _value(cos_atan)
     assert sp.simplify(got - sp.sqrt(5) / 5) == 0, cos_atan
