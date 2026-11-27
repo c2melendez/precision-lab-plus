@@ -20,13 +20,13 @@ CASES = [
  ('IT-D-05','sec(x)*tan(x)',lambda x:math.tan(x)/math.cos(x)),
  ('IT-D-06','csc(x)*cot(x)',lambda x:math.cos(x)/math.sin(x)**2),
  ('IT-D-07','tan(x)',lambda x:math.tan(x)),
- pytest.param('IT-D-08','cot(x)',lambda x:1/math.tan(x), marks=pytest.mark.xfail(reason='real negative branch returns log(sin(x)) without absolute value', strict=True)),
+ ('IT-D-08','cot(x)',lambda x:1/math.tan(x)),
  ('IT-D-09','sec(x)',lambda x:1/math.cos(x)),
- pytest.param('IT-D-10','csc(x)',lambda x:1/math.sin(x), marks=pytest.mark.xfail(reason='real negative branch returns log of negative argument', strict=True)),
+ ('IT-D-10','csc(x)',lambda x:1/math.sin(x)),
  ('IT-D-11','sin(x)^2',lambda x:math.sin(x)**2),
  ('IT-D-12','sin(x)^3',lambda x:math.sin(x)**3),
  ('IT-D-13','tan(x)^2',lambda x:math.tan(x)**2),
- pytest.param('IT-D-14','sec(x)^3',lambda x:1/math.cos(x)**3, marks=pytest.mark.xfail(reason='real antiderivative represented using complex logarithms', strict=True)),
+ ('IT-D-14','sec(x)^3',lambda x:1/math.cos(x)**3),
  ('IT-D-15','x*cos(x)',lambda x:x*math.cos(x)),
  ('IT-D-16','exp(x)*sin(x)',lambda x:math.exp(x)*math.sin(x)),
  ('IT-D-17','sin(3*x)',lambda x:math.sin(3*x)),
@@ -74,16 +74,16 @@ HYPERBOLIC_CASES = [
  ('IT-H-01','sinh(x)',lambda x:math.sinh(x)),
  ('IT-H-02','cosh(x)',lambda x:math.cosh(x)),
  ('IT-H-03','tanh(x)',lambda x:math.tanh(x)),
- pytest.param('IT-H-04','coth(x)',lambda x:1/math.tanh(x),marks=pytest.mark.xfail(reason='logarithm real branch requires review',strict=True)),
+ ('IT-H-04','coth(x)',lambda x:1/math.tanh(x)),
  ('IT-H-05','sech(x)^2',lambda x:1/math.cosh(x)**2),
  ('IT-H-06','csch(x)^2',lambda x:1/math.sinh(x)**2),
  ('IT-H-07','sech(x)',lambda x:1/math.cosh(x)),
- pytest.param('IT-H-08','csch(x)',lambda x:1/math.sinh(x),marks=pytest.mark.xfail(reason='negative real logarithm branch',strict=True)),
+ ('IT-H-08','csch(x)',lambda x:1/math.sinh(x)),
  ('IT-H-09','sech(x)*tanh(x)',lambda x:math.tanh(x)/math.cosh(x)),
  ('IT-H-10','csch(x)*coth(x)',lambda x:math.cosh(x)/math.sinh(x)**2),
  ('IT-H-11','sinh(x)^2',lambda x:math.sinh(x)**2),
  ('IT-H-12','cosh(x)^2',lambda x:math.cosh(x)**2),
- pytest.param('IT-H-13','tanh(x)^2',lambda x:math.tanh(x)**2,marks=pytest.mark.xfail(reason='complex logarithmic form requires real-branch review',strict=True)),
+ ('IT-H-13','tanh(x)^2',lambda x:math.tanh(x)**2),
  ('IT-H-14','x*sinh(x)',lambda x:x*math.sinh(x)),
  ('IT-H-15','sinh(x)*cosh(x)',lambda x:math.sinh(x)*math.cosh(x)),
  ('IT-H-16','exp(x)*cosh(x)',lambda x:math.exp(x)*math.cosh(x)),
@@ -239,3 +239,21 @@ def test_inverse_sqrt_primitive_uses_selected_variable():
     result = integrate_expression('1/sqrt(y^2-1)', 'y').antiderivative
     assert not result.has(sp.Integral)
     assert float(sp.N(sp.diff(result, y).subs(y, 2), 15)) == pytest.approx(1/math.sqrt(3), rel=1e-12)
+
+
+@pytest.mark.parametrize('expression,oracle', [
+    ('cot(y)', lambda y: 1/math.tan(y)),
+    ('csc(y)', lambda y: 1/math.sin(y)),
+    ('sec(y)^3', lambda y: 1/math.cos(y)**3),
+    ('coth(y)', lambda y: 1/math.tanh(y)),
+    ('csch(y)', lambda y: 1/math.sinh(y)),
+    ('tanh(y)^2', lambda y: math.tanh(y)**2),
+])
+def test_real_primitives_selected_variable_and_disconnected_branches(expression, oracle):
+    y = sp.Symbol('y')
+    primitive = integrate_expression(expression, 'y').antiderivative
+    f = sp.lambdify(y, primitive, modules='math')
+    for point in (-2.4, -0.7, 0.7, 2.4):
+        h = 1e-5
+        assert math.isfinite(f(point))
+        assert (f(point+h)-f(point-h))/(2*h) == pytest.approx(oracle(point), rel=1e-6, abs=1e-6)

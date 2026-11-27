@@ -172,6 +172,23 @@ def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
     if input_expr == sympy.asech(var_symbol):
         # Principal real branch: 0 < x <= 1.
         return var_symbol * sympy.asech(var_symbol) + sympy.asin(var_symbol), [], False, []
+    # Exact elementary primitives, real branches on each connected component.
+    # Do not apply these to arbitrary composed expressions or use them as
+    # evidence of complex analyticity. Definite integrals keep the independent
+    # SymPy reference path below (including singularities).
+    x = var_symbol
+    real_primitives = {
+        sympy.cot(x): sympy.log(sympy.Abs(sympy.sin(x))),
+        sympy.csc(x): sympy.log(sympy.Abs(sympy.tan(x / 2))),
+        sympy.sec(x)**3: (sympy.sec(x)*sympy.tan(x) + sympy.log(sympy.Abs(sympy.sec(x)+sympy.tan(x))))/2,
+        sympy.coth(x): sympy.log(sympy.Abs(sympy.sinh(x))),
+        sympy.csch(x): sympy.log(sympy.Abs(sympy.tanh(x / 2))),
+        sympy.tanh(x)**2: x - sympy.tanh(x),
+    }
+    if input_expr in real_primitives:
+        return real_primitives[input_expr], [], False, [
+            "Primitiva en cada intervalo conexo del dominio real; las ramas complejas requieren un tratamiento independiente."
+        ]
     rule = mi.integral_steps(input_expr, var_symbol)
 
     if isinstance(rule, mi.DontKnowRule):
