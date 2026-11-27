@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 644,
+  "revision": 645,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
-  "baseline_case": "TR324-V2-IT-HI-04-06-VERIFIED",
+  "technical_baseline_sha": "630f1e4bfe9d985a6c35822fd3231d490bc9c138",
+  "baseline_case": "TR324-V2-FOUR-PRIMITIVES-VERIFIED",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -32,9 +32,9 @@
     }
   },
   "next_action": {
-    "id": "TR324-V2-FOUR-PRIMITIVES-VERIFY",
+    "id": "TR324-V2-LITE-FIVE-PRIMITIVES-VERIFY",
     "status": "IN_PROGRESS",
-    "action": "Revisar TR324 Plus 46039903624 y gates 46039903541/46039903513/46039903575/46039903577 para SHA 630f1e4; comparar JSON/JUnit y diagnosticar fallos; después soporte Lite IT-I-05/06/11 e IT-HI-05/06, mapeos y canales pendientes según contrato; S25, SG28/DIST y EV-D-01 BLOCKED. No duplicar."
+    "action": "Revisar TR324 Lite 46042450137 y gates 46042450257/46042450293/46042450256/46042450311 para SHA 1660f20; validar 5 casos y controles, comparar artefactos; revisar CI Plus 46039903575; después brechas de mapeo por familia y canal, distinguir prueba negativa de capability y anclajes; S25, SG28/DIST y EV-D-01 BLOCKED. No duplicar."
   },
   "blockers": [
     {
@@ -52,7 +52,7 @@
       "last_shutdown_classification": "INFRA_SHUTDOWN_NO_FINAL_REPORT",
       "last_shutdown_utc": "2026-11-27T10:43:33Z",
       "review_report_artifact_id": 14105803916,
-      "current_job_id": 132577946517
+      "current_job_id": 140644949790
     },
     {
       "id": "H2-SG28-DIST-01..08",
@@ -73,27 +73,27 @@
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md",
     "qa/certification/BATCH_80_01.md"
   ],
-  "updated_utc": "2026-11-27T17:12:07Z",
+  "updated_utc": "2026-11-27T17:31:08Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "a09ba06ff555eb15b3a8304118328a009f8b298ddc70ba3237565e865183e8d2",
-      "head_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
-      "evidence_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+      "input_fingerprint": "591b6a56c4380baddfad0a3df8419a5e8bb1f18fb703414a9e0327b5bdb517df",
+      "head_sha": "630f1e4bfe9d985a6c35822fd3231d490bc9c138",
+      "evidence_sha": "630f1e4bfe9d985a6c35822fd3231d490bc9c138",
       "decision": "REUSE",
-      "reason": "Backend 3609 PASS, 1 SKIP, 19 XFAIL; frontend 1055 PASS, 28 TODO. Logs revisados.",
+      "reason": "Backend 3628 PASS, 1 SKIP, 11 XFAIL; frontend 1055 PASS, 28 TODO. Logs revisados.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45945338973,
+      "run_id": 46039903541,
       "jobs": [
         {
-          "id": 140328630702,
+          "id": 140644681798,
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "id": 140328630473,
+          "id": 140644681418,
           "status": "completed",
           "conclusion": "success"
         }
@@ -101,18 +101,18 @@
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "acdccf8582fc4b4ab9f427a3358eae5804d6c7d6a120545fc137b1636128d718",
-      "head_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
-      "evidence_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+      "input_fingerprint": "0cf636569f74217e294857992851559be6587ae572b75ef79c36b56726215096",
+      "head_sha": "630f1e4bfe9d985a6c35822fd3231d490bc9c138",
+      "evidence_sha": "630f1e4bfe9d985a6c35822fd3231d490bc9c138",
       "decision": "REUSE",
       "reason": "38 pruebas ejecutadas; logs revisados.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45945338878,
+      "run_id": 46039903513,
       "jobs": [
         {
-          "id": 140328629979,
+          "id": 140644680537,
           "status": "completed",
           "conclusion": "success"
         }
@@ -120,30 +120,30 @@
     },
     "security": {
       "gate": "security",
-      "input_fingerprint": "7bd8696c69bf26ef8d004ff8b932e837a623c955d4235f9d67a1991fc5f58418",
-      "head_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
-      "evidence_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
-      "decision": "DIAGNOSE",
-      "reason": "Backend-security success, frontend skipped, mutación interrumpida por shutdown del runner, informe final ausente. S25 BLOCKED.",
-      "logs_reviewed": true,
+      "input_fingerprint": "0925a0aec7d37393d32a468670c4ccf031623569091da115003365886a1110bb",
+      "head_sha": "630f1e4bfe9d985a6c35822fd3231d490bc9c138",
+      "evidence_sha": "630f1e4bfe9d985a6c35822fd3231d490bc9c138",
+      "decision": "WAIT",
+      "reason": "Backend-security success, frontend skipped, mutación en progreso; S25 BLOCKED.",
+      "logs_reviewed": false,
       "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45945338882,
+      "run_id": 46039903658,
       "jobs": [
         {
-          "id": 140328748648,
+          "id": 140644866766,
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "id": 140328750600,
+          "id": 140644869542,
           "status": "completed",
           "conclusion": "skipped"
         },
         {
-          "id": 140328800156,
-          "status": "completed",
-          "conclusion": "failure"
+          "id": 140644949790,
+          "status": "in_progress",
+          "conclusion": null
         }
       ]
     }
@@ -890,23 +890,23 @@
     "prior_evidence": {
       "cumulative": {
         "gate": "cumulative",
-        "input_fingerprint": "fb75f8f6036a4284502bdaa8a390c05dd8981354779eeb945ed796642e671065",
-        "head_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
-        "evidence_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+        "input_fingerprint": "a09ba06ff555eb15b3a8304118328a009f8b298ddc70ba3237565e865183e8d2",
+        "head_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+        "evidence_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
         "decision": "REUSE",
-        "reason": "Log revisado: backend 3598 passed, 1 SKIP, 23 XFAIL; frontend 1055 passed, 28 TODO, typecheck/build ejecutados.",
+        "reason": "Backend 3609 PASS, 1 SKIP, 19 XFAIL; frontend 1055 PASS, 28 TODO. Logs revisados.",
         "logs_reviewed": true,
         "evidence_executed": true,
         "acceptance_revision": "2026-10-16-continuity-v1",
-        "run_id": 45942633674,
+        "run_id": 45945338973,
         "jobs": [
           {
-            "id": 140320143679,
+            "id": 140328630702,
             "status": "completed",
             "conclusion": "success"
           },
           {
-            "id": 140320144244,
+            "id": 140328630473,
             "status": "completed",
             "conclusion": "success"
           }
@@ -914,18 +914,18 @@
       },
       "h1d": {
         "gate": "h1d",
-        "input_fingerprint": "0ff15b001934599d1e72d954dc5bc08fac44ef6e82006124c2f438d2fb5dccbd",
-        "head_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
-        "evidence_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+        "input_fingerprint": "acdccf8582fc4b4ab9f427a3358eae5804d6c7d6a120545fc137b1636128d718",
+        "head_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+        "evidence_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
         "decision": "REUSE",
-        "reason": "Log revisado: 38 pruebas ejecutadas.",
+        "reason": "38 pruebas ejecutadas; logs revisados.",
         "logs_reviewed": true,
         "evidence_executed": true,
         "acceptance_revision": "2026-10-16-continuity-v1",
-        "run_id": 45942633921,
+        "run_id": 45945338878,
         "jobs": [
           {
-            "id": 140320143986,
+            "id": 140328629979,
             "status": "completed",
             "conclusion": "success"
           }
@@ -933,41 +933,53 @@
       },
       "security": {
         "gate": "security",
-        "input_fingerprint": "2114a36350c94da098411ac9668bfee3d0967c38ef6849717d7282b09e0b6e68",
-        "head_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
-        "evidence_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
-        "decision": "WAIT",
-        "reason": "Run equivalente en curso; mutación backend no concluida; S25 permanece BLOCKED, no es PASS.",
-        "logs_reviewed": false,
+        "input_fingerprint": "7bd8696c69bf26ef8d004ff8b932e837a623c955d4235f9d67a1991fc5f58418",
+        "head_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+        "evidence_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+        "decision": "DIAGNOSE",
+        "reason": "Backend-security success, frontend skipped, mutación interrumpida por shutdown del runner, informe final ausente. S25 BLOCKED.",
+        "logs_reviewed": true,
         "evidence_executed": false,
         "acceptance_revision": "2026-10-16-continuity-v1",
-        "run_id": 45923556047,
+        "run_id": 45945338882,
         "jobs": [
           {
-            "id": 140259745609,
-            "status": "in_progress",
-            "conclusion": null
+            "id": 140328748648,
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 140328750600,
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "id": 140328800156,
+            "status": "completed",
+            "conclusion": "failure"
           }
         ]
       }
     },
     "artifact_verified": true,
     "tr324": {
-      "run_id": 45945338885,
-      "job_id": 140328630039,
-      "artifact_id": 15173773505,
-      "sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+      "run_id": 46039903624,
+      "job_id": 140644681473,
+      "artifact_id": 15218543886,
+      "sha": "630f1e4bfe9d985a6c35822fd3231d490bc9c138",
       "counts": {
-        "REVIEW_TEST_OK": 163,
+        "REVIEW_TEST_OK": 167,
         "REVIEW_CONTEXT_ONLY": 70,
         "REVIEW_NO_MAPPED_TEST": 86,
-        "REVIEW_SKIPPED": 5
+        "REVIEW_SKIPPED": 1
       },
       "certification_pass_count": 0,
       "artifact_verified": true,
       "transition_ids": [
-        "IT-HI-04",
-        "IT-HI-06"
+        "IT-I-04",
+        "IT-I-05",
+        "IT-I-06",
+        "IT-HI-09"
       ]
     },
     "mv153": {
@@ -986,88 +998,113 @@
       "cumulative_run": 45920446566
     },
     "prior_tr324": {
-      "run_id": 45942633766,
-      "job_id": 140320145171,
-      "artifact_id": 15173685360,
-      "sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+      "run_id": 45945338885,
+      "job_id": 140328630039,
+      "artifact_id": 15173773505,
+      "sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
       "counts": {
-        "REVIEW_TEST_OK": 161,
+        "REVIEW_TEST_OK": 163,
         "REVIEW_CONTEXT_ONLY": 70,
         "REVIEW_NO_MAPPED_TEST": 86,
-        "REVIEW_SKIPPED": 7
+        "REVIEW_SKIPPED": 5
       },
       "certification_pass_count": 0,
       "artifact_verified": true,
       "transition_ids": [
-        "IT-D-08",
-        "IT-D-10",
-        "IT-D-14",
-        "IT-H-04",
-        "IT-H-08",
-        "IT-H-13"
+        "IT-HI-04",
+        "IT-HI-06"
       ]
     }
   },
   "pending_tr324_v2": {
     "status": "WAIT",
-    "technical_sha": "630f1e4bfe9d985a6c35822fd3231d490bc9c138",
-    "product": "plus",
+    "technical_sha": "1660f2026bd60a2fe03746cfbca3c6f3b84cdf89",
+    "product": "lite",
     "workflow": ".github/workflows/certification-tr324-v2.yml",
-    "run_id": 46039903624,
-    "job_id": 140644681473,
-    "cumulative_run_id": 46039903541,
-    "cumulative_input_fingerprint": "591b6a56c4380baddfad0a3df8419a5e8bb1f18fb703414a9e0327b5bdb517df",
-    "h1d_run_id": 46039903513,
-    "ci_run_id": 46039903575,
-    "native_syntax_run_id": 46039903577,
-    "security_run_id": 46039903658,
-    "runner_run_id": 46039903542,
+    "run_id": 46042450137,
+    "job_id": 140653316067,
+    "cumulative_run_id": 46042450257,
+    "cumulative_input_fingerprint": "3089883892172f71432996626061febe517066b86298ef3bbbcbc1e6fa257871",
+    "h1d_run_id": 46042450293,
+    "ci_run_id": 46042450256,
+    "scientific_ui_run_id": 46042450311,
+    "runner_run_id": 46042450298,
     "prior_verified_run": {
       "status": "WAIT",
-      "technical_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+      "technical_sha": "630f1e4bfe9d985a6c35822fd3231d490bc9c138",
       "product": "plus",
       "workflow": ".github/workflows/certification-tr324-v2.yml",
-      "run_id": 45945338885,
-      "job_id": 140328630039,
-      "cumulative_run_id": 45945338973,
-      "h1d_run_id": 45945338878,
-      "ci_run_id": 45945338887,
-      "native_syntax_run_id": 45945338977,
-      "security_run_id": 45945338882,
-      "runner_run_id": 45945338886,
+      "run_id": 46039903624,
+      "job_id": 140644681473,
+      "cumulative_run_id": 46039903541,
+      "cumulative_input_fingerprint": "591b6a56c4380baddfad0a3df8419a5e8bb1f18fb703414a9e0327b5bdb517df",
+      "h1d_run_id": 46039903513,
+      "ci_run_id": 46039903575,
+      "native_syntax_run_id": 46039903577,
+      "security_run_id": 46039903658,
+      "runner_run_id": 46039903542,
       "prior_verified_run": {
         "status": "WAIT",
-        "technical_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+        "technical_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+        "product": "plus",
         "workflow": ".github/workflows/certification-tr324-v2.yml",
-        "run_id": 45942633766,
-        "cumulative_run_id": 45942633674,
-        "cumulative_input_fingerprint": "fb75f8f6036a4284502bdaa8a390c05dd8981354779eeb945ed796642e671065",
-        "h1d_run_id": 45942633921,
-        "ci_run_id": 45942633776,
-        "runner_run_id": 45942633687,
-        "peer": {
-          "technical_sha": "63e0abf73fd83c7edeec210dc76d94863193ce8e",
-          "run_id": 45942624538,
-          "cumulative_run_id": 45942624470,
-          "h1d_run_id": 45942624490
+        "run_id": 45945338885,
+        "job_id": 140328630039,
+        "cumulative_run_id": 45945338973,
+        "h1d_run_id": 45945338878,
+        "ci_run_id": 45945338887,
+        "native_syntax_run_id": 45945338977,
+        "security_run_id": 45945338882,
+        "runner_run_id": 45945338886,
+        "prior_verified_run": {
+          "status": "WAIT",
+          "technical_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+          "workflow": ".github/workflows/certification-tr324-v2.yml",
+          "run_id": 45942633766,
+          "cumulative_run_id": 45942633674,
+          "cumulative_input_fingerprint": "fb75f8f6036a4284502bdaa8a390c05dd8981354779eeb945ed796642e671065",
+          "h1d_run_id": 45942633921,
+          "ci_run_id": 45942633776,
+          "runner_run_id": 45942633687,
+          "peer": {
+            "technical_sha": "63e0abf73fd83c7edeec210dc76d94863193ce8e",
+            "run_id": 45942624538,
+            "cumulative_run_id": 45942624470,
+            "h1d_run_id": 45942624490
+          },
+          "prior_baseline_retained": true,
+          "reason": "El baseline aceptado anterior se conserva hasta revisar ejecución nueva; no reutilizar automáticamente en SHA técnico distinto."
         },
+        "cases": [
+          "IT-HI-04",
+          "IT-HI-06"
+        ],
         "prior_baseline_retained": true,
-        "reason": "El baseline aceptado anterior se conserva hasta revisar ejecución nueva; no reutilizar automáticamente en SHA técnico distinto."
+        "reason": "Corrección publicada, CI iniciado. No contar nuevos PASS completos."
       },
       "cases": [
-        "IT-HI-04",
-        "IT-HI-06"
+        "IT-I-04",
+        "IT-I-05",
+        "IT-I-06",
+        "IT-HI-09"
       ],
       "prior_baseline_retained": true,
-      "reason": "Corrección publicada, CI iniciado. No contar nuevos PASS completos."
+      "reason": "Cuatro reparaciones publicadas, CI iniciado; verificar evidencia por ID antes de aceptar."
+    },
+    "peer": {
+      "technical_sha": "630f1e4bfe9d985a6c35822fd3231d490bc9c138",
+      "run_id": 46039903624,
+      "ci_run_id": 46039903575,
+      "security_run_id": 46039903658
     },
     "cases": [
-      "IT-I-04",
       "IT-I-05",
       "IT-I-06",
-      "IT-HI-09"
+      "IT-I-11",
+      "IT-HI-05",
+      "IT-HI-06"
     ],
     "prior_baseline_retained": true,
-    "reason": "Cuatro reparaciones publicadas, CI iniciado; verificar evidencia por ID antes de aceptar."
+    "reason": "Cinco reparaciones publicadas Lite, CI iniciado; verificar ejecución y no contar pruebas negativas como resultados matemáticos."
   }
 }
