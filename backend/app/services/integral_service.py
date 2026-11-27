@@ -178,6 +178,12 @@ def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
     # SymPy reference path below (including singularities).
     x = var_symbol
     real_primitives = {
+        # IT-HI-04: |x| > 1. The real logarithm has positive argument
+        # on both disconnected components of the domain.
+        sympy.acoth(x): x*sympy.acoth(x) + sympy.log(x**2 - 1)/2,
+        # IT-HI-06: x != 0. The frozen source's asinh(x) term is valid
+        # only for x > 0; abs(x) is needed for the negative real branch.
+        sympy.acsch(x): x*sympy.acsch(x) + sympy.asinh(sympy.Abs(x)),
         sympy.cot(x): sympy.log(sympy.Abs(sympy.sin(x))),
         sympy.csc(x): sympy.log(sympy.Abs(sympy.tan(x / 2))),
         sympy.sec(x)**3: (sympy.sec(x)*sympy.tan(x) + sympy.log(sympy.Abs(sympy.sec(x)+sympy.tan(x))))/2,

@@ -386,6 +386,14 @@ def validate_length(text: str) -> None:
 
 def normalize_unicode(text: str) -> str:
     """Normaliza símbolos seguros antes del parser de SymPy."""
+    # TR324 IT-HI-04/06: exact single-variable integrands from the
+    # frozen source. Do not normalize arbitrary LaTeX or expressions.
+    source_inverse_hyperbolic = re.fullmatch(
+        r"\s*\\operatorname\{(arcoth|arcsch)\}\s+([A-Za-z])\s*", text
+    )
+    if source_inverse_hyperbolic:
+        name, variable = source_inverse_hyperbolic.groups()
+        text = f"{name}({variable})"
     # EV-L-09: accept the matrix's bounded canonical LaTeX logarithm form
     # with numeric base and numeric argument; do not attempt to parse arbitrary
     # LaTeX or nested expressions through this shortcut.
