@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 643,
+  "revision": 644,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
-  "baseline_case": "TR324-V2-DIFFERENTIAL-OBSERVATIONS",
+  "technical_baseline_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+  "baseline_case": "TR324-V2-IT-HI-04-06-VERIFIED",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -32,9 +32,9 @@
     }
   },
   "next_action": {
-    "id": "TR324-V2-IT-HI-04-06-VERIFY",
+    "id": "TR324-V2-FOUR-PRIMITIVES-VERIFY",
     "status": "IN_PROGRESS",
-    "action": "Revisar TR324 Plus 45945338885 y gates 45945338973/45945338878/45945338887/45945338977 en SHA edbd2f1; comparar JSON/JUnit por ID, diagnosticar fallos de parser/HTTP/límites, después abordar IT-HI-09 e IT-I-04/05/06, canales y mapeo según contrato; S25 y SG28/DIST y EV-D-01 BLOCKED. No duplicar."
+    "action": "Revisar TR324 Plus 46039903624 y gates 46039903541/46039903513/46039903575/46039903577 para SHA 630f1e4; comparar JSON/JUnit y diagnosticar fallos; después soporte Lite IT-I-05/06/11 e IT-HI-05/06, mapeos y canales pendientes según contrato; S25, SG28/DIST y EV-D-01 BLOCKED. No duplicar."
   },
   "blockers": [
     {
@@ -44,13 +44,13 @@
       "job_id": 132273991849,
       "classification": "ACCEPTANCE_REVIEW",
       "exit_condition": "Evaluar informe ya producido y criterios de aceptación por perfil; supervivientes/timeouts y jobs omitidos no son PASS. Conservar el shutdown histórico sin relanzar inputs idénticos.",
-      "current_run_id": 43637618276,
+      "current_run_id": 46039903658,
       "review_report_run_id": 43559502112,
       "review_report_job_id": 132339909267,
-      "last_shutdown_run_id": 43695734343,
-      "last_shutdown_job_id": 132755851381,
+      "last_shutdown_run_id": 45945338882,
+      "last_shutdown_job_id": 140328800156,
       "last_shutdown_classification": "INFRA_SHUTDOWN_NO_FINAL_REPORT",
-      "last_shutdown_utc": "2026-11-15T11:21:05Z",
+      "last_shutdown_utc": "2026-11-27T10:43:33Z",
       "review_report_artifact_id": 14105803916,
       "current_job_id": 132577946517
     },
@@ -73,27 +73,27 @@
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md",
     "qa/certification/BATCH_80_01.md"
   ],
-  "updated_utc": "2026-11-27T05:22:00Z",
+  "updated_utc": "2026-11-27T17:12:07Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "fb75f8f6036a4284502bdaa8a390c05dd8981354779eeb945ed796642e671065",
-      "head_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
-      "evidence_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+      "input_fingerprint": "a09ba06ff555eb15b3a8304118328a009f8b298ddc70ba3237565e865183e8d2",
+      "head_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+      "evidence_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
       "decision": "REUSE",
-      "reason": "Log revisado: backend 3598 passed, 1 SKIP, 23 XFAIL; frontend 1055 passed, 28 TODO, typecheck/build ejecutados.",
+      "reason": "Backend 3609 PASS, 1 SKIP, 19 XFAIL; frontend 1055 PASS, 28 TODO. Logs revisados.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45942633674,
+      "run_id": 45945338973,
       "jobs": [
         {
-          "id": 140320143679,
+          "id": 140328630702,
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "id": 140320144244,
+          "id": 140328630473,
           "status": "completed",
           "conclusion": "success"
         }
@@ -101,18 +101,18 @@
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "0ff15b001934599d1e72d954dc5bc08fac44ef6e82006124c2f438d2fb5dccbd",
-      "head_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
-      "evidence_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+      "input_fingerprint": "acdccf8582fc4b4ab9f427a3358eae5804d6c7d6a120545fc137b1636128d718",
+      "head_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+      "evidence_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
       "decision": "REUSE",
-      "reason": "Log revisado: 38 pruebas ejecutadas.",
+      "reason": "38 pruebas ejecutadas; logs revisados.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45942633921,
+      "run_id": 45945338878,
       "jobs": [
         {
-          "id": 140320143986,
+          "id": 140328629979,
           "status": "completed",
           "conclusion": "success"
         }
@@ -120,20 +120,30 @@
     },
     "security": {
       "gate": "security",
-      "input_fingerprint": "2114a36350c94da098411ac9668bfee3d0967c38ef6849717d7282b09e0b6e68",
-      "head_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
-      "evidence_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
-      "decision": "WAIT",
-      "reason": "Run equivalente en curso; mutación backend no concluida; S25 permanece BLOCKED, no es PASS.",
-      "logs_reviewed": false,
+      "input_fingerprint": "7bd8696c69bf26ef8d004ff8b932e837a623c955d4235f9d67a1991fc5f58418",
+      "head_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+      "evidence_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+      "decision": "DIAGNOSE",
+      "reason": "Backend-security success, frontend skipped, mutación interrumpida por shutdown del runner, informe final ausente. S25 BLOCKED.",
+      "logs_reviewed": true,
       "evidence_executed": false,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45923556047,
+      "run_id": 45945338882,
       "jobs": [
         {
-          "id": 140259745609,
-          "status": "in_progress",
-          "conclusion": null
+          "id": 140328748648,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 140328750600,
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 140328800156,
+          "status": "completed",
+          "conclusion": "failure"
         }
       ]
     }
@@ -880,23 +890,23 @@
     "prior_evidence": {
       "cumulative": {
         "gate": "cumulative",
-        "input_fingerprint": "66ce49e9e7ba5b77acc7fd0d8a82dcf64731fafad12a83f43164c1fd0f12f674",
-        "head_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
-        "evidence_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
+        "input_fingerprint": "fb75f8f6036a4284502bdaa8a390c05dd8981354779eeb945ed796642e671065",
+        "head_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+        "evidence_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
         "decision": "REUSE",
-        "reason": "Log revisado: backend 3598 passed, 1 skipped, 23 xfailed; frontend 1055 passed, 28 todo; alcance acotado.",
+        "reason": "Log revisado: backend 3598 passed, 1 SKIP, 23 XFAIL; frontend 1055 passed, 28 TODO, typecheck/build ejecutados.",
         "logs_reviewed": true,
         "evidence_executed": true,
         "acceptance_revision": "2026-10-16-continuity-v1",
-        "run_id": 45923550286,
+        "run_id": 45942633674,
         "jobs": [
           {
-            "id": 140259598731,
+            "id": 140320143679,
             "status": "completed",
             "conclusion": "success"
           },
           {
-            "id": 140259598578,
+            "id": 140320144244,
             "status": "completed",
             "conclusion": "success"
           }
@@ -904,18 +914,18 @@
       },
       "h1d": {
         "gate": "h1d",
-        "input_fingerprint": "2d20be5dd8c4d3126543dbeb4920df085a6fe2f06f563e81a7c077cc8e2a6530",
-        "head_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
-        "evidence_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
+        "input_fingerprint": "0ff15b001934599d1e72d954dc5bc08fac44ef6e82006124c2f438d2fb5dccbd",
+        "head_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+        "evidence_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
         "decision": "REUSE",
-        "reason": "Log revisado: 38 pruebas H1d ejecutadas.",
+        "reason": "Log revisado: 38 pruebas ejecutadas.",
         "logs_reviewed": true,
         "evidence_executed": true,
         "acceptance_revision": "2026-10-16-continuity-v1",
-        "run_id": 45923550310,
+        "run_id": 45942633921,
         "jobs": [
           {
-            "id": 140259598297,
+            "id": 140320143986,
             "status": "completed",
             "conclusion": "success"
           }
@@ -943,6 +953,39 @@
     },
     "artifact_verified": true,
     "tr324": {
+      "run_id": 45945338885,
+      "job_id": 140328630039,
+      "artifact_id": 15173773505,
+      "sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+      "counts": {
+        "REVIEW_TEST_OK": 163,
+        "REVIEW_CONTEXT_ONLY": 70,
+        "REVIEW_NO_MAPPED_TEST": 86,
+        "REVIEW_SKIPPED": 5
+      },
+      "certification_pass_count": 0,
+      "artifact_verified": true,
+      "transition_ids": [
+        "IT-HI-04",
+        "IT-HI-06"
+      ]
+    },
+    "mv153": {
+      "run_id": 45920455897,
+      "job_id": 140249671098,
+      "artifact_id": 15163588175,
+      "sha": "f78fc86d3c9baa4c736ed3db0e6eb6d31be2e3c7",
+      "counts": {
+        "REVIEW_TEST_OK": 148,
+        "REVIEW_NO_MAPPED_TEST": 5
+      },
+      "certification_pass_count": 0
+    },
+    "peer": {
+      "sha": "aa89238d114f42f12b648ca420c8c29f253cf5c6",
+      "cumulative_run": 45920446566
+    },
+    "prior_tr324": {
       "run_id": 45942633766,
       "job_id": 140320145171,
       "artifact_id": 15173685360,
@@ -963,74 +1006,68 @@
         "IT-H-08",
         "IT-H-13"
       ]
-    },
-    "mv153": {
-      "run_id": 45920455897,
-      "job_id": 140249671098,
-      "artifact_id": 15163588175,
-      "sha": "f78fc86d3c9baa4c736ed3db0e6eb6d31be2e3c7",
-      "counts": {
-        "REVIEW_TEST_OK": 148,
-        "REVIEW_NO_MAPPED_TEST": 5
-      },
-      "certification_pass_count": 0
-    },
-    "peer": {
-      "sha": "aa89238d114f42f12b648ca420c8c29f253cf5c6",
-      "cumulative_run": 45920446566
-    },
-    "prior_tr324": {
-      "run_id": 45920455889,
-      "job_id": 140249671215,
-      "artifact_id": 15163938695,
-      "sha": "f78fc86d3c9baa4c736ed3db0e6eb6d31be2e3c7",
-      "counts": {
-        "REVIEW_TEST_OK": 155,
-        "REVIEW_CONTEXT_ONLY": 70,
-        "REVIEW_SKIPPED": 13,
-        "REVIEW_NO_MAPPED_TEST": 86
-      },
-      "certification_pass_count": 0,
-      "refresh_required": true
     }
   },
   "pending_tr324_v2": {
     "status": "WAIT",
-    "technical_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+    "technical_sha": "630f1e4bfe9d985a6c35822fd3231d490bc9c138",
     "product": "plus",
     "workflow": ".github/workflows/certification-tr324-v2.yml",
-    "run_id": 45945338885,
-    "job_id": 140328630039,
-    "cumulative_run_id": 45945338973,
-    "h1d_run_id": 45945338878,
-    "ci_run_id": 45945338887,
-    "native_syntax_run_id": 45945338977,
-    "security_run_id": 45945338882,
-    "runner_run_id": 45945338886,
+    "run_id": 46039903624,
+    "job_id": 140644681473,
+    "cumulative_run_id": 46039903541,
+    "cumulative_input_fingerprint": "591b6a56c4380baddfad0a3df8419a5e8bb1f18fb703414a9e0327b5bdb517df",
+    "h1d_run_id": 46039903513,
+    "ci_run_id": 46039903575,
+    "native_syntax_run_id": 46039903577,
+    "security_run_id": 46039903658,
+    "runner_run_id": 46039903542,
     "prior_verified_run": {
       "status": "WAIT",
-      "technical_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+      "technical_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+      "product": "plus",
       "workflow": ".github/workflows/certification-tr324-v2.yml",
-      "run_id": 45942633766,
-      "cumulative_run_id": 45942633674,
-      "cumulative_input_fingerprint": "fb75f8f6036a4284502bdaa8a390c05dd8981354779eeb945ed796642e671065",
-      "h1d_run_id": 45942633921,
-      "ci_run_id": 45942633776,
-      "runner_run_id": 45942633687,
-      "peer": {
-        "technical_sha": "63e0abf73fd83c7edeec210dc76d94863193ce8e",
-        "run_id": 45942624538,
-        "cumulative_run_id": 45942624470,
-        "h1d_run_id": 45942624490
+      "run_id": 45945338885,
+      "job_id": 140328630039,
+      "cumulative_run_id": 45945338973,
+      "h1d_run_id": 45945338878,
+      "ci_run_id": 45945338887,
+      "native_syntax_run_id": 45945338977,
+      "security_run_id": 45945338882,
+      "runner_run_id": 45945338886,
+      "prior_verified_run": {
+        "status": "WAIT",
+        "technical_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+        "workflow": ".github/workflows/certification-tr324-v2.yml",
+        "run_id": 45942633766,
+        "cumulative_run_id": 45942633674,
+        "cumulative_input_fingerprint": "fb75f8f6036a4284502bdaa8a390c05dd8981354779eeb945ed796642e671065",
+        "h1d_run_id": 45942633921,
+        "ci_run_id": 45942633776,
+        "runner_run_id": 45942633687,
+        "peer": {
+          "technical_sha": "63e0abf73fd83c7edeec210dc76d94863193ce8e",
+          "run_id": 45942624538,
+          "cumulative_run_id": 45942624470,
+          "h1d_run_id": 45942624490
+        },
+        "prior_baseline_retained": true,
+        "reason": "El baseline aceptado anterior se conserva hasta revisar ejecución nueva; no reutilizar automáticamente en SHA técnico distinto."
       },
+      "cases": [
+        "IT-HI-04",
+        "IT-HI-06"
+      ],
       "prior_baseline_retained": true,
-      "reason": "El baseline aceptado anterior se conserva hasta revisar ejecución nueva; no reutilizar automáticamente en SHA técnico distinto."
+      "reason": "Corrección publicada, CI iniciado. No contar nuevos PASS completos."
     },
     "cases": [
-      "IT-HI-04",
-      "IT-HI-06"
+      "IT-I-04",
+      "IT-I-05",
+      "IT-I-06",
+      "IT-HI-09"
     ],
     "prior_baseline_retained": true,
-    "reason": "Corrección publicada, CI iniciado. No contar nuevos PASS completos."
+    "reason": "Cuatro reparaciones publicadas, CI iniciado; verificar evidencia por ID antes de aceptar."
   }
 }
