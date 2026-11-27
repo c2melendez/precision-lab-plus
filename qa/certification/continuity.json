@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "revision": 642,
+  "revision": 643,
   "repository": "c2melendez/precision-lab-plus",
   "canonical_branch": "qa/syntax-audit-in625-a1",
-  "technical_baseline_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
-  "baseline_case": "TR324-V2-RECONCILIATION",
+  "technical_baseline_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+  "baseline_case": "TR324-V2-DIFFERENTIAL-OBSERVATIONS",
   "baseline_status": "PASS_SCOPED",
   "global_certification": "OPEN",
   "gates": {
@@ -32,9 +32,9 @@
     }
   },
   "next_action": {
-    "id": "TR324-V2-REFRESH-REPAIR",
+    "id": "TR324-V2-IT-HI-04-06-VERIFY",
     "status": "IN_PROGRESS",
-    "action": "WAIT/RECONCILE: revisar los runs TR324 45942624538 Lite y 45942633766 Plus y gates acumulativos/H1d del SHA técnico correspondiente, obtener JSON/JUnit y comparar observaciones por ID. Después corregir IT-HI-06/04 Plus con fuente y oráculo por ramas, canal HTTP/literal; mantener revisión compleja/UI y bloqueos. No duplicar CI."
+    "action": "Revisar TR324 Plus 45945338885 y gates 45945338973/45945338878/45945338887/45945338977 en SHA edbd2f1; comparar JSON/JUnit por ID, diagnosticar fallos de parser/HTTP/límites, después abordar IT-HI-09 e IT-I-04/05/06, canales y mapeo según contrato; S25 y SG28/DIST y EV-D-01 BLOCKED. No duplicar."
   },
   "blockers": [
     {
@@ -73,27 +73,27 @@
     "qa/certification/GLOBAL_CERTIFICATION_DASHBOARD.md",
     "qa/certification/BATCH_80_01.md"
   ],
-  "updated_utc": "2026-11-27T04:54:40Z",
+  "updated_utc": "2026-11-27T05:22:00Z",
   "evidence": {
     "cumulative": {
       "gate": "cumulative",
-      "input_fingerprint": "66ce49e9e7ba5b77acc7fd0d8a82dcf64731fafad12a83f43164c1fd0f12f674",
-      "head_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
-      "evidence_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
+      "input_fingerprint": "fb75f8f6036a4284502bdaa8a390c05dd8981354779eeb945ed796642e671065",
+      "head_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+      "evidence_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
       "decision": "REUSE",
-      "reason": "Log revisado: backend 3598 passed, 1 skipped, 23 xfailed; frontend 1055 passed, 28 todo; alcance acotado.",
+      "reason": "Log revisado: backend 3598 passed, 1 SKIP, 23 XFAIL; frontend 1055 passed, 28 TODO, typecheck/build ejecutados.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45923550286,
+      "run_id": 45942633674,
       "jobs": [
         {
-          "id": 140259598731,
+          "id": 140320143679,
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "id": 140259598578,
+          "id": 140320144244,
           "status": "completed",
           "conclusion": "success"
         }
@@ -101,18 +101,18 @@
     },
     "h1d": {
       "gate": "h1d",
-      "input_fingerprint": "2d20be5dd8c4d3126543dbeb4920df085a6fe2f06f563e81a7c077cc8e2a6530",
-      "head_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
-      "evidence_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
+      "input_fingerprint": "0ff15b001934599d1e72d954dc5bc08fac44ef6e82006124c2f438d2fb5dccbd",
+      "head_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+      "evidence_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
       "decision": "REUSE",
-      "reason": "Log revisado: 38 pruebas H1d ejecutadas.",
+      "reason": "Log revisado: 38 pruebas ejecutadas.",
       "logs_reviewed": true,
       "evidence_executed": true,
       "acceptance_revision": "2026-10-16-continuity-v1",
-      "run_id": 45923550310,
+      "run_id": 45942633921,
       "jobs": [
         {
-          "id": 140259598297,
+          "id": 140320143986,
           "status": "completed",
           "conclusion": "success"
         }
@@ -880,23 +880,23 @@
     "prior_evidence": {
       "cumulative": {
         "gate": "cumulative",
-        "input_fingerprint": "verified-f3ac7f29efb6907d51e2c16fdd083fafbc145020",
-        "head_sha": "f3ac7f29efb6907d51e2c16fdd083fafbc145020",
-        "evidence_sha": "f3ac7f29efb6907d51e2c16fdd083fafbc145020",
+        "input_fingerprint": "66ce49e9e7ba5b77acc7fd0d8a82dcf64731fafad12a83f43164c1fd0f12f674",
+        "head_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
+        "evidence_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
         "decision": "REUSE",
-        "reason": "Ejecución y registros revisados; alcance acotado (3580 passed, 1 skipped, 35 xfailed).",
+        "reason": "Log revisado: backend 3598 passed, 1 skipped, 23 xfailed; frontend 1055 passed, 28 todo; alcance acotado.",
         "logs_reviewed": true,
         "evidence_executed": true,
         "acceptance_revision": "2026-10-16-continuity-v1",
-        "run_id": 45731223450,
+        "run_id": 45923550286,
         "jobs": [
           {
-            "id": 139613416223,
+            "id": 140259598731,
             "status": "completed",
             "conclusion": "success"
           },
           {
-            "id": 139613416651,
+            "id": 140259598578,
             "status": "completed",
             "conclusion": "success"
           }
@@ -904,18 +904,18 @@
       },
       "h1d": {
         "gate": "h1d",
-        "input_fingerprint": "da68567ff8a6e0546ac981ed17a6a3925f34fc93ccf2cf9c207cb6310ab8fa8b",
-        "head_sha": "c2d66e7124ce7f2bbc652009e610293f30044ab4",
-        "evidence_sha": "c2d66e7124ce7f2bbc652009e610293f30044ab4",
+        "input_fingerprint": "2d20be5dd8c4d3126543dbeb4920df085a6fe2f06f563e81a7c077cc8e2a6530",
+        "head_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
+        "evidence_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
         "decision": "REUSE",
-        "reason": "Ejecución y registros revisados; alcance acotado.",
+        "reason": "Log revisado: 38 pruebas H1d ejecutadas.",
         "logs_reviewed": true,
         "evidence_executed": true,
         "acceptance_revision": "2026-10-16-continuity-v1",
-        "run_id": 45582006239,
+        "run_id": 45923550310,
         "jobs": [
           {
-            "id": 139094131149,
+            "id": 140259598297,
             "status": "completed",
             "conclusion": "success"
           }
@@ -923,31 +923,46 @@
       },
       "security": {
         "gate": "security",
-        "input_fingerprint": "42dae767ccddbc2342121e29b3d2f59dbb3670e33fc6d802e44a129fc7bd84da",
-        "head_sha": "9ff400f503beae1fd3c567a42c1a64191e4c2481",
-        "decision": "REVIEW",
-        "reason": "Advisories externos requieren revisión actual.",
+        "input_fingerprint": "2114a36350c94da098411ac9668bfee3d0967c38ef6849717d7282b09e0b6e68",
+        "head_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
+        "evidence_sha": "1342b0f0d28cb77080933fa959735c19ac7ed421",
+        "decision": "WAIT",
+        "reason": "Run equivalente en curso; mutación backend no concluida; S25 permanece BLOCKED, no es PASS.",
         "logs_reviewed": false,
         "evidence_executed": false,
         "acceptance_revision": "2026-10-16-continuity-v1",
-        "run_id": 44140446149,
-        "evidence_sha": "18ce66bc13b7beb3d72916b39804ae6c489d3580"
+        "run_id": 45923556047,
+        "jobs": [
+          {
+            "id": 140259745609,
+            "status": "in_progress",
+            "conclusion": null
+          }
+        ]
       }
     },
     "artifact_verified": true,
     "tr324": {
-      "run_id": 45920455889,
-      "job_id": 140249671215,
-      "artifact_id": 15163938695,
-      "sha": "f78fc86d3c9baa4c736ed3db0e6eb6d31be2e3c7",
+      "run_id": 45942633766,
+      "job_id": 140320145171,
+      "artifact_id": 15173685360,
+      "sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
       "counts": {
-        "REVIEW_TEST_OK": 155,
+        "REVIEW_TEST_OK": 161,
         "REVIEW_CONTEXT_ONLY": 70,
-        "REVIEW_SKIPPED": 13,
-        "REVIEW_NO_MAPPED_TEST": 86
+        "REVIEW_NO_MAPPED_TEST": 86,
+        "REVIEW_SKIPPED": 7
       },
       "certification_pass_count": 0,
-      "refresh_required": true
+      "artifact_verified": true,
+      "transition_ids": [
+        "IT-D-08",
+        "IT-D-10",
+        "IT-D-14",
+        "IT-H-04",
+        "IT-H-08",
+        "IT-H-13"
+      ]
     },
     "mv153": {
       "run_id": 45920455897,
@@ -963,25 +978,59 @@
     "peer": {
       "sha": "aa89238d114f42f12b648ca420c8c29f253cf5c6",
       "cumulative_run": 45920446566
+    },
+    "prior_tr324": {
+      "run_id": 45920455889,
+      "job_id": 140249671215,
+      "artifact_id": 15163938695,
+      "sha": "f78fc86d3c9baa4c736ed3db0e6eb6d31be2e3c7",
+      "counts": {
+        "REVIEW_TEST_OK": 155,
+        "REVIEW_CONTEXT_ONLY": 70,
+        "REVIEW_SKIPPED": 13,
+        "REVIEW_NO_MAPPED_TEST": 86
+      },
+      "certification_pass_count": 0,
+      "refresh_required": true
     }
   },
   "pending_tr324_v2": {
     "status": "WAIT",
-    "technical_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+    "technical_sha": "edbd2f18e71a7a3d69a2e02acca36b83afa556c8",
+    "product": "plus",
     "workflow": ".github/workflows/certification-tr324-v2.yml",
-    "run_id": 45942633766,
-    "cumulative_run_id": 45942633674,
-    "cumulative_input_fingerprint": "fb75f8f6036a4284502bdaa8a390c05dd8981354779eeb945ed796642e671065",
-    "h1d_run_id": 45942633921,
-    "ci_run_id": 45942633776,
-    "runner_run_id": 45942633687,
-    "peer": {
-      "technical_sha": "63e0abf73fd83c7edeec210dc76d94863193ce8e",
-      "run_id": 45942624538,
-      "cumulative_run_id": 45942624470,
-      "h1d_run_id": 45942624490
+    "run_id": 45945338885,
+    "job_id": 140328630039,
+    "cumulative_run_id": 45945338973,
+    "h1d_run_id": 45945338878,
+    "ci_run_id": 45945338887,
+    "native_syntax_run_id": 45945338977,
+    "security_run_id": 45945338882,
+    "runner_run_id": 45945338886,
+    "prior_verified_run": {
+      "status": "WAIT",
+      "technical_sha": "5acc018da87cfbcd7299152c1593b0b09cd3ed1e",
+      "workflow": ".github/workflows/certification-tr324-v2.yml",
+      "run_id": 45942633766,
+      "cumulative_run_id": 45942633674,
+      "cumulative_input_fingerprint": "fb75f8f6036a4284502bdaa8a390c05dd8981354779eeb945ed796642e671065",
+      "h1d_run_id": 45942633921,
+      "ci_run_id": 45942633776,
+      "runner_run_id": 45942633687,
+      "peer": {
+        "technical_sha": "63e0abf73fd83c7edeec210dc76d94863193ce8e",
+        "run_id": 45942624538,
+        "cumulative_run_id": 45942624470,
+        "h1d_run_id": 45942624490
+      },
+      "prior_baseline_retained": true,
+      "reason": "El baseline aceptado anterior se conserva hasta revisar ejecución nueva; no reutilizar automáticamente en SHA técnico distinto."
     },
+    "cases": [
+      "IT-HI-04",
+      "IT-HI-06"
+    ],
     "prior_baseline_retained": true,
-    "reason": "El baseline aceptado anterior se conserva hasta revisar ejecución nueva; no reutilizar automáticamente en SHA técnico distinto."
+    "reason": "Corrección publicada, CI iniciado. No contar nuevos PASS completos."
   }
 }
