@@ -177,7 +177,13 @@ def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
     # evidence of complex analyticity. Definite integrals keep the independent
     # SymPy reference path below (including singularities).
     x = var_symbol
+    # The frozen IT-I-04 contract and EV-I-07 use arccot in (0, pi),
+    # unlike native SymPy acot for negative arguments.
     real_primitives = {
+        sympy.acot(x): x*(sympy.pi/2-sympy.atan(x)) + sympy.log(1+x**2)/2,
+        # IT-I-05/06: both disconnected real components |x| >= 1.
+        sympy.asec(x): x*sympy.acos(1/x) - sympy.acosh(sympy.Abs(x)),
+        sympy.acsc(x): x*sympy.asin(1/x) + sympy.acosh(sympy.Abs(x)),
         # IT-HI-04: |x| > 1. The real logarithm has positive argument
         # on both disconnected components of the domain.
         sympy.acoth(x): x*sympy.acoth(x) + sympy.log(x**2 - 1)/2,
@@ -191,6 +197,12 @@ def _compute_indefinite(input_expr: sympy.Expr, var_symbol: sympy.Symbol):
         sympy.csch(x): sympy.log(sympy.Abs(sympy.tanh(x / 2))),
         sympy.tanh(x)**2: x - sympy.tanh(x),
     }
+    # evaluate=False retains the parsed shape of 1/(1-x**2); use the
+    # bounded exact shape as well as the canonical AST (IT-HI-09).
+    if input_expr == 1/(1-x**2) or source_shape == f'1/(1-{x}**2)':
+        return sympy.log(sympy.Abs((1+x)/(1-x)))/2, [], False, [
+            "Primitiva en cada intervalo conexo del dominio real; las ramas complejas requieren un tratamiento independiente."
+        ]
     if input_expr in real_primitives:
         return real_primitives[input_expr], [], False, [
             "Primitiva en cada intervalo conexo del dominio real; las ramas complejas requieren un tratamiento independiente."
@@ -257,7 +269,13 @@ def integrate_expression(
 
     lower_expr = _parse_bound(lower_bound)
     upper_expr = _parse_bound(upper_bound)
-    reference = sympy.integrate(input_expr, (var_symbol, lower_expr, upper_expr))
+    # Preserve the same real principal arccot convention for the exact
+    # integrand in definite mode. Other integrands keep the existing path.
+    reference_input = (
+        sympy.pi/2 - sympy.atan(var_symbol)
+        if input_expr == sympy.acot(var_symbol) else input_expr
+    )
+    reference = sympy.integrate(reference_input, (var_symbol, lower_expr, upper_expr))
 
     can_use_ftc_steps = has_detailed_steps and not antiderivative.has(sympy.Integral)
     if can_use_ftc_steps:

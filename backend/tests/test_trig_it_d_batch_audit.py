@@ -49,9 +49,9 @@ INVERSE_CASES = [
  ('IT-I-01','asin(x)', lambda x:math.asin(x), [-.8,-.3,.3,.8]),
  ('IT-I-02','acos(x)', lambda x:math.acos(x), [-.8,-.3,.3,.8]),
  ('IT-I-03','atan(x)', lambda x:math.atan(x), [-.8,-.3,.3,.8]),
- pytest.param('IT-I-04','acot(x)', lambda x:math.atan2(1,x), [-.8,-.3,.3,.8], marks=pytest.mark.xfail(reason='negative arccot branch differs; contract review required',strict=True)),
- pytest.param('IT-I-05','asec(x)', lambda x:math.acos(1/x), [1.2,1.5,2,3], marks=pytest.mark.xfail(reason='integral remains unresolved',strict=True)),
- pytest.param('IT-I-06','acsc(x)', lambda x:math.asin(1/x), [1.2,1.5,2,3], marks=pytest.mark.xfail(reason='integral remains unresolved',strict=True)),
+ ('IT-I-04','acot(x)', lambda x:math.atan2(1,x), [-3,-.8,-.3,0,.3,.8,3]),
+ ('IT-I-05','asec(x)', lambda x:math.acos(1/x), [-3,-2,-1.5,-1.2,1.2,1.5,2,3]),
+ ('IT-I-06','acsc(x)', lambda x:math.asin(1/x), [-3,-2,-1.5,-1.2,1.2,1.5,2,3]),
  ('IT-I-07','x*atan(x)', lambda x:x*math.atan(x), [-.8,-.3,.3,.8]),
  ('IT-I-08','asin(x)/sqrt(1-x^2)', lambda x:math.asin(x)/math.sqrt(1-x*x), [-.8,-.3,.3,.8]),
  ('IT-I-09','1/(1+x^2)', lambda x:1/(1+x*x), [-.8,-.3,.3,.8]),
@@ -131,7 +131,7 @@ INVERSE_HYPERBOLIC_CASES = [
  ('IT-HI-06','acsch(x)',lambda x:math.asinh(1/x),[-2,-1,-.5,-.2,.2,.5,1,2]),
  ('IT-HI-07','1/sqrt(x^2+1)',lambda x:1/math.sqrt(x*x+1),[-2,-.5,.5,2]),
  ('IT-HI-08','1/sqrt(x^2-1)',lambda x:1/math.sqrt(x*x-1),[1.2,1.5,2,3]),
- pytest.param('IT-HI-09','1/(1-x^2)',lambda x:1/(1-x*x),[-.8,-.3,.3,.8],marks=pytest.mark.xfail(reason='complex logarithmic representation requires real-branch review',strict=True)),
+ ('IT-HI-09','1/(1-x^2)',lambda x:1/(1-x*x),[-3,-2,-1.1,-.8,-.3,.3,.8,1.1,2,3]),
  ('IT-HI-10','x*asinh(x)',lambda x:x*math.asinh(x),[-2,-.5,.5,2]),
 ]
 
@@ -311,3 +311,50 @@ def test_inverse_hyperbolic_real_primitive_one_sided_limits(case, expression, en
     real_x = sp.Symbol('x', real=True)
     actual = integrate_expression(expression, 'x').antiderivative.subs(sp.Symbol('x'), real_x)
     assert sp.simplify(sp.limit(actual, real_x, endpoint, dir=direction) - expected) == 0
+
+
+@pytest.mark.parametrize('case,expression,oracle,points', [
+    ('IT-I-04', 'acot(y)', lambda y: math.atan2(1,y), [-3, -1, 0, 1, 3]),
+    ('IT-I-05', 'asec(y)', lambda y: math.acos(1/y), [-3, -1.01, 1.01, 3]),
+    ('IT-I-06', 'acsc(y)', lambda y: math.asin(1/y), [-3, -1.01, 1.01, 3]),
+    ('IT-HI-09', '1/(1-y^2)', lambda y: 1/(1-y*y), [-3,-1.1,-.9,0,.9,1.1,3]),
+])
+def test_tr324_remaining_real_primitives_http_selected_variable(case, expression, oracle, points):
+    assert any(f'| {case} |' in row for row in MATRIX.splitlines())
+    with TestClient(app) as client:
+        response = client.post('/api/v1/integral', json={'expression': expression, 'variable': 'y'})
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body['success'] is True and body['result_text'].endswith('+ C'), body
+    assert body['result_latex'] and body['has_detailed_steps'] is False
+    assert any('dominio real' in warning for warning in body['warnings'])
+    y = sp.Symbol('y')
+    actual = sp.sympify(body['result_text'].removesuffix('+ C').strip())
+    assert actual.free_symbols == {y} and not actual.has(sp.Integral)
+    f = sp.lambdify(y, actual, modules='math')
+    for point in points:
+        h = 1e-6
+        assert math.isfinite(f(point))
+        assert (f(point+h)-f(point-h))/(2*h) == pytest.approx(
+            oracle(point), rel=1e-6, abs=1e-6), (case, point)
+
+@pytest.mark.parametrize('case,expression,endpoint,expected', [
+    ('IT-I-05', 'asec(x)', -1, -sp.pi),
+    ('IT-I-05', 'asec(x)', 1, 0),
+    ('IT-I-06', 'acsc(x)', -1, sp.pi/2),
+    ('IT-I-06', 'acsc(x)', 1, sp.pi/2),
+])
+def test_tr324_inverse_reciprocal_primitive_real_endpoint(case, expression, endpoint, expected):
+    actual = integrate_expression(expression, 'x').antiderivative
+    assert sp.simplify(actual.subs(sp.Symbol('x'), endpoint) - expected) == 0
+
+@pytest.mark.parametrize('endpoint', [-1, 1])
+def test_it_hi_09_primitive_preserves_singularities(endpoint):
+    primitive = integrate_expression('1/(1-x^2)', 'x').antiderivative
+    assert primitive.subs(sp.Symbol('x'), endpoint).is_finite is False
+
+def test_it_i_04_definite_principal_branch_across_zero():
+    # arccot(x) + arccot(-x) = pi on the real principal branch.
+    result = integrate_expression('acot(x)', 'x', '-2', '2')
+    assert result.is_definite
+    assert sp.simplify(result.definite_value - 2*sp.pi) == 0
