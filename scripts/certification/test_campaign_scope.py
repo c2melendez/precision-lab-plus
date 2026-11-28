@@ -37,6 +37,18 @@ class RoutingTests(unittest.TestCase):
                  "qa/certification/continuity.json", "qa/certification/CURRENT_STATE.md"]
         self.assertEqual(set(scope.select(paths, "push").values()), {"NOT_SELECTED"})
 
+    def test_shard_runner_change_selects_backend_mutation(self):
+        result = scope.select(["qa/s19/shard_mutmut.py"], "push")
+        self.assertEqual(result["mutation_backend"], "CHECK")
+        self.assertEqual(result["mutation_frontend"], "NOT_SELECTED")
+
+    def test_backend_aggregate_contract_includes_preflight_and_shard_execution(self):
+        workflow = (ROOT / ".github/workflows/s19-mutation.yml").read_text()
+        contract = scope.job_contract(workflow, "plus-backend-mutmut")
+        for step in ("Execute one real mutant and verify complete export", "Verify mutation-specific backend tests", "Run bounded mutation shard and preserve full status inventory", "Prove exact coverage and aggregate distinct mutant results"):
+            self.assertIn(step, contract)
+        self.assertNotEqual(contract, scope.job_contract(workflow.replace("15m", "20m").replace("shard_mutmut.py preflight", "shard_mutmut.py changed"), "plus-backend-mutmut"))
+
     def test_e2e_only_does_not_select_mutation(self):
         self.assertFalse(scope.affected(["frontend/e2e/in625-syntax-native.spec.ts"], "mutation_frontend"))
 
