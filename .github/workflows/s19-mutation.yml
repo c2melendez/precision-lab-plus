@@ -56,15 +56,21 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 2
+          fetch-depth: 0
       - id: classify
         shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           if [[ "$GITHUB_EVENT_NAME" != "pull_request" && "$GITHUB_EVENT_NAME" != "workflow_call" ]]; then
             echo "scope=full" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          mapfile -t changed_paths < <(git diff --name-only HEAD^ HEAD)
+          if [[ -z "$BASE_SHA" ]] || ! git cat-file -e "$BASE_SHA^{commit}"; then
+            echo "scope=full" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          mapfile -t changed_paths < <(git diff --name-only "$BASE_SHA"...HEAD)
           if [[ "${#changed_paths[@]}" -eq 0 ]]; then
             echo "scope=full" >> "$GITHUB_OUTPUT"
             echo "No commit delta available; failing conservatively to full scope."
@@ -93,9 +99,6 @@ jobs:
           done
 
           if [[ "$focused" == true && "$has_targeted_test" == true ]]; then
-            scope=focused
-          elif [[ "$focused" == true && "${#changed_paths[@]}" -eq 1 && "${changed_paths[0]}" == ".github/workflows/s19-mutation.yml" ]]; then
-            # Workflow-only scope-filter fixes still run the focused validation job.
             scope=focused
           else
             docs_only=true
@@ -183,9 +186,9 @@ jobs:
           path: lite/reports/mutation
           if-no-files-found: warn
 
-  plus-backend-mutmut:
+  plus-backend-mutmut-focused:
     needs: [validate-request, change-scope]
-    if: (needs.change-scope.outputs.scope == 'focused' && github.event_name == 'pull_request') || (needs.change-scope.outputs.scope == 'full' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_backend))
+    if: needs.change-scope.outputs.scope == 'focused' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     # The 2026-11-12 run reached the 40-minute hard limit at 2,970/5,049 mutants
     # without producing reports. Extend only the execution ceiling; keep scope,
@@ -255,6 +258,83 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: s19-plus-backend-mutmut
+          name: s19-plus-backend-mutmut-focused
           path: reports/s19
           if-no-files-found: warn
+
+  plus-backend-mutmut-shard:
+    needs: [validate-request, change-scope]
+    if: needs.change-scope.outputs.scope == 'full' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_backend)
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        shard: [parsing, ast, evaluate, responses, solve-a-g, solve-h, solve-other-private, solve-public]
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      CORS_ORIGINS: http://localhost:5173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Verify partition and fail-closed aggregation
+        run: python -m unittest discover -s ../qa/s19 -p 'test_shard_mutmut.py' -v
+      - name: Install backend QA stack and pinned mutmut
+        run: pip install -r requirements.txt -r requirements-qa.txt mutmut==3.8.0
+      - name: Verify mutation-specific backend tests
+        run: pytest -q --disable-warnings tests/test_parsing.py tests/test_evaluate.py tests/test_solve.py tests/test_exhaustive_module13_security.py
+      - name: Run bounded mutation shard and preserve full status inventory
+        run: python ../qa/s19/shard_mutmut.py run ${{ matrix.shard }} ../reports/s19/${{ matrix.shard }}
+      - name: Upload shard even on incomplete execution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s19-backend-shard-${{ matrix.shard }}
+          path: reports/s19/${{ matrix.shard }}
+          if-no-files-found: error
+
+  plus-backend-mutmut:
+    needs: [validate-request, change-scope, plus-backend-mutmut-focused, plus-backend-mutmut-shard]
+    if: always() && (needs.change-scope.outputs.scope == 'focused' || (needs.change-scope.outputs.scope == 'full' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_backend)))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate partition logic
+        run: python -m unittest discover -s qa/s19 -p 'test_shard_mutmut.py' -v
+      - name: Verify required backend execution
+        env:
+          SCOPE: ${{ needs.change-scope.outputs.scope }}
+          FOCUSED_RESULT: ${{ needs.plus-backend-mutmut-focused.result }}
+          SHARD_RESULT: ${{ needs.plus-backend-mutmut-shard.result }}
+        run: |
+          if [ "$SCOPE" = "focused" ]; then
+            test "$FOCUSED_RESULT" = "success"
+          else
+            test "$SHARD_RESULT" = "success"
+          fi
+      - name: Download all full-scope shard reports
+        if: needs.change-scope.outputs.scope == 'full'
+        uses: actions/download-artifact@v4
+        with:
+          pattern: s19-backend-shard-*
+          path: reports/s19/shards
+      - name: Prove exact coverage and aggregate distinct mutant results
+        if: needs.change-scope.outputs.scope == 'full'
+        run: python qa/s19/shard_mutmut.py aggregate reports/s19/shards reports/s19/aggregate.json
+      - name: Upload complete backend evidence
+        if: needs.change-scope.outputs.scope == 'full'
+        uses: actions/upload-artifact@v4
+        with:
+          name: s19-plus-backend-mutmut
+          path: reports/s19/aggregate.json
+          if-no-files-found: error
