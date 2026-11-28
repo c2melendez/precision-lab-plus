@@ -53,3 +53,17 @@ def test_frozen_decimal_discrepancy():
     assert row["numeric_oracle"] == pytest.approx(0.30747679967138351, abs=1e-14)
     assert abs(row["numeric_oracle"] - 0.307426799) > .00005
 
+
+@pytest.mark.parametrize("expression,lower,upper,expected", [
+    ("ln(sin(y))", "pi/2", "0", sp.pi*sp.log(2)/2),
+    ("ln(sin(y))", "0", "pi", -sp.pi*sp.log(2)),
+    ("sech(y)^2", "1", "-1", -2*sp.tanh(1)),
+    ("acosh(y)", "2", "1", sp.sqrt(3)-2*sp.acosh(2)),
+])
+def test_scoped_definite_exact_controls(expression, lower, upper, expected):
+    with TestClient(app) as client:
+        body = client.post("/api/v1/integral", json={"expression":expression,"variable":"y","lower_bound":lower,"upper_bound":upper}).json()
+    assert body["success"] is True, body
+    got = sp.sympify(body["result_text"].replace("^","**"), locals={"ln":sp.log})
+    assert not got.has(sp.Integral) and not got.free_symbols
+    assert sp.simplify(got-expected)==0

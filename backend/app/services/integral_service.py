@@ -276,6 +276,31 @@ def integrate_expression(
         if input_expr == sympy.acot(var_symbol) else input_expr
     )
     reference = sympy.integrate(reference_input, (var_symbol, lower_expr, upper_expr))
+    # Scoped fallback for known real integrands that the definite CAS leaves
+    # unevaluated. No extrapolation across a non-real interval or pole.
+    if reference.has(sympy.Integral):
+        x = var_symbol
+        exact_value = None
+        explanation = ""
+        finite_real = all(b.is_real is True and b.is_finite is True for b in (lower_expr, upper_expr))
+        if finite_real and input_expr == sympy.sech(x)**2:
+            exact_value = sympy.tanh(upper_expr)-sympy.tanh(lower_expr)
+            explanation = "Primitiva tanh verificada en todo el dominio real."
+        elif finite_real and input_expr == sympy.acosh(x) and all((b-1).is_nonnegative is True for b in (lower_expr, upper_expr)):
+            def primitive(t):
+                return t*sympy.acosh(t)-sympy.sqrt(t-1)*sympy.sqrt(t+1)
+            exact_value = primitive(upper_expr)-primitive(lower_expr)
+            explanation = "Primitiva real de acosh y continuidad en el extremo 1."
+        elif input_expr == sympy.log(sympy.sin(x)):
+            endpoints = [sympy.S.Zero, sympy.pi/2, sympy.pi]
+            def index(b):
+                return next((i for i,v in enumerate(endpoints) if sympy.simplify(b-v)==0), None)
+            lo, hi = index(lower_expr), index(upper_expr)
+            if lo is not None and hi is not None:
+                exact_value = -sympy.Rational(hi-lo,2)*sympy.pi*sympy.log(2)
+                explanation = "Integral impropia convergente por simetría del seno y fórmula de ángulo doble."
+        if exact_value is not None:
+            return IntegralResult(input_expr, antiderivative, [], False, [explanation], True, sympy.simplify(exact_value))
 
     can_use_ftc_steps = has_detailed_steps and not antiderivative.has(sympy.Integral)
     if can_use_ftc_steps:
