@@ -58,16 +58,16 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - name: Install dependencies
-        run: npm ci
+        run: bash ../scripts/certification/frontend-runner.sh install
       - name: QA dependency audit
         continue-on-error: true
         run: npm audit --audit-level=moderate
       - name: Typecheck
-        run: npm run typecheck
+        run: bash ../scripts/certification/frontend-runner.sh typecheck
       - name: Unit and parity tests
-        run: npm test
+        run: bash ../scripts/certification/frontend-runner.sh test
       - name: Production build
-        run: npm run build
+        run: bash ../scripts/certification/frontend-runner.sh build
       - name: Upload production build
         if: always()
         uses: actions/upload-artifact@v4
