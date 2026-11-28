@@ -262,8 +262,39 @@ jobs:
           path: reports/s19
           if-no-files-found: warn
 
-  plus-backend-mutmut-shard:
+  plus-backend-mutmut-preflight:
     needs: [validate-request, change-scope]
+    if: needs.change-scope.outputs.scope == 'full' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_backend)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      CORS_ORIGINS: http://localhost:5173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Verify partition and fail-closed aggregation
+        run: python -m unittest discover -s ../qa/s19 -p 'test_shard_mutmut.py' -v
+      - name: Install backend QA stack and pinned mutmut
+        run: pip install -r requirements.txt -r requirements-qa.txt mutmut==3.8.0
+      - name: Execute one real mutant and verify complete export
+        run: python ../qa/s19/shard_mutmut.py preflight ../reports/s19/preflight
+      - name: Upload preflight evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s19-backend-preflight
+          path: reports/s19/preflight
+          if-no-files-found: error
+
+  plus-backend-mutmut-shard:
+    needs: [validate-request, change-scope, plus-backend-mutmut-preflight]
     if: needs.change-scope.outputs.scope == 'full' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_backend)
     runs-on: ubuntu-latest
     timeout-minutes: 180
@@ -301,7 +332,7 @@ jobs:
           if-no-files-found: error
 
   plus-backend-mutmut:
-    needs: [validate-request, change-scope, plus-backend-mutmut-focused, plus-backend-mutmut-shard]
+    needs: [validate-request, change-scope, plus-backend-mutmut-focused, plus-backend-mutmut-preflight, plus-backend-mutmut-shard]
     if: always() && (needs.change-scope.outputs.scope == 'focused' || (needs.change-scope.outputs.scope == 'full' && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || inputs.run_backend)))
     runs-on: ubuntu-latest
     steps:
@@ -315,12 +346,13 @@ jobs:
         env:
           SCOPE: ${{ needs.change-scope.outputs.scope }}
           FOCUSED_RESULT: ${{ needs.plus-backend-mutmut-focused.result }}
+          PREFLIGHT_RESULT: ${{ needs.plus-backend-mutmut-preflight.result }}
           SHARD_RESULT: ${{ needs.plus-backend-mutmut-shard.result }}
         run: |
           if [ "$SCOPE" = "focused" ]; then
             test "$FOCUSED_RESULT" = "success"
           else
-            test "$SHARD_RESULT" = "success"
+            test "$PREFLIGHT_RESULT" = "success" && test "$SHARD_RESULT" = "success"
           fi
       - name: Download all full-scope shard reports
         if: needs.change-scope.outputs.scope == 'full'

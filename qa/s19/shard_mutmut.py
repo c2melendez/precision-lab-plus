@@ -64,6 +64,32 @@ def identity():
             "qa_requirements_sha256": sha("requirements-qa.txt"),
             "environment_sha256": hashlib.sha256("\n".join(sorted(command("python", "-m", "pip", "freeze").splitlines())).encode()).hexdigest()}
 
+def export_results():
+    # Mutmut 3.8.0 exposes a Click bool option, not an is_flag option.
+    return command("mutmut", "results", "--all", "true")
+
+def preflight(output):
+    output.mkdir(parents=True, exist_ok=True)
+    require(not Path("mutants").exists(), "Fresh checkout required")
+    provenance = identity()
+    require(provenance["mutmut"] == "3.8.0", "Tool version drift")
+    # Witness observed in the previous AST shard. Exact name, not a wildcard.
+    witness = "app.services.ast_validator.x_validate_ast_safety__mutmut_6"
+    rc = subprocess.call(["timeout", "--signal=INT", "--kill-after=30s", "15m",
+                          "mutmut", "run", witness])
+    (output / "mutmut-exit-code.txt").write_text(str(rc) + "\n")
+    raw = export_results()
+    (output / "mutmut-results-all.txt").write_text(raw + "\n")
+    inventory = parse_results(raw)
+    require(rc == 0 and inventory.get(witness) in TERMINAL, "Witness failed or missing")
+    require(len(inventory) > 1 and any(v == "not checked" for v in inventory.values()), "Expected full inventory, including unchecked")
+    require(all(v == "not checked" for k, v in inventory.items() if k != witness), "Unexpected execution outside witness")
+    report = {"identity": provenance, "witness": witness, "status": inventory[witness],
+              "total": len(inventory), "inventory_sha256": hashlib.sha256("\n".join(sorted(inventory)).encode()).hexdigest(),
+              "acceptance": "PREFLIGHT_ONLY"}
+    (output / "preflight.json").write_text(json.dumps(report, indent=2) + "\n")
+    print("S19_PREFLIGHT " + json.dumps(report))
+
 def run_shard(shard, output):
     output.mkdir(parents=True, exist_ok=True)
     require(not Path("mutants").exists(), "Fresh checkout required; no stale mutmut state")
@@ -74,7 +100,7 @@ def run_shard(shard, output):
     rc = subprocess.call(["timeout", "--signal=INT", "--kill-after=30s", "150m",
                           "mutmut", "run", *patterns])
     (output / "mutmut-exit-code.txt").write_text(str(rc) + "\n")
-    raw = command("mutmut", "results", "--all")
+    raw = export_results()
     (output / "mutmut-results-all.txt").write_text(raw + "\n")
     inventory = parse_results(raw)
     mine = {k: v for k, v in inventory.items() if selected(shard, k)}
@@ -123,12 +149,16 @@ def main():
     a = sub.add_parser("run")
     a.add_argument("shard", choices=SHARDS)
     a.add_argument("output", type=Path)
+    c = sub.add_parser("preflight")
+    c.add_argument("output", type=Path)
     b = sub.add_parser("aggregate")
     b.add_argument("directory", type=Path)
     b.add_argument("output", type=Path)
     args = p.parse_args()
     if args.action == "run":
         run_shard(args.shard, args.output)
+    elif args.action == "preflight":
+        preflight(args.output)
     else:
         rows = [json.loads(f.read_text()) for f in sorted(args.directory.rglob("shard.json"))]
         report = aggregate(rows, command("git", "rev-parse", "HEAD"))

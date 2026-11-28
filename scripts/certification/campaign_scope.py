@@ -20,7 +20,7 @@ PROFILES = {
     "security_frontend": ("s25-security.yml", "frontend-audit", ["frontend/package*.json", "frontend/.npmrc"], ["Block high/critical npm vulnerabilities"]),
     "security_backend": ("s25-security.yml", "backend-security", ["backend/*"], ["pip-audit runtime dependencies", "Bandit medium/high gate", "Security and CORS regressions"]),
     "mutation_frontend": ("s19-mutation.yml", "plus-frontend-stryker", ["frontend/*", "qa/certification/*.jsonl"], ["Run Plus frontend mutation baseline"]),
-    "mutation_backend": ("s19-mutation.yml", "plus-backend-mutmut", ["backend/*", "qa/certification/*.jsonl"], ["Verify mutation-specific backend tests", "Run mutation baseline on critical backend surfaces"]),
+    "mutation_backend": ("s19-mutation.yml", "plus-backend-mutmut", ["backend/*", "qa/certification/*.jsonl", "qa/s19/shard_mutmut.py", "qa/s19/test_shard_mutmut.py"], ["Verify required backend execution", "Prove exact coverage and aggregate distinct mutant results"]),
     # The job contract contains the immutable external repo/ref and pinned tools.
     # Local Lite HEAD and Plus backend files are not inputs to that reference job.
     "mutation_lite": ("s19-mutation.yml", "lite-frontend-stryker", ["qa/s19/stryker-lite.config.json"], ["Run Lite frontend mutation baseline"]),
@@ -41,8 +41,13 @@ def job_contract(workflow, job):
         raise ValueError("Missing job contract: " + job)
     # Ignore only the top-level routing/needs added by this change. Every step,
     # tool version, checkout ref, command, environment and timeout stays hashed.
-    return "\n".join(line for line in match[0].splitlines()
-                     if not line.startswith(("    if:", "    needs:"))) .strip()
+    contract = "\n".join(line for line in match[0].splitlines()
+                         if not line.startswith(("    if:", "    needs:"))).strip()
+    if job == "plus-backend-mutmut" and "  plus-backend-mutmut-shard:" in workflow:
+        # Preserve complete routing and executable contracts for all backend jobs.
+        contract = match[0].strip() + "\n" + "\n".join(job_contract(workflow, name) for name in (
+            "plus-backend-mutmut-focused", "plus-backend-mutmut-preflight", "plus-backend-mutmut-shard"))
+    return contract
 
 
 def fingerprint(sha, profile):
@@ -87,6 +92,18 @@ def mutation_decision(candidates, reviews, profile, current_fingerprint):
         steps = [[step for step in job.get("steps", []) if step["name"] == name] for name in required]
         if not all(len(matches) == 1 and matches[0].get("status") == "completed" and matches[0].get("conclusion") == "success" for matches in steps):
             continue  # A successful no-op is not evidence; resolve its origin.
+        if profile == "mutation_backend":
+            # A focused success or green aggregate alone is not full-scope evidence.
+            required_children = {"plus-backend-mutmut-preflight": "Execute one real mutant and verify complete export"}
+            for shard in ("parsing", "ast-responses", "evaluate", "solve-a-g", "solve-h", "solve-other-private", "solve-public"):
+                required_children[f"plus-backend-mutmut-shard ({shard})"] = "Run bounded mutation shard and preserve full status inventory"
+            for child, step_name in required_children.items():
+                matches = [j for j in run["jobs"] if j["name"].split(" / ")[-1] == child]
+                if len(matches) != 1 or matches[0].get("conclusion") != "success":
+                    return "REVIEW", run["id"], job["id"]
+                executed = [s for s in matches[0].get("steps", []) if s["name"] == step_name and s.get("conclusion") == "success" and s.get("status") == "completed"]
+                if len(executed) != 1:
+                    return "REVIEW", run["id"], job["id"]
         reviewed = any(review.get("profile") == profile and review.get("run_id") == run["id"]
                        and review.get("job_id") == job["id"] and review.get("input_fingerprint") == current_fingerprint
                        and review.get("logs_reviewed") is True and review.get("mutations_executed") is True

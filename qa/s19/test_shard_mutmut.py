@@ -1,7 +1,8 @@
 import copy
 import unittest
 
-from shard_mutmut import SHARDS, aggregate, owners, parse_results
+from unittest import mock
+from shard_mutmut import SHARDS, aggregate, owners, parse_results, export_results
 
 NAMES = {
     "parsing": "app.services.parsing.x_parse__mutmut_1",
@@ -48,6 +49,11 @@ class ShardTests(unittest.TestCase):
             mutate(rows)
             with self.assertRaises(ValueError):
                 aggregate(rows, SHA)
+
+    def test_pinned_cli_boolean_value_is_explicit(self):
+        with mock.patch("shard_mutmut.command", return_value="inventory") as run:
+            self.assertEqual(export_results(), "inventory")
+            run.assert_called_once_with("mutmut", "results", "--all", "true")
 
     def test_complete_results_including_killed_and_unchecked(self):
         raw = f"    {NAMES['parsing']}: killed\n    {NAMES['ast-responses']}: not checked\n"
