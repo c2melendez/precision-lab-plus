@@ -14,9 +14,8 @@ MODULES = ("app.services.parsing", "app.services.ast_validator", "app.services.s
 SOLVE = MODULES[2] + "."
 SHARDS = {
     "parsing": (MODULES[0] + "*",),
-    "ast": (MODULES[1] + "*",),
+    "ast-responses": (MODULES[1] + "*", MODULES[4] + "*"),
     "evaluate": (MODULES[3] + "*",),
-    "responses": (MODULES[4] + "*",),
     "solve-a-g": (SOLVE + "x__[a-g]*",),
     "solve-h": (SOLVE + "x__h*",),
     "solve-other-private": (SOLVE + "x__[!a-h]*",),
